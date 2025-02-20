@@ -36,7 +36,7 @@ where:
 - $$f(\cdot,\cdot)$$ and $$g(\cdot,\cdot)$$ satisfy suitable conditions (e.g., global Lipschitz, linear growth, uniform ellipticity), ensuring existence and uniqueness of strong solutions.
 - $$p(x,t)$$ denotes the transition density of $$X_t$$, assumed to be smooth and strictly positive.
 
-Under these assumptions, the density $$p(x,t)$$ satisfies the Fokker–Planck (forward Kolmogorov) equation:
+Under these assumptions, the density $$p(x,t)$$ satisfies the Fokker–Planck (forward Kolmogorov) equation, whose derivation is in [Appendix A.1](#a1-sketch-of-the-fokkerplanck-derivation):
 
 $$
 \frac{\partial p}{\partial t}(x,t)
@@ -48,15 +48,15 @@ $$
 
 ## 1. Introducing Reverse Time
 
-Define the reverse-time variable:
-$$
-s \;=\; T - t, \quad \text{so that} \quad t \;=\; T - s.
-$$
+Define the reverse-time variable: $$s \;=\; T - t, \quad \text{so that} \quad t \;=\; T - s.$$
 We restrict $$s\in [0,T]$$. The **reverse-time process** is given by
+
 $$
 Y_s \;:=\; X_{T-s}.
 $$
+
 To avoid clutter, we define:
+
 $$
 F(x,s) \;:=\; f\bigl(x,\;T-s\bigr),
 \quad
@@ -64,6 +64,7 @@ G(x,s) \;:=\; g\bigl(x,\;T-s\bigr),
 \quad
 q(x,s) \;:=\; p\bigl(x,\;T-s\bigr).
 $$
+
 Rewriting the forward Fokker–Planck equation in terms of $$(x,s)$$, one obtains:
 
 $$
@@ -72,7 +73,9 @@ $$
 -\nabla \cdot \Bigl(F(x,s)\,q(x,s)\Bigr)
 \;+\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr),
 $$
+
 or equivalently,
+
 $$
 \frac{\partial q}{\partial s}(x,s)
 \;=\;
@@ -113,7 +116,9 @@ $$
 \nabla \cdot \Bigl(F(x,s)\,q(x,s)\Bigr)
 \;-\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr).
 $$
-Canceling the $$\Delta\bigl(G^2\,q\bigr)$$ terms, we get:
+
+Combining the $$\Delta\bigl(G^2\,q\bigr)$$ terms, we get:
+
 $$
 -\nabla \cdot \Bigl(b(x,s)\,q(x,s)\Bigr)
 \;=\;
@@ -121,7 +126,7 @@ $$
 \;-\; \Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr).
 $$
 
-A formal integration by parts argument (see Appendix A.1 for the analogous derivation in the forward direction) shows that for all test functions $$\varphi$$, this identity implies:
+A formal integration by parts argument (see [Appendix A.1](#a1-sketch-of-the-fokkerplanck-derivation) for the analogous derivation in the forward direction) shows that for all test functions $$\varphi$$, this identity implies:
 
 $$
 b(x,s)\,q(x,s)
@@ -130,6 +135,7 @@ b(x,s)\,q(x,s)
 \;+\;
 G(x,s)^2\,\nabla q(x,s).
 $$
+
 Since $$q(x,s)>0$$, we divide both sides by $$q(x,s)$$ to obtain the **reverse drift**:
 
 $$
@@ -153,6 +159,7 @@ dY_s
 \;+\;
 G(Y_s,s)\,d\widetilde{W}_s.
 $$
+
 Recalling that $$F(x,s) = f(x,T-s)$$, $$G(x,s)=g(x,T-s)$$, and $$q(x,s)=p(x,T-s)$$, we can write:
 
 $$
@@ -170,9 +177,11 @@ $$
 ## A.1. Sketch of the Fokker–Planck Derivation
 
 For the forward SDE
+
 $$
 dX_t \;=\; f(X_t,t)\,dt \;+\; g(X_t,t)\,dW_t,
 $$
+
 let $$\varphi\in C_c^\infty(\mathbb{R}^d)$$ be a test function. *(Recall that test functions are smooth (infinitely differentiable) and have compact support, meaning they vanish outside some bounded region, which makes them ideal for probing the behavior of densities without boundary complications.)* By Itô’s formula:
 
 $$
@@ -184,6 +193,7 @@ d\,\varphi(X_t)
 \;+\;
 g(X_t,t)\,\nabla\varphi(X_t)\,dW_t.
 $$
+
 Taking expectations and noting that the Itô integral has mean zero, we get:
 
 $$
@@ -193,6 +203,7 @@ $$
 \;+\;
 \tfrac12\,g(X_t,t)^2\,\Delta\varphi(X_t)\Bigr].
 $$
+
 Expressing $$\mathbb{E}[\varphi(X_t)]$$ in terms of the density $$p(x,t)$$:
 
 $$
@@ -204,6 +215,7 @@ $$
 \;=\;
 \int \varphi(x)\,\frac{\partial p}{\partial t}(x,t)\,dx.
 $$
+
 Equating the two expressions and performing an integration by parts (assuming sufficient smoothness and decay at infinity so that boundary terms vanish) yields:
 
 $$
@@ -214,6 +226,7 @@ $$
 \tfrac12\,g(x,t)^2\,\Delta\varphi(x)\Bigr]\,
 p(x,t)\,dx.
 $$
+
 Since this holds for all $$\varphi$$, we deduce the Fokker–Planck equation:
 
 $$
@@ -266,13 +279,17 @@ $$
 
 3. **Reverse SDE:**
    By matching the Fokker–Planck equation for the reparameterized forward process to that of a putative SDE, we obtain
+
    $$
    b(x,s) = -\,F(x,s) + G(x,s)^2\,\nabla \log q(x,s).
    $$
+
    Hence,
+
    $$
    dY_s  = \bigl[b(Y_s,s)\bigr]\,ds + G(Y_s,s)\,d\widetilde{W}_s,
    $$
+
    with the explicit drift given above.
 
 4. **Why This is an SDE (Appendix A.2):**
