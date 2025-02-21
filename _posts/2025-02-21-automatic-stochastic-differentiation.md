@@ -26,7 +26,7 @@ $$
 
 This is convenient, as it means that for each differential form, we only need to store the function value and its derivative of the previous one.
 
-Formally, we define this as $$\mathbb{R}[\epsilon]/\epsilon^2$$ with $$dt \sim \epsilon$$, meaning that $$\epsilon^2 = 0$$ just like how $$dt^2 \rightarrow 0$$.
+Formally, we define this as $$\mathbb{R}[\epsilon]/\epsilon^2$$: we adjoin the dual $$dt \sim \epsilon$$ such that $$\epsilon^2 = 0$$ just like how $$dt^2 \rightarrow 0$$.
 
 As an example, take the product rule: it simplifies down to
 
@@ -43,11 +43,39 @@ On the other hand, in stochastic calculus, the quadratic variation of a Brownian
 Stochastic calculus becomes algebraic with dual numbers. Deterministic derivatives use $$ \mathbb{R}[\epsilon]/\epsilon^2 $$ (where $$ \epsilon^2 = 0 $$). For stochastic calculus, extend to $$ \mathbb{R}[\epsilon]/\epsilon^3 $$:
 - $$ \epsilon \sim dB_t $$ Brownian motion, with $$ \langle \epsilon^2 \rangle = dt $$,
 - $$ \epsilon^2 \sim dt $$ Time
-- $$ \epsilon^3 = 0 $$
+- $$ \epsilon^3 = 0 $$ for higher order terms.
 
 Then $$ dX_t = \mu \, dt + \sigma \, dB_t $$ becomes $$ \sigma \epsilon + \mu \epsilon^2 $$.
 
-For $$ f(X_t) $$, $$ df = f(X_t + dX_t) - f(X_t) $$ extracts the $$ dB_t $$- and $$ dt $$-coefficients from the $$ \epsilon $$- and $$ \epsilon^2 $$-terms.
+For $$ f(X_t,t) $$, $$ df(X_t,t) = f(X_t + dX_t,t+dt) - f(X_t,t) $$ extracts the $$ dB_t $$- and $$ dt $$-coefficients from the $$ \epsilon $$- and $$ \epsilon^2 $$-terms. For instance, you can derive Ito's lemma:
+
+Using $$ \mathbb{R}[\epsilon]/\epsilon^3 $$ with $$ \epsilon \sim dB_t $$, $$ \epsilon^2 \sim dt $$, $$ \epsilon^3 = 0 $$, and $$ dX_t = \mu dt + \sigma dB_t = \mu \epsilon^2 + \sigma \epsilon $$:
+
+For $$f(X_t, t)$$:
+
+$$
+df = f(X_t + \sigma \epsilon + \mu \epsilon^2, t + \epsilon^2) - f(X_t, t).
+$$
+
+Taylor expand:
+
+$$
+f = f + f_x (\sigma \epsilon + \mu \epsilon^2) + f_t \epsilon^2 + \frac{1}{2} f_{xx} (\sigma \epsilon + \mu \epsilon^2)^2.
+$$
+
+We have $$(\sigma \epsilon + \mu \epsilon^2)^2 = \sigma^2 \epsilon^2$$, so:
+
+$$
+df = f_x \sigma \epsilon + (f_x \mu + f_t + \frac{1}{2} f_{xx} \sigma^2) \epsilon^2.
+$$
+
+Thus:
+
+$$
+d f(X_t, t) = f_x \sigma dB_t + (f_t + f_x \mu + \frac{1}{2} f_{xx} \sigma^2) dt
+$$
+
+which is Ito’s lemma, concise and algebraic!
 
 ## Itô’s Framework
 
