@@ -26,9 +26,17 @@ $$
 
 This is convenient, as it means that for each differential form, we only need to store the function value and its derivative of the previous one.
 
-Formally, we define this as $$\mathbb{R}[\epsilon]/\epsilon^2$$, meaning that $\epsilon^2 = 0$ just like how $dt^2 \rightarrow 0$.
+Formally, we define this as $$\mathbb{R}[\epsilon]/\epsilon^2$$ with $$dt \sim \epsilon$$, meaning that $$\epsilon^2 = 0$$ just like how $$dt^2 \rightarrow 0$$.
 
-On the other hand, in stochastic calculus, the quadratic variation of a Brownian motion $\Delta B_t := B_t - B_0 \sim N(0,t)$ is $t$. Symbolically, this means that $dB_t^2=dt$, which leads to a different number system. Here, to avoid fractions, we will use $dB_t:=\epsilon$ as our "base differential" instead, and take up to three powers of it to construct the system because $o(dt) \rightarrow 0$ as before.
+As an example, take the product rule: it simplifies down to
+
+$$
+(a+a'\epsilon)(b+b'\epsilon)=ab+(ab'+a'b)\epsilon+a'b'\epsilon^2
+$$
+
+Since $$\epsilon^2=0$$, the term $$a'b'\epsilon^2$$ vanishes, leaving $$(a+a'\epsilon)(b+b'\epsilon)=ab+(ab'+a'b)\epsilon$$, so we interpret $$(ab)'=(ab'+a'b)$$, which is the standard product rule.
+
+On the other hand, in stochastic calculus, the quadratic variation of a Brownian motion $$\Delta B_t := B_t - B_0 \sim N(0,t)$$ is $$t$$. Symbolically, this means that $$dB_t^2=dt$$, which leads to a different number system. Here, to avoid fractions, we will use $$dB_t:=\epsilon$$ as our "base differential" instead, and take up to three powers of it to construct the system because $$o(dt) \rightarrow 0$$ as before.
 
 # Stochastic Calculus as Algebra with Dual Numbers
 
