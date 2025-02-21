@@ -18,7 +18,7 @@ math: true
 
 Calculus can be quite tedious when computed symbolically by hand. Hence, modern systems such in applied science such as machine learning will resort to an algorithm called automatic differentiation.
 
-The key idea is that only differential forms with order 1 will survive during the process of differentiation. Namely, we have that $$o(dt)=\sum_{k>1} dt^k \rightarrow 0$$. From the definition of the derivative:
+The key idea is that only differential forms with order 1 will survive during the process of differentiation. Namely, we have that $$o(dt)\rightarrow$$, i.e. $$dt^k \rightarrow 0$$ for $$k>1$$. From the definition of the derivative:
 
 $$
 \lim_{dt \rightarrow 0} \frac{f(t+dt)-f(t)}{dt}
