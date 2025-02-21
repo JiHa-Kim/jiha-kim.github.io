@@ -14,6 +14,22 @@ date: 2025-02-21 05:41 +0000
 math: true
 ---
 
+## Introduction
+
+Calculus can be quite tedious when computed symbolically by hand. Hence, modern systems such in applied science such as machine learning will resort to an algorithm called automatic differentiation.
+
+The key idea is that only differential forms with order 1 will survive during the process of differentiation. Namely, we have that $$o(dt)=\sum_{k>1} dt^k \rightarrow 0$$. From the definition of the derivative:
+
+$$
+\lim_{dt \rightarrow 0} \frac{f(t+dt)-f(t)}{dt}
+$$
+
+This is convenient, as it means that for each differential form, we only need to store the function value and its derivative of the previous one.
+
+Formally, we define this as $$\mathbb{R}[\epsilon]/\epsilon^2$$, meaning that $\epsilon^2 = 0$ just like how $dt^2 \rightarrow 0$.
+
+On the other hand, in stochastic calculus, the quadratic variation of a Brownian motion $\Delta B_t := B_t - B_0 \sim N(0,t)$ is $t$. Symbolically, this means that $dB_t^2=dt$, which leads to a different number system. Here, to avoid fractions, we will use $dB_t:=\epsilon$ as our "base differential" instead, and take up to three powers of it to construct the system because $o(dt) \rightarrow 0$ as before.
+
 # Stochastic Calculus as Algebra with Dual Numbers
 
 Stochastic calculus becomes algebraic with dual numbers. Deterministic derivatives use $$ \mathbb{R}[\epsilon]/\epsilon^2 $$ (where $$ \epsilon^2 = 0 $$). For stochastic calculus, extend to $$ \mathbb{R}[\epsilon]/\epsilon^3 $$:
