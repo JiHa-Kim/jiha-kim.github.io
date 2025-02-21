@@ -41,9 +41,11 @@ On the other hand, in stochastic calculus, the quadratic variation of a Brownian
 # Stochastic Calculus as Algebra with Dual Numbers
 
 Stochastic calculus becomes algebraic with dual numbers. Deterministic derivatives use $$ \mathbb{R}[\epsilon]/\epsilon^2 $$ (where $$ \epsilon^2 = 0 $$). For stochastic calculus, extend to $$ \mathbb{R}[\epsilon]/\epsilon^3 $$:
-- Brownian motion $$ dB_t \sim \epsilon $$, with $$ \langle \epsilon^2 \rangle = dt $$,
-- Time $$ dt \sim \epsilon^2 $$, and $$ \epsilon^3 = 0 $$,
-- $$ dX_t = \mu \, dt + \sigma \, dB_t $$ becomes $$ \sigma \epsilon + \mu \epsilon^2 $$.
+- $$ \epsilon \sim dB_t $$ Brownian motion, with $$ \langle \epsilon^2 \rangle = dt $$,
+- $$ \epsilon^2 \sim dt $$ Time
+- $$ \epsilon^3 = 0 $$
+
+Then $$ dX_t = \mu \, dt + \sigma \, dB_t $$ becomes $$ \sigma \epsilon + \mu \epsilon^2 $$.
 
 For $$ f(X_t) $$, $$ df = f(X_t + dX_t) - f(X_t) $$ extracts the $$ dB_t $$- and $$ dt $$-coefficients from the $$ \epsilon $$- and $$ \epsilon^2 $$-terms.
 
