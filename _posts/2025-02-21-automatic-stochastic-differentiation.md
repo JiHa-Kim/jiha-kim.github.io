@@ -1,6 +1,15 @@
 ---
 layout: post
 title: Automatic Stochastic Differentiation
+categories:
+  - Applied Mathematics
+  - Stochastic Calculus
+tags:
+  - Automatic Differentiation
+  - Dual Numbers
+  - Ito Calculus
+  - Ito Lemma
+  - Stratonovich Calculus
 date: 2025-02-21 05:41 +0000
 math: true
 ---
