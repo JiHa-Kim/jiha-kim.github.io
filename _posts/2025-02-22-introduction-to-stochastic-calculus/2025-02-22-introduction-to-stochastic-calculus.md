@@ -533,7 +533,7 @@ where the logarithm is applied component-wise to $$b$$. This is the **conversion
 - [An Intuitive Introduction For Understanding and Solving Stochastic Differential Equations - Chris Rackauckas (2017)](https://www.chrisrackauckas.com/assets/Papers/ChrisRackauckas-IntuitiveSDEs.pdf)
 - [Stochastic analysis - Paul Bourgade (2010)](https://math.nyu.edu/~bourgade/SA2010/StochasticAnalysis.pdf)
 - [AN INTRODUCTION TO STOCHASTIC DIFFERENTIAL EQUATIONS VERSION 1.2 - Lawrence C. Evans (2013)](https://www.cmor-faculty.rice.edu/~cox/stoch/SDE.course.pdf)
-- [Stochastic differential equations An introduction with applications - Bernt K. Øksendal (2003)](http://www.stat.ucla.edu/~ywu/research/documents/StochasticDifferentialEquations.pdf)
+- Stochastic differential equations An introduction with applications - Bernt K. Øksendal (2003)
 - [Wikipedia: Stochastic calculus](https://en.wikipedia.org/wiki/Stochastic_calculus)
 - [Wikipedia: Stochastic differential equation](https://en.wikipedia.org/wiki/Stochastic_differential_equation)
 
