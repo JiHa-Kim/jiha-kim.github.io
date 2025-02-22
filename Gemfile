@@ -13,6 +13,7 @@ end
 
 gem "wdm", "~> 0.2.0", :platforms => [:mingw, :x64_mingw, :mswin]
 
-gem 'jekyll-compose', group: [:jekyll_plugins]
-
-gem 'jekyll-postfiles'
+group :jekyll_plugins do
+  gem 'jekyll-compose'
+  gem 'jekyll-postfiles'
+end
