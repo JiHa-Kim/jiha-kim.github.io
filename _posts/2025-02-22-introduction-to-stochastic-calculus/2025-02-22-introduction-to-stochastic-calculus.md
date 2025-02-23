@@ -98,7 +98,7 @@ Can we adapt this to the binomial distribution? Let’s try.
 
 Picture the $$n$$-th row of Pascal’s triangle as a random walk: at each of $$n$$ steps, we move $$+1$$ (a win) or $$-1$$ (a loss).
 
-We'll set $$p = 0.5$$ as a first example since it's symmetric, making each direction equally likely and simpler to work with.
+We'll set the probabability of winning as $$p = 0.5$$ as a first example since it's symmetric, making each direction equally likely and simpler to work with.
 
 The number of ways to get $$k$$ wins (and $$n - k$$ losses) is $$\binom{n}{k}$$. Let's try to plot this for a different values $$n$$ over $$k$$. (The code can be found in the [Appendix](#b1-python-code-for-binomial-plots).)
 
@@ -118,7 +118,7 @@ X(t) = \begin{cases}
 \end{cases}
 $$
 
-Here, $$X(t)$$ will encode our displacement at the $$t$$-th step where $$t \in \{1,\dots,n\}$$ is an indexing parameter. As before, we assume that $$X(t_1)$$ is independent of $$X(t_2)$$ for $$t_1 \ne t_2 $$. Hence, $$X(t)$$ has mean $$0$$ and variance $$1$$.
+Here, $$X(t)$$ will encode our displacement at the $$t$$-th step where $$t \in \{1,\dots,n\}$$ is an indexing parameter. As before, we assume that $$X(t_1)$$ is independent of $$X(t_2)$$ for $$t_1 \ne t_2 $$. At each step $$t$$, $$X(t)$$ has mean $$0$$ and variance $$1$$.
 
 Then, the overall displacement $$S(n)$$ is:
 
@@ -126,7 +126,7 @@ $$
 S(n) = X(1) + X(2) + \dots + X(n) = \sum_{t=1}^n X(t)
 $$
 
-So there it is! The central limit theorem states more precisely that given $$n$$ independent and identically distributed random variables $$X_1$$, $$X_2$$, \dots, $$X_n$$ with mean $$\mu$$ and variance $$\sigma^2$$, we have:
+So there it is! The central limit theorem states more precisely that given $$n$$ independent and identically distributed random variables $$X_1, X_2, \dots, X_n$$ with mean $$\mu$$ and variance $$\sigma^2$$, we have:
 
 $$
 X_1 + \dots + X_n \sim N(n\mu, n\sigma^2) \text{ as } n \to \infty
