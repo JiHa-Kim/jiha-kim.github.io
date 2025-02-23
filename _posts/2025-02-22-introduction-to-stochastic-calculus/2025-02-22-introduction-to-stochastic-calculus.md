@@ -517,13 +517,13 @@ Now, if we plug in $$dX=a dt + b dW$$, the first term vanishes, leaving $$b_X b 
 Hence:
 
 $$
-\tilde a = a - \frac{1}{2} b_X b
+\tilde a = a + \frac{1}{2} b_X b
 $$
 
 Notice that, we can write $$b_X b$$ as the the **score** of $$b$$:
 
 $$
-\tilde a = a - \frac{1}{2} \nabla \log(b)
+\tilde a = a + \frac{1}{2} \nabla \log(b)
 $$
 
 where the logarithm is applied component-wise to $$b$$. This is the **conversion formula** between Itô and Stratonovich SDEs, and also hints toward applications for diffusion models in machine learning as it relates to the score function.
