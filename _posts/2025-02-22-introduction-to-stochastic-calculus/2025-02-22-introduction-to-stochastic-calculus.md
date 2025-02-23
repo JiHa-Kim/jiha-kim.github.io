@@ -28,10 +28,10 @@ I hope that a wider audience can feel inspired as to how stochastic calculus eme
 
 #### Applications
 
-Brownian motion and Itô calculus aren’t just math tricks—they model the real world. Stock prices jiggle like $$W(t)$$, molecules bounce in fluids, and noise messes with signals. Stochastic calculus gives us tools to predict, optimize, and understand these messy systems.
+Brownian motion and Itô calculare a notable example of fairly high-level mathematics that are applied to model the real world. Stock prices jiggle erratically, molecules bounce in fluids, and noise partially corrupts signals. Stochastic calculus gives us tools to predict, optimize, and understand these messy systems in a simpified model.
 
 - **Physics**: Einstein used Brownian motion to prove atoms exist—its jittering matched molecular collisions.
-- **Finance**: Option pricing (e.g., Black-Scholes) relies on stochastic differential equations like $$dS = \mu S dt + \sigma S dW$$.
+- **Finance**: Option pricing (e.g., the famous Black-Scholes equation) relies on stochastic differential equations like $$dS = \mu S dt + \sigma S dW$$.
 - **Biology**: Random walks model how species spread or neurons fire.
 
 This is just the tip of the iceberg. More and more applications are emerging, notably in machine learning, as [Song et al. (2021)](https://arxiv.org/abs/2011.13456) have shown in their great paper "Score-Based Generative Modeling through Stochastic Differential Equations".
@@ -52,6 +52,9 @@ $$
 $$
 
 Using 0-indexing, the number of ways to reach the $$k$$-th spot in the $$n$$-th row is $$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$. For example, in row 3, there are $$\binom{3}{2} = 3$$ ways to hit position 2.
+
+![Pascal's Triangle Paths for 3 choose 2](./binom_3_2_paths_pascal.svg)
+_[Code](#b5-latex-code-for-tikz-diagram-of-paths-in-pascals-triangle) 2D image: All 3 paths for the 2nd position in the 3rd row of Pascal's triangle_
 
 Why care? This setup powers the binomial distribution, which models repeated trials with two outcomes—win or lose, heads or tails. Think of:
 - A basketball player shooting free throws with probability $$p$$ of success and $$q = 1 - p$$ of failure.
@@ -673,6 +676,68 @@ plt.legend()
 plt.grid(True)
 plt.savefig("gbm_path.png", dpi=300, bbox_inches="tight")
 plt.show()
+```
+
+### B5. LaTeX Code for Tikz Diagram of Paths in Pascal's Triangle
+```tex
+\documentclass{standalone}
+\usepackage{tikz}
+\begin{document}
+
+\begin{tikzpicture}[scale=0.8]
+    % Add a white background rectangle
+  \fill[white] (-12, 1) rectangle (10, -5);
+  
+  % Row labels (only once, to the left of the first diagram)
+  \node[align=right] at (-11, 0) {Row 0};
+  \node[align=right] at (-11, -1) {Row 1};
+  \node[align=right] at (-11, -2) {Row 2};
+  \node[align=right] at (-11, -3) {Row 3};
+
+  % Diagram 1: Path RRL
+  \node at (-6, 0) {1}; % Row 0
+  \node at (-7, -1) {1}; % Row 1
+  \node at (-5, -1) {1};
+  \node at (-8, -2) {1}; % Row 2
+  \node at (-6, -2) {2};
+  \node at (-4, -2) {1};
+  \node at (-9, -3) {1}; % Row 3
+  \node at (-7, -3) {3};
+  \node at (-5, -3) {3};
+  \node at (-3, -3) {1};
+  \draw[->, red, thick] (-6, 0) -- (-5, -1) -- (-4, -2) -- (-5, -3); % RRL
+  \node at (-6, -4) {Right-Right-Left};
+
+  % Diagram 2: Path RLR
+  \node at (0, 0) {1}; % Row 0
+  \node at (-1, -1) {1}; % Row 1
+  \node at (1, -1) {1};
+  \node at (-2, -2) {1}; % Row 2
+  \node at (0, -2) {2};
+  \node at (2, -2) {1};
+  \node at (-3, -3) {1}; % Row 3
+  \node at (-1, -3) {3};
+  \node at (1, -3) {3};
+  \node at (3, -3) {1};
+  \draw[->, blue, thick] (0, 0) -- (1, -1) -- (0, -2) -- (1, -3); % RLR
+  \node at (0, -4) {Right-Left-Right};
+
+  % Diagram 3: Path LRR
+  \node at (6, 0) {1}; % Row 0
+  \node at (5, -1) {1}; % Row 1
+  \node at (7, -1) {1};
+  \node at (4, -2) {1}; % Row 2
+  \node at (6, -2) {2};
+  \node at (8, -2) {1};
+  \node at (3, -3) {1}; % Row 3
+  \node at (5, -3) {3};
+  \node at (7, -3) {3};
+  \node at (9, -3) {1};
+  \draw[->, green, thick] (6, 0) -- (5, -1) -- (6, -2) -- (7, -3); % LRR
+  \node at (6, -4) {Left-Right-Right};
+\end{tikzpicture}
+
+\end{document}
 ```
 
 ### 3D Visualizations
