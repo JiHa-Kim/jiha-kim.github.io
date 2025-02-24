@@ -530,45 +530,45 @@ $$
 
 Stratonovich calculus, with its midpoint evaluation rule, adjusts how we handle stochastic integrals compared to Itô’s left-endpoint approach. This shift makes it valuable in certain fields where its properties align with physical systems or simplify calculations. Below are some practical applications, each with a concrete mathematical example.
 
-- **Physics with Multiplicative Noise**: In physical systems, noise often scales with the state—like a particle in a fluid where random kicks depend on its position. Consider a damped oscillator with position \(X(t)\) under state-dependent noise:
+- **Physics with Multiplicative Noise**: In physical systems, noise often scales with the state—like a particle in a fluid where random kicks depend on its position. Consider a damped oscillator with position $$X(t)$$ under state-dependent noise:
   $$
   dX = -k X \, dt + \sigma X \circ dW
   $$
-  Here, \(k > 0\) is the damping constant, \(\sigma\) is the noise strength, and \(\circ dW\) denotes the Stratonovich differential. Using Stratonovich’s chain rule, for \(f(X) = \ln X\):
+  Here, $$k > 0$$ is the damping constant, $$\sigma$$ is the noise strength, and $$\circ dW$$ denotes the Stratonovich differential. Using Stratonovich’s chain rule, for $$f(X) = \ln X$$:
   $$
   d(\ln X) = \frac{1}{X} (-k X \, dt + \sigma X \circ dW) = -k \, dt + \sigma \circ dW
   $$
-  This integrates to \(X(t) = X(0) e^{-kt + \sigma W(t)}\), matching the expected exponential decay with noise. Stratonovich fits here because it preserves symmetries in continuous physical processes, unlike Itô, which adds a \(\frac{1}{2} \sigma^2 X \, dt\) drift term.
+  This integrates to $$X(t) = X(0) e^{-kt + \sigma W(t)}$$, matching the expected exponential decay with noise. Stratonovich fits here because it preserves symmetries in continuous physical processes, unlike Itô, which adds a $$\frac{1}{2} \sigma^2 X \, dt$$ drift term.
 
-- **Wong-Zakai Theorem and Smooth Noise**: Real-world noise isn’t perfectly white (uncorrelated like \(dW\))—it’s often smoother. The Wong-Zakai theorem shows that approximating smooth noise (e.g., \(\eta(t)\) with correlation time \(\epsilon\)) as \(\epsilon \to 0\) yields a Stratonovich SDE. Take a simple system:
+- **Wong-Zakai Theorem and Smooth Noise**: Real-world noise isn’t perfectly white (uncorrelated like $$dW$$)—it’s often smoother. The Wong-Zakai theorem shows that approximating smooth noise (e.g., $$\eta(t)$$ with correlation time $$\epsilon$$) as $$\epsilon \to 0$$ yields a Stratonovich SDE. Take a simple system:
   $$
   \dot{x} = a x + b x \eta(t)
   $$
-  As \(\eta(t) \to\) white noise, this becomes \(dX = a X \, dt + b X \circ dW\). In Stratonovich form, the solution is \(X(t) = X(0) e^{a t + b W(t)}\). This is useful in engineering, like modeling voltage in a circuit with thermal fluctuations, where noise has slight smoothness.
+  As $$\eta(t) \to$$ white noise, this becomes $$dX = a X \, dt + b X \circ dW$$. In Stratonovich form, the solution is $$X(t) = X(0) e^{a t + b W(t)}$$. This is useful in engineering, like modeling voltage in a circuit with thermal fluctuations, where noise has slight smoothness.
 
-- **Stochastic Control**: In control problems, Stratonovich can simplify dynamics under feedback. Consider a system with control input \(u(t)\) and noise:
+- **Stochastic Control**: In control problems, Stratonovich can simplify dynamics under feedback. Consider a system with control input $$u(t)$$ and noise:
   $$
   dX = (a X + u) \, dt + \sigma X \circ dW
   $$
-  For \(f(X) = X^2\), the Stratonovich rule gives:
+  For $$f(X) = X^2$$, the Stratonovich rule gives:
   $$
   d(X^2) = 2X (a X + u) \, dt + 2X \cdot \sigma X \circ dW = (2a X^2 + 2X u) \, dt + 2\sigma X^2 \circ dW
   $$
-  The lack of a second-derivative term (unlike Itô’s \(+ \sigma^2 X^2 dt\)) aligns with classical control intuition, making it easier to design \(u(t)\) for, say, stabilizing a noisy pendulum or a drone in wind.
+  The lack of a second-derivative term (unlike Itô’s $$+ \sigma^2 X^2 dt$$) aligns with classical control intuition, making it easier to design $$u(t)$$ for, say, stabilizing a noisy pendulum or a drone in wind.
 
 - **Biological Diffusion**: In biology, noise can depend on spatial gradients, like protein diffusion across a cell. Model this as:
   $$
   dX = \mu \, dt + \sigma(X) \circ dW, \quad \sigma(X) = \sqrt{2D (1 + k X^2)}
   $$
-  where \(D\) is diffusivity and \(k\) adjusts noise with position. Stratonovich ensures the diffusion term reflects physical conservation laws, matching experimental data in systems like bacterial motility better than Itô, which alters the drift.
+  where $$D$$ is diffusivity and $$k$$ adjusts noise with position. Stratonovich ensures the diffusion term reflects physical conservation laws, matching experimental data in systems like bacterial motility better than Itô, which alters the drift.
 
-- **Numerical Stability**: For simulations, Stratonovich pairs well with midpoint methods. Take \(dX = -a X \, dt + \sigma \circ dW\). A Stratonovich discretization might use:
+- **Numerical Stability**: For simulations, Stratonovich pairs well with midpoint methods. Take $$dX = -a X \, dt + \sigma \circ dW$$. A Stratonovich discretization might use:
   $$
   X_{n+1} = X_n - a \left(\frac{X_n + X_{n+1}}{2}\right) \Delta t + \sigma \Delta W_n
   $$
   This implicit scheme leverages the midpoint rule, reducing numerical artifacts in models like chemical kinetics compared to Itô’s explicit steps.
 
-The choice between Stratonovich and Itô depends on context. Stratonovich suits systems where noise is tied to physical continuity or symmetry, while Itô dominates in finance for its non-anticipating properties. The conversion \(a = \tilde{a} + \frac{1}{2} b b_X\) lets you switch forms as needed.
+The choice between Stratonovich and Itô depends on context. Stratonovich suits systems where noise is tied to physical continuity or symmetry, while Itô dominates in finance for its non-anticipating properties. The conversion $$a = \tilde{a} + \frac{1}{2} b b_X$$ lets you switch forms as needed.
 
 ## Appendix
 ### A.0. Further Reading
