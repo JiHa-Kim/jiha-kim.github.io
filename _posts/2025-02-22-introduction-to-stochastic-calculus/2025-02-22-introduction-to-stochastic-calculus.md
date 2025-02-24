@@ -28,7 +28,7 @@ I hope that a wider audience can feel inspired as to how stochastic calculus eme
 
 #### Applications
 
-Brownian motion and Itô calculare a notable example of fairly high-level mathematics that are applied to model the real world. Stock prices jiggle erratically, molecules bounce in fluids, and noise partially corrupts signals. Stochastic calculus gives us tools to predict, optimize, and understand these messy systems in a simpified model.
+Brownian motion and Itô calculus are a notable example of fairly high-level mathematics that are applied to model the real world. Stock prices jiggle erratically, molecules bounce in fluids, and noise partially corrupts signals. Stochastic calculus gives us tools to predict, optimize, and understand these messy systems in a simpified model.
 
 - **Physics**: Einstein used Brownian motion to prove atoms exist—its jittering matched molecular collisions.
 - **Finance**: Option pricing (e.g., the famous Black-Scholes equation) relies on stochastic differential equations like $$dS = \mu S dt + \sigma S dW$$.
