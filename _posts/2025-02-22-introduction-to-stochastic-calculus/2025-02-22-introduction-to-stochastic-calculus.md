@@ -16,7 +16,7 @@ math: true
 
 # **Introduction to Stochastic Calculus**
 
-Notation is presented in the [Appendix](#a1-notation).
+Notation and code for generating visuals are presented in the [Appendix](#appendix).
 
 ### **0. Introduction**
 
@@ -149,10 +149,13 @@ which is our desired limit. We have shown that a "continuous binomial distributi
 Here are some very nice 3D animations of sample paths with the distribution evolving over the number of steps:
 
 ![Discrete Random Walk, 15 steps](./discrete_binomial.gif)
-_15 steps [Code](#c1-3d-plot-of-discrete-random-walks) 3D animation: Discrete Random Walk,_
+_[Code](#c1-3d-plot-of-discrete-random-walks) 3D animation: Discrete Random Walk, 15 steps_
 
 ![Discrete Random Walk, 100 steps](./discrete_binomial_normalizing.gif)
 _[Code](#c1-3d-plot-of-discrete-random-walks) Discrete Random Walk, 100 steps over 5 seconds_
+
+![Normal Distribution Approximation by Random Walks](./discrete_random_walk.gif)
+_[Code](#c4-python-code-for-normal-distribution-approximation-by-random-walks) Normal distribution approximation by discrete random walks_
 
 ### **3. Defining Brownian motion (Wiener process)**
 
@@ -742,13 +745,13 @@ plt.show()
 
 ### 3D Visualizations
 
-#### C.1. 3D Plot of Discrete Random Walks
+#### C1. 3D Plot of Discrete Random Walks
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # for 3D plotting
-import imageio
+import imageio.v3 as imageio  # using modern imageio v3 API
 import os
 from scipy.special import comb
 from scipy.stats import norm
@@ -756,7 +759,10 @@ from scipy.stats import norm
 # Create a directory for frames
 os.makedirs('gif_frames', exist_ok=True)
 
-# Parameters for the discrete random walk
+##############################################
+# Part 1: Discrete Binomial Random Walk (N = 15)
+##############################################
+
 N = 15  # total number of steps (kept small for clear discreteness)
 num_sample_paths = 5  # number of sample paths to overlay
 
@@ -804,10 +810,16 @@ for t_step in range(N + 1):
     plt.close()
     frames.append(imageio.imread(frame_path))
 
-# Save the resulting animation as a GIF
-imageio.mimsave('discrete_binomial.gif', frames, duration=0.5)
+# Compute per-frame durations: 0.25 sec for all frames except the last one (2 sec)
+durations = [0.25] * (len(frames) - 1) + [2.0]
 
-# Parameters for the discrete random walk
+# Write the GIF with variable durations and infinite looping
+imageio.imwrite('discrete_binomial.gif', frames, duration=durations, loop=0)
+
+##############################################
+# Part 2: Discrete Random Walk Normalizing (N = 50)
+##############################################
+
 N = 50  # total number of steps (increased to show gradual convergence)
 num_sample_paths = 5  # number of sample paths to overlay
 
@@ -862,11 +874,14 @@ for t_step in range(N + 1):
     plt.close()
     frames.append(imageio.imread(frame_path))
 
-# Save the resulting animation as a GIF
-imageio.mimsave('discrete_binomial_normalizing.gif', frames, duration=0.5)
+# Compute per-frame durations: 0.25 sec for all frames except the last one (2 sec)
+durations = [0.25] * (len(frames) - 1) + [2.0]
+
+# Write the GIF with variable durations and infinite looping
+imageio.imwrite('discrete_binomial_normalizing.gif', frames, duration=durations, loop=0)
 ```
 
-### C.2. 3D Animation of Brownian Motion
+### C2. 3D Animation of Brownian Motion
 Normal distribution sweeping and evolving across time according Brownian motion
 
 ```python
@@ -874,23 +889,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # for 3D plotting
 from scipy.stats import norm
-import imageio
+import imageio.v3 as imageio  # using modern API
 import os
 
-# Create a directory for frames
 os.makedirs('gif_frames', exist_ok=True)
 
-# Parameters for the continuous Brownian motion
-num_frames = 100                # Increase number of frames for smoother animation
-t_values = np.linspace(0.1, 5, num_frames)  # More time points from 0.1 to 5
-x = np.linspace(-5, 5, 200)       # Increase x resolution for a smoother density surface
+# Parameters for continuous Brownian motion
+num_frames = 100  # more frames for smoother animation
+t_values = np.linspace(0.1, 5, num_frames)
+x = np.linspace(-5, 5, 200)  # increased resolution
 
-# Simulate a few sample Brownian motion paths using finer time steps
 num_sample_paths = 5
 sample_paths = np.zeros((num_sample_paths, len(t_values)))
-dt_cont = t_values[1] - t_values[0]  # uniform time step
+dt_cont = t_values[1] - t_values[0]
 for i in range(num_sample_paths):
-    increments = np.random.normal(0, np.sqrt(dt_cont), size=len(t_values) - 1)
+    increments = np.random.normal(0, np.sqrt(dt_cont), size=len(t_values)-1)
     sample_paths[i, 1:] = np.cumsum(increments)
 
 frames = []
@@ -898,13 +911,11 @@ for i, t in enumerate(t_values):
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection='3d')
     
-    # Create a density surface for times up to the current frame t
     mask = t_values <= t
     T_sub, X_sub = np.meshgrid(t_values[mask], x)
     P_sub = (1 / np.sqrt(2 * np.pi * T_sub)) * np.exp(-X_sub**2 / (2 * T_sub))
     ax.plot_surface(X_sub, T_sub, P_sub, cmap='viridis', alpha=0.7, edgecolor='none')
     
-    # Overlay sample paths as red curves (projected on the z=0 plane)
     for sp in sample_paths:
         ax.plot(sp[:i+1], t_values[:i+1], np.zeros(i+1), 'r-', marker='o', markersize=3)
     
@@ -919,40 +930,36 @@ for i, t in enumerate(t_values):
     plt.close()
     frames.append(imageio.imread(frame_path))
 
-# Save the smoother continuous Brownian motion GIF
-imageio.mimsave('continuous_brownian_3d_smooth.gif', frames, duration=0.1)
+imageio.imwrite('continuous_brownian_3d_smooth.gif', frames, duration=0.1, loop=0)
 ```
 
-### C.3. 3D Animation of Geometric Brownian Motion
+### C3. 3D Animation of Geometric Brownian Motion
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # for 3D plotting
-import imageio
+import imageio.v3 as imageio  # modern API
 import os
 
-# Create a directory for frames
 os.makedirs('gif_frames', exist_ok=True)
 
-# Parameters for geometric Brownian motion
-S0 = 1.0          # initial stock price
-mu = 0.2          # increased drift rate to emphasize the upward shift
-sigma = 0.2       # volatility
+# Parameters for geometric Brownian motion (GBM)
+S0 = 1.0    # initial stock price
+mu = 0.2    # drift rate (increased for noticeable drift)
+sigma = 0.2 # volatility
 
-# Set up time and price ranges
 num_frames = 100
-t_values = np.linspace(0.1, 5, num_frames)  # avoid t=0 to prevent singularities in the density
-S_range = np.linspace(0.01, 5, 200)         # expanded range to better capture the drift
+t_values = np.linspace(0.1, 5, num_frames)  # avoid t=0 to prevent singularity in density
+S_range = np.linspace(0.01, 5, 200)         # price range
 
-# Simulate sample paths for geometric Brownian motion using the GBM formula
+# Simulate GBM sample paths
 num_sample_paths = 5
 sample_paths = np.zeros((num_sample_paths, len(t_values)))
 dt = t_values[1] - t_values[0]
 for i in range(num_sample_paths):
-    increments = np.random.normal(0, np.sqrt(dt), size=len(t_values) - 1)
+    increments = np.random.normal(0, np.sqrt(dt), size=len(t_values)-1)
     W = np.concatenate(([0], np.cumsum(increments)))
-    # GBM: S(t) = S0 * exp((mu - 0.5*sigma^2)*t + sigma * W(t))
     sample_paths[i] = S0 * np.exp((mu - 0.5 * sigma**2) * t_values + sigma * W)
 
 frames = []
@@ -960,17 +967,12 @@ for i, t in enumerate(t_values):
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111, projection='3d')
     
-    # Plot the lognormal density surface for times up to the current t
     mask = t_values <= t
     T_sub, S_sub = np.meshgrid(t_values[mask], S_range)
-    # Lognormal density:
-    # p(S,t) = 1/(S*sigma*sqrt(2*pi*t)) * exp( - (ln(S/S0) - (mu - 0.5*sigma^2)*t)^2/(2*sigma^2*t) )
     P_sub = (1 / (S_sub * sigma * np.sqrt(2 * np.pi * T_sub))) * \
             np.exp(- (np.log(S_sub / S0) - (mu - 0.5 * sigma**2) * T_sub)**2 / (2 * sigma**2 * T_sub))
-    
     ax.plot_surface(S_sub, T_sub, P_sub, cmap='viridis', alpha=0.7, edgecolor='none')
     
-    # Overlay sample GBM paths projected at z=0
     for sp in sample_paths:
         ax.plot(sp[:i+1], t_values[:i+1], np.zeros(i+1), 'r-', marker='o', markersize=3)
     
@@ -985,6 +987,73 @@ for i, t in enumerate(t_values):
     plt.close()
     frames.append(imageio.imread(frame_path))
 
-# Save the resulting animation as a GIF
-imageio.mimsave('geometric_brownian_drifted_3d.gif', frames, duration=0.1)
+imageio.imwrite('geometric_brownian_drifted_3d.gif', frames, duration=0.1, loop=0)
+```
+
+### C4. Python Code for Normal Distribution Approximation by Random Walks
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+import imageio.v3 as imageio  # modern ImageIO v3 API
+import os
+from scipy.special import comb
+
+# Create a directory for frames
+os.makedirs('gif_frames', exist_ok=True)
+
+# 2. Discrete Random Walk with Sample Paths
+
+def simulate_random_walk(dt, T, num_paths):
+    """Simulate random walk paths with step size sqrt(dt)."""
+    n_steps = int(T / dt)
+    positions = np.zeros((num_paths, n_steps + 1))
+    for i in range(num_paths):
+        increments = np.random.choice([-1, 1], size=n_steps) * np.sqrt(dt)
+        positions[i, 1:] = np.cumsum(increments)
+    return positions
+
+dt = 0.01  # Step size
+T = 5.0    # Total time
+num_paths = 10000  # For histogram
+times = np.arange(0, T + dt, dt)
+positions = simulate_random_walk(dt, T, num_paths)
+sample_indices = np.arange(5)
+
+frames = []
+for i, t in enumerate(times):
+    if i % 10 == 0:  # Use every 10th frame for the GIF
+        current_positions = positions[:, i]
+        x_vals = np.linspace(-5, 5, 100)
+        p_theoretical = norm.pdf(x_vals, 0, np.sqrt(t) if t > 0 else 1e-5)
+        
+        plt.figure(figsize=(12, 4))
+        plt.subplot(1, 2, 1)
+        plt.hist(current_positions, bins=50, density=True, alpha=0.6, label=f't = {t:.2f}')
+        plt.plot(x_vals, p_theoretical, 'r-', label='N(0,t)')
+        plt.title('Discrete Random Walk Distribution')
+        plt.xlabel('Position')
+        plt.ylabel('Density')
+        plt.ylim(0, 0.8)
+        plt.legend()
+        plt.grid(True)
+        
+        plt.subplot(1, 2, 2)
+        for idx in sample_indices:
+            plt.plot(times[:i+1], positions[idx, :i+1], '-o', markersize=3)
+        plt.title('Sample Random Walk Paths')
+        plt.xlabel('Time')
+        plt.ylabel('Position')
+        plt.xlim(0, T)
+        plt.grid(True)
+        
+        frame_path = f'gif_frames/discrete_t_{t:.2f}.png'
+        plt.tight_layout()
+        plt.savefig(frame_path)
+        plt.close()
+        frames.append(imageio.imread(frame_path))
+
+# Save the discrete random walk GIF with infinite looping
+imageio.imwrite('discrete_random_walk.gif', frames, duration=0.1, loop=0)
 ```
