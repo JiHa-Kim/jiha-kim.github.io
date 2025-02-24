@@ -152,10 +152,10 @@ Here are some very nice 3D animations of sample paths with the distribution evol
 _[Code](#c1-3d-plot-of-discrete-random-walks) 3D animation: Discrete Random Walk, 15 steps_
 
 ![Discrete Random Walk, 100 steps](./discrete_binomial_normalizing.gif)
-_[Code](#c1-3d-plot-of-discrete-random-walks) Discrete Random Walk, 100 steps over 5 seconds_
+_[Code](#c1-3d-plot-of-discrete-random-walks) 3D Animation: Discrete Random Walk, 100 steps over 5 seconds_
 
 ![Normal Distribution Approximation by Random Walks](./discrete_random_walk.gif)
-_[Code](#c4-python-code-for-normal-distribution-approximation-by-random-walks) Normal distribution approximation by discrete random walks_
+_[Code](#c4-python-code-for-normal-distribution-approximation-by-random-walks) 2D animation: Normal distribution approximation by discrete random walks_
 
 ### **3. Defining Brownian motion (Wiener process)**
 
@@ -175,7 +175,7 @@ Motivated by these observations as well as our previous intuition on continuous 
 
 So let's write this mathematically. Such a random variable is usually denoted either by $$B_t$$ for "Bronian motion", which is the physical phenomenon, or $$W_t$$ for "Wiener process", in honor of the mathematician **Norbert Wiener** who developed a lot of its early theory.
 
-I will use $$W(t)$$ to emphasize its dependence on $$t$$. (I will no longer use the vertical bars for better readability and ease of writing, but keep in mind that it's still a random variable.)
+I will use $$W(t)$$ to emphasize its dependence on $$t$$.
 
 Let $$W(t)$$ be the position of the Brownian motion at time $$t$$, and let $$\Delta W(t_1,t_2)$$ be the displacement of the Brownian motion from time $$t_1$$ to time $$t_2$$.
 
@@ -184,7 +184,7 @@ Let $$W(t)$$ be the position of the Brownian motion at time $$t$$, and let $$\De
 Then, we write some properties of Brownian motion:
 
 1. $$W(0)=0$$ almost surely
-2. $$W(t)\sim N(0,t)$$
+2. \$$W(t)\sim N(0,t)$$
     - With the first condition, this is often written equivalently as $$\Delta W(s,t)\sim N(0,t-s)$$ for all $$s \ne t$$
 3. $$\Delta W(t_1,t_2)$$ is independent of $$\Delta W(t_2,t_3)$$ for arbitrary distinct $$t_1 < t_2 \le t_3$$
 
