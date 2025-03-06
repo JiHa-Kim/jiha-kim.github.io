@@ -84,162 +84,301 @@ $$
 
 This is exactly the gradient descent update rule we started with. By taking the limit as $$ \eta \to 0 $$, we recover the continuous-time dynamics, which gives us a new perspective to study.
 
+> **Exercise: Deriving Gradient Descent from Gradient Flow**  
+> Starting from the gradient flow ODE  
+> 
+> $$
+> \frac{dx(t)}{dt} = -\nabla L(x(t)),
+> $$ 
+> 
+> use the forward Euler discretization
+> 
+> $$
+> \frac{x(t+\eta) - x(t)}{\eta} \approx -\nabla L(x(t))
+> $$
+> 
+> to derive the standard gradient descent update
+> 
+> $$
+> x_{k+1} = x_k - \eta \nabla L(x_k).
+> $$
+> 
+> *Hint:* Thinking in terms of numerical simulations for ODEs, explain each step and discuss the role of the step size $$ \eta $$ in controlling the approximation accuracy.
+
 ### A Concrete Example: Mean Squared Error (MSE)
 
-Imagine our loss function is convex and resembles a smooth bowl. Let
+> **Exercise: Exponential Convergence in a Quadratic Bowl**  
+> Consider the mean squared error loss
+> 
+> $$
+> L(x) = \frac{1}{2}\|x-x^\ast\|^2,
+> $$
+> 
+> where $$ x^\ast $$ is the unique minimizer.  
+> **(a)** Show that the gradient flow
+> 
+> $$
+> \dot{x}(t) = -(x(t)-x^\ast)
+> $$
+> 
+> has the solution
+> 
+> $$
+> x(t) = x^\ast + (x(0)-x^\ast)e^{-t}.
+> $$
+> 
+> **(b)** Explain why this solution demonstrates exponential convergence to the minimizer.
+> > **Exponential Convergence:**  
+> > A sequence $$ \{x(t)\} $$ or trajectory $$ x(t) $$ is said to converge exponentially to a limit $$ x^\ast $$ if there exist constants $$ C > 0 $$ and $$ \alpha > 0 $$ such that
+> > 
+> > $$
+> > \|x(t) - x^\ast\| \leq C e^{-\alpha t} \quad \text{for all } t \geq 0.
+> > $$ 
+> **(c)** Now consider the discrete gradient descent update with a fixed step size \( \eta \):
+> 
+> \[
+> x_{k+1} = x_k - \eta (x_k - x^\ast).
+> \]
+> 
+> Show that the error evolves as
+> \[
+> 
+> \|x_{k} - x^\ast\| = |1-\eta|^k \|x_0-x^\ast\|,
+> \]
+> 
+> and deduce the condition on \( \eta \) (in terms of its magnitude) under which the discrete update converges exponentially.  
+> 
+> **(d)** Reflect on the following questions:  
+> 1. How does the convergence rate \( |1-\eta| \) compare to the continuous rate \( e^{-1} \) when \( \eta \) is small?  
+> 2. What are the potential pitfalls if \( \eta \) is chosen too large or too small in the discrete case?  
+> 3. Can you identify scenarios where the discrete updates may fail to mimic the continuous dynamics, even if the continuous gradient flow converges exponentially?  
+>  
+> *Hint:* Consider evaluating the discrete convergence factor \( |1-\eta| \) for different choices of \( \eta \), and compare these values with the ideal continuous decay rate \( e^{-1} \) over a unit time interval.
 
-\[
-L(x) = \frac{1}{2} \| x - x^\ast \|^2,
-\]
+We might also be worried about the convergence of the gradient flow ODE into a saddle point, but we can fortunately demonstrate that this is improbable.
 
-where \( x^\ast \) is the unique minimizer. In this case, the gradient is
-
-\[
-\nabla L(x) = x - x^\ast.
-\]
-
-The continuous gradient flow becomes:
-
-\[
-\dot{x}(t) = -(x(t) - x^\ast),
-\]
-
-a linear ordinary differential equation. Its solution is given by:
-
-\[
-x(t) = x^\ast + \bigl(x(0)-x^\ast\bigr) e^{-t},
-\]
-
-which shows an exponential convergence toward the optimum. The forward Euler discretization with step size \( \eta \) yields:
-
-\[
-x_{k+1} = x_k - \eta (x_k - x^\ast).
-\]
-
-For a sufficiently small \( \eta \), this discrete scheme mimics the continuous exponential decay, building the bridge between the theoretical foundation and practical algorithm.
-
-Now, are we really justified in doing this? Let's take a more theoretical perspective through Lyapunov’s Stability Theorem.
+> **Exercise: Investigating the Instability of Saddle Points**  
+> Consider a twice-differentiable function \( L: \mathbb{R}^n \to \mathbb{R} \) and let \( x^\ast \) be a critical point (i.e., \( \nabla L(x^\ast) = 0 \)). Suppose that the Hessian \( H = \nabla^2 L(x^\ast) \) has both positive and negative eigenvalues, meaning \( x^\ast \) is a saddle point.  
+>
+> **(a)** Linearize the gradient flow dynamics around \( x^\ast \) by writing  
+> \[
+> \dot{y}(t) = -H\,y(t),
+> \]  
+> where \( y(t) = x(t) - x^\ast \). Explain how the eigenvalues of \( H \) influence the behavior of \( y(t) \).  
+>
+> **(b)** Show that even though \( \nabla L(x^\ast) = 0 \), a small perturbation in the direction corresponding to a negative eigenvalue of \( H \) will grow over time, thereby illustrating the instability of the saddle point under gradient flow.  
+>
+> **(c)** Discuss why the standard gradient descent update  
+> \[
+> x_{k+1} = x_k - \eta \nabla L(x_k)
+> \]  
+> might exhibit erratic behavior when initialized near a saddle point, and how this contrasts with the behavior near a local minimum.
+>
+> *Hint:* Consider the exponential behavior \( y(t) \approx e^{-\lambda t} y(0) \) in each eigendirection and relate this to the choice of step size \( \eta \) in the discrete case.
 
 ## Rigorous Foundations: Lyapunov Stability
 
-To understand why our gradient flow leads to convergence, we turn to **Lyapunov’s Stability Theorem**. This theorem provides a systematic way to prove that an equilibrium point of a dynamical system is stable by constructing an appropriate Lyapunov function. In our context, the equilibrium is the minimum \( x^\ast \) of the loss function \( L(x) \).
+Now, this playing around is fun, but are we really justified in creating this continuous formulation? Let's take a more theoretical perspective through Lyapunov’s Stability Theorem.
+
+To understand why our gradient flow leads to convergence, we turn to **Lyapunov’s Stability Theorem**. This theorem provides a systematic way to prove that an equilibrium point of a dynamical system is stable by constructing an appropriate Lyapunov function. In our context, the equilibrium is the minimum $$ x^\ast $$ of the loss function $$ L(x) $$.
 
 ### Lyapunov Functions: The Core Idea
 
-A Lyapunov function \( V(x) \) is a scalar function that serves as an "energy measure" for the system. For a system described by
+A Lyapunov function $$ V(x) $$ is a scalar function that serves as an "energy measure" for the system. For a system described by
 
-\[
+$$
 \dot{x}(t) = f(x(t)),
-\]
+$$
 
-a function \( V : \mathbb{R}^n \to \mathbb{R} \) is a Lyapunov function if it satisfies:
+a function $$ V : \mathbb{R}^n \to \mathbb{R} $$ is a Lyapunov function if it satisfies:
 
 1. **Positive Definiteness:**
-   \[
-   V(x) > 0 \quad \text{for all } x \neq x^\ast \quad \text{and} \quad V(x^\ast) = 0.
-   \]
-2. **Negative Definiteness of the Derivative:**
-   \[
-   \dot{V}(x) = \nabla V(x)^\top f(x) < 0 \quad \text{for all } x \neq x^\ast.
-   \]
 
-If these conditions hold, the equilibrium \( x^\ast \) is stable, and trajectories \( x(t) \) converge toward \( x^\ast \).
+   $$
+   V(x) > 0 \quad \text{for all } x \neq x^\ast \quad \text{and} \quad V(x^\ast) = 0.
+   $$
+
+2. **Negative Definiteness of the Derivative:**
+   
+   $$
+   \dot{V}(x) = \nabla V(x)^\top f(x) < 0 \quad \text{for all } x \neq x^\ast.
+   $$
+
+If these conditions hold, the equilibrium $$ x^\ast $$ is stable, and trajectories $$ x(t) $$ converge toward $$ x^\ast $$.
 
 ### Constructing a Lyapunov Function for Gradient Flow
 
 For our gradient flow:
 
-\[
+$$
 \dot{x}(t) = -\nabla L(x(t)),
-\]
+$$
 
 a natural candidate is the loss function itself (or a shifted version). Define
 
-\[
+$$
 V(x) = L(x) - L(x^\ast),
-\]
+$$
 
-where \( x^\ast \) is the minimizer of \( L \). Notice that:
+where $$ x^\ast $$ is the minimizer of $$ L $$. Notice that $$V(x)$$ has the same differentiability properties as $$L(x)$$.
 
-- \( V(x) \geq 0 \) for all \( x \) and \( V(x^\ast) = 0 \),
-- \( V(x) \) is continuously differentiable provided \( L(x) \) is.
+> **Exercise:** Assuming that $$x*$$ is unique, show that $$V(x)$$ is a valid Lyapunov function for the gradient flow.
 
-To examine the time derivative along the flow, compute:
-
-\[
-\dot{V}(x) = \nabla V(x)^\top \dot{x}(t).
-\]
-
-Since \( \nabla V(x) = \nabla L(x) \) and \( \dot{x}(t) = -\nabla L(x(t)) \), we have
-
-\[
-\dot{V}(x) = \nabla L(x)^\top \bigl( -\nabla L(x) \bigr) = -\|\nabla L(x)\|^2.
-\]
-
-Because the squared norm \( \|\nabla L(x)\|^2 \) is strictly positive when \( x \neq x^\ast \), it follows that
-
-\[
-\dot{V}(x) < 0 \quad \text{for all } x \neq x^\ast.
-\]
-
-Thus, \( V(x) \) qualifies as a Lyapunov function, which shows that the gradient flow is asymptotically stable: as \( t \to \infty \), \( x(t) \) converges to the minimizer \( x^\ast \).
-
-## 3. A Majorization-Minimization Perspective
+## A Majorization-Minimization Perspective For Convex Lipschitz Smooth Functions
 
 An alternative way to understand gradient descent is through the lens of **majorization-minimization (MM)**. The MM framework seeks to solve a complex optimization problem by instead iteratively minimizing a surrogate (upper bound) that is easier to handle. 
 
 ### The Variational Problem
 
-Assume that the loss function \( L(x) \) is convex and \(\lambda\)-Lipschitz smooth. For any \( x \) and \( y \) in the domain, we have:
+Assume that the loss function $$ L(x) $$ is convex and $$\lambda$$-Lipschitz smooth, i.e.:
 
-\[
+> A function $$L: \mathbb{R}^d \to \mathbb{R}$$ is $$\lambda$$-Lipschitz smooth if for all $$x,y\in \mathbb{R}^d$$, the gradient satisfies
+> 
+> $$
+> \|\nabla L(y) - \nabla L(x)\| \le \lambda \|y-x\|.
+> $$
+
+This condition implies the following upper bound. For any $$ x $$ and $$ y $$ in the domain, we have:
+
+$$
 L(y) \leq L(x) + \nabla L(x)^\top (y-x) + \frac{\lambda}{2}\|y-x\|^2.
-\]
+$$
 
-The proof is in the [appendix](#appendix-compact-proof-of-the-quadratic-upper-bound). The right-hand side of the inequality acts as an upper bound (or surrogate) for \( L(y) \) around the point \( x \). This quadratic function is tight at \( y = x \) and easy to minimize with respect to \( y \).
+The proof is in the [appendix](#appendix-compact-proof-of-the-quadratic-upper-bound). The right-hand side of the inequality acts as an upper bound (or surrogate) for $$ L(y) $$ around the point $$ x $$. This quadratic function is tight at $$ y = x $$ and easy to minimize with respect to $$ y $$.
 
 ### Formulating the Surrogate Minimization
 
-At the current iterate \( x_k \), we define the surrogate function:
+At the current iterate $$ x_k $$, we define the surrogate function:
 
-\[
+$$
 Q(y; x_k) = L(x_k) + \nabla L(x_k)^\top (y-x_k) + \frac{\lambda}{2}\|y-x_k\|^2.
-\]
+$$
 
-The Majorization-Minimization (MM) principle suggests that instead of minimizing \( L(y) \) directly, we can minimize this upper bound:
+Since the inequality above holds for all points $$y$$, it should also hold at the minimum: $$\arg\min_y L(y) \le \arg\min_y Q(y; x_k)$$.
 
-\[
+The Majorization-Minimization (MM) principle suggests that instead of minimizing $$ L(y) $$ directly, we can minimize this upper bound:
+
+$$
 x_{k+1} = \arg\min_{y} Q(y; x_k).
-\]
+$$
 
-Intuitively, think of our loss landscape again. This surface might be somewhat jagged and annoying to work with. Instead, majorization-minimization tells us "let's lay a nicely shaped and artificially constructed tarp lying strictly above the landscape". In such a way, if our choice is fairly good, then since the tarp traps the landscape below, descending it will ensure that the loss is at least below it.
+Intuitively, think of our loss landscape again. This surface might be somewhat jagged and annoying to work with. Instead, majorization-minimization tells us "let's lay a nicely shaped and artificially constructed tarp lying strictly above the landscape". In such a way, if our choice is fairly good, then since the tarp traps the landscape below, descending it will ensure that the loss is at least below it. How well this works depends on the sharpness of our bound (closeness of our tarp).
 
 [Example majorization through surrogate function]
 
 ### Solving the Variational Problem
 
-To find the minimizer, we differentiate \( Q(y; x_k) \) with respect to \( y \) and set the derivative to zero:
+To find the minimizer, we differentiate $$ Q(y; x_k) $$ with respect to $$ y $$ and set the derivative to zero. For simplicity, let's start with the case of the $$\ell_2$$ norm $$\|x\|_2 = \sqrt{x^\top x}$$:
 
-\[
+$$
 \nabla_y Q(y; x_k) = \nabla L(x_k) + \lambda (y-x_k) = 0.
-\]
+$$
 
-Solving for \( y \) yields:
+Solving for $$ y $$ yields:
 
-\[
+$$
 y = x_k - \frac{1}{\lambda} \nabla L(x_k).
-\]
+$$
 
 Thus, the update rule becomes:
 
-\[
+$$
 x_{k+1} = x_k - \frac{1}{\lambda} \nabla L(x_k).
-\]
+$$
 
-This is exactly the gradient descent update with a fixed learning rate \( \eta = \frac{1}{\lambda} \).
+This is exactly the gradient descent update with a fixed learning rate $$ \eta = \frac{1}{\lambda} $$.
 
+## Proximal Methods: Generalizing to Non-Differentiable Losses
+
+So far, we derived the familiar gradient descent update rule by discretizing the continuous gradient flow using the forward Euler method. However, the **backward Euler** method offers distinct advantages that are especially relevant in machine learning, while maintaining a single evaluation point per update.
+
+### The Backward Euler Discretization
+
+Recall our gradient flow ODE:
+
+> Given a differentiable $$L: \mathbb{R}^d \to \mathbb{R}$$, the continuous-time dynamics are given by the gradient flow ODE
+> $$
+> \frac{dx(t)}{dt} = -\nabla L(x(t)).
+> $$
+
+Instead of approximating the derivative at the current iterate, backward Euler evaluates it at the future point:
+
+$$
+\frac{x_{k+1} - x_k}{\eta} = -\nabla L(x_{k+1}).
+$$
+
+Rearranging, we obtain the implicit update:
+
+$$
+x_{k+1} = x_k - \eta \, \nabla L(x_{k+1}).
+$$
+
+This implicitness means that the new iterate $$ x_{k+1} $$ is defined through an equation that involves itself, making the method more stable—especially in stiff or rapidly changing regions of the loss landscape.
+
+In practice, it is of course harder to compute this, $$x_k$$ is dependent on itself here. Hence, you have to solve a nonlinear equation to get $$x_{k+1}$$. However, as we are about to see, it is possible to transform this into a more tractable form to serve for theoretical analysis.
+
+### Variational Formulation and Regularization
+
+The backward Euler update, after some similar re-arrangement, can be interpreted as the first-order optimality condition of the minimization problem
+
+$$
+x_{k+1} = \arg\min_{y} \left\{ L(y) + \frac{1}{2\eta}\|y - x_k\|_2^2 \right\}.
+$$
+
+Here, the quadratic term $$\frac{1}{2\eta}\|y - x_k\|^2$$ serves two important roles:
+
+1. **Regularization:** In machine learning, adding regularization terms is a common strategy to avoid overfitting and to stabilize optimization. This quadratic term naturally penalizes large deviations from the current iterate $$ x_k $$, thereby acting as an implicit regularizer. It forces the update to remain close to $$ x_k $$ unless the loss $$ L(y) $$ strongly suggests a different direction. This is particularly advantageous when dealing with noisy data or highly non-linear loss landscapes.
+
+2. **Stability:** By preventing large steps, this term also dampens oscillations in regions where the loss function changes rapidly. In essence, it “smooths out” the update dynamics, much like adding momentum or using adaptive step sizes in other optimization methods.
+
+Notice that this form does not contain the gradient of $$L$$ anywhere! This is because the gradient is implicitly included in the minimization problem.
+
+We assumed throughout the previous examples that $$L$$ behaved nicely, namely that it should be differentiable. But this is not always the case: take, for instance
+
+$$\text{ReLU}(x) := \max(0, x).$$
+
+This function is extensively used as an activation function for multi-layer perceptrons (a.k.a. feed-forward neural networks). It is not differentiable at $$x=0$$.
+
+### Extension to Composite Optimization: Proximal Methods
+
+The variational interpretation paves the way to tackle composite optimization problems, where the loss can be split as
+
+$$
+L(x) = f(x) + g(x),
+$$
+
+with $$ f(x) $$ being smooth and $$ g(x) $$ possibly non-smooth (often representing regularization, such as an $$ \ell_1 $$ penalty).
+
+Using backward Euler ideas, we can decouple the treatment of the smooth and non-smooth parts. First, perform a gradient step on the smooth function:
+
+$$
+v = x_k - \eta \, \nabla f(x_k),
+$$
+
+and then apply a proximal step to incorporate the non-smooth regularizer $$ g(x) $$:
+
+$$
+x_{k+1} = \operatorname{prox}_{\eta g}(v) = \arg\min_{y} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}.
+$$
+
+This minimized quantity is referred to as the **Moreau envelope**.
+
+> **Proximal Mapping:**  
+> Given a proper, lower semicontinuous, convex function $$ g: \mathbb{R}^n \to \mathbb{R}\cup\{+\infty\} $$ and a parameter $$ \eta > 0 $$, the proximal mapping of $$ g $$ is defined as  
+> $$
+> \operatorname{prox}_{\eta g}(v) = \arg\min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|^2 \right\}.
+> $$  
+> This operator finds a point $$ y $$ that balances minimizing $$ g $$ while remaining close to $$ v $$.
+
+> **Moreau Envelope:**  
+> The Moreau envelope of a function $$ g $$ with parameter $$ \eta > 0 $$ is given by  
+> $$
+> M_{\eta g}(v) = \min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|^2 \right\}.
+> $$  
+> It provides a smooth approximation of $$ g $$, and its gradient is closely related to the proximal mapping, making it a powerful tool in optimization.
 
 ### Gradient Flows: Applications
+
 Reformulating the steepest descent scenario into a continuous setting allows for a whole new branch of studying and development of theory in machine learning algorithms. The following is a short list of some interesting perspectives on machine learning that emerge from it.
 
 - [Chen et al. (2020) - Better Parameter-free Stochastic Optimization with ODE Updates for Coin-Betting](https://arxiv.org/abs/2006.07507)
@@ -254,49 +393,49 @@ Reformulating the steepest descent scenario into a continuous setting allows for
 
 ### Appendix: Compact Proof of the Quadratic Upper Bound
 
-Let \( L: \mathbb{R}^n \to \mathbb{R} \) be differentiable and \(\lambda\)-Lipschitz smooth, so that for any \( x,y \):
+Let $$ L: \mathbb{R}^n \to \mathbb{R} $$ be differentiable and $$\lambda$$-Lipschitz smooth, so that for any $$ x,y $$:
 
-\[
+$$
 \|\nabla L(y) - \nabla L(x)\| \leq \lambda \|y-x\|.
-\]
+$$
 
 **Goal:** Show that
 
-\[
+$$
 L(y) \leq L(x) + \nabla L(x)^\top (y-x) + \frac{\lambda}{2}\|y-x\|^2.
-\]
+$$
 
 **Proof:**
 
-1. Define \(\phi(t) = L(x+t(y-x))\) for \( t \in [0,1] \). Then \(\phi(0)=L(x)\) and \(\phi(1)=L(y)\).
+1. Define $$\phi(t) = L(x+t(y-x))$$ for $$ t \in [0,1] $$. Then $$\phi(0)=L(x)$$ and $$\phi(1)=L(y)$$.
 
 2. By the chain rule,
-   \[
+   $$
    \phi'(t) = \nabla L(x+t(y-x))^\top (y-x).
-   \]
+   $$
    Using the Fundamental Theorem of Calculus:
-   \[
+   $$
    L(y)-L(x)=\int_0^1 \phi'(t) \, dt = \int_0^1 \nabla L(x+t(y-x))^\top (y-x) \, dt.
-   \]
+   $$
 
-3. Add and subtract \(\nabla L(x)^\top (y-x)\):
-   \[
+3. Add and subtract $$\nabla L(x)^\top (y-x)$$:
+   $$
    L(y)-L(x)=\nabla L(x)^\top (y-x)+\int_0^1 \Bigl(\nabla L(x+t(y-x))-\nabla L(x)\Bigr)^\top (y-x) \, dt.
-   \]
+   $$
 
-4. By the Lipschitz condition and Cauchy-Schwarz, for each \( t \):
-   \[
+4. By the Lipschitz condition and Cauchy-Schwarz, for each $$ t $$:
+   $$
    \left|\Bigl(\nabla L(x+t(y-x))-\nabla L(x)\Bigr)^\top (y-x)\right| \leq \lambda t\,\|y-x\|^2.
-   \]
+   $$
    Therefore,
-   \[
+   $$
    \int_0^1 \Bigl(\nabla L(x+t(y-x))-\nabla L(x)\Bigr)^\top (y-x) \, dt \leq \lambda \|y-x\|^2 \int_0^1 t\, dt = \frac{\lambda}{2}\|y-x\|^2.
-   \]
+   $$
 
 5. Combining the results:
-   \[
+   $$
    L(y)-L(x) \leq \nabla L(x)^\top (y-x) + \frac{\lambda}{2}\|y-x\|^2.
-   \]
+   $$
    Rearranging gives the desired inequality.
 
 
