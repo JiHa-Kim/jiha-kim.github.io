@@ -225,3 +225,16 @@ jekyll-archives:
     tag: /tags/:name/
     category: /categories/:name/
 
+jekyll_compose:
+  default_front_matter:
+    drafts:
+      description:
+      image:
+      category:
+      tags:
+    posts:
+      description:
+      image:
+      category:
+      tags:
+      published: false
