@@ -5,8 +5,8 @@ description: "A intuitive exploration of optimization theory, connecting optimiz
 categories: ["Machine Learning", "Optimization"]
 tags: ["gradient descent", "optimization", "Bregman divergence", "Riemannian geometry"]
 image:
-  path:
-  alt:
+  path: /assets/2025-03-06-optimization-in-machine-learning/GradientFlowVsDescent.gif
+  alt: "Gradient flow vs. gradient descent"
 date: 2025-03-06 02:45 +0000
 math: true
 ---
@@ -441,12 +441,17 @@ $$
 
 ## Further Reading
 
+- [Kundu (2024) - Who's Adam and What's He Optimizing? | Deep Dive into Optimizers for Machine Learning!](https://www.youtube.com/watch?v=MD2fYip6QsQ)
 - [Bernstein and Newhouse (2024) - Old Optimizer, New Norm: An Anthology](https://arxiv.org/abs/2409.20325)
 - [Zhang and Nemeth (2024) - Why Should We Care About Gradient Flows?](https://shusheng3927.github.io/posts/2024-09-13-WGF/)
 - [Zhang (2024) - Gradient Flow and Its Applications in Statistical Learning](https://shusheng3927.github.io/files/grad_flow.pdf)
 - [Orabona (2023) - A Modern Introduction to Online Learning](https://arxiv.org/abs/1912.13213)
 - [Bach (2019) - Effortless optimization through gradient flows](https://francisbach.com/gradient-flows/)
-- [Schiebinger -  Gradient Flow in Wasserstein Space](https://personal.math.ubc.ca/~geoff/courses/W2019T1/Lecture16.pdf)
+- [Nielsen (2021) - Bregman divergences, dual information geometry, and generalized comparative convexity](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
+- [Banerjee et al. (2005) - On the Optimality of Conditional Expectation as a Bregman Predictor](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1459065)
+- [Mehta (2023) - Introduction to Online Learning (CSC 482A/581A)- Lecture 6](https://web.uvic.ca/~nmehta/online_learning_spring2023/lecture6.pdf)
+- [Wikipedia - Bregman Divergence](https://en.wikipedia.org/wiki/Bregman_divergence)
+- [Schiebinger (2019) -  Gradient Flow in Wasserstein Space](https://personal.math.ubc.ca/~geoff/courses/W2019T1/Lecture16.pdf)
 - [Fatir (2020) - Introduction to Gradient Flows in the 2-Wasserstein Space](https://abdulfatir.com/blog/2020/Gradient-Flows/)
 - [Wibisono et al. (2016) - A Variational Perspective on Accelerated Methods in Optimization](https://arxiv.org/abs/1603.04245)
 - [Figalli (2022) - AN INTRODUCTION TO OPTIMAL TRANSPORT
