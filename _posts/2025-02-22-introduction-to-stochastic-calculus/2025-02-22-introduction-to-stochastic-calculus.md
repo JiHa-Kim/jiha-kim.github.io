@@ -31,7 +31,7 @@ I hope that a wider audience can feel inspired as to how stochastic calculus eme
 
 #### Applications
 
-Brownian motion and Itô calculare a notable example of fairly high-level mathematics that are applied to model the real world. Stock prices jiggle erratically, molecules bounce in fluids, and noise partially corrupts signals. Stochastic calculus gives us tools to predict, optimize, and understand these messy systems in a simpified model.
+Brownian motion and Itô calculus are notable examples of fairly high-level mathematics that are applied to model the real world. Stock prices jiggle erratically, molecules bounce in fluids, and noise partially corrupts signals. Stochastic calculus gives us tools to predict, optimize, and understand these messy systems in a simpified model.
 
 - **Physics**: Einstein used Brownian motion to prove atoms exist—its jittering matched molecular collisions.
 - **Finance**: Option pricing (e.g., the famous Black-Scholes equation) relies on stochastic differential equations like $$dS = \mu S dt + \sigma S dW$$.
@@ -135,7 +135,7 @@ $$
 X_1 + \dots + X_n \sim N(n\mu, n\sigma^2) \text{ as } n \to \infty
 $$
 
-This is precisely what need. As we take $$n \to \infty$$, we have that
+This is precisely what we need. As we take $$n \to \infty$$, we have that
 
 $$
 S(n) \sim N(0, n)
@@ -166,7 +166,7 @@ Let's consider a scenario faced by Scottish botanist **Robert Brown** in the 182
 
 Brown realized that its movement was surprisingly erratic. It seemed like the small-scale nature of the setup resulted in such sensitivity to fluctuations, so much is that the real movement from external forces would completely overtake the previous one. Hence, in a simplified mathematical model we scale consider the events at different times as *independent*.
 
-In addition, there is positional symmetry: the average position of the particle at time $$t$$ seemed float approximately around the origin.
+In addition, there is positional symmetry: the average position of the particle at time $$t$$ seemed to float approximately around the origin.
 
 Motivated by these observations as well as our previous intuition on continuous random walks, let's first think about a simplified model for 1-dimensional discrete case. We'll list some properties that a continuous random walk should have.
 
@@ -176,7 +176,7 @@ Motivated by these observations as well as our previous intuition on continuous 
 4. **Continuity**: The walk is continuous, with no jumps or gaps.
 5. **Normality**: As we established by taking discrete random walks in the continuous limit, the distribution of positions at any given time should be normal.
 
-So let's write this mathematically. Such a random variable is usually denoted either by $$B_t$$ for "Bronian motion", which is the physical phenomenon, or $$W_t$$ for "Wiener process", in honor of the mathematician **Norbert Wiener** who developed a lot of its early theory.
+So let's write this mathematically. Such a random variable is usually denoted either by $$B_t$$ for "Brownian motion", which is the physical phenomenon, or $$W_t$$ for "Wiener process", in honor of the mathematician **Norbert Wiener** who developed a lot of its early theory.
 
 I will use $$W(t)$$ to emphasize its dependence on $$t$$.
 
