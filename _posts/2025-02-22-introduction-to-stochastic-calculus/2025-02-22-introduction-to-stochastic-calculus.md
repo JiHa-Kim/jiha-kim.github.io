@@ -983,7 +983,7 @@ for i, t in enumerate(t_values):
     plt.close()
     frames.append(imageio.imread(frame_path))
 
-imageio.imwrite('continuous_brownian_3d_smooth.gif', frames, duration=0.1)
+imageio.imwrite('continuous_brownian_3d_smooth.gif', frames, duration=0.1, loop=0)
 ```
 
 ### C3. 3D Animation of Geometric Brownian Motion
