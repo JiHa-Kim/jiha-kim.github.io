@@ -448,7 +448,7 @@ $$
 - [Orabona (2023) - A Modern Introduction to Online Learning](https://arxiv.org/abs/1912.13213)
 - [Bach (2019) - Effortless optimization through gradient flows](https://francisbach.com/gradient-flows/)
 - [Nielsen (2021) - Bregman divergences, dual information geometry, and generalized comparative convexity](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
-- [Banerjee et al. (2005) - On the Optimality of Conditional Expectation as a Bregman Predictor](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1459065)
+- [Banerjee et al. (2005) - On the Optimality of Conditional Expectation as a Bregman Predictor](https://www.dam.brown.edu/people/huiwang/research/bgw.pdf)
 - [Mehta (2023) - Introduction to Online Learning (CSC 482A/581A)- Lecture 6](https://web.uvic.ca/~nmehta/online_learning_spring2023/lecture6.pdf)
 - [Wikipedia - Bregman Divergence](https://en.wikipedia.org/wiki/Bregman_divergence)
 - [Schiebinger (2019) -  Gradient Flow in Wasserstein Space](https://personal.math.ubc.ca/~geoff/courses/W2019T1/Lecture16.pdf)
