@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Optimization in Machine Learning: From Gradient Descent to Modern Variants"
+title: "Optimization in Machine Learning: From Gradient Descent to Modern Algorithms"
 description: "Exploring optimization theory, leading to modern optimizers like gradient descent, Adam, Muon, through physics and information geometry."
 categories: ["Machine Learning", "Optimization"]
 tags: ["gradient descent", "gradient flow", "optimization", "optimizer", "Bregman divergence", "information geometry", "duality", "proximal mapping", "mirror descent", "stochastic gradient descent", "projected gradient descent", "Adam", "Muon"]
@@ -163,7 +163,7 @@ This is exactly the gradient descent update rule we started with. By taking the 
 > Hint: Consider evaluating the discrete convergence factor 
 > $$|1-\eta|$$ for different choices of $$\eta$$, and compare these values with the ideal continuous decay rate $$e^{-1}$$ over a unit time interval.
 
-We might also be worried about the convergence of the gradient flow ODE into a saddle point, but we can fortunately demonstrate that this is improbable.
+We might also be worried about the convergence of the gradient flow ODE into a saddle point, but we can fortunately demonstrate that this is an unstable state.
 
 > **Exercise: Investigating the Instability of Saddle Points**  
 > Consider a twice-differentiable function $$ L: \mathbb{R}^n \to \mathbb{R} $$ and let $$ x^\ast $$ be a critical point (i.e., $$ \nabla L(x^\ast) = 0 $$). Suppose that the Hessian $$ H = \nabla^2 L(x^\ast) $$ has both positive and negative eigenvalues, meaning $$ x^\ast $$ is a saddle point.  
@@ -232,53 +232,6 @@ where $$ x^\ast $$ is the minimizer of $$ L $$. Notice that $$V(x)$$ has the sam
 
 > **Exercise:** Assuming that $$x*$$ is unique, show that $$V(x)$$ is a valid Lyapunov function for the gradient flow.
 
-### Momentum: A Heavier Ball
-
-Imagine a ball rolling down a hill. In basic gradient descent, the ball follows the steepest descent direction at every step. However, if the hill is bumpy (as when using mini-batches in stochastic gradient descent), the ball’s path can be erratic. Adding momentum is like making the ball heavier—it smooths out its trajectory and helps it overcome small obstacles.
-
-#### Accumulating Past Gradients
-
-In momentum-based methods, instead of moving solely in the direction of the current gradient, the ball also “remembers” previous gradients. Mathematically, this is expressed with a velocity term \(v\):
-
-\[
-v_{t+1} = \beta v_t - \eta \nabla L(x_t)
-\]
-\[
-x_{t+1} = x_t + v_{t+1}
-\]
-
-Here:
-- \( \eta \) is the learning rate.
-- \( \beta \) (typically between 0 and 1) is the momentum coefficient.
-- \( \nabla L(x_t) \) is the gradient computed at the current point.
-
-This formulation acts as a running average of past gradients. Just as a heavy ball is less affected by small bumps, the accumulated velocity reduces the impact of noisy gradient estimates.
-
-#### Noise and Variance Reduction
-
-When training with mini-batch SGD, each gradient is computed on a subset of data and contains random fluctuations. The momentum term helps average out this noise over multiple iterations, steering the ball in the overall descent direction rather than reacting to each random “bump.”
-
-- **Analogy:** Think of the ball rolling over uneven terrain. With low mass, a small pebble could deflect its path significantly. A heavier ball, however, is largely undisturbed by the pebble—it maintains its overall course.
-- **Example:** In a deep learning model, the noisy gradients from individual mini-batches might point in slightly different directions. Accumulating these directions over time with momentum yields a more stable update that better approximates the true gradient of the entire dataset.
-
-#### Beyond Basic Momentum: Looking Ahead
-
-An extension of this idea is **Nesterov’s Accelerated Gradient (NAG)**. Here, the optimizer not only accumulates past gradients but also “peeks” at the future position:
-
-\[
-v_{t+1} = \beta v_t - \eta \nabla L(x_t + \beta v_t)
-\]
-\[
-x_{t+1} = x_t + v_{t+1}
-\]
-
-By evaluating the gradient at a predicted future point, NAG provides a more accurate correction. This “look-ahead” mechanism often results in faster convergence and a smoother path down the loss landscape.
-
-#### Key Takeaways
-
-- **Accumulation:** Momentum aggregates past gradients, which helps to smooth out updates and maintain a consistent descent direction.
-- **Noise Reduction:** The running average effect inherent in momentum reduces the variance introduced by stochastic sampling.
-- **Practical Impact:** By making the optimizer less sensitive to individual mini-batch noise, momentum accelerates convergence and helps avoid oscillations, especially in rugged or noisy loss landscapes.
 
 ### Gradient Flows: Applications
 
@@ -290,6 +243,95 @@ Reformulating the steepest descent scenario into a continuous setting allows for
 - [Chen and Ewald (2024) - Gradient flow in parameter space is equivalent to linear interpolation in output space](https://arxiv.org/abs/2408.01517v1)
 - [Romero and Benosman (2019) - Finite-Time Convergence of Continuous-Time Optimization Algorithms via Differential Inclusions](https://arxiv.org/abs/1912.08342)
 - [Zhang et al. (2020) -  A Hessian-Free Gradient Flow (HFGF) Method for the Optimisation of Deep Learning Neural Networks](https://wenyudu.github.io/publication/hfgf_preproof.pdf)
+
+Below is the revised section that naturally incorporates the discretization of the heavy ball ODE into the discussion:
+
+---
+
+## Momentum: A Heavier Ball
+
+Imagine a ball rolling down a hill. In basic gradient descent, the ball follows the steepest descent direction at every step. However, if the hill is bumpy—as is often the case with noisy gradients from mini-batches—the ball’s path can become erratic. Adding momentum is like making the ball heavier: its inertia helps smooth out the trajectory and overcome small obstacles.
+
+### From Physical Dynamics to Discrete Updates
+
+To better understand momentum, we start with a physical model: the heavy ball moving in a loss landscape \(L(x)\). In continuous time, the ball’s motion is described by Newton’s second law with friction:
+
+\[
+\ddot{x}(t) + \gamma\,\dot{x}(t) + \nabla L(x(t)) = 0,
+\]
+
+where:
+- \(\ddot{x}(t)\) is the acceleration,
+- \(\gamma\,\dot{x}(t)\) is a damping (friction) term with coefficient \(\gamma\),
+- \(\nabla L(x(t))\) is the force driving the ball downhill.
+
+To connect this with optimization, we discretize the time \(t\) using a step size \(\eta\) and denote \(x_k \approx x(k\eta)\). Approximating the derivatives with finite differences:
+- The velocity is \(\dot{x}(t) \approx \frac{x_k - x_{k-1}}{\eta}\),
+- The acceleration is \(\ddot{x}(t) \approx \frac{x_{k+1} - 2x_k + x_{k-1}}{\eta^2}\).
+
+Plugging these approximations into the ODE, we obtain:
+
+\[
+\frac{x_{k+1} - 2x_k + x_{k-1}}{\eta^2} + \gamma\,\frac{x_k - x_{k-1}}{\eta} + \nabla L(x_k) = 0.
+\]
+
+Multiplying by \(\eta^2\) and rearranging for \(x_{k+1}\) gives:
+
+\[
+x_{k+1} = 2x_k - x_{k-1} - \gamma\,\eta\,(x_k - x_{k-1}) - \eta^2 \nabla L(x_k).
+\]
+
+Defining the momentum coefficient \(\beta = 1 - \gamma\,\eta\) and absorbing one factor of \(\eta\) into the learning rate (a common reparameterization), we recover the familiar momentum update:
+
+\[
+x_{k+1} = x_k - \eta \nabla L(x_k) + \beta (x_k - x_{k-1}).
+\]
+
+This derivation shows that the standard momentum method is a natural discretization of the heavy ball dynamics, where the term \(\beta (x_k - x_{k-1})\) represents the inertia accumulated from previous updates.
+
+### Accumulating Past Gradients
+
+In momentum-based methods, rather than updating solely in the direction of the current gradient, the optimizer “remembers” previous steps. This can be equivalently described by introducing a velocity term \(v\):
+
+\[
+\begin{aligned}
+v_{t+1} &= \beta v_t - \eta \nabla L(x_t), \\
+x_{t+1} &= x_t + v_{t+1}.
+\end{aligned}
+\]
+
+Here:
+- \(\eta\) is the learning rate,
+- \(\beta\) (typically between 0 and 1) is the momentum coefficient,
+- \(\nabla L(x_t)\) is the gradient at the current point.
+
+This formulation acts as a running average of past gradients. Just as a heavy ball is less affected by small bumps on its path, the accumulated velocity helps smooth the updates and reduce the impact of noisy gradient estimates.
+
+### Noise and Variance Reduction
+
+When training with mini-batch stochastic gradient descent (SGD), each gradient is computed on a subset of data and contains random fluctuations. The momentum term helps average out this noise over multiple iterations, steering the ball steadily downhill rather than reacting to each random “bump.”
+
+- **Analogy:** Imagine a ball rolling over uneven terrain. A light ball might get deflected by a small pebble, while a heavy ball, with its momentum, largely maintains its course.
+- **Example:** In deep learning, the noisy gradients from mini-batches may point in slightly different directions. By accumulating these directions with momentum, the update more closely follows the true gradient of the full dataset.
+
+### Beyond Basic Momentum: Looking Ahead
+
+An extension of this idea is **Nesterov’s Accelerated Gradient (NAG)**. In NAG, the optimizer not only accumulates past gradients but also “peeks” at the future position:
+
+\[
+\begin{aligned}
+v_{t+1} &= \beta v_t - \eta \nabla L\bigl(x_t + \beta v_t\bigr), \\
+x_{t+1} &= x_t + v_{t+1}.
+\end{aligned}
+\]
+
+By evaluating the gradient at a predicted future point, NAG provides a more accurate correction, often resulting in faster convergence and a smoother descent path.
+
+### Key Takeaways
+
+- **Accumulation:** Momentum aggregates past gradients, smoothing out the updates and maintaining a consistent descent direction.
+- **Noise Reduction:** The velocity term acts as a running average, reducing the variance caused by stochastic sampling.
+- **Practical Impact:** Incorporating momentum accelerates convergence and helps prevent oscillations, especially in rugged or noisy loss landscapes.
 
 ## Proximal Methods: Generalizing to Non-Differentiable Losses
 
@@ -479,7 +521,7 @@ This minimized quantity is referred to as the **Moreau envelope**.
 > $$
 > \delta_C(x) =
 > \begin{cases}
-> 0 & \text{if } x\in C,\\[1mm]
+> 0 & \text{if } x\in C,\$$1mm]
 > +\infty & \text{if } x\notin C.
 > \end{cases}
 > $$
@@ -527,6 +569,8 @@ This minimized quantity is referred to as the **Moreau envelope**.
 >
 > *Hint:*
 > Discuss the properties of infimal convolution and its relation to Moreau envelope in the context of convex analysis and optimization.
+
+More information concerning proximal methods and the Moreau envelope can be found in [Rockafellar and Wets (2009) - VARIATIONAL ANALYSIS](https://sites.math.washington.edu/~rtr/papers/rtr169-VarAnalysis-RockWets.pdf), [Candes (2015) - MATH 301: Advanced Topics in Convex Optimization Lecture 22](https://candes.su.domains/teaching/math301/Lectures/Moreau-Yosida.pdf) and [Bauschke and Lucet (2011)](https://cmps-people.ok.ubc.ca/bauschke/Research/68.pdf).
 
 ---
 
@@ -702,7 +746,7 @@ TODO: Convex conjugate
 
 
 
-Any convex function can hence be pictured as a supremum of affine functions shifted exactly up and down in the output direction according to its dual evaluated at that point to "support" the function's epigraph.
+Any convex function can hence be pictured as a supremum of linear functions shifted exactly up and down in the output direction according to its dual evaluated at that point to "support" the function's epigraph (geometrically, these are supporting hyperplanes).
 
 ![Convex Function as Supremum of Affine Functions](convex_as_sup_of_affine.png)
 
@@ -833,7 +877,10 @@ $$
 - [Kundu (2024) - Who's Adam and What's He Optimizing? | Deep Dive into Optimizers for Machine Learning!](https://www.youtube.com/watch?v=MD2fYip6QsQ)
 - [Orabona (2023) - A Modern Introduction to Online Learning](https://arxiv.org/abs/1912.13213)
 - [Mehta (2023) - Introduction to Online Learning (CSC 482A/581A)- Lecture 6](https://web.uvic.ca/~nmehta/online_learning_spring2023/lecture6.pdf)
+- [Boyd and Vandenberghe (2004) - Convex Optimization](https://web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf)
 - [Bach (2019) - Effortless optimization through gradient flows](https://francisbach.com/gradient-flows/)
+- [Rockafellar and Wets (2009) - VARIATIONAL ANALYSIS](https://sites.math.washington.edu/~rtr/papers/rtr169-VarAnalysis-RockWets.pdf)
+- [Candes (2015) - MATH 301: Advanced Topics in Convex Optimization Lecture 22](https://candes.su.domains/teaching/math301/Lectures/Moreau-Yosida.pdf)
 - [Nielsen (2021) - Bregman divergences, dual information geometry, and generalized comparative convexity](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
 - [Nielsen and Nock (2008) - The Sided and Symmetrized Bregman Centroids](https://www.researchgate.net/publication/224460161_Sided_and_Symmetrized_Bregman_Centroids)
 - [Qin (2017) - How to understand Bregman divergence?](https://www.zhihu.com/question/22426561/answer/209945856)
@@ -844,8 +891,10 @@ $$
 - [Wikipedia - Mirror Descent](https://en.wikipedia.org/wiki/Mirror_descent)
 - [Wikipedia - Bregman Divergence](https://en.wikipedia.org/wiki/Bregman_divergence)
 - [Banarjee et al. (2004) - Optimal Bregman Prediction and Jensen’s Equality](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
+- [Wikipedia - Convex Conjugate](https://en.wikipedia.org/wiki/Convex_conjugate)
 - [Wikipedia - Fenchel's Duality Theorem](https://en.wikipedia.org/wiki/Fenchel%27s_duality_theorem)
-- [Bauschke and Lucet (2011)](https://cmps-people.ok.ubc.ca/bauschke/Research/68.pdf)
+- [Bauschke and Lucet (2011) - WHAT IS a Fenchel conjugate?](https://cmps-people.ok.ubc.ca/bauschke/Research/68.pdf)
+- [Boyd and Vandenberghe (2008) - Subgradients](https://see.stanford.edu/materials/lsocoee364b/01-subgradients_notes.pdf)
 - [Schiebinger (2019) -  Gradient Flow in Wasserstein Space](https://personal.math.ubc.ca/~geoff/courses/W2019T1/Lecture16.pdf)
 - [Fatir (2020) - Introduction to Gradient Flows in the 2-Wasserstein Space](https://abdulfatir.com/blog/2020/Gradient-Flows/)
 - [Wibisono et al. (2016) - A Variational Perspective on Accelerated Methods in Optimization](https://arxiv.org/abs/1603.04245)
