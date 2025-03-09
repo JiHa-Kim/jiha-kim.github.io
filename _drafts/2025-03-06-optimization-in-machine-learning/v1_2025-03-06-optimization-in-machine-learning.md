@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Optimization in Machine Learning: From Gradient Descent to Modern Algorithms"
+title: "(V1) Optimization in Machine Learning: From Gradient Descent to Modern Algorithms"
 description: "Exploring optimization theory, leading to modern optimizers like gradient descent, Adam, Muon, through physics and information geometry."
 categories: ["Machine Learning", "Optimization"]
 tags: ["gradient descent", "gradient flow", "optimization", "optimizer", "Bregman divergence", "information geometry", "duality", "proximal mapping", "mirror descent", "stochastic gradient descent", "projected gradient descent", "Adam", "Muon"]
@@ -387,10 +387,10 @@ This function is extensively used as an activation function for multi-layer perc
 To make the relation more clear, we have
 
 $$
-\operatorname{prox}_{\eta, g} = (\operatorname{id} + \eta \del f)^{-1}
+\operatorname{prox}_{\eta, g} = (\operatorname{id} + \eta \partial f)^{-1}
 $$
 
-where $$\operatorname{id}$$ is the identity function and $$\del f$$ is the subdifferential of $$f$$. See [Parikh and Boyd (2013) - Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf) section 3.2 "Resolvent of subdifferential operator" for more details.
+where $$\operatorname{id}$$ is the identity function and $$\partial f$$ is the subdifferential of $$f$$. See [Parikh and Boyd (2013) - Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf) section 3.2 "Resolvent of subdifferential operator" for more details.
 
 ### Extension to Composite Optimization: Proximal Methods
 
@@ -640,7 +640,7 @@ This question is answered in [Banerjee et al. (2005)](https://ieeexplore.ieee.or
 > Let $$\phi:\mathbb{R}^n\to\mathbb{R}$$ be a strictly convex and differentiable function. The Bregman divergence between two points $$x$$ and $$y$$ is defined as  
 > 
 > $$  
-> D_\phi(x,y) = \phi(x) - \left[\phi(y) + \langle \nabla \phi(y), x - y \rangle\right].  
+> D_\phi(x\,\|\,y) = \phi(x) - \left[\phi(y) + \langle \nabla \phi(y), x - y \rangle\right].  
 > $$  
 
 Examples taken from [Nielsen and Nock (2008)](https://www.researchgate.net/publication/224460161_Sided_and_Symmetrized_Bregman_Centroids) (definitely worth a read):
@@ -673,8 +673,8 @@ $$
 
 > **Exercise: Non-Negativity and Uniqueness of Zero**  
 > 
-> **(a)** Prove that $$D_\phi(x,y) \geq 0$$ for all $$x,y\in\mathbb{R}^n$$.  
-> **(b)** Show that $$D_\phi(x,y)=0$$ if and only if $$x=y$$.  
+> **(a)** Prove that $$D_\phi(x\,\|\,y) \geq 0$$ for all $$x,y\in\mathbb{R}^n$$.  
+> **(b)** Show that $$D_\phi(x\,\|\,y)=0$$ if and only if $$x=y$$.  
 > *Hint:* Use the strict convexity of $$\phi$$ and consider the first-order Taylor expansion of $$\phi$$ at the point $$y$$.
 
 > **Exercise: Bregman Divergence for the Kullback–Leibler (KL) Divergence**  
@@ -688,19 +688,19 @@ $$
 > **(a)** Show that the Bregman divergence induced by $$\phi$$, 
 >  
 > $$
-> D_\phi(x,y) = \phi(x) - \phi(y) - \langle \nabla \phi(y), x-y \rangle,  
+> D_\phi(x\,\|\,y) = \phi(x) - \phi(y) - \langle \nabla \phi(y), x-y \rangle,  
 > $$
 > 
 > reduces to the KL divergence between $$x$$ and $$y$$.  
 > **(b)** Verify explicitly that the divergence is non-negative and zero if and only if $$x=y$$.  
-> *Hint:* Compute the gradient $$\nabla \phi(y)$$ and substitute it back into the expression for $$D_\phi(x,y)$$.
+> *Hint:* Compute the gradient $$\nabla \phi(y)$$ and substitute it back into the expression for $$D_\phi(x\,\|\,y)$$.
 
 > **Exercise: Bregman Projections and Proximal Mappings**  
 > In many optimization algorithms (such as mirror descent), the update step is formulated as a Bregman projection.  
 > **(a)** Given a closed convex set $$\mathcal{C}\subseteq\mathbb{R}^n$$ and a point $$z\in\mathbb{R}^n$$, define the Bregman projection of $$z$$ onto $$\mathcal{C}$$ as  
 > 
 > $$  
-> \operatorname{proj}_{\mathcal{C}}^\phi(z) = \arg\min_{x\in\mathcal{C}} D_\phi(x,z).  
+> \operatorname{proj}_{\mathcal{C}}^\phi(z) = \arg\min_{x\in\mathcal{C}} D_\phi(x\,\|\,z).  
 > $$  
 > 
 > Show that when $$\phi(x)=\frac{1}{2}\|x\|_2^2$$, the Bregman projection reduces to the standard Euclidean projection onto $$\mathcal{C}$$.  
@@ -715,10 +715,10 @@ $$
 > Define the conditional Bregman information of a random variable $$X$$ for a strictly convex differentable function $$\phi : \mathbb{R}^n \to \mathbb{R}$$ as
 >
 > $$
-> I_{\phi}(X|\mathcal{G}) := \mathbb{E}[D_\phi(X,E[X|\mathcal{G}])|\mathcal{G}]
+> I_{\phi}(X|\mathcal{G}) := \mathbb{E}[D_\phi(x\,\|\,E[X|\mathcal{G}])|\mathcal{G}]
 > $$
 >
-> where $$D_\phi(x,y) := \phi(x) - (\phi(y) + \langle \nabla \phi(y), x-y \rangle)$$ is the Bregman divergence under $$\phi$$ from $$y$$ to $$x$$.
+> where $$D_\phi(x\,\|\,y) := \phi(x) - (\phi(y) + \langle \nabla \phi(y), x-y \rangle)$$ is the Bregman divergence under $$\phi$$ from $$y$$ to $$x$$.
 >
 > Prove that 
 > $$I_{\phi}(X|\mathcal{G}) \geq 0$$ for all $$X$$ and $$\phi$$. Then, show Jensen's inequality in the following form:
@@ -941,6 +941,7 @@ $$
 - [user940 (2011) - Intuition behind Conditional Expectation](https://math.stackexchange.com/questions/23600/intuition-behind-conditional-expectation/23613#23613)
 - [Parikh and Boyd (2013) - Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf)
 - [Chen (2019) - Proximal gradient methods](https://yuxinchen2020.github.io/ele522_optimization/lectures/proximal_gradient.pdf)
+- [Farina (2024) -  Lecture 9A-B Projected gradient descent and mirror descent](https://www.mit.edu/~gfarina/2024/67220s24_L09A_mirror_descent/L09.pdf)
 - [Lienart (2021) - Mirror descent algorithm](https://tlienart.github.io/posts/2018/10/27-mirror-descent-algorithm/)
 - [Wikipedia - Mirror Descent](https://en.wikipedia.org/wiki/Mirror_descent)
 - [Wikipedia - Bregman Divergence](https://en.wikipedia.org/wiki/Bregman_divergence)
