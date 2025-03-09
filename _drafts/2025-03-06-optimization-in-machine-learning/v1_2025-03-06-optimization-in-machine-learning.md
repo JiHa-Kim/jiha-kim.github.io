@@ -244,8 +244,6 @@ Reformulating the steepest descent scenario into a continuous setting allows for
 - [Romero and Benosman (2019) - Finite-Time Convergence of Continuous-Time Optimization Algorithms via Differential Inclusions](https://arxiv.org/abs/1912.08342)
 - [Zhang et al. (2020) -  A Hessian-Free Gradient Flow (HFGF) Method for the Optimisation of Deep Learning Neural Networks](https://wenyudu.github.io/publication/hfgf_preproof.pdf)
 
-Below is the revised section that naturally incorporates the discretization of the heavy ball ODE into the discussion:
-
 ---
 
 ## Momentum: A Heavier Ball
@@ -254,56 +252,56 @@ Imagine a ball rolling down a hill. In basic gradient descent, the ball follows 
 
 ### From Physical Dynamics to Discrete Updates
 
-To better understand momentum, we start with a physical model: the heavy ball moving in a loss landscape \(L(x)\). In continuous time, the ball’s motion is described by Newton’s second law with friction:
+To better understand momentum, we start with a physical model: the heavy ball moving in a loss landscape $$L(x)$$. In continuous time, the ball’s motion is described by Newton’s second law with friction:
 
-\[
+$$
 \ddot{x}(t) + \gamma\,\dot{x}(t) + \nabla L(x(t)) = 0,
-\]
+$$
 
 where:
-- \(\ddot{x}(t)\) is the acceleration,
-- \(\gamma\,\dot{x}(t)\) is a damping (friction) term with coefficient \(\gamma\),
-- \(\nabla L(x(t))\) is the force driving the ball downhill.
+- $$\ddot{x}(t)$$ is the acceleration,
+- $$\gamma\,\dot{x}(t)$$ is a damping (friction) term with coefficient $$\gamma$$,
+- $$\nabla L(x(t))$$ is the force driving the ball downhill.
 
-To connect this with optimization, we discretize the time \(t\) using a step size \(\eta\) and denote \(x_k \approx x(k\eta)\). Approximating the derivatives with finite differences:
-- The velocity is \(\dot{x}(t) \approx \frac{x_k - x_{k-1}}{\eta}\),
-- The acceleration is \(\ddot{x}(t) \approx \frac{x_{k+1} - 2x_k + x_{k-1}}{\eta^2}\).
+To connect this with optimization, we discretize the time $$t$$ using a step size $$\eta$$ and denote $$x_k \approx x(k\eta)$$. Approximating the derivatives with finite differences:
+- The velocity is $$\dot{x}(t) \approx \frac{x_k - x_{k-1}}{\eta}$$,
+- The acceleration is $$\ddot{x}(t) \approx \frac{x_{k+1} - 2x_k + x_{k-1}}{\eta^2}$$.
 
 Plugging these approximations into the ODE, we obtain:
 
-\[
+$$
 \frac{x_{k+1} - 2x_k + x_{k-1}}{\eta^2} + \gamma\,\frac{x_k - x_{k-1}}{\eta} + \nabla L(x_k) = 0.
-\]
+$$
 
-Multiplying by \(\eta^2\) and rearranging for \(x_{k+1}\) gives:
+Multiplying by $$\eta^2$$ and rearranging for $$x_{k+1}$$ gives:
 
-\[
+$$
 x_{k+1} = 2x_k - x_{k-1} - \gamma\,\eta\,(x_k - x_{k-1}) - \eta^2 \nabla L(x_k).
-\]
+$$
 
-Defining the momentum coefficient \(\beta = 1 - \gamma\,\eta\) and absorbing one factor of \(\eta\) into the learning rate (a common reparameterization), we recover the familiar momentum update:
+Defining the momentum coefficient $$\beta = 1 - \gamma\,\eta$$ and absorbing one factor of $$\eta$$ into the learning rate (a common reparameterization), we recover the familiar momentum update:
 
-\[
+$$
 x_{k+1} = x_k - \eta \nabla L(x_k) + \beta (x_k - x_{k-1}).
-\]
+$$
 
-This derivation shows that the standard momentum method is a natural discretization of the heavy ball dynamics, where the term \(\beta (x_k - x_{k-1})\) represents the inertia accumulated from previous updates.
+This derivation shows that the standard momentum method is a natural discretization of the heavy ball dynamics, where the term $$\beta (x_k - x_{k-1})$$ represents the inertia accumulated from previous updates.
 
 ### Accumulating Past Gradients
 
-In momentum-based methods, rather than updating solely in the direction of the current gradient, the optimizer “remembers” previous steps. This can be equivalently described by introducing a velocity term \(v\):
+In momentum-based methods, rather than updating solely in the direction of the current gradient, the optimizer “remembers” previous steps. This can be equivalently described by introducing a velocity term $$v$$:
 
-\[
+$$
 \begin{aligned}
 v_{t+1} &= \beta v_t - \eta \nabla L(x_t), \\
 x_{t+1} &= x_t + v_{t+1}.
 \end{aligned}
-\]
+$$
 
 Here:
-- \(\eta\) is the learning rate,
-- \(\beta\) (typically between 0 and 1) is the momentum coefficient,
-- \(\nabla L(x_t)\) is the gradient at the current point.
+- $$\eta$$ is the learning rate,
+- $$\beta$$ (typically between 0 and 1) is the momentum coefficient,
+- $$\nabla L(x_t)$$ is the gradient at the current point.
 
 This formulation acts as a running average of past gradients. Just as a heavy ball is less affected by small bumps on its path, the accumulated velocity helps smooth the updates and reduce the impact of noisy gradient estimates.
 
@@ -318,12 +316,12 @@ When training with mini-batch stochastic gradient descent (SGD), each gradient i
 
 An extension of this idea is **Nesterov’s Accelerated Gradient (NAG)**. In NAG, the optimizer not only accumulates past gradients but also “peeks” at the future position:
 
-\[
+$$
 \begin{aligned}
 v_{t+1} &= \beta v_t - \eta \nabla L\bigl(x_t + \beta v_t\bigr), \\
 x_{t+1} &= x_t + v_{t+1}.
 \end{aligned}
-\]
+$$
 
 By evaluating the gradient at a predicted future point, NAG provides a more accurate correction, often resulting in faster convergence and a smoother descent path.
 
@@ -366,7 +364,7 @@ In practice, it is of course harder to compute this, $$x_k$$ is dependent on its
 
 ### Variational Formulation and Regularization
 
-The backward Euler update, after some similar re-arrangement (exercise), can be interpreted as the first-order optimality condition of the minimization problem
+The backward Euler update, after some similar re-arrangement, can be interpreted as the first-order optimality condition of the minimization problem
 
 $$
 x_{k+1} = \arg\min_{y} \left\{ L(y) + \frac{1}{2\eta}\|y - x_k\|_2^2 \right\}.
@@ -385,6 +383,14 @@ We assumed throughout the previous examples that $$L$$ behaved nicely, namely th
 $$\text{ReLU}(x) := \max(0, x).$$
 
 This function is extensively used as an activation function for multi-layer perceptrons (a.k.a. feed-forward neural networks). It is not differentiable at $$x=0$$.
+
+To make the relation more clear, we have
+
+$$
+\operatorname{prox}_{\eta, g} = (\operatorname{id} + \eta \del f)^{-1}
+$$
+
+where $$\operatorname{id}$$ is the identity function and $$\del f$$ is the subdifferential of $$f$$. See [Parikh and Boyd (2013) - Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf) section 3.2 "Resolvent of subdifferential operator" for more details.
 
 ### Extension to Composite Optimization: Proximal Methods
 
@@ -498,7 +504,8 @@ This minimized quantity is referred to as the **Moreau envelope**.
 >
 > The Huber loss function is a loss function used in robust statistics, that is less sensitive to outliers in data than the squared error loss.
 >
-> **(a)** Let $$ g:\mathbb{R}\to\mathbb{R} $$ be defined as $$ g(x)=|x| $$. Derive the Moreau envelope
+> **(a)** Let 
+> $$ g:\mathbb{R}\to\mathbb{R} $$ be defined as $$ g(x)=|x| $$. Derive the Moreau envelope
 >
 > $$
 > M_{\eta, g}(v) = \min_{y\in\mathbb{R}} \left\{ |y| + \frac{1}{2\eta}(v-y)^2 \right\},
@@ -521,7 +528,7 @@ This minimized quantity is referred to as the **Moreau envelope**.
 > $$
 > \delta_C(x) =
 > \begin{cases}
-> 0 & \text{if } x\in C,\$$1mm]
+> 0 & \text{if } x\in C, \\
 > +\infty & \text{if } x\notin C.
 > \end{cases}
 > $$
@@ -561,8 +568,6 @@ This minimized quantity is referred to as the **Moreau envelope**.
 > $$
 > M_{\eta, g}(v) = g \square \left(\frac{1}{2\eta}\|\cdot\|_2^2\right)(v),
 > $$
->
-> where the quadratic term is understood to be scaled appropriately with the parameter $$ \eta $$.
 >
 > **(b)** Discuss the significance of expressing the Moreau envelope as an infimal convolution in terms of regularization and duality.
 >
@@ -722,7 +727,56 @@ $$
 > \mathbb{E}[\phi(X)|\mathcal{G}] = \phi(\mathbb{E}[X|\mathcal{G}]) + I_{\phi}(X|\mathcal{G}).
 > $$
 
-TODO: Euclidean projected gradient descent vs Euler backward gives same variational formulation, Bregman projection, Moreau Envelope
+### TODO: Euclidean Projected Gradient Descent
+
+TODO: Euclidean projected gradient descent to mirror descent, Bregman projection, Moreau Envelope
+
+## The Mirror is a Lie (Mirror Descent)
+
+Got it! Let’s craft a more compelling story with a mysterious, otherworldly feel while keeping the core idea intact.  
+
+---
+
+## **The Mirror is a Lie**  
+
+Deep in the heart of an endless void, there lived a being of shifting light. It had no name, no fixed form—only movement and reflection. Each day, it gazed into the great Mirror of Equivalence, an ancient surface that had always shown its perfect twin. No matter how the being twisted, flickered, or expanded, the reflection responded in perfect symmetry.  
+
+For eons, this was its reality. The mirror was a truth so absolute that it had never questioned it. The world beyond the glass was simply a copy of its own—an immutable law of existence.  
+
+But then, a whisper.  
+
+A ripple in the void.  
+
+A fleeting thought: *What if there were other mirrors?*  
+
+Curiosity, an unfamiliar sensation, took root. The being left its familiar plane and drifted into the unknown, searching for another surface to reflect upon. After an eternity of wandering, it found one—a mirror unlike any it had seen before. Its surface was not smooth but warped, its edges pulsed with strange energy.  
+
+Hesitantly, the being approached.  
+
+And when it looked inside, it recoiled in shock.  
+
+Its reflection was no longer a perfect twin. Its form stretched unnaturally in some places, shrank into nothingness in others. The light that once moved in harmony was now twisted and distorted. It panicked—was it breaking apart? Had it changed? Or had it only now seen itself for what it truly was?  
+
+In that moment, the being realized the horrifying truth. The perfect mirror it had known all its life was never a simple window to another world. It had been a *choice*—a constraint that shaped its entire perception of itself.  
+
+The mirror had never been neutral. It had merely tricked it into believing so.  
+
+---  
+
+### **Beyond Euclidean Geometry**  
+
+This story is more than just a fable—it’s a warning about how assumptions shape our understanding of reality. For centuries, humans have measured the world using **Euclidean geometry**, much like the being’s perfect mirror. In this space, distances, gradients, and optimizations behave in a way that feels natural, symmetrical, and intuitive.  
+
+But this symmetry is a **deception**. In Euclidean space, the norm and its dual are the same:  
+
+$$
+\|x\|_2 := \sqrt{x^\top x} = \|x\|_2^\ast.
+$$
+
+This makes it easy to believe that the space in which gradients live does not matter. But step outside of Euclidean geometry, and suddenly, the illusion shatters. The dual space is no longer identical, and our once-reliable gradients behave in unfamiliar, unintuitive ways.  
+
+Just as the being discovered the limits of its perception, we too must confront the limits of our assumptions—because the mirror is a lie.
+
 
 ## TODO: A Dual World (Duality)
 
@@ -741,9 +795,7 @@ TODO: Convex conjugate
 > **(b)** Discuss how this duality relationship helps interpret the Bregman divergence and its potential role in the upcoming mirror descent algorithm.
 > *Hint:* Think about how the Bregman divergence measures the gap between the function and its first-order Taylor approximation and how this relates to the optimality conditions in convex duality.
 
-
-## TODO: Staring in the Mirror (Mirror Descent)
-
+### 
 
 
 Any convex function can hence be pictured as a supremum of linear functions shifted exactly up and down in the output direction according to its dual evaluated at that point to "support" the function's epigraph (geometrically, these are supporting hyperplanes).
@@ -875,10 +927,10 @@ $$
 - [Zhang and Nemeth (2024) - Why Should We Care About Gradient Flows?](https://shusheng3927.github.io/posts/2024-09-13-WGF/)
 - [Zhang (2024) - Gradient Flow and Its Applications in Statistical Learning](https://shusheng3927.github.io/files/grad_flow.pdf)
 - [Kundu (2024) - Who's Adam and What's He Optimizing? | Deep Dive into Optimizers for Machine Learning!](https://www.youtube.com/watch?v=MD2fYip6QsQ)
+- [Bach (2019) - Effortless optimization through gradient flows](https://francisbach.com/gradient-flows/)
 - [Orabona (2023) - A Modern Introduction to Online Learning](https://arxiv.org/abs/1912.13213)
 - [Mehta (2023) - Introduction to Online Learning (CSC 482A/581A)- Lecture 6](https://web.uvic.ca/~nmehta/online_learning_spring2023/lecture6.pdf)
 - [Boyd and Vandenberghe (2004) - Convex Optimization](https://web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf)
-- [Bach (2019) - Effortless optimization through gradient flows](https://francisbach.com/gradient-flows/)
 - [Rockafellar and Wets (2009) - VARIATIONAL ANALYSIS](https://sites.math.washington.edu/~rtr/papers/rtr169-VarAnalysis-RockWets.pdf)
 - [Candes (2015) - MATH 301: Advanced Topics in Convex Optimization Lecture 22](https://candes.su.domains/teaching/math301/Lectures/Moreau-Yosida.pdf)
 - [Nielsen (2021) - Bregman divergences, dual information geometry, and generalized comparative convexity](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
@@ -887,6 +939,8 @@ $$
 - [Banerjee et al. (2005) - On the Optimality of Conditional Expectation as a Bregman Predictor](https://ieeexplore.ieee.org/document/1459065)
 - [Banarjee et al. (2005) - Clustering with Bregman divergences](https://jmlr.org/papers/volume6/banerjee05b/banerjee05b.pdf)
 - [user940 (2011) - Intuition behind Conditional Expectation](https://math.stackexchange.com/questions/23600/intuition-behind-conditional-expectation/23613#23613)
+- [Parikh and Boyd (2013) - Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf)
+- [Chen (2019) - Proximal gradient methods](https://yuxinchen2020.github.io/ele522_optimization/lectures/proximal_gradient.pdf)
 - [Lienart (2021) - Mirror descent algorithm](https://tlienart.github.io/posts/2018/10/27-mirror-descent-algorithm/)
 - [Wikipedia - Mirror Descent](https://en.wikipedia.org/wiki/Mirror_descent)
 - [Wikipedia - Bregman Divergence](https://en.wikipedia.org/wiki/Bregman_divergence)
