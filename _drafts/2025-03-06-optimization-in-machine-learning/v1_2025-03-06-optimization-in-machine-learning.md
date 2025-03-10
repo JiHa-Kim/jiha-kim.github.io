@@ -7,7 +7,7 @@ tags: ["gradient descent", "gradient flow", "optimization", "optimizer", "Bregma
 image:
   path: /assets/2025-03-06-optimization-in-machine-learning/GradientFlowVsDescent.gif
   alt: "Gradient flow vs. gradient descent"
-date: 2025-03-06 02:45 +0000
+date: 2025-03-06 02:44 +0000
 math: true
 ---
 

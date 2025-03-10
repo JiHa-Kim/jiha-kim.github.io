@@ -7,7 +7,7 @@ tags: ["gradient descent", "gradient flow", "optimization", "optimizer", "Bregma
 image:
   path: /assets/2025-03-06-optimization-in-machine-learning/GradientFlowVsDescent.gif
   alt: "Gradient flow vs. gradient descent"
-date: 2025-03-06 02:45 +0000
+date: 2025-03-06 02:44 +0000
 math: true
 ---
 
@@ -314,6 +314,166 @@ $$
 The crucial difference was the gradient evaluation – now at the "lookahead" position $$x_t + \beta v_t$$. It was like a swimmer anticipating the river's current, adjusting their stroke not based on their current location, but on where the current was about to carry them.
 
 As you drifted to sleep, the river murmuring beside you, you felt a profound sense of progress.  Physical intuition, metaphors of heavy balls and flowing rivers, had illuminated the powerful concept of momentum, a principle that promised a smoother, swifter descent through the Loss Lands.  But you sensed this was just one step on a much longer, more complex quest.
+
+## **The Adaptive Travelers**
+### **A Camp of Experimenters**
+
+Following the river's course, the terrain began to change. The smooth slopes gave way to a more rugged, unpredictable landscape. You crested a rise and saw before you a sprawling camp nestled at the base of a towering cliff – a vibrant hub of activity unlike any you had encountered before.  These were not the steady travelers of gradient descent or the momentum-driven seekers, but a different breed altogether: the Adaptive Travelers.
+
+As you approached, a welcoming figure emerged from a cluster of tents. "Welcome, traveler," he said, his name, Duchi. "We are the Adaptive Travelers. We see you've learned the ways of steady descent and the power of momentum. But here, in these shifting lands, a fixed strategy is not enough."
+
+You watched as the Adaptive Travelers moved across the uneven ground.  Their steps were dynamic, not fixed. Some slowed to a careful crawl on rocky patches, others quickened their pace on smoother paths.  Unlike the consistent stride of momentum-based methods, these travelers seemed to adjust their every step, their pace dictated by the terrain directly beneath them.
+
+“We do not presume to know the best learning rate,” Duchi explained, noticing your observation. “A single step size for all parameters?  Preposterous!  The Loss Lands are too varied for such rigidity. Instead, we let the landscape itself guide our steps. We adapt.”
+
+### **The Pathfinder’s Compass: AdaGrad**
+
+Duchi led you into a tent filled with maps, charts, and peculiar instruments.  He picked up a compass, unlike any you'd seen. It didn't just point north; it seemed to record every direction it had ever faced, leaving faint etchings on its surface.
+
+“This is AdaGrad,” he announced, sketching symbols in the dust with a twig.
+
+$$
+g_t = \nabla L(x_t)
+$$
+
+$$
+G_t = G_{t-1} + g_t \odot g_t
+$$
+
+$$
+x_{t+1} = x_t - \frac{\eta}{\sqrt{G_t + \epsilon}} \odot g_t
+$$
+
+He tapped the term **$$ G_t $$** with the twig.  “This compass remembers.  It keeps a record of the sum of past squared gradients for each parameter.  If a parameter has been updated aggressively in the past – if it has experienced large gradients – AdaGrad will become more cautious, reducing its step size in future iterations.”
+
+You watched an AdaGrad practitioner navigate a steep ravine. Their path was indeed cautious.  They moved relatively quickly across the flatter valley floor, but as they began to climb the steep ravine walls, their steps became tiny, almost hesitant.
+
+“Excellent for sparse terrains,” Duchi commented. “Think of vast plains where only certain regions are relevant, like mapping sprawling cities or navigating complex texts. AdaGrad excels when only a few parameters truly matter at any given time. It tames those frequently updated parameters, preventing them from dominating the descent.”
+
+You nodded, the logic clear. Yet, as you continued to observe the AdaGrad traveler, a subtle unease crept in. Their movements, initially adaptable, seemed to become increasingly sluggish, their pace diminishing with each step.
+
+“AdaGrad… it has a long memory,” Duchi admitted, a slight shadow crossing his face. “It remembers *everything*.  Its step sizes shrink, and they keep shrinking.  In some terrains, this is a virtue, a careful descent. But in others… it can stall.  It can become too cautious, too hesitant to explore new paths.”
+
+### **The Fading Memory: RMSProp**
+
+Nearby, another traveler was descending the same ravine, but with a markedly different style.  Their movements were more fluid, more agile. Like AdaGrad, their step sizes adjusted dynamically, but they didn't seem to suffer the same progressive slowdown.  Their pace, while adapting to the terrain, remained more robust, less prone to stagnation.
+
+“This is RMSProp,” announced a traveler named Hinton, approaching from the ravine’s edge. “We saw AdaGrad’s wisdom, but also its flaw – its unwavering memory.  We gave it a fading memory, a way to forget the distant past.”
+
+He sketched his own equations in the dust, subtly different from Duchi’s:
+
+$$
+G_t = \beta G_{t-1} + (1-\beta) g_t \odot g_t
+$$
+
+$$
+x_{t+1} = x_t - \frac{\eta}{\sqrt{G_t + \epsilon}} \odot g_t
+$$
+
+“The difference?” Hinton explained, pointing to the modified accumulation term, $$G_t$$. “Instead of summing *all* past squared gradients forever, RMSProp uses an **exponentially weighted average**.  Recent gradients matter more; older ones fade into the background.”
+
+You watched the RMSProp practitioner navigate the ravine.  They adapted to the shifting terrain just as AdaGrad did, shrinking their step size on steep inclines. But when the path leveled out again, their stride recovered, their pace quickening once more – unlike AdaGrad, which seemed trapped in an ever-decreasing step size.
+
+“This prevents AdaGrad’s vanishing step sizes,” Hinton elaborated.  “That’s why RMSProp is so effective in the deeper Loss Lands, in deep learning. The landscapes there are non-stationary, ever-changing. What works early in the descent may not work later. RMSProp adapts on the fly, responding to the *current* terrain, not just the history of the entire journey.”
+
+A pattern was emerging, a spectrum of adaptation:
+
+- **AdaGrad:**  Unwavering memory, step sizes shrink relentlessly.  Cautious, but prone to stalling.
+- **RMSProp:** Fading memory, step sizes adapt dynamically, recovering from cautious phases. More agile, less prone to stagnation.
+
+But then, Hinton gestured towards the center of the camp, where a traveler moved with a remarkable combination of smoothness and adaptability.  “And then there’s Adam,” Hinton said, a hint of admiration in his voice. “He’s taken the best of both worlds.”
+
+### **The Heavy Adaptive Traveler: Adam**
+
+At the heart of the camp, a traveler moved with an almost effortless grace.  They possessed the smooth, directional persistence reminiscent of momentum-based methods, yet also exhibited the fine-grained adaptability of RMSProp.  This was Adam.
+
+Kingma, Adam’s guide, approached, a knowing smile on his face. “We sought to combine the directional power of **momentum** (from the Heavy Ball’s Quest) with RMSProp’s parameter-wise adaptive step sizes. Why choose one virtue when you can embrace both?”
+
+He unfurled a scroll, revealing the intricate update rules of Adam:
+
+$$
+m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t  \quad \text{(Momentum term)}
+$$
+
+$$
+v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t \odot g_t \quad \text{(Adaptation term)}
+$$
+
+Bias corrections, subtle but crucial:
+
+$$
+\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
+$$
+
+And the final, elegant update:
+
+$$
+x_{t+1} = x_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \odot \hat{m}_t
+$$
+
+“It’s a fusion of ideas,” Kingma explained, tracing the equations with his finger. “Momentum, through $$m_t$$, provides directional persistence, smoothing the descent, helping to overcome minor obstacles.  The RMSProp-inspired term, $$v_t$$, adapts the step size, but crucially, it does so *per parameter*, recognizing that different directions in the Loss Lands may require different levels of caution.”
+
+The synthesis was breathtakingly clear:
+
+- **Adam = Momentum + RMSProp.**
+- **Momentum:**  Provides smooth, directional flow, resisting oscillations.
+- **RMSProp:**  Adapts learning rates per parameter, responding to varying terrain.
+
+Adam inherited the strengths of both, creating a powerful, versatile optimizer.
+
+But just as you began to celebrate this apparent pinnacle of optimization, a figure emerged from the shadows – an older traveler, their face etched with wisdom and a hint of caution.
+
+### **The Alchemist’s Warning: When Adam Falters**
+
+The old traveler, Reddi, knelt beside you, drawing a small diagram in the dust. “Adam is indeed powerful,” he conceded, his voice low and grave. “A remarkable synthesis. But be warned, traveler, even Adam is not infallible. In certain terrains, it can falter.  It can even fail to converge.”
+
+He tapped the diagram with a gnarled finger. “Adam adapts *too* aggressively at times. Its step sizes, while adaptive, can shrink unpredictably, leading to instability, especially in complex, adversarial Loss Landscapes.”
+
+He then introduced **AMSGrad**, a subtle but important modification, a refinement of Adam's adaptive mechanism:
+
+$$
+\hat{v}_t = \max(\hat{v}_{t-1}, v_t)
+$$
+
+$$
+x_{t+1} = x_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \odot \hat{m}_t
+$$
+
+“AMSGrad,” Reddi explained, “introduces a constraint.  It ensures that the adaptive step size, derived from $$v_t$$, only *decreases* or *stays the same*. It never *increases* unexpectedly. This subtle change prevents Adam’s step sizes from becoming erratic, ensuring a more stable, reliable descent.”
+
+Nearby, another Adaptive Traveler, Loshchilov, stepped forward, presenting another refinement, **AdamW**. “Adam, in its original form, sometimes entangled weight decay with its adaptive learning rates, leading to unintended consequences, especially in regularization.”
+
+He demonstrated **AdamW**, a deceptively simple tweak:
+
+$$
+x_{t+1} = x_t - \eta \left( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \lambda x_t \right)
+$$
+
+“See?” Loshchilov pointed. “AdamW decouples weight decay.  Instead of applying it within the optimizer’s step size calculation, we apply it *directly* to the parameters, the term $$\lambda x_t$$.  This prevents undesirable interactions, especially when strong regularization is needed.”
+
+And then, a final traveler, You, presented **LAMB**, an adaptation for a different kind of terrain – the vast expanses of large-batch training.
+
+$$
+r_t = \frac{\|x_t\|}{\|\hat{m}_t / \sqrt{\hat{v}_t + \epsilon} + \lambda x_t\|}
+$$
+
+$$
+x_{t+1} = x_t - \eta \cdot r_t \cdot \left( \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \lambda x_t} \right)
+$$
+
+“LAMB,” You explained, “is designed for large batch sizes. When training on massive datasets, standard Adam can become too aggressive, leading to divergence.  The ratio $$r_t$$ acts as a scaling factor, preventing overly large updates when using large batches.”
+
+### **The Empirical Travelers: Optimization as an Art**
+
+As the sun dipped below the cliff, casting long shadows across the camp, a profound realization dawned.  The Adaptive Travelers, with their myriad techniques – AdaGrad, RMSProp, Adam, AMSGrad, AdamW, LAMB – had revealed a crucial truth:
+
+- **Optimization is not a purely deductive science, but also an empirical art.**
+- **These adaptive methods were not derived solely from first principles, but emerged from experimentation, observation, and iterative refinement.**
+- **They are tools, each with its own strengths and weaknesses. No single optimizer is universally optimal, a panacea for all Loss Landscapes.**
+
+“The best optimizer,” Kingma reiterated, as the campfire crackled to life, casting dancing shadows on the cliff face, “depends on the terrain. Some excel in sparse settings, others in the depths of deep networks.  There is no single ‘perfect’ algorithm. The true mastery lies in understanding their nuances, in choosing the right tool for the specific challenge.”
+
+With a richer, more nuanced understanding of adaptive optimization, you prepared to leave the camp of experimenters.  You carried with you not just formulas and algorithms, but a deeper appreciation for the art of descent, the empirical nature of optimization, and the crucial wisdom that the best path forward is often dictated by the terrain itself. Your quest to uncover the deeper secrets of optimization was far from over; it was merely entering a new, more intricate phase.
 
 ## The Backward Oracle's Secret
 
@@ -739,13 +899,17 @@ As the boat glided across the misty river, the Loss Lands receding behind you, t
 
 > **Exercise: Duality and the Convex Conjugate**
 > Let $$\phi$$ be a strictly convex and differentiable function, and let $$\phi^*$$ denote its convex conjugate defined as
+> 
 > $$
 > \phi^*(y) = \sup_{x\in\mathbb{R}^n}\{\langle y,x\rangle - \phi(x)\}.
 > $$
+> 
 > **(a)** Prove the Fenchel–Young inequality:
+> 
 > $$
 > \phi(x) + \phi^*(y) \geq \langle x, y \rangle,
 > $$
+> 
 > with equality if and only if $$y = \nabla \phi(x)$$.
 > **(b)** Discuss how this duality relationship helps interpret the Bregman divergence and its potential role in the upcoming mirror descent algorithm.
 > *Hint:* Think about how the Bregman divergence measures the gap between the function and its first-order Taylor approximation and how this relates to the optimality conditions in convex duality.
@@ -764,6 +928,9 @@ $$
 \phi^*(y) = \sup_{x\in\mathbb{R}^n}\{\langle y,x\rangle - \phi(x)\}.
 $$
 
+![2D graphical representation of convex conjugate](./convex_conjugate.png)
+_Figure: Fenchel's convex conjugate, from [Mordukhovich and Nam (2015)](https://people.scs.carleton.ca/~bertossi/dmbi/material/Convex%20Analysis.pdf)_
+
 This dual function lives in a different space, the **dual space**, often interpreted as the space of gradients or slopes of the primal function.  The relationship between $$\phi(x)$$ and $$\phi^*(y)$$ is not arbitrary; it is governed by a fundamental principle called the **Fenchel-Young inequality**:
 
 $$
@@ -771,6 +938,11 @@ $$
 $$
 
 Equality holds in this inequality if and only if $$y$$ is the gradient of $$\phi$$ at $$x$$, i.e., $$y = \nabla \phi(x)$$. This tight link between the primal function and its conjugate is the key to duality."
+
+[Le Priol (2020) - Visualizing Convex Conjugates](https://remilepriol.github.io/dualityviz/) "Here is an interactive visualization of the convex conjugate of a convex function," concluded the ferryman. "It presents some primal functions, their convex conjugates, and Young's duality gaps., $$\phi(x) + \phi^*(y) - \langle x, y \rangle \ge 0$$."
+
+![Le Priol's visualization of convex conjugates](./le_priol_dualityviz.png)
+_Figure: [Le Priol](https://remilepriol.github.io/dualityviz/)'s visualization of convex conjugates_
 
 ### The Dance of Primal and Dual
 
@@ -785,8 +957,8 @@ The crucial insight, you discovered, was that under certain conditions (like con
 
 As you explored the Palace of Duality, the concept of convex conjugacy began to solidify in your mind. You understood that any convex function could be represented as the supremum of linear functions, shifted vertically according to its dual value – these linear functions formed the "supporting hyperplanes" that defined the function's epigraph.
 
-[Convex Function as Supremum of Affine Functions]
-*(Need to insert image here if possible, or describe it: "Imagine a convex curve shown as the upper envelope of many straight lines tangent to it.")*
+![Convex Function as Supremum of Affine Functions](./convex_as_sup_of_affine.png)
+_Figure: Convex function as supremum of affine functions_
 
 You realized that the convex conjugate was not just a mathematical abstraction; it was a way to represent a convex function in terms of its slopes, its gradients.  It was a transformation that shifted the focus from function values to gradient information, from points in the primal space to slopes in the dual space.
 
@@ -834,8 +1006,8 @@ $$
 
 You visualized the process: imagine laying a smooth, quadratic "tarp" over the potentially jagged loss landscape at each point $$x_k$$.  Minimizing this tarp was much easier than directly minimizing the complex landscape itself.  And because the tarp always lay *above* the landscape, descending the tarp guaranteed a descent in the actual loss function.
 
-[Example majorization through surrogate function]
-*(Need to insert image here if possible, or describe it: "Imagine a jagged loss curve with a parabola drawn above it, touching it at one point. Minimizing the parabola is easier than minimizing the jagged curve.")*
+![Example majorization-minimization iteration of log-sum-exp bounded by quadratic](./majorization_minimization.png)
+_Figure: Example majorization-minimization iteration of log-sum-exp bounded by quadratic_
 
 ### Solving the Variational Problem
 
@@ -913,3 +1085,204 @@ Thus, the quadratic bound is established:
 $$
 \left|f(x)-\Bigl[f(y)+\langle\nabla f(y),x-y\rangle\Bigr]\right|\le\frac{\lambda}{2}\|x-y\|^2.
 $$
+
+## References and Further Reading
+
+- [Bernstein and Newhouse (2024) - Old Optimizer, New Norm: An Anthology](https://arxiv.org/abs/2409.20325)
+- [Zhang and Nemeth (2024) - Why Should We Care About Gradient Flows?](https://shusheng3927.github.io/posts/2024-09-13-WGF/)
+- [Zhang (2024) - Gradient Flow and Its Applications in Statistical Learning](https://shusheng3927.github.io/files/grad_flow.pdf)
+- [Kundu (2024) - Who's Adam and What's He Optimizing? | Deep Dive into Optimizers for Machine Learning!](https://www.youtube.com/watch?v=MD2fYip6QsQ)
+- [Bach (2019) - Effortless optimization through gradient flows](https://francisbach.com/gradient-flows/)
+- [Orabona (2023) - A Modern Introduction to Online Learning](https://arxiv.org/abs/1912.13213)
+- [Mordukhovich and Nam (2015) - An Easy Path to Convex Analysis and Applications](https://people.scs.carleton.ca/~bertossi/dmbi/material/Convex%20Analysis.pdf)
+- [Mehta (2023) - Introduction to Online Learning (CSC 482A/581A)- Lecture 6](https://web.uvic.ca/~nmehta/online_learning_spring2023/lecture6.pdf)
+- [Boyd and Vandenberghe (2004) - Convex Optimization](https://web.stanford.edu/~boyd/cvxbook/bv_cvxbook.pdf)
+- [Rockafellar and Wets (2009) - VARIATIONAL ANALYSIS](https://sites.math.washington.edu/~rtr/papers/rtr169-VarAnalysis-RockWets.pdf)
+- [Candes (2015) - MATH 301: Advanced Topics in Convex Optimization Lecture 22](https://candes.su.domains/teaching/math301/Lectures/Moreau-Yosida.pdf)
+- [Le Priol (2020) - Visualizing Convex Conjuates](https://remilepriol.github.io/dualityviz/)
+- [Nielsen (2021) - Bregman divergences, dual information geometry, and generalized comparative convexity](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
+- [Nielsen and Nock (2008) - The Sided and Symmetrized Bregman Centroids](https://www.researchgate.net/publication/224460161_Sided_and_Symmetrized_Bregman_Centroids)
+- [Qin (2017) - How to understand Bregman divergence?](https://www.zhihu.com/question/22426561/answer/209945856)
+- [Banerjee et al. (2005) - On the Optimality of Conditional Expectation as a Bregman Predictor](https://ieeexplore.ieee.org/document/1459065)
+- [Banarjee et al. (2005) - Clustering with Bregman divergences](https://jmlr.org/papers/volume6/banerjee05b/banerjee05b.pdf)
+- [user940 (2011) - Intuition behind Conditional Expectation](https://math.stackexchange.com/questions/23600/intuition-behind-conditional-expectation/23613#23613)
+- [Parikh and Boyd (2013) - Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf)
+- [Chen (2019) - Proximal gradient methods](https://yuxinchen2020.github.io/ele522_optimization/lectures/proximal_gradient.pdf)
+- [Farina (2024) -  Lecture 9A-B Projected gradient descent and mirror descent](https://www.mit.edu/~gfarina/2024/67220s24_L09A_mirror_descent/L09.pdf)
+- [Lienart (2021) - Mirror descent algorithm](https://tlienart.github.io/posts/2018/10/27-mirror-descent-algorithm/)
+- [Wikipedia - Mirror Descent](https://en.wikipedia.org/wiki/Mirror_descent)
+- [Wikipedia - Bregman Divergence](https://en.wikipedia.org/wiki/Bregman_divergence)
+- [Banarjee et al. (2004) - Optimal Bregman Prediction and Jensen’s Equality](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
+- [Wikipedia - Convex Conjugate](https://en.wikipedia.org/wiki/Convex_conjugate)
+- [Wikipedia - Fenchel's Duality Theorem](https://en.wikipedia.org/wiki/Fenchel%27s_duality_theorem)
+- [Bauschke and Lucet (2011) - WHAT IS a Fenchel conjugate?](https://cmps-people.ok.ubc.ca/bauschke/Research/68.pdf)
+- [Boyd and Vandenberghe (2008) - Subgradients](https://see.stanford.edu/materials/lsocoee364b/01-subgradients_notes.pdf)
+- [Schiebinger (2019) -  Gradient Flow in Wasserstein Space](https://personal.math.ubc.ca/~geoff/courses/W2019T1/Lecture16.pdf)
+- [Fatir (2020) - Introduction to Gradient Flows in the 2-Wasserstein Space](https://abdulfatir.com/blog/2020/Gradient-Flows/)
+- [Wibisono et al. (2016) - A Variational Perspective on Accelerated Methods in Optimization](https://arxiv.org/abs/1603.04245)
+- [Figalli (2022) - AN INTRODUCTION TO OPTIMAL TRANSPORT
+  AND WASSERSTEIN GRADIENT FLOWS](https://people.math.ethz.ch/~afigalli/lecture-notes-pdf/An-introduction-to-optimal-transport-and-Wasserstein-gradient-flows.pdf)
+- [d’Aspremont et al. (2021) - Acceleration Methods](https://arxiv.org/abs/2101.09545)
+- [Xu (2024) - Gradient Flows: Modeling and Numerical
+ Methods](https://www.birs.ca/iasm-workshops/2024/24w5504/files/10.24-01%20Chuanju%20Xu%20-%20for%20sharing.pdf)
+
+## Code
+
+### 3D Animation for Gradient Flow vs Gradient Descent
+
+```python
+from manim import *
+import numpy as np
+
+class DiscreteJumpAnimation(Animation):
+    def __init__(self, mobject, points, **kwargs):
+        self.points = points
+        super().__init__(mobject, **kwargs)
+
+    def interpolate_mobject(self, alpha):
+        # Use a step function to have the ball "jump" discretely.
+        index = int(alpha * (len(self.points) - 1))
+        self.mobject.move_to(self.points[index])
+
+class GradientFlowVsDescent(ThreeDScene):
+    def construct(self):
+        # Set camera orientation with zoom and focal distance adjustments.
+        self.set_camera_orientation(
+            phi= 15 * DEGREES, theta=-80 * DEGREES, focal_distance=20, zoom=1.4
+        )
+
+        axes = ThreeDAxes(
+            x_range=[-3, 3, 1],
+            y_range=[-3, 3, 1],
+            z_range=[-2, 4, 2],
+            x_length=6,
+            y_length=6,
+            z_length=4,
+        )
+        self.add(axes)
+
+        # Define the loss function.
+        def loss_func(u, v):
+            x = u
+            y = v
+            z = (x**2 + 0.1 * y**2) * 0.7 # scaled down for illustration
+            return np.array([x, y, z])
+        
+        # Create a smooth gradient surface without the checkerboard pattern.
+        surface = Surface(
+            loss_func,
+            u_range=[-2.5, 2.5],
+            v_range=[-3, 3],
+            resolution=(40, 40),  # Higher resolution for smooth color transitions.
+            fill_color=BLUE,
+            fill_opacity=1,
+            stroke_width=0,      # Remove the mesh strokes.
+            shade_in_3d=True,
+        )
+        # Map a smooth gradient along the z-axis.
+        surface.set_fill_by_value(axes=axes, colors=[BLUE, GREEN, YELLOW, RED], axis=2)
+        self.add(surface)
+
+        # Set the starting point.
+        start_point = np.array([2, 2, 2.5])
+        
+        # Precompute the continuous gradient flow trajectory.
+        dt_cf = 0.05
+        steps_cf = 100
+        points_cf = []
+        x_cf, y_cf = start_point[0], start_point[1]
+        for _ in range(steps_cf):
+            pos = loss_func(x_cf, y_cf)
+            points_cf.append(pos)
+            grad_x_cf = 2 * x_cf
+            grad_y_cf = 0.2 * y_cf
+            x_cf -= dt_cf * grad_x_cf
+            y_cf -= dt_cf * grad_y_cf
+
+        # Precompute the discrete gradient descent (GD) trajectory.
+        dt_gd = 0.8
+        steps_gd = 10
+        points_gd = []
+        x_gd, y_gd = start_point[0], start_point[1]
+        for _ in range(steps_gd):
+            pos = loss_func(x_gd, y_gd)
+            points_gd.append(pos)
+            grad_x_gd = 2 * x_gd
+            grad_y_gd = 0.2 * y_gd
+            x_gd -= dt_gd * grad_x_gd
+            y_gd -= dt_gd * grad_y_gd
+
+        # Create the continuous gradient flow traced curve.
+        curve_cf = VMobject()
+        curve_cf.set_points_as_corners(points_cf)
+        curve_cf.set_color(PURPLE)
+        self.add(curve_cf)
+
+        # Create the discrete GD traced curve.
+        curve_gd = VMobject()
+        curve_gd.set_points_as_corners(points_gd)
+        curve_gd.set_color(DARK_BLUE)
+        self.add(curve_gd)
+
+        # Create spheres for the moving points.
+        ball_cf = Sphere(radius=0.15, resolution=16, fill_color=YELLOW, fill_opacity=1)
+        ball_cf.move_to(points_cf[0])
+        self.add(ball_cf)
+
+        ball_gd = Sphere(radius=0.15, resolution=16, fill_color=ORANGE, fill_opacity=1)
+        ball_gd.move_to(points_gd[0])
+        self.add(ball_gd)
+
+        # Use the custom discrete jump animation for the GD ball.
+        discrete_animation = DiscreteJumpAnimation(ball_gd, points_gd, run_time=6)
+
+        # Animate both trajectories concurrently.
+        self.play(
+            AnimationGroup(
+                MoveAlongPath(ball_cf, curve_cf, run_time=6, rate_func=linear),
+                discrete_animation,
+                lag_ratio=0,
+            )
+        )
+        self.wait(1)
+```
+
+### Convex Function as Supremum of Affine Functions
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the convex function f(x) = (1/2)x^2
+def f(x):
+    return 0.5 * x**2
+
+# Compute the convex conjugate f*(u)
+def f_star(u):
+    return 0.5 * u**2  # Since f(x) = (1/2)x^2, the convex conjugate is the same
+
+# Define the family of affine functions: x -> u*x - f*(u)
+def affine_func(x, u):
+    return u*x - f_star(u)
+
+# Generate x values
+x_vals = np.linspace(-3, 3, 100)
+f_vals = f(x_vals)
+
+# Choose several values of u to show affine functions forming the envelope
+u_values = np.linspace(-2, 2, 5)
+
+# Plot the convex function
+plt.figure(figsize=(8, 6))
+plt.plot(x_vals, f_vals, 'k', linewidth=2, label=r'$f(x) = \frac{1}{2}x^2$')
+
+# Plot the affine functions forming the envelope
+for u in u_values:
+    plt.plot(x_vals, affine_func(x_vals, u), '--', label=rf'$x \mapsto {u}x - f^*({u})$')
+
+plt.xlabel('$x$')
+plt.ylabel('$y$')
+plt.title('Convex Function as Supremum of Affine Functions')
+plt.legend()
+plt.grid()
+plt.show()
+```
