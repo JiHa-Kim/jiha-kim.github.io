@@ -232,9 +232,10 @@ jekyll_compose:
       image:
       category:
       tags:
+      math: true
     posts:
       description:
       image:
       category:
       tags:
-      published: false
+      math: true
