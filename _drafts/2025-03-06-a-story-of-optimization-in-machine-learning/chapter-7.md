@@ -1,187 +1,166 @@
 ---
 layout: post
-title: "A Story of Optimization in ML: Chapter 7 - Reflections in a Distorted Mirror: Stepping Beyond Euclidean Space"
-description: "Chapter 7 introduces Mirror Descent, extending optimization beyond Euclidean spaces by using Bregman divergences to navigate in geometries that are not flat."
+title: "A Story of Optimization in ML: Chapter 7 - Generalizing Euclidean Distance with Bregman Divergences"
+description: "Chapter 7 explores how Bregman divergences generalize Euclidean distance for differerently suited geometries."
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
-tags: ["mirror descent", "non-Euclidean optimization", "Bregman divergence", "Bregman projection", "optimizer"]
+tags: ["Bregman divergence", "non-Euclidean optimization", "Bregman projection", "optimizer"]
 image:
   path: /assets/2025-03-06-optimization-in-machine-learning/mirror_descent_chapter7.gif # Placeholder image path
-  alt: "Visual metaphor for mirror descent - a distorted reflection guiding the path" # Placeholder alt text
+  alt: "A visual metaphor for mirror descent in non-Euclidean geometry" # Placeholder alt text
 date: 2025-03-06 02:45 +0000
 math: true
 ---
 
-## Chapter 7: Reflections in a Distorted Mirror - Stepping Beyond Euclidean Space
+### Diverging from the Norm: Bregman Divergence
 
-Imagine you are in a hall of mirrors. But these aren't your usual funhouse mirrors; these are *mathematical* mirrors, distorting space itself.  You want to find the lowest point in this distorted reflection of reality. If you naively apply what you know about downhill directions in the *mirror* world, and then try to translate those steps back to the *real* world, you might end up going completely astray.  What if the 'downhill' direction in the mirror corresponds to 'uphill' in reality, or a completely different direction altogether?
-
-This is the challenge we face when our optimization landscape isn't the flat, familiar Euclidean space we've been used to.  Sometimes, the natural geometry of our problem is curved, distorted, non-Euclidean. And in these cases, our trusty Projected Gradient Descent, with its reliance on straight lines and Euclidean projections, might not be the most effective guide.
-
-Think back to **Projected Gradient Descent (PGD)** from Chapter 5. It’s a wonderfully intuitive method when we're confined to a convex set in Euclidean space. We take a gradient step, and then, if we stray outside our allowed boundaries, we simply project ourselves straight back in – using the familiar Euclidean distance as our guide.
-
-[Visual: Simple diagram of Projected Gradient Descent in Euclidean space - step and project]
-
-But what if "straight back in" isn't the most natural or efficient way to correct our course? What if our feasible region isn't best described by Euclidean geometry?
-
-Consider optimizing over the **probability simplex** – the space of all probability distributions.  If you take a gradient step and then project back using Euclidean projection, you might end up with a distribution that's valid, but it might feel… unnatural.  Euclidean distance treats all directions as equally "straight," but in the world of probabilities, some directions are more meaningful than others.
-
-What we need is a way to generalize the idea of "projection" and "descent" to geometries beyond the Euclidean.  We need a method that respects the intrinsic structure of the space we're working in. This is where **Mirror Descent** comes into play.
-
-### Mirror Descent:  A Reflection of Geometry
-
-Mirror Descent is a beautiful generalization of Projected Gradient Descent.  Instead of relying solely on Euclidean distances and projections, it leverages the concept of **Bregman divergences** we explored in the previous chapter. Remember, Bregman divergences are distance-like measures tailored to specific convex functions, offering a way to quantify "dissimilarity" in a non-Euclidean way.
-
-The core idea of Mirror Descent is to perform optimization in a **transformed space**, a "mirror space," and then map the updates back to our original parameter space. This transformation is guided by a carefully chosen **mirror map**, which is derived from a strictly convex function, often called the **potential function**.
-
-Here’s the conceptual outline of Mirror Descent:
-
-1.  **Choose a Mirror Map:** Select a strictly convex and differentiable function $$\phi(x)$$ that defines our "mirror geometry" through its induced Bregman divergence $$D_\phi(x\|y)$$.  The gradient of this function, $$\nabla \phi(x)$$, acts as our **mirror map**.
-
-2.  **Map to the Mirror Space:**  Instead of working directly with our parameters $$x$$ in the original space, we work with their "reflections" in the mirror space, given by $$\nabla \phi(x)$$. Think of $$\nabla \phi(x)$$ as a coordinate transformation, mapping our parameters into a new, potentially non-Euclidean space.
-
-3.  **Perform Gradient Descent in the Mirror Space:** We compute the gradient of our loss function $$\nabla f(x_k)$$ in the *original* space, but then we take our optimization step in the *mirror* space.  Imagine the gradient as a direction in the real world, but we apply this direction in our distorted mirror reflection.
-
-4.  **Map Back to the Original Space (Bregman Projection):**  After taking a step in the mirror space, we need to translate this update back to our original parameter space.  This "inverse mapping" is not a simple inverse function. Instead, it involves a **Bregman projection**. We find the point in the original space that, when mapped to the mirror space, is closest (in terms of Bregman divergence) to our updated point in the mirror space.
-
-[Visual: Diagram of Mirror Descent - Primal space -> Mirror space (via mirror map), GD step in mirror space, Mirror space -> Primal space (via Bregman projection)]
-
-Let’s formalize the Mirror Descent algorithm.  Given a loss function $$f(x)$$, a strictly convex potential function $$\phi(x)$$, and a learning rate $$\eta$$, the Mirror Descent update is as follows:
-
-1.  **Gradient Step (in Primal Space):** Compute the gradient of the loss function at the current point $$x_k$$,  $$\nabla f(x_k)$$.
-
-2.  **Update in Mirror Space:**  Take a gradient descent step *in the mirror space*.  This is done implicitly through the following Bregman projection step. We want to find the next iterate $$x_{k+1}$$ such that its mirror image, $$\nabla \phi(x_{k+1})$$, is close to the mirror image of the previous point, $$\nabla \phi(x_k)$$, *minus* the gradient in the original space, $$\eta \nabla f(x_k)$$.  More formally, we find $$x_{k+1}$$ by solving the following Bregman projection problem:
+It holds for a $$\lambda$$-Lipschitz smooth function that
 
 $$
-x_{k+1} = \arg\min_{x} \left\{ \eta \langle \nabla f(x_k), x \rangle + D_\phi(x \| x_k) \right\}
+\left|f(x)-\Bigl[f(y)+\langle\nabla f(y),x-y\rangle\Bigr]\right|\le\frac{\lambda}{2}\|x-y\|^2.
 $$
 
-This minimization problem effectively combines the gradient descent step with the Bregman projection back to the original space in a single, elegant update.
+Interpreting this geometrically, it tells us that the difference between $$f(x)$$ and the linear approximation of $$f$$ at $$y$$ is bounded by a paraboloid with a curvature of $$\lambda$$.
 
-In many cases, this Bregman projection step has a closed-form solution, making Mirror Descent computationally efficient.
+[Quadratic bound on difference between function and linear approximation in 2D]
 
-### How Mirror Descent Unifies and Generalizes
+As we will see, this quantity on the left-hand side is very interesting. To proceed, we will take a detour along the way.
 
-The beauty of Mirror Descent lies in its generality. It's not just a single algorithm, but a framework. By carefully choosing the potential function $$\phi(x)$$, we can recover familiar algorithms and also unlock new approaches tailored to specific geometries. Let's see how Mirror Descent elegantly encompasses both Projected Gradient Descent and Proximal Gradient Descent as special cases.
+### Optimality of conditional expectation
 
-#### Recovering Projected Gradient Descent
+$$\ell^2$$ loss makes the conditional expectation the optimal predictor, but this does not hold for $$\ell^1$$, which results in the median. In fact, the following is true:
 
-What happens if we choose the simplest possible potential function: the squared Euclidean norm? Let $$\phi(x) = \frac{1}{2}\|x\|_2^2$$.
-
-With this choice:
-
-*   The gradient of the potential is simply $$\nabla \phi(x) = x$$.
-*   The Bregman divergence becomes the squared Euclidean distance:
-
-$$
-D_\phi(x\|y) = \phi(x) - \phi(y) - \langle \nabla \phi(y), x-y \rangle = \frac{1}{2}\|x\|^2 - \frac{1}{2}\|y\|^2 - \langle y, x-y \rangle = \frac{1}{2}\|x-y\|^2.
-$$
-
-Now, let's plug this into the Mirror Descent update formula, assuming we are constrained to a convex set $$C$$:
-
-$$
-x_{k+1} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + D_\phi(x\|x_k) \right\} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + \frac{1}{2}\|x-x_k\|^2 \right\}.
-$$
-
-This minimization problem is precisely the update step in **Projected Gradient Descent!**  Minimizing $$\frac{1}{2}\|x-x_k\|^2 + \eta \langle \nabla f(x_k), x \rangle$$ is equivalent to projecting the point $$x_k - \eta \nabla f(x_k)$$ onto the feasible set $$C$$ using Euclidean projection.
-
-Thus, with the squared Euclidean norm as our potential, Mirror Descent *becomes* Projected Gradient Descent. It's a special case, tailored to Euclidean geometry.
-
-#### Recovering Proximal Gradient Descent (and Beyond)
-
-Now, let's consider how Mirror Descent relates to Proximal Gradient Descent. Recall that Proximal Gradient Descent is designed for composite optimization problems of the form: $$\min_x f(x) + g(x)$$, where $$f(x)$$ is smooth and $$g(x)$$ is a (possibly non-smooth) convex function.  The Proximal Gradient Descent update is:
-
-$$
-x_{k+1} = \arg\min_{x} \left\{ \langle \nabla f(x_k), x-x_k \rangle + \frac{1}{2\eta}\|x-x_k\|^2 + g(x) \right\}.
-$$
-
-We can extend the Mirror Descent framework to handle such composite objectives by simply adding the non-smooth term $$g(x)$$ into the minimization problem:
-
-$$
-x_{k+1} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + \eta g(x) + D_\phi(x\|x_k) \right\}.
-$$
-
-Again, if we choose the Euclidean potential $$\phi(x) = \frac{1}{2}\|x\|_2^2$$ (and assume for simplicity that $$C = \mathbb{R}^n$$ or that the constraint is already handled by $$g(x)$$), the Mirror Descent update becomes:
-
-$$
-x_{k+1} = \arg\min_{x} \left\{ \eta \langle \nabla f(x_k), x \rangle + \eta g(x) + \frac{1}{2}\|x-x_k\|^2 \right\}.
-$$
-
-Rearranging and scaling this expression, we see it is equivalent to the Proximal Gradient Descent update.
-
-So, not only does Mirror Descent generalize Projected Gradient Descent, but it also provides a broader framework that encompasses Proximal Gradient Descent.  And crucially, by changing our choice of potential function $$\phi(x)$$, we can move beyond these Euclidean-based methods and explore optimization algorithms adapted to non-Euclidean geometries.
-
-This versatility is what makes Mirror Descent such a powerful and fundamental concept in optimization. It’s a lens through which we can understand and generalize many existing algorithms, and a springboard for developing new ones tailored to the specific geometric structures of modern machine learning problems.
-
-### Why Does This "Mirror" Trick Work?
-
-Why go through all this trouble of transforming to a mirror space and back?  The power of Mirror Descent lies in its ability to **adapt to the geometry of the problem**. By choosing an appropriate potential function $$\phi(x)$$ and its associated Bregman divergence, we can tailor our optimization algorithm to the specific constraints and structure of our parameter space.
-
-*   **Non-Euclidean Geometry:** When the natural geometry is non-Euclidean (e.g., probability simplex, positive definite matrices), Mirror Descent, using a suitably chosen Bregman divergence (like KL divergence or Burg divergence), can lead to much faster convergence and better performance compared to Euclidean methods like Projected Gradient Descent.
-
-*   **Respecting Constraints:**  The Bregman projection step naturally keeps the iterates within the feasible region (if the Bregman divergence is well-defined on that region). It's a more geometry-aware way of enforcing constraints compared to simple Euclidean projection.
-
-*   **Generalized Projections:**  Euclidean projection is just a special case of Bregman projection when we use the squared Euclidean norm as our potential function.  Mirror Descent generalizes the concept of projection to a much broader class of divergences, opening up new possibilities for optimization.
-
-### Examples and Applications
-
-Mirror Descent finds applications in various areas where non-Euclidean geometries are important:
-
-*   **Optimization on the Probability Simplex:** For problems involving probability distributions, using the KL divergence as the Bregman divergence in Mirror Descent leads to algorithms like **Exponentiated Gradient Descent**, which are particularly well-suited for this constrained space.
-
-*   **Online Learning and Regret Minimization:** Mirror Descent is a fundamental algorithm in online learning and regret minimization, especially in settings where actions or predictions are constrained to lie in non-Euclidean sets.
-
-*   **Matrix and Tensor Optimization:**  For optimization problems involving positive definite matrices or tensors, Bregman divergences based on matrix norms or entropy functions can be used to design efficient Mirror Descent algorithms.
-
-###  Stepping Out of the Flatland
-
-Mirror Descent is a powerful reminder that optimization is not just about blindly following gradients. It's about understanding the geometry of the landscape and choosing algorithms that respect that geometry.  By stepping beyond the confines of Euclidean space and embracing the flexibility of Bregman divergences, Mirror Descent provides us with a richer and more versatile toolkit for navigating the complex optimization landscapes of machine learning.
-
-In the chapters to come, we'll explore how these geometric insights, combined with other optimization principles like duality and majorization-minimization, lead to the sophisticated and efficient optimizers that power modern machine learning. But for now, let's solidify our understanding of Mirror Descent with a few exercises.
-
----
-
-> **Exercise 1: Mirror Descent with Squared Euclidean Norm: Recovering Gradient Descent**
->
-> Consider the potential function $$\phi(x) = \frac{1}{2}\|x\|_2^2$$.
->
-> **(a)** Show that the Bregman divergence induced by $$\phi$$ is the squared Euclidean distance: $$D_\phi(x\|y) = \frac{1}{2}\|x-y\|_2^2$$.
->
-> **(b)** Derive the Mirror Descent update rule for this potential function. Show that it simplifies to the standard Gradient Descent update.
->
-> **(c)** If we also consider projection onto a closed convex set $$C$$ in the Mirror Descent framework with this potential function, what algorithm do we recover?
->
-> *Hint:* Substitute $$\phi(x) = \frac{1}{2}\|x\|_2^2$$ and its gradient into the Mirror Descent update formula and simplify.
-
-> **Exercise 2: Mirror Descent with Negative Entropy: Exponentiated Gradient Descent**
->
-> Consider the negative entropy potential function on the probability simplex $$\Delta^n = \{x \in \mathbb{R}^n_+ : \sum_{i=1}^n x_i = 1\}$$:
+> **Exercise.**  
+> Let $$X$$ be an $$\mathbb{R}^n$$-valued random variable and $$Y$$ be another random variable (possibly vector-valued) on the same probability space. Define the $$\ell^p$$ loss for a vector $$x \in \mathbb{R}^n$$ by
+> 
 > $$
-> \phi(x) = \sum_{i=1}^n x_i \log x_i.
+> \|x\|_p^p := \sum_{i=1}^n |x_i|^p.
+> $$
+> 
+> For a given $$p > 1$$ with $$p \neq 2$$, consider the problem of finding a predictor $$\hat{Y}$$ (which may depend on $$Y$$) that minimizes the expected loss
+> 
+> $$
+> \min_{\hat{Y}}\,\mathbb{E}\bigl[\|X-\hat{Y}\|_p^p\bigr].
+> $$
+> 
+> Demonstrate that, in general, the conditional expectation is not the optimal predictor under the $$\ell^p$$ loss. That is, show that
+> 
+> $$
+> \mathbb{E}[X|Y] \ne \arg\min_{\hat{Y}}\,\mathbb{E}\bigl[\|X-\hat{Y}\|_p^p\bigr].
+> $$
+>  
+> *Hint:*  
+> 1. Use the linearity of expectation to decompose the multivariate problem into $$n$$ independent univariate problems—one for each coordinate.  
+> 2. For each coordinate 
+> $$i$$, consider the function $$f_i(a) = \mathbb{E}\bigl[|X_i - a|^p \mid Y\bigr]$$ and assume that $$p>1$$ so that the loss is differentiable almost everywhere.  
+> 3. Differentiate $$f_i(a)$$ with respect to $$a$$ under the expectation to obtain the first-order optimality condition:  
+>    $$
+>    \mathbb{E}\Bigl[\operatorname{sgn}(X_i-a)|X_i-a|^{p-1} \mid Y\Bigr] = \mathbb{E}\Bigl[(X_i-a)|X_i-a|^{p-2} \mid Y\Bigr] = 0.
+>    $$
+> 4. Note that for $$p=2$$ this condition simplifies to  
+>    $$
+>    \mathbb{E}[X_i - a \mid Y] = 0,
+>    $$
+>    yielding $$a = \mathbb{E}[X_i|Y]$$; however, for $$p \neq 2$$ the optimal $$a$$ will generally differ from $$\mathbb{E}[X_i|Y]$$.
+
+So this gives rise to the natural question: what other losses beyond squared Euclidean distance ($$\ell^2$$) will make the conditional expectation the optimal predictor? 
+
+This question is answered in [Banerjee et al. (2005)](https://ieeexplore.ieee.org/document/1459065) as a Bregman divergence.
+
+> **Definition. Bregman Divergence**
+> Let $$\phi:\mathbb{R}^n\to\mathbb{R}$$ be a strictly convex and differentiable function. The Bregman divergence between two points $$x$$ and $$y$$ is defined as  
+> 
+> $$  
+> D_\phi(x\,\|\,y) = \phi(x) - \left[\phi(y) + \langle \nabla \phi(y), x - y \rangle\right].  
+> $$  
+
+Examples taken from [Nielsen and Nock (2008)](https://www.researchgate.net/publication/224460161_Sided_and_Symmetrized_Bregman_Centroids) (definitely worth a read):
+
+### Table: Common Univariate Bregman Divergences $$ D_F(p||q) $$ for Creating Separable Bregman Divergences
+
+$$
+\begin{array}{|c|c|c|c|c|}
+\hline
+\text{Domain } \mathcal{X} & \text{Function } F(x) & \text{Gradient } F'(x) & \text{Inverse Gradient } (F'(x))^{-1} & \text{Divergence } D_F(p||q) \\
+\hline
+\mathbb{R} & \begin{array}{c} \text{Squared function} \\ x^2 \end{array} & 2x & \frac{x}{2} & \begin{array}{c} (p-q)^2 \\ \text{(Squared loss)} \end{array} \\
+\hline
+\mathbb{R}_+, \alpha \in \mathbb{N}, \alpha > 1 & \begin{array}{c} \text{Norm-like} \\ x^\alpha \end{array} & \alpha x^{\alpha - 1} & \left( \frac{x}{\alpha} \right)^{\frac{1}{\alpha-1}} & p^\alpha + (\alpha - 1)q^\alpha - \alpha p q^{\alpha -1} \\
+\hline
+\mathbb{R}^+ & \begin{array}{c} \text{Unnormalized Shannon entropy} \\ x \log x - x \end{array} & \log x & \exp(x) & \begin{array}{c} p \log \frac{p}{q} - p + q \\ \text{(Kullback-Leibler divergence, I-divergence)} \end{array} \\
+\hline
+\mathbb{R} & \begin{array}{c} \text{Exponential function} \\ \exp x \end{array} & \exp x & \log x & \begin{array}{c} \exp(p) - (p-q+1)\exp(q) \\ \text{(Exponential loss)} \end{array} \\
+\hline
+\mathbb{R}^+_* & \begin{array}{c} \text{Burg entropy} \\ -\log x \end{array} & -\frac{1}{x} & -\frac{1}{x} & \begin{array}{c} \frac{p}{q} - \log \frac{p}{q} - 1 \\ \text{(Itakura-Saito divergence)} \end{array} \\
+\hline
+[0,1] & \begin{array}{c} \text{Bit entropy} \\ x \log x + (1-x) \log (1-x) \end{array} & \log \frac{x}{1-x} & \frac{\exp x}{1+\exp x} & \begin{array}{c} p \log \frac{p}{q} + (1-p) \log \frac{1-p}{1-q} \\ \text{(Logistic loss)} \end{array} \\
+\hline
+\mathbb{R} & \begin{array}{c} \text{Dual bit entropy} \\ \log(1+\exp x) \end{array} & \frac{\exp x}{1+\exp x} & \log \frac{x}{1-x} & \begin{array}{c} \log \frac{1+\exp p}{1+\exp q} - (p-q) \frac{\exp q}{1+\exp q} \\ \text{(Dual logistic loss)} \end{array} \\
+\hline
+[-1,1] & \begin{array}{c} \text{Hellinger-like function} \\ -\sqrt{1-x^2} \end{array} & \frac{x}{\sqrt{1-x^2}} & \frac{x}{\sqrt{1+x^2}} & \begin{array}{c} \frac{1-pq}{\sqrt{1-q^2}} - \sqrt{1-p^2} \\ \text{(Hellinger-like divergence)} \end{array} \\
+\hline
+\end{array}
+$$
+
+> **Exercise: Non-Negativity and Uniqueness of Zero**  
+> 
+> **(a)** Prove that $$D_\phi(x\,\|\,y) \geq 0$$ for all $$x,y\in\mathbb{R}^n$$.  
+> **(b)** Show that $$D_\phi(x\,\|\,y)=0$$ if and only if $$x=y$$.  
+> *Hint:* Use the strict convexity of $$\phi$$ and consider the first-order Taylor expansion of $$\phi$$ at the point $$y$$.
+
+> **Exercise: Bregman Divergence for the Kullback–Leibler (KL) Divergence**  
+> Consider the function  
+> 
+> $$  
+> \phi(x) = \sum_{i=1}^n x_i \log x_i - x_i,  
+> $$  
+> 
+> defined on the probability simplex (with the usual convention that $$0\log0=0$$).  
+> **(a)** Show that the Bregman divergence induced by $$\phi$$, 
+>  
+> $$
+> D_\phi(x\,\|\,y) = \phi(x) - \phi(y) - \langle \nabla \phi(y), x-y \rangle,  
+> $$
+> 
+> reduces to the KL divergence between $$x$$ and $$y$$.  
+> **(b)** Verify explicitly that the divergence is non-negative and zero if and only if $$x=y$$.  
+> *Hint:* Compute the gradient $$\nabla \phi(y)$$ and substitute it back into the expression for $$D_\phi(x\,\|\,y)$$.
+
+> **Exercise: Bregman Projections and Proximal Mappings**  
+> In many optimization algorithms (such as mirror descent), the update step is formulated as a Bregman projection.  
+> **(a)** Given a closed convex set $$\mathcal{C}\subseteq\mathbb{R}^n$$ and a point $$z\in\mathbb{R}^n$$, define the Bregman projection of $$z$$ onto $$\mathcal{C}$$ as  
+> 
+> $$  
+> \operatorname{proj}_{\mathcal{C}}^\phi(z) = \arg\min_{x\in\mathcal{C}} D_\phi(x\,\|\,z).  
+> $$  
+> 
+> Show that when $$\phi(x)=\frac{1}{2}\|x\|_2^2$$, the Bregman projection reduces to the standard Euclidean projection onto $$\mathcal{C}$$.  
+> **(b)** Discuss how this concept is connected to the proximal mapping defined earlier through the Moreau envelope. Generalize this concept to a generalize Bregman divergence.
+> *Hint:* Recall that the Euclidean proximal mapping for a function $$g$$ is given by  
+> 
+> $$  
+> \operatorname{prox}_{\eta, g}(v) = \arg\min_{y}\left\{ g(y) + \frac{1}{2\eta}\|y-v\|_2^2 \right\}.  
+> $$
+
+> **Exercise.** [Banarjee et al. (2004)](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
+> Define the conditional Bregman information of a random variable $$X$$ for a strictly convex differentable function $$\phi : \mathbb{R}^n \to \mathbb{R}$$ as
+>
+> $$
+> I_{\phi}(X|\mathcal{G}) := \mathbb{E}[D_\phi(x\,\|\,E[X|\mathcal{G}])|\mathcal{G}]
 > $$
 >
-> **(a)** Compute the gradient $$\nabla \phi(x)$$ and the Bregman divergence $$D_\phi(x\|y)$$ for this potential function.  Recognize the Bregman divergence as the Kullback-Leibler (KL) divergence.
+> where $$D_\phi(x\,\|\,y) := \phi(x) - (\phi(y) + \langle \nabla \phi(y), x-y \rangle)$$ is the Bregman divergence under $$\phi$$ from $$y$$ to $$x$$.
 >
-> **(b)** Derive the Mirror Descent update rule for this potential function. Show that it leads to the Exponentiated Gradient Descent update, where updates are multiplicative and preserve the probability simplex constraint.
->
-> **(c)** Explain why Exponentiated Gradient Descent is naturally suited for optimization over probability distributions and contrast it with standard Gradient Descent followed by Euclidean projection onto the simplex.
->
-> *Hint:* For part (b), you might need to solve the Bregman projection minimization problem explicitly for the negative entropy potential.
-
-> **Exercise 3: Bregman Projection for Mirror Descent with KL Divergence**
->
-> Consider Mirror Descent with the negative entropy potential function (leading to KL divergence).  Given a point $$x_k$$ and a gradient $$\nabla f(x_k)$$, explicitly solve the Bregman projection problem:
+> Prove that 
+> $$I_{\phi}(X|\mathcal{G}) \geq 0$$ for all $$X$$ and $$\phi$$. Then, show Jensen's inequality in the following form:
+> 
 > $$
-> x_{k+1} = \arg\min_{x \in \Delta^n} \left\{ \eta \langle \nabla f(x_k), x \rangle + D_{KL}(x \| x_k) \right\}
+> \mathbb{E}[\phi(X)|\mathcal{G}] = \phi(\mathbb{E}[X|\mathcal{G}]) + I_{\phi}(X|\mathcal{G}).
 > $$
-> to derive the update rule for Exponentiated Gradient Descent.
->
-> *Hint:* Use Lagrange multipliers to solve the constrained optimization problem. Consider the constraints of the probability simplex.
 
 ---
 
 **Further Reading:**
 
-*   [Nemirovski and Yudin (1983) - Problem Complexity and Method Efficiency in Optimization](https://link.springer.com/book/10.1007/978-3-662-09978-1) (Seminal work on Mirror Descent)
-*   [Beck and Teboulle (2003) - Mirror Descent and Nonlinear Projected Subgradient Methods for Convex Optimization](https://epubs.siam.org/doi/abs/10.1137/S003614290241847X) (More accessible introduction)
-*   [Shalev-Shwartz (2012) - Online Learning and Online Convex Optimization](http://www.cs.huji.ac.il/~shais/papers/OLbook-v1.pdf) (Chapter 4 - Mirror Descent)
-*   [Hazan (2019) - Lecture Notes: Optimization for Machine Learning](https://arxiv.org/abs/1909.03550) (Lecture 7 - Mirror Descent)
+*   [Banerjee et al. (2005) - On the Optimality of Conditional Expectation as a Bregman Predictor](https://ieeexplore.ieee.org/document/1459065)
+*   [Nielsen and Nock (2008) - The Sided and Symmetrized Bregman Centroids](https://www.researchgate.net/publication/224460161_Sided_and_Symmetrized_Bregman_Centroids)
+*   [Hazan (2019) - Lecture Notes: Optimization for Machine Learning](https://arxiv.org/abs/1909.03550)

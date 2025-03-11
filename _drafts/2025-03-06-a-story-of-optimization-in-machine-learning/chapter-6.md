@@ -1,166 +1,107 @@
 ---
 layout: post
-title: "A Story of Optimization in ML: Chapter 6 - Generalizing Euclidean Distance with Bregman Divergences"
-description: "Chapter 6 explores how Bregman divergences generalize Euclidean distance for differerently suited geometries."
+title: "A Story of Optimization in ML: Chapter 6 - Staying Within Bounds: Projected Descent"
+description: "Chapter 6 introduces Projected Gradient Descent, a method for handling constraints in Euclidean space by combining gradient steps with projections onto feasible sets."
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
-tags: ["Bregman divergence", "non-Euclidean optimization", "Bregman projection", "optimizer"]
+tags: ["projected gradient descent", "constrained optimization", "Euclidean projection", "optimizer"]
 image:
-  path: /assets/2025-03-06-optimization-in-machine-learning/mirror_descent_chapter6.gif # Placeholder image path
-  alt: "A visual metaphor for mirror descent in non-Euclidean geometry" # Placeholder alt text
+  path: /assets/2025-03-06-optimization-in-machine-learning/projected_gd_chapter6.gif # Placeholder image path
+  alt: "Visual representation of Projected Gradient Descent" # Placeholder alt text
 date: 2025-03-06 02:45 +0000
 math: true
 ---
 
-### Diverging from the Norm: Bregman Divergence
+## Chapter 6: Staying Within Bounds - Projected Descent in Euclidean Space
 
-It holds for a $$\lambda$$-Lipschitz smooth function that
+So far, we've been exploring unconstrained optimization – freely navigating the loss landscape to find the lowest point. But in many real-world machine learning problems, we need to work with **constraints**. We might want to ensure our model parameters satisfy certain conditions, or stay within specific, valid ranges.
 
-$$
-\left|f(x)-\Bigl[f(y)+\langle\nabla f(y),x-y\rangle\Bigr]\right|\le\frac{\lambda}{2}\|x-y\|^2.
-$$
+Imagine you're sculpting a statue. You're chipping away at a block of stone (minimizing loss), but you also need to make sure your sculpture stays within the original boundaries of the stone block (constraints). You can't let your chisel strokes wander completely freely; you must stay within the feasible region.
 
-Interpreting this geometrically, it tells us that the difference between $$f(x)$$ and the linear approximation of $$f$$ at $$y$$ is bounded by a paraboloid with a curvature of $$\lambda$$.
+Constraints in machine learning arise in various forms:
 
-[Quadratic bound on difference between function and linear approximation in 2D]
+*   **Weight Clipping:** To prevent exploding gradients or ensure stability, we might want to keep the weights of our neural network within a certain range, say, between -1 and 1.
+*   **Non-Negativity Constraints:** In some models, parameters might represent probabilities or physical quantities that must be non-negative.
+*   **Norm Constraints:**  We might want to limit the overall magnitude of our parameter vector to prevent overfitting or improve generalization.
+*   **Constraints to Lie on a Manifold:** Parameters might need to reside on a specific manifold, like the probability simplex (for probability distributions) or the Stiefel manifold (for orthogonal matrices).
 
-As we will see, this quantity on the left-hand side is very interesting. To proceed, we will take a detour along the way.
+If we use standard Gradient Descent for constrained optimization, we run into a problem: **gradient steps can take us outside the feasible region**, violating our constraints. Imagine our ball rolling down a hill, but the hill is fenced in.  A simple downhill roll might easily take the ball crashing into the fence, outside the allowed area.
 
-### Optimality of conditional expectation
+How do we adapt Gradient Descent to handle constraints?  A simple and intuitive approach in Euclidean space is **Projected Gradient Descent (PGD)**.
 
-$$\ell^2$$ loss makes the conditional expectation the optimal predictor, but this does not hold for $$\ell^1$$, which results in the median. In fact, the following is true:
+**Projected Gradient Descent: Step and Project**
 
-> **Exercise.**  
-> Let $$X$$ be an $$\mathbb{R}^n$$-valued random variable and $$Y$$ be another random variable (possibly vector-valued) on the same probability space. Define the $$\ell^p$$ loss for a vector $$x \in \mathbb{R}^n$$ by
-> 
-> $$
-> \|x\|_p^p := \sum_{i=1}^n |x_i|^p.
-> $$
-> 
-> For a given $$p > 1$$ with $$p \neq 2$$, consider the problem of finding a predictor $$\hat{Y}$$ (which may depend on $$Y$$) that minimizes the expected loss
-> 
-> $$
-> \min_{\hat{Y}}\,\mathbb{E}\bigl[\|X-\hat{Y}\|_p^p\bigr].
-> $$
-> 
-> Demonstrate that, in general, the conditional expectation is not the optimal predictor under the $$\ell^p$$ loss. That is, show that
-> 
-> $$
-> \mathbb{E}[X|Y] \ne \arg\min_{\hat{Y}}\,\mathbb{E}\bigl[\|X-\hat{Y}\|_p^p\bigr].
-> $$
->  
-> *Hint:*  
-> 1. Use the linearity of expectation to decompose the multivariate problem into $$n$$ independent univariate problems—one for each coordinate.  
-> 2. For each coordinate 
-> $$i$$, consider the function $$f_i(a) = \mathbb{E}\bigl[|X_i - a|^p \mid Y\bigr]$$ and assume that $$p>1$$ so that the loss is differentiable almost everywhere.  
-> 3. Differentiate $$f_i(a)$$ with respect to $$a$$ under the expectation to obtain the first-order optimality condition:  
->    $$
->    \mathbb{E}\Bigl[\operatorname{sgn}(X_i-a)|X_i-a|^{p-1} \mid Y\Bigr] = \mathbb{E}\Bigl[(X_i-a)|X_i-a|^{p-2} \mid Y\Bigr] = 0.
->    $$
-> 4. Note that for $$p=2$$ this condition simplifies to  
->    $$
->    \mathbb{E}[X_i - a \mid Y] = 0,
->    $$
->    yielding $$a = \mathbb{E}[X_i|Y]$$; however, for $$p \neq 2$$ the optimal $$a$$ will generally differ from $$\mathbb{E}[X_i|Y]$$.
+The core idea of Projected Gradient Descent is remarkably straightforward:
 
-So this gives rise to the natural question: what other losses beyond squared Euclidean distance ($$\ell^2$$) will make the conditional expectation the optimal predictor? 
+1.  **Take a standard Gradient Descent step.**  Calculate the gradient and update your parameters as if there were no constraints.
+2.  **Project the updated parameters back onto the feasible set.** If the gradient step has taken you outside the allowed region, "project" your parameters back to the closest point within the feasible region.
 
-This question is answered in [Banerjee et al. (2005)](https://ieeexplore.ieee.org/document/1459065) as a Bregman divergence.
+It's like taking a step downhill, and then, if you find yourself outside the boundaries of the allowed area, immediately "snapping" back to the nearest valid point.
 
-> **Definition. Bregman Divergence**
-> Let $$\phi:\mathbb{R}^n\to\mathbb{R}$$ be a strictly convex and differentiable function. The Bregman divergence between two points $$x$$ and $$y$$ is defined as  
-> 
-> $$  
-> D_\phi(x\,\|\,y) = \phi(x) - \left[\phi(y) + \langle \nabla \phi(y), x - y \rangle\right].  
-> $$  
+[Visual representation of Projected Gradient Descent - GD step followed by projection back to feasible set]
 
-Examples taken from [Nielsen and Nock (2008)](https://www.researchgate.net/publication/224460161_Sided_and_Symmetrized_Bregman_Centroids) (definitely worth a read):
+Let's formalize this. Suppose we want to minimize a smooth function $$f(x)$$ subject to the constraint that $$x$$ must belong to a closed convex set $$C \subseteq \mathbb{R}^n$$.  The **Projected Gradient Descent (PGD)** algorithm is:
 
-### Table: Common Univariate Bregman Divergences $$ D_F(p||q) $$ for Creating Separable Bregman Divergences
+1.  **Gradient Descent Step:**
+    $$v_k = x_k - \eta \nabla f(x_k)$$
+2.  **Projection Step:**
+    $$x_{k+1} = \operatorname{proj}_C(v_k)$$
+
+Where $$\operatorname{proj}_C(v_k)$$ denotes the **Euclidean projection** of the point $$v_k$$ onto the set $$C$$.
+
+**Euclidean Projection: Finding the Closest Valid Point**
+
+The **Euclidean projection** of a point $$v$$ onto a closed convex set $$C$$ is the point in $$C$$ that is closest to $$v$$ in terms of Euclidean distance. Mathematically:
 
 $$
-\begin{array}{|c|c|c|c|c|}
-\hline
-\text{Domain } \mathcal{X} & \text{Function } F(x) & \text{Gradient } F'(x) & \text{Inverse Gradient } (F'(x))^{-1} & \text{Divergence } D_F(p||q) \\
-\hline
-\mathbb{R} & \begin{array}{c} \text{Squared function} \\ x^2 \end{array} & 2x & \frac{x}{2} & \begin{array}{c} (p-q)^2 \\ \text{(Squared loss)} \end{array} \\
-\hline
-\mathbb{R}_+, \alpha \in \mathbb{N}, \alpha > 1 & \begin{array}{c} \text{Norm-like} \\ x^\alpha \end{array} & \alpha x^{\alpha - 1} & \left( \frac{x}{\alpha} \right)^{\frac{1}{\alpha-1}} & p^\alpha + (\alpha - 1)q^\alpha - \alpha p q^{\alpha -1} \\
-\hline
-\mathbb{R}^+ & \begin{array}{c} \text{Unnormalized Shannon entropy} \\ x \log x - x \end{array} & \log x & \exp(x) & \begin{array}{c} p \log \frac{p}{q} - p + q \\ \text{(Kullback-Leibler divergence, I-divergence)} \end{array} \\
-\hline
-\mathbb{R} & \begin{array}{c} \text{Exponential function} \\ \exp x \end{array} & \exp x & \log x & \begin{array}{c} \exp(p) - (p-q+1)\exp(q) \\ \text{(Exponential loss)} \end{array} \\
-\hline
-\mathbb{R}^+_* & \begin{array}{c} \text{Burg entropy} \\ -\log x \end{array} & -\frac{1}{x} & -\frac{1}{x} & \begin{array}{c} \frac{p}{q} - \log \frac{p}{q} - 1 \\ \text{(Itakura-Saito divergence)} \end{array} \\
-\hline
-[0,1] & \begin{array}{c} \text{Bit entropy} \\ x \log x + (1-x) \log (1-x) \end{array} & \log \frac{x}{1-x} & \frac{\exp x}{1+\exp x} & \begin{array}{c} p \log \frac{p}{q} + (1-p) \log \frac{1-p}{1-q} \\ \text{(Logistic loss)} \end{array} \\
-\hline
-\mathbb{R} & \begin{array}{c} \text{Dual bit entropy} \\ \log(1+\exp x) \end{array} & \frac{\exp x}{1+\exp x} & \log \frac{x}{1-x} & \begin{array}{c} \log \frac{1+\exp p}{1+\exp q} - (p-q) \frac{\exp q}{1+\exp q} \\ \text{(Dual logistic loss)} \end{array} \\
-\hline
-[-1,1] & \begin{array}{c} \text{Hellinger-like function} \\ -\sqrt{1-x^2} \end{array} & \frac{x}{\sqrt{1-x^2}} & \frac{x}{\sqrt{1+x^2}} & \begin{array}{c} \frac{1-pq}{\sqrt{1-q^2}} - \sqrt{1-p^2} \\ \text{(Hellinger-like divergence)} \end{array} \\
-\hline
-\end{array}
+\operatorname{proj}_C(v) = \arg\min_{y \in C} \|y - v\|_2
 $$
 
-> **Exercise: Non-Negativity and Uniqueness of Zero**  
-> 
-> **(a)** Prove that $$D_\phi(x\,\|\,y) \geq 0$$ for all $$x,y\in\mathbb{R}^n$$.  
-> **(b)** Show that $$D_\phi(x\,\|\,y)=0$$ if and only if $$x=y$$.  
-> *Hint:* Use the strict convexity of $$\phi$$ and consider the first-order Taylor expansion of $$\phi$$ at the point $$y$$.
+For some simple convex sets, the Euclidean projection is easy to compute analytically. For more complex sets, it might require solving a smaller optimization problem.
 
-> **Exercise: Bregman Divergence for the Kullback–Leibler (KL) Divergence**  
-> Consider the function  
-> 
-> $$  
-> \phi(x) = \sum_{i=1}^n x_i \log x_i - x_i,  
-> $$  
-> 
-> defined on the probability simplex (with the usual convention that $$0\log0=0$$).  
-> **(a)** Show that the Bregman divergence induced by $$\phi$$, 
->  
-> $$
-> D_\phi(x\,\|\,y) = \phi(x) - \phi(y) - \langle \nabla \phi(y), x-y \rangle,  
-> $$
-> 
-> reduces to the KL divergence between $$x$$ and $$y$$.  
-> **(b)** Verify explicitly that the divergence is non-negative and zero if and only if $$x=y$$.  
-> *Hint:* Compute the gradient $$\nabla \phi(y)$$ and substitute it back into the expression for $$D_\phi(x\,\|\,y)$$.
+**Examples of Euclidean Projections onto Common Convex Sets:**
 
-> **Exercise: Bregman Projections and Proximal Mappings**  
-> In many optimization algorithms (such as mirror descent), the update step is formulated as a Bregman projection.  
-> **(a)** Given a closed convex set $$\mathcal{C}\subseteq\mathbb{R}^n$$ and a point $$z\in\mathbb{R}^n$$, define the Bregman projection of $$z$$ onto $$\mathcal{C}$$ as  
-> 
-> $$  
-> \operatorname{proj}_{\mathcal{C}}^\phi(z) = \arg\min_{x\in\mathcal{C}} D_\phi(x\,\|\,z).  
-> $$  
-> 
-> Show that when $$\phi(x)=\frac{1}{2}\|x\|_2^2$$, the Bregman projection reduces to the standard Euclidean projection onto $$\mathcal{C}$$.  
-> **(b)** Discuss how this concept is connected to the proximal mapping defined earlier through the Moreau envelope. Generalize this concept to a generalize Bregman divergence.
-> *Hint:* Recall that the Euclidean proximal mapping for a function $$g$$ is given by  
-> 
-> $$  
-> \operatorname{prox}_{\eta, g}(v) = \arg\min_{y}\left\{ g(y) + \frac{1}{2\eta}\|y-v\|_2^2 \right\}.  
-> $$
+*   **Projection onto a Box Constraint:**  Suppose $$C = \{x \in \mathbb{R}^n \mid l_i \leq x_i \leq u_i \text{ for all } i=1, \dots, n \}$$, where $$l_i$$ and $$u_i$$ are lower and upper bounds for each component $$x_i$$.  The projection onto this box is simply **component-wise clipping**:
 
-> **Exercise.** [Banarjee et al. (2004)](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
-> Define the conditional Bregman information of a random variable $$X$$ for a strictly convex differentable function $$\phi : \mathbb{R}^n \to \mathbb{R}$$ as
->
-> $$
-> I_{\phi}(X|\mathcal{G}) := \mathbb{E}[D_\phi(x\,\|\,E[X|\mathcal{G}])|\mathcal{G}]
-> $$
->
-> where $$D_\phi(x\,\|\,y) := \phi(x) - (\phi(y) + \langle \nabla \phi(y), x-y \rangle)$$ is the Bregman divergence under $$\phi$$ from $$y$$ to $$x$$.
->
-> Prove that 
-> $$I_{\phi}(X|\mathcal{G}) \geq 0$$ for all $$X$$ and $$\phi$$. Then, show Jensen's inequality in the following form:
-> 
-> $$
-> \mathbb{E}[\phi(X)|\mathcal{G}] = \phi(\mathbb{E}[X|\mathcal{G}]) + I_{\phi}(X|\mathcal{G}).
-> $$
+    $$
+    [\operatorname{proj}_C(v)]_i = \begin{cases}
+        l_i & \text{if } v_i < l_i \\
+        v_i & \text{if } l_i \leq v_i \leq u_i \\
+        u_i & \text{if } v_i > u_i
+    \end{cases}
+    $$
 
----
+*   **Projection onto the Non-negative Orthant:**  Suppose $$C = \{x \in \mathbb{R}^n \mid x_i \geq 0 \text{ for all } i=1, \dots, n \}$$.  The projection onto the non-negative orthant is also component-wise: **clip negative values to zero**:
 
-**Further Reading:**
+    $$
+    [\operatorname{proj}_C(v)]_i = \max(0, v_i) = \begin{cases}
+        v_i & \text{if } v_i \geq 0 \\
+        0 & \text{if } v_i < 0
+    \end{cases}
+    $$
 
-*   [Banerjee et al. (2005) - On the Optimality of Conditional Expectation as a Bregman Predictor](https://ieeexplore.ieee.org/document/1459065)
-*   [Nielsen and Nock (2008) - The Sided and Symmetrized Bregman Centroids](https://www.researchgate.net/publication/224460161_Sided_and_Symmetrized_Bregman_Centroids)
-*   [Hazan (2019) - Lecture Notes: Optimization for Machine Learning](https://arxiv.org/abs/1909.03550)
+*   **Projection onto the Probability Simplex (More Complex Example):** Suppose $$C = \{x \in \mathbb{R}^n \mid x_i \geq 0, \sum_{i=1}^n x_i = 1 \}$$.  Projection onto the probability simplex is slightly more involved, but there are efficient algorithms to compute it.  It ensures that the projected vector is non-negative and sums to 1, making it a valid probability distribution.
+
+**Connection to Proximal Gradient Descent (Revisited):**
+
+Remember Proximal Gradient Descent from the previous chapter?  We saw that for a composite loss function $$L(x) = f(x) + g(x)$$, we could use the update:
+
+1.  Gradient Step: $$v = x_k - \eta \nabla f(x_k)$$
+2.  Proximal Step: $$x_{k+1} = \operatorname{prox}_{\eta, g}(v)$$
+
+Now, consider setting the non-smooth function $$g(x)$$ to be the **indicator function** of the constraint set $$C$$, i.e., $$g(x) = \delta_C(x) = 0$$ if $$x \in C$$ and $$+\infty$$ if $$x \notin C$$.  Then, the Proximal Gradient Descent update becomes:
+
+1.  Gradient Step: $$v = x_k - \eta \nabla f(x_k)$$
+2.  Proximal Step: $$x_{k+1} = \operatorname{prox}_{\eta, \delta_C}(v) = \arg\min_{y} \left\{ \delta_C(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}$$
+
+But we know from the previous chapter (Exercise 2) that the proximal operator of the indicator function $$\delta_C(x)$$ is precisely the **Euclidean projection onto the set $$C$$**:  $$\operatorname{prox}_{\eta, \delta_C}(v) = \operatorname{proj}_C(v)$$.
+
+Therefore, **Projected Gradient Descent is a special case of Proximal Gradient Descent**, where the non-smooth part of the loss function is the indicator function of the constraint set.  This provides a deeper connection between these two seemingly different approaches.
+
+**Advantages and Considerations of Projected Gradient Descent:**
+
+*   **Simplicity and Intuition:** PGD is conceptually simple and easy to implement, especially when the projection onto the constraint set is computationally efficient.
+*   **Handles Constraints in Euclidean Space:** It provides a straightforward way to incorporate constraints into gradient-based optimization in Euclidean space.
+*   **Convergence Guarantees (for Convex Problems):** For convex objective functions and convex constraint sets, PGD often enjoys convergence guarantees under suitable step size conditions.
+*   **Still in Euclidean Space:**  PGD is fundamentally a Euclidean space method.  It relies on Euclidean projection and Euclidean gradients.  For problems where the natural geometry is non-Euclidean, or where constraints are more naturally expressed in non-Euclidean spaces, PGD might not be the most efficient or elegant approach.
+
+In the next chapter, we will take a significant step beyond Euclidean space. We will explore **Mirror Descent**, a powerful generalization of Projected Gradient Descent that allows us to perform constrained optimization in non-Euclidean geometries, using more general "projections" based on **Bregman divergences**.  This will open up a new world of optimization techniques tailored to the intrinsic geometry of the problem at hand.

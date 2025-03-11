@@ -1,107 +1,239 @@
 ---
 layout: post
-title: "A Story of Optimization in ML: Chapter 5 - Staying Within Bounds: Projected Descent"
-description: "Chapter 5 introduces Projected Gradient Descent, a method for handling constraints in Euclidean space by combining gradient steps with projections onto feasible sets."
+title: "A Story of Optimization in ML: Chapter 5 - Navigating Non-Smooth Terrain"
+description: "Chapter 5 explores optimization in non-smooth loss landscapes, introducing proximal methods and the Moreau envelope as tools to handle functions that lack gradients everywhere."
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
-tags: ["projected gradient descent", "constrained optimization", "Euclidean projection", "optimizer"]
+tags: ["proximal methods", "non-smooth optimization", "Moreau envelope", "proximal gradient descent", "optimizer"]
 image:
-  path: /assets/2025-03-06-optimization-in-machine-learning/projected_gd_chapter5.gif # Placeholder image path
-  alt: "Visual representation of Projected Gradient Descent" # Placeholder alt text
+  path: /assets/2025-03-06-optimization-in-machine-learning/nonsmooth_chapter5.gif # Placeholder image path
+  alt: "Visual representation of non-smooth optimization and proximal methods" # Placeholder alt text
 date: 2025-03-06 02:45 +0000
 math: true
 ---
 
-## Chapter 5: Staying Within Bounds - Projected Descent in Euclidean Space
+## Chapter 5: Navigating Non-Smooth Terrain – Beyond the Gradient
 
-So far, we've been exploring unconstrained optimization – freely navigating the loss landscape to find the lowest point. But in many real-world machine learning problems, we need to work with **constraints**. We might want to ensure our model parameters satisfy certain conditions, or stay within specific, valid ranges.
+In our optimization journey, we've become comfortable with smooth loss landscapes, where the concept of a **gradient** guides our descent.  Gradient Descent and its variations thrive in these terrains, efficiently leading us towards the minimum.  But what happens when the landscape becomes… jagged?
 
-Imagine you're sculpting a statue. You're chipping away at a block of stone (minimizing loss), but you also need to make sure your sculpture stays within the original boundaries of the stone block (constraints). You can't let your chisel strokes wander completely freely; you must stay within the feasible region.
+Imagine stepping onto a terrain that's no longer gently sloping hills, but a fractured landscape of sharp cliffs, abrupt edges, and sudden corners. This is the world of **non-smooth optimization**.  Non-smoothness isn't just a theoretical curiosity; it arises naturally in many practical machine learning scenarios.
 
-Constraints in machine learning arise in various forms:
+Think about these common elements in modern models:
 
-*   **Weight Clipping:** To prevent exploding gradients or ensure stability, we might want to keep the weights of our neural network within a certain range, say, between -1 and 1.
-*   **Non-Negativity Constraints:** In some models, parameters might represent probabilities or physical quantities that must be non-negative.
-*   **Norm Constraints:**  We might want to limit the overall magnitude of our parameter vector to prevent overfitting or improve generalization.
-*   **Constraints to Lie on a Manifold:** Parameters might need to reside on a specific manifold, like the probability simplex (for probability distributions) or the Stiefel manifold (for orthogonal matrices).
+*   **ReLU Activation:**  The ReLU (Rectified Linear Unit) activation function, $$\operatorname{ReLU}(x) = \max(0, x)$$, is incredibly popular in neural networks. But at the point $$x=0$$, it has a sharp kink – it's not differentiable there.
+*   **L1 Regularization:**  To encourage simpler, sparser models, we often use L1 regularization, adding terms like 
+$$|x|$$ to our loss function.  The absolute value function $$|x|$$ also has a sharp, non-differentiable point at zero.
+*   **Constraints:**  Sometimes we impose explicit constraints on our model parameters – perhaps they must be non-negative, or lie within a specific range.  These constraints can also introduce non-smoothness into the optimization problem.
 
-If we use standard Gradient Descent for constrained optimization, we run into a problem: **gradient steps can take us outside the feasible region**, violating our constraints. Imagine our ball rolling down a hill, but the hill is fenced in.  A simple downhill roll might easily take the ball crashing into the fence, outside the allowed area.
+In these non-smooth landscapes, the gradient, our trusty guide, becomes unreliable.  At those sharp edges and corners, the gradient simply isn't well-defined in the usual sense.  Standard gradient-based methods might falter, struggling to find a consistent direction of descent.
 
-How do we adapt Gradient Descent to handle constraints?  A simple and intuitive approach in Euclidean space is **Projected Gradient Descent (PGD)**.
+So, how do we proceed when gradients fail us?  How do we navigate this non-smooth terrain?
 
-**Projected Gradient Descent: Step and Project**
+We need to move **beyond the gradient** as our sole guide.  We need a more robust compass, one that can point us towards the minimum even in the absence of smooth gradients.  This is where **proximal methods** come to our rescue.
 
-The core idea of Projected Gradient Descent is remarkably straightforward:
+### Moving Beyond the Gradient: The Proximal Idea
 
-1.  **Take a standard Gradient Descent step.**  Calculate the gradient and update your parameters as if there were no constraints.
-2.  **Project the updated parameters back onto the feasible set.** If the gradient step has taken you outside the allowed region, "project" your parameters back to the closest point within the feasible region.
+The core idea of proximal methods is to replace the direct gradient step with a more robust update. Instead of blindly following the gradient, we formulate each step as a **mini-optimization problem**.  This mini-problem balances two things:
 
-It's like taking a step downhill, and then, if you find yourself outside the boundaries of the allowed area, immediately "snapping" back to the nearest valid point.
+1.  **Reducing the Loss:** We still want to move towards lower loss, to descend further into the valley.
+2.  **Staying Close to the Current Point:** We don't want to make wild, uncontrolled jumps, especially in these unpredictable landscapes. We want to take cautious, well-behaved steps.
 
-[Visual representation of Projected Gradient Descent - GD step followed by projection back to feasible set]
-
-Let's formalize this. Suppose we want to minimize a smooth function $$f(x)$$ subject to the constraint that $$x$$ must belong to a closed convex set $$C \subseteq \mathbb{R}^n$$.  The **Projected Gradient Descent (PGD)** algorithm is:
-
-1.  **Gradient Descent Step:**
-    $$v_k = x_k - \eta \nabla f(x_k)$$
-2.  **Projection Step:**
-    $$x_{k+1} = \operatorname{proj}_C(v_k)$$
-
-Where $$\operatorname{proj}_C(v_k)$$ denotes the **Euclidean projection** of the point $$v_k$$ onto the set $$C$$.
-
-**Euclidean Projection: Finding the Closest Valid Point**
-
-The **Euclidean projection** of a point $$v$$ onto a closed convex set $$C$$ is the point in $$C$$ that is closest to $$v$$ in terms of Euclidean distance. Mathematically:
+Let's revisit the **backward Euler discretization** of gradient flow, even for non-smooth functions.  For a smooth function, we saw it led to:
 
 $$
-\operatorname{proj}_C(v) = \arg\min_{y \in C} \|y - v\|_2
+x_{k+1} = \arg\min_{y} \left\{ L(y) + \frac{1}{2\eta}\|y - x_k\|_2^2 \right\}.
 $$
 
-For some simple convex sets, the Euclidean projection is easy to compute analytically. For more complex sets, it might require solving a smaller optimization problem.
+Remarkably, this formulation remains meaningful and useful even when the loss function $$L(y)$$ is non-smooth!  The added quadratic term, $$\frac{1}{2\eta}\|y - x_k\|_2^2$$, acts as a **regularizer**, smoothing things out and ensuring our update is well-defined and stable, even when gradients are not.
 
-**Examples of Euclidean Projections onto Common Convex Sets:**
+### The Proximal Operator: A Robust Compass
 
-*   **Projection onto a Box Constraint:**  Suppose $$C = \{x \in \mathbb{R}^n \mid l_i \leq x_i \leq u_i \text{ for all } i=1, \dots, n \}$$, where $$l_i$$ and $$u_i$$ are lower and upper bounds for each component $$x_i$$.  The projection onto this box is simply **component-wise clipping**:
+This leads us to the concept of the **proximal operator**.  For any function $$g(x)$$ (smooth or non-smooth) and a parameter $$\eta > 0$$, the **proximal operator** is defined as:
 
+$$
+\operatorname{prox}_{\eta, g}(v) = \arg\min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}.
+$$
+
+Think of it as a **robust compass**. Given a current point $$v$$, the proximal operator points us to a new point $$y = \operatorname{prox}_{\eta, g}(v)$$ that is a good compromise: it tries to make $$g(y)$$ as small as possible, while also staying reasonably close to our starting point $$v$$.  The parameter $$\eta$$ controls this balance: a smaller $$\eta$$ emphasizes proximity, a larger $$\eta$$ emphasizes minimizing $$g(y)$$.
+
+For this to work well, we typically assume that the function $$g$$ has some nice properties: it should be **proper**, **lower semicontinuous**, and **convex**.  Under these conditions, we are guaranteed that the proximal operator is **well-defined** and **unique** – for any starting point $$v$$, there is always a single, best "proximal" point.
+
+### Proximal Gradient Descent: For Composite Landscapes
+
+Now, consider a loss landscape that is a combination of both smooth and non-smooth parts:
+
+$$
+L(x) = f(x) + g(x),
+$$
+
+where $$f(x)$$ is a smooth, differentiable function (the "smooth hills" part) and $$g(x)$$ is a non-smooth function (the "jagged edges" part).  We can combine our familiar gradient descent for the smooth part with a proximal step for the non-smooth part to create **Proximal Gradient Descent**.
+
+The Proximal Gradient Descent algorithm works in two steps:
+
+1.  **Gradient Step (Smooth Descent):**  First, we take a standard gradient descent step using the gradient of the smooth part $$f(x)$$:
     $$
-    [\operatorname{proj}_C(v)]_i = \begin{cases}
-        l_i & \text{if } v_i < l_i \\
-        v_i & \text{if } l_i \leq v_i \leq u_i \\
-        u_i & \text{if } v_i > u_i
-    \end{cases}
+    v = x_k - \eta\, \nabla f(x_k)
     $$
+    This step moves us downhill in the smooth part of the landscape.
 
-*   **Projection onto the Non-negative Orthant:**  Suppose $$C = \{x \in \mathbb{R}^n \mid x_i \geq 0 \text{ for all } i=1, \dots, n \}$$.  The projection onto the non-negative orthant is also component-wise: **clip negative values to zero**:
-
+2.  **Proximal Step (Non-Smooth Correction):** Then, we apply the proximal operator of the non-smooth part $$g(x)$$ to the point $$v$$ we just obtained:
     $$
-    [\operatorname{proj}_C(v)]_i = \max(0, v_i) = \begin{cases}
-        v_i & \text{if } v_i \geq 0 \\
-        0 & \text{if } v_i < 0
-    \end{cases}
+    x_{k+1} = \operatorname{prox}_{\eta, g}(v)
     $$
+    This proximal step "corrects" our gradient step, pulling us towards points that minimize the non-smooth part $$g(x)$$ while keeping us reasonably close to where the gradient step took us.
 
-*   **Projection onto the Probability Simplex (More Complex Example):** Suppose $$C = \{x \in \mathbb{R}^n \mid x_i \geq 0, \sum_{i=1}^n x_i = 1 \}$$.  Projection onto the probability simplex is slightly more involved, but there are efficient algorithms to compute it.  It ensures that the projected vector is non-negative and sums to 1, making it a valid probability distribution.
+By alternating these two steps, Proximal Gradient Descent allows us to effectively navigate composite loss landscapes, leveraging the smoothness where it exists and robustly handling the non-smooth parts.
 
-**Connection to Proximal Gradient Descent (Revisited):**
+### The Moreau Envelope: Smoothing the Rough Edges (Mathematically)
 
-Remember Proximal Gradient Descent from the previous chapter?  We saw that for a composite loss function $$L(x) = f(x) + g(x)$$, we could use the update:
+There's a beautiful mathematical way to understand why Proximal Gradient Descent works so well.  It turns out we can view it as standard gradient descent, but on a *smoothed* version of our non-smooth function! This smoothed version is called the **Moreau envelope**.
 
-1.  Gradient Step: $$v = x_k - \eta \nabla f(x_k)$$
-2.  Proximal Step: $$x_{k+1} = \operatorname{prox}_{\eta, g}(v)$$
+The **Moreau envelope** of a function $$g(x)$$ is defined as:
 
-Now, consider setting the non-smooth function $$g(x)$$ to be the **indicator function** of the constraint set $$C$$, i.e., $$g(x) = \delta_C(x) = 0$$ if $$x \in C$$ and $$+\infty$$ if $$x \notin C$$.  Then, the Proximal Gradient Descent update becomes:
+$$
+M_{\eta, g}(v) = \min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}.
+$$
 
-1.  Gradient Step: $$v = x_k - \eta \nabla f(x_k)$$
-2.  Proximal Step: $$x_{k+1} = \operatorname{prox}_{\eta, \delta_C}(v) = \arg\min_{y} \left\{ \delta_C(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}$$
+Notice that the Moreau envelope is defined using the very same minimization problem as the proximal operator!  The proximal operator gives us the *minimizer* $$y = \operatorname{prox}_{\eta, g}(v)$$, while the Moreau envelope gives us the *minimum value* of this minimization problem, $$M_{\eta, g}(v)$$.
 
-But we know from the previous chapter (Exercise 2) that the proximal operator of the indicator function $$\delta_C(x)$$ is precisely the **Euclidean projection onto the set $$C$$**:  $$\operatorname{prox}_{\eta, \delta_C}(v) = \operatorname{proj}_C(v)$$.
+The truly remarkable property of the Moreau envelope is that, even if the original function $$g(x)$$ is non-differentiable, its Moreau envelope $$M_{\eta, g}(v)$$ is **always differentiable** (if $$g$$ is closed proper and convex).  It's a smooth approximation of the potentially rough function $$g(x)$$.
 
-Therefore, **Projected Gradient Descent is a special case of Proximal Gradient Descent**, where the non-smooth part of the loss function is the indicator function of the constraint set.  This provides a deeper connection between these two seemingly different approaches.
+And even more surprisingly, the **gradient of the Moreau envelope** is directly related to the proximal operator itself:
 
-**Advantages and Considerations of Projected Gradient Descent:**
+$$
+\nabla M_{\eta, g}(v) = \frac{1}{\eta}\left( v - \operatorname{prox}_{\eta, g}(v) \right).
+$$
 
-*   **Simplicity and Intuition:** PGD is conceptually simple and easy to implement, especially when the projection onto the constraint set is computationally efficient.
-*   **Handles Constraints in Euclidean Space:** It provides a straightforward way to incorporate constraints into gradient-based optimization in Euclidean space.
-*   **Convergence Guarantees (for Convex Problems):** For convex objective functions and convex constraint sets, PGD often enjoys convergence guarantees under suitable step size conditions.
-*   **Still in Euclidean Space:**  PGD is fundamentally a Euclidean space method.  It relies on Euclidean projection and Euclidean gradients.  For problems where the natural geometry is non-Euclidean, or where constraints are more naturally expressed in non-Euclidean spaces, PGD might not be the most efficient or elegant approach.
+This equation reveals a deep insight: when we perform a proximal gradient step, we are, in essence, taking a standard gradient descent step, but not on the original non-smooth function $$g(x)$$, but on its smooth Moreau envelope $$M_{\eta, g}(x)$$.  Proximal Gradient Descent is effectively **Gradient Descent on the Moreau Envelope**.
 
-In the next chapter, we will take a significant step beyond Euclidean space. We will explore **Mirror Descent**, a powerful generalization of Projected Gradient Descent that allows us to perform constrained optimization in non-Euclidean geometries, using more general "projections" based on **Bregman divergences**.  This will open up a new world of optimization techniques tailored to the intrinsic geometry of the problem at hand.
+[Consider adding a diagram here that visually compares a non-smooth function (e.g., absolute value function or ReLU) with its Moreau envelope, showing how the envelope "smooths out" the sharp corners.]
+
+### Practical Considerations and Convergence
+
+The parameter $$\eta$$ in proximal methods plays a dual role. It not only scales the quadratic proximity term, but also controls the degree of smoothing in the Moreau envelope.  A **smaller $$\eta$$** makes the Moreau envelope a *closer* approximation to the original non-smooth function, but potentially less smooth. A **larger $$\eta$$** yields a *smoother* Moreau envelope, but potentially a less accurate approximation of the original function. This trade-off can influence the convergence speed and accuracy of Proximal Gradient Descent.
+
+Choosing the right learning rate (which is related to $$\eta$$) and other hyperparameters in Proximal Gradient Descent often involves empirical tuning, considering the curvature of the smooth part of the loss landscape and the degree of non-smoothness in the non-smooth component.
+
+Proximal methods, particularly Proximal Gradient Descent, have become indispensable tools in machine learning, especially for problems involving sparsity (via L1 regularization), constraints, and non-smooth activations like ReLU. They provide a robust and principled way to navigate loss landscapes that go beyond the smooth, differentiable ideal.
+
+### Bonus: Proximal Mapping and Subdifferentials
+
+For convex functions, the proximal operator’s optimality condition can be expressed in terms of the subdifferential. For example, for
+
+$$
+x^\star = \operatorname{prox}_{\eta, g}(v),
+$$
+
+the first-order optimality condition is
+
+$$
+0 \in \partial g(x^\star) + \frac{1}{\eta}(x^\star - v),
+$$
+
+which can be rearranged to show
+
+$$
+\frac{1}{\eta}(v - x^\star) \in \partial g(x^\star).
+$$
+
+This establishes a connection between the proximal step and generalized gradients for non-smooth functions.
+
+---
+
+### **Exercises**
+
+> **Exercise 1: Proximal Operator of the L1 Norm (Soft Thresholding)**
+>
+> Let
+> $$
+> g(x) = \|x\|_1 = \sum_{i=1}^n |x_i|.
+> $$
+> Show that the proximal operator of $$g$$ is the soft thresholding operator:
+> $$
+> [\operatorname{prox}_{\eta, \|\cdot\|_1}(v)]_i = S_{\eta}(v_i) =
+> \begin{cases}
+> v_i - \eta, & \text{if } v_i > \eta, \\
+> v_i + \eta, & \text{if } v_i < -\eta, \\
+> 0, & \text{if } |v_i| \leq \eta.
+> \end{cases}
+> $$
+> *Hint:* Solve the minimization problem component-wise.
+
+> **Exercise 2: Proximal Operator of the Indicator Function (Projection)**
+>
+> Let $$C$$ be a closed convex set and let the indicator function be
+> $$
+> \delta_C(x) =
+> \begin{cases}
+> 0, & \text{if } x\in C, \\
+> +\infty, & \text{otherwise}.
+> \end{cases}
+> $$
+> Show that
+> $$
+> \operatorname{prox}_{\eta, \delta_C}(v) = \operatorname{proj}_C(v) = \arg\min_{y\in C}\|y-v\|_2.
+> $$
+> *Hint:* Consider the minimization problem with the constraint $$y \in C$$.
+
+> **Exercise 3: Existence, Uniqueness, and Non-Expansiveness of the Proximal Operator**
+>
+> **(a)** Prove that for any proper, lower semicontinuous, convex function $$g: \mathbb{R}^n\to \mathbb{R}\cup\{+\infty\}$$ and any $$v\in\mathbb{R}^n$$, the mapping
+> $$
+> \operatorname{prox}_{\eta, g}(v)
+> $$
+> is well-defined and unique.
+>
+> **(b)** Show that for all $$v,w\in\mathbb{R}^n$$,
+> $$
+> \|\operatorname{prox}_{\eta, g}(v)-\operatorname{prox}_{\eta, g}(w)\|_2 \le \|v-w\|_2.
+> $$
+> *Hint:* Use the optimality conditions and the monotonicity of the subdifferential.
+
+> **Exercise 4: Differentiability and Lipschitz Continuity of the Moreau Envelope**
+>
+> **(a)** Prove that the Moreau envelope
+> $$
+> M_{\eta, g}(v) = \min_{y\in\mathbb{R}^n}\left\{g(y) + \frac{1}{2\eta}\|y-v\|_2^2\right\}
+> $$
+> is differentiable with respect to $$v$$.
+>
+> **(b)** Show that
+> $$
+> \nabla M_{\eta, g}(v) = \frac{1}{\eta}\left(v-\operatorname{prox}_{\eta, g}(v)\right),
+> $$
+> and that this gradient is Lipschitz continuous with constant $$\frac{1}{\eta}$$.
+> *Hint:* Leverage the non-expansiveness of the proximal operator.
+
+> **Exercise 5: Moreau Envelope of the Absolute Value Function (Huber Loss)**
+>
+> **(a)** Let $$g(x)=|x|.$$ Derive the Moreau envelope
+> $$
+> M_{\eta, g}(v) = \min_{y\in\mathbb{R}}\left\{|y|+\frac{1}{2\eta}(v-y)^2\right\},
+> $$
+> and show that it yields the Huber loss.
+>
+> **(b)** Identify the regions in $$v$$ where the envelope behaves quadratically versus linearly.
+> *Hint:* Analyze the optimality conditions for different ranges of $$v$$.
+
+> **Exercise 6: Moreau Envelope via Infimal Convolution**
+>
+> **(a)** Verify that
+> $$
+> M_{\eta, g}(v) = g \square \left(\frac{1}{2\eta}\|\cdot\|_2^2\right)(v),
+> $$
+> where
+> $$
+> (f \square h)(v)=\inf_{y\in\mathbb{R}^n}\{f(y)+h(v-y)\}.
+> $$
+>
+> **(b)** Discuss the significance of this formulation in terms of regularization and duality.
+> *Hint:* Reflect on the properties of infimal convolution in convex analysis.
+
+---
+
+### Further Reading
+
+For deeper insights into proximal methods and the Moreau envelope, consider exploring:
+- [Parikh and Boyd (2013) – Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf) (Section 3.2)
+- [Rockafellar and Wets (2009) – Variational Analysis](https://sites.math.washington.edu/~rtr/papers/rtr169-VarAnalysis-RockWets.pdf)
+- [Candes (2015) – Advanced Topics in Convex Optimization](https://candes.su.domains/teaching/math301/Lectures/Moreau-Yosida.pdf)
+- [Bauschke and Lucet (2011)](https://cmps-people.ok.ubc.ca/bauschke/Research/68.pdf)
