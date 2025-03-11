@@ -81,28 +81,25 @@ This shows that the effective computation is confined to $$d_k$$ dimensions.
 
 ## Computational Complexity
 
-1. **Projection:**  
-   $$Q = XW_Q,\ K = XW_K,\ V = XW_V$$ requires
-
-   $$
-   O(ndd_k).
-   $$
-
-2. **Standard Attention:**  
-   Directly computing $$QK^T$$ incurs a cost of
+1. **Standard Attention:**  
+   Computing $$Q = XW_Q,\ K = XW_K,\ V = XW_V$$ requires $$O(ndd_k)$$.
    
+   Directly computing $$QK^T$$ incurs a cost of $$O(n^2d_k)$$.
+
+   Thus, the total cost is:
+
    $$
-   O(n^2d_k).
+   O(ndd_k + n^2d_k).
    $$
 
-3. **Reparameterized Attention:**  
-   - **Eigen-decomposition:** Decomposing $$S_w \in \mathbb{R}^{d \times d}$$ costs approximately $$ O(dd_k^2) $$, given $$d_k \ll d$$. This step only needs to be done once if you store the decomposition.
+2. **Reparameterized Attention:**  
+   - **Eigen-decomposition:** Decomposing $$S_w \in \mathbb{R}^{d \times d}$$ costs approximately $$ O(dd_k^2) $$, given $$d_k \ll d$$. However, this cost is amortized over all inputs since the decomposition is computed once and then reused.
    - **Evaluation:** The reparameterized computation involves operations that cost $$O(nd_k).$$
 
 Thus, the overall evaluation complexity is
 
 $$
-O(ndd_k + nd_k),
+O(nd_k),
 $$
 
 which is linear in $$n$$ when $$d$$ and $$d_k$$ are relatively small.
@@ -124,7 +121,7 @@ While the symmetric reparameterization is mathematically exact (given that the s
 By reparameterizing the query-key interaction through the decomposition of $$W_QW_K^T$$, we reduce the effective computational burden from a quadratic dependency on $$n$$ to a linear one. The approach leverages the low-rank structure of $$W_QW_K^T$$ (with rank at most $$d_k$$) and relies on a modest eigen-decomposition, which is computed once and then stored for all subsequent computations. This one-time cost of $$O(dd_k^2)$$ is amortized over many inputs, resulting in a per-input complexity of
 
 $$
-O(ndd_k + nd_k),
+O(nd_k),
 $$
 
 which is linear in $$n$$ when $$d$$ and $$d_k$$ are relatively small. In comparison, the original complexity is $$O(n^2 d_k)$$. Additionally, the orthogonality of $$U$$ simplifies the mathematical formulation, enhances numerical stability, and improves interpretability—making this parameterization a powerful tool for efficient Transformer attention mechanisms.
