@@ -3,7 +3,7 @@ layout: post
 title: "A Story of Optimization in ML: Chapter 7 - Reflections in a Distorted Mirror: Stepping Beyond Euclidean Space"
 description: "Chapter 7 introduces Mirror Descent, extending optimization beyond Euclidean spaces by using Bregman divergences to navigate in geometries that are not flat."
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
-tags: ["mirror descent", "non-Euclidean optimization", "Bregman divergence", "Bregman projection", "optimizer", "projected gradient descent"]
+tags: ["mirror descent", "non-Euclidean optimization", "Bregman divergence", "Bregman projection", "optimizer"]
 image:
   path: /assets/2025-03-06-optimization-in-machine-learning/mirror_descent_chapter7.gif # Placeholder image path
   alt: "Visual metaphor for mirror descent - a distorted reflection guiding the path" # Placeholder alt text
@@ -51,13 +51,66 @@ Let’s formalize the Mirror Descent algorithm.  Given a loss function $$f(x)$$,
 
 2.  **Update in Mirror Space:**  Take a gradient descent step *in the mirror space*.  This is done implicitly through the following Bregman projection step. We want to find the next iterate $$x_{k+1}$$ such that its mirror image, $$\nabla \phi(x_{k+1})$$, is close to the mirror image of the previous point, $$\nabla \phi(x_k)$$, *minus* the gradient in the original space, $$\eta \nabla f(x_k)$$.  More formally, we find $$x_{k+1}$$ by solving the following Bregman projection problem:
 
-    $$
-    x_{k+1} = \arg\min_{x} \left\{ \eta \langle \nabla f(x_k), x \rangle + D_\phi(x \| x_k) \right\}
-    $$
+$$
+x_{k+1} = \arg\min_{x} \left\{ \eta \langle \nabla f(x_k), x \rangle + D_\phi(x \| x_k) \right\}
+$$
 
-    This minimization problem effectively combines the gradient descent step with the Bregman projection back to the original space in a single, elegant update.
+This minimization problem effectively combines the gradient descent step with the Bregman projection back to the original space in a single, elegant update.
 
-    In many cases, this Bregman projection step has a closed-form solution, making Mirror Descent computationally efficient.
+In many cases, this Bregman projection step has a closed-form solution, making Mirror Descent computationally efficient.
+
+### How Mirror Descent Unifies and Generalizes
+
+The beauty of Mirror Descent lies in its generality. It's not just a single algorithm, but a framework. By carefully choosing the potential function $$\phi(x)$$, we can recover familiar algorithms and also unlock new approaches tailored to specific geometries. Let's see how Mirror Descent elegantly encompasses both Projected Gradient Descent and Proximal Gradient Descent as special cases.
+
+#### Recovering Projected Gradient Descent
+
+What happens if we choose the simplest possible potential function: the squared Euclidean norm? Let $$\phi(x) = \frac{1}{2}\|x\|_2^2$$.
+
+With this choice:
+
+*   The gradient of the potential is simply $$\nabla \phi(x) = x$$.
+*   The Bregman divergence becomes the squared Euclidean distance:
+
+$$
+D_\phi(x\|y) = \phi(x) - \phi(y) - \langle \nabla \phi(y), x-y \rangle = \frac{1}{2}\|x\|^2 - \frac{1}{2}\|y\|^2 - \langle y, x-y \rangle = \frac{1}{2}\|x-y\|^2.
+$$
+
+Now, let's plug this into the Mirror Descent update formula, assuming we are constrained to a convex set $$C$$:
+
+$$
+x_{k+1} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + D_\phi(x\|x_k) \right\} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + \frac{1}{2}\|x-x_k\|^2 \right\}.
+$$
+
+This minimization problem is precisely the update step in **Projected Gradient Descent!**  Minimizing $$\frac{1}{2}\|x-x_k\|^2 + \eta \langle \nabla f(x_k), x \rangle$$ is equivalent to projecting the point $$x_k - \eta \nabla f(x_k)$$ onto the feasible set $$C$$ using Euclidean projection.
+
+Thus, with the squared Euclidean norm as our potential, Mirror Descent *becomes* Projected Gradient Descent. It's a special case, tailored to Euclidean geometry.
+
+#### Recovering Proximal Gradient Descent (and Beyond)
+
+Now, let's consider how Mirror Descent relates to Proximal Gradient Descent. Recall that Proximal Gradient Descent is designed for composite optimization problems of the form: $$\min_x f(x) + g(x)$$, where $$f(x)$$ is smooth and $$g(x)$$ is a (possibly non-smooth) convex function.  The Proximal Gradient Descent update is:
+
+$$
+x_{k+1} = \arg\min_{x} \left\{ \langle \nabla f(x_k), x-x_k \rangle + \frac{1}{2\eta}\|x-x_k\|^2 + g(x) \right\}.
+$$
+
+We can extend the Mirror Descent framework to handle such composite objectives by simply adding the non-smooth term $$g(x)$$ into the minimization problem:
+
+$$
+x_{k+1} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + \eta g(x) + D_\phi(x\|x_k) \right\}.
+$$
+
+Again, if we choose the Euclidean potential $$\phi(x) = \frac{1}{2}\|x\|_2^2$$ (and assume for simplicity that $$C = \mathbb{R}^n$$ or that the constraint is already handled by $$g(x)$$), the Mirror Descent update becomes:
+
+$$
+x_{k+1} = \arg\min_{x} \left\{ \eta \langle \nabla f(x_k), x \rangle + \eta g(x) + \frac{1}{2}\|x-x_k\|^2 \right\}.
+$$
+
+Rearranging and scaling this expression, we see it is equivalent to the Proximal Gradient Descent update.
+
+So, not only does Mirror Descent generalize Projected Gradient Descent, but it also provides a broader framework that encompasses Proximal Gradient Descent.  And crucially, by changing our choice of potential function $$\phi(x)$$, we can move beyond these Euclidean-based methods and explore optimization algorithms adapted to non-Euclidean geometries.
+
+This versatility is what makes Mirror Descent such a powerful and fundamental concept in optimization. It’s a lens through which we can understand and generalize many existing algorithms, and a springboard for developing new ones tailored to the specific geometric structures of modern machine learning problems.
 
 ### Why Does This "Mirror" Trick Work?
 
