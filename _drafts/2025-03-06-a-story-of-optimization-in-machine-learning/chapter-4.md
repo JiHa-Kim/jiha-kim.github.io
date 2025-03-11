@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "A Story of Optimization in ML: Chapter 4 - Navigating Non-Smooth Terrain"
-description: "Chapter 4 explores optimization in non-smooth loss landscapes, introducing proximal methods and the Moreau envelope as tools to navigate functions without gradients everywhere."
+description: "Chapter 4 explores optimization in non-smooth loss landscapes, introducing proximal methods and the Moreau envelope as tools to handle functions that lack gradients everywhere."
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
 tags: ["proximal methods", "non-smooth optimization", "Moreau envelope", "proximal gradient descent", "optimizer"]
 image:
@@ -11,316 +11,229 @@ date: 2025-03-06 02:45 +0000
 math: true
 ---
 
-## Chapter 4: Navigating Non-Smooth Terrain - Beyond the Gradient
+## Chapter 4: Navigating Non-Smooth Terrain – Beyond the Gradient
 
-In our journey so far, we've relied heavily on the concept of the **gradient**. Gradient Descent, Momentum, and Adaptive methods all fundamentally depend on the gradient to guide our descent.  We’ve implicitly assumed that our loss landscapes are **smooth**, with well-defined gradients everywhere, like gently rolling hills.
+In our optimization journey, we've become comfortable with smooth loss landscapes, where the concept of a **gradient** guides our descent.  Gradient Descent and its variations thrive in these terrains, efficiently leading us towards the minimum.  But what happens when the landscape becomes… jagged?
 
-But what if the terrain becomes… jagged?  Imagine a loss landscape that's not smooth, but **non-smooth**.  Think of a landscape with sharp edges, sudden cliffs, and corners, rather than gentle curves.  In mathematical terms, this means our loss function is not differentiable everywhere.
+Imagine stepping onto a terrain that's no longer gently sloping hills, but a fractured landscape of sharp cliffs, abrupt edges, and sudden corners. This is the world of **non-smooth optimization**.  Non-smoothness isn't just a theoretical curiosity; it arises naturally in many practical machine learning scenarios.
 
-Why does this matter?  Why would we encounter non-smooth loss functions in machine learning?
+Think about these common elements in modern models:
 
-Consider these common scenarios:
+*   **ReLU Activation:**  The ReLU (Rectified Linear Unit) activation function, $$\operatorname{ReLU}(x) = \max(0, x)$$, is incredibly popular in neural networks. But at the point $$x=0$$, it has a sharp kink – it's not differentiable there.
+*   **L1 Regularization:**  To encourage simpler, sparser models, we often use L1 regularization, adding terms like 
+$$|x|$$ to our loss function.  The absolute value function $$|x|$$ also has a sharp, non-differentiable point at zero.
+*   **Constraints:**  Sometimes we impose explicit constraints on our model parameters – perhaps they must be non-negative, or lie within a specific range.  These constraints can also introduce non-smoothness into the optimization problem.
 
-*   **ReLU Activation Function:** The Rectified Linear Unit (ReLU), defined as $$ReLU(x) = \max(0, x)$$, is a cornerstone of modern neural networks.  It introduces a sharp "kink" at $$x=0$$. At this point, the derivative is not uniquely defined.
-*   **L1 Regularization:**  To encourage sparsity in our models, we often add an L1 regularization term to the loss function, like $$L_1(w) = \|w\|_1 = \sum_i |w_i|$$. The absolute value function $$|w_i|$$ is also non-differentiable at $$w_i = 0$$.
-*   **Constraints:**  Sometimes we want to constrain our parameters to lie within a specific set, for example, enforcing non-negativity or limiting the parameter norm.  Constraints often lead to non-smooth optimization problems.
+In these non-smooth landscapes, the gradient, our trusty guide, becomes unreliable.  At those sharp edges and corners, the gradient simply isn't well-defined in the usual sense.  Standard gradient-based methods might falter, struggling to find a consistent direction of descent.
 
-When we encounter non-smooth functions, the gradient, as we traditionally understand it, ceases to exist at certain points, like those sharp corners or edges.  Standard gradient-based methods, which rely on the gradient to determine the descent direction, can struggle or even fail to converge reliably in these non-smooth landscapes.
+So, how do we proceed when gradients fail us?  How do we navigate this non-smooth terrain?
 
-So, how do we navigate non-smooth terrain?  How do we optimize functions when gradients are not always available?
+We need to move **beyond the gradient** as our sole guide.  We need a more robust compass, one that can point us towards the minimum even in the absence of smooth gradients.  This is where **proximal methods** come to our rescue.
 
-We need to move **beyond the gradient** in its strict, differentiable sense. We need tools that can handle these "kinks" and discontinuities.  This is where **proximal methods** come into play.
+### Moving Beyond the Gradient: The Proximal Idea
 
-Let's revisit an idea we touched upon briefly in Chapter 1: the **Backward Euler discretization** of gradient flow. Recall the forward Euler discretization led us to standard Gradient Descent.  But what if we discretize the gradient flow differently, using the *backward* Euler method?
+The core idea of proximal methods is to replace the direct gradient step with a more robust update. Instead of blindly following the gradient, we formulate each step as a **mini-optimization problem**.  This mini-problem balances two things:
 
-The backward Euler discretization of $$\frac{dx(t)}{dt} = -\nabla L(x(t))$$ is:
+1.  **Reducing the Loss:** We still want to move towards lower loss, to descend further into the valley.
+2.  **Staying Close to the Current Point:** We don't want to make wild, uncontrolled jumps, especially in these unpredictable landscapes. We want to take cautious, well-behaved steps.
 
-$$\frac{x_{k+1} - x_k}{\eta} = -\nabla L(x_{k+1})$$
-
-This leads to the **implicit update rule**:
-
-$$x_{k+1} = x_k - \eta \nabla L(x_{k+1})$$
-
-This equation defines $$x_{k+1}$$ in terms of its *own gradient*, $$\nabla L(x_{k+1})$$.  It seems circular and difficult to solve directly.  However, we can rewrite it in a different, insightful form. Rearranging the terms, we get:
-
-$$x_{k+1} = \arg\min_{y} \left\{ L(y) + \frac{1}{2\eta}\|y - x_k\|_2^2 \right\}$$
-
-This seemingly implicit update is actually an **explicit minimization problem**!  We are choosing the next point $$x_{k+1}$$ by minimizing a combination of two terms:
-
-1.  **The loss function itself, $$L(y)$$**: We still want to move towards lower loss.
-2.  **A proximity term, $$\frac{1}{2\eta}\|y - x_k\|_2^2$$**:  We want to stay "close" to our current position $$x_k$$. This term penalizes large jumps and encourages stability.
-
-This minimization formulation is the heart of **proximal methods**.  It introduces the concept of the **proximal operator**.
-
-**The Proximal Operator: Your Compass in Non-Smooth Terrain**
-
-For a (possibly non-smooth) function $$g(x)$$ and a parameter $$\eta > 0$$, the **proximal operator** of $$g$$, denoted as $$\operatorname{prox}_{\eta, g}(v)$$, is defined as:
+Let's revisit the **backward Euler discretization** of gradient flow, even for non-smooth functions.  For a smooth function, we saw it led to:
 
 $$
-\operatorname{prox}_{\eta, g}(v) = \arg\min_{y} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}
+x_{k+1} = \arg\min_{y} \left\{ L(y) + \frac{1}{2\eta}\|y - x_k\|_2^2 \right\}.
 $$
 
-Given a point $$v$$, the proximal operator finds a new point $$y = \operatorname{prox}_{\eta, g}(v)$$ that balances two competing goals:
+Remarkably, this formulation remains meaningful and useful even when the loss function $$L(y)$$ is non-smooth!  The added quadratic term, $$\frac{1}{2\eta}\|y - x_k\|_2^2$$, acts as a **regularizer**, smoothing things out and ensuring our update is well-defined and stable, even when gradients are not.
 
-*   **Minimize $$g(y)$$**:  We want to decrease the value of the function $$g$$.
-*   **Stay close to $$v$$**: We don't want to move too far from our current point $$v$$. The quadratic term $$\frac{1}{2\eta}\|y - v\|_2^2$$ enforces this proximity. The parameter $$\eta$$ controls the strength of this proximity constraint.
+### The Proximal Operator: A Robust Compass
 
-The proximal operator acts like a **compass** in non-smooth terrain.  Even if the gradient of $$g$$ is undefined, the proximal operator still provides a well-defined "step" towards minimizing $$g$$, while ensuring we don't make wild, uncontrolled jumps.
-
-Consider a composite loss function of the form $$L(x) = f(x) + g(x)$$, where $$f(x)$$ is a smooth, differentiable function, and $$g(x)$$ is a non-smooth function (e.g., the L1 regularization term).  We can combine gradient descent for the smooth part $$f(x)$$ with the proximal operator for the non-smooth part $$g(x)$$ to create **Proximal Gradient Descent**.
-
-**Proximal Gradient Descent: Combining Smooth and Non-Smooth Descent**
-
-The Proximal Gradient Descent algorithm for minimizing $$L(x) = f(x) + g(x)$$ proceeds as follows:
-
-1.  **Gradient Step (Smooth Part):** Take a standard gradient descent step using the gradient of the smooth part $$f(x)$$:
-    $$v = x_k - \eta \, \nabla f(x_k)$$
-2.  **Proximal Step (Non-Smooth Part):** Apply the proximal operator of the non-smooth part $$g(x)$$ to the intermediate point $$v$$:
-    $$x_{k+1} = \operatorname{prox}_{\eta, g}(v) = \arg\min_{y} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}$$
-
-This two-step approach effectively handles both smooth and non-smooth components of the loss function.  The gradient step descends along the smooth part, and the proximal step "corrects" this step by accounting for the non-smoothness of $$g(x)$$.
-
-Interestingly, Proximal Gradient Descent can be viewed as **Gradient Descent on the Moreau Envelope** of the non-smooth function $$g(x)$$.
-
-**The Moreau Envelope: Smoothing the Rough Edges**
-
-The **Moreau envelope** of a non-smooth function $$g(x)$$ is defined as:
+This leads us to the concept of the **proximal operator**.  For any function $$g(x)$$ (smooth or non-smooth) and a parameter $$\eta > 0$$, the **proximal operator** is defined as:
 
 $$
-M_{\eta, g}(v) = \min_{y} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}
+\operatorname{prox}_{\eta, g}(v) = \arg\min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}.
 $$
 
-Notice that the Moreau envelope is *exactly* the minimization problem we solve in the proximal operator!  In fact, the proximal operator gives us the *minimizer* of this problem:  $$\operatorname{prox}_{\eta, g}(v) = \arg\min_{y} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}$$, and the Moreau envelope gives us the *minimum value*: $$M_{\eta, g}(v) = \min_{y} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\} = g(\operatorname{prox}_{\eta, g}(v)) + \frac{1}{2\eta}\|\operatorname{prox}_{\eta, g}(v) - v\|_2^2 $$.
+Think of it as a **robust compass**. Given a current point $$v$$, the proximal operator points us to a new point $$y = \operatorname{prox}_{\eta, g}(v)$$ that is a good compromise: it tries to make $$g(y)$$ as small as possible, while also staying reasonably close to our starting point $$v$$.  The parameter $$\eta$$ controls this balance: a smaller $$\eta$$ emphasizes proximity, a larger $$\eta$$ emphasizes minimizing $$g(y)$$.
 
-A remarkable property of the Moreau envelope is that it is **always differentiable**, even if the original function $$g(x)$$ is not!  It provides a **smooth approximation** of the non-smooth function.  And it turns out that the gradient of the Moreau envelope is directly related to the proximal operator:
+For this to work well, we typically assume that the function $$g$$ has some nice properties: it should be **proper**, **lower semicontinuous**, and **convex**.  Under these conditions, we are guaranteed that the proximal operator is **well-defined** and **unique** – for any starting point $$v$$, there is always a single, best "proximal" point.
+
+### Proximal Gradient Descent: For Composite Landscapes
+
+Now, consider a loss landscape that is a combination of both smooth and non-smooth parts:
 
 $$
-\nabla M_{\eta, g}(v) = \frac{1}{\eta} \left( v - \operatorname{prox}_{\eta, g}(v) \right)
+L(x) = f(x) + g(x),
 $$
 
-Therefore, when we perform Proximal Gradient Descent, we are essentially performing standard Gradient Descent on a *smoothed* version of our loss function – the Moreau envelope of the non-smooth part.  The proximal step is implicitly computing a gradient step in this smoothed space.
+where $$f(x)$$ is a smooth, differentiable function (the "smooth hills" part) and $$g(x)$$ is a non-smooth function (the "jagged edges" part).  We can combine our familiar gradient descent for the smooth part with a proximal step for the non-smooth part to create **Proximal Gradient Descent**.
 
-While we won't delve deeply into the mathematical details of non-smooth analysis here, it's worth noting that the concept of the **subdifferential** generalizes the idea of the gradient to non-smooth functions.  For a convex function (which is often the case in optimization), the subdifferential at a point is a *set* of vectors, rather than a single vector, representing all possible "generalized gradients" at that point.  There's a deep connection between proximal operators and subdifferentials, which provides a more rigorous foundation for proximal methods.
+The Proximal Gradient Descent algorithm works in two steps:
 
-> **Bonus Section (Optional): Proximal Mapping and Subdifferentials**
->
-> For a convex function $$g$$, a vector $$s$$ is in the subdifferential of $$g$$ at $$x$$, denoted $$s \in \partial g(x)$$, if for all $$y$$:
->
-> $$g(y) \geq g(x) + \langle s, y-x \rangle$$
->
-> The first-order optimality condition for the proximal mapping problem
-> $$
-> x^\star = \operatorname{prox}_{\eta, g}(v) = \arg\min_{y} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}
-> $$
-> can be expressed in terms of subdifferentials as:
->
-> $$
-> 0 \in \partial g(x^\star) + \frac{1}{\eta}(x^\star - v)
-> $$
->
-> This can be rewritten as:
->
-> $$
-> v - x^\star \in \eta \partial g(x^\star)  \quad \text{or} \quad  \frac{1}{\eta}(v - x^\star) \in \partial g(x^\star)
-> $$
->
-> This relationship shows that the proximal operator step $$x^\star = \operatorname{prox}_{\eta, g}(v)$$ moves from $$v$$ to a point $$x^\star$$ such that the "step" $$ \frac{1}{\eta}(v - x^\star) $$ is a subgradient of $$g$$ at $$x^\star$$.  This provides a deeper connection between proximal mappings and the generalized gradient concept of subdifferentials.
+1.  **Gradient Step (Smooth Descent):**  First, we take a standard gradient descent step using the gradient of the smooth part $$f(x)$$:
+    $$
+    v = x_k - \eta\, \nabla f(x_k)
+    $$
+    This step moves us downhill in the smooth part of the landscape.
+
+2.  **Proximal Step (Non-Smooth Correction):** Then, we apply the proximal operator of the non-smooth part $$g(x)$$ to the point $$v$$ we just obtained:
+    $$
+    x_{k+1} = \operatorname{prox}_{\eta, g}(v)
+    $$
+    This proximal step "corrects" our gradient step, pulling us towards points that minimize the non-smooth part $$g(x)$$ while keeping us reasonably close to where the gradient step took us.
+
+By alternating these two steps, Proximal Gradient Descent allows us to effectively navigate composite loss landscapes, leveraging the smoothness where it exists and robustly handling the non-smooth parts.
+
+### The Moreau Envelope: Smoothing the Rough Edges (Mathematically)
+
+There's a beautiful mathematical way to understand why Proximal Gradient Descent works so well.  It turns out we can view it as standard gradient descent, but on a *smoothed* version of our non-smooth function! This smoothed version is called the **Moreau envelope**.
+
+The **Moreau envelope** of a function $$g(x)$$ is defined as:
+
+$$
+M_{\eta, g}(v) = \min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}.
+$$
+
+Notice that the Moreau envelope is defined using the very same minimization problem as the proximal operator!  The proximal operator gives us the *minimizer* $$y = \operatorname{prox}_{\eta, g}(v)$$, while the Moreau envelope gives us the *minimum value* of this minimization problem, $$M_{\eta, g}(v)$$.
+
+The truly remarkable property of the Moreau envelope is that, even if the original function $$g(x)$$ is non-differentiable, its Moreau envelope $$M_{\eta, g}(v)$$ is **always differentiable** (if $$g$$ is closed proper and convex).  It's a smooth approximation of the potentially rough function $$g(x)$$.
+
+And even more surprisingly, the **gradient of the Moreau envelope** is directly related to the proximal operator itself:
+
+$$
+\nabla M_{\eta, g}(v) = \frac{1}{\eta}\left( v - \operatorname{prox}_{\eta, g}(v) \right).
+$$
+
+This equation reveals a deep insight: when we perform a proximal gradient step, we are, in essence, taking a standard gradient descent step, but not on the original non-smooth function $$g(x)$$, but on its smooth Moreau envelope $$M_{\eta, g}(x)$$.  Proximal Gradient Descent is effectively **Gradient Descent on the Moreau Envelope**.
+
+[Consider adding a diagram here that visually compares a non-smooth function (e.g., absolute value function or ReLU) with its Moreau envelope, showing how the envelope "smooths out" the sharp corners.]
+
+### Practical Considerations and Convergence
+
+The parameter $$\eta$$ in proximal methods plays a dual role. It not only scales the quadratic proximity term, but also controls the degree of smoothing in the Moreau envelope.  A **smaller $$\eta$$** makes the Moreau envelope a *closer* approximation to the original non-smooth function, but potentially less smooth. A **larger $$\eta$$** yields a *smoother* Moreau envelope, but potentially a less accurate approximation of the original function. This trade-off can influence the convergence speed and accuracy of Proximal Gradient Descent.
+
+Choosing the right learning rate (which is related to $$\eta$$) and other hyperparameters in Proximal Gradient Descent often involves empirical tuning, considering the curvature of the smooth part of the loss landscape and the degree of non-smoothness in the non-smooth component.
+
+Proximal methods, particularly Proximal Gradient Descent, have become indispensable tools in machine learning, especially for problems involving sparsity (via L1 regularization), constraints, and non-smooth activations like ReLU. They provide a robust and principled way to navigate loss landscapes that go beyond the smooth, differentiable ideal.
+
+### Bonus: Proximal Mapping and Subdifferentials
+
+For convex functions, the proximal operator’s optimality condition can be expressed in terms of the subdifferential. For example, for
+
+$$
+x^\star = \operatorname{prox}_{\eta, g}(v),
+$$
+
+the first-order optimality condition is
+
+$$
+0 \in \partial g(x^\star) + \frac{1}{\eta}(x^\star - v),
+$$
+
+which can be rearranged to show
+
+$$
+\frac{1}{\eta}(v - x^\star) \in \partial g(x^\star).
+$$
+
+This establishes a connection between the proximal step and generalized gradients for non-smooth functions.
+
+---
+
+### **Exercises**
 
 > **Exercise 1: Proximal Operator of the L1 Norm (Soft Thresholding)**
 >
 > Let
-> $$g(x) := \|x\|_1 = \sum_{i=1}^n |x_i|$$.
-> Show that the proximal operator of $$g$$ is given by the **soft thresholding operator**, $$S_{\tau}(v)$$, where $$\tau = \eta$$, and for each component $$i$$:
->
+> $$
+> g(x) = \|x\|_1 = \sum_{i=1}^n |x_i|.
+> $$
+> Show that the proximal operator of $$g$$ is the soft thresholding operator:
 > $$
 > [\operatorname{prox}_{\eta, \|\cdot\|_1}(v)]_i = S_{\eta}(v_i) =
 > \begin{cases}
-> v_i - \eta & \text{if } v_i > \eta \\
-> v_i + \eta & \text{if } v_i < -\eta \\
-> 0 & \text{if } |v_i| \leq \eta
+> v_i - \eta, & \text{if } v_i > \eta, \\
+> v_i + \eta, & \text{if } v_i < -\eta, \\
+> 0, & \text{if } |v_i| \leq \eta.
 > \end{cases}
 > $$
->
-> *Hint:* Solve the minimization problem
-> $$\arg\min_{y} \left\{ \|y\|_1 + \frac{1}{2\eta}\|y - v\|_2^2 \right\}$$ component-wise. Consider the cases $$v_i > \eta$$, $$v_i < -\eta$$, and $$|v_i| \leq \eta$$ separately, by analyzing the subgradient of $$|y_i|$$.
+> *Hint:* Solve the minimization problem component-wise.
 
 > **Exercise 2: Proximal Operator of the Indicator Function (Projection)**
 >
-> Let $$C$$ be a closed convex set, and let $$\delta_C(x)$$ be the indicator function of $$C$$, defined as $$ \delta_C(x) = 0 $$ if $$x \in C$$ and $$ \delta_C(x) = +\infty $$ if $$x \notin C$$. Show that the proximal operator of $$\delta_C$$ is the **Euclidean projection onto the set $$C$**:
->
-> $$
-> \operatorname{prox}_{\eta, \delta_C}(v) = \operatorname{proj}_C(v) = \arg\min_{y \in C} \|y - v\|_2
-> $$
->
-> *Hint:* Consider the minimization problem $$\arg\min_{y} \left\{ \delta_C(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}$$.  If $$y \in C$$, then $$\delta_C(y) = 0$$, and we are minimizing $$\frac{1}{2\eta}\|y - v\|_2^2$$ subject to $$y \in C$$. If $$y \notin C$$, then $$\delta_C(y) = +\infty$$, so such $$y$$ cannot be a minimizer.
-
-In summary, proximal methods provide us with a powerful toolkit for navigating non-smooth loss landscapes. By moving beyond gradients and embracing the concept of proximity, we can optimize a broader class of functions, including those with important non-smooth regularizers and constraints, expanding our ability to build more sophisticated and robust machine learning models. In the next chapter, we'll explore yet another perspective shift: moving beyond Euclidean space itself and considering optimization in non-Euclidean geometries.
-
-> **Definition. Proximal Mapping**  
-> Given a proper, lower semicontinuous, convex function $$ g: \mathbb{R}^n \to \mathbb{R}\cup\{+\infty\} $$ and a parameter $$ \eta > 0 $$, the proximal mapping of $$ g $$ is defined as  
-> $$
-> \operatorname{prox}_{\eta, g}(v) = \arg\min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}.
-> $$  
-> This operator finds a point $$ y $$ that balances minimizing $$ g $$ while remaining close to $$ v $$.
-
-> **Definition. Moreau Envelope**  
-> The Moreau envelope of a proper lower semi-continuous convex function $$ g $$ with parameter $$ \eta > 0 $$ is given by  
-> $$
-> M_{\eta, g}(v) = \min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}.
-> $$
-> It provides a smooth approximation of $$ g $$, and its gradient is closely related to the proximal mapping, making it a powerful tool in optimization.
-
-### **Exercises**
-
-> **Exercise 1: Existence, Uniqueness, and Non-Expansiveness of the Proximal Operator**
->
-> **(a)** Let $$ g : \mathbb{R}^n \to \mathbb{R}\cup\{+\infty\} $$ be a proper, lower semicontinuous, and convex function. Prove that for any $$ v\in\mathbb{R}^n $$ and any $$ \eta>0 $$, the proximal mapping
->
-> $$
-> \operatorname{prox}_{\eta, g}(v) = \arg\min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}
-> $$
->
-> is well-defined and unique.
->
-> **(b)** Show that the proximal operator is non-expansive; that is, for all $$ v,w\in\mathbb{R}^n $$, prove that
->
-> $$
-> \|\operatorname{prox}_{\eta, g}(v)-\operatorname{prox}_{\eta, g}(w)\|_2 \le \|v-w\|_2.
-> $$
->
->
-> *Hint:*
-> Use the first-order optimality conditions for the minimization problem and the monotonicity of the subdifferential of $$ g $$.
-
----
-
-> **Exercise 2: Differentiability and Lipschitz Continuity of the Moreau Envelope**
->
-> **(a)** Prove that the Moreau envelope
->
-> $$
-> M_{\eta, g}(v) = \min_{y\in\mathbb{R}^n} \left\{ g(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}
-> $$
->
-> of any proper lower semicontinuous convex function $$ g $$ is differentiable with respect to $$ v $$.
->
-> **(b)** Show that its gradient is given by
->
-> $$
-> \nabla M_{\eta, g}(v) = \frac{1}{\eta} \left( v - \operatorname{prox}_{\eta, g}(v) \right),
-> $$
->
-> and prove that this gradient is Lipschitz continuous with Lipschitz constant $$ L = \frac{1}{\eta} $$.
->
->
-> *Hint:*
-> Relate the first-order optimality condition for the minimization defining $$ M_{\eta, g}(v) $$ with the proximal mapping, and use the non-expansiveness property established in Exercise 1.
-
----
-
-> **Exercise 3: Smoothing Effect and Convergence of the Moreau Envelope**
->
-> **(a)** For a given convex function $$ g $$, demonstrate that the Moreau envelope $$ M_{\eta, g} $$ provides a smooth approximation of $$ g $$. Discuss in detail how the quadratic term
->
-> $$
-> \frac{1}{2\eta}\|y - v\|_2^2
-> $$
->
-> facilitates smoothing even when $$ g $$ is non-differentiable.
->
-> **(b)** Show that as $$ \eta \to 0 $$, the Moreau envelope converges pointwise to the original function $$ g $$; that is, prove
->
-> $$
-> \lim_{\eta\to 0} M_{\eta, g}(v) = g(v) \quad \text{for all } v\in\mathbb{R}^n.
-> $$
->
->
-> *Hint:*
-> Consider the behavior of the minimization problem defining $$ M_{\eta, g}(v) $$ as the weight on the quadratic term becomes increasingly dominant.
-
----
-
-> **Exercise 4: Moreau Envelope of the Absolute Value Function (Huber Loss)**
->
-> The Huber loss function is a loss function used in robust statistics, that is less sensitive to outliers in data than the squared error loss.
->
-> **(a)** Let 
-> $$ g:\mathbb{R}\to\mathbb{R} $$ be defined as $$ g(x)=|x| $$. Derive the Moreau envelope
->
-> $$
-> M_{\eta, g}(v) = \min_{y\in\mathbb{R}} \left\{ |y| + \frac{1}{2\eta}(v-y)^2 \right\},
-> $$
->
-> and show that it yields the Huber loss function.
->
-> **(b)** Identify the regions in $$ v $$ for which the Moreau envelope has quadratic behavior versus linear behavior, and explain the intuition behind this smoothing effect.
->
->
-> *Hint:*
-> Analyze the optimality condition for $$ y $$ and consider the cases when $$ |v| $$ is small versus when $$ |v| $$ is large.
-
----
-
-> **Exercise 5: Moreau Envelope of an Indicator Function and the Squared Distance Function**
->
-> Let $$ C \subset \mathbb{R}^n $$ be a nonempty closed convex set. The indicator function $$ \delta_C(x) $$ is defined as
->
+> Let $$C$$ be a closed convex set and let the indicator function be
 > $$
 > \delta_C(x) =
 > \begin{cases}
-> 0 & \text{if } x\in C, \\
-> +\infty & \text{if } x\notin C.
+> 0, & \text{if } x\in C, \\
+> +\infty, & \text{otherwise}.
 > \end{cases}
 > $$
->
-> The Euclidean distance from a point $$ v $$ to a set $$ C $$ is defined as $$ \operatorname{dist}(v,C) = \inf_{x \in C} \|v - x\|_2 $$.
->
-> **(a)** Let $$ C \subset \mathbb{R}^n $$ be a nonempty closed convex set, and define the indicator function $$ \delta_C(x) $$ as above.
->
-> Show that the Moreau envelope of $$ \delta_C $$ is given by
->
+> Show that
 > $$
-> M_{\eta, \delta_C}(v) = \frac{1}{2\eta}\operatorname{dist}(v,C)^2,
+> \operatorname{prox}_{\eta, \delta_C}(v) = \operatorname{proj}_C(v) = \arg\min_{y\in C}\|y-v\|_2.
 > $$
->
-> where $$ \operatorname{dist}(v,C) $$ is the Euclidean distance from $$ v $$ to the set $$ C $$.
->
-> **(b)** Explain why this result is significant in the context of projection methods and feasibility problems in optimization.
->
->
-> *Hint:*
-> Use the fact that the proximal mapping of $$ \delta_C $$ is the Euclidean projection onto $$ C $$.
+> *Hint:* Consider the minimization problem with the constraint $$y \in C$$.
 
----
+> **Exercise 3: Existence, Uniqueness, and Non-Expansiveness of the Proximal Operator**
+>
+> **(a)** Prove that for any proper, lower semicontinuous, convex function $$g: \mathbb{R}^n\to \mathbb{R}\cup\{+\infty\}$$ and any $$v\in\mathbb{R}^n$$, the mapping
+> $$
+> \operatorname{prox}_{\eta, g}(v)
+> $$
+> is well-defined and unique.
+>
+> **(b)** Show that for all $$v,w\in\mathbb{R}^n$$,
+> $$
+> \|\operatorname{prox}_{\eta, g}(v)-\operatorname{prox}_{\eta, g}(w)\|_2 \le \|v-w\|_2.
+> $$
+> *Hint:* Use the optimality conditions and the monotonicity of the subdifferential.
+
+> **Exercise 4: Differentiability and Lipschitz Continuity of the Moreau Envelope**
+>
+> **(a)** Prove that the Moreau envelope
+> $$
+> M_{\eta, g}(v) = \min_{y\in\mathbb{R}^n}\left\{g(y) + \frac{1}{2\eta}\|y-v\|_2^2\right\}
+> $$
+> is differentiable with respect to $$v$$.
+>
+> **(b)** Show that
+> $$
+> \nabla M_{\eta, g}(v) = \frac{1}{\eta}\left(v-\operatorname{prox}_{\eta, g}(v)\right),
+> $$
+> and that this gradient is Lipschitz continuous with constant $$\frac{1}{\eta}$$.
+> *Hint:* Leverage the non-expansiveness of the proximal operator.
+
+> **Exercise 5: Moreau Envelope of the Absolute Value Function (Huber Loss)**
+>
+> **(a)** Let $$g(x)=|x|.$$ Derive the Moreau envelope
+> $$
+> M_{\eta, g}(v) = \min_{y\in\mathbb{R}}\left\{|y|+\frac{1}{2\eta}(v-y)^2\right\},
+> $$
+> and show that it yields the Huber loss.
+>
+> **(b)** Identify the regions in $$v$$ where the envelope behaves quadratically versus linearly.
+> *Hint:* Analyze the optimality conditions for different ranges of $$v$$.
 
 > **Exercise 6: Moreau Envelope via Infimal Convolution**
 >
-> The infimal convolution of two functions $$ f $$ and $$ g $$ is defined as
->
-> $$
-> (f \square g)(x) = \inf_{y\in\mathbb{R}^n} \left\{ f(x-y) + g(y) \right\}.
-> $$
->
-> **(a)** An infimal convolution of two functions $$ f $$ and $$ g $$ is defined as above.
->
-> Verify that the Moreau envelope of $$ g $$ can be expressed as the following infimal convolution:
->
+> **(a)** Verify that
 > $$
 > M_{\eta, g}(v) = g \square \left(\frac{1}{2\eta}\|\cdot\|_2^2\right)(v),
 > $$
+> where
+> $$
+> (f \square h)(v)=\inf_{y\in\mathbb{R}^n}\{f(y)+h(v-y)\}.
+> $$
 >
-> **(b)** Discuss the significance of expressing the Moreau envelope as an infimal convolution in terms of regularization and duality.
->
->
-> *Hint:*
-> Discuss the properties of infimal convolution and its relation to Moreau envelope in the context of convex analysis and optimization.
+> **(b)** Discuss the significance of this formulation in terms of regularization and duality.
+> *Hint:* Reflect on the properties of infimal convolution in convex analysis.
 
-An interesting identity: we have
+---
 
-$$
-\operatorname{prox}_{\eta, g} = (\operatorname{id} + \eta \, \partial f)^{-1}
-$$
+### Further Reading
 
-where $$\operatorname{id}$$ is the identity function and $$\partial f$$ is the subdifferential of $$f$$. See [Parikh and Boyd (2013) - Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf) section 3.2 "Resolvent of subdifferential operator" for more details.
-
-More information concerning proximal methods and the Moreau envelope can be found in [Rockafellar and Wets (2009) - VARIATIONAL ANALYSIS](https://sites.math.washington.edu/~rtr/papers/rtr169-VarAnalysis-RockWets.pdf), [Candes (2015) - MATH 301: Advanced Topics in Convex Optimization Lecture 22](https://candes.su.domains/teaching/math301/Lectures/Moreau-Yosida.pdf) and [Bauschke and Lucet (2011)](https://cmps-people.ok.ubc.ca/bauschke/Research/68.pdf).
+For deeper insights into proximal methods and the Moreau envelope, consider exploring:
+- [Parikh and Boyd (2013) – Proximal Algorithms](https://web.stanford.edu/~boyd/papers/pdf/prox_algs.pdf) (Section 3.2)
+- [Rockafellar and Wets (2009) – Variational Analysis](https://sites.math.washington.edu/~rtr/papers/rtr169-VarAnalysis-RockWets.pdf)
+- [Candes (2015) – Advanced Topics in Convex Optimization](https://candes.su.domains/teaching/math301/Lectures/Moreau-Yosida.pdf)
+- [Bauschke and Lucet (2011)](https://cmps-people.ok.ubc.ca/bauschke/Research/68.pdf)

@@ -141,7 +141,10 @@ This function has a unique minimum at $$x = x^\ast$$, and its landscape is a per
 > $$ \eta $$ is chosen too large or too small in the discrete case?
 > 3. Can you identify scenarios where the discrete updates may fail to mimic the continuous dynamics, even if the continuous gradient flow converges exponentially?
 >
-> *Hint:* For part (a), verify by differentiation. For part (c), repeatedly apply the update rule. For part (d), consider values of $$\eta$$ like 0.1, 0.5, 1, 1.5, 2.1 and think about what happens to $$|1-\eta|^k$$ as $$k$$ increases.
+> *Hint:* For part (a), verify by differentiation. 
+> For part (c), repeatedly apply the update rule. 
+> For part (d), consider values of 
+> $$\eta$$ like 0.1, 0.5, 1, 1.5, 2.1 and think about what happens to $$|1-\eta|^k$$ as $$k$$ increases.
 
 However, as we've seen with our ball and hill analogy, Gradient Descent is not without its challenges. Local minima, saddle points, and zigzagging in narrow valleys are real obstacles. Let's delve a bit deeper into the analysis of saddle points and their potential to derail our descent.
 
@@ -171,3 +174,42 @@ However, as we've seen with our ball and hill analogy, Gradient Descent is not w
 So it seems that although saddle points are an issue, they are not stable under perturbations. This will be a hint toward our future design choices.
 
 In the chapters ahead, we'll explore how to overcome these limitations, how to refine our descent strategy to navigate even more complex and treacherous loss landscapes.  But for now, we have a starting point, a fundamental tool – Gradient Descent – inspired by the simple act of a ball rolling down a hill.  It's a first step, and like any first step in a vast landscape, it reveals both possibilities and the challenges ahead.
+
+
+
+> **Exercise: Verifying Lyapunov Stability for Gradient Flow**
+> 
+> Consider the gradient flow defined by
+> $$
+> \dot{x}(t) = -\nabla L(x(t)),
+> $$
+> where $$L: \mathbb{R}^n \to \mathbb{R}$$ is a continuously differentiable loss function. In the formulation below, we initially assume that $$x^\ast$$ is the unique minimizer of $$L$$. Define the candidate Lyapunov function as
+> $$
+> V(x) = L(x) - L(x^\ast).
+> $$
+> 
+> **Task:** Prove that $$V(x)$$ is a valid Lyapunov function for the gradient flow under the assumption that $$x^\ast$$ is unique. In particular, show that:
+> 
+> 1. **Positive Definiteness:**  
+>    Demonstrate that
+>    $$
+>    V(x) > 0 \quad \text{for all } x \neq x^\ast, \quad \text{and} \quad V(x^\ast) = 0.
+>    $$
+> 
+> 2. **Negative Definiteness of the Time Derivative:**  
+>    By applying the chain rule, compute the time derivative $$\dot{V}(x(t))$$ along the trajectories of the gradient flow. Prove that
+>    $$
+>    \dot{V}(x(t)) \leq 0 \quad \text{for all } x \neq x^\ast,
+>    $$
+>    and discuss under what conditions $$\dot{V}(x(t)) < 0$$.
+> 
+> **Hint:**  
+> - Use the fact that at the minimizer $$x^\ast$$, we have $$\nabla L(x^\ast) = 0$$.
+> - Carefully apply the chain rule to derive $$\dot{V}(x(t)) = \nabla L(x(t))^\top \dot{x}(t)$$.
+> 
+> **Discussion:**  
+> The above formulation assumes the uniqueness of $$x^\ast$$ to ensure that $$V(x)$$ is strictly positive away from the minimizer and zero only at that point. If the minimizer is not unique—meaning there is a set of minimizers where $$L$$ attains its minimum—the function
+> $$
+> V(x) = L(x) - \min_{y \in \mathbb{R}^n} L(y)
+> $$
+> remains non-negative and vanishes on the entire set of minimizers. In this case, the Lyapunov function guarantees stability of the *set* of minimizers rather than asymptotic stability of a unique point. That is, trajectories of the gradient flow can be shown to converge to this set, but additional conditions might be required to select or further characterize convergence within the set.

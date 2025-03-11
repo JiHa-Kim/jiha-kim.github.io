@@ -93,7 +93,7 @@ Now, consider setting the non-smooth function $$g(x)$$ to be the **indicator fun
 1.  Gradient Step: $$v = x_k - \eta \nabla f(x_k)$$
 2.  Proximal Step: $$x_{k+1} = \operatorname{prox}_{\eta, \delta_C}(v) = \arg\min_{y} \left\{ \delta_C(y) + \frac{1}{2\eta}\|y - v\|_2^2 \right\}$$
 
-But we know from the previous chapter (Exercise 2) that the proximal operator of the indicator function $$\delta_C(x)$$ is precisely the **Euclidean projection onto the set $$C$**:  $$\operatorname{prox}_{\eta, \delta_C}(v) = \operatorname{proj}_C(v)$$.
+But we know from the previous chapter (Exercise 2) that the proximal operator of the indicator function $$\delta_C(x)$$ is precisely the **Euclidean projection onto the set $$C$$**:  $$\operatorname{prox}_{\eta, \delta_C}(v) = \operatorname{proj}_C(v)$$.
 
 Therefore, **Projected Gradient Descent is a special case of Proximal Gradient Descent**, where the non-smooth part of the loss function is the indicator function of the constraint set.  This provides a deeper connection between these two seemingly different approaches.
 

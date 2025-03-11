@@ -110,3 +110,56 @@ Factors to consider when choosing an optimizer:
 In practice, it's often a good idea to experiment with a few different optimizers (e.g., Adam, RMSProp, and Momentum) and compare their performance on your specific task.
 
 In the next chapter, we'll shift our focus from adapting learning rates to handling a different kind of challenge: **non-smooth loss landscapes**. We'll explore techniques that go beyond gradients and allow us to optimize functions even when they are not differentiable everywhere.
+
+---
+
+> **Exercise: Convergence Analysis of Adaptive Gradient Methods on a Quadratic Loss**
+>
+> Consider the quadratic loss function
+>
+> $$
+> L(x) = \frac{1}{2}\|x-x^\ast\|^2,
+> $$
+>
+> where $$ x^\ast $$ is the unique minimizer.
+>
+> In this exercise, we analyze a simplified version of the **RMSProp** update applied to this loss.
+>
+> **(a)** Consider the following RMSProp-inspired update rules:
+>
+> $$
+> \begin{aligned}
+> v_{k+1} &= \beta\, v_k + (1-\beta)(x_k-x^\ast)^2, \\
+> x_{k+1} &= x_k - \frac{\eta}{\sqrt{v_{k+1}+\epsilon}} (x_k-x^\ast),
+> \end{aligned}
+> $$
+>
+> where $$ \eta > 0 $$ is the nominal step size, $$ \beta \in [0,1) $$ is a decay parameter, and $$ \epsilon > 0 $$ is a small constant to prevent division by zero.
+>
+> Define the error as $$ e_k = x_k-x^\ast. $$  
+> *Derive the recurrence relation for the error $$ e_k $$ in terms of $$ e_{k-1} $$, $$ \eta $$, $$ \beta $$, and $$ v_k $$.*
+>
+> **(b)** Assume that initially $$ e_0 > 0 $$ (i.e., the error remains positive) and that $$ v_0 $$ is set such that the updates are well-behaved.  
+> *Under what conditions on $$ \eta $$ and $$ \beta $$ will the error sequence $$ \{e_k\} $$ decrease (i.e., $$ |e_{k+1}| < |e_k| $$) for all $$ k $$?*
+>
+> **(c)** The adaptive factor
+>
+> $$
+> \frac{1}{\sqrt{v_{k+1}+\epsilon}}
+> $$
+>
+> dynamically adjusts the effective learning rate.  
+> *Discuss how this term modifies the effective step size compared to using a constant step size $$ \eta $$, and explain the role of $$ \epsilon $$ in ensuring numerical stability.*
+>
+> **(d)** Reflect on the following discussion points:
+>
+> 1. *Compare the convergence behavior of this RMSProp update with that of standard gradient descent applied to the same quadratic loss. How does the adaptive adjustment help in scenarios where the curvature of the loss might vary?*
+>
+> 2. *What are the potential advantages and drawbacks of having a memory term (via $$ \beta $$) that incorporates past gradient information? Consider the cases when $$ \beta $$ is set very close to 1 versus when it is significantly smaller.*
+>
+> 3. *Can you identify situations (for instance, in non-quadratic or non-smooth losses) where the adaptive updates might not track the “ideal” continuous-time dynamics as effectively as standard gradient descent?*
+>
+> *Hint:*  
+> - For part **(a)**, start by substituting $$ e_k = x_k-x^\ast $$ into the update rule for $$ x_{k+1} $$ and express the new error in terms of $$ e_k $$ and $$ v_{k+1} $$.
+> - For part **(b)**, consider what bounds on $$ \frac{\eta}{\sqrt{v_{k+1}+\epsilon}} $$ would guarantee contraction of the error.
+> - For part **(c)**, think about how the running average $$ v_{k+1} $$ influences the effective learning rate over iterations.
