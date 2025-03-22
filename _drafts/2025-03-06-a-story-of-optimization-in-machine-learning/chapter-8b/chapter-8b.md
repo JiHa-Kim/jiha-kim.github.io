@@ -335,3 +335,94 @@ Having formalized the foundation, we’re ready to:
 - Apply these ideas to concrete ML problems.
 
 Stay tuned!
+
+---
+
+## Exercises
+
+Here are some exercises to help consolidate the formal concepts introduced:
+
+### 1. **Tangent Vectors as Derivatives**
+
+Given the circle \( S^1 = \{ (x, y) \in \mathbb{R}^2 : x^2 + y^2 = 1 \} \), define a curve:
+\[
+\gamma(t) = (\cos t, \sin t).
+\]
+Compute the tangent vector at \( t = 0 \). Express it as a vector in \( \mathbb{R}^2 \).
+
+---
+
+### 2. **Cotangent Space Duality**
+
+Given the standard basis vectors \( \frac{\partial}{\partial x^i} \) in \( \mathbb{R}^2 \), write down the dual basis covectors \( dx^1, dx^2 \).
+
+Verify explicitly that:
+\[
+dx^i \left( \frac{\partial}{\partial x^j} \right) = \delta^i_j.
+\]
+
+---
+
+### 3. **Differential of a Function**
+
+Consider \( f(x, y) = x^2 + y^2 \) on \( \mathbb{R}^2 \).
+
+- Compute the differential \( df \).
+- Show explicitly that \( df \) is a covector by applying it to a general vector \( v = v^1 \frac{\partial}{\partial x} + v^2 \frac{\partial}{\partial y} \).
+
+---
+
+### 4. **Metric Lowering Indices**
+
+Given a non-standard metric on \( \mathbb{R}^2 \):
+\[
+g_{ij} = \begin{pmatrix} 2 & 0 \\ 0 & 3 \end{pmatrix},
+\]
+and a vector:
+\[
+v = \begin{pmatrix} 1 \\ 2 \end{pmatrix},
+\]
+compute the corresponding covector \( v_i = g_{ij} v^j \).
+
+---
+
+### 5. **Coordinate Transformation Behavior**
+
+Consider the following coordinate transformation in \( \mathbb{R}^2 \):
+\[
+\tilde{x}^1 = 2x^1, \quad \tilde{x}^2 = x^2.
+\]
+
+- Write down how a vector \( v^i \) transforms under this change.
+- Write down how a covector \( \omega_i \) transforms.
+- Verify that the inner product \( \omega_i v^i \) remains invariant.
+
+---
+
+### 6. **Gradient Descent Step on a Manifold**
+
+Consider minimizing \( f(x, y) = x^2 + 4y^2 \) on \( \mathbb{R}^2 \) equipped with the metric:
+\[
+g_{ij} = \begin{pmatrix} 1 & 0 \\ 0 & 4 \end{pmatrix}.
+\]
+
+Compute:
+
+1. The differential \( df \).
+2. The gradient vector (after applying the metric).
+3. Explain why the naive Euclidean gradient descent step behaves differently from the step using this metric.
+
+---
+
+## Further Challenge:
+
+### 7. **Exploring the Sphere: Charts & Tangent Vectors**
+
+Take the unit sphere \( S^2 \) embedded in \( \mathbb{R}^3 \).
+
+1. Define spherical coordinates \( (\theta, \phi) \) (longitude, latitude chart).
+2. Write down basis vectors \( \frac{\partial}{\partial \theta}, \frac{\partial}{\partial \phi} \) at a point.
+3. Explain how these basis vectors span the tangent space at that point.
+4. Compute the metric induced on \( S^2 \) from \( \mathbb{R}^3 \) in these coordinates (optional advanced).
+
+---
