@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "A Story of Optimization in ML: Chapter 6b – Formal Foundations: Manifolds, Tangent Spaces, Metrics, and Duality"
+title: "A Story of Optimization in ML: Chapter 8b – Formal Foundations: Manifolds, Tangent Spaces, Metrics, and Duality"
 description: "Formal definitions of manifolds, tangent spaces, and metrics, and why gradients live in the dual space. A precise foundation for geometric optimization in machine learning."
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
 tags: ["differential geometry", "manifolds", "tangent spaces", "dual space", "coordinate transformations", "natural gradient", "Riemannian metric"]
@@ -10,8 +10,6 @@ image:
 date: 2025-03-07 04:00 +0000
 math: true
 ---
-
-# Chapter 6b: Formal Foundations – Manifolds, Tangent Spaces, Metrics, and Duality
 
 In the previous post, we developed intuition:
 - Gradients live in the dual (cotangent) space.
@@ -113,83 +111,200 @@ This ensures we can smoothly do calculus across the entire manifold.
 
 ## 2. Tangent Spaces: Directions You Can Move
 
-At each point on a manifold, we need a way to formalize **directions you can move without leaving the manifold**. That’s the role of the **tangent space**.
+At each point on a manifold, we want to formalize the idea of **directions you can move without leaving the manifold**. These directions form a **vector space** called the **tangent space**.
 
 ---
 
-### Definition: Tangent Space
+### 2.1. Geometric Intuition: Tangent Vectors as Velocity Vectors
 
-For each point \( p \in \mathcal{M} \), the **tangent space** \( T_p\mathcal{M} \) is a vector space consisting of all possible directions at \( p \).
+Imagine walking on the surface of the Earth (a sphere).  
+Locally, you can move north-south, east-west—but you can't leave the surface.
 
-There are two equivalent formal definitions:
+At any point:
+- The **tangent plane** is the flat plane touching the surface.
+- Possible movement directions lie in this plane.
 
 ---
 
-### A) Tangent Vectors as Velocities of Curves
+### Example: Circle \( S^1 \)
 
-Given a smooth curve \( \gamma(t) \) passing through \( p \):
+Consider the unit circle:
 \[
-\gamma(0) = p,
+S^1 = \{ (x, y) \in \mathbb{R}^2 : x^2 + y^2 = 1 \}.
 \]
-we define the **tangent vector** at \( p \) as:
+
+Define a curve:
 \[
-v = \left. \frac{d\gamma}{dt} \right|_{t=0}.
+\gamma(t) = (\cos t, \sin t).
 \]
-Two curves are equivalent if their derivatives at \( t = 0 \) are equal.
+
+- At \( t = 0 \), \( \gamma(0) = (1, 0) \).
+- The derivative:
+\[
+\frac{d\gamma}{dt}\Big|_{t=0} = (-\sin(0), \cos(0)) = (0, 1).
+\]
+
+Interpretation:
+- The tangent vector at \( (1, 0) \) is \( (0, 1) \)—it points **upwards**, tangent to the circle.
+- It's the **velocity vector** of the curve at \( t = 0 \).
 
 ---
 
-### B) Tangent Vectors as Derivations
+### Formal Definition: Tangent Vectors as Curves
 
-A more abstract (but powerful) definition:
+At any point \( p \in \mathcal{M} \), we can define:
 
-> A tangent vector at \( p \) is a linear map:
-> \[
-> v: C^\infty(\mathcal{M}) \to \mathbb{R}
-> \]
-> satisfying:
-> - **Linearity:**
-> \[
-> v(af + bg) = a v(f) + b v(g),
-> \]
-> - **Leibniz rule:**
-> \[
-> v(fg) = f(p) v(g) + g(p) v(f).
-> \]
-
-This definition views vectors as **directional derivatives**—they differentiate functions.
+> The **tangent vector** at \( p \) is the derivative of a smooth curve \( \gamma(t) \) with \( \gamma(0) = p \).
 
 ---
 
-### Coordinate Basis:
+### 2.2. Tangent Vectors as Derivations: The Analytical Perspective
 
-Given a chart \( \varphi \), we can form basis vectors:
+There’s a second, more formal definition, deeply connected to calculus:
+
+### Definition:
+
+A **tangent vector at \( p \)** is a linear operator:
 \[
-\frac{\partial}{\partial x^i} \quad \text{at point} \quad p.
+v: C^\infty(\mathcal{M}) \to \mathbb{R},
 \]
-Any tangent vector can be written:
+satisfying:
+- **Linearity:**  
+\[
+v(af + bg) = a v(f) + b v(g).
+\]
+- **Leibniz Rule:**  
+\[
+v(fg) = f(p) v(g) + g(p) v(f).
+\]
+
+---
+
+### Why This Makes Sense:
+
+Think of how **directional derivatives** behave:
+
+In \( \mathbb{R}^n \):
+\[
+D_v f = \sum_i v^i \frac{\partial f}{\partial x^i}.
+\]
+
+- It’s **linear** in \( f \).
+- It satisfies the product rule (Leibniz rule).
+
+Thus:
+- **Directional derivatives = derivations.**
+- Every tangent vector gives you a way to differentiate smooth functions at \( p \).
+
+---
+
+### Example: Tangent Vectors in \( \mathbb{R}^2 \)
+
+At point \( p = (1, 0) \), consider the vector:
+\[
+v = \begin{pmatrix} 0 \\ 1 \end{pmatrix}.
+\]
+
+It acts on functions \( f(x, y) \) by:
+\[
+v(f) = \frac{\partial f}{\partial y}(1, 0).
+\]
+
+This:
+- Is **linear in \( f \)**.
+- Satisfies the product rule.
+
+Therefore, tangent vectors **are equivalent to derivations** at \( p \).
+
+---
+
+### Connection to Charts & Coordinates:
+
+Manifolds are locally like \( \mathbb{R}^n \).
+
+Given a **chart** \( (U, \varphi) \):
+- The coordinates \( x^i = \varphi^i(p) \) act like standard \( \mathbb{R}^n \) coordinates.
+
+This gives natural basis vectors:
+\[
+\frac{\partial}{\partial x^i},
+\]
+which act on functions by taking partial derivatives:
+\[
+\frac{\partial}{\partial x^i}(f) = \frac{\partial f}{\partial x^i}(p).
+\]
+
+Thus, any tangent vector at \( p \) can be written:
 \[
 v = v^i \frac{\partial}{\partial x^i}.
 \]
+
+Here, we use the Einstein summation convention (summing over repeated indices). This happens when there are contravariant components like \( v^i \) and covariant components like \( v_i \) or \( \dfrac{\partial}{\partial x^i} \).
+
+---
+
+### 2.3. More Concrete Examples:
+
+#### Example: Sphere \( S^2 \)
+
+Consider \( S^2 \) embedded in \( \mathbb{R}^3 \):
+\[
+x^2 + y^2 + z^2 = 1.
+\]
+
+At point \( (0, 0, 1) \), valid tangent vectors lie in the **plane \( z = 1 \)**:
+- They are of the form \( (v^1, v^2, 0) \).
+  
+**Interpretation:**
+- Moving along latitude or longitude at the North Pole.
+- Tangent space is a 2D plane sitting in \( \mathbb{R}^3 \).
+
+---
+
+#### Example: Tangent Vectors on the Probability Simplex
+
+The probability simplex in \( \mathbb{R}^n \):
+\[
+\Delta^{n-1} = \left\{ (p_1, ..., p_n) \mid p_i \geq 0, \sum p_i = 1 \right\}.
+\]
+
+At any point:
+- Valid tangent vectors must satisfy:
+\[
+\sum_{i=1}^{n} v^i = 0.
+\]
+This constraint keeps you on the simplex (since total probability must remain 1).
 
 ---
 
 ## 3. Cotangent Spaces: Linear Functionals (Covectors)
 
-The **cotangent space** \( T_p^*\mathcal{M} \) is the **dual space** to \( T_p\mathcal{M} \).
+So far, we've seen that **tangent vectors** at a point \( p \) on a manifold describe valid directions you can move locally.
 
-**Definition:**
+Now, we introduce the **cotangent space**, which consists of objects that act **on vectors** to produce real numbers.
+
+---
+
+### Definition: Cotangent Space
+
+The **cotangent space** \( T_p^*\mathcal{M} \) at point \( p \) is the **dual space** to the tangent space:
 \[
 T_p^*\mathcal{M} = \{ \omega: T_p\mathcal{M} \to \mathbb{R} \quad \text{linear} \}.
 \]
+Its elements are called **covectors** (or one-forms).
 
-These are **covectors**: they take in vectors and output real numbers.
+They take in a tangent vector and return a real number.
 
 ---
 
 ### Basis of Cotangent Space:
 
-The natural basis is:
+In local coordinates, we already have basis vectors for the tangent space:
+\[
+\frac{\partial}{\partial x^i}.
+\]
+
+The dual basis for the cotangent space is denoted:
 \[
 dx^i,
 \]
@@ -198,7 +313,7 @@ defined by:
 dx^i \left( \frac{\partial}{\partial x^j} \right) = \delta^i_j.
 \]
 
-Any covector:
+Thus, any covector at \( p \) can be written:
 \[
 \omega = \omega_i dx^i.
 \]
@@ -210,37 +325,86 @@ It acts on a vector \( v = v^j \frac{\partial}{\partial x^j} \) via:
 
 ---
 
-## 4. Differentials of Functions: Gradients as Covectors
+### Example:
 
-Given a smooth function \( f: \mathcal{M} \to \mathbb{R} \), its **differential** at point \( p \) is:
+In \( \mathbb{R}^2 \), if:
 \[
-df_p: T_p\mathcal{M} \to \mathbb{R}.
+v = \begin{pmatrix} 1 \\ 2 \end{pmatrix},
+\quad
+\omega = (3, 4),
+\]
+then:
+\[
+\omega(v) = 3 \times 1 + 4 \times 2 = 11.
 \]
 
-It’s defined by:
+Covectors "measure" vectors.
+
+---
+
+## 4. Differentials of Functions: Gradients as Covectors
+
+Let’s connect this to gradients.
+
+Given a smooth function \( f: \mathcal{M} \to \mathbb{R} \), the **differential** \( df \) at \( p \) is:
+
+\[
+df_p: T_p\mathcal{M} \to \mathbb{R},
+\]
+defined by:
 \[
 df_p(v) = v(f).
 \]
 
-In coordinates:
+That is, given a direction (vector) \( v \), it tells you how fast \( f \) increases along \( v \).
+
+---
+
+### Coordinate Representation:
+
+In local coordinates:
 \[
 df = \frac{\partial f}{\partial x^i} dx^i.
 \]
 
-Thus, **the differential is a covector**—it takes in a vector (direction) and outputs how fast \( f \) changes in that direction.
+Notice:
+- \( df \) is a **covector** (a one-form).
+- It lives in the cotangent space.
+- It "measures" vectors by computing directional derivatives.
+
+---
+
+### Example:
+
+In \( \mathbb{R}^2 \), for:
+\[
+f(x, y) = x^2 + y^2,
+\]
+we compute:
+\[
+df = 2x \, dx + 2y \, dy.
+\]
+
+At \( (1, 0) \), this gives:
+\[
+df = 2 \times 1 \, dx = 2 \, dx.
+\]
+Acting on \( v = (v^1, v^2) \), we get:
+\[
+df(v) = 2v^1.
+\]
 
 ---
 
 ## 5. The Metric: Relating Vectors and Covectors
 
-In Euclidean space, we identify vectors and covectors via the dot product:
+In Euclidean space, the dot product identifies vectors and covectors:
 \[
 \langle v, w \rangle = v^i w^i.
 \]
-This blurs the distinction.
+But on a general manifold, no natural dot product exists globally.
 
-But on manifolds, there is no global dot product.  
-To connect vectors and covectors, we introduce a **Riemannian metric**.
+To bridge vectors and covectors, we introduce the **Riemannian metric**.
 
 ---
 
@@ -252,20 +416,22 @@ A **Riemannian metric** assigns, at each point \( p \in \mathcal{M} \), an inner
 \]
 
 **Properties:**
-- **Symmetric:** \( g_{ij} = g_{ji} \).
-- **Positive-definite.**
-- **Smoothly varying.**
+- Symmetric: \( g_{ij} = g_{ji} \).
+- Positive-definite.
+- Smoothly varying across \( \mathcal{M} \).
 
 ---
 
 ### Raising and Lowering Indices:
 
 Using the metric:
-- **Lower indices (vector → covector):**
+
+- **Lowering (vector → covector):**
 \[
 v_i = g_{ij} v^j.
 \]
-- **Raise indices (covector → vector):**
+
+- **Raising (covector → vector):**
 \[
 v^i = g^{ij} v_j,
 \]
@@ -273,41 +439,72 @@ where \( g^{ij} \) is the inverse of \( g_{ij} \).
 
 ---
 
+### Why This Matters:
+
+Given a differential \( df \) (a covector), we use the metric to convert it into a **tangent vector**—the direction to move in optimization.
+
+---
+
+### Example:
+
+Consider a metric in \( \mathbb{R}^2 \):
+\[
+g_{ij} = \begin{pmatrix} 2 & 0 \\ 0 & 3 \end{pmatrix}.
+\]
+
+Given \( df = (4, 5) \), the gradient vector is:
+\[
+(\nabla f)^i = g^{ij} \frac{\partial f}{\partial x^j}.
+\]
+
+Computing:
+\[
+g^{ij} = \begin{pmatrix} 0.5 & 0 \\ 0 & \frac{1}{3} \end{pmatrix},
+\]
+so:
+\[
+\nabla f = \begin{pmatrix} 0.5 \times 4 \\ \frac{1}{3} \times 5 \end{pmatrix} = \begin{pmatrix} 2 \\ \frac{5}{3} \end{pmatrix}.
+\]
+
+---
+
 ## 6. Coordinate Transformations: Behavior of Vectors, Covectors, and Metrics
 
-When we change coordinates:
+Manifolds are about **coordinate freedom**. What happens when we change coordinates?
 
-- **Vectors transform:**  
-  Via the Jacobian \( \frac{\partial \tilde{x}^i}{\partial x^j} \).
+### Vectors:
+Transform via the Jacobian:
+\[
+\tilde{v}^i = \frac{\partial \tilde{x}^i}{\partial x^j} v^j.
+\]
 
-- **Covectors transform:**  
-  Via the **transpose inverse** of the Jacobian.
+### Covectors:
+Transform via the **transpose inverse**:
+\[
+\tilde{\omega}_i = \frac{\partial x^j}{\partial \tilde{x}^i} \omega_j.
+\]
 
-- **Metrics adjust:**  
-  To preserve inner products:
-  \[
-  \tilde{g}_{kl} = \frac{\partial x^i}{\partial \tilde{x}^k} \frac{\partial x^j}{\partial \tilde{x}^l} g_{ij}.
-  \]
+### Metrics:
+Adjust to preserve inner products:
+\[
+\tilde{g}_{kl} = \frac{\partial x^i}{\partial \tilde{x}^k} \frac{\partial x^j}{\partial \tilde{x}^l} g_{ij}.
+\]
 
-This is key:  
-**Geometry cares about invariant relationships, not specific coordinates.**
+**Key Insight:**
+- Geometry focuses on **invariant relationships**, not specific coordinates.
+- This is why naive gradient descent fails under reparameterization, but geometric methods (natural gradients) succeed.
 
 ---
 
 ## 7. Gradients Live in the Cotangent Space
 
-Bringing it all together:
+To summarize:
 
-- The gradient of \( f \) is the differential \( df \)—a covector.
-- To step in a valid direction, we convert to a vector:
+- The **differential \( df \)** is naturally a covector.
+- To compute valid directions to move (vectors), we apply the metric:
 \[
 (\nabla f)^i = g^{ij} \frac{\partial f}{\partial x^j}.
 \]
-
-This is essential in optimization:
-- On curved spaces,
-- Under coordinate transformations,
-- For respecting manifold structure (e.g., in natural gradients).
 
 ---
 
@@ -320,25 +517,13 @@ We’ve formalized:
 - **Cotangent spaces:** Linear functionals measuring vectors.
 - **Differentials:** Gradients as covectors.
 - **Riemannian metrics:** Relating vectors and covectors.
-- **Coordinate transformations:** How everything behaves under change of coordinates.
+- **Coordinate transformations:** Predictable behavior under change of variables.
 
 These concepts form the mathematical bedrock for **optimization on manifolds**, crucial in many ML contexts.
 
 ---
 
-## What’s Next:
-
-Having formalized the foundation, we’re ready to:
-
-- Explore **natural gradients** and parameterization-invariant optimization.
-- Derive **geodesics** (generalizing straight lines).
-- Apply these ideas to concrete ML problems.
-
-Stay tuned!
-
----
-
-## Exercises
+## 9. Exercises
 
 Here are some exercises to help consolidate the formal concepts introduced:
 
@@ -348,7 +533,7 @@ Given the circle \( S^1 = \{ (x, y) \in \mathbb{R}^2 : x^2 + y^2 = 1 \} \), defi
 \[
 \gamma(t) = (\cos t, \sin t).
 \]
-Compute the tangent vector at \( t = 0 \). Express it as a vector in \( \mathbb{R}^2 \).
+Compute the tangent vector at \( t = 0 \) and interpret it geometrically.
 
 ---
 
@@ -368,13 +553,14 @@ dx^i \left( \frac{\partial}{\partial x^j} \right) = \delta^i_j.
 Consider \( f(x, y) = x^2 + y^2 \) on \( \mathbb{R}^2 \).
 
 - Compute the differential \( df \).
-- Show explicitly that \( df \) is a covector by applying it to a general vector \( v = v^1 \frac{\partial}{\partial x} + v^2 \frac{\partial}{\partial y} \).
+- Apply it to a general vector \( v = v^1 \frac{\partial}{\partial x} + v^2 \frac{\partial}{\partial y} \).
+- Show explicitly how \( df(v) \) computes the directional derivative.
 
 ---
 
 ### 4. **Metric Lowering Indices**
 
-Given a non-standard metric on \( \mathbb{R}^2 \):
+Given a non-standard metric:
 \[
 g_{ij} = \begin{pmatrix} 2 & 0 \\ 0 & 3 \end{pmatrix},
 \]
@@ -382,18 +568,18 @@ and a vector:
 \[
 v = \begin{pmatrix} 1 \\ 2 \end{pmatrix},
 \]
-compute the corresponding covector \( v_i = g_{ij} v^j \).
+compute the covector \( v_i = g_{ij} v^j \).
 
 ---
 
 ### 5. **Coordinate Transformation Behavior**
 
-Consider the following coordinate transformation in \( \mathbb{R}^2 \):
+Consider the coordinate transformation:
 \[
 \tilde{x}^1 = 2x^1, \quad \tilde{x}^2 = x^2.
 \]
 
-- Write down how a vector \( v^i \) transforms under this change.
+- Write down how a vector \( v^i \) transforms.
 - Write down how a covector \( \omega_i \) transforms.
 - Verify that the inner product \( \omega_i v^i \) remains invariant.
 
@@ -414,15 +600,16 @@ Compute:
 
 ---
 
-## Further Challenge:
+## What’s Next:
 
-### 7. **Exploring the Sphere: Charts & Tangent Vectors**
+Having formalized the foundations, we’re now ready to:
+- Explore **natural gradients** and parameterization-invariant optimization.
+- Dive into **geodesics** (generalizing straight lines).
+- Apply these tools to practical ML problems.
 
-Take the unit sphere \( S^2 \) embedded in \( \mathbb{R}^3 \).
+Stay tuned!
 
-1. Define spherical coordinates \( (\theta, \phi) \) (longitude, latitude chart).
-2. Write down basis vectors \( \frac{\partial}{\partial \theta}, \frac{\partial}{\partial \phi} \) at a point.
-3. Explain how these basis vectors span the tangent space at that point.
-4. Compute the metric induced on \( S^2 \) from \( \mathbb{R}^3 \) in these coordinates (optional advanced).
+## Further Reading
 
----
+- [eigenchris' YouTube playlist on tensors for beginners](https://www.youtube.com/watch?v=8ptMTLzV4-I&list=PLJHszsWbB6hrkmmq57lX8BV-o-YIOFsiG)
+- [eigenchris' YouTube playlist on tensor calculus](https://www.youtube.com/watch?v=kGXr1SF3WmA&list=PLJHszsWbB6hpk5h8lSfBkVrpjsqvUGTCx)

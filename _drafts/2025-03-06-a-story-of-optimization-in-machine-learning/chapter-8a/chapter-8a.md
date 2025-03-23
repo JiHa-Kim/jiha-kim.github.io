@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "A Story of Optimization in ML: Chapter 8a — Vectors, Covectors, and Why Gradients Aren’t What You Think"
-description: "Why gradients live in the dual space, how inner products blur the distinction in Euclidean space, and why coordinate transformations in machine learning demand geometric thinking."
+title: "A Story of Optimization in ML: Chapter 8a — Pencils, Rulers, and Why Gradients Aren’t What You Think"
+description: "Gradients live in the dual space, but why? This post introduces vectors and covectors through the physical metaphor of pencils and rulers, leading to metrics, coordinate transformations, and why geometry matters in machine learning optimization."
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
-tags: ["differential geometry", "manifolds", "tangent spaces", "dual space", "inner product", "coordinate transformations", "natural gradient"]
+tags: ["differential geometry", "manifolds", "tangent spaces", "dual space", "coordinate transformations", "natural gradient"]
 image:
   path: /assets/2025-03-06-optimization-in-machine-learning/vector_covector_duality.png
   alt: "Visual metaphor for vectors and covectors and their dual relationship"
@@ -11,237 +11,250 @@ date: 2025-03-06 04:00 +0000
 math: true
 ---
 
-In machine learning, optimization often feels routine:  
+# Chapter 8a: Pencils, Rulers, and Why Gradients Aren’t What You Think
+
+In machine learning, optimization feels routine:  
 Compute gradients, step downhill, repeat.
 
-But behind the scenes, something subtle is happening. Gradients don’t live where we think they do. To see why, we need to start from something familiar: **linear algebra**.
+But behind the scenes, something subtle is happening:  
+**Gradients aren’t vectors in the usual sense.**
+They don’t naturally point in a direction until we apply a metric to interpret them.
+
+They live in a different space entirely: the **dual space**.
+
+To understand why, we’ll start with a physical analogy: pencils and rulers.
 
 ---
 
-## 1. Motivation: Why Should We Care About Geometry?
+## 1. Vectors Are Pencils, Covectors Are Rulers
 
-One of the guiding principles in ML is the **manifold hypothesis**:
-> High-dimensional data (like images, speech, or embeddings) often lies near a much lower-dimensional manifold inside the ambient space.
+Here’s the key intuition:
 
-That’s not just a philosophical point. It affects:
-- How optimization behaves.
-- How gradients should be interpreted.
-- How coordinate transformations (e.g., normalization layers, reparameterizations) impact learning.
+- **Vectors are pencils.**  
+  You can imagine them as arrows pointing in some direction—you move along them.
 
-Naive gradient descent assumes we’re optimizing in flat, uniform \( \mathbb{R}^n \). But the real world—and real data—lives on curved, constrained spaces.
+- **Covectors are rulers.**  
+  They **measure** how much of a vector points in a certain direction.
+  They have grid lines perpendicular to the direction they measure.
 
----
+### Visualization:
 
-## 2. Vectors and Covectors: Back to Linear Algebra Basics
+Picture yourself standing on a flat plane:
+- You hold a pencil pointing northeast → **that’s a vector**.
+- You lay down a ruler pointing north → the ruler **measures how much of your pencil points north**.
 
-Let’s revisit concepts you already know:
-
-### Vectors:
-
-Think of a vector space \( V \) over \( \mathbb{R} \).  
-Vectors here are familiar objects:
-\[
-v = \begin{pmatrix} v^1 \\ v^2 \\ \vdots \\ v^n \end{pmatrix}.
-\]
-They are arrows—directions in space.
+A covector (ruler) takes any vector (pencil) and returns **a number**:
+> “How much of this pencil lies along me?”
 
 ---
 
-### Covectors (Dual Vectors):
+## 2. Formalizing Vectors and Covectors
 
-The **dual space** \( V^* \) consists of **linear functionals**:
+Let’s make this precise.
+
+- A **vector space** \( V \) (think \( \mathbb{R}^n \)) consists of vectors—pencils.
+  
+- The **dual space** \( V^* \) consists of **covectors**—rulers.
+
+A covector is a **linear function** that eats a vector and returns a real number:
 \[
-\omega: V \to \mathbb{R}.
-\]
-Given a vector \( v \), the covector returns a number:
-\[
-\omega(v) = \omega_i v^i.
+\omega(v) = \text{scalar}.
 \]
 
-In matrix terms:
-- Vectors = column vectors.
-- Covectors = row vectors (transpose).
+In \( \mathbb{R}^n \):
+- Vectors are column vectors.
+- Covectors are row vectors.
+
+**Important:**  
+- Covectors live in a different space than vectors, even though they’re related.
 
 ---
 
-## 3. Inner Products Give an Isomorphism Between Vectors and Covectors
+## 3. Why They Feel Identical in Euclidean Space: The Inner Product
 
-In flat \( \mathbb{R}^n \), we have the dot product:
+In standard \( \mathbb{R}^n \), we have a familiar tool: the **dot product**:
 \[
-\langle v, w \rangle = v^i w^i.
+\langle v, w \rangle = v^1 w^1 + v^2 w^2 + \dots + v^n w^n.
 \]
 
-This inner product **lets us turn a vector into a covector**:
+This dot product does something sneaky:
+
+- Given a vector \( v \), we can **turn it into a covector**:
 \[
 v^*(\cdot) = \langle v, \cdot \rangle.
 \]
-Or in matrix language:
-\[
-v^* = v^\top.
-\]
 
-Thus:
-- Vectors and covectors are *identified* via the inner product.
-- It feels natural to treat them interchangeably.
+In matrix terms:
+- Vector = column vector.
+- Covector = row vector (transpose).
 
----
-
-## 4. The Euclidean Illusion: Why We Confuse Vectors and Covectors
-
-In linear algebra and ML:
-- Gradients are computed as vectors.
-- Steps in gradient descent are vectors.
-
-But technically:
-- The **gradient of a function is a covector**—it maps directions (vectors) to rates of change (scalars).
-
-In Euclidean space, the dot product blurs this distinction:
-\[
-\text{Gradient (row vector)} = \text{Direction (column vector)}^\top.
-\]
-
-However, this is **coordinate-dependent**:
-- Change the basis or rescale axes → dot product, and thus identification, changes.
+In this flat space:
+- Pencils (vectors) and rulers (covectors) can be identified effortlessly.
+- So people casually treat gradients (covectors!) as vectors.
 
 ---
 
-## 5. Breaking Point: Curved Spaces & Coordinate Changes
+## 4. What’s Behind This Magic: The Metric
 
-Real-world data, and many ML models, live in **curved, constrained spaces**:
-- Spheres (normalization constraints),
-- Probability simplices (softmax outputs),
-- Rotation matrices (SO(3)),
-- Embedding spaces with non-trivial geometry.
+But what **allows us to equate vectors and covectors** like this?
 
-In these spaces:
-- There’s **no global, fixed inner product**.
-- **No global way to transpose vectors and covectors.**
+**Answer:**  
+> The dot product is a special case of something deeper: the **metric**.
 
-Additionally, when we **reparameterize variables** (common in ML), naive gradient descent struggles because:
-- The step direction depends heavily on the coordinate choice.
-- The underlying geometry isn't being respected.
+### **What Is the Metric?**
 
----
+A **metric** tells us:
+- How long a vector is.
+- How to measure angles.
+- How to align rulers and pencils.
 
-## 6. Fixing the Problem: Introducing the Metric
+In Euclidean space:
+- The metric is just the identity matrix.
+- Everything’s flat and simple.
 
-To properly connect vectors and covectors in curved spaces, we need extra structure:  
-A **Riemannian metric**.
-
-### The Metric:
-
-A metric defines an inner product at **each point**:
-\[
-\langle v, w \rangle = g_{ij}(x) v^i w^j.
-\]
-
-This allows:
-- **Lowering indices (vector → covector):**
-\[
-v_i = g_{ij} v^j.
-\]
-- **Raising indices (covector → vector):**
-\[
-v^i = g^{ij} v_j.
-\]
-where \( g^{ij} \) is the inverse of \( g_{ij} \).
+But **the metric is what lets us lower and raise indices:**
+- It converts vectors ↔ covectors.
 
 ---
 
-## 7. Gradients Live in the Dual Space
+## 5. Covariance vs. Contravariance: How Vectors & Covectors Transform
 
-Let’s return to gradients.
+Let’s pause here:
 
-Given a function \( f \):
-\[
-df = \frac{\partial f}{\partial x^i} dx^i.
-\]
-This is a **covector** (differential):
-- It takes a vector (direction) and tells you how fast \( f \) increases in that direction.
+- **Basis vectors, as geometric objects, are said to be "covariant".**  
+  They exist independently of coordinates—they're the same "pencil" no matter how you redraw the grid.
+- **Basis covectors, on the other hand, are said to be "contravariant".**
+  Think of it: a more crushed grid in a ruler makes you think the vector is longer. We say that its behavior varies **contrary to basis vectors**, i.e. contravariantly.
+- **But vector components transform contravariantly.**  
+  When you double the length of a basis pencil, then your pencil's perceived length is half as short. A vector’s components adjust in the **opposite way** to the basis vectors in order to preserve the meaning of the vector itself.
+- **Covectors, by contrast, have components that transform covariantly.**  
+  Their components scale or rotate **in the same way** as the basis vector transformations, ensuring they continue to measure vectors correctly.
 
-**To move in that direction:**
-- We must convert \( df \) into a vector.
-- **The metric provides the bridge.**
+This distinction is crucial:
+- **Pencils and rulers transform differently under coordinate changes.**
+- Their pairing—the covector acting on the vector—remains invariant, no matter how the coordinates shift.
+- In Euclidean space, the identity metric hides this difference, letting us casually conflate them.
 
----
-
-## 8. Coordinate Transformations: Why They Matter in ML
-
-Now, here’s something ML practitioners encounter daily:
-
-**Coordinate changes.**
-
-Examples:
-- Scaling variables.
-- Applying batch normalization.
-- Reparameterizing latent variables.
-- Normalizing embeddings.
-
-Naive gradient descent **is not invariant** under these changes:
-- Gradient directions change unpredictably.
-- Optimization slows down or behaves poorly.
-
-But in differential geometry:
-- **Vectors and covectors transform predictably under coordinate changes.**
-- The metric adjusts inner products, ensuring consistency.
-
-This is precisely why **natural gradient methods** (Amari) adapt optimization to the manifold’s geometry—they account for these transformations explicitly.
+See [eigenchris' playlist](https://www.youtube.com/watch?v=d5da-mcVJ20) for a more detailed explanation.
 
 ---
 
-## 9. A Simple Example: Reparameterization Trouble
+## 6. Where Trouble Starts: Curved Spaces, Reparameterizations
 
-Consider optimizing:
-\[
-f(x, y) = x^2 + 100 y^2.
-\]
+What happens when:
+- You’re optimizing over a sphere (Earth)?
+- Your data lives on a probability simplex (softmax outputs)?
+- You apply normalization or scaling in ML?
 
-Naive gradient descent struggles:
-- Steps in \( y \)-direction are tiny (ill-conditioning).
-
-Now, change variables:
-\[
-\tilde{x} = x, \quad \tilde{y} = 10 y.
-\]
-Function becomes:
-\[
-f(\tilde{x}, \tilde{y}) = \tilde{x}^2 + \tilde{y}^2.
-\]
-In the new coordinates, optimization improves.
-
-**But the gradient transformation isn’t automatic.**
-
-This exposes how:
-- Step directions depend heavily on chosen coordinates.
-- Ignoring geometry leads to inefficiencies.
+Now:
+- There’s no global, fixed dot product.
+- **No natural way to identify pencils and rulers.**
+- Vectors and covectors **transform differently**—and the naive transpose trick breaks down.
 
 ---
 
-## 10. Summary: Geometry Guides Optimization
+## 7. The Sphere Example: Concrete Breakdown
 
-- **Vectors = directions.**
-- **Covectors = rulers (linear functionals).**
-- In \( \mathbb{R}^n \), dot products blur the distinction (transpose trick).
-- On manifolds (curved spaces), no global inner product exists.
-- The **metric bridges vectors and covectors locally**.
-- Respecting this structure is essential for:
-  - Efficient optimization,
-  - Reparameterization-invariant methods (natural gradient, Riemannian optimization),
-  - ML tasks involving constrained or non-Euclidean parameter spaces.
+### **7.1 The Manifold: Earth as a Sphere**
+
+Use spherical coordinates:
+- \( \theta = \) latitude
+- \( \phi = \) longitude
+
+Locally:
+- Valid movement directions = tangent vectors = pencils (east-west, north-south).
 
 ---
 
-## 11. What’s Next: Cleaning Up the Formalism
+### **7.2 A Simple Function: Temperature**
 
-In this post, we stayed in intuitive, linear algebra territory.
+Define:
+\[
+f(\theta, \phi) = \cos(\theta).
+\]
 
-But we can be much more precise.
+- Hottest at equator, coldest at poles.
 
-In the next chapter, we’ll:
-- Formally define **manifolds** (charts, atlases, smoothness).
-- Define **tangent and cotangent spaces** rigorously.
-- Introduce **Riemannian metrics** properly.
-- Show exactly how **coordinate transformations behave**.
-- Lay the mathematical foundation for natural gradient methods and geometric optimization.
+---
 
-Stay tuned for **Chapter 6b: Formal Foundations – Manifolds, Tangent Spaces, and Duality**.
+### **7.3 Compute the Differential**
+
+The **differential** (gradient as covector) is:
+\[
+df = -\sin(\theta) \, d\theta.
+\]
+
+This is a ruler:
+- Measures how temperature changes in any direction.
+
+---
+
+### **7.4 The Metric of the Sphere**
+
+The sphere has a non-trivial metric:
+\[
+g = 
+\begin{pmatrix} 
+1 & 0 \\ 
+0 & \sin^2(\theta) 
+\end{pmatrix}.
+\]
+
+- Moving east-west depends on latitude.
+- Near the poles, circles shrink → geometry changes.
+
+---
+
+### **7.5 Why the Naive Gradient Isn't a Valid Direction**
+
+If you naively treat \( df \) as a vector:
+- You ignore that east-west directions shrink near poles.
+- Steps become distorted—might "step off the sphere."
+
+---
+
+### **7.6 How the Metric Fixes It**
+
+To get a valid **gradient vector**:
+\[
+\nabla f = g^{-1} df.
+\]
+
+Explicitly:
+- Apply the metric inverse to convert the covector into a vector.
+- The gradient vector now respects the sphere's curvature.
+
+---
+
+## 8. Broader ML Relevance: Where Else This Breaks
+
+In ML, similar problems arise:
+- **Normalized vectors, softmax outputs, rotation matrices** → constrained, curved spaces.
+- **Batch normalization, reparameterization** → change coordinates.
+  
+**Naive gradient descent ignores these transformations.**
+
+---
+
+## 9. Summary: The Metric Was Always There
+
+- In flat space, the metric = identity → hides complexity.
+- In curved spaces or after coordinate changes:
+  - Vectors (pencils) and covectors (rulers) transform differently.
+  - You **need the metric** to bridge them correctly.
+  
+Failing to account for this leads to inefficient or even invalid optimization.
+
+---
+
+## 10. What’s Next: Cleaning Up the Formalism
+
+In this post, we built physical intuition:
+- Vectors and covectors, pencils and rulers.
+- Why they feel identical in flat space.
+- Why metrics matter when things curve.
+
+Next, we’ll formalize:
+- Manifolds, charts, tangent and cotangent spaces.
+- Metrics, coordinate transformations.
+- And fully justify everything we computed here!
