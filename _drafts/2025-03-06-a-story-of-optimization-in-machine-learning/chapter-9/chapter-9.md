@@ -5,7 +5,7 @@ description: "Chapter 9 delves into convex duality, revealing how every convex o
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
 tags: ["convex duality", "Lagrangian duality", "Fenchel conjugate", "Legendre duality"]
 image:
-  path: /assets/2025-03-06-optimization-in-machine-learning/duality_chapter5.gif
+  path: /assets/2025-03-06-optimization-in-machine-learning/duality_chapter9.gif
   alt: "Visual representation of convex duality with primal and dual spaces"
 date: 2025-03-06 03:30 +0000
 math: true

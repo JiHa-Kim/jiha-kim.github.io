@@ -1,187 +1,126 @@
 ---
 layout: post
-title: "A Story of Optimization in ML: Chapter 8 - Reflections in a Distorted Mirror: Stepping Beyond Euclidean Space"
-description: "Chapter 8 introduces Mirror Descent, extending optimization beyond Euclidean spaces by using Bregman divergences to navigate in geometries that are not flat."
+title: "A Story of Optimization in ML: Chapter 10 - Reflections in a Distorted Mirror: Duality and Beyond Euclidean Space"
+description: "Chapter 10 extends our journey into optimization by exploring Mirror Descent through the lens of duality. Discover how mapping into a dual space via convex potentials transforms our approach to non-Euclidean optimization."
 categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
-tags: ["mirror descent", "non-Euclidean optimization", "Bregman divergence", "Bregman projection", "optimizer"]
+tags: ["mirror descent", "non-Euclidean optimization", "Bregman divergence", "duality"]
 image:
-  path: /assets/2025-03-06-optimization-in-machine-learning/mirror_descent_chapter8.gif
-  alt: "Visual metaphor for mirror descent - a distorted reflection guiding the path"
+  path: /assets/2025-03-06-optimization-in-machine-learning/mirror_descent_chapter10_duality.gif
+  alt: "A dual view of optimization: mapping between primal and dual spaces"
 date: 2025-03-06 02:45 +0000
 math: true
 ---
 
-## Chapter 8: Reflections in a Distorted Mirror - Stepping Beyond Euclidean Space
+## Chapter 10: Reflections in a Distorted Mirror – Duality and Beyond Euclidean Space
 
-Imagine a hall of mirrors—but not the playful kind. These are *mathematical* mirrors that distort space itself. In our quest to minimize a function, using standard Euclidean gradients in such a warped setting might lead us astray: the “downhill” direction in the mirror could be entirely different from that in the real world.
-
-In traditional optimization, **Projected Gradient Descent (PGD)** works well when our constraints and geometry are Euclidean. We take a gradient step and then project back onto a feasible set using the familiar Euclidean distance. However, when the underlying geometry is non-Euclidean—say, when optimizing over the probability simplex—Euclidean projections can feel unnatural or inefficient.
-
-This is where **Mirror Descent** comes into play. It generalizes PGD by using **Bregman divergences** (distance-like functions tailored to specific convex potentials) to respect the intrinsic geometry of the problem.
+In our exploration of optimization, we often assume that the landscape is flat and Euclidean. However, many practical problems reside in non-Euclidean spaces, where classical gradient methods can falter. **Mirror Descent** offers a powerful alternative by leveraging the concept of duality—recasting the optimization problem in a dual space where the geometry better reflects the problem’s inherent structure.
 
 ---
 
-### Mirror Descent: A Geometric Perspective
+### 1. Embracing the Dual Perspective in Mirror Descent
 
-The idea behind Mirror Descent is to **transform** the problem into a mirror (or dual) space where the geometry is better aligned with the problem’s structure, take a gradient-like step there, and then map back to the original space.
-
-Here’s the step-by-step intuition:
-
-1. **Choose a Mirror Map:**  
-   Select a strictly convex and differentiable potential function $$\phi(x)$$. Its gradient, $$\nabla \phi(x)$$, serves as the mirror map that transforms our variables into a new space. This map induces a **Bregman divergence**,
-   
-   $$
-   D_\phi(x \| y) = \phi(x) - \phi(y) - \langle \nabla \phi(y), x-y \rangle,
-   $$
-   
-   which measures distance in a geometry that need not be Euclidean.
-
-2. **Map to the Mirror Space:**  
-   Instead of working directly with the parameters $$x$$, we consider their images under the mirror map, $$\nabla \phi(x)$$. This transformation reorients the space to better capture the underlying structure.
-
-3. **Perform the Gradient Step in Mirror Space:**  
-   Compute the gradient of the loss function $$\nabla f(x_k)$$ in the original space, and then take a step in the mirror space. In essence, we modify the mirror image of the current iterate by subtracting a scaled gradient:
-   
-   $$
-   \nabla \phi(x_k) - \eta \nabla f(x_k).
-   $$
-
-4. **Map Back via Bregman Projection:**  
-   To translate the update back to the original space, we perform a **Bregman projection**. The next iterate $$x_{k+1}$$ is chosen by solving:
-   
-   $$
-   x_{k+1} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + D_\phi(x \| x_k) \right\}.
-   $$
-   
-   This step finds the point that is closest to the mirror update (in terms of Bregman divergence) while balancing the descent direction.
+Imagine transforming the problem from its original space (the *primal* space) into a mirror (or *dual*) space. By choosing a **strictly convex and differentiable** potential function \( \phi(x) \), we define the mirror map:
+\[
+\nabla \phi(x).
+\]
+This mapping translates our variables into a dual space where distances and directions are measured not by the standard Euclidean norm, but by a **Bregman divergence**:
+\[
+D_\phi(x \| y) = \phi(x) - \phi(y) - \langle \nabla \phi(y),\, x-y \rangle.
+\]
+This divergence captures the geometry of the problem and guides our update steps in a way that respects its natural structure.
 
 ---
 
-### Unifying Euclidean and Non-Euclidean Approaches
+### 2. The Math Behind Mirror Descent and Duality
 
-The strength of Mirror Descent lies in its flexibility. By a careful choice of the potential function $$\phi(x)$$, Mirror Descent can recover standard methods:
+Let’s break down the steps that reveal how duality shapes Mirror Descent:
 
-#### 1. Recovering Projected Gradient Descent
+#### **Step 1: Choosing a Mirror Map**
+Select a potential function \( \phi(x) \) such that:
+\[
+\phi: \mathbb{R}^n \to \mathbb{R} \quad \text{is strictly convex and differentiable}.
+\]
+Its gradient \( \nabla \phi(x) \) acts as a bridge to the dual space.
 
-Choose the Euclidean potential:
-$$
-\phi(x) = \frac{1}{2}\|x\|_2^2.
-$$
+#### **Step 2: Defining the Bregman Divergence**
+Using the potential, we measure distance in the dual space via:
+\[
+D_\phi(x \| y) = \phi(x) - \phi(y) - \langle \nabla \phi(y),\, x-y \rangle.
+\]
+This divergence generalizes the squared Euclidean distance, allowing us to capture more complex geometries.
 
-- **Mirror Map:**  
-  $$\nabla \phi(x) = x.$$
-  
-- **Bregman Divergence:**  
-  $$
+#### **Step 3: Gradient Step in the Dual Space**
+Compute the gradient \( \nabla f(x_k) \) of the objective function in the primal space, and update in the dual space:
+\[
+\nabla \phi(x_k) - \eta\, \nabla f(x_k),
+\]
+where \( \eta \) is the step size. Here, the duality principle ensures that the descent direction is adjusted according to the geometry induced by \( \phi(x) \).
+
+#### **Step 4: Mapping Back with Bregman Projection**
+To return to the primal space, we perform a Bregman projection:
+\[
+x_{k+1} = \arg\min_{x \in C} \left\{ \eta\, \langle \nabla f(x_k),\, x \rangle + D_\phi(x \| x_k) \right\}.
+\]
+This step finds the best next iterate \( x_{k+1} \) that balances the descent direction with the geometry of the space.
+
+---
+
+### 3. Duality: The Bridge Between Primal and Dual Worlds
+
+Duality in Mirror Descent does more than just provide a mathematical trick—it transforms how we view and solve optimization problems:
+
+- **Natural Transformation:**  
+  The mapping \( x \mapsto \nabla \phi(x) \) is analogous to computing the **Fenchel conjugate** of a function, a core concept in convex duality. This process reorients the problem, revealing hidden structure and simplifying analysis.
+
+- **Recovery of Classical Methods:**  
+  When we choose the Euclidean potential,
+  \[
+  \phi(x) = \frac{1}{2}\|x\|_2^2,
+  \]
+  the mirror map becomes the identity function, and the Bregman divergence reduces to:
+  \[
   D_\phi(x \| y) = \frac{1}{2}\|x-y\|_2^2.
-  $$
-  
-Plugging these into the update rule gives:
+  \]
+  In this case, Mirror Descent recovers the familiar **Projected Gradient Descent** update:
+  \[
+  x_{k+1} = \arg\min_{x \in C} \left\{ \eta\, \langle \nabla f(x_k),\, x \rangle + \frac{1}{2}\|x-x_k\|_2^2 \right\}.
+  \]
 
-$$
-x_{k+1} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + \frac{1}{2}\|x-x_k\|_2^2 \right\},
-$$
-
-which is exactly the update in Projected Gradient Descent.
-
-#### 2. Recovering Proximal Gradient Descent (and Beyond)
-
-For composite optimization problems of the form
-
-$$
-\min_x \; f(x) + g(x),
-$$
-
-we can extend Mirror Descent by incorporating the non-smooth term into the update:
-
-$$
-x_{k+1} = \arg\min_{x \in C} \left\{ \eta \langle \nabla f(x_k), x \rangle + \eta g(x) + D_\phi(x \| x_k) \right\}.
-$$
-
-Again, if we choose the Euclidean potential, this formulation simplifies to the familiar Proximal Gradient Descent update. More generally, selecting non-Euclidean potentials tailors the algorithm to the geometry of the problem—leading, for example, to **Exponentiated Gradient Descent** when optimizing over the probability simplex.
+- **Adapting to Non-Euclidean Geometries:**  
+  For problems defined on the probability simplex or other curved spaces, choosing potentials like the negative entropy,
+  \[
+  \phi(x) = \sum_{i=1}^n x_i \log x_i,
+  \]
+  leads to Bregman divergences that mirror the Kullback-Leibler divergence. This enables **Exponentiated Gradient Descent**, naturally preserving constraints without the need for awkward Euclidean projections.
 
 ---
 
-### Why Mirror Descent?
+### 4. Exercises and Further Thoughts
 
-Mirror Descent adapts to the geometry of the problem by:
+To deepen your understanding of duality in Mirror Descent, consider the following exercises:
 
-- **Embracing Non-Euclidean Geometries:**  
-  In domains like the probability simplex or spaces of positive definite matrices, using Bregman divergences such as KL divergence or Burg divergence can lead to faster convergence and more natural updates than Euclidean methods.
+1. **Derive the Euclidean Case:**  
+   Show that for 
+   \[
+   \phi(x) = \frac{1}{2}\|x\|_2^2,
+   \]
+   the Bregman divergence is the squared Euclidean distance and that the Mirror Descent update simplifies to the standard Projected Gradient Descent rule.
 
-- **Respecting Intrinsic Constraints:**  
-  Bregman projections naturally enforce constraints in a way that aligns with the geometry of the space.
+2. **Explore Negative Entropy:**  
+   For the negative entropy potential on the probability simplex, derive the mirror map and corresponding Bregman divergence. Use these to obtain the Exponentiated Gradient Descent update.
 
-- **Generalizing Classical Methods:**  
-  By choosing different potential functions, Mirror Descent unifies and extends classical algorithms like Projected and Proximal Gradient Descent, providing a powerful framework for a wide range of optimization problems.
-
----
-
-### Applications
-
-Mirror Descent has wide-ranging applications:
-
-- **Optimization over the Probability Simplex:**  
-  With the negative entropy potential, Mirror Descent becomes Exponentiated Gradient Descent, which is well-suited for probability distributions.
-  
-- **Online Learning and Regret Minimization:**  
-  It is a cornerstone algorithm in online convex optimization, especially when decisions are made in non-Euclidean domains.
-  
-- **Matrix and Tensor Optimization:**  
-  Custom potentials enable efficient updates in problems involving positive definite matrices or tensors.
+3. **Connecting to Fenchel Conjugacy:**  
+   Explain how the mirror map \( \nabla \phi(x) \) relates to the Fenchel conjugate of \( \phi \), and discuss the geometric intuition behind this connection.
 
 ---
 
-### Stepping Out of Flatland
+### 5. Conclusion
 
-Mirror Descent reminds us that optimization isn’t solely about following Euclidean gradients—it’s about understanding and leveraging the geometry of the problem. By stepping beyond the confines of Euclidean space and embracing Bregman divergences, Mirror Descent equips us with a versatile toolkit for tackling modern machine learning challenges.
+Duality is not merely a theoretical construct—it is the foundation that allows Mirror Descent to thrive in non-Euclidean spaces. By transforming the optimization problem into a dual space, we obtain a more natural measure of distance and direction. This insight unifies classical gradient methods and paves the way for more sophisticated algorithms that respect the intrinsic geometry of modern machine learning problems.
 
-In the chapters to come, we’ll see how these geometric insights, combined with principles like duality and majorization-minimization, lead to the sophisticated optimizers powering contemporary machine learning. For now, solidify your understanding of Mirror Descent with the following exercises.
+In the next chapter, we will build on these duality principles to explore natural gradients and information geometry, deepening our understanding of how geometry shapes optimization.
 
----
+Stay tuned, and happy optimizing!
 
-> **Exercise 1: Mirror Descent with Squared Euclidean Norm: Recovering Gradient Descent**
->
-> Consider the potential function $$\phi(x) = \frac{1}{2}\|x\|_2^2$$.
->
-> **(a)** Show that the Bregman divergence induced by $$\phi$$ is the squared Euclidean distance: $$D_\phi(x\|y) = \frac{1}{2}\|x-y\|_2^2$$.
->
-> **(b)** Derive the Mirror Descent update rule for this potential function and show that it simplifies to the standard Gradient Descent update.
->
-> **(c)** If we include projection onto a closed convex set $$C$$, what algorithm do we recover?
->
-> *Hint:* Substitute $$\phi(x) = \frac{1}{2}\|x\|_2^2$$ and simplify the update.
-
-> **Exercise 2: Mirror Descent with Negative Entropy: Exponentiated Gradient Descent**
->
-> Consider the negative entropy potential on the probability simplex $$\Delta^n = \{x \in \mathbb{R}^n_+ : \sum_{i=1}^n x_i = 1\}$$:
-> $$
-> \phi(x) = \sum_{i=1}^n x_i \log x_i.
-> $$
->
-> **(a)** Compute $$\nabla \phi(x)$$ and the corresponding Bregman divergence, recognizing it as the Kullback-Leibler (KL) divergence.
->
-> **(b)** Derive the Mirror Descent update rule and show that it leads to Exponentiated Gradient Descent, which naturally preserves the simplex constraint.
->
-> **(c)** Explain why this approach is preferable to standard Gradient Descent with Euclidean projection on the simplex.
->
-> *Hint:* Solve the Bregman projection minimization explicitly for the negative entropy potential.
-
-> **Exercise 3: Bregman Projection for Mirror Descent with KL Divergence**
->
-> Using the negative entropy potential, solve the Bregman projection:
-> $$
-> x_{k+1} = \arg\min_{x \in \Delta^n} \left\{ \eta \langle \nabla f(x_k), x \rangle + D_{KL}(x \| x_k) \right\},
-> $$
-> to derive the Exponentiated Gradient Descent update.
->
-> *Hint:* Use Lagrange multipliers to incorporate the simplex constraints.
-
----
-
-**Further Reading:**
-
-- [Nemirovski and Yudin (1983) - Problem Complexity and Method Efficiency in Optimization](https://link.springer.com/book/10.1007/978-3-662-09978-1)
-- [Beck and Teboulle (2003) - Mirror Descent and Nonlinear Projected Subgradient Methods for Convex Optimization](https://epubs.siam.org/doi/abs/10.1137/S003614290241847X)
-- [Shalev-Shwartz (2012) - Online Learning and Online Convex Optimization](http://www.cs.huji.ac.il/~shais/papers/OLbook-v1.pdf)
-- [Hazan (2019) - Lecture Notes: Optimization for Machine Learning](https://arxiv.org/abs/1909.03550)
+### Further Reading
+- [Harvey (2018) - Machine Learning Theory Lecture 20: Mirror Descent](https://www.cs.ubc.ca/~nickhar/F18-531/Notes20.pdf)

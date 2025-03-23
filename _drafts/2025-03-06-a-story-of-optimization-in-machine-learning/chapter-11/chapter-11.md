@@ -1,113 +1,274 @@
-Below is a derivation that formalizes mirror descent from a differential geometric viewpoint by explicitly linking it to Riemannian geometry. The key idea is to view the algorithm as a gradient descent method on a manifold whose metric is induced by a strictly convex function.
+---
+layout: post
+title: "A Story of Optimization in ML: Chapter 11 - Curved Statistics: The Fisher Information Matrix and the Geometry of Learning"
+description: "Chapter 11 introduces the Fisher Information Matrix, tracing its origins in statistics and showing how it naturally defines a geometry on parameter spaces, leading to deeper insights in optimization."
+categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
+tags: ["information geometry", "Fisher information", "natural gradient", "statistical estimation", "Riemannian geometry"]
+image:
+  path: /assets/2025-03-06-optimization-in-machine-learning/fisher_information_chapter11.gif
+  alt: "Visual metaphor for curved statistical spaces and Fisher information"
+date: 2025-03-22 14:00 +0000
+math: true
+---
+
+## Chapter 11: Curved Statistics - The Fisher Information Matrix and the Geometry of Learning
+
+Imagine walking blindfolded across an unfamiliar landscape. You can’t see far, but by carefully feeling the slope under your feet, you can infer the shape of the ground.
+
+In statistics and machine learning, the landscape is the space of probability distributions. Our "slope" is how sensitive those distributions are to the parameters we’re trying to learn. But what if the terrain isn’t flat? What if the space of parameters is **curved**?
+
+Enter the **Fisher Information Matrix**—an elegant tool that quantifies not only how precisely we can estimate parameters but also reveals the intrinsic geometry of statistical models.
 
 ---
 
-### 1. Setting Up the Manifold
+## 1. Estimation and Precision: Where It All Began
 
-Let \( \mathcal{M} \) be the open convex domain where our optimization is performed. Choose a strictly convex, twice-differentiable function  
-\[
-\psi : \mathcal{M} \to \mathbb{R},
-\]  
-which serves as the distance‐generating function. This function defines a Riemannian metric on \( \mathcal{M} \) via its Hessian:
-\[
-g(x) = \nabla^2 \psi(x).
-\]
-This metric endows \( \mathcal{M} \) with a notion of “local geometry.” In other words, near each point \( x \), small displacements are measured according to the quadratic form induced by \( g(x) \).
+Suppose you have data sampled from a distribution \( p(x \mid \theta) \), but you don't know the true parameter \( \theta \). You want to construct an estimator \( \hat{\theta}(x) \) that guesses \( \theta \) based on the data.
+
+Naturally, you'd like your estimate to be **precise and unbiased**. But is there a fundamental limit to how precisely we can estimate \( \theta \)?
+
+This question intrigued **R.A. Fisher** in the early 20th century, and his answer was the concept of **Fisher Information**.
 
 ---
 
-### 2. Riemannian Gradient Flow
+## 2. Measuring Sensitivity: The Fisher Information Matrix
 
-On a Riemannian manifold, the gradient of a smooth function \( f: \mathcal{M} \to \mathbb{R} \) is defined so that for any tangent vector \( v \) we have
+The key intuition:
+
+> **If small changes in \( \theta \) lead to large changes in the likelihood function, then we should be able to estimate \( \theta \) more precisely.**
+
+### Definition:
+
+For a scalar parameter \( \theta \):
+
 \[
-Df(x)[v] = \langle \mathrm{grad}_g f(x),\, v \rangle_{g(x)},
+F(\theta) = \mathbb{E}_{x \sim p(x \mid \theta)} \left[ \left( \frac{\partial}{\partial \theta} \log p(x \mid \theta) \right)^2 \right].
 \]
-where the inner product is given by
+
+For a vector parameter \( \theta \in \mathbb{R}^n \), the **Fisher Information Matrix (FIM)** is:
+
 \[
-\langle u, v \rangle_{g(x)} = u^\top \nabla^2 \psi(x)\, v.
+F(\theta) = \mathbb{E}_{x \sim p(x \mid \theta)} \left[ \nabla_\theta \log p(x \mid \theta) \, \nabla_\theta \log p(x \mid \theta)^\top \right].
 \]
-A standard result from differential geometry is that the Riemannian gradient satisfies
-\[
-\mathrm{grad}_g f(x) = \nabla^2 \psi(x)^{-1} \nabla f(x).
-\]
-Thus, the natural (continuous-time) gradient flow on the manifold is given by:
-\[
-\dot{x}(t) = -\,\mathrm{grad}_g f(x(t)) = -\,\nabla^2 \psi(x(t))^{-1} \nabla f(x(t)).
-\]
-This is the geometric analogue of steepest descent, adapted to the metric \( g(x) \).
 
 ---
 
-### 3. Discretization: From Continuous Flow to Mirror Descent
+### 2.1. Example: The Bernoulli Distribution
 
-If one were to discretize the above continuous flow using an explicit Euler scheme with step size \(\eta\), the update becomes
-\[
-x_{t+1} \approx x_t - \eta\, \nabla^2 \psi(x_t)^{-1} \nabla f(x_t).
-\]
-While this expression suggests a second-order object (the Hessian of \(\psi\)) is involved, note that the discretization is only first order in \(\eta\).
+Consider a coin flip modeled as:
 
-However, there is an alternative—and very elegant—way to view this update using the mirror map. The mirror map is defined by
 \[
-\nabla \psi: \mathcal{M} \to \mathcal{M}^*,
+p(x \mid \theta) = \theta^x (1 - \theta)^{1 - x}, \quad x \in \{0, 1\}, \quad 0 < \theta < 1.
 \]
-which is invertible since \(\psi\) is strictly convex. By defining the dual variable
+
+Compute:
+
 \[
-y = \nabla \psi(x),
+\frac{\partial}{\partial \theta} \log p(x \mid \theta) = \frac{x}{\theta} - \frac{1 - x}{1 - \theta}.
 \]
-we can reinterpret the dynamics. In the dual space, the natural gradient flow update becomes a standard (Euclidean) gradient descent step.
+
+Then:
+
+\[
+F(\theta) = \mathbb{E}_{x} \left[ \left( \frac{x}{\theta} - \frac{1 - x}{1 - \theta} \right)^2 \right] = \frac{1}{\theta(1 - \theta)}.
+\]
+
+**Insight:**
+
+- Fisher information grows large when \( \theta \to 0 \) or \( \theta \to 1 \), where the outcome becomes almost deterministic.
+- It's smallest at \( \theta = 0.5 \), where randomness is maximized.
 
 ---
 
-### 4. Change of Coordinates: The Mirror Map
+## 3. Cramér-Rao Bound: Precision Has Limits
 
-Let’s rewrite the update in the dual coordinates. Starting with the discretized Riemannian flow,
+Fisher Information isn't just abstract—it quantifies a **fundamental limit** on estimation precision.
+
+The **Cramér-Rao bound** tells us:
+
 \[
-x_{t+1} \approx x_t - \eta\, \nabla^2 \psi(x_t)^{-1} \nabla f(x_t),
-\]
-we apply \(\nabla \psi\) to both sides. Using a first-order (linear) approximation,
-\[
-\nabla \psi(x_{t+1}) \approx \nabla \psi(x_t) + \nabla^2 \psi(x_t)(x_{t+1} - x_t).
-\]
-Substitute the update:
-\[
-\nabla \psi(x_{t+1}) \approx \nabla \psi(x_t) - \eta\, \nabla f(x_t).
-\]
-Defining \( y_t = \nabla \psi(x_t) \), we get a simple update in the dual space:
-\[
-y_{t+1} = y_t - \eta\, \nabla f(x_t).
-\]
-Finally, to recover the primal iterate \( x_{t+1} \), we invert the mirror map:
-\[
-x_{t+1} = (\nabla \psi)^{-1}(y_{t+1}).
+\mathrm{Var}(\hat{\theta}) \geq \frac{1}{F(\theta)}.
 \]
 
-This derivation shows that mirror descent is equivalent to a change of coordinates:  
-1. **Map to the dual space:** \( y_t = \nabla \psi(x_t) \).  
-2. **Take a standard gradient step:** \( y_{t+1} = y_t - \eta\, \nabla f(x_t) \).  
-3. **Map back to the primal space:** \( x_{t+1} = (\nabla \psi)^{-1}(y_{t+1}) \).
+This means:
+
+- No unbiased estimator can achieve variance smaller than \( 1/F(\theta) \).
+- **Higher Fisher information → Tighter bound → Greater precision.**
+
+It’s a ceiling imposed by nature, not by our choice of estimator.
 
 ---
 
-### 5. Formalizing the Connection
+## 4. From Statistics to Geometry: A Riemannian View
 
-Notice that although the derivation begins with the Riemannian gradient flow, the discretization step involves only a first-order Taylor expansion of \(\nabla \psi\) (a linear approximation). This is why mirror descent is fundamentally a first-order method despite having its roots in second-order geometry:
-- The geometry (the metric \( \nabla^2 \psi(x) \)) determines the change of coordinates.
-- The update in the dual space is simply a linear (first-order) gradient step.
-- The overall procedure amounts to using the local geometry to make a more informed step while still relying only on the first-order derivative \( \nabla f \).
+Here’s where the story takes a geometric turn.
+
+Fisher observed that **Fisher Information behaves like a metric**, defining how "far apart" two distributions are when you vary \( \theta \).
+
+In Euclidean space, distance is:
+
+\[
+ds^2 = dx^\top dx.
+\]
+
+In the space of probability distributions, Fisher introduced:
+
+\[
+ds^2 = d\theta^\top F(\theta) d\theta.
+\]
+
+This is a **Riemannian metric**—meaning, the parameter space forms a **curved manifold**, with the Fisher Information Matrix capturing its local geometry.
 
 ---
 
-### 6. Conclusion
+## 5. Information Geometry: The Statistical Manifold
 
-In summary, by formalizing the problem on a Riemannian manifold with metric \( \nabla^2 \psi(x) \), we see that:
-- The natural gradient flow on this manifold is
+In the 1980s, **Shun'ichi Amari** and others formalized these insights into **Information Geometry**:
+
+- **Statistical Manifold:**  
+  The space of all probability distributions parameterized by \( \theta \).
+
+- **Fisher-Rao Metric:**  
+  The Fisher Information Matrix defines the metric tensor, measuring distances between distributions.
+
+- **Geodesics & Curvature:**  
+  Optimization paths and inference trajectories follow curved lines (geodesics) respecting this metric.
+
+---
+
+## 6. Key Properties of the Fisher Information Matrix
+
+Beyond intuition, the Fisher Information Matrix has **powerful mathematical properties** that make it indispensable in both statistics and optimization.
+
+---
+
+### 6.1. Relation to the Hessian of Log-Likelihood
+
+For differentiable densities, Fisher Information is directly related to the curvature of the log-likelihood:
+
+\[
+F(\theta) = -\mathbb{E}_{x \sim p(x \mid \theta)} \left[ \nabla^2_\theta \log p(x \mid \theta) \right].
+\]
+
+**Why?**
+
+Starting with:
+
+\[
+\nabla_\theta \log p(x \mid \theta) = \frac{1}{p(x \mid \theta)} \nabla_\theta p(x \mid \theta),
+\]
+
+the second derivative gives:
+
+\[
+\nabla^2_\theta \log p(x \mid \theta) = \frac{\nabla^2_\theta p(x \mid \theta)}{p(x \mid \theta)} - \nabla_\theta \log p(x \mid \theta) \, \nabla_\theta \log p(x \mid \theta)^\top.
+\]
+
+Taking expectations cancels the first term (under regularity conditions), yielding:
+
+\[
+F(\theta) = \mathbb{E} \left[ \nabla_\theta \log p(x \mid \theta) \, \nabla_\theta \log p(x \mid \theta)^\top \right] = -\mathbb{E} \left[ \nabla^2_\theta \log p(x \mid \theta) \right].
+\]
+
+---
+
+### 6.2. Observed vs Expected Fisher Information
+
+- **Expected Fisher Information:**  
+  The average curvature over the data distribution.
+  
+- **Observed Fisher Information:**  
+  Evaluates the negative Hessian at the specific observed data:
+
   \[
-  \dot{x}(t) = -\nabla^2 \psi(x(t))^{-1} \nabla f(x(t)).
+  I_{\text{obs}}(\theta) = -\nabla^2_\theta \log p(x_{\text{obs}} \mid \theta).
   \]
-- A first-order Euler discretization combined with a linearization of the mirror map yields
-  \[
-  \nabla \psi(x_{t+1}) = \nabla \psi(x_t) - \eta\, \nabla f(x_t).
-  \]
-- This is exactly the mirror descent update, interpreted as a change of coordinates to the dual space where a standard gradient descent step is performed.
 
-Thus, mirror descent is naturally derived as the discretization of a Riemannian gradient flow, with the key approximation being the first-order Taylor expansion used to relate the dual coordinates \( \nabla \psi(x) \) across iterates. This formalizes the familiar observation that mirror descent is “just” a change of coordinates on the Euclidean gradient step, adapted to the geometry defined by \( \psi \).
+In large samples, both align, but the observed version is often used in practical estimation (e.g., standard errors).
+
+---
+
+### 6.3. Additivity: Independent Samples
+
+Fisher Information **adds up across independent data points**:
+
+\[
+F_{\text{total}}(\theta) = \sum_{i=1}^n F_i(\theta).
+\]
+
+This underlies:
+
+- Consistency of MLEs.
+- Asymptotic normality (MLE converges to Gaussian with covariance \( F(\theta)^{-1} \)).
+
+---
+
+### 6.4. Invariance Under Reparameterization
+
+**Fisher Information transforms correctly under smooth, invertible changes of variables.**
+
+If \( \theta = h(\phi) \), then:
+
+\[
+F_\phi(\phi) = J(\phi)^\top F_\theta(h(\phi)) J(\phi),
+\]
+
+where \( J(\phi) = \frac{\partial h(\phi)}{\partial \phi} \).
+
+**Consequence:**
+
+- Fisher Information is **intrinsic**—it depends only on the family of distributions, not how we parameterize them.
+- This makes optimization methods like **Natural Gradient Descent** coordinate-invariant.
+
+---
+
+## 7. Applications Beyond Estimation
+
+The Fisher Information Matrix shows up everywhere:
+
+- **Statistical Inference:**  
+  MLE consistency, asymptotic variances, hypothesis testing.
+
+- **Bayesian Inference:**  
+  Jeffreys prior is derived from \( \sqrt{\det F(\theta)} \).
+
+- **Optimization:**  
+  Natural gradient methods (deep learning, variational inference, reinforcement learning).
+
+- **Second-Order Methods:**  
+  Approximating the Hessian efficiently via Fisher Information (e.g., K-FAC optimizer).
+
+---
+
+## 8. Conclusion: Statistics Meets Geometry
+
+The Fisher Information Matrix began as a tool to quantify estimation precision. But it revealed something much deeper:
+
+- It defines a **curved geometry** on parameter spaces.
+- It connects to the **Hessian of log-likelihood**, providing curvature information.
+- It enjoys beautiful properties like **additivity** and **invariance**, making it robust in both theory and practice.
+
+Most importantly, it teaches us that in optimization, not all steps are created equal—the shape of the space matters.
+
+---
+
+## Exercises
+
+> **Exercise 1:** Derive the Fisher Information Matrix for a univariate Gaussian with unknown mean and known variance.
+
+> **Exercise 2:** Show explicitly that for the Bernoulli distribution, the Fisher Information adds linearly over \( n \) i.i.d. samples.
+
+> **Exercise 3:** Prove the invariance of Fisher Information under smooth reparameterizations.
+
+---
+
+## Further Reading
+
+- Fisher, R.A. (1922) – *On the Mathematical Foundations of Theoretical Statistics*
+- Amari, S. – *Information Geometry and Its Applications*
+- Nielsen, F. – *An Elementary Introduction to Information Geometry*
+- Martens, J. (2020) – [New Insights and Perspectives on the Natural Gradient Method](https://jmlr.org/papers/volume21/17-678/17-678.pdf)
+
+---
+
+*In the next chapter, we’ll show how this geometric viewpoint connects Natural Gradient Descent with Mirror Descent—two methods that, at their core, exploit the same principles of curved optimization spaces.*
