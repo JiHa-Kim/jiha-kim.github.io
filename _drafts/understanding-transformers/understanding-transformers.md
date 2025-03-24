@@ -270,9 +270,23 @@ where indices are taken over the individual rows of $$Q$$ and $$K$$, and $$\thet
 
 Note that the product is generalized by an "inner product", so-called because in the Euclidean case, it is measures the component of the scaled projection of one vector "into" the other. (This is in contrast to the *exterior product*, which generalizes the cross product and is closely related to the determinant.)
 
+Doing a little trigonometry shows that the dot product of a vector with a unit vector is the orthogonal projection of the vector onto the unit vector:
+
+$$
+a \cdot \frac{b}{\|b\|} = \|a\| \cos(\theta) = \text{proj}_b(a)
+$$
+
+where $$\theta$$ is the angle between the vectors. Thus, for general unnormalized vectors $a$ and $b$, we have the dot product:
+
+$$
+a\cdot b = \|a\|\|b\| \cos(\theta) = \|a\| \text{proj}_b(a) = \|b\| \text{proj}_a(b).
+$$
+
+where $$\text{proj}_a(b)$$ is the orthogonal projection of $b$ onto $a$.
+
 ---
 
-### **What Is Cosine Similarity?**
+#### **What Is Cosine Similarity?**
 
 The **cosine similarity** normalizes out the length of vectors:
 
@@ -284,7 +298,7 @@ In self-attention, **we don’t explicitly compute cosine similarity**, but the 
 
 ---
 
-## **Why Do We Apply Softmax After Dot Product?**
+#### **Why Do We Apply Softmax After Dot Product?**
 
 After computing all $$S_{ij}$$, we want to:
 1. Convert the raw dot product scores to **positive values**.
@@ -298,11 +312,11 @@ $$
 
 ---
 
-## **But Wait—Why Do We Divide by $$\sqrt{d_k}$$?**
+#### **But Wait—Why Do We Divide by $$\sqrt{d_k}$$?**
 
 This is **super important** and often under-explained.
 
-### **Key Issue: Growth of Dot Product Magnitude**
+#### **Key Issue: Growth of Dot Product Magnitude**
 
 Consider:
 
@@ -314,7 +328,7 @@ If:
 
 Then:
 
-### **Variance of the dot product:**
+#### **Variance of the dot product:**
 
 The dot product sums $$d_k$$ terms:
 
@@ -332,7 +346,7 @@ Each term has variance ≈ $$\sigma^2 \times \sigma^2 = \sigma^4$$.
 
 ---
 
-### **Effect on Softmax:**
+#### **Effect on Softmax:**
 
 If dot products become large in magnitude:
 
@@ -343,7 +357,7 @@ If dot products become large in magnitude:
 
 ---
 
-### **Solution: Normalize by $$\sqrt{d_k}$$**
+#### **Solution: Normalize by $$\sqrt{d_k}$$**
 
 Why $$\sqrt{d_k}$$?
 
@@ -358,7 +372,7 @@ Because:
 
 ---
 
-## **Summary: Dot Product, Cosine, Normalization**
+#### **Summary: Dot Product, Cosine, Normalization**
 
 | **Concept**                       | **Formula**                                                  | **Purpose**                                           |
 | --------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------- |
@@ -369,7 +383,7 @@ Because:
 
 ---
 
-## **Intuition in Words:**
+#### **Intuition in Words:**
 
 - The **dot product** captures **how aligned** two token representations are.
 - The **magnitude of the vectors influences the dot product**, which can distort the attention distribution.
@@ -382,7 +396,9 @@ So overall, we see that the dot product measures **alignment** and **magnitude i
 
 ---
 
-## **4.D Geometric Interpretation Using Reduced SVD**
+### **4.D Geometric Interpretation Using Reduced SVD**
+
+While writing this section, I made a careless algebra mistake which resulted in me posting a completely erroneous derivation. I have taken down the post since it no longer held significance, and thanks to those who pointed out the error. I'm sorry for the inconvenience to the readers.
 
 An alternative—and enlightening—perspective on self-attention is obtained by examining the query–key interaction through the singular value decomposition (SVD). Recall that the dot product between queries and keys is computed as
 
@@ -408,7 +424,7 @@ $$
 S = Q\,K^\top \in \mathbb{R}^{n \times n}.
 $$
 
-### **Focusing on the Core Transformation**
+#### **Focusing on the Core Transformation**
 
 Consider the matrix
 
@@ -428,7 +444,7 @@ where
 - \(U \in \mathbb{R}^{d \times d_k}\) and \(V \in \mathbb{R}^{d \times d_k}\) are semi‑orthogonal (\(U^\top U = I_{d_k}\) and \(V^\top V = I_{d_k}\)),
 - \(\Sigma \in \mathbb{R}^{d_k \times d_k}\) is diagonal with nonnegative singular values \(\sigma_1,\dots,\sigma_{d_k}\).
 
-### **Reparameterizing the Query–Key Interaction**
+#### **Reparameterizing the Query–Key Interaction**
 
 For a token represented by \(x \in \mathbb{R}^{1 \times d}\) (a row of \(X\)), the query and key are
 
@@ -560,7 +576,7 @@ x_i = \begin{bmatrix} 0.8 \\ 0.3 \\ 0.5 \end{bmatrix},
 \]
 normalized so that \( \|x_i\| = 1 \) for easier viewing.
 
-### **Summary of the Setup with Numbers**
+#### **Summary of the Setup with Numbers**
 
 - **Dimensions:** \( d = 3 \), \( d_k = 2 \)
 - **Matrix Construction:**  
@@ -599,13 +615,24 @@ Please note that in this example, I sacrifice the magnitude information of the o
 ![2D left semi-orthogonal transformation](./2D_left_semi-orthogonal_transformation.png)
 _2D left semi-orthogonal transformation_
 
+Here, we illustrate the boundary circle of the disk formed under the image of the unit sphere in $$\mathbb{R}^d=\mathbb{R}^3$$. It is flattened into a rotated $$d_k=2$$-dimensional subspace by the orthogonal matrix $$U$$. The orthonormal $$u_1$$ and $$u_2$$ point to the diagonals that will be used to rescale the principal components.
+
 ![2D rescaling principal components](./2D_rescaling_principal_components.png)
 _2D rescaling principal components_
+
+Here, we rescale the principal components $$u_1$$ and $$u_2$$ by the eigenvalues $$\sigma_1$$ and $$\sigma_2$$, respectively. In essence, we reweigh the different directions in our $$d_k$$-dimensional subspace.
 
 ![2D right semi-orthogonal transformation](./2D_right_semi-orthogonal_transformation.png)
 _2D right semi-orthogonal transformation_
 
-### **Geometric and Practical Insights**
+![2D dot product as scaled projection](./2D_dot_product_as_scaled_projection.png)
+_2D dot product as scaled projection_
+
+(Note that we can always look at a 2D plane containing both vectors, defined by their span.)
+
+Because matrix multiplication is associative, there are many different ways to re-arrange and interpret this dot product in the reduced SVD. This is just one possibility, and I found that it was fairly clean, so I ran with it. Feel free to play around with other interpretations, for instance applying $$V^T$$ onto $$\hat{q}$$ to "lift" the vector in a $$d_k$$-dimensional subspace within the $$d$$-dimensional space.
+
+#### **Geometric and Practical Insights**
 
 1. **Effective Dimensionality Reduction:**  
    Although the original weight matrices \(W_Q\) and \(W_K\) map tokens from \(\mathbb{R}^d\) into \(\mathbb{R}^{d_k}\), the SVD shows that their interaction—embodied in \(M\)—only “lives” in a \(d_k\)-dimensional subspace of \(\mathbb{R}^d\). The columns of \(U\) and \(V\) serve as orthogonal bases for this effective subspace.
@@ -616,37 +643,43 @@ _2D right semi-orthogonal transformation_
 3. **Computational Implications:**  
    The structure of \(U\) (and \(V\))—which have fewer degrees of freedom due to their semi‑orthogonal nature—might be exploited via structured representations (like Householder reflectors or Givens rotations) to potentially reduce the number of parameters or improve memory efficiency. Sadly, in practice, this doesn't reduce computational cost and is harder to parallelize.
 
-
 ## Code
 
 ### 4.D Geometric Interpretation Using Reduced SVD
 
 ```python
+# Full combined visualization block (3D + 2D dot product) to verify correctness
+
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# ---------------------------------------------------------
-# 1) Define all matrices, tokens, etc.
-# ---------------------------------------------------------
+# -------------------------------
+# 1) Define matrices and tokens
+# -------------------------------
 U = np.array([[-0.8083, -0.4115],
               [-0.5877,  0.5192],
               [ 0.0367, -0.7491]])
 V = np.array([[-0.5948,  0.0413],
               [-0.7862, -0.2381],
               [-0.1676,  0.9704]])
-Sigma = np.diag([2.5, 0.8])  # Unequal singular values
-
-u1, u2 = U[:, 0], U[:, 1]
-v1, v2 = V[:, 0], V[:, 1]
+Sigma = np.diag([2.5, 0.8])  # Singular values
 
 def normalize(x):
     return x / np.linalg.norm(x)
 
-x_i = normalize(np.array([0.8, 0.3, 0.5]))  # Query token
-x_j = normalize(np.array([-0.5,  0.7, 0.5]))  # Key token
+x_i = normalize(np.array([0.8, 0.3, 0.5]))
+x_j = normalize(np.array([-0.5,  0.7, 0.5]))
 
-# 3D sphere for background
+# Reduced representations
+q_tilde = x_i @ U
+k_tilde = x_j @ V
+q_hat = Sigma @ q_tilde
+dot_product = np.dot(q_hat, k_tilde)
+
+# -------------------------------
+# 2) Prepare 3D geometry data
+# -------------------------------
 num_sphere = 50
 u_vals = np.linspace(0, 2*np.pi, num_sphere)
 v_vals = np.linspace(0, np.pi, num_sphere)
@@ -654,85 +687,72 @@ x_sphere = np.outer(np.cos(u_vals), np.sin(v_vals))
 y_sphere = np.outer(np.sin(u_vals), np.sin(v_vals))
 z_sphere = np.outer(np.ones(num_sphere), np.cos(v_vals))
 
-# Boundary circles in U-plane, V-plane
+u1, u2 = U[:, 0], U[:, 1]
+v1, v2 = V[:, 0], V[:, 1]
+
+grid_range = np.linspace(-1.5, 1.5, 25)
+A_u, B_u = np.meshgrid(grid_range, grid_range)
+plane_points_U = A_u[..., None]*u1 + B_u[..., None]*u2
+
+grid_range_v = np.linspace(-1.5, 1.5, 25)
+A_v, B_v = np.meshgrid(grid_range_v, grid_range_v)
+plane_points_V = A_v[..., None]*v1 + B_v[..., None]*v2
+
 t_vals = np.linspace(0, 2*np.pi, 300)
 circle_points_U = np.array([np.cos(t)*u1 + np.sin(t)*u2 for t in t_vals])
 circle_points_V = np.array([np.cos(t)*v1 + np.sin(t)*v2 for t in t_vals])
 
-# Reduced query + rescaled query
-q_tilde = x_i @ U
 q_tilde_3D = q_tilde[0]*u1 + q_tilde[1]*u2
-q_hat = Sigma @ q_tilde
-q_hat_3D = q_hat[0]*u1 + q_hat[1]*u2
-
-# Reduced key (no rescaling)
-k_tilde = x_j @ V
+q_hat_3D   = q_hat[0]*u1   + q_hat[1]*u2
 k_tilde_3D = k_tilde[0]*v1 + k_tilde[1]*v2
 
-# Rescaled ellipse in U-plane
 ellipse_points_U = np.array([
     Sigma[0,0]*np.cos(t)*u1 + Sigma[1,1]*np.sin(t)*u2
     for t in t_vals
 ])
 
-# Consistent view
+# -------------------------------
+# 3) 3D Visualizations
+# -------------------------------
 elev, azim = 30, 120
 
-# ---------------------------------------------------------
-# FIGURE A: Query-Side, side-by-side
-#   Left  = Original 3D Sphere + x_i
-#   Right = Range(U) + reduced query
-# ---------------------------------------------------------
+# Figure A: Query-Side
 figA = plt.figure(figsize=(12, 5))
 
-# Left subplot: sphere + x_i
+# A.1) Sphere + x_i
 axA1 = figA.add_subplot(1, 2, 1, projection='3d')
 axA1.plot_surface(x_sphere, y_sphere, z_sphere, color='lightblue', alpha=0.2, edgecolor='gray')
-axA1.quiver(0,0,0, 1,0,0, color='r', linestyle='dashed', label='x-axis')
-axA1.quiver(0,0,0, 0,1,0, color='g', linestyle='dashed', label='y-axis')
-axA1.quiver(0,0,0, 0,0,1, color='b', linestyle='dashed', label='z-axis')
-axA1.quiver(0,0,0, x_i[0], x_i[1], x_i[2], color='magenta', linewidth=3, arrow_length_ratio=0.1, label='$x_i$')
+axA1.quiver(0,0,0, 1,0,0, color='r', linestyle='dashed')
+axA1.quiver(0,0,0, 0,1,0, color='g', linestyle='dashed')
+axA1.quiver(0,0,0, 0,0,1, color='b', linestyle='dashed')
+axA1.quiver(0,0,0, x_i[0], x_i[1], x_i[2], color='magenta', linewidth=3, arrow_length_ratio=0.1)
 axA1.scatter(x_i[0], x_i[1], x_i[2], color='magenta', s=100)
 axA1.set_title('Original 3D Sphere + $x_i$')
 axA1.set_xlim([-1.5, 1.5]); axA1.set_ylim([-1.5, 1.5]); axA1.set_zlim([-1.5, 1.5])
-axA1.legend()
 axA1.view_init(elev=elev, azim=azim)
 
-# Right subplot: Range(U) + reduced query
+# A.2) Range(U) + reduced query
 axA2 = figA.add_subplot(1, 2, 2, projection='3d')
-grid_range = np.linspace(-1.5, 1.5, 25)
-A_u, B_u = np.meshgrid(grid_range, grid_range)
-plane_points_U = A_u[..., None]*u1 + B_u[..., None]*u2
 plane_x_U = plane_points_U[:,:,0]
 plane_y_U = plane_points_U[:,:,1]
 plane_z_U = plane_points_U[:,:,2]
 axA2.plot_surface(plane_x_U, plane_y_U, plane_z_U, alpha=0.15, color='gray', edgecolor='none')
+axA2.plot3D(circle_points_U[:,0], circle_points_U[:,1], circle_points_U[:,2], color='purple', linewidth=1.5)
 
-cxU = circle_points_U[:,0]
-cyU = circle_points_U[:,1]
-czU = circle_points_U[:,2]
-axA2.plot3D(cxU, cyU, czU, color='purple', linewidth=1.5, label='Boundary Circle')
-
-axA2.quiver(0,0,0, u1[0],u1[1],u1[2], color='r', linestyle='dashed', label='$u_1$')
-axA2.quiver(0,0,0, u2[0],u2[1],u2[2], color='b', linestyle='dashed', label='$u_2$')
+axA2.quiver(0,0,0, u1[0],u1[1],u1[2], color='r', linestyle='dashed')
+axA2.quiver(0,0,0, u2[0],u2[1],u2[2], color='b', linestyle='dashed')
 axA2.quiver(0,0,0, q_tilde_3D[0], q_tilde_3D[1], q_tilde_3D[2],
-            color='magenta', linewidth=3, arrow_length_ratio=0.1, label='$\\tilde{q}_i$')
+            color='magenta', linewidth=3, arrow_length_ratio=0.1)
 axA2.scatter(q_tilde_3D[0], q_tilde_3D[1], q_tilde_3D[2], color='magenta', s=100)
 axA2.set_title('Range(U) + $\\tilde{q}_i$')
 axA2.set_xlim([-1.5, 1.5]); axA2.set_ylim([-1.5, 1.5]); axA2.set_zlim([-1.5, 1.5])
-axA2.legend()
 axA2.view_init(elev=elev, azim=azim)
-
 plt.tight_layout()
 plt.show()
 
-# ---------------------------------------------------------
-# FIGURE B: Rescaled query ellipse
-# ---------------------------------------------------------
+# Figure B: Rescaled query ellipse
 figB = plt.figure(figsize=(6,5))
 axB = figB.add_subplot(111, projection='3d')
-
-# Larger plane
 grid_range2 = np.linspace(-3, 3, 30)
 A2, B2 = np.meshgrid(grid_range2, grid_range2)
 plane_points2_U = A2[..., None]*u1 + B2[..., None]*u2
@@ -740,82 +760,89 @@ px2U = plane_points2_U[:,:,0]
 py2U = plane_points2_U[:,:,1]
 pz2U = plane_points2_U[:,:,2]
 axB.plot_surface(px2U, py2U, pz2U, alpha=0.15, color='gray', edgecolor='none')
+axB.plot3D(circle_points_U[:,0], circle_points_U[:,1], circle_points_U[:,2], color='purple', linewidth=1.5)
 
-# Original circle
-axB.plot3D(cxU, cyU, czU, color='purple', linewidth=1.5, label='Original Circle')
-
-# Dashed basis
-axB.quiver(0,0,0, *u1, color='r', linestyle='dashed', label='$u_1$')
-axB.quiver(0,0,0, *u2, color='b', linestyle='dashed', label='$u_2$')
-
-# Original reduced query
+axB.quiver(0,0,0, *u1, color='r', linestyle='dashed')
+axB.quiver(0,0,0, *u2, color='b', linestyle='dashed')
 axB.quiver(0,0,0, q_tilde_3D[0], q_tilde_3D[1], q_tilde_3D[2],
-           color='magenta', linewidth=3, arrow_length_ratio=0.1, label='$\\tilde{q}_i$')
+           color='magenta', linewidth=3, arrow_length_ratio=0.1)
 axB.scatter(q_tilde_3D[0], q_tilde_3D[1], q_tilde_3D[2], color='magenta', s=100)
-
-# Rescaled query
 axB.quiver(0,0,0, q_hat_3D[0], q_hat_3D[1], q_hat_3D[2],
-           color='green', linewidth=3, arrow_length_ratio=0.1, label='$\\hat{q}_i$')
+           color='green', linewidth=3, arrow_length_ratio=0.1)
 axB.scatter(q_hat_3D[0], q_hat_3D[1], q_hat_3D[2], color='green', s=100)
-
-# Rescaled ellipse
-exU = ellipse_points_U[:,0]
-eyU = ellipse_points_U[:,1]
-ezU = ellipse_points_U[:,2]
-axB.plot3D(exU, eyU, ezU, color='green', linewidth=2, label='Rescaled Ellipse')
-
+axB.plot3D(ellipse_points_U[:,0], ellipse_points_U[:,1], ellipse_points_U[:,2], color='green', linewidth=2)
 axB.set_xlim([-3, 3]); axB.set_ylim([-3, 3]); axB.set_zlim([-3, 3])
 axB.set_title('Range(U): Rescaling $\\tilde{q}_i$ via $\\Sigma$')
-axB.legend()
 axB.view_init(elev=elev, azim=azim)
 plt.tight_layout()
 plt.show()
 
-# ---------------------------------------------------------
-# FIGURE C: Key-Side, side-by-side
-#   Left  = Original 3D Sphere + x_j
-#   Right = Range(V) + reduced key
-# ---------------------------------------------------------
+# Figure C: Key-Side
 figC = plt.figure(figsize=(12, 5))
-
-# Left subplot: sphere + x_j
 axC1 = figC.add_subplot(1, 2, 1, projection='3d')
 axC1.plot_surface(x_sphere, y_sphere, z_sphere, color='lightblue', alpha=0.2, edgecolor='gray')
-axC1.quiver(0,0,0, 1,0,0, color='r', linestyle='dashed', label='x-axis')
-axC1.quiver(0,0,0, 0,1,0, color='g', linestyle='dashed', label='y-axis')
-axC1.quiver(0,0,0, 0,0,1, color='b', linestyle='dashed', label='z-axis')
-axC1.quiver(0,0,0, x_j[0], x_j[1], x_j[2], color='orange', linewidth=3, arrow_length_ratio=0.1, label='$x_j$')
+axC1.quiver(0,0,0, 1,0,0, color='r', linestyle='dashed')
+axC1.quiver(0,0,0, 0,1,0, color='g', linestyle='dashed')
+axC1.quiver(0,0,0, 0,0,1, color='b', linestyle='dashed')
+axC1.quiver(0,0,0, x_j[0], x_j[1], x_j[2], color='orange',
+            linewidth=3, arrow_length_ratio=0.1)
 axC1.scatter(x_j[0], x_j[1], x_j[2], color='orange', s=100)
 axC1.set_title('Original 3D Sphere + $x_j$')
 axC1.set_xlim([-1.5, 1.5]); axC1.set_ylim([-1.5, 1.5]); axC1.set_zlim([-1.5, 1.5])
-axC1.legend()
 axC1.view_init(elev=elev, azim=azim)
 
-# Right subplot: Range(V) + reduced key
 axC2 = figC.add_subplot(1, 2, 2, projection='3d')
-grid_range_v = np.linspace(-1.5, 1.5, 25)
-A_v, B_v = np.meshgrid(grid_range_v, grid_range_v)
-plane_points_v = A_v[..., None]*v1 + B_v[..., None]*v2
-pxV = plane_points_v[:,:,0]
-pyV = plane_points_v[:,:,1]
-pzV = plane_points_v[:,:,2]
-axC2.plot_surface(pxV, pyV, pzV, alpha=0.15, color='gray', edgecolor='none')
+plane_x_V = plane_points_V[:,:,0]
+plane_y_V = plane_points_V[:,:,1]
+plane_z_V = plane_points_V[:,:,2]
+axC2.plot_surface(plane_x_V, plane_y_V, plane_z_V, alpha=0.15, color='gray', edgecolor='none')
+axC2.plot3D(circle_points_V[:,0], circle_points_V[:,1], circle_points_V[:,2], color='orange', linewidth=1.5)
 
-cxV = circle_points_V[:,0]
-cyV = circle_points_V[:,1]
-czV = circle_points_V[:,2]
-axC2.plot3D(cxV, cyV, czV, color='orange', linewidth=1.5, label='Boundary Circle')
-
-axC2.quiver(0,0,0, v1[0],v1[1],v1[2], color='r', linestyle='dashed', label='$v_1$')
-axC2.quiver(0,0,0, v2[0],v2[1],v2[2], color='b', linestyle='dashed', label='$v_2$')
+axC2.quiver(0,0,0, v1[0],v1[1],v1[2], color='r', linestyle='dashed')
+axC2.quiver(0,0,0, v2[0],v2[1],v2[2], color='b', linestyle='dashed')
 axC2.quiver(0,0,0, k_tilde_3D[0], k_tilde_3D[1], k_tilde_3D[2],
-            color='orange', linewidth=3, arrow_length_ratio=0.1, label='$\\tilde{k}_j$')
+            color='orange', linewidth=3, arrow_length_ratio=0.1)
 axC2.scatter(k_tilde_3D[0], k_tilde_3D[1], k_tilde_3D[2], color='orange', s=100)
 axC2.set_title('Range(V) + $\\tilde{k}_j$')
 axC2.set_xlim([-1.5, 1.5]); axC2.set_ylim([-1.5, 1.5]); axC2.set_zlim([-1.5, 1.5])
-axC2.legend()
 axC2.view_init(elev=elev, azim=azim)
+plt.tight_layout()
+plt.show()
 
+# -------------------------------
+# 4) 2D Dot Product Visualization
+# -------------------------------
+norm_q_hat = np.linalg.norm(q_hat)
+proj_length = np.dot(k_tilde, q_hat) / norm_q_hat
+proj_vector = (proj_length / norm_q_hat) * q_hat
+
+figD, axD = plt.subplots(figsize=(6,6))
+axD.axhline(0, color='gray', lw=0.5)
+axD.axvline(0, color='gray', lw=0.5)
+axD.quiver(0, 0, q_hat[0], q_hat[1], angles='xy', scale_units='xy', scale=1,
+           color='green', width=0.005, label=r'$\hat{q} = \Sigma\,\tilde{q}$')
+axD.quiver(0, 0, k_tilde[0], k_tilde[1], angles='xy', scale_units='xy', scale=1,
+           color='orange', width=0.005, label=r'$\tilde{k}$')
+axD.plot([0, proj_vector[0]], [0, proj_vector[1]], color='blue', linestyle='dashed', linewidth=2,
+         label='Projection of $\\tilde{k}$ onto $\\hat{q}$')
+
+axD.plot(q_hat[0], q_hat[1], 'go', markersize=8)
+axD.plot(k_tilde[0], k_tilde[1], 'o', color='orange', markersize=8)
+axD.plot(proj_vector[0], proj_vector[1], 'bo', markersize=8)
+
+textstr = (r'$\hat{q}^\top\,\tilde{k} = ||\hat{q}||\,||\mathrm{proj}_{\hat{q}}(\tilde{k})||$' + '\n' +
+           r'$= %.2f \times %.2f = %.2f$' % (norm_q_hat, abs(proj_length), dot_product))
+axD.text(0.05, 0.95, textstr, transform=axD.transAxes, fontsize=12,
+         verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+
+max_val = max(np.linalg.norm(q_hat), np.linalg.norm(k_tilde)) + 1
+axD.set_xlim(-max_val, max_val)
+axD.set_ylim(-max_val, max_val)
+axD.set_xlabel('Dimension 1')
+axD.set_ylabel('Dimension 2')
+axD.set_title('Geometric Visualization of the Dot Product')
+axD.legend()
+axD.grid(True)
 plt.tight_layout()
 plt.show()
 ```
