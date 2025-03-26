@@ -119,30 +119,42 @@ $$
 $$
 
 where $$ \|y - \hat{y}\|_2^2 $$ is the sum of squared residuals—the loss we’re minimizing.
-<!-- 
+
 <script type="text/tikz">
-\usepackage{amsmath}
-\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing,angles,quotes}
+
 \begin{document}
-\begin{tikzpicture}[scale=1.2, thick]
-  % Axes
-  \draw[->] (-0.5,0) -- (4.5,0) node[anchor=west] {\footnotesize $\text{span}(\mathbf{1})$};
-  \draw[->] (0,-0.5) -- (0,3.5) node[anchor=south east] {\footnotesize $\mathbb{R}^n$};
+\begin{tikzpicture}[scale=1.0]
 
-  % y vector
-  \draw[->, blue, very thick] (0,0) -- (2.2,2.8) node[anchor=south west] {\footnotesize $y$};
+% Axes (for context, optional)
+\draw[->] (0,0) -- (4,0) node[right] {$y_1$};
+\draw[->] (0,0) -- (0,4) node[above] {$y_2$};
 
-  % projection (onto horizontal axis)
-  \draw[->, orange, very thick] (0,0) -- (3.3,0) node[anchor=north] {\footnotesize $\hat{y}$};
+% Constant subspace (y=x line)
+\draw[thick] (0,0) -- (3.5,3.5) node[above right] {Subspace of constant vectors};
 
-  % residual vector
-  \draw[->, red, dashed, thick] (3.3,0) -- (2.2,2.8) node[midway, right=2pt] {\footnotesize $y - \hat{y}$};
+% Original vector y
+\draw[thick,->] (0,0) -- (3,1.5) node[right] {$y=(y_1,y_2)$};
 
-  % right angle indicator
-  \draw (3.1,0) -- (3.1,0.2) -- (2.9,0.2);
+% Projection line (orthogonal)
+\draw[dashed] (3,1.5) -- (2.25,2.25);
+
+% Projected vector (y_hat)
+\draw[thick,->] (0,0) -- (2.25,2.25) node[above left] {$\hat{y}=(\bar{y},\bar{y})$};
+
+% Residual vector (error)
+\draw[thick,->,red] (2.25,2.25) -- (3,1.5) node[midway,right] {$y-\hat{y}$};
+
+% Orthogonality right-angle mark
+\draw (2.25,2.25) ++(0.2,-0.2) -- ++(0.2,0.2) -- ++(-0.2,0.2);
+
+% Optional labels for clarity
+\node at (1.4,0.5) [rotate=25] {projection};
+
 \end{tikzpicture}
 \end{document}
-</script> -->
+</script>
 
 This shows that squared loss has deep geometric roots: minimizing it is equivalent to orthogonally projecting $$ y $$ onto a subspace, and the mean arises as the optimal point in that subspace. This perspective will resurface again when we look at linear regression more generally.
 
