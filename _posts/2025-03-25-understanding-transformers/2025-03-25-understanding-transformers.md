@@ -4,7 +4,7 @@ title: Understanding Transformers
 date: 2025-03-11 10:22 +0000
 description: An exploration of Transformer-based LLMs, their mathematical foundations,
   and how they work.
-image: ./assets/2025-03-25-understanding-transformers/2D_right_semi-orthogonal_transformation.png
+image: /assets/2025-03-25-understanding-transformers/2D_right_semi-orthogonal_transformation.png
 category:
 - Machine Learning
 tags:
@@ -13,6 +13,7 @@ tags:
 - LLM
 math: true
 ---
+
 # Understanding Transformers: An Iterative Exploration
 
 ## Introduction

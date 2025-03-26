@@ -233,9 +233,11 @@ jekyll_compose:
       category:
       tags:
       math: true
+      tikz: true
     posts:
       description:
       image:
       category:
       tags:
       math: true
+      tikz: true
