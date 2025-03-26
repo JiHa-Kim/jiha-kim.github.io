@@ -1,6 +1,6 @@
 ---
 layout: post
-title: What Do Loss Functions Mean?
+title: The Mean-ing of Loss Functions
 date: 2025-03-25 20:32 -0400
 description: Surface-level introduction to information geometry, exploration of basic loss functions encoding deep assumptions about our data and the goals of learning.
 image: /assets/img/loss_functions_concept.png # Suggest using a relevant image here
@@ -551,7 +551,8 @@ $$
 The choice of L2 loss fundamentally steers the learning process towards finding the *conditional mean* of the target variable. This provides a clear statistical meaning to the objective pursued when minimizing squared errors. Any deviation of our learned model 
 $$f_\theta(x)$$ from the true $$E[Y|X=x]$$ contributes to the reducible error.
 
-The minimum achievable expected squared error, obtained when $$f(X) = E[Y|X]$$, is:
+The minimum achievable expected squared error, obtained when 
+$$f(X) = E[Y|X]$$, is:
 
 $$
 E[(Y - E[Y|X])^2] = E[\text{Var}(Y|X)]
@@ -567,7 +568,7 @@ This is the expected conditional variance, representing the inherent uncertainty
 *   **L2 loss, Hilbert Spaces, Inner Products:** Briefly recap that L2 loss comes from the squared L2 norm $$ \|y-\hat{y}\|_2^2 $$, which itself derives from the standard Euclidean inner product $$ \langle u, v \rangle = u^T v $$. Hilbert spaces generalize this structure.
 *   **Linear Regression as Projection:** Connect the general result ($$f^*(x) = E[Y|X=x]$$) back to linear regression. Linear regression assumes $$E[Y|X=x]$$ is a linear function, $$w^T x + b$$. Minimizing MSE finds the best *linear* approximation to the true conditional expectation function by orthogonally projecting the target vector $$y$$ onto the subspace spanned by the input features (columns of the design matrix $$X$$).
 *   **Gauss-Markov Theorem:** Mention that under certain assumptions (linear model, errors have zero mean, are uncorrelated, and have constant variance - homoscedasticity), the Ordinary Least Squares (OLS) estimator (which minimizes SSE/MSE) is the Best Linear Unbiased Estimator (BLUE). It has the minimum variance among all linear unbiased estimators. This provides another justification for L2 loss in the linear context.
-*   **Probabilistic View: Gaussian Noise:** Show that if we assume the data follows $$ y = f(x; \theta) + \epsilon $$, where the noise $$\epsilon$$ is independent and identically distributed (i.i.d.) Gaussian with zero mean and constant variance ($$\epsilon \sim \mathcal{N}(0, \sigma^2)$$), then minimizing the MSE is equivalent to maximizing the **log-likelihood** of the data under this model.
+*   **Probabilistic View: Gaussian Noise:** Show that if we assume the data follows $$ y = f(x; \theta) + \epsilon $$, where the noise $$\epsilon$$ is independent and identically distributed (i.i.d.) Gaussian with zero mean and constant variance ($$\epsilon \sim \mathcal{N}(0, \sigma^2)$$), then minimizing the MSE is equivalent to maximizing the **log-likelihood** of the data under this model, i.e. minimizing the Shannon entropy.
     *   Likelihood: $$ P(\mathcal{D} | \theta) = \prod_{i=1}^N P(y_i | x_i, \theta) = \prod_{i=1}^N \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - f(x_i; \theta))^2}{2\sigma^2}\right) $$
     *   Log-Likelihood: $$ \log P(\mathcal{D} | \theta) = \sum_{i=1}^N \left( -\frac{1}{2}\log(2\pi\sigma^2) - \frac{(y_i - f(x_i; \theta))^2}{2\sigma^2} \right) $$
     *   Maximizing log-likelihood is equivalent to minimizing $$ \sum_{i=1}^N (y_i - f(x_i; \theta))^2 $$, which is the SSE / L2 Loss.
