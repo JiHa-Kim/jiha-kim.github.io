@@ -2,9 +2,10 @@
 layout: post
 title: Understanding Transformers
 date: 2025-03-11 10:22 +0000
-description: An exploration of Transformer-based LLMs, their mathematical foundations, and how they work.
-image: 
-category: 
+description: An exploration of Transformer-based LLMs, their mathematical foundations,
+  and how they work.
+image: ./assets/2025-03-25-understanding-transformers/2D_right_semi-orthogonal_transformation.png
+category:
 - Machine Learning
 tags:
 - Transformer
@@ -12,7 +13,6 @@ tags:
 - LLM
 math: true
 ---
-
 # Understanding Transformers: An Iterative Exploration
 
 ## Introduction
@@ -642,6 +642,52 @@ Because matrix multiplication is associative, there are many different ways to r
 
 3. **Computational Implications:**  
    The structure of \(U\) (and \(V\))—which have fewer degrees of freedom due to their semi‑orthogonal nature—might be exploited via structured representations (like Householder reflectors or Givens rotations) to potentially reduce the number of parameters or improve memory efficiency. Sadly, in practice, this doesn't reduce computational cost and is harder to parallelize.
+
+### 4.E Softmax
+
+What is softmax? Such a mysterious operation. As a black box, it is a function that takes a vector as input and normalizes its components into a probability distribution as output. Max refers to the maximum component of the vector. Thus, the name hints that the operation is a smooth approximation to the maximum component of the input.
+
+Softmax is a generalization of the sigmoid function, which is the inverse of the logistic function. But interestingly, the roots of the softmax function originate from statistical mechanics, where they are used to normalize the probabilities of a discrete distribution.
+
+Boltzmann presented his work in 1868 on the probability distribution of the kinetic energy of gas molecules. More generally, the Boltzmann distribution computes the probability of a state of a system given its energy and temperature. If the mean energy is fixed, then the Boltzmann distribution maximizes entropy. See [Wikipedia](https://en.wikipedia.org/wiki/Boltzmann_distribution) for details.
+
+The Boltzmann distribution gives:
+
+$$
+P(x) = \frac{e^{-E(x)/T}}{\sum_{x'} e^{-E(x')/T}}
+$$
+
+where $$E(x)$$ is the energy of the system at state $$x$$, and $$T$$ is the temperature. Following the physical intuition, cranking up the temperature means increasing the energy of the system, so higher energy states are more likely to be reached. Sometimes, we literally define temperature
+
+$$
+\frac{1}{T} = \left( \frac{\partial S}{\partial E} \right)_V
+$$
+
+at a fixed volume $$V$$, where $$S$$ is the entropy of the system, and $$E$$ is the internal energy of the system. Temperature measures how much energy is needed to increase the entropy of the system.
+
+If we take this interpretation literally, it means that our attention scores are negative energies in this framework. The negative sign doesn't matter, since the model can reparameterize the scores to have the opposite sign, so softmax is defined as follows:
+
+$$
+\text{softmax}(x,T) = \frac{e^{x/T}}{\sum_{x'} e^{x'/T}}
+$$
+
+This is the same as the Boltzmann distribution, but with the energy replaced by the score.
+
+See more in Artem Kirsanov's great video on [Boltzmann Machines](https://www.youtube.com/watch?v=_bqa_I5hNAo) or the document [Statistical Interpretation of Temperature and Entropy](https://www.physics.udel.edu/~glyde/PHYS813/Lectures/chapter_9.pdf).
+
+There is a critical flaw in our current version of self-attention. It doesn’t take into account the relative positions of the tokens in the sequence. In the Boltzmann distribution, we don't care at all about the "direction" information of the particles, only their energy. But unlike space, language is asymmetric.
+
+Indeed, the softmax operation is a set operation: it is invariant to the order of the inputs, treating it like a set rather than an ordered list. We will deal with this problem in the next section.
+
+## 5. Positional Encoding in Embeddings
+
+So, why do I bother to present this view of attention? The SVD is a powerful tool to decompose a linear transformation into a composition of simpler ones, but it literally works on any matrix, so it’s not limited to the attention mechanism.
+
+Yet, I find that it leads much more naturally to the intuition of attention in the embedding space.
+
+Of course, as all other machine learning tasks, you can probably just throw more models to learn positional encodings, but it has been shown empirically that it is not necessary. Modern LLMs tend to use something called [Rotary Positional Embeddings (RoPE)](https://arxiv.org/abs/2104.09864), which is a simpler and more efficient way to do it.
+
+TODO: Attention vs MLP: Choosing Ingredients vs Cooking
 
 ## Code
 
