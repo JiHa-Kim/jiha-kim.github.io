@@ -24,11 +24,11 @@ $$
 block
 $$
 
-like so. Note that sometimes, if you have an inline equation following text in the first sentence of a paragraph (this includes lists), you must escape the leftmost delimiter with a backslash. But sometimes you are not supposed to escape it, I am not sure when. I believe that you are supposed to escape it when there are characters that might be parsed as HTML or Markdown, such as an underscore like a vertical bar like in conditional expectation or probability. I am not sure if this is a bug or a feature. It is thus preferable to use the LaTeX syntax for symbols as much as possible such as $$\vert$$ or $$\ast$$. Actually, after changing all instances of a vertical bar to \vert, it seems to have fixed the issue, and now I don't have to escape it anymore.
+like so. Note that sometimes, if you have an inline equation following text in the first sentence of a paragraph (this includes lists), you must escape the leftmost delimiter with a backslash. But sometimes you are not supposed to escape it, I am not sure when. I believe that you are supposed to escape it when there are characters that might be parsed as HTML or Markdown, such as an underscore like a vertical bar like in conditional expectation or probability. I am not sure if this is a bug or a feature. It is thus preferable to use the LaTeX syntax for symbols as much as possible such as $$\vert$$ or $$\ast$$. Actually, after changing all instances of a vertical bar to \vert, it seems to have fixed the issue for the ones with underscores. So please avoid using the vertical bar symbol, only use \vert, \Vert.
 
 The syntax for lists is:
 1. $$inline$$ item
-2. item \$$inline$$
+2. item $$inline$$
 
 Inside HTML environments (like blockquotes), please use the following syntax:
 
@@ -59,13 +59,13 @@ One of the simplest settings where loss functions appear is linear regression. I
 The standard approach is to find the parameters that minimize the **Sum of Squared Errors (SSE)** between the predicted values $$\hat{y}_i$$ and the true values $$y_i$$ across all $$n$$ data points in our dataset $$\mathcal{D} = \{(x_1, y_1), \dots, (x_n, y_n)\}$$:
 
 $$
-\min_{w,b} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \min_{w,b} \sum_{i=1}^n (y_i - (w^T x_i + b))^2 = \min_{w,b} \|y - \hat{y}\|_2^2
+\min_{w,b} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \min_{w,b} \sum_{i=1}^n (y_i - (w^T x_i + b))^2 = \min_{w,b} \Vert y - \hat{y}\Vert _2^2
 $$
 
 This is often called the **L2 loss**. Minimizing the SSE is equivalent to minimizing the **Mean Squared Error (MSE)**,
 
 $$
-\min_{w,b} \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \min_{w,b} \frac{1}{n} \|y - \hat{y}\|_2^2
+\min_{w,b} \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \min_{w,b} \frac{1}{n} \Vert y - \hat{y}\Vert _2^2
 $$
 
 since they only differ by a constant factor $$1/n$$. This minimization problem is convex and can be solved efficiently, for instance, using gradient descent or even analytically via the Normal Equations. L2 loss is used in many machine learning applications, including regression and diffusion models.
@@ -154,17 +154,17 @@ There's also a powerful geometric interpretation of the mean using **orthogonal 
 
 Think of the data vector $$ y = (y_1, y_2, \dots, y_N)^T $$ as a point in $$ \mathbb{R}^N $$. Now consider the 1-dimensional subspace of $$ \mathbb{R}^N $$ that consists of all constant vectors—those of the form $$ (c, c, \dots, c)^T $$. This subspace is spanned by the all-ones vector $$ \mathbf{1} = (1, 1, \dots, 1)^T $$.
 
-Finding the constant $$c$$ that minimizes the sum of squared errors $$ \sum_{i=1}^N (y_i - c)^2 = \|y - c \mathbf{1}\|_2^2 $$ is equivalent to finding the point $$ \hat{y} = c \mathbf{1} $$ in the subspace $$ \mathcal{S} $$ that is closest to the point $$ y $$ in terms of Euclidean (L2) distance.
+Finding the constant $$c$$ that minimizes the sum of squared errors $$ \sum_{i=1}^N (y_i - c)^2 = \Vert y - c \mathbf{1}\Vert _2^2 $$ is equivalent to finding the point $$ \hat{y} = c \mathbf{1} $$ in the subspace $$ \mathcal{S} $$ that is closest to the point $$ y $$ in terms of Euclidean (L2) distance.
 
 The **Projection Theorem** in linear algebra states that this closest point $$ \hat{y} $$ is the **orthogonal projection** of $$ y $$ onto the subspace $$ \mathcal{S} $$. The formula for projecting a vector $$ y $$ onto the line spanned by a vector $$ a $$ (in our case, $$a=\mathbf{1}$$) is:
 
 $$
-\text{proj}_a y = \frac{y \cdot a}{a \cdot a} a = \frac{\langle y, a \rangle}{\|a\|_2^2} a
+\text{proj}_a y = \frac{y \cdot a}{a \cdot a} a = \frac{\langle y, a \rangle}{\Vert a\Vert _2^2} a
 $$
 
 Applying this with $$ a = \mathbf{1} $$:
 *   The dot product $$ \langle y, \mathbf{1} \rangle = y \cdot \mathbf{1} = \sum_{i=1}^N y_i \cdot 1 = \sum_{i=1}^N y_i $$.
-*   The squared norm $$ \|\mathbf{1}\|_2^2 = \mathbf{1} \cdot \mathbf{1} = \sum_{i=1}^N 1^2 = N $$.
+*   The squared norm $$ \Vert \mathbf{1}\Vert _2^2 = \mathbf{1} \cdot \mathbf{1} = \sum_{i=1}^N 1^2 = N $$.
 
 So, the orthogonal projection of $$ y $$ onto the subspace of constant vectors is:
 
@@ -177,10 +177,10 @@ The vector in the subspace $$ \mathcal{S} $$ closest to $$ y $$ is the constant 
 The **Pythagorean theorem** then relates the original vector, its projection, and the residual (error) vector $$ y - \hat{y} $$. Since $$ \hat{y} $$ is the projection onto $$ \mathcal{S} $$, the residual $$ y - \hat{y} $$ is orthogonal to $$ \mathcal{S} $$ (and thus orthogonal to $$ \hat{y} $$). Therefore:
 
 $$
-\|y\|_2^2 = \|\hat{y} + (y - \hat{y})\|_2^2 = \|\hat{y}\|_2^2 + \|y - \hat{y}\|_2^2
+\Vert y\Vert _2^2 = \Vert \hat{y} + (y - \hat{y})\Vert _2^2 = \Vert \hat{y}\Vert _2^2 + \Vert y - \hat{y}\Vert _2^2
 $$
 
-The term $$ \|y - \hat{y}\|_2^2 = \sum_{i=1}^N (y_i - \bar{y})^2 $$ is exactly the sum of squared errors (or residuals) that we minimized. This quantity is related to the sample variance ($$ s^2 = \frac{1}{N-1} \|y - \hat{y}\|_2^2 $$).
+The term $$ \Vert y - \hat{y}\Vert _2^2 = \sum_{i=1}^N (y_i - \bar{y})^2 $$ is exactly the sum of squared errors (or residuals) that we minimized. This quantity is related to the sample variance ($$ s^2 = \frac{1}{N-1} \Vert y - \hat{y}\Vert _2^2 $$).
 
 <script type="text/tikz">
 \usepackage{tikz}
@@ -239,10 +239,9 @@ The answer lies in the **Conditional Expectation**.
 
 #### Intuition and Examples
 
-Let \$$X$$ and $$Y$$ be random variables representing our inputs and targets, drawn from a joint probability distribution $$P(X, Y)$$. The **conditional expectation** of $$Y$$ given $$X=x$$, denoted $$E[Y \vert X=x]$$, represents the average value of $$Y$$ we expect to see, given that we have observed $$X$$ taking the specific value $$x$$.
+Let $$X$$ and $$Y$$ be random variables representing our inputs and targets, drawn from a joint probability distribution $$P(X, Y)$$. The **conditional expectation** of $$Y$$ given $$X=x$$, denoted $$E[Y \vert X=x]$$, represents the average value of $$Y$$ we expect to see, given that we have observed $$X$$ taking the specific value $$x$$.
 
-*   **Discrete Case:** If 
-$$X$$ and $$Y$$ are discrete, $$E[Y \vert X=x]$$ is the weighted average of possible $$y$$ values, using the conditional probabilities $$P(Y=y \vert X=x)$$ as weights:
+*   **Discrete Case:** If $$X$$ and $$Y$$ are discrete, $$E[Y \vert X=x]$$ is the weighted average of possible $$y$$ values, using the conditional probabilities $$P(Y=y \vert X=x)$$ as weights:
 
     $$
     E[Y \vert X=x] = \sum_y y \cdot P(Y=y \vert X=x) = \sum_y y \frac{P(X=x, Y=y)}{P(X=x)}
@@ -250,14 +249,13 @@ $$X$$ and $$Y$$ are discrete, $$E[Y \vert X=x]$$ is the weighted average of poss
 
     (where $$P(X=x) > 0$$).
 
-*   **Continuous Case:** If 
-$$X$$ and $$Y$$ are continuous with joint density $$p(x, y)$$, and conditional density $$p(y \vert x) = p(x, y) / p(x)$$ (where $$p(x) = \int p(x, y) dy > 0$$ is the marginal density of $$X$$), then:
+*   **Continuous Case:** If $$X$$ and $$Y$$ are continuous with joint density $$p(x, y)$$, and conditional density $$p(y \vert x) = p(x, y) / p(x)$$ (where $$p(x) = \int p(x, y) dy > 0$$ is the marginal density of $$X$$), then:
 
     $$
     E[Y \vert X=x] = \int_{-\infty}^{\infty} y \cdot p(y \vert x) \, dy
     $$
 
-In both scenarios, \$$E[Y \vert X=x]$$ gives the "local mean" of $$Y$$ in the context provided by $$X=x$$. It defines a function of $$x$$, often called the **regression function**.
+In both scenarios, $$E[Y \vert X=x]$$ gives the "local mean" of $$Y$$ in the context provided by $$X=x$$. It defines a function of $$x$$, often called the **regression function**.
 
 **Example 1 (Discrete):** Let $$X$$ be the result of a fair die roll ($$\{1, ..., 6\}$$) and $$Y = X^2$$.
 If we observe $$X=3$$, then $$Y$$ is deterministically $$3^2=9$$. So, $$E[Y \vert X=3] = 9$$.
@@ -373,8 +371,8 @@ Let's visualize the discrete example 2 and the continuous example 3.
 1.  The blue dots represent possible data points $$(x, y)$$ generated from the model $$Y = 2X + \epsilon$$.
 2.  The vertical dashed red line highlights the condition $$X=3$$.
 3.  When $$X=3$$, the only possible outcomes for $$Y$$ are 5 and 7 (orange circles), each occurring with a conditional probability of 0.5.
-4.  The conditional expectation \$$E[Y \vert X=3]$$ is the average of these possible outcomes, weighted by their probabilities: $$0.5 \times 5 + 0.5 \times 7 = 6$$. This is marked by the green star.
-5.  The dashed green line shows the function \$$y=2x$$, which represents the true conditional expectation $$E[Y\vert X=x]$$ for *any* $$x$$. Notice the green star lies exactly on this line.
+4.  The conditional expectation $$E[Y \vert X=3]$$ is the average of these possible outcomes, weighted by their probabilities: $$0.5 \times 5 + 0.5 \times 7 = 6$$. This is marked by the green star.
+5.  The dashed green line shows the function $$y=2x$$, which represents the true conditional expectation $$E[Y\vert X=x]$$ for *any* $$x$$. Notice the green star lies exactly on this line.
 
 **Diagram 2: Continuous Case (Example 3: $$Y \sim U[0, x]$$)**
 
@@ -458,7 +456,7 @@ $$E[Y\vert X=x]$$ relates to the distribution of $$Y$$ *after* fixing the value 
 #### Formal Definition (Measure-Theoretic)
 
 While the above formulas are useful, a more general and powerful definition comes from measure theory. Let 
-$$(\Omega, \mathcal{F}, P)$$ be our underlying probability space. $$X$$ and $$Y$$ are random variables defined on this space. Assume $$Y$$ is integrable ($$E[|Y|] < \infty$$).
+$$(\Omega, \mathcal{F}, P)$$ be our underlying probability space. $$X$$ and $$Y$$ are random variables defined on this space. Assume $$Y$$ is integrable ($$E[ \vert Y \vert ] < \infty$$).
 
 The **conditional expectation** of 
 $$Y$$ given $$X$$, denoted $$E[Y \vert X]$$ or more formally $$E[Y \vert \sigma(X)]$$, is defined as *any* random variable $$Z$$ that satisfies two conditions:
@@ -486,18 +484,18 @@ $$
 \langle U, V \rangle = E[UV]
 $$
 
-The squared norm induced by this inner product is $$\|V\|^2 = \langle V, V \rangle = E[V^2]$$. The distance between two random variables $$U, V$$ in this space is $$\|U - V\| = \sqrt{E[(U - V)^2]}$$. Minimizing the expected squared error $$E[(Y - f(X))^2]$$ is equivalent to minimizing the squared distance $$ \|Y - f(X)\|^2 $$ in this $$L^2$$ space.
+The squared norm induced by this inner product is $$\Vert V\Vert ^2 = \langle V, V \rangle = E[V^2]$$. The distance between two random variables $$U, V$$ in this space is $$\Vert U - V\Vert  = \sqrt{E[(U - V)^2]}$$. Minimizing the expected squared error $$E[(Y - f(X))^2]$$ is equivalent to minimizing the squared distance $$ \Vert Y - f(X)\Vert ^2 $$ in this $$L^2$$ space.
 
 We are looking for a predictor $$f(X)$$ that is a function *only* of $$X$$. This means $$f(X)$$ must belong to the subspace of $$L^2$$ consisting of random variables that are measurable with respect to the information contained in $$X$$. Let's call this subspace $$\mathcal{M} = L^2(\Omega, \sigma(X), P)$$, where $$\sigma(X)$$ is the sigma-algebra generated by $$X$$. This is a closed subspace of the full Hilbert space $$L^2(\Omega, \mathcal{F}, P)$$.
 
 Our problem is to find the element $$Z^\ast \in \mathcal{M}$$ (representing the optimal predictor $$f^\ast(X)$$) that is closest to the target random variable $$Y \in L^2(\Omega, \mathcal{F}, P)$$ in the $$L^2$$ norm. That is, we want to solve:
 
 $$
-\min_{Z \in \mathcal{M}} \|Y - Z\|^2 = \min_{f \text{ s.t. } f(X) \in \mathcal{M}} E[(Y - f(X))^2]
+\min_{Z \in \mathcal{M}} \Vert Y - Z\Vert ^2 = \min_{f \text{ s.t. } f(X) \in \mathcal{M}} E[(Y - f(X))^2]
 $$
 
 Due to the construction of Hilbert spaces to behave just like Euclidean spaces, we can extend the projection theorem in linear algebra to these spaces. The **Hilbert Projection Theorem** guarantees that for any closed subspace $$\mathcal{M}$$ of a Hilbert space $$\mathcal{H}$$, and any element $$y \in \mathcal{H}$$, there exists a unique element $$z^\ast \in \mathcal{M}$$ (the orthogonal projection of $$y$$ onto $$\mathcal{M}$$) such that:
-1.  $$z^\ast$$ minimizes the distance: $$\|y - z^\ast\| = \min_{z \in \mathcal{M}} \|y - z\|$$
+1.  $$z^\ast$$ minimizes the distance: $$\Vert y - z^\ast\Vert  = \min_{z \in \mathcal{M}} \Vert y - z\Vert $$
 2.  The error vector $$(y - z^\ast)$$ is orthogonal to the subspace $$\mathcal{M}$$. That is, $$\langle y - z^\ast, z \rangle = 0$$ for all $$z \in \mathcal{M}$$.
 
 Applying this theorem to our problem ($$\mathcal{H} = L^2(\Omega, \mathcal{F}, P)$$, $$y=Y$$, $$\mathcal{M} = L^2(\Omega, \sigma(X), P)$$): The unique minimizer $$Z^\ast$$ exists and is characterized by the orthogonality condition:
@@ -577,12 +575,12 @@ In matrix form, for $$N$$ data points, this is $$\hat{y} = X\beta$$, where $$X$$
 The L2 loss objective is to minimize the Sum of Squared Errors (SSE), which is the squared Euclidean distance between the vector of true target values $$y$$ and the vector of predictions $$\hat{y}$$.
 
 $$
-\min_{\beta} \text{SSE}(\beta) = \min_{\beta} \sum_{i=1}^N (y_i - (X\beta)_i)^2 = \min_{\beta} \|y - X\beta\|_2^2
+\min_{\beta} \text{SSE}(\beta) = \min_{\beta} \sum_{i=1}^N (y_i - (X\beta)_i)^2 = \min_{\beta} \Vert y - X\beta\Vert _2^2
 $$
 
 Now, think geometrically in the $$N$$-dimensional space where the vector $$y$$ lives. Each possible choice of coefficients $$\beta$$ defines a potential prediction vector $$\hat{y} = X\beta$$. The set of *all* possible prediction vectors that can be formed this way, i.e., $$\{X\beta \mid \beta \in \mathbb{R}^{d+1}\}$$, constitutes a subspace of $$\mathbb{R}^N$$. This is the **column space** of $$X$$, denoted $$\text{Col}(X)$$ – the subspace spanned by the columns of the design matrix (our input features, plus the intercept).
 
-Minimizing $$\|y - X\beta\|_2^2$$ is therefore equivalent to finding the vector $$\hat{y}$$ *within the column space of* $$X$$ that is **closest** to the actual target vector $$y$$, measured by Euclidean distance.
+Minimizing $$\Vert y - X\beta\Vert _2^2$$ is therefore equivalent to finding the vector $$\hat{y}$$ *within the column space of* $$X$$ that is **closest** to the actual target vector $$y$$, measured by Euclidean distance.
 
 From linear algebra (specifically, the **Projection Theorem**), we know that the unique vector in a subspace closest to an external point is the **orthogonal projection** of that point onto the subspace.
 
@@ -700,7 +698,7 @@ Let's carefully understand each term:
 
     % Target 1: Low Bias, Low Variance
     \node[target] at (c1) {};
-    \node[anchor=north] at (c1 |- 0,-1) {Low Bias, Low Var};
+    \node[anchor=north] at (c1  \vert - 0,-1) {Low Bias, Low Var};
     \foreach \i in {1,...,5} {
         \node[shot] at ($(c1) + (rand*0.2, rand*0.2)$) {};
     }
@@ -708,7 +706,7 @@ Let's carefully understand each term:
 
     % Target 2: High Bias, Low Variance
     \node[target] at (c2) {};
-    \node[anchor=north] at (c2 |- 0,-1) {High Bias, Low Var};
+    \node[anchor=north] at (c2  \vert - 0,-1) {High Bias, Low Var};
     \coordinate (bias_offset2) at (0.5, 0.3); % Consistent offset for shots
     \foreach \i in {1,...,5} {
         \node[shot] at ($(c2) + bias_offset2 + (rand*0.2, rand*0.2)$) {};
@@ -717,7 +715,7 @@ Let's carefully understand each term:
 
     % Target 3: Low Bias, High Variance
     \node[target] at (c3) {};
-    \node[anchor=north] at (c3 |- 0,-1) {Low Bias, High Var};
+    \node[anchor=north] at (c3  \vert - 0,-1) {Low Bias, High Var};
      \foreach \i in {1,...,5} {
         \node[shot] at ($(c3) + (rand*0.6, rand*0.6)$) {};
     }
@@ -725,7 +723,7 @@ Let's carefully understand each term:
 
     % Target 4: High Bias, High Variance
     \node[target] at (c4) {};
-    \node[anchor=north] at (c4 |- 0,-1) {High Bias, High Var};
+    \node[anchor=north] at (c4  \vert - 0,-1) {High Bias, High Var};
      \coordinate (bias_offset4) at (0.4, -0.4); % Consistent offset for shots' center
     \foreach \i in {1,...,5} {
         \node[shot] at ($(c4) + bias_offset4 + (rand*0.6, rand*0.6)$) {};
@@ -772,12 +770,12 @@ Note that this theorem does *not* require the errors to be normally distributed.
 ### 3. Revisiting L2 Loss and Linear Regression
 **(TODO)**
 
-*   **L2 loss, Hilbert Spaces, Inner Products:** Briefly recap that L2 loss comes from the squared L2 norm $$ \|y-\hat{y}\|_2^2 $$, which itself derives from the standard Euclidean inner product $$ \langle u, v \rangle = u^T v $$. Hilbert spaces generalize this structure.
+*   **L2 loss, Hilbert Spaces, Inner Products:** Briefly recap that L2 loss comes from the squared L2 norm $$ \Vert y-\hat{y}\Vert _2^2 $$, which itself derives from the standard Euclidean inner product $$ \langle u, v \rangle = u^T v $$. Hilbert spaces generalize this structure.
 *   **Linear Regression as Projection:** Connect the general result ($$f^\ast(x) = E[Y\vert X=x]$$) back to linear regression. Linear regression assumes $$E[Y \vert X=x]$$ is a linear function, $$w^T x + b$$. Minimizing MSE finds the best *linear* approximation to the true conditional expectation function by orthogonally projecting the target vector $$y$$ onto the subspace spanned by the input features (columns of the design matrix $$X$$). 
 *   **Gauss-Markov Theorem:** Mention that under certain assumptions (linear model, errors have zero mean, are uncorrelated, and have constant variance - homoscedasticity), the Ordinary Least Squares (OLS) estimator (which minimizes SSE/MSE) is the Best Linear Unbiased Estimator (BLUE). It has the minimum variance among all linear unbiased estimators. This provides another justification for L2 loss in the linear context.
 *   **Probabilistic View: Gaussian Noise:** Show that if we assume the data follows $$ y = f(x; \theta) + \epsilon $$, where the noise $$\epsilon$$ is independent and identically distributed (i.i.d.) Gaussian with zero mean and constant variance ($$\epsilon \sim \mathcal{N}(0, \sigma^2)$$), then minimizing the MSE is equivalent to maximizing the **log-likelihood** of the data under this model.
-    *   Likelihood: \$$ P(\mathcal{D} \vert \theta) = \prod_{i=1}^N P(y_i \vert x_i, \theta) = \prod_{i=1}^N \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - f(x_i; \theta))^2}{2\sigma^2}\right) $$
-    *   Log-Likelihood: \$$ \log P(\mathcal{D} \vert \theta) = \sum_{i=1}^N \left( -\frac{1}{2}\log(2\pi\sigma^2) - \frac{(y_i - f(x_i; \theta))^2}{2\sigma^2} \right) $$
+    *   Likelihood: $$ P(\mathcal{D} \vert \theta) = \prod_{i=1}^N P(y_i \vert x_i, \theta) = \prod_{i=1}^N \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - f(x_i; \theta))^2}{2\sigma^2}\right) $$
+    *   Log-Likelihood: $$ \log P(\mathcal{D} \vert \theta) = \sum_{i=1}^N \left( -\frac{1}{2}\log(2\pi\sigma^2) - \frac{(y_i - f(x_i; \theta))^2}{2\sigma^2} \right) $$
     *   Maximizing log-likelihood is equivalent to minimizing $$ \sum_{i=1}^N (y_i - f(x_i; \theta))^2 $$, which is the SSE / L2 Loss.
     *   Thus, using L2 loss implicitly corresponds to assuming Gaussian noise around the model's predictions.
 
@@ -785,9 +783,9 @@ Note that this theorem does *not* require the errors to be normally distributed.
 ### 4. Other Loss Functions: Estimating Different Quantities
 **(TODO - Briefly contrast L2)**
 
-*   **L1 Loss (Mean Absolute Error - MAE):** $$ \ell(y, \hat{y}) = |y - \hat{y}| $$.
-    *   Minimizing $$ \sum |y_i - c| $$ leads to the **median**, not the mean.
-    *   Minimizing $$ E[|Y - f(X)|] $$ leads to the **conditional median**, Median($$Y\vert X$$).
+*   **L1 Loss (Mean Absolute Error - MAE):** $$ \ell(y, \hat{y}) =  \vert y - \hat{y} \vert  $$.
+    *   Minimizing $$ \sum  \vert y_i - c \vert  $$ leads to the **median**, not the mean.
+    *   Minimizing $$ E[ \vert Y - f(X) \vert ] $$ leads to the **conditional median**, Median($$Y\vert X$$).
     *   Less sensitive to outliers than L2 loss.
     *   Not smoothly differentiable at zero (can use subgradients).
 *   **Huber Loss:** A combination of L2 (for small errors) and L1 (for large errors), providing robustness to outliers while being smooth near zero.
@@ -814,11 +812,11 @@ Now, how can we generalize these ideas further, especially towards classificatio
 **(TODO)**
 
 *   Introduce **Bregman Divergences** as a family of generalized "distance" measures derived from a strictly convex function $$\phi$$.
-    $$ D_\phi(p \| q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle $$
-*   Show that **Squared Euclidean Distance (L2 Loss)** is a Bregman divergence with $$\phi(x) = \|x\|_2^2 = \sum x_i^2$$.
-    $$ D_\phi(y \| \hat{y}) = \sum y_i^2 - \sum \hat{y}_i^2 - \sum (2\hat{y}_i)(y_i - \hat{y}_i) = \sum (y_i^2 - \hat{y}_i^2 - 2y_i\hat{y}_i + 2\hat{y}_i^2) = \sum (y_i^2 - 2y_i\hat{y}_i + \hat{y}_i^2) = \|y - \hat{y}\|_2^2 $$
-*   **Centroid Property:** The minimizer of the expected Bregman divergence $$ E_P[D_\phi(X \| c)] $$ is the **mean** under the distribution P: $$ c^\ast = E_P[X] $$.
-    $$ \arg\min_c E_P[D_\phi(X \| c)] = E_P[X] $$
+    $$ D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle $$
+*   Show that **Squared Euclidean Distance (L2 Loss)** is a Bregman divergence with $$\phi(x) = \Vert x\Vert _2^2 = \sum x_i^2$$.
+    $$ D_\phi(y \Vert  \hat{y}) = \sum y_i^2 - \sum \hat{y}_i^2 - \sum (2\hat{y}_i)(y_i - \hat{y}_i) = \sum (y_i^2 - \hat{y}_i^2 - 2y_i\hat{y}_i + 2\hat{y}_i^2) = \sum (y_i^2 - 2y_i\hat{y}_i + \hat{y}_i^2) = \Vert y - \hat{y}\Vert _2^2 $$
+*   **Centroid Property:** The minimizer of the expected Bregman divergence $$ E_P[D_\phi(X \Vert  c)] $$ is the **mean** under the distribution P: $$ c^\ast = E_P[X] $$.
+    $$ \arg\min_c E_P[D_\phi(X \Vert  c)] = E_P[X] $$
     This generalizes the property we saw for squared error ($$\phi(x)=x^2$$). The "mean" is the Bregman centroid.
 *   **Generalized Pythagorean Theorem:** For certain Bregman divergences, there's a notion of orthogonality and a Pythagorean-like theorem relating divergences, connecting back to projection ideas.
 *   **Bregman Information:** Mention it as a measure of statistical dispersion or heterogeneity based on Bregman divergences (e.g., Chodrow's work). Variance is the Bregman information for squared error.
@@ -829,15 +827,15 @@ Now, how can we generalize these ideas further, especially towards classificatio
 **(TODO)**
 
 *   Introduce **Kullback-Leibler (KL) Divergence** as a measure of difference between two probability distributions $$P$$ and $$Q$$.
-    $$ D_{KL}(P \| Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)} $$ (discrete) or $$ \int p(x) \log \frac{p(x)}{q(x)} dx $$ (continuous).
+    $$ D_{KL}(P \Vert  Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)} $$ (discrete) or $$ \int p(x) \log \frac{p(x)}{q(x)} dx $$ (continuous).
 *   **Properties:** Non-negative ($$D_{KL} \ge 0$$), zero iff $$P=Q$$. Not symmetric (not a true distance).
 *   **KL as a Bregman Divergence:** Show that KL divergence is a Bregman divergence derived from the **negative entropy** function $$\phi(p) = \sum p_i \log p_i$$ (up to sign/convention depending on definition). The "space" here is the space of probability distributions (probability simplex).
     Let $$p, q$$ be probability vectors. Convex function $$\phi(p) = \sum p_i \log p_i$$ (negative entropy). Gradient $$ \nabla \phi(q)_i = \log q_i + 1 $$.
-    $$ D_\phi(p \| q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle $$
+    $$ D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle $$
     $$ = \sum p_i \log p_i - \sum q_i \log q_i - \sum (\log q_i + 1)(p_i - q_i) $$
     $$ = \sum p_i \log p_i - \sum q_i \log q_i - \sum p_i \log q_i + \sum q_i \log q_i - \sum p_i + \sum q_i $$
     Since $$\sum p_i = \sum q_i = 1$$, the last two terms cancel.
-    $$ = \sum p_i (\log p_i - \log q_i) = \sum p_i \log \frac{p_i}{q_i} = D_{KL}(p \| q) $$
+    $$ = \sum p_i (\log p_i - \log q_i) = \sum p_i \log \frac{p_i}{q_i} = D_{KL}(p \Vert  q) $$
 *   **Information Geometry:** Briefly mention that KL divergence plays a central role. The space of probability distributions can be viewed as a statistical manifold. The Fisher Information Matrix acts as a Riemannian metric on this manifold, and KL divergence relates to geodesic distances locally. Bregman divergences provide dually flat structures.
 
 ---
@@ -848,9 +846,9 @@ Now, how can we generalize these ideas further, especially towards classificatio
 *   Introduce **Cross-Entropy** between two distributions $$P$$ (true) and $$Q$$ (model):
     $$ H(P, Q) = - \sum_x P(x) \log Q(x) $$ (discrete) or $$ - \int p(x) \log q(x) dx $$ (continuous).
 *   **Relationship to KL Divergence:**
-    $$ D_{KL}(P \| Q) = \sum P(x) \log P(x) - \sum P(x) \log Q(x) = -H(P) + H(P, Q) $$
+    $$ D_{KL}(P \Vert  Q) = \sum P(x) \log P(x) - \sum P(x) \log Q(x) = -H(P) + H(P, Q) $$
     where $$H(P) = -\sum P(x) \log P(x)$$ is the entropy of the true distribution $$P$$.
-*   **Minimizing Cross-Entropy:** Since $$H(P)$$ is constant with respect to the model $$Q$$, minimizing the KL divergence $$D_{KL}(P \| Q)$$ is **equivalent** to minimizing the cross-entropy $$H(P, Q)$$.
+*   **Minimizing Cross-Entropy:** Since $$H(P)$$ is constant with respect to the model $$Q$$, minimizing the KL divergence $$D_{KL}(P \Vert  Q)$$ is **equivalent** to minimizing the cross-entropy $$H(P, Q)$$.
 *   **Cross-Entropy Loss in ML:** In classification, $$P$$ is often the empirical distribution from the data (e.g., one-hot vectors for labels like $$y=(0, 1, 0)$$), and $$Q$$ is the model's predicted probability distribution $$\hat{y} = f_\theta(x)$$.
     *   For a single data point $$(x_i, y_i)$$ (where $$y_i$$ is a one-hot vector), the pointwise cross-entropy loss is:
         $$ \ell_{CE}(y_i, \hat{y}_i) = - \sum_k (y_i)_k \log (\hat{y}_i)_k $$
@@ -875,19 +873,19 @@ While L2 loss and its connection to the mean/conditional mean are foundational, 
 The L1 loss, also known as Mean Absolute Error (MAE) when averaged over the dataset, measures the absolute difference between the true value $$y$$ and the prediction $$\hat{y}$$:
 
 $$
-\ell_{L1}(y, \hat{y}) = |y - \hat{y}|
+\ell_{L1}(y, \hat{y}) =  \vert y - \hat{y} \vert 
 $$
 
 The empirical L1 loss is the average of these absolute differences:
 
 $$
-L_{L1}(\theta; \mathcal{D}) = \frac{1}{N} \sum_{i=1}^N |y_i - f_\theta(x_i)|
+L_{L1}(\theta; \mathcal{D}) = \frac{1}{N} \sum_{i=1}^N  \vert y_i - f_\theta(x_i) \vert 
 $$
 
 What statistical quantity does minimizing L1 loss target? Let's revisit the simple problem from Section 1: finding a single constant $$c$$ that best represents a dataset $$\{y_1, \dots, y_N\}$$, but this time minimizing the sum of absolute deviations:
 
 $$
-\min_{c \in \mathbb{R}} J_{L1}(c) \quad \text{where} \quad J_{L1}(c) = \sum_{i=1}^N |y_i - c|
+\min_{c \in \mathbb{R}} J_{L1}(c) \quad \text{where} \quad J_{L1}(c) = \sum_{i=1}^N  \vert y_i - c \vert 
 $$
 
 The value $$c^*$$ that minimizes this sum is the **median** of the dataset $$\{y_1, \dots, y_N\}$$. Recall that the median is the value separating the higher half from the lower half of a data sample. For an odd number of points, it's the middle value after sorting; for an even number, it's typically the average of the two middle values.
@@ -895,7 +893,7 @@ The value $$c^*$$ that minimizes this sum is the **median** of the dataset $$\{y
 Just as minimizing squared error leads to the mean, minimizing absolute error leads to the median. This extends to the conditional case:
 
 <blockquote class="prompt-tip">
-The function \( f(x) \) that minimizes the expected absolute error \( E[|Y - f(X)|] \) is the **conditional median** function, \( f^*(x) = \text{Median}(Y \vert X=x) \).
+The function \( f(x) \) that minimizes the expected absolute error \( E[ \vert Y - f(X) \vert ] \) is the **conditional median** function, \( f^*(x) = \text{Median}(Y \vert X=x) \).
 </blockquote>
 
 Models trained using MAE loss are therefore implicitly trying to approximate the conditional median of the target variable.
@@ -904,7 +902,7 @@ Models trained using MAE loss are therefore implicitly trying to approximate the
 
 1.  **Target Statistic:** L1 targets the median, L2 targets the mean.
 2.  **Robustness to Outliers:** The median is less sensitive to extreme values (outliers) than the mean. Correspondingly, L1 loss is more robust to outliers than L2 loss. Squaring the error in L2 loss gives disproportionately large weight to large errors, pulling the model towards outliers. L1 loss penalizes errors linearly, making it less affected by a few very wrong predictions.
-3.  **Differentiability:** L1 loss $$|z|$$ is not differentiable at $$z=0$$. This can pose challenges for gradient-based optimization methods, which often rely on smooth gradients. Techniques like using subgradients or replacing the non-differentiable point with a smooth approximation (like in Huber loss) are employed. L2 loss is smoothly differentiable everywhere.
+3.  **Differentiability:** L1 loss $$\vert z \vert$$ is not differentiable at $$z=0$$. This can pose challenges for gradient-based optimization methods, which often rely on smooth gradients. Techniques like using subgradients or replacing the non-differentiable point with a smooth approximation (like in Huber loss) are employed. L2 loss is smoothly differentiable everywhere.
 
 #### Huber Loss: A Hybrid Approach
 
@@ -913,8 +911,8 @@ The **Huber Loss** offers a compromise between L2 and L1 loss. It behaves like L
 $$
 L_\delta(y, \hat{y}) =
 \begin{cases}
-\frac{1}{2}(y - \hat{y})^2 & \text{for } |y - \hat{y}| \le \delta \\
-\delta (|y - \hat{y}| - \frac{1}{2}\delta) & \text{for } |y - \hat{y}| > \delta
+\frac{1}{2}(y - \hat{y})^2 & \text{for }  \vert y - \hat{y} \vert  \le \delta \\
+\delta ( \vert y - \hat{y} \vert  - \frac{1}{2}\delta) & \text{for }  \vert y - \hat{y} \vert  > \delta
 \end{cases}
 $$
 
@@ -933,27 +931,27 @@ The connection we found between L2 loss and the mean ($$\min E[(X-c)^2]$$ yields
 Let $$\phi: S \to \mathbb{R}$$ be a strictly convex function defined on a convex set $$S \subseteq \mathbb{R}^d$$, which is continuously differentiable on the interior of $$S$$. The **Bregman divergence** associated with $$\phi$$ is a function $$D_\phi: S \times \text{int}(S) \to [0, \infty)$$ defined as:
 
 $$
-D_\phi(p \| q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle
+D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle
 $$
 
 Here, $$\nabla \phi(q)$$ is the gradient of $$\phi$$ evaluated at $$q$$, and $$\langle \cdot, \cdot \rangle$$ denotes the standard inner product (dot product).
 
-Geometrically, $$D_\phi(p \| q)$$ represents the difference between the value of $$\phi(p)$$ and the value of the first-order Taylor expansion of $$\phi$$ around $$q$$, evaluated at $$p$$. Because $$\phi$$ is strictly convex, this difference is always non-negative, and it equals zero if and only if $$p=q$$.
+Geometrically, $$D_\phi(p \Vert  q)$$ represents the difference between the value of $$\phi(p)$$ and the value of the first-order Taylor expansion of $$\phi$$ around $$q$$, evaluated at $$p$$. Because $$\phi$$ is strictly convex, this difference is always non-negative, and it equals zero if and only if $$p=q$$.
 
-**Important Note:** Bregman divergences are generally *not* symmetric ($$D_\phi(p \| q) \neq D_\phi(q \| p)$$) and do not satisfy the triangle inequality. Therefore, they are not true distance metrics, but they serve as useful measures of discrepancy or "generalized distance".
+**Important Note:** Bregman divergences are generally *not* symmetric ($$D_\phi(p \Vert  q) \neq D_\phi(q \Vert  p)$$) and do not satisfy the triangle inequality. Therefore, they are not true distance metrics, but they serve as useful measures of discrepancy or "generalized distance".
 
 #### Squared Euclidean Distance as a Bregman Divergence
 
-Let's see how the familiar squared Euclidean distance fits into this framework. Consider the function $$\phi(x) = \|x\|_2^2 = \sum_{i=1}^d x_i^2$$ defined on $$S = \mathbb{R}^d$$. This function is strictly convex. Its gradient is $$\nabla \phi(q) = 2q$$.
+Let's see how the familiar squared Euclidean distance fits into this framework. Consider the function $$\phi(x) = \Vert x\Vert _2^2 = \sum_{i=1}^d x_i^2$$ defined on $$S = \mathbb{R}^d$$. This function is strictly convex. Its gradient is $$\nabla \phi(q) = 2q$$.
 
 Plugging this into the Bregman divergence definition:
 
 $$
-D_\phi(p \| q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle
+D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle
 $$
 
 $$
-= \|p\|_2^2 - \|q\|_2^2 - \langle 2q, p - q \rangle
+= \Vert p\Vert _2^2 - \Vert q\Vert _2^2 - \langle 2q, p - q \rangle
 $$
 
 $$
@@ -973,22 +971,22 @@ $$
 $$
 
 $$
-= \sum_{i=1}^d (p_i - q_i)^2 = \|p - q\|_2^2
+= \sum_{i=1}^d (p_i - q_i)^2 = \Vert p - q\Vert _2^2
 $$
 
-Thus, the squared Euclidean distance is precisely the Bregman divergence generated by the convex function $$\phi(x) = \|x\|_2^2$.
+Thus, the squared Euclidean distance is precisely the Bregman divergence generated by the convex function $$\phi(x) = \Vert x\Vert _2^2$.
 
 #### The Bregman Centroid Property
 
 The connection to the mean generalizes beautifully. For any Bregman divergence $$D_\phi$$ and any probability distribution $$P$$ over $$S$$, the point $$c \in \text{int}(S)$$ that minimizes the expected divergence from points $$X$$ drawn according to $$P$$ is the **mean** (expected value) of $$X$$ under $$P$$.
 
 $$
-\arg\min_{c \in \text{int}(S)} E_P[D_\phi(X \| c)] = E_P[X]
+\arg\min_{c \in \text{int}(S)} E_P[D_\phi(X \Vert  c)] = E_P[X]
 $$
 
 This point $$E_P[X]$$ is sometimes called the **Bregman centroid** or **$$\phi$$-centroid** of the distribution $$P$$.
 
-Why is this true? Let $$J(c) = E_P[D_\phi(X \| c)] = E_P[\phi(X) - \phi(c) - \langle \nabla \phi(c), X - c \rangle]$$. Since the expectation is linear, and $$\phi(c)$$ and $$\nabla \phi(c)$$ are constant with respect to the expectation over $$X$$:
+Why is this true? Let $$J(c) = E_P[D_\phi(X \Vert  c)] = E_P[\phi(X) - \phi(c) - \langle \nabla \phi(c), X - c \rangle]$$. Since the expectation is linear, and $$\phi(c)$$ and $$\nabla \phi(c)$$ are constant with respect to the expectation over $$X$$:
 
 $$
 J(c) = E_P[\phi(X)] - \phi(c) - \langle \nabla \phi(c), E_P[X] - c \rangle
@@ -1018,15 +1016,15 @@ This confirms that the expected Bregman divergence is minimized when $$c$$ is th
 
 #### Generalized Pythagorean Theorem and Bregman Information
 
-Bregman divergences also satisfy a **generalized Pythagorean theorem**. If we consider projecting a point $$p$$ onto a convex set $$C$$ using Bregman divergence (finding $$q^* = \arg\min_{q \in C} D_\phi(p \| q)$$), then for any other point $$r \in C$$, the following holds under certain conditions:
+Bregman divergences also satisfy a **generalized Pythagorean theorem**. If we consider projecting a point $$p$$ onto a convex set $$C$$ using Bregman divergence (finding $$q^* = \arg\min_{q \in C} D_\phi(p \Vert  q)$$), then for any other point $$r \in C$$, the following holds under certain conditions:
 
 $$
-D_\phi(p \| r) \ge D_\phi(p \| q^*) + D_\phi(q^* \| r)
+D_\phi(p \Vert  r) \ge D_\phi(p \Vert  q^*) + D_\phi(q^* \Vert  r)
 $$
 
 This inequality relates the divergence from $$p$$ to $$r$$ with the divergence from $$p$$ to its projection $$q^*$$ and the divergence between the projection $$q^*$$ and $$r$$. When equality holds (which happens in dually flat spaces, common in information geometry), it resembles the Pythagorean theorem $$a^2 = b^2 + c^2$$. This reinforces the geometric projection intuition.
 
-Furthermore, the minimum value of the expected divergence, $$E_P[D_\phi(X \| E_P[X])]$$, serves as a generalized measure of the statistical dispersion or "spread" of the distribution $$P$$, analogous to variance. This quantity is sometimes called the **Bregman information** (see Chodrow, 2022). For the squared error divergence ($$\phi(x)=x^2$$), this minimum expected divergence is $$E[(X - E[X])^2]$$, which is exactly the variance.
+Furthermore, the minimum value of the expected divergence, $$E_P[D_\phi(X \Vert  E_P[X])]$$, serves as a generalized measure of the statistical dispersion or "spread" of the distribution $$P$$, analogous to variance. This quantity is sometimes called the **Bregman information** (see Chodrow, 2022). For the squared error divergence ($$\phi(x)=x^2$$), this minimum expected divergence is $$E[(X - E[X])^2]$$, which is exactly the variance.
 
 Bregman divergences provide a rich mathematical structure that generalizes concepts like distance, projection, centroids (means), and variance, connecting optimization objectives used in machine learning to deeper geometric and statistical principles.
 
@@ -1043,24 +1041,24 @@ Let $$P$$ and $$Q$$ be two probability distributions defined over the same space
 *   **Discrete Case:** If $$P$$ and $$Q$$ have probability mass functions $$p(x)$$ and $$q(x)$$, the KL divergence from $$Q$$ to $$P$$ is defined as:
 
     $$
-    D_{KL}(P \| Q) = \sum_{x \in \mathcal{X}} p(x) \log \frac{p(x)}{q(x)}
+    D_{KL}(P \Vert  Q) = \sum_{x \in \mathcal{X}} p(x) \log \frac{p(x)}{q(x)}
     $$
 
 *   **Continuous Case:** If $$P$$ and $$Q$$ have probability density functions $$p(x)$$ and $$q(x)$$, the KL divergence is:
 
     $$
-    D_{KL}(P \| Q) = \int_{\mathcal{X}} p(x) \log \frac{p(x)}{q(x)} dx
+    D_{KL}(P \Vert  Q) = \int_{\mathcal{X}} p(x) \log \frac{p(x)}{q(x)} dx
     $$
 
 (We use the convention that $$0 \log(0/q) = 0$$ and $$p \log(p/0) = \infty$$ if $$p>0$$).
 
-The KL divergence $$D_{KL}(P \| Q)$$ measures the expected value (under distribution $$P$$) of the logarithmic difference between the probabilities assigned by $$P$$ and $$Q$$. It quantifies how much information is lost when using distribution $$Q$$ to approximate the true distribution $$P$$.
+The KL divergence $$D_{KL}(P \Vert  Q)$$ measures the expected value (under distribution $$P$$) of the logarithmic difference between the probabilities assigned by $$P$$ and $$Q$$. It quantifies how much information is lost when using distribution $$Q$$ to approximate the true distribution $$P$$.
 
 #### Properties
 
-1.  **Non-negativity:** $$D_{KL}(P \| Q) \ge 0$$ always. This is a consequence of Jensen's inequality applied to the convex function $$-\log x$$.
-2.  **Identity:** $$D_{KL}(P \| Q) = 0$$ if and only if $$P = Q$$ (almost everywhere).
-3.  **Asymmetry:** In general, $$D_{KL}(P \| Q) \neq D_{KL}(Q \| P)$$. This is a crucial difference from true distance metrics. It means the "information lost" depends on which distribution is considered the approximation.
+1.  **Non-negativity:** $$D_{KL}(P \Vert  Q) \ge 0$$ always. This is a consequence of Jensen's inequality applied to the convex function $$-\log x$$.
+2.  **Identity:** $$D_{KL}(P \Vert  Q) = 0$$ if and only if $$P = Q$$ (almost everywhere).
+3.  **Asymmetry:** In general, $$D_{KL}(P \Vert  Q) \neq D_{KL}(Q \Vert  P)$$. This is a crucial difference from true distance metrics. It means the "information lost" depends on which distribution is considered the approximation.
 
 #### KL Divergence as a Bregman Divergence
 
@@ -1080,10 +1078,10 @@ $$
 
 So, the gradient vector is $$\nabla \phi(q) = (\log q_1 + 1, \dots, \log q_d + 1)$$.
 
-Now, let's compute the Bregman divergence $$D_\phi(p \| q)$$:
+Now, let's compute the Bregman divergence $$D_\phi(p \Vert  q)$$:
 
 $$
-D_\phi(p \| q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle
+D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle
 $$
 
 $$
@@ -1097,7 +1095,7 @@ $$
 Since $$p$$ and $$q$$ are probability vectors, $$\sum p_i = 1$$ and $$\sum q_i = 1$$. The last two terms cancel out ($$-1 + 1 = 0$$).
 
 $$
-D_\phi(p \| q) = \sum_i p_i \log p_i - \sum_i p_i \log q_i
+D_\phi(p \Vert  q) = \sum_i p_i \log p_i - \sum_i p_i \log q_i
 $$
 
 $$
@@ -1105,7 +1103,7 @@ $$
 $$
 
 $$
-= \sum_i p_i \log \frac{p_i}{q_i} = D_{KL}(p \| q)
+= \sum_i p_i \log \frac{p_i}{q_i} = D_{KL}(p \Vert  q)
 $$
 
 Therefore, the KL divergence is the Bregman divergence generated by the negative entropy function on the space of probability distributions.
@@ -1135,10 +1133,10 @@ Given two probability distributions $$P$$ (the "true" or target distribution) an
 
 This measures the average number of bits needed to encode events drawn from $$P$$ when using an optimal code designed for distribution $$Q$$.
 
-How does this relate to KL divergence? Let's expand the definition of $$D_{KL}(P \| Q)$$:
+How does this relate to KL divergence? Let's expand the definition of $$D_{KL}(P \Vert  Q)$$:
 
 $$
-D_{KL}(P \| Q) = \sum_x p(x) \log \frac{p(x)}{q(x)} = \sum_x p(x) (\log p(x) - \log q(x))
+D_{KL}(P \Vert  Q) = \sum_x p(x) \log \frac{p(x)}{q(x)} = \sum_x p(x) (\log p(x) - \log q(x))
 $$
 
 $$
@@ -1152,25 +1150,25 @@ $$
 The first term is the **entropy** of the true distribution $$P$$, denoted $$H(P)$$. The second term is the cross-entropy $$H(P, Q)$$.
 
 $$
-D_{KL}(P \| Q) = -H(P) + H(P, Q)
+D_{KL}(P \Vert  Q) = -H(P) + H(P, Q)
 $$
 
 Rearranging, we get:
 
 $$
-H(P, Q) = H(P) + D_{KL}(P \| Q)
+H(P, Q) = H(P) + D_{KL}(P \Vert  Q)
 $$
 
 #### Minimizing Cross-Entropy in Machine Learning
 
 In supervised learning, we are given a dataset $$\mathcal{D}$$. We can think of the "true" distribution $$P$$ as the underlying data-generating distribution, or more practically, the **empirical distribution** derived from the training data. Our model $$f_\theta$$ produces predictions, which for classification often take the form of a probability distribution $$Q = f_\theta(x)$$ over the possible classes.
 
-Our goal is to adjust the parameters $$\theta$$ to make our model's distribution $$Q$$ as close as possible to the true distribution $$P$$. We measure this "closeness" using KL divergence $$D_{KL}(P \| Q)$$.
+Our goal is to adjust the parameters $$\theta$$ to make our model's distribution $$Q$$ as close as possible to the true distribution $$P$$. We measure this "closeness" using KL divergence $$D_{KL}(P \Vert  Q)$$.
 
-According to the relationship $$H(P, Q) = H(P) + D_{KL}(P \| Q)$$, minimizing the KL divergence $$D_{KL}(P \| Q)$$ with respect to our model $$Q$$ (i.e., with respect to $$\theta$$) is **equivalent** to minimizing the cross-entropy $$H(P, Q)$$, because the entropy of the true distribution $$H(P)$$ is a constant that does not depend on our model's parameters $$\theta$$.
+According to the relationship $$H(P, Q) = H(P) + D_{KL}(P \Vert  Q)$$, minimizing the KL divergence $$D_{KL}(P \Vert  Q)$$ with respect to our model $$Q$$ (i.e., with respect to $$\theta$$) is **equivalent** to minimizing the cross-entropy $$H(P, Q)$$, because the entropy of the true distribution $$H(P)$$ is a constant that does not depend on our model's parameters $$\theta$$.
 
 <blockquote class="prompt-tip">
-Minimizing Cross-Entropy \(H(P, Q)\) with respect to the model distribution \(Q\) is equivalent to minimizing the KL Divergence \(D_{KL}(P \| Q)\).
+Minimizing Cross-Entropy \(H(P, Q)\) with respect to the model distribution \(Q\) is equivalent to minimizing the KL Divergence \(D_{KL}(P \Vert  Q)\).
 </blockquote>
 
 This is why cross-entropy is the standard loss function for training classification models that output probabilities.
@@ -1205,11 +1203,11 @@ $$
 
 #### Connection to Maximum Likelihood
 
-Minimizing the empirical cross-entropy (or average NLL) is equivalent to **maximizing the average log-likelihood** of the data under the model. If the model outputs probabilities $$q(y|x; \theta)$$, the log-likelihood of the dataset is $$\sum_i \log q(y_i|x_i; \theta)$$. For classification with one-hot targets, $$q(y_i|x_i; \theta)$$ is simply the probability assigned to the true class $$c_i$$, which is $$(\hat{y}_i)_{c_i}$$. Maximizing $$\sum_i \log (\hat{y}_i)_{c_i}$$ is equivalent to minimizing $$-\sum_i \log (\hat{y}_i)_{c_i}$$.
+Minimizing the empirical cross-entropy (or average NLL) is equivalent to **maximizing the average log-likelihood** of the data under the model. If the model outputs probabilities $$q(y \vert x; \theta)$$, the log-likelihood of the dataset is $$\sum_i \log q(y_i \vert x_i; \theta)$$. For classification with one-hot targets, $$q(y_i \vert x_i; \theta)$$ is simply the probability assigned to the true class $$c_i$$, which is $$(\hat{y}_i)_{c_i}$$. Maximizing $$\sum_i \log (\hat{y}_i)_{c_i}$$ is equivalent to minimizing $$-\sum_i \log (\hat{y}_i)_{c_i}$$.
 
 #### What does minimizing cross-entropy "mean"?
 
-Unlike L2 loss which targets the conditional *mean*, cross-entropy loss targets the **entire conditional distribution** $$P(Y|X)$$. By minimizing the KL divergence between the empirical conditional distribution (represented by the one-hot labels) and the model's predicted conditional distribution, we are driving the model to capture the correct probabilities for all classes, given the input. The parameters $$\theta$$ are adjusted to maximize the expected log probability assigned to the true outcomes, effectively making the model's distribution $$Q$$ resemble the data distribution $$P$$ as closely as possible in the sense defined by KL divergence. It's about matching the shape and uncertainty profile of the data, not just its central tendency.
+Unlike L2 loss which targets the conditional *mean*, cross-entropy loss targets the **entire conditional distribution** $$P(Y \vert X)$$. By minimizing the KL divergence between the empirical conditional distribution (represented by the one-hot labels) and the model's predicted conditional distribution, we are driving the model to capture the correct probabilities for all classes, given the input. The parameters $$\theta$$ are adjusted to maximize the expected log probability assigned to the true outcomes, effectively making the model's distribution $$Q$$ resemble the data distribution $$P$$ as closely as possible in the sense defined by KL divergence. It's about matching the shape and uncertainty profile of the data, not just its central tendency.
 
 ---
 
