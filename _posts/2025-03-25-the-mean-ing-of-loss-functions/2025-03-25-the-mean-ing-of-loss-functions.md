@@ -102,7 +102,13 @@ Now that we have a clearer definition, let's return to the question: why specifi
 
 ### 1. The Mean: A Central Point of Reference
 
-The arithmetic mean is perhaps the most fundamental statistic. For a set of numbers $$\{y_1, \dots, y_N\}$$, it's simply their sum divided by the count: $$\bar{y} = \frac{1}{N} \sum_{i=1}^N y_i$$. In probability theory, this generalizes to the **expected value** (or expectation) of a random variable $$Y$$, denoted $$E[Y]$$, representing its probability-weighted average value.
+The arithmetic mean is perhaps the most fundamental statistic. For a set of numbers $$\{y_1, \dots, y_N\}$$, it's simply their sum divided by the count: 
+
+$$
+\bar{y} = \frac{1}{N} \sum_{i=1}^N y_i.
+$$
+
+In probability theory, this generalizes to the **expected value** (or expectation) of a random variable $$Y$$, denoted $$E[Y]$$, representing its probability-weighted average value.
 
 What makes the mean so special? Let's reconsider the squared error criterion. Suppose we have a set of data points $$\{y_1, \dots, y_N\}$$, and we want to find a *single constant value* $$c$$ that is "closest" to all these points. If we define "closest" using the sum of squared differences, our objective is to find the $$c$$ that solves:
 
@@ -115,7 +121,7 @@ This is an unconstrained optimization problem. Since $$J(c)$$ is a convex quadra
 Thus, expanding:
 
 $$
-J(c) = \sum_{i=1}^N (y_i - c)^2 = \sum_{i=1}^N (y_i^2 - 2yc + c^2) = N c^2 - 2\sum_{i=1}^N y_ic + \sum_{i=1}^N y_i^2
+J(c) = \sum_{i=1}^N (y_i - c)^2 = \sum_{i=1}^N (y_i^2 - 2y_i c + c^2) = N c^2 - 2\sum_{i=1}^N y_ic + \sum_{i=1}^N y_i^2
 $$
 
 Then, we find the optimal $$c^\ast$$:
@@ -183,7 +189,6 @@ $$
 The term $$ \Vert y - \hat{y}\Vert _2^2 = \sum_{i=1}^N (y_i - \bar{y})^2 $$ is exactly the sum of squared errors (or residuals) that we minimized. This quantity is related to the sample variance ($$ s^2 = \frac{1}{N-1} \Vert y - \hat{y}\Vert _2^2 $$).
 
 <script type="text/tikz">
-\usepackage{tikz}
 \usetikzlibrary{decorations.pathreplacing,angles,quotes}
 
 \begin{document}
@@ -226,7 +231,7 @@ Before moving on, let's briefly list some key properties of Expectation, which w
 
 - **Linearity**: $$E[aX + bY] = aE[X] + bE[Y]$$
 - **Independence**: $$E[XY] = E[X]E[Y]$$
-- **Constants**: $$E[C] = C \quad \forall C \in \mathbb{R}^{m \times n}$$
+- **Constants**: $$E[C] = C \quad \forall C constant \in \mathbb{R}^{m \times n}$$
 - **Jensen's Inequality**: $$g(E[X]) \leq E[g(X)]$$ for convex $$g$$ (i.e. $$g(\lambda x + (1-\lambda)y) \leq \lambda g(x) + (1-\lambda)g(y) \quad \forall \lambda \in [0,1]$$)
 
 ---
@@ -290,7 +295,6 @@ So, the conditional expectation function is $$f(x) = x/2$$ for $$x \in [0, 1]$$.
 Let's visualize the discrete example 2 and the continuous example 3.
 
 <script type="text/tikz">
-\usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric} % Removed backgrounds library
 
 \begin{document}
@@ -380,7 +384,6 @@ This diagram illustrates finding
 $$E[Y \vert X=x]$$ where $$Y$$ is uniformly distributed on $$[0, x]$$, given $$X=x$$. We pick a specific value, say $$x=0.8$$. Given $$X=0.8$$, $$Y$$ is uniform on $$[0, 0.8]$$. The conditional expectation $$E[Y \vert X=0.8]$$ is the midpoint of this interval, which is $$0.8 / 2 = 0.4$$.
 
 <script type="text/tikz">
-\usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, calc, decorations.pathreplacing, patterns, shapes.geometric}
 
 \begin{document}
@@ -444,10 +447,10 @@ $$E[Y \vert X=x]$$ where $$Y$$ is uniformly distributed on $$[0, x]$$, given $$X
 1.  We focus on a specific value $$x=0.8$$. The vertical dashed red line indicates this condition.
 2.  Given $$X=0.8$$, the variable $$Y$$ is uniformly distributed over the interval $$[0, 0.8]$$. This range is shown by the thick blue vertical line segment along 
 $$X=0.8$$. The faint blue rectangle hints at the uniform probability density over this range.
-3.  The conditional expectation 
+1.  The conditional expectation 
 $$E[Y \vert X=0.8]$$ for a uniform distribution is its midpoint:
 $$(0 + 0.8) / 2 = 0.4$$. This is marked by the green star.
-4.  The dashed green line shows the function 
+1.  The dashed green line shows the function 
 $$y=x/2$$, which represents the true conditional expectation $$E[Y\vert X=x]$$ for *any* $$x \in [0, 1]$$. Again, the green star lies perfectly on this line.
 
 These diagrams should help clarify how 
@@ -681,7 +684,6 @@ Let's carefully understand each term:
 3.  **Variance ($$\text{Variance}[\hat{f}(x_0)] = E_{\mathcal{D}} [(\hat{f}(x_0) - E_{\mathcal{D}}[\hat{f}(x_0)])^2]$$):** This measures how much the model's prediction $$\hat{f}(x_0)$$ tends to vary *around its own average prediction* as we train it on different datasets $$\mathcal{D}$$. High variance indicates that the model is very sensitive to the specific training data; small changes in the data lead to large changes in the model's predictions. This often happens with overly complex models that fit the noise in the training data. This leads to **overfitting**.
 
 <script type="text/tikz">
-\usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning}
 
 \begin{document}
@@ -940,6 +942,8 @@ Geometrically, $$D_\phi(p \Vert  q)$$ represents the difference between the valu
 
 **Important Note:** Bregman divergences are generally *not* symmetric ($$D_\phi(p \Vert  q) \neq D_\phi(q \Vert  p)$$) and do not satisfy the triangle inequality. Therefore, they are not true distance metrics, but they serve as useful measures of discrepancy or "generalized distance".
 
+In particular, a Bregman divergence is symmetric if and only if it is the strictly convex function $$\phi$$ that generates it is a positive definite quadratic form under some Riemannian metric (sometimes called Mahalanobis distance, especially in the context of probability distributions). See [Nielsen et Nock (2007) - On the Centroids of Symmetrized Bregman Divergences](https://arxiv.org/abs/0711.3242).
+
 #### Squared Euclidean Distance as a Bregman Divergence
 
 Let's see how the familiar squared Euclidean distance fits into this framework. Consider the function $$\phi(x) = \Vert x\Vert _2^2 = \sum_{i=1}^d x_i^2$$ defined on $$S = \mathbb{R}^d$$. This function is strictly convex. Its gradient is $$\nabla \phi(q) = 2q$$.
@@ -1032,7 +1036,7 @@ Bregman divergences provide a rich mathematical structure that generalizes conce
 
 ### 6. Measuring Differences Between Distributions: KL Divergence
 
-We saw that L2 loss focuses on the (conditional) mean. Classification tasks, however, often involve predicting probability distributions over classes. How can we measure the "distance" or difference between two probability distributions? A cornerstone concept from information theory is the **Kullback-Leibler (KL) divergence**.
+We saw that L2 loss focuses on the (conditional) mean. Classification tasks, however, often involve predicting probability distributions over classes. How can we measure the "distance" or difference between two probability distributions? A cornerstone concept from information theory is the **Kullback-Leibler (KL) divergence**, also known as the **relative entropy** because it is the expected surprisal introduced when using a model for a probability distribution.
 
 #### Definition
 
@@ -1209,6 +1213,155 @@ Minimizing the empirical cross-entropy (or average NLL) is equivalent to **maxim
 
 Unlike L2 loss which targets the conditional *mean*, cross-entropy loss targets the **entire conditional distribution** $$P(Y \vert X)$$. By minimizing the KL divergence between the empirical conditional distribution (represented by the one-hot labels) and the model's predicted conditional distribution, we are driving the model to capture the correct probabilities for all classes, given the input. The parameters $$\theta$$ are adjusted to maximize the expected log probability assigned to the true outcomes, effectively making the model's distribution $$Q$$ resemble the data distribution $$P$$ as closely as possible in the sense defined by KL divergence. It's about matching the shape and uncertainty profile of the data, not just its central tendency.
 
+### 8. Total Bregman Divergence
+
+The total Bregman divergence is a normalized version of the Bregman divergence. Specifically, given a generator $$\phi$$, rather than defining the divergence as the vertical gap between the tangent point $$y$$ and a target $$x$$, we instead use the orthogonal distance between the tangent space at $$y$$ and the target $$x$$. Thus, the total Bregman divergence is invariant under change of basis.
+
+If we define a local Cartesian coordinate system $$(\vec u,v)$$ for our Bregman generator, a strictly convex function $$\phi: \mathbb{R}^n \to \mathbb{R}; u \mapsto v$$ with some vector $$u$$ and some scalar $$v$$, then our equation is $$v = \phi(u) \iff v - \phi(u) = 0$$.
+
+The tangent space at $$y$$ is then given by $$\{(u,v) \mid v = \phi(y) + \langle \nabla \phi(y), u - y \rangle \}$$. The gradient at $$(u,v)$$ is $$\nabla (u,v) = \nabla (u,\phi(u)) = (1, \nabla \phi(u))$$. 
+
+Thus, the normal vector at $$y$$ is in the direction $$(-\nabla \phi(y), 1)$$, which we normalize by dividing its length: 
+
+$$
+\hat n = \frac{1}{\sqrt{1 + \Vert \nabla \phi(y) \Vert^2}} (-\nabla \phi(y), 1).
+$$
+
+The vertical gap has coordinates $$(0, D_\phi (y, x))$$. The length of the orthogonal projection is thus: 
+
+$$
+TBD(y,x) = (0, D_\phi (y, x)) \cdot \hat n = \frac{D_\phi (y, x)}{\sqrt{1+\Vert \nabla \phi(y) \Vert^2}}.
+$$
+
+<script type="text/tikz">
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\usepackage{xcolor} % For custom colors if needed and \textcolor
+\usetikzlibrary{
+    arrows.meta,
+    calc,
+    matrix, % For the legend node
+    positioning, % Needed for 'below=of'
+    intersections
+}
+\pgfplotsset{compat=1.17}
+
+\begin{document}
+
+\begin{tikzpicture}[
+    declare function={
+        phi(\x) = 0.3*\x^2 + 0.1*\x + 0.5; % Convex function (generator)
+        phi_prime(\x) = 0.6*\x + 0.1; % Derivative of phi
+    },
+    >=Latex, % Arrow tip style
+    % Define colors for legend consistency
+    funcColor/.style={blue},
+    tanColor/.style={gray},
+    bdColor/.style={red},
+    tbdColor/.style={orange},
+    normalColor/.style={green!60!black},
+    pointColor/.style={black},
+    projColor/.style={red} % For projection line from Px to axis
+]
+
+% --- Values and Calculations ---
+\def\yval{1.5}
+\def\xval{4}
+\pgfmathsetmacro{\phix}{phi(\xval)}
+\pgfmathsetmacro{\phiy}{phi(\yval)}
+\pgfmathsetmacro{\phiyprime}{phi_prime(\yval)}
+\pgfmathsetmacro{\tanx}{phi(\yval) + phi_prime(\yval)*(\xval - \yval)}
+\pgfmathsetmacro{\BD}{\phix - \tanx}
+\pgfmathsetmacro{\nx}{- \phiyprime}
+\pgfmathsetmacro{\ny}{1}
+\pgfmathsetmacro{\normNsq}{\nx*\nx + \ny*\ny}
+\pgfmathsetmacro{\TBDval}{\BD / sqrt(\normNsq)}
+\pgfmathsetmacro{\tangentAngle}{atan(\phiyprime)}
+\pgfmathsetmacro{\normalAngle}{\tangentAngle + 90}
+
+% --- Axis Setup ---
+\begin{axis}[
+    axis lines=middle,
+    xlabel={$u$},
+    ylabel={$v$},
+    xlabel style={anchor=north east},
+    ylabel style={anchor=north east},
+    xtick={\yval, \xval},
+    xticklabels={$y$, $x$},
+    ytick=\empty,
+    ymin=-0.5, ymax=7, % Keep ymax for space
+    xmin=-2, xmax=6.5, % Keep xmax for space
+    width=11cm, height=9cm,
+    clip=false
+]
+
+% --- Plotting Elements ---
+% Function phi
+\addplot [funcColor, thick, domain=-1.5:5, samples=100, name path=phi] {phi(x)}
+    node[pos=0.98, anchor=west, font=\small] {$v=\phi(u)$};
+
+% Tangent line at y
+\addplot [tanColor, dashed, domain=-1.5:5.5, samples=2, name path=tangent] {phi(\yval) + phi_prime(\yval)*(x - \yval)};
+
+% --- Points ---
+\coordinate (Py) at (axis cs:\yval, \phiy);
+\coordinate (Px) at (axis cs:\xval, \phix);
+\coordinate (Ptan) at (axis cs:\xval, \tanx);
+\coordinate (X) at (axis cs:\xval, 0);
+
+\filldraw [pointColor] (Py) circle (1.5pt) node[anchor=east, font=\small, xshift=-2pt] {$(y, \phi(y))$};
+\filldraw [pointColor] (Px) circle (1.5pt) node[anchor=west, font=\small, xshift=2pt] {$(x, \phi(x))$};
+\filldraw [tanColor] (Ptan) circle (1.5pt);
+
+% --- Lines / Vectors ---
+\draw [bdColor, thick, <->] (Ptan) -- (Px);
+\draw [projColor, dashed, thin] (Px) -- (X);
+\draw [normalColor, thick, ->] (Py) -- ++(\normalAngle:0.8cm);
+\pgfmathsetmacro{\TBDvecX}{(\BD / \normNsq) * \nx}
+\pgfmathsetmacro{\TBDvecY}{(\BD / \normNsq) * \ny}
+\coordinate (P_proj) at ($(Px) - (axis direction cs:{\TBDvecX}, {\TBDvecY})$);
+\draw [tbdColor, thick, <->] (Px) -- (P_proj);
+\coordinate (RA_TangentDir) at (axis direction cs:{\ny}, {-\nx});
+\coordinate (RA1) at ($(P_proj)!3pt!(Px)$);
+\coordinate (RA2) at ($(P_proj)!3pt!(RA_TangentDir)$);
+\coordinate (RA3) at ($(RA1) + (RA2) - (P_proj)$);
+\draw [tanColor, thin] (RA1) -- (RA3) -- (RA2);
+
+\end{axis} % Axis ends here
+
+% --- Manual Legend ---
+\matrix (legend) [
+    matrix of nodes,
+    anchor=north west,
+    draw, thin, black,
+    inner sep=2pt,
+    nodes={anchor=west, font=\scriptsize, inner sep=1pt},
+    column 1/.style={nodes={inner xsep=0pt}},
+    column 2/.style={nodes={inner xsep=2pt}},
+    ampersand replacement=\&
+    ] at ($(current axis.north east) + (-0.1cm, -0.1cm)$)
+{
+    \node{\color{blue}\rule{0.4cm}{1pt}}; \& \node{$v = \phi(u)$ (Generator)}; \\
+    \node{\color{gray}\rule[0.5pt]{0.4cm}{0.4pt}}; \& \node{Tangent at $y$}; \\
+    \node{\color{red}\rule{0.4cm}{1pt}}; \& \node{$D_\phi(x, y)$ (Bregman Divergence)}; \\
+    \node{\color{orange}\rule{0.4cm}{1pt}}; \& \node{$TBD(x, y)$ (Total Bregman Divergence)}; \\
+    \node{\color{green!60!black}\rule{0.4cm}{1pt}}; \& \node{Normal Direction $\vec{n} \propto (-\nabla\phi(y), 1)$}; \\
+};
+
+% --- Explanatory Text Block (Positioned below legend) ---
+\node[font=\small, align=left, anchor=north west, % Set anchor
+    below=2pt of legend % Position relative to legend node
+    ]
+{
+    $TBD(x, y) = \left\| \text{proj}_{\vec{n}} \vec{v}_{BD} \right\|$ \\
+    where $\vec{v}_{BD} = (0, D_\phi(x, y))$
+};
+
+\end{tikzpicture}
+
+\end{document}
+</script>
+
 ---
 
 ## Conclusion
@@ -1232,10 +1385,11 @@ Understanding the meaning behind loss functions helps us choose appropriate ones
 
 ## Further Reading
 
-1.  **Bishop, C. M. (2006). *Pattern Recognition and Machine Learning*. Springer.** (Chapter 1 covers loss functions for regression and classification, Chapter 4 discusses linear models and links MSE to MLE).
-2.  **Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning*. Springer.** (Chapter 2 discusses loss functions and optimality, including conditional expectation).
-3.  **Nielsen, F. (2022). The Many Faces of Information Geometry. *Notices of the American Mathematical Society*, 69(1), 36-45.** ([PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)) - A great overview of Information Geometry concepts.
+Wikipedia is a great resource for all the math in this post.
+
+1.  **Wikipedia (2025). Bregman Divergence.** ([Link](https://en.wikipedia.org/wiki/Bregman_divergence)) - An excellent overview of Bregman divergences and their properties.
+2.  **Nielsen, F. (2022). The Many Faces of Information Geometry. *Notices of the American Mathematical Society*, 69(1), 36-45.** ([PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)) - A great, very short and readable introduction to Information Geometry concepts.
+3.  **Nielsen, F. (2021). Bregman Divergences, dual information geometry, and generalized convexity** [PDF](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
 4.  **Banerjee, A., Guo, X., & Wang, H. (2005). On the optimality of conditional expectation as a Bregman predictor. *IEEE Transactions on Information Theory*, 51(7), 2664-2669.** - Formalizes the connection between conditional expectation and Bregman divergences.
-5.  **Reid, M. D., & Williamson, R. C. (2010). Information, divergence and risk for binary experiments. *Journal of Machine Learning Research*, 11, 731-817.** (Section 2 provides a good overview of Bregman divergences and their properties).
-6.  **Chodrow, P. S. (2022). The Short Story of Bregman Information for Measuring Segregation.** ([Blog Post](https://www.philchodrow.prof/posts/2022-06-24-bregman/)) - An accessible introduction to Bregman information in a specific context.
-7.  **Reid, M. (2013). Meet the Bregman Divergences.** ([Blog Post](https://mark.reid.name/blog/meet-the-bregman-divergences.html)) - A classic blog post introducing Bregman divergences.
+5.  **Chodrow, P. S. (2022). The Short Story of Bregman Information for Measuring Segregation.** ([Blog Post](https://www.philchodrow.prof/posts/2022-06-24-bregman/)) - An accessible introduction to Bregman information in a specific context.
+6.  **Reid, M. (2013). Meet the Bregman Divergences.** ([Blog Post](https://mark.reid.name/blog/meet-the-bregman-divergences.html)) - A classic blog post introducing Bregman divergences.
