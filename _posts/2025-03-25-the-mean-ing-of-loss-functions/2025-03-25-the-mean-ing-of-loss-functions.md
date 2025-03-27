@@ -3,7 +3,7 @@ layout: post
 title: The Mean-ing of Loss Functions
 date: 2025-03-25 20:32 -0400
 description: Surface-level introduction to information geometry, exploration of basic loss functions encoding deep assumptions about our data and the goals of learning.
-image: /assets/img/loss_functions_concept.png # Suggest using a relevant image here
+image: 
 category: Machine Learning
 tags: [loss functions, machine learning, information theory, statistics, optimization, bregman divergence, information geometry]
 math: true
