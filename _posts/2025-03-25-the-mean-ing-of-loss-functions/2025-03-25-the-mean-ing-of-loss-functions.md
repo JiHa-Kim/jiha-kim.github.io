@@ -3,7 +3,7 @@ layout: post
 title: The Mean-ing of Loss Functions
 date: 2025-03-25 20:32 -0400
 description: Surface-level introduction to information geometry, exploration of basic loss functions encoding deep assumptions about our data and the goals of learning.
-image: 
+image: /assets/2025-03-25-the-mean-ing-of-loss-functions/The_Mean_ing_of_Loss_Functions.svg 
 category: Machine Learning
 tags: [loss functions, machine learning, information theory, statistics, optimization, bregman divergence, information geometry]
 math: true
@@ -38,7 +38,7 @@ Inside HTML environments (like blockquotes), please use the following syntax:
 block
 \]
 
-like so.
+like so. Also, HTML markers must be used rather than markdown, e.g. <b>bold</b> rather than **bold**.
 
 Within the TikZ environment, it is necessary to omit the \documentclass line.
 
@@ -152,7 +152,7 @@ Variance is the second moment of a random variable. It measures the minimum poss
 
 </blockquote>
 
----
+
 
 #### A Geometric Perspective: The Mean as a Projection
 
@@ -742,7 +742,7 @@ Let's carefully understand each term:
 </script>
 
 <blockquote class="prompt-warning">
-The **Bias-Variance Tradeoff** highlights a fundamental challenge in modeling: decreasing bias (by making the model more complex/flexible) often increases variance, and decreasing variance (by simplifying the model or using regularization) often increases bias. The goal is to find a model complexity that balances these two sources of error to minimize the total expected prediction error (\( \text{Bias}^2 + \text{Variance} \)).
+The <b>Bias-Variance Tradeoff</b> highlights a fundamental challenge in modeling: decreasing bias (by making the model more complex/flexible) often increases variance, and decreasing variance (by simplifying the model or using regularization) often increases bias. The goal is to find a model complexity that balances these two sources of error to minimize the total expected prediction error (\( \text{Bias}^2 + \text{Variance} \)).
 </blockquote>
 
 This decomposition is specific to **squared error loss** and is a cornerstone for understanding model selection, regularization (like Ridge and Lasso, which intentionally introduce some bias to dramatically reduce variance), and diagnosing under/overfitting.
@@ -774,29 +774,6 @@ Note that this theorem does *not* require the errors to be normally distributed.
 
 ---
 
-### 3. Revisiting L2 Loss and Linear Regression
-
-*   **L2 loss, Hilbert Spaces, Inner Products:** Briefly recap that L2 loss comes from the squared L2 norm $$ \Vert y-\hat{y}\Vert _2^2 $$, which itself derives from the standard Euclidean inner product $$ \langle u, v \rangle = u^T v $$. Hilbert spaces generalize this structure.
-*   **Linear Regression as Projection:** Connect the general result ($$f^\ast(x) = E[Y\vert X=x]$$) back to linear regression. Linear regression assumes $$E[Y \vert X=x]$$ is a linear function, $$w^T x + b$$. Minimizing MSE finds the best *linear* approximation to the true conditional expectation function by orthogonally projecting the target vector $$y$$ onto the subspace spanned by the input features (columns of the design matrix $$X$$). 
-*   **Gauss-Markov Theorem:** Mention that under certain assumptions (linear model, errors have zero mean, are uncorrelated, and have constant variance - homoscedasticity), the Ordinary Least Squares (OLS) estimator (which minimizes SSE/MSE) is the Best Linear Unbiased Estimator (BLUE). It has the minimum variance among all linear unbiased estimators. This provides another justification for L2 loss in the linear context.
-*   **Probabilistic View: Gaussian Noise:** Show that if we assume the data follows $$ y = f(x; \theta) + \epsilon $$, where the noise $$\epsilon$$ is independent and identically distributed (i.i.d.) Gaussian with zero mean and constant variance ($$\epsilon \sim \mathcal{N}(0, \sigma^2)$$), then minimizing the MSE is equivalent to maximizing the **log-likelihood** of the data under this model.
-    *   Likelihood: $$ P(\mathcal{D} \vert \theta) = \prod_{i=1}^N P(y_i \vert x_i, \theta) = \prod_{i=1}^N \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(y_i - f(x_i; \theta))^2}{2\sigma^2}\right) $$
-    *   Log-Likelihood: $$ \log P(\mathcal{D} \vert \theta) = \sum_{i=1}^N \left( -\frac{1}{2}\log(2\pi\sigma^2) - \frac{(y_i - f(x_i; \theta))^2}{2\sigma^2} \right) $$
-    *   Maximizing log-likelihood is equivalent to minimizing $$ \sum_{i=1}^N (y_i - f(x_i; \theta))^2 $$, which is the SSE / L2 Loss.
-    *   Thus, using L2 loss implicitly corresponds to assuming Gaussian noise around the model's predictions.
-
-
-### 4. Other Loss Functions: Estimating Different Quantities
-
-*   **L1 Loss (Mean Absolute Error - MAE):** $$ \ell(y, \hat{y}) =  \vert y - \hat{y} \vert  $$.
-    *   Minimizing $$ \sum  \vert y_i - c \vert  $$ leads to the **median**, not the mean.
-    *   Minimizing $$ E[ \vert Y - f(X) \vert ] $$ leads to the **conditional median**, Median($$Y\vert X$$).
-    *   Less sensitive to outliers than L2 loss.
-    *   Not smoothly differentiable at zero (can use subgradients).
-*   **Huber Loss:** A combination of L2 (for small errors) and L1 (for large errors), providing robustness to outliers while being smooth near zero.
-
----
-
 ### Recap
 That was a lot of math, so let's recap what we've learned so far:
 
@@ -813,112 +790,34 @@ Now, how can we generalize these ideas further, especially towards classificatio
 
 ---
 
-### 5. Bregman Divergences and Bregman Information
+### 4. Other Loss Functions: Estimating Different Quantities
 
-*   Introduce **Bregman Divergences** as a family of generalized "distance" measures derived from a strictly convex function $$\phi$$.
-    $$ D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle $$
-*   Show that **Squared Euclidean Distance (L2 Loss)** is a Bregman divergence with $$\phi(x) = \Vert x\Vert _2^2 = \sum x_i^2$$.
-    $$ D_\phi(y \Vert  \hat{y}) = \sum y_i^2 - \sum \hat{y}_i^2 - \sum (2\hat{y}_i)(y_i - \hat{y}_i) = \sum (y_i^2 - \hat{y}_i^2 - 2y_i\hat{y}_i + 2\hat{y}_i^2) = \sum (y_i^2 - 2y_i\hat{y}_i + \hat{y}_i^2) = \Vert y - \hat{y}\Vert _2^2 $$
-*   **Centroid Property:** The minimizer of the expected Bregman divergence $$ E_P[D_\phi(X \Vert  c)] $$ is the **mean** under the distribution P: $$ c^\ast = E_P[X] $$.
-    $$ \arg\min_c E_P[D_\phi(X \Vert  c)] = E_P[X] $$
-    This generalizes the property we saw for squared error ($$\phi(x)=x^2$$). The "mean" is the Bregman centroid.
-*   **Generalized Pythagorean Theorem:** For certain Bregman divergences, there's a notion of orthogonality and a Pythagorean-like theorem relating divergences, connecting back to projection ideas.
-*   **Bregman Information:** Mention it as a measure of statistical dispersion or heterogeneity based on Bregman divergences (e.g., Chodrow's work). Variance is the Bregman information for squared error.
+While L2 loss targets the conditional mean $$E[Y \vert X]$$, alternative loss functions aim for different statistical properties of the conditional distribution.
 
----
+#### L1 Loss (Mean Absolute Error - MAE)
 
-### 6. Kullback-Leibler Divergence and Information Geometry
-
-*   Introduce **Kullback-Leibler (KL) Divergence** as a measure of difference between two probability distributions $$P$$ and $$Q$$.
-    $$ D_{KL}(P \Vert  Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)} $$ (discrete) or $$ \int p(x) \log \frac{p(x)}{q(x)} dx $$ (continuous).
-*   **Properties:** Non-negative ($$D_{KL} \ge 0$$), zero iff $$P=Q$$. Not symmetric (not a true distance).
-*   **KL as a Bregman Divergence:** Show that KL divergence is a Bregman divergence derived from the **negative entropy** function $$\phi(p) = \sum p_i \log p_i$$ (up to sign/convention depending on definition). The "space" here is the space of probability distributions (probability simplex).
-    Let $$p, q$$ be probability vectors. Convex function $$\phi(p) = \sum p_i \log p_i$$ (negative entropy). Gradient $$ \nabla \phi(q)_i = \log q_i + 1 $$.
-    $$ D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle $$
-    $$ = \sum p_i \log p_i - \sum q_i \log q_i - \sum (\log q_i + 1)(p_i - q_i) $$
-    $$ = \sum p_i \log p_i - \sum q_i \log q_i - \sum p_i \log q_i + \sum q_i \log q_i - \sum p_i + \sum q_i $$
-    Since $$\sum p_i = \sum q_i = 1$$, the last two terms cancel.
-    $$ = \sum p_i (\log p_i - \log q_i) = \sum p_i \log \frac{p_i}{q_i} = D_{KL}(p \Vert  q) $$
-*   **Information Geometry:** Briefly mention that KL divergence plays a central role. The space of probability distributions can be viewed as a statistical manifold. The Fisher Information Matrix acts as a Riemannian metric on this manifold, and KL divergence relates to geodesic distances locally. Bregman divergences provide dually flat structures.
-
----
-
-### 7. Cross-Entropy Loss: Same Objective as KL-Divergence
-
-*   Introduce **Cross-Entropy** between two distributions $$P$$ (true) and $$Q$$ (model):
-    $$ H(P, Q) = - \sum_x P(x) \log Q(x) $$ (discrete) or $$ - \int p(x) \log q(x) dx $$ (continuous).
-*   **Relationship to KL Divergence:**
-    $$ D_{KL}(P \Vert  Q) = \sum P(x) \log P(x) - \sum P(x) \log Q(x) = -H(P) + H(P, Q) $$
-    where $$H(P) = -\sum P(x) \log P(x)$$ is the entropy of the true distribution $$P$$.
-*   **Minimizing Cross-Entropy:** Since $$H(P)$$ is constant with respect to the model $$Q$$, minimizing the KL divergence $$D_{KL}(P \Vert  Q)$$ is **equivalent** to minimizing the cross-entropy $$H(P, Q)$$.
-*   **Cross-Entropy Loss in ML:** In classification, $$P$$ is often the empirical distribution from the data (e.g., one-hot vectors for labels like $$y=(0, 1, 0)$$), and $$Q$$ is the model's predicted probability distribution $$\hat{y} = f_\theta(x)$$.
-    *   For a single data point $$(x_i, y_i)$$ (where $$y_i$$ is a one-hot vector), the pointwise cross-entropy loss is:
-        $$ \ell_{CE}(y_i, \hat{y}_i) = - \sum_k (y_i)_k \log (\hat{y}_i)_k $$
-        If $$y_i$$ is one-hot with the true class being $$c$$, then $$(y_i)_k = 1$$ if $$k=c$$ and 0 otherwise. The loss simplifies to:
-        $$ \ell_{CE}(y_i, \hat{y}_i) = - \log (\hat{y}_i)_c $$
-        This is the familiar **Negative Log Likelihood (NLL)** loss for multi-class classification, assuming the model outputs probabilities.
-    *   The empirical cross-entropy loss over the dataset is:
-        $$ L_{CE}(\theta) = \frac{1}{N} \sum_{i=1}^N \ell_{CE}(y_i, \hat{y}_i) = - \frac{1}{N} \sum_{i=1}^N \sum_k (y_i)_k \log (f_\theta(x_i))_k $$
-*   **Connection to Maximum Likelihood:** Minimizing empirical cross-entropy is equivalent to maximizing the average log-likelihood of the data under the model's predicted probabilities.
-*   **What does it "mean"?** Minimizing cross-entropy (or KL divergence) drives the model's predicted distribution $$Q$$ to be as close as possible to the true data distribution $$P$$ (or the empirical distribution $$P_{data}$$), where "close" is measured by KL divergence. It's about matching the *entire distribution*, not just the mean. The parameters $$\theta$$ are adjusted to maximize the *expected* log probability of the true outcomes under the model. In a sense, the goal is to match the expected "information content" or shape of the distribution.
-
----
-
-### 4. Beyond Squared Error: Estimating Different Quantities
-
-While L2 loss and its connection to the mean/conditional mean are foundational, it's not the only loss function used, nor is the mean always the most appropriate statistical quantity to target. Different loss functions implicitly aim to estimate different properties of the data distribution. Let's contrast L2 with another popular choice: L1 loss.
-
-#### L1 Loss: Mean Absolute Error (MAE)
-
-The L1 loss, also known as Mean Absolute Error (MAE) when averaged over the dataset, measures the absolute difference between the true value $$y$$ and the prediction $$\hat{y}$$:
-
+The pointwise L1 loss is the absolute difference:
 $$
 \ell_{L1}(y, \hat{y}) =  \vert y - \hat{y} \vert 
 $$
+Minimizing the sum of absolute errors $$ \sum_{i=1}^N  \vert y_i - c \vert  $$ for a constant predictor $$c$$ yields the **median** of the data $$\{y_1, \dots, y_N\}$$. More generally, the function $$f(x)$$ that minimizes the expected absolute error $$ E[  \vert Y - f(X) \vert  ] $$ is the **conditional median** function, $$ f^*(x) = \text{Median}(Y  \vert  X=x) $$.
 
-The empirical L1 loss is the average of these absolute differences:
+**Key Aspects:**
+*   **Target:** Conditional median.
+*   **Robustness:** Less sensitive to outliers than L2 loss due to linear penalization of errors.
+*   **Differentiability:** Not differentiable at $$y = \hat{y}$$, requiring techniques like subgradients for optimization.
 
-$$
-L_{L1}(\theta; \mathcal{D}) = \frac{1}{N} \sum_{i=1}^N  \vert y_i - f_\theta(x_i) \vert 
-$$
+#### Huber Loss
 
-What statistical quantity does minimizing L1 loss target? Let's revisit the simple problem from Section 1: finding a single constant $$c$$ that best represents a dataset $$\{y_1, \dots, y_N\}$$, but this time minimizing the sum of absolute deviations:
-
-$$
-\min_{c \in \mathbb{R}} J_{L1}(c) \quad \text{where} \quad J_{L1}(c) = \sum_{i=1}^N  \vert y_i - c \vert 
-$$
-
-The value $$c^\ast$$ that minimizes this sum is the **median** of the dataset $$\{y_1, \dots, y_N\}$$. Recall that the median is the value separating the higher half from the lower half of a data sample. For an odd number of points, it's the middle value after sorting; for an even number, it's typically the average of the two middle values.
-
-Just as minimizing squared error leads to the mean, minimizing absolute error leads to the median. This extends to the conditional case:
-
-<blockquote class="prompt-tip">
-The function \( f(x) \) that minimizes the expected absolute error \( E[ \vert Y - f(X) \vert ] \) is the **conditional median** function, \( f^\ast(x) = \text{Median}(Y \vert X=x) \).
-</blockquote>
-
-Models trained using MAE loss are therefore implicitly trying to approximate the conditional median of the target variable.
-
-**Key Differences from L2 (MSE):**
-
-1.  **Target Statistic:** L1 targets the median, L2 targets the mean.
-2.  **Robustness to Outliers:** The median is less sensitive to extreme values (outliers) than the mean. Correspondingly, L1 loss is more robust to outliers than L2 loss. Squaring the error in L2 loss gives disproportionately large weight to large errors, pulling the model towards outliers. L1 loss penalizes errors linearly, making it less affected by a few very wrong predictions.
-3.  **Differentiability:** L1 loss $$\vert z \vert$$ is not differentiable at $$z=0$$. This can pose challenges for gradient-based optimization methods, which often rely on smooth gradients. Techniques like using subgradients or replacing the non-differentiable point with a smooth approximation (like in Huber loss) are employed. L2 loss is smoothly differentiable everywhere.
-
-#### Huber Loss: A Hybrid Approach
-
-The **Huber Loss** offers a compromise between L2 and L1 loss. It behaves like L2 loss for small errors (near zero) but like L1 loss for large errors. It's defined piecewise:
-
+Huber loss provides a compromise between L1 and L2, defined piecewise using a threshold $$\delta$$:
 $$
 L_\delta(y, \hat{y}) =
 \begin{cases}
-\frac{1}{2}(y - \hat{y})^2 & \text{for }  \vert y - \hat{y} \vert  \le \delta \\
-\delta ( \vert y - \hat{y} \vert  - \frac{1}{2}\delta) & \text{for }  \vert y - \hat{y} \vert  > \delta
+\frac{1}{2}(y - \hat{y})^2 & \text{for }  \vert y - \hat{y} \vert  \le \delta \quad (\text{L2-like}) \\
+\delta ( \vert y - \hat{y} \vert  - \frac{1}{2}\delta) & \text{for }  \vert y - \hat{y} \vert  > \delta \quad (\text{L1-like})
 \end{cases}
 $$
-
-Here, $$\delta$$ is a threshold parameter. This loss function is quadratic near the optimum (providing smooth gradients like L2) but grows linearly for large errors (providing robustness like L1).
-
-The choice between L1, L2, Huber, or other loss functions depends on the specific goals of the modeling task and assumptions about the data, particularly the nature of the noise and the presence of outliers. Choosing L2 implicitly prioritizes minimizing variance around the mean and assumes errors are well-behaved (like Gaussian noise), while L1 prioritizes robustness and targets the central point in terms of rank (median).
+It benefits from L2's smoothness near the minimum and L1's robustness for larger errors. The choice between L1, L2, and Huber depends on the data's noise characteristics and the desired robustness.
 
 ---
 
@@ -1016,184 +915,192 @@ More generally, you can prove the following:
 
 ---
 
-### 6. Measuring Differences Between Distributions: KL Divergence
+### 6. Measuring Information and Surprise: Entropy and Cross-Entropy
 
-We saw that L2 loss focuses on the (conditional) mean. Classification tasks, however, often involve predicting probability distributions over classes. How can we measure the "distance" or difference between two probability distributions? A cornerstone concept from information theory is the **Kullback-Leibler (KL) divergence**, also known as the **relative entropy** because it is the expected surprisal introduced when using a model for a probability distribution.
+We saw that **L2 loss** focuses on the conditional **mean** $$\mathbb{E}[Y \vert X]$$, and **Bregman divergences** generalize this idea. However, many machine learning tasks, particularly **classification**, require us to work with *probability distributions*. Instead of predicting a single value, we often predict the **probability** of an input belonging to different classes.
 
-#### Definition
+How do we measure the **error** or **discrepancy** between distributions? How does this relate to **expectation**? **Information theory** provides the tools, starting with **entropy**.
 
-Let $$P$$ and $$Q$$ be two probability distributions defined over the same space $$\mathcal{X}$$.
+#### 6.1 Entropy: Expected Surprise
 
-*   **Discrete Case:** If $$P$$ and $$Q$$ have probability mass functions $$p(x)$$ and $$q(x)$$, the KL divergence from $$Q$$ to $$P$$ is defined as:
+Entropy measures the **uncertainty** of a probability distribution. The **Shannon entropy** of a distribution $$P$$ quantifies the average amount of "surprise" (or "information") contained in a random variable $$X$$ drawn from $$P$$. The **surprise** of observing an outcome $$x$$ is measured by its **negative log-probability**, $$-\log P(x)$$.
 
-    $$
-    D_{KL}(P \Vert  Q) = \sum_{x \in \mathcal{X}} p(x) \log \frac{p(x)}{q(x)}
-    $$
-
-*   **Continuous Case:** If $$P$$ and $$Q$$ have probability density functions $$p(x)$$ and $$q(x)$$, the KL divergence is:
-
-    $$
-    D_{KL}(P \Vert  Q) = \int_{\mathcal{X}} p(x) \log \frac{p(x)}{q(x)} dx
-    $$
-
-(We use the convention that $$0 \log(0/q) = 0$$ and $$p \log(p/0) = \infty$$ if $$p>0$$).
-
-The KL divergence $$D_{KL}(P \Vert  Q)$$ measures the expected value (under distribution $$P$$) of the logarithmic difference between the probabilities assigned by $$P$$ and $$Q$$. It quantifies how much information is lost when using distribution $$Q$$ to approximate the true distribution $$P$$.
-
-#### Properties
-
-1.  **Non-negativity:** $$D_{KL}(P \Vert  Q) \ge 0$$ always. This is a consequence of Jensen's inequality applied to the convex function $$-\log x$$.
-2.  **Identity:** $$D_{KL}(P \Vert  Q) = 0$$ if and only if $$P = Q$$ (almost everywhere).
-3.  **Asymmetry:** In general, $$D_{KL}(P \Vert  Q) \neq D_{KL}(Q \Vert  P)$$. This is a crucial difference from true distance metrics. It means the "information lost" depends on which distribution is considered the approximation.
-
-#### KL Divergence as a Bregman Divergence
-
-Remarkably, KL divergence also fits within the Bregman divergence framework. Consider the space of probability distributions over a finite set $$\mathcal{X} = \{1, \dots, d\}$$. A distribution can be represented by a probability vector $$p = (p_1, \dots, p_d)$$ where $$p_i \ge 0$$ and $$\sum p_i = 1$$ (this is the probability simplex).
-
-Let the convex function be the **negative entropy** (or negative Shannon entropy):
+Entropy is the **expected value** of this surprise:
 
 $$
-\phi(p) = \sum_{i=1}^d p_i \log p_i
+H(P) = \mathbb{E}_P[-\log P(X)]
 $$
 
-This function is strictly convex on the probability simplex. Its gradient components (considering $$p_i$$ as independent variables for differentiation, then restricting to the simplex) are:
+For a discrete distribution with probability mass function $$p(x)$$ over a set $$\mathcal{X}$$:
 
 $$
-\frac{\partial \phi}{\partial q_i} = \log q_i + 1
+H(P) = - \sum_{x \in \mathcal{X}} p(x) \log p(x)
 $$
 
-So, the gradient vector is $$\nabla \phi(q) = (\log q_1 + 1, \dots, \log q_d + 1)$$.
+Using log base 2 gives entropy in **bits**.
 
-Now, let's compute the Bregman divergence $$D_\phi(p \Vert  q)$$:
+##### Intuition:
+1.  If $$P$$ is a uniform distribution, all outcomes are equally likely, leading to **maximum entropy**.
+2.  If $$P$$ assigns high probability to one outcome (high certainty), entropy is **low**.
+3.  **Entropy represents the minimum number of bits** needed, on average, to encode outcomes from $$P$$.
 
-$$
-D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle
-$$
-
-$$
-= \left( \sum_i p_i \log p_i \right) - \left( \sum_i q_i \log q_i \right) - \sum_i (\log q_i + 1)(p_i - q_i)
-$$
+##### Example:
+A fair coin flip with $$P(\text{heads}) = P(\text{tails}) = 0.5$$ has entropy:
 
 $$
-= \sum_i p_i \log p_i - \sum_i q_i \log q_i - \sum_i p_i \log q_i + \sum_i q_i \log q_i - \sum_i p_i + \sum_i q_i
+H(P) = - (0.5 \log 0.5 + 0.5 \log 0.5) = 1 \text{ bit}
 $$
 
-Since $$p$$ and $$q$$ are probability vectors, $$\sum p_i = 1$$ and $$\sum q_i = 1$$. The last two terms cancel out ($$-1 + 1 = 0$$).
+A biased coin with $$P(\text{heads}) = 0.9$$ has **lower** entropy:
 
 $$
-D_\phi(p \Vert  q) = \sum_i p_i \log p_i - \sum_i p_i \log q_i
+H(P) = - (0.9 \log 0.9 + 0.1 \log 0.1) \approx 0.469
 $$
 
-$$
-= \sum_i p_i (\log p_i - \log q_i)
-$$
+Since the outcome is more predictable, **fewer bits** are needed on average to describe it.
+
+#### 6.2 Cross-Entropy: Expected Surprise Using a Model
+
+Now, suppose we have a **true distribution** $$P$$ but instead use a different distribution $$Q$$ (our **model**) to assign probabilities to outcomes. The **cross-entropy** measures the **expected surprise** of outcomes drawn from $$P$$ when evaluated using $$Q$$:
 
 $$
-= \sum_i p_i \log \frac{p_i}{q_i} = D_{KL}(p \Vert  q)
+H(P, Q) = \mathbb{E}_P[-\log Q(X)]
 $$
 
-Therefore, the KL divergence is the Bregman divergence generated by the negative entropy function on the space of probability distributions.
-
-#### Information Geometry
-
-This connection is central to the field of **Information Geometry** (see Nielsen, 2022). This field views the set of probability distributions (e.g., all Gaussian distributions, or all distributions on a finite set) as a **statistical manifold**.
-
-*   The **Fisher Information Matrix** acts as a natural Riemannian metric on this manifold, defining local distances and curvature.
-*   KL divergence is closely related to this geometry. While not a metric itself, its second-order expansion around $$P=Q$$ involves the Fisher Information metric.
-*   Bregman divergences, including KL divergence, induce a **dually flat geometry** on these statistical manifolds. This means there are two different "flat" coordinate systems (related via the convex function $$\phi$$ and its conjugate) where geodesic paths are straight lines. This structure provides powerful tools for analyzing learning algorithms and statistical inference.
-
-Essentially, KL divergence provides a natural way to measure discrepancy in the "space" of probability distributions, intrinsically linked to information content (entropy) and geometric structures.
-
----
-
-### 7. Cross-Entropy Loss: The Practical Face of KL Divergence
-
-In machine learning, particularly for classification tasks, we often encounter **Cross-Entropy Loss**. It turns out that minimizing cross-entropy is effectively the same as minimizing KL divergence, making it the practical objective function for matching probability distributions.
-
-#### Definition and Relationship to KL Divergence
-
-Given two probability distributions $$P$$ (the "true" or target distribution) and $$Q$$ (the model's predicted distribution) over the same space $$\mathcal{X}$$, the **cross-entropy** is defined as:
-
-*   **Discrete Case:** $$ H(P, Q) = - \sum_{x \in \mathcal{X}} p(x) \log q(x) $$
-*   **Continuous Case:** $$ H(P, Q) = - \int_{\mathcal{X}} p(x) \log q(x) dx $$
-
-This measures the average number of bits needed to encode events drawn from $$P$$ when using an optimal code designed for distribution $$Q$$.
-
-How does this relate to KL divergence? Let's expand the definition of $$D_{KL}(P \Vert  Q)$$:
+For a discrete probability distribution:
 
 $$
-D_{KL}(P \Vert  Q) = \sum_x p(x) \log \frac{p(x)}{q(x)} = \sum_x p(x) (\log p(x) - \log q(x))
+H(P, Q) = - \sum_{x \in \mathcal{X}} p(x) \log q(x)
 $$
 
-$$
-= \sum_x p(x) \log p(x) - \sum_x p(x) \log q(x)
-$$
+Cross-entropy quantifies **how many bits are needed on average** if we encode events from $$P$$ using probabilities from $$Q$$.
+
+Since $$H(P, Q) \geq H(P)$$, the difference:
 
 $$
-= \left( - \sum_x p(x) \log p(x) \right) + \left( - \sum_x p(x) \log q(x) \right)
+H(P, Q) - H(P)
 $$
 
-The first term is the **entropy** of the true distribution $$P$$, denoted $$H(P)$$. The second term is the cross-entropy $$H(P, Q)$$.
+represents the **extra expected surprise (or extra coding cost)** incurred by using the wrong model $$Q$$ instead of the true distribution $$P$$.
+
+#### 6.3 Cross-Entropy Loss in Machine Learning
+
+Cross-entropy is **directly used as a loss function** in classification tasks.
+
+Let’s say we have a **multi-class classification problem** with $$K$$ classes. For a given input $$x_i$$, the true label $$y_i$$ corresponds to a "true" distribution $$P_i$$ which is typically a **one-hot vector**:
+(Probability = 1 for the correct class, and 0 for all others).
+
+Our model $$f_\theta$$ takes $$x_i$$ and outputs a vector of predicted probabilities $$\hat{y}_i = f_\theta(x_i) = (\hat{y}_{i1}, \dots, \hat{y}_{iK})$$, representing the model’s distribution $$Q_i$$.
+
+The **cross-entropy loss** for this single data point is:
 
 $$
-D_{KL}(P \Vert  Q) = -H(P) + H(P, Q)
+\ell_{CE}(y_i, \hat{y}_i) = H(P_i, Q_i) = \mathbb{E}_{P_i}[-\log q_i(X)]
 $$
 
-Rearranging, we get:
+Since $$y_i$$ is a **one-hot vector**, the expectation simplifies:
 
 $$
-H(P, Q) = H(P) + D_{KL}(P \Vert  Q)
+\ell_{CE}(y_i, \hat{y}_i) = - \log (\hat{y}_i)_{c}
 $$
 
-#### Minimizing Cross-Entropy in Machine Learning
+where $$c$$ is the correct class.
 
-In supervised learning, we are given a dataset $$\mathcal{D}$$. We can think of the "true" distribution $$P$$ as the underlying data-generating distribution, or more practically, the **empirical distribution** derived from the training data. Our model $$f_\theta$$ produces predictions, which for classification often take the form of a probability distribution $$Q = f_\theta(x)$$ over the possible classes.
-
-Our goal is to adjust the parameters $$\theta$$ to make our model's distribution $$Q$$ as close as possible to the true distribution $$P$$. We measure this "closeness" using KL divergence $$D_{KL}(P \Vert  Q)$$.
-
-According to the relationship $$H(P, Q) = H(P) + D_{KL}(P \Vert  Q)$$, minimizing the KL divergence $$D_{KL}(P \Vert  Q)$$ with respect to our model $$Q$$ (i.e., with respect to $$\theta$$) is **equivalent** to minimizing the cross-entropy $$H(P, Q)$$, because the entropy of the true distribution $$H(P)$$ is a constant that does not depend on our model's parameters $$\theta$$.
-
-<blockquote class="prompt-tip">
-Minimizing Cross-Entropy \(H(P, Q)\) with respect to the model distribution \(Q\) is equivalent to minimizing the KL Divergence \(D_{KL}(P \Vert  Q)\).
-</blockquote>
-
-This is why cross-entropy is the standard loss function for training classification models that output probabilities.
-
-Let's consider a single data point $$(x_i, y_i)$$ for multi-class classification with $$K$$ classes. The true label $$y_i$$ is typically represented as a **one-hot vector**, e.g., $$y_i = (0, 0, 1, 0)$$ if the true class is the 3rd out of 4. This one-hot vector represents the empirical probability distribution $$P_i$$ for this single sample (probability 1 on the true class, 0 elsewhere). The model outputs a vector of predicted probabilities $$\hat{y}_i = f_\theta(x_i) = (\hat{y}_{i1}, \dots, \hat{y}_{iK})$$, representing the model distribution $$Q_i$$.
-
-The pointwise cross-entropy loss for this sample is:
-
-$$
-\ell_{CE}(y_i, \hat{y}_i) = H(P_i, Q_i) = - \sum_{k=1}^K (y_i)_k \log (\hat{y}_i)_k
-$$
-
-Since $$y_i$$ is one-hot, let $$c$$ be the index of the true class, so $$(y_i)_c = 1$$ and $$(y_i)_k = 0$$ for $$k \neq c$$. The sum simplifies dramatically:
-
-$$
-\ell_{CE}(y_i, \hat{y}_i) = - (1 \cdot \log (\hat{y}_i)_c + \sum_{k \neq c} 0 \cdot \log (\hat{y}_i)_k) = - \log (\hat{y}_i)_c
-$$
-
-This is exactly the **Negative Log Likelihood (NLL)** of the true class $$c$$ under the model's predicted probabilities!
-
-The total empirical cross-entropy loss over the dataset is the average of these pointwise losses:
-
-$$
-L_{CE}(\theta) = \frac{1}{N} \sum_{i=1}^N \ell_{CE}(y_i, \hat{y}_i) = - \frac{1}{N} \sum_{i=1}^N \sum_{k=1}^K (y_i)_k \log (f_\theta(x_i))_k
-$$
-
-Or, using the NLL form (where $$c_i$$ is the true class index for sample $$i$$):
+The **total empirical cross-entropy loss** (over $$N$$ training samples) is:
 
 $$
 L_{CE}(\theta) = - \frac{1}{N} \sum_{i=1}^N \log (\hat{y}_{ic_i})
 $$
 
-#### Connection to Maximum Likelihood
+This is exactly the **Negative Log Likelihood (NLL)** of the true class labels under the model’s predicted probabilities.
 
-Minimizing the empirical cross-entropy (or average NLL) is equivalent to **maximizing the average log-likelihood** of the data under the model. If the model outputs probabilities $$q(y \vert x; \theta)$$, the log-likelihood of the dataset is $$\sum_i \log q(y_i \vert x_i; \theta)$$. For classification with one-hot targets, $$q(y_i \vert x_i; \theta)$$ is simply the probability assigned to the true class $$c_i$$, which is $$(\hat{y}_i)_{c_i}$$. Maximizing $$\sum_i \log (\hat{y}_i)_{c_i}$$ is equivalent to minimizing $$-\sum_i \log (\hat{y}_i)_{c_i}$$.
+#### 6.4 Connection to Maximum Likelihood Estimation
 
-#### What does minimizing cross-entropy "mean"?
+Maximizing the likelihood of the data under our model is equivalent to **minimizing the cross-entropy loss**.
 
-Unlike L2 loss which targets the conditional *mean*, cross-entropy loss targets the **entire conditional distribution** $$P(Y \vert X)$$. By minimizing the KL divergence between the empirical conditional distribution (represented by the one-hot labels) and the model's predicted conditional distribution, we are driving the model to capture the correct probabilities for all classes, given the input. The parameters $$\theta$$ are adjusted to maximize the expected log probability assigned to the true outcomes, effectively making the model's distribution $$Q$$ resemble the data distribution $$P$$ as closely as possible in the sense defined by KL divergence. It's about matching the shape and uncertainty profile of the data, not just its central tendency.
+For independent samples, the **log-likelihood** of the dataset is:
+
+$$
+\log L(\theta; \mathcal{D}) = \sum_{i=1}^N \log P(y_i \vert x_i; \theta)
+$$
+
+Since our model assigns probabilities to classes, we have:
+
+$$
+\log L(\theta; \mathcal{D}) = \sum_{i=1}^N \log (\hat{y}_{ic_i})
+$$
+
+Maximizing this is the same as **minimizing the negative log-likelihood**, which is the **cross-entropy loss**:
+
+$$
+L_{CE}(\theta) = - \frac{1}{N} \sum_{i=1}^N \log (\hat{y}_{ic_i})
+$$
+
+<blockquote class="prompt-tip">
+Minimizing cross-entropy loss is equivalent to performing **Maximum Likelihood Estimation (MLE)** for a classification model that outputs probabilities.
+</blockquote>
+
+---
+
+### 7. KL Divergence: The Expected Extra Bits
+
+#### 7.1 Definition via Expected Log-Ratio
+
+The **Kullback-Leibler (KL) divergence** measures how much **extra information** is needed to encode samples from $$P$$ when using a mismatched model $$Q$$:
+
+$$
+D_{KL}(P \Vert Q) = \mathbb{E}_P\left[\log \frac{P(X)}{Q(X)}\right]
+$$
+
+For discrete distributions:
+
+$$
+D_{KL}(P \Vert Q) = \sum_{x \in \mathcal{X}} p(x) \log \frac{p(x)}{q(x)}
+$$
+
+#### 7.2 Alternative Definition via Entropy and Cross-Entropy
+
+Rearranging:
+
+$$
+D_{KL}(P \Vert Q) = H(P, Q) - H(P)
+$$
+
+KL divergence is the **extra expected surprise** caused by using $$Q$$ instead of $$P$$.
+
+1.  If $$P = Q$$, then $$D_{KL}(P \Vert Q) = 0$$ (no extra bits needed).
+2.  If $$P \neq Q$$, then $$D_{KL}(P \Vert Q) > 0$$ (extra bits needed).
+
+#### 7.3 Why Minimizing KL is Equivalent to Minimizing Cross-Entropy
+
+Since:
+
+$$
+D_{KL}(P \Vert Q) = H(P, Q) - H(P)
+$$
+
+Minimizing **KL divergence**:
+
+$$
+\arg\min_Q D_{KL}(P \Vert Q)
+$$
+
+is equivalent to minimizing **cross-entropy**, because $$H(P)$$ is a constant that does not depend on $$Q$$.
+
+<blockquote class="prompt-tip">
+Minimizing \(D_{KL}(P \Vert Q)\) with respect to \(Q\) is <b>equivalent</b> to minimizing the cross-entropy \(H(P, Q)\).
+</blockquote>
+
+This explains why **cross-entropy loss is used in classification**:
+1.  It **implicitly minimizes KL divergence**, bringing the model’s distribution $$Q$$ closer to the true distribution $$P$$.
+
+#### Summary
+
+1.  **Entropy $$H(P)$$** = Expected surprise of a distribution $$P$$.
+2.  **Cross-Entropy $$H(P, Q)$$** = Expected surprise when using $$Q$$ instead of $$P$$.
+3.  **KL Divergence $$D_{KL}(P \Vert Q)$$** = Extra bits needed when using $$Q$$ instead of $$P$$.
+4.  **Minimizing cross-entropy loss = Minimizing KL divergence**.
+5.  **This is why cross-entropy is used as a loss function in classification**.
 
 ### 8. Total Bregman Divergence
 
@@ -1243,12 +1150,13 @@ Understanding the meaning behind loss functions helps us choose appropriate ones
 
 Wikipedia is a great resource for all the math in this post.
 
-1.  **Wikipedia (2025). Bregman Divergence.** ([Link](https://en.wikipedia.org/wiki/Bregman_divergence)) - An excellent overview of Bregman divergences and their properties.
-2.  **Nielsen, F. (2022). The Many Faces of Information Geometry. *Notices of the American Mathematical Society*, 69(1), 36-45.** ([PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)) - A great, very short and readable introduction to Information Geometry concepts.
-3.  **Nielsen, F. (2021). Bregman Divergences, dual information geometry, and generalized convexity** [PDF](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
-4.  **Nielsen, F., Nock, R. (2007). On the Centroids of Symmetrized Bregman Divergences.** [ArXiv: 0711.3242](https://arxiv.org/abs/0711.3242)
-5.  **Banerjee, A., Guo, X., & Wang, H. (2005). On the optimality of conditional expectation as a Bregman predictor. *IEEE Transactions on Information Theory*, 51(7), 2664-2669.** - Formalizes the connection between conditional expectation and Bregman divergences.
-6.  A. Banerjee, Xin Guo and Hui Wang, "Optimal Bregman prediction and Jensen's equality," International Symposium onInformation Theory, 2004. ISIT 2004. Proceedings., Chicago, IL, 2004, pp. 169-, doi: 10.1109/ISIT.2004.1365205.
+1. **Artem Kirsanov (2024). The Key Equation Behind Probability** [YouTube video](https://www.youtube.com/watch?v=KHVR587oW8I) - Excellent visual explanation of the connection between KL divergence and entropy.
+2. **Wikipedia (2025). Bregman Divergence.** ([Link](https://en.wikipedia.org/wiki/Bregman_divergence)) - An excellent overview of Bregman divergences and their properties.
+3.  **Nielsen, F. (2022). The Many Faces of Information Geometry. *Notices of the American Mathematical Society*, 69(1), 36-45.** ([PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)) - A great, very short and readable introduction to Information Geometry concepts.
+4.  **Nielsen, F. (2021). Bregman Divergences, dual information geometry, and generalized convexity** [PDF](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
+5.  **Nielsen, F., Nock, R. (2007). On the Centroids of Symmetrized Bregman Divergences.** [ArXiv: 0711.3242](https://arxiv.org/abs/0711.3242)
+6.  **Banerjee, A., Guo, X., & Wang, H. (2005). On the optimality of conditional expectation as a Bregman predictor. *IEEE Transactions on Information Theory*, 51(7), 2664-2669.** - Formalizes the connection between conditional expectation and Bregman divergences.
+7.  A. Banerjee, Xin Guo and Hui Wang, "Optimal Bregman prediction and Jensen's equality," International Symposium onInformation Theory, 2004. ISIT 2004. Proceedings., Chicago, IL, 2004, pp. 169-, doi: 10.1109/ISIT.2004.1365205.
 keywords: {Random variables;Sufficient conditions;Euclidean distance;Least squares methods} - Single page paper on optimality of conditional expectation as a Bregman predictor. [ResearchGate](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
-7.  **Chodrow, P. S. (2022). The Short Story of Bregman Information for Measuring Segregation.** ([Blog Post](https://www.philchodrow.prof/posts/2022-06-24-bregman/)) - An accessible introduction to Bregman information in a specific context.
-8.  **Reid, M. (2013). Meet the Bregman Divergences.** ([Blog Post](https://mark.reid.name/blog/meet-the-bregman-divergences.html)) - A classic blog post introducing Bregman divergences.
+1.  **Chodrow, P. S. (2022). The Short Story of Bregman Information for Measuring Segregation.** ([Blog Post](https://www.philchodrow.prof/posts/2022-06-24-bregman/)) - An accessible introduction to Bregman information in a specific context.
+2.  **Reid, M. (2013). Meet the Bregman Divergences.** ([Blog Post](https://mark.reid.name/blog/meet-the-bregman-divergences.html)) - A classic blog post introducing Bregman divergences.
