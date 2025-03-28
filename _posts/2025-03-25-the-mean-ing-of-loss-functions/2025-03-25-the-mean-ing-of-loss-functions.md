@@ -775,7 +775,6 @@ Note that this theorem does *not* require the errors to be normally distributed.
 ---
 
 ### 3. Revisiting L2 Loss and Linear Regression
-**(TODO)**
 
 *   **L2 loss, Hilbert Spaces, Inner Products:** Briefly recap that L2 loss comes from the squared L2 norm $$ \Vert y-\hat{y}\Vert _2^2 $$, which itself derives from the standard Euclidean inner product $$ \langle u, v \rangle = u^T v $$. Hilbert spaces generalize this structure.
 *   **Linear Regression as Projection:** Connect the general result ($$f^\ast(x) = E[Y\vert X=x]$$) back to linear regression. Linear regression assumes $$E[Y \vert X=x]$$ is a linear function, $$w^T x + b$$. Minimizing MSE finds the best *linear* approximation to the true conditional expectation function by orthogonally projecting the target vector $$y$$ onto the subspace spanned by the input features (columns of the design matrix $$X$$). 
@@ -788,7 +787,6 @@ Note that this theorem does *not* require the errors to be normally distributed.
 
 
 ### 4. Other Loss Functions: Estimating Different Quantities
-**(TODO - Briefly contrast L2)**
 
 *   **L1 Loss (Mean Absolute Error - MAE):** $$ \ell(y, \hat{y}) =  \vert y - \hat{y} \vert  $$.
     *   Minimizing $$ \sum  \vert y_i - c \vert  $$ leads to the **median**, not the mean.
@@ -816,7 +814,6 @@ Now, how can we generalize these ideas further, especially towards classificatio
 ---
 
 ### 5. Bregman Divergences and Bregman Information
-**(TODO)**
 
 *   Introduce **Bregman Divergences** as a family of generalized "distance" measures derived from a strictly convex function $$\phi$$.
     $$ D_\phi(p \Vert  q) = \phi(p) - \phi(q) - \langle \nabla \phi(q), p - q \rangle $$
@@ -831,7 +828,6 @@ Now, how can we generalize these ideas further, especially towards classificatio
 ---
 
 ### 6. Kullback-Leibler Divergence and Information Geometry
-**(TODO)**
 
 *   Introduce **Kullback-Leibler (KL) Divergence** as a measure of difference between two probability distributions $$P$$ and $$Q$$.
     $$ D_{KL}(P \Vert  Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)} $$ (discrete) or $$ \int p(x) \log \frac{p(x)}{q(x)} dx $$ (continuous).
@@ -848,7 +844,6 @@ Now, how can we generalize these ideas further, especially towards classificatio
 ---
 
 ### 7. Cross-Entropy Loss: Same Objective as KL-Divergence
-**(TODO)**
 
 *   Introduce **Cross-Entropy** between two distributions $$P$$ (true) and $$Q$$ (model):
     $$ H(P, Q) = - \sum_x P(x) \log Q(x) $$ (discrete) or $$ - \int p(x) \log q(x) dx $$ (continuous).
@@ -866,8 +861,6 @@ Now, how can we generalize these ideas further, especially towards classificatio
         $$ L_{CE}(\theta) = \frac{1}{N} \sum_{i=1}^N \ell_{CE}(y_i, \hat{y}_i) = - \frac{1}{N} \sum_{i=1}^N \sum_k (y_i)_k \log (f_\theta(x_i))_k $$
 *   **Connection to Maximum Likelihood:** Minimizing empirical cross-entropy is equivalent to maximizing the average log-likelihood of the data under the model's predicted probabilities.
 *   **What does it "mean"?** Minimizing cross-entropy (or KL divergence) drives the model's predicted distribution $$Q$$ to be as close as possible to the true data distribution $$P$$ (or the empirical distribution $$P_{data}$$), where "close" is measured by KL divergence. It's about matching the *entire distribution*, not just the mean. The parameters $$\theta$$ are adjusted to maximize the *expected* log probability of the true outcomes under the model. In a sense, the goal is to match the expected "information content" or shape of the distribution.
-
-Okay, let's tackle the remaining TODO sections (4, 5, 6, and 7), ensuring we maintain the narrative flow and adhere to the specified MathJax syntax.
 
 ---
 
@@ -895,12 +888,12 @@ $$
 \min_{c \in \mathbb{R}} J_{L1}(c) \quad \text{where} \quad J_{L1}(c) = \sum_{i=1}^N  \vert y_i - c \vert 
 $$
 
-The value $$c^*$$ that minimizes this sum is the **median** of the dataset $$\{y_1, \dots, y_N\}$$. Recall that the median is the value separating the higher half from the lower half of a data sample. For an odd number of points, it's the middle value after sorting; for an even number, it's typically the average of the two middle values.
+The value $$c^\ast$$ that minimizes this sum is the **median** of the dataset $$\{y_1, \dots, y_N\}$$. Recall that the median is the value separating the higher half from the lower half of a data sample. For an odd number of points, it's the middle value after sorting; for an even number, it's typically the average of the two middle values.
 
 Just as minimizing squared error leads to the mean, minimizing absolute error leads to the median. This extends to the conditional case:
 
 <blockquote class="prompt-tip">
-The function \( f(x) \) that minimizes the expected absolute error \( E[ \vert Y - f(X) \vert ] \) is the **conditional median** function, \( f^*(x) = \text{Median}(Y \vert X=x) \).
+The function \( f(x) \) that minimizes the expected absolute error \( E[ \vert Y - f(X) \vert ] \) is the **conditional median** function, \( f^\ast(x) = \text{Median}(Y \vert X=x) \).
 </blockquote>
 
 Models trained using MAE loss are therefore implicitly trying to approximate the conditional median of the target variable.
@@ -931,7 +924,7 @@ The choice between L1, L2, Huber, or other loss functions depends on the specifi
 
 ### 5. Generalizing Distance: Bregman Divergences
 
-The connection we found between L2 loss and the mean ($$\min E[(X-c)^2]$$ yields $$c=E[X]$$) is actually a specific instance of a more general phenomenon related to a family of "distance-like" measures called **Bregman divergences**. These provide a powerful framework linking convex analysis, optimization, and information geometry.
+The connection we found between L2 loss and the mean ($$\min_{c} E[(X-c)^2]$$ yields $$c=E[X]$$) is actually a specific instance of a more general phenomenon related to a family of "distance-like" measures called **Bregman divergences**. These provide a powerful framework linking convex analysis, optimization, and information geometry.
 
 #### Definition
 
@@ -964,23 +957,7 @@ $$
 $$
 
 $$
-= \sum_{i=1}^d p_i^2 - \sum_{i=1}^d q_i^2 - 2 \sum_{i=1}^d q_i (p_i - q_i)
-$$
-
-$$
-= \sum_{i=1}^d p_i^2 - \sum_{i=1}^d q_i^2 - 2 \sum_{i=1}^d q_i p_i + 2 \sum_{i=1}^d q_i^2
-$$
-
-$$
-= \sum_{i=1}^d p_i^2 + \sum_{i=1}^d q_i^2 - 2 \sum_{i=1}^d q_i p_i
-$$
-
-$$
-= \sum_{i=1}^d (p_i^2 - 2 p_i q_i + q_i^2)
-$$
-
-$$
-= \sum_{i=1}^d (p_i - q_i)^2 = \Vert p - q\Vert _2^2
+= \Vert p\Vert _2^2 + \Vert q\Vert _2^2 - 2 \langle q,p \rangle = \Vert p - q\Vert _2^2
 $$
 
 Thus, the squared Euclidean distance is precisely the Bregman divergence generated by the convex function $$\phi(x) = \Vert x\Vert _2^2$.
@@ -990,52 +967,52 @@ Thus, the squared Euclidean distance is precisely the Bregman divergence generat
 The connection to the mean generalizes beautifully. For any Bregman divergence $$D_\phi$$ and any probability distribution $$P$$ over $$S$$, the point $$c \in \text{int}(S)$$ that minimizes the expected divergence from points $$X$$ drawn according to $$P$$ is the **mean** (expected value) of $$X$$ under $$P$$.
 
 $$
-\arg\min_{c \in \text{int}(S)} E_P[D_\phi(X \Vert  c)] = E_P[X]
+\arg\min_{\boxed{c} \in \text{int}(S)} E_P[D_\phi(X \Vert  \boxed{c})] = E_P[X]
 $$
 
-This point $$E_P[X]$$ is sometimes called the **Bregman centroid** or **$$\phi$$-centroid** of the distribution $$P$$.
-
-Why is this true? Let $$J(c) = E_P[D_\phi(X \Vert  c)] = E_P[\phi(X) - \phi(c) - \langle \nabla \phi(c), X - c \rangle]$$. Since the expectation is linear, and $$\phi(c)$$ and $$\nabla \phi(c)$$ are constant with respect to the expectation over $$X$$:
-
-$$
-J(c) = E_P[\phi(X)] - \phi(c) - \langle \nabla \phi(c), E_P[X] - c \rangle
-$$
-
-To find the minimum, we take the gradient with respect to $$c$$ and set it to zero. Using properties of gradients and Hessians (denoted $$\nabla^2 \phi$$):
-
-$$
-\nabla_c J(c) = 0 - \nabla \phi(c) - [ \nabla^2 \phi(c) (E_P[X] - c) + \nabla \phi(c) (-I) ]
-$$
-
-$$
-= - \nabla \phi(c) - \nabla^2 \phi(c) E_P[X] + \nabla^2 \phi(c) c + \nabla \phi(c)
-$$
-
-$$
-= \nabla^2 \phi(c) (c - E_P[X])
-$$
-
-Since $$\phi$$ is strictly convex, its Hessian $$\nabla^2 \phi(c)$$ is positive definite and thus invertible. Therefore, the gradient is zero if and only if:
-
-$$
-c - E_P[X] = 0 \implies c = E_P[X]
-$$
-
-This confirms that the expected Bregman divergence is minimized when $$c$$ is the expected value of $$X$$. This provides a unifying perspective: minimizing expected squared error yields the mean because squared error *is* a Bregman divergence.
+This point $$E_P[X]$$ is sometimes called the **right Bregman centroid** of the distribution $$P$$ since we are varying the argument on the right of the Bregman divergence. See Theorem 2.1 in [Nielsen and Nock (2007)](https://arxiv.org/abs/0711.3242) for a proof.
 
 #### Generalized Pythagorean Theorem and Bregman Information
 
-Bregman divergences also satisfy a **generalized Pythagorean theorem**. If we consider projecting a point $$p$$ onto a convex set $$C$$ using Bregman divergence (finding $$q^* = \arg\min_{q \in C} D_\phi(p \Vert  q)$$), then for any other point $$r \in C$$, the following holds under certain conditions:
+Bregman divergences also satisfy a **generalized Pythagorean theorem**. If we consider projecting a point $$p$$ onto a convex set $$C$$ using Bregman divergence (finding $$q^\ast = \arg\min_{q \in C} D_\phi(p \Vert  q)$$), then for any other point $$r \in C$$, the following holds under certain conditions:
 
 $$
-D_\phi(p \Vert  r) \ge D_\phi(p \Vert  q^*) + D_\phi(q^* \Vert  r)
+D_\phi(p \Vert  r) \ge D_\phi(p \Vert  q^\ast) + D_\phi(q^\ast \Vert  r)
 $$
 
-This inequality relates the divergence from $$p$$ to $$r$$ with the divergence from $$p$$ to its projection $$q^*$$ and the divergence between the projection $$q^*$$ and $$r$$. When equality holds (which happens in dually flat spaces, common in information geometry), it resembles the Pythagorean theorem $$a^2 = b^2 + c^2$$. This reinforces the geometric projection intuition.
+with equality if $$q^\ast \in \text {relint } C$$. See [Wikipedia - Bregman Divergence](https://en.wikipedia.org/wiki/Bregman_divergence#:~:text=%5B3%5D-,Generalized%20Pythagorean%20Theorem,-%3A%5B1) for more. This inequality relates the divergence from $$p$$ to $$r$$ with the divergence from $$p$$ to its projection $$q^\ast$$ and the divergence between the projection $$q^\ast$$ and $$r$$. When equality holds (which happens in dually flat spaces, common in information geometry), it resembles the Pythagorean theorem $$a^2 = b^2 + c^2$$. This reinforces the geometric projection intuition.
 
 Furthermore, the minimum value of the expected divergence, $$E_P[D_\phi(X \Vert  E_P[X])]$$, serves as a generalized measure of the statistical dispersion or "spread" of the distribution $$P$$, analogous to variance. This quantity is sometimes called the **Bregman information** (see Chodrow, 2022). For the squared error divergence ($$\phi(x)=x^2$$), this minimum expected divergence is $$E[(X - E[X])^2]$$, which is exactly the variance.
 
-Bregman divergences provide a rich mathematical structure that generalizes concepts like distance, projection, centroids (means), and variance, connecting optimization objectives used in machine learning to deeper geometric and statistical principles.
+More generally, you can prove the following:
+
+> #### Theorem: Jensen's Equality [(Banarjee et al., 2004)](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
+>
+> Given a continuously differentiable strictly convex function (called Bregman generator) $$\phi$$, let its corresponding Bregman divergence be defined as the error incurred in a local linear approximation at $$x$$ to $$y$$:
+>
+> $$
+> D_\phi (x,y) := \phi(x) - \left( \phi(y) + \langle \nabla \phi(y), x-y \rangle \right).
+> $$
+> 
+> The conditional expectation (a.k.a. conditional mean) $$E[X \vert \mathcal{G}]$$ is the **right Bregman centroid**, which minimizes 
+>
+> $$
+> E[X \vert \mathcal{G}] = \arg\min_{\boxed{Y} \in \mathcal{G}} E[D_\phi(X, \boxed{Y})]
+> $$
+>
+> Thus, the Bregman information (generalization of variance) is defined as the minimized expected Bregman divergence:
+>
+> $$
+> I_\phi (X \vert G) := E[D_\phi(X,E[X \vert \mathcal{G}])]
+> $$
+> 
+> Note that $$I_\phi(X \vert \mathcal{G}) \ge 0$$. When $$\phi = \Vert \cdot \Vert_2^2$$, this is the variance.
+>
+> Then, Jensen's equality holds:
+>
+> $$
+> E[\phi(X) \vert \mathcal{G}] = \phi(E[X \vert \mathcal{G}]) + I_\phi(X \vert \mathcal{G})
+> $$
 
 ---
 
@@ -1269,6 +1246,9 @@ Wikipedia is a great resource for all the math in this post.
 1.  **Wikipedia (2025). Bregman Divergence.** ([Link](https://en.wikipedia.org/wiki/Bregman_divergence)) - An excellent overview of Bregman divergences and their properties.
 2.  **Nielsen, F. (2022). The Many Faces of Information Geometry. *Notices of the American Mathematical Society*, 69(1), 36-45.** ([PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)) - A great, very short and readable introduction to Information Geometry concepts.
 3.  **Nielsen, F. (2021). Bregman Divergences, dual information geometry, and generalized convexity** [PDF](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
-4.  **Banerjee, A., Guo, X., & Wang, H. (2005). On the optimality of conditional expectation as a Bregman predictor. *IEEE Transactions on Information Theory*, 51(7), 2664-2669.** - Formalizes the connection between conditional expectation and Bregman divergences.
-5.  **Chodrow, P. S. (2022). The Short Story of Bregman Information for Measuring Segregation.** ([Blog Post](https://www.philchodrow.prof/posts/2022-06-24-bregman/)) - An accessible introduction to Bregman information in a specific context.
-6.  **Reid, M. (2013). Meet the Bregman Divergences.** ([Blog Post](https://mark.reid.name/blog/meet-the-bregman-divergences.html)) - A classic blog post introducing Bregman divergences.
+4.  **Nielsen, F., Nock, R. (2007). On the Centroids of Symmetrized Bregman Divergences.** [ArXiv: 0711.3242](https://arxiv.org/abs/0711.3242)
+5.  **Banerjee, A., Guo, X., & Wang, H. (2005). On the optimality of conditional expectation as a Bregman predictor. *IEEE Transactions on Information Theory*, 51(7), 2664-2669.** - Formalizes the connection between conditional expectation and Bregman divergences.
+6.  A. Banerjee, Xin Guo and Hui Wang, "Optimal Bregman prediction and Jensen's equality," International Symposium onInformation Theory, 2004. ISIT 2004. Proceedings., Chicago, IL, 2004, pp. 169-, doi: 10.1109/ISIT.2004.1365205.
+keywords: {Random variables;Sufficient conditions;Euclidean distance;Least squares methods} - Single page paper on optimality of conditional expectation as a Bregman predictor. [ResearchGate](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
+7.  **Chodrow, P. S. (2022). The Short Story of Bregman Information for Measuring Segregation.** ([Blog Post](https://www.philchodrow.prof/posts/2022-06-24-bregman/)) - An accessible introduction to Bregman information in a specific context.
+8.  **Reid, M. (2013). Meet the Bregman Divergences.** ([Blog Post](https://mark.reid.name/blog/meet-the-bregman-divergences.html)) - A classic blog post introducing Bregman divergences.
