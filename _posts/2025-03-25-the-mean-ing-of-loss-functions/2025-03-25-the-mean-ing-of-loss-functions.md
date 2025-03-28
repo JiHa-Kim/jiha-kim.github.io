@@ -68,7 +68,7 @@ $$
 \min_{w,b} \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \min_{w,b} \frac{1}{n} \Vert y - \hat{y}\Vert _2^2
 $$
 
-since they only differ by a constant factor $$1/n$$. This minimization problem is convex and can be solved efficiently, for instance, using gradient descent or even analytically via the Normal Equations. L2 loss is used in many machine learning applications, including regression and diffusion models.
+since they only differ by a constant factor $$1/n > 0$$. This minimization problem is convex and can be solved efficiently, for instance, using gradient descent or even analytically via the Normal Equations. L2 loss is used in many machine learning applications, including regression and diffusion models.
 
 Why squared error? Common justifications include:
 1.  **Nonnegative Penalty:** Squaring ensures errors are always non-negative, $$ (y_i - \hat{y}_i)^2 \ge 0 $$, with zero error only when prediction matches the target perfectly.
@@ -77,24 +77,28 @@ Why squared error? Common justifications include:
 
 While useful, these points don't fully capture the deeper reasons. To explore those, let's first formalize what we mean by a loss function.
 
-> **Definition (Loss Function):**
-> In supervised learning, we seek a model $$f_\theta: \mathcal{X} \to \mathcal{Y}$$ parameterized by $$\theta \in \Theta$$, mapping inputs $$x \in \mathcal{X}$$ to outputs $$\hat{y} \in \mathcal{Y}$$.
->
-> 1.  A **Pointwise Loss Function** (or Cost Function) $$ \ell: \mathcal{Y} \times \mathcal{Y} \to [0, \infty) $$ measures the discrepancy between a *single* true target value $$y$$ and its corresponding prediction $$\hat{y}$$. Typically, $$\ell(y, y) = 0$$ and $$\ell(y, \hat{y}) \ge 0$$.
->
-> 2.  Given a dataset $$\mathcal{D} = \{(x_1, y_1), \dots, (x_N, y_N)\}$$, the **Empirical Loss** (or Objective Function) $$ L_{emp}: \Theta \to [0, \infty) $$ aggregates the pointwise losses over the dataset, quantifying the overall model performance for parameters $$\theta$$. It is typically the arithmetic mean (or expectation):
-> 
->     $$
->     L_{emp}(\theta; \mathcal{D}) = \frac{1}{N} \sum_{i=1}^N \ell(y_i, f_\theta(x_i))
->     $$
->
-> The process of **training** involves finding the parameters $$\theta^\ast$$ that minimize this empirical loss:
-> 
-> $$
-> \theta^\ast = \arg\min_{\theta \in \Theta} L_{emp}(\theta; \mathcal{D})
-> $$
-> 
-> *(Often, a regularization term is added to $$L_{emp}$$ to prevent overfitting).*
+<blockquote class="prompt-info">
+    <p><b>Definition (Loss Function):</b></p>
+    <p>In supervised learning, we seek a model \( f_\theta: \mathcal{X} \to \mathcal{Y} \) parameterized by \( \theta \in \Theta \), mapping inputs \( x \in \mathcal{X} \) to outputs \( \hat{y} \in \mathcal{Y} \). We assume the data \((x, y)\) arises from an underlying (usually unknown or computationally intractable) joint probability distribution \( P(X, Y) \).</p>
+    <ol>
+        <li>A <b>Pointwise Loss Function</b> (or Cost Function) \( \ell: \mathcal{Y} \times \mathcal{Y} \to [0, \infty) \) measures the discrepancy between a <i>single</i> true target value \( y \) and its corresponding prediction \( \hat{y} \). Typically, \( \ell(y, y) = 0 \) and \( \ell(y, \hat{y}) \ge 0 \).</li>
+        <li>The <b>True Loss</b> (also called Expected Loss or Risk) \( L: \Theta \to [0, \infty) \) measures the expected pointwise loss over the <i>entire data distribution</i> \( P(X, Y) \). It represents the true generalization performance of the model with parameters \( \theta \):
+            \[
+            L(\theta) = E_{(X, Y) \sim P}[\ell(Y, f_\theta(X))] = \int_{\mathcal{X} \times \mathcal{Y}} \ell(y, f_\theta(x)) \, dP(x, y)
+            \]
+            Ideally, we want to find parameters \( \theta \) that minimize this true loss, but this is usually impossible because we don't know \( P(X, Y) \).</li>
+        <li>Given a finite dataset \( \mathcal{D} = \{(x_1, y_1), \dots, (x_N, y_N)\} \) sampled i.i.d. from \( P(X, Y) \), the <b>Empirical Loss</b> (or Objective Function) \( L_{emp}: \Theta \to [0, \infty) \) aggregates the pointwise losses over this dataset. It serves as a <b>discrete approximation</b> to the true loss \( L(\theta) \), calculated as the sample mean:
+            \[
+            L_{emp}(\theta; \mathcal{D}) = \frac{1}{N} \sum_{i=1}^N \ell(y_i, f_\theta(x_i))
+            \]
+            By the Law of Large Numbers, as the dataset size \( N \to \infty \), \( L_{emp}(\theta; \mathcal{D}) \) converges to \( L(\theta) \).</li>
+    </ol>
+    <p>The process of <b>training</b> typically involves finding the parameters \( \theta^\ast \) that minimize this empirical loss (or a regularized version) as a proxy for minimizing the true loss:</p>
+    \[
+    \theta^\ast = \arg\min_{\theta \in \Theta} L_{emp}(\theta; \mathcal{D})
+    \]
+    <p><i>(Often, a regularization term is added to \( L_{emp} \) to improve generalization and prevent overfitting, effectively balancing the empirical loss approximation with prior beliefs about the parameters.)</i></p>
+</blockquote>
 
 Now that we have a clearer definition, let's return to the question: why specific forms for $$\ell(y, \hat{y})$$? We'll start by connecting the familiar squared error to the concept of the mean.
 
@@ -148,11 +152,9 @@ This connection extends to random variables. If $$Y$$ is a random variable, the 
 
 <blockquote class="prompt-info">
 
-Variance is the second moment of a random variable. It measures the minimum possible sum of squared distances between the random variable and the best possible constant approximation under L2 loss, i.e. the <b>mean</b>.
+Variance is the second moment of a random variable. It measures the minimum possible expected L2 loss incurred by a constant approximation, i.e. the <b>mean</b>.
 
 </blockquote>
-
-
 
 #### A Geometric Perspective: The Mean as a Projection
 
@@ -175,7 +177,7 @@ Applying this with $$ a = \mathbf{1} $$:
 So, the orthogonal projection of $$ y $$ onto the subspace of constant vectors is:
 
 $$
-\hat{y} = \frac{\sum_{i=1}^N y_i}{N} \mathbf{1} = \bar{y} \cdot \mathbf{1} = (\bar{y}, \bar{y}, \dots, \bar{y})^T
+\hat{y} = \frac{\sum_{i=1}^N y_i}{N} \mathbf{1} = \bar{y} \mathbf{1} = (\bar{y}, \bar{y}, \dots, \bar{y})^T
 $$
 
 The vector in the subspace $$ \mathcal{S} $$ closest to $$ y $$ is the constant vector where each component is the arithmetic mean $$ \bar{y} $$. This confirms our previous result geometrically: the mean $$ \bar{y} $$ is the coefficient of this projection. It's not just an average—it's the **best constant approximation** to the data vector $$ y $$ under squared error, viewed as an orthogonal projection in $$ \mathbb{R}^N $$.
@@ -452,93 +454,27 @@ $$E[Y \vert X=x]$$ where $$Y$$ is uniformly distributed on $$[0, x]$$, given $$X
 
 **Explanation of Diagram 2:**
 1.  We focus on a specific value $$x=0.8$$. The vertical dashed red line indicates this condition.
-2.  Given $$X=0.8$$, the variable $$Y$$ is uniformly distributed over the interval $$[0, 0.8]$$. This range is shown by the thick blue vertical line segment along 
-$$X=0.8$$. The faint blue rectangle hints at the uniform probability density over this range.
-1.  The conditional expectation 
-$$E[Y \vert X=0.8]$$ for a uniform distribution is its midpoint:
-$$(0 + 0.8) / 2 = 0.4$$. This is marked by the green star.
-1.  The dashed green line shows the function 
-$$y=x/2$$, which represents the true conditional expectation $$E[Y\vert X=x]$$ for *any* $$x \in [0, 1]$$. Again, the green star lies perfectly on this line.
+2.  Given $$X=0.8$$, the variable $$Y$$ is uniformly distributed over the interval $$[0, 0.8]$$. This range is shown by the thick blue vertical line segment along $$X=0.8$$. The faint blue rectangle hints at the uniform probability density over this range.
+1.  The conditional expectation $$E[Y \vert X=0.8]$$ for a uniform distribution is its midpoint: $$(0 + 0.8) / 2 = 0.4$$. This is marked by the green star.
+1.  The dashed green line shows the function $$y=x/2$$, which represents the true conditional expectation $$E[Y\vert X=x]$$ for *any* $$x \in [0, 1]$$. Again, the green star lies perfectly on this line.
 
-These diagrams should help clarify how 
-$$E[Y\vert X=x]$$ relates to the distribution of $$Y$$ *after* fixing the value of $$X$$, and why it represents the "best guess" for $$Y$$ under squared error.
+These diagrams should help clarify how $$E[Y\vert X=x]$$ relates to the distribution of $$Y$$ *after* fixing the value of $$X$$, and why it represents the "best guess" for $$Y$$ under squared error.
 
-#### Formal Definition (Measure-Theoretic)
+*(Note: While the intuitive definitions using sums/integrals are sufficient for understanding the concept's role here, conditional expectation has a more rigorous foundation in measure theory, which guarantees its existence and uniqueness under general conditions. See [Appendix A](#appendix-a-formal-justification-for-conditional-expectation) for details.)*
 
-While the above formulas are useful, a more general and powerful definition comes from measure theory. Let 
-$$(\Omega, \mathcal{F}, P)$$ be our underlying probability space. $$X$$ and $$Y$$ are random variables defined on this space. Assume $$Y$$ is integrable ($$E[ \vert Y \vert ] < \infty$$).
+#### Optimality of Conditional Expectation for L2 Loss
 
-The **conditional expectation** of $$Y$$ given $$X$$, denoted $$E[Y \vert X]$$ or more formally $$E[Y \vert \sigma(X)]$$, is defined as *any* random variable $$Z$$ that satisfies two conditions:
+Now, let's formally state why $$E[Y\vert X]$$ is the optimal predictor under expected squared error. We are looking for the function $$f(X)$$ that minimizes $$E[(Y - f(X))^2]$$.
 
-1.  **Measurability:** $$Z$$ is $$\sigma(X)$$-measurable. This means $$Z$$ is a function of $$X$$; its value depends only on the outcome of $$X$$. *(Technically, for any Borel set $$B$$, the pre-image $$Z^{-1}(B)$$ belongs to the $$\sigma$$-algebra generated by $$X$$, denoted $$\sigma(X)$$, which represents the information contained in $$X$$)*.
-2.  **Partial Averaging:** For any set $$A \in \sigma(X)$$,
-
-    $$
-    \int_A Z \, dP = \int_A Y \, dP \quad \Leftrightarrow \quad E[Z \cdot \mathbb{1}_A] = E[Y \cdot \mathbb{1}_A]
-    $$
-
-    where $$\mathbb{1}_A$$ is the indicator function for the set $$A$$. This property essentially says that $$Z$$ has the same average value as $$Y$$ over any event $$A$$ that can be defined solely in terms of $$X$$.
-
-It's a fundamental theorem in probability theory that such a random variable $$Z$$ exists and is unique up to sets of measure zero. We denote this unique random variable by $$E[Y \vert X]$$. The value $$E[Y \vert X=x]$$ we discussed earlier can be seen as a specific evaluation of this random variable $$E[Y \vert X]$$ when $$X$$ happens to be $$x$$.
-
-#### Optimality via Orthogonal Projection (in Function Space)
-
-Now, let's formally show why 
-$$E[Y\vert X]$$ is the optimal predictor under expected squared error. We'll use the geometric intuition of orthogonal projection again, but this time in a space of random variables (a function space).
-
-Consider the space $$L^2(\Omega, \mathcal{F}, P)$$, which is the Hilbert space of all random variables $$V$$ defined on our underlying probability space $$(\Omega, \mathcal{F}, P)$$ such that their variance is finite ($$E[V^2] < \infty$$). This space is equipped with an inner product defined by expectation:
+It's a fundamental result in probability theory that the unique function $$f^*(x)$$ achieving this minimum is precisely the conditional expectation function:
 
 $$
-\langle U, V \rangle = E[UV]
+f^*(x) = E[Y \vert X=x]
 $$
 
-The squared norm induced by this inner product is $$\Vert V\Vert ^2 = \langle V, V \rangle = E[V^2]$$. The distance between two random variables $$U, V$$ in this space is $$\Vert U - V\Vert  = \sqrt{E[(U - V)^2]}$$. Minimizing the expected squared error $$E[(Y - f(X))^2]$$ is equivalent to minimizing the squared distance $$ \Vert Y - f(X)\Vert ^2 $$ in this $$L^2$$ space.
+This means that the predictor $$f^*(X) = E[Y \vert X]$$ minimizes the expected squared error $$E[(Y - f(X))^2]$$ over all possible functions $$f$$ that depend only on $$X$$.
 
-We are looking for a predictor $$f(X)$$ that is a function *only* of $$X$$. This means $$f(X)$$ must belong to the subspace of $$L^2$$ consisting of random variables that are measurable with respect to the information contained in $$X$$. Let's call this subspace $$\mathcal{M} = L^2(\Omega, \sigma(X), P)$$, where $$\sigma(X)$$ is the sigma-algebra generated by $$X$$. This is a closed subspace of the full Hilbert space $$L^2(\Omega, \mathcal{F}, P)$$.
-
-Our problem is to find the element $$Z^\ast \in \mathcal{M}$$ (representing the optimal predictor $$f^\ast(X)$$) that is closest to the target random variable $$Y \in L^2(\Omega, \mathcal{F}, P)$$ in the $$L^2$$ norm. That is, we want to solve:
-
-$$
-\min_{Z \in \mathcal{M}} \Vert Y - Z\Vert ^2 = \min_{f \text{ s.t. } f(X) \in \mathcal{M}} E[(Y - f(X))^2]
-$$
-
-Due to the construction of Hilbert spaces to behave just like Euclidean spaces, we can extend the projection theorem in linear algebra to these spaces. The **Hilbert Projection Theorem** guarantees that for any closed subspace $$\mathcal{M}$$ of a Hilbert space $$\mathcal{H}$$, and any element $$y \in \mathcal{H}$$, there exists a unique element $$z^\ast \in \mathcal{M}$$ (the orthogonal projection of $$y$$ onto $$\mathcal{M}$$) such that:
-1.  $$z^\ast$$ minimizes the distance: $$\Vert y - z^\ast\Vert  = \min_{z \in \mathcal{M}} \Vert y - z\Vert $$
-2.  The error vector $$(y - z^\ast)$$ is orthogonal to the subspace $$\mathcal{M}$$. That is, $$\langle y - z^\ast, z \rangle = 0$$ for all $$z \in \mathcal{M}$$.
-
-Applying this theorem to our problem ($$\mathcal{H} = L^2(\Omega, \mathcal{F}, P)$$, $$y=Y$$, $$\mathcal{M} = L^2(\Omega, \sigma(X), P)$$): The unique minimizer $$Z^\ast$$ exists and is characterized by the orthogonality condition:
-
-$$
-\langle Y - Z^\ast, Z \rangle = 0 \quad \text{for all } Z \in \mathcal{M}
-$$
-
-Substituting the inner product definition $$ \langle U, V \rangle = E[UV] $$:
-
-$$
-E[(Y - Z^\ast) Z] = 0 \quad \text{for all } Z \in L^2(\Omega, \sigma(X), P)
-$$
-
-This implies:
-
-$$
-E[Y Z] = E[Z^\ast Z] \quad \text{for all } Z \in L^2(\Omega, \sigma(X), P)
-$$
-
-This condition is precisely the defining property of the **conditional expectation** $$E[Y \vert \sigma(X)]$$ (often written as $$E[Y \vert X]$$). A random variable $$Z^\ast$$ is the conditional expectation of $$Y$$ given $$X$$ if and only if:
-1.  $$Z^\ast$$ is $$\sigma(X)$$-measurable (i.e., $$Z^\ast$$ is a function of $$X$$, $$Z^\ast \in \mathcal{M}$$).
-2.  $$E[Z^\ast Z] = E[Y Z]$$ for all bounded $$\sigma(X)$$-measurable random variables $$Z$$ (this extends to all $$Z \in \mathcal{M}$$).
-
-Therefore, the unique element $$Z^\ast \in \mathcal{M}$$ that minimizes the expected squared error is exactly the conditional expectation:
-
-$$
-Z^\ast = E[Y \vert X]
-$$
-
-The optimal predictor function $$f^\ast(x)$$ that minimizes $$E[(Y - f(X))^2]$$ is the conditional expectation function:
-
-$$
-f^\ast(x) = E[Y \vert X=x]
-$$
+Intuitively, this optimality arises because the conditional expectation acts like an orthogonal projection in a space of random variables (specifically, the Hilbert space $$L^2$$). It finds the function of $$X$$ that is "closest" to $$Y$$ in terms of the average squared difference. *(The rigorous proof involves the Hilbert Projection Theorem and is provided in [Appendix A](#appendix-a-formal-justification-for-conditional-expectation).)*
 
 #### Interpretation
 
@@ -550,17 +486,38 @@ $$
 \hat{y} = f_\theta(x) \approx E[Y \vert X=x]
 $$
 
-The choice of L2 loss fundamentally steers the learning process towards finding the *conditional mean* of the target variable. This provides a clear statistical meaning to the objective pursued when minimizing squared errors. Any deviation of our learned model 
-$$f_\theta(x)$$ from the true $$E[Y\vert X=x]$$ contributes to the reducible error.
+The choice of L2 loss fundamentally steers the learning process towards finding the *conditional mean* of the target variable. This provides a clear statistical meaning to the objective pursued when minimizing squared errors. Any deviation of our learned model $$f_\theta(x)$$ from the true $$E[Y\vert X=x]$$ contributes to the reducible error.
 
-The minimum achievable expected squared error, obtained when 
-$$f(X) = E[Y\vert X]$$, is:
+The minimum achievable expected squared error, obtained when $$f(X) = E[Y\vert X]$$, is:
 
 $$
 E[(Y - E[Y\vert X])^2] = E[\text{Var}(Y\vert X)]
 $$
 
 This is the expected conditional variance, representing the inherent uncertainty or noise in $$Y$$ that *cannot* be explained by $$X$$, no matter how good our model is. This is the irreducible error or Bayes error rate (for squared loss).
+
+#### Aside: Variance Additivity via Orthogonality
+
+This geometric view also illuminates why variance is additive for **independent** random variables. Recall $$\text{Var}(X) = E[(X - E[X])^2]$$. In the $$L^2$$ space, this is the squared norm of the *centered* variable $$\tilde{X} = X - E[X]$$: $$\text{Var}(X) = \Vert \tilde{X} \Vert^2$$.
+
+Consider $$\text{Var}(X+Y)$$. The centered version of the sum is $$\widetilde{X+Y} = (X+Y) - E[X+Y] = \tilde{X} + \tilde{Y}$$.
+So, $$\text{Var}(X+Y) = \Vert \tilde{X} + \tilde{Y} \Vert^2$$.
+
+By the Pythagorean theorem in $$L^2$$, $$\Vert \tilde{X} + \tilde{Y} \Vert^2 = \Vert \tilde{X} \Vert^2 + \Vert \tilde{Y} \Vert^2$$ if and only if $$\tilde{X}$$ and $$\tilde{Y}$$ are orthogonal, meaning their inner product is zero:
+
+$$
+\langle \tilde{X}, \tilde{Y} \rangle = E[\tilde{X} \tilde{Y}] = E[(X - E[X])(Y - E[Y])] = \text{Cov}(X, Y) = 0
+$$
+
+Since **independence** of $$X$$ and $$Y$$ implies their covariance is zero, $$\text{Cov}(X, Y) = 0$$, independence implies the centered variables $$\tilde{X}$$ and $$\tilde{Y}$$ are orthogonal.
+
+Therefore, if $$X$$ and $$Y$$ are independent:
+
+$$
+\text{Var}(X+Y) = \Vert \tilde{X} + \tilde{Y} \Vert^2 = \Vert \tilde{X} \Vert^2 + \Vert \tilde{Y} \Vert^2 = \text{Var}(X) + \text{Var}(Y)
+$$
+
+Thus, the additivity of variance for independent variables is a direct consequence of the Pythagorean theorem in the $$L^2$$ space applied to centered random variables.
 
 ---
 
@@ -688,13 +645,13 @@ Let's carefully understand each term:
 2.  **Bias ($$\text{Bias}[\hat{f}(x_0)] = E_{\mathcal{D}}[\hat{f}(x_0)] - f(x_0)$$):** This is the difference between the *average prediction* of our model at $$x_0$$ (if we were to train it on many different datasets $$\mathcal{D}$$ and average the predictions) and the *true* value $$f(x_0)$$. Squared bias measures how much our model's average prediction deviates from the truth. High bias suggests the model is systematically wrong, perhaps because it's too simple to capture the underlying structure (e.g., fitting a line to a curve). This leads to **underfitting**.
 3.  **Variance ($$\text{Variance}[\hat{f}(x_0)] = E_{\mathcal{D}} [(\hat{f}(x_0) - E_{\mathcal{D}}[\hat{f}(x_0)])^2]$$):** This measures how much the model's prediction $$\hat{f}(x_0)$$ tends to vary *around its own average prediction* as we train it on different datasets $$\mathcal{D}$$. High variance indicates that the model is very sensitive to the specific training data; small changes in the data lead to large changes in the model's predictions. This often happens with overly complex models that fit the noise in the training data. This leads to **overfitting**.
 
-![Target Practice Analogy](target_practice.png)
+![Target Practice Analogy](./target_practice.png)
 _Figure: Target Practice Analogy. Imagine you're trying to hit a target. The irreducible error is the size of the target itself (the inherent noise). The bias is how far your average shot lands from the target. The variance is how much your shots vary from the average._
 
-![Bias-Variance Plot](bias_variance_plot.png)
+![Bias-Variance Plot](./bias_variance_plot.png)
 _Figure: Bias-Variance Plot_
 
-![Underfitting vs Overfitting](underfitting_vs_overfitting.png)
+![Underfitting vs Overfitting](./underfitting_vs_overfitting.png)
 _Figure: Underfitting vs Overfitting example with polynomials_
 
 <blockquote class="prompt-warning">
@@ -720,29 +677,13 @@ The theorem states that if the following assumptions hold:
 3.  **Homoscedasticity:** The errors all have the same finite variance ($$Var(\epsilon_i \vert X) = \sigma^2 < \infty$$ for all $$i$$). The variance doesn't depend on $$X$$.
 4.  **Uncorrelated Errors:** Errors for different observations are uncorrelated ($$Cov(\epsilon_i, \epsilon_j \vert X) = 0$$ for all $$i \neq j$$).
 
-**If** these assumptions are met, then the OLS estimator $$\hat{\beta}_{OLS} = (X^T X)^{-1} X^T y$$ is the **Best Linear Unbiased Estimator (BLUE)** of $$\beta$.
+**If** these assumptions are met, then the OLS estimator $$\hat{\beta}_{OLS} = (X^T X)^{-1} X^T y$$ is the **Best Linear Unbiased Estimator (BLUE)** of $$\beta$$.
 
 *   **Best:** It has the minimum variance among all estimators in the class. No other linear unbiased estimator is more precise.
 *   **Linear:** $$\hat{\beta}_{OLS}$$ is a linear combination of the observed $$y$$ values.
 *   **Unbiased:** On average (over many datasets), the estimator gives the true parameter value ($$E[\hat{\beta}_{OLS}] = \beta$$).
 
 Note that this theorem does *not* require the errors to be normally distributed. It provides a strong justification for using OLS (which minimizes L2 loss) based on its efficiency (minimum variance) within the class of linear unbiased estimators, provided the core assumptions hold. Violations of these assumptions (e.g., heteroscedasticity, correlated errors, omitted variables causing correlation between X and $$\epsilon$$) mean OLS may no longer be BLUE, and alternative estimation methods might be preferred.
-
----
-
-### Recap
-That was a lot of math, so let's recap what we've learned so far:
-
-1.  **Loss functions** quantify the mismatch between predictions $$\hat{y}$$ and true values $$y$$. Empirical loss aggregates these over a dataset.
-2.  **Squared Error (L2 Loss)** is deeply connected to the **mean**. Minimizing $$ \sum (y_i - c)^2 $$ yields the arithmetic mean $$c = \bar{y}$$. Geometrically, this corresponds to orthogonal projection onto the subspace of constant vectors.
-3.  The **Conditional Expectation** $$E[Y\vert X=x]$$ is the function $$f(x)$$ that minimizes the **expected squared error** $$E[(Y - f(X))^2]$$. It represents the theoretically optimal predictor under L2 loss.
-4.  Training models with **MSE** aims to approximate this conditional expectation function. This connection is justified by the Hilbert Projection Theorem in $$L^2$$ space.
-5.  Assuming **Gaussian noise** also leads to L2 loss via Maximum Likelihood Estimation.
-6.  Other losses like **L1 (MAE)** are connected to different statistical quantities like the **median**.
-
-The choice of L2 loss isn't arbitrary; it implicitly sets the goal of learning to finding the conditional mean and assumes that squared deviations are the appropriate way to measure error (which aligns well with Gaussian noise).
-
-Now, how can we generalize these ideas further, especially towards classification and information theory?
 
 ---
 
@@ -774,6 +715,22 @@ L_\delta(y, \hat{y}) =
 \end{cases}
 $$
 It benefits from L2's smoothness near the minimum and L1's robustness for larger errors. The choice between L1, L2, and Huber depends on the data's noise characteristics and the desired robustness.
+
+---
+
+### Recap
+That was a lot of math, so let's recap what we've learned so far:
+
+1.  **Loss functions** quantify the mismatch between predictions $$\hat{y}$$ and true values $$y$$. Empirical loss aggregates these over a dataset.
+2.  **Squared Error (L2 Loss)** is deeply connected to the **mean**. Minimizing $$ \sum (y_i - c)^2 $$ yields the arithmetic mean $$c = \bar{y}$$. Geometrically, this corresponds to orthogonal projection onto the subspace of constant vectors.
+3.  The **Conditional Expectation** $$E[Y\vert X=x]$$ is the function $$f(x)$$ that minimizes the **expected squared error** $$E[(Y - f(X))^2]$$. It represents the theoretically optimal predictor under L2 loss.
+4.  Training models with **MSE** aims to approximate this conditional expectation function. This connection is justified by the Hilbert Projection Theorem in $$L^2$$ space.
+5.  Assuming **Gaussian noise** also leads to L2 loss via Maximum Likelihood Estimation.
+6.  Other losses like **L1 (MAE)** are connected to different statistical quantities like the **median**.
+
+The choice of L2 loss isn't arbitrary; it implicitly sets the goal of learning to finding the conditional mean and assumes that squared deviations are the appropriate way to measure error (which aligns well with Gaussian noise).
+
+Now, how can we generalize these ideas further, especially towards classification and information theory?
 
 ---
 
@@ -1060,7 +1017,9 @@ This explains why **cross-entropy loss is used in classification**:
 
 ### 8. Total Bregman Divergence
 
-The total Bregman divergence is a normalized version of the Bregman divergence. Specifically, given a generator $$\phi$$, rather than defining the divergence as the vertical gap between the tangent point $$y$$ and a target $$x$$, we instead use the orthogonal distance between the tangent space at $$y$$ and the target $$x$$. Thus, the total Bregman divergence is invariant under change of basis.
+The total Bregman divergence is a normalized version of the Bregman divergence. It's useful in some more traditional ML algorithms, but as far as I know, it's less commonly used in modern machine learning. There was a cool geometric view, so I included it.
+
+Given a generator $$\phi$$, rather than defining the divergence as the vertical gap between the tangent point $$y$$ and a target $$x$$, we instead use the orthogonal distance between the tangent space at $$y$$ and the target $$x$$. Thus, the total Bregman divergence is invariant under change of basis.
 
 If we define a local Cartesian coordinate system $$(\vec u,v)$$ for our Bregman generator, a strictly convex function $$\phi: \mathbb{R}^n \to \mathbb{R}; u \mapsto v$$ with some vector $$u$$ and some scalar $$v$$, then our equation is $$v = \phi(u) \iff v - \phi(u) = 0$$.
 
@@ -1106,13 +1065,96 @@ Understanding the meaning behind loss functions helps us choose appropriate ones
 
 Wikipedia is a great resource for all the math in this post.
 
-1. **Artem Kirsanov (2024). The Key Equation Behind Probability** [YouTube video](https://www.youtube.com/watch?v=KHVR587oW8I) - Excellent visual explanation of the connection between KL divergence and entropy.
-2. **Wikipedia (2025). Bregman Divergence.** ([Link](https://en.wikipedia.org/wiki/Bregman_divergence)) - An excellent overview of Bregman divergences and their properties.
-3.  **Nielsen, F. (2022). The Many Faces of Information Geometry. *Notices of the American Mathematical Society*, 69(1), 36-45.** ([PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)) - A great, very short and readable introduction to Information Geometry concepts.
-4.  **Nielsen, F. (2021). Bregman Divergences, dual information geometry, and generalized convexity** [PDF](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
-5.  **Nielsen, F., Nock, R. (2007). On the Centroids of Symmetrized Bregman Divergences.** [ArXiv: 0711.3242](https://arxiv.org/abs/0711.3242)
-6.  **Banerjee, A., Guo, X., & Wang, H. (2005). On the optimality of conditional expectation as a Bregman predictor. *IEEE Transactions on Information Theory*, 51(7), 2664-2669.** - Formalizes the connection between conditional expectation and Bregman divergences.
-7.  A. Banerjee, Xin Guo and Hui Wang, "Optimal Bregman prediction and Jensen's equality," International Symposium onInformation Theory, 2004. ISIT 2004. Proceedings., Chicago, IL, 2004, pp. 169-, doi: 10.1109/ISIT.2004.1365205.
-keywords: {Random variables;Sufficient conditions;Euclidean distance;Least squares methods} - Single page paper on optimality of conditional expectation as a Bregman predictor. [ResearchGate](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
-1.  **Chodrow, P. S. (2022). The Short Story of Bregman Information for Measuring Segregation.** ([Blog Post](https://www.philchodrow.prof/posts/2022-06-24-bregman/)) - An accessible introduction to Bregman information in a specific context.
-2.  **Reid, M. (2013). Meet the Bregman Divergences.** ([Blog Post](https://mark.reid.name/blog/meet-the-bregman-divergences.html)) - A classic blog post introducing Bregman divergences.
+1.  **Kirsanov, A. (2024).** "The Key Equation Behind Probability". *YouTube*. [Video Link](https://www.youtube.com/watch?v=KHVR587oW8I)
+    *   *Excellent visual explanation of the connection between KL divergence and entropy.*
+2.  **Wikipedia. (Accessed 2025).** "Bregman Divergence". *Wikipedia, The Free Encyclopedia*. [Link](https://en.wikipedia.org/wiki/Bregman_divergence)
+    *   *A comprehensive overview of Bregman divergences and their properties.*
+3.  **Nielsen, F. (2022).** "The Many Faces of Information Geometry". *Notices of the American Mathematical Society*, 69(1), 36-45. [PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)
+    *   *A great, very short and readable introduction to Information Geometry concepts.*
+4.  **Nielsen, F. (2021).** "Bregman Divergences, dual information geometry, and generalized convexity". *Personal Course Notes/Slides*. [PDF Link](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
+5.  **Nielsen, F., & Nock, R. (2007).** "On the Centroids of Symmetrized Bregman Divergences". *arXiv preprint arXiv:0711.3242*. [arXiv Link](https://arxiv.org/abs/0711.3242)
+6.  **Banerjee, A., Guo, X., & Wang, H. (2005).** "On the optimality of conditional expectation as a Bregman predictor". *IEEE Transactions on Information Theory*, 51(7), 2664-2669. [IEEE Xplore Link](https://ieeexplore.ieee.org/document/1459065)
+    *   *Formalizes the connection between conditional expectation and Bregman divergences.*
+7.  **Banerjee, A., Guo, X., & Wang, H. (2004).** "Optimal Bregman prediction and Jensen's equality". *Proceedings of the International Symposium on Information Theory (ISIT 2004)*, p. 169. [DOI: 10.1109/ISIT.2004.1365205](https://doi.org/10.1109/ISIT.2004.1365205), [ResearchGate Link](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
+    *   *Single page paper on optimality of conditional expectation as a Bregman predictor.*
+8.  **Chodrow, P. S. (2022).** "The Short Story of Bregman Information for Measuring Segregation". *Personal Blog*. [Blog Post Link](https://www.philchodrow.prof/posts/2022-06-24-bregman/)
+    *   *An accessible introduction to Bregman information in a specific context.*
+9.  **Reid, M. (2013).** "Meet the Bregman Divergences". *Personal Blog*. [Blog Post Link](https://mark.reid.name/blog/meet-the-bregman-divergences.html)
+    *   *A classic blog post introducing Bregman divergences.*
+
+## Appendix A: Formal Justification for Conditional Expectation
+
+This appendix provides the more rigorous measure-theoretic definition of conditional expectation and the proof of its optimality for minimizing expected squared error using Hilbert space projections.
+
+#### Formal Definition (Measure-Theoretic)
+
+While the formulas using sums and integrals are useful for discrete and continuous cases, a more general and powerful definition comes from measure theory. Let $$(\Omega, \mathcal{F}, P)$$ be our underlying probability space. $$X$$ and $$Y$$ are random variables defined on this space. Assume $$Y$$ is integrable ($$E[ \vert Y \vert ] < \infty$$).
+
+The **conditional expectation** of $$Y$$ given $$X$$, denoted $$E[Y \vert X]$$ or more formally $$E[Y \vert \sigma(X)]$$, is defined as *any* random variable $$Z$$ that satisfies two conditions:
+
+1.  **Measurability:** $$Z$$ is $$\sigma(X)$$-measurable. This means $$Z$$ is a function of $$X$$; its value depends only on the outcome of $$X$$. *(Technically, for any Borel set $$B$$, the pre-image $$Z^{-1}(B)$$ belongs to the $$\sigma$$-algebra generated by $$X$$, denoted $$\sigma(X)$$, which represents the information contained in $$X$$)*.
+2.  **Partial Averaging:** For any set $$A \in \sigma(X)$$,
+
+    $$
+    \int_A Z \, dP = \int_A Y \, dP \quad \Leftrightarrow \quad E[Z \cdot \mathbb{1}_A] = E[Y \cdot \mathbb{1}_A]
+    $$
+
+    where $$\mathbb{1}_A$$ is the indicator function for the set $$A$$. This property essentially says that $$Z$$ has the same average value as $$Y$$ over any event $$A$$ that can be defined solely in terms of $$X$$.
+
+It's a fundamental theorem in probability theory (related to the Radon-Nikodym theorem) that such a random variable $$Z$$ exists and is unique up to sets of measure zero. We denote this unique random variable by $$E[Y \vert X]$$. The value $$E[Y \vert X=x]$$ we discussed earlier can be seen as a specific evaluation (or version) of this random variable $$E[Y \vert X]$$ when $$X$$ happens to be $$x$$.
+
+#### Optimality via Orthogonal Projection (in Function Space)
+
+Now, let's formally show why $$E[Y\vert X]$$ is the optimal predictor under expected squared error using the geometric intuition of orthogonal projection in a function space.
+
+Consider the space $$L^2(\Omega, \mathcal{F}, P)$$, which is the Hilbert space of all random variables $$V$$ defined on our underlying probability space $$(\Omega, \mathcal{F}, P)$$ such that their variance is finite ($$E[V^2] < \infty$$). This space is equipped with an inner product defined by expectation:
+
+$$
+\langle U, V \rangle = E[UV]
+$$
+
+The squared norm induced by this inner product is $$\Vert V\Vert ^2 = \langle V, V \rangle = E[V^2]$$. The distance between two random variables $$U, V$$ in this space is $$\Vert U - V\Vert  = \sqrt{E[(U - V)^2]}$$. Minimizing the expected squared error $$E[(Y - f(X))^2]$$ is equivalent to minimizing the squared distance $$ \Vert Y - f(X)\Vert ^2 $$ in this $$L^2$$ space.
+
+We are looking for a predictor $$f(X)$$ that is a function *only* of $$X$$. This means $$f(X)$$ must belong to the subspace of $$L^2$$ consisting of random variables that are measurable with respect to the information contained in $$X$$. Let's call this subspace $$\mathcal{M} = L^2(\Omega, \sigma(X), P)$$, where $$\sigma(X)$$ is the sigma-algebra generated by $$X$$. This is a closed subspace of the full Hilbert space $$L^2(\Omega, \mathcal{F}, P)$$.
+
+Our problem is to find the element $$Z^\ast \in \mathcal{M}$$ (representing the optimal predictor $$f^\ast(X)$$) that is closest to the target random variable $$Y \in L^2(\Omega, \mathcal{F}, P)$$ in the $$L^2$$ norm. That is, we want to solve:
+
+$$
+\min_{Z \in \mathcal{M}} \Vert Y - Z\Vert ^2 = \min_{f \text{ s.t. } f(X) \in \mathcal{M}} E[(Y - f(X))^2]
+$$
+
+Due to the construction of Hilbert spaces to behave just like Euclidean spaces, we can extend the projection theorem in linear algebra to these spaces. The **Hilbert Projection Theorem** guarantees that for any closed subspace $$\mathcal{M}$$ of a Hilbert space $$\mathcal{H}$$, and any element $$y \in \mathcal{H}$$, there exists a unique element $$z^\ast \in \mathcal{M}$$ (the orthogonal projection of $$y$$ onto $$\mathcal{M}$$) such that:
+1.  $$z^\ast$$ minimizes the distance: $$\Vert y - z^\ast\Vert  = \min_{z \in \mathcal{M}} \Vert y - z\Vert $$
+2.  The error vector $$(y - z^\ast)$$ is orthogonal to the subspace $$\mathcal{M}$$. That is, $$\langle y - z^\ast, z \rangle = 0$$ for all $$z \in \mathcal{M}$$.
+
+Applying this theorem to our problem ($$\mathcal{H} = L^2(\Omega, \mathcal{F}, P)$$, $$y=Y$$, $$\mathcal{M} = L^2(\Omega, \sigma(X), P)$$): The unique minimizer $$Z^\ast$$ exists and is characterized by the orthogonality condition:
+
+$$
+\langle Y - Z^\ast, Z \rangle = 0 \quad \text{for all } Z \in \mathcal{M}
+$$
+
+Substituting the inner product definition $$ \langle U, V \rangle = E[UV] $$:
+
+$$
+E[(Y - Z^\ast) Z] = 0 \quad \text{for all } Z \in L^2(\Omega, \sigma(X), P)
+$$
+
+This implies:
+
+$$
+E[Y Z] = E[Z^\ast Z] \quad \text{for all } Z \in L^2(\Omega, \sigma(X), P)
+$$
+
+Now, recall the formal definition of conditional expectation $$E[Y \vert \sigma(X)]$$ (often written as $$E[Y \vert X]$$). A random variable $$W$$ is the conditional expectation of $$Y$$ given $$X$$ if and only if:
+1.  $$W$$ is $$\sigma(X)$$-measurable (i.e., $$W$$ is a function of $$X$$, $$W \in \mathcal{M}$$).
+2.  $$E[W Z] = E[Y Z]$$ for all bounded $$\sigma(X)$$-measurable random variables $$Z$$ (this condition can be extended to hold for all $$Z \in L^2(\Omega, \sigma(X), P)$$).
+
+Comparing the orthogonality condition $$E[Z^\ast Z] = E[Y Z]$$ for all $$Z \in \mathcal{M}$$ with the defining property of conditional expectation, and noting that the projection $$Z^\ast$$ must be in $$\mathcal{M}$$ (i.e., $$\sigma(X)$$-measurable), we see that $$Z^\ast$$ exactly satisfies the definition of the conditional expectation $$E[Y \vert X]$$.
+
+Therefore, the unique element $$Z^\ast \in \mathcal{M}$$ that minimizes the expected squared error is exactly the conditional expectation:
+
+$$
+Z^\ast = E[Y \vert X]
+$$
+
+This rigorously proves that the optimal predictor function $$f^\ast(x)$$ that minimizes $$E[(Y - f(X))^2]$$ is the conditional expectation function, $$f^\ast(x) = E[Y \vert X=x]$$.
