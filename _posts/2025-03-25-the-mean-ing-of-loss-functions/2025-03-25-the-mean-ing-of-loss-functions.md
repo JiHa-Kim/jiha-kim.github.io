@@ -1061,27 +1061,6 @@ Understanding the meaning behind loss functions helps us choose appropriate ones
 
 ---
 
-## Further Reading
-
-Wikipedia is a great resource for all the math in this post.
-
-1.  **Kirsanov, A. (2024).** "The Key Equation Behind Probability". *YouTube*. [Video Link](https://www.youtube.com/watch?v=KHVR587oW8I)
-    *   *Excellent visual explanation of the connection between KL divergence and entropy.*
-2.  **Wikipedia. (Accessed 2025).** "Bregman Divergence". *Wikipedia, The Free Encyclopedia*. [Link](https://en.wikipedia.org/wiki/Bregman_divergence)
-    *   *A comprehensive overview of Bregman divergences and their properties.*
-3.  **Nielsen, F. (2022).** "The Many Faces of Information Geometry". *Notices of the American Mathematical Society*, 69(1), 36-45. [PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)
-    *   *A great, very short and readable introduction to Information Geometry concepts.*
-4.  **Nielsen, F. (2021).** "Bregman Divergences, dual information geometry, and generalized convexity". *Personal Course Notes/Slides*. [PDF Link](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
-5.  **Nielsen, F., & Nock, R. (2007).** "On the Centroids of Symmetrized Bregman Divergences". *arXiv preprint arXiv:0711.3242*. [arXiv Link](https://arxiv.org/abs/0711.3242)
-6.  **Banerjee, A., Guo, X., & Wang, H. (2005).** "On the optimality of conditional expectation as a Bregman predictor". *IEEE Transactions on Information Theory*, 51(7), 2664-2669. [IEEE Xplore Link](https://ieeexplore.ieee.org/document/1459065)
-    *   *Formalizes the connection between conditional expectation and Bregman divergences.*
-7.  **Banerjee, A., Guo, X., & Wang, H. (2004).** "Optimal Bregman prediction and Jensen's equality". *Proceedings of the International Symposium on Information Theory (ISIT 2004)*, p. 169. [DOI: 10.1109/ISIT.2004.1365205](https://doi.org/10.1109/ISIT.2004.1365205), [ResearchGate Link](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
-    *   *Single page paper on optimality of conditional expectation as a Bregman predictor.*
-8.  **Chodrow, P. S. (2022).** "The Short Story of Bregman Information for Measuring Segregation". *Personal Blog*. [Blog Post Link](https://www.philchodrow.prof/posts/2022-06-24-bregman/)
-    *   *An accessible introduction to Bregman information in a specific context.*
-9.  **Reid, M. (2013).** "Meet the Bregman Divergences". *Personal Blog*. [Blog Post Link](https://mark.reid.name/blog/meet-the-bregman-divergences.html)
-    *   *A classic blog post introducing Bregman divergences.*
-
 ## Appendix A: Formal Justification for Conditional Expectation
 
 This appendix provides the more rigorous measure-theoretic definition of conditional expectation and the proof of its optimality for minimizing expected squared error using Hilbert space projections.
@@ -1158,3 +1137,27 @@ Z^\ast = E[Y \vert X]
 $$
 
 This rigorously proves that the optimal predictor function $$f^\ast(x)$$ that minimizes $$E[(Y - f(X))^2]$$ is the conditional expectation function, $$f^\ast(x) = E[Y \vert X=x]$$.
+
+---
+
+
+## Further Reading
+
+Wikipedia is a great resource for all the math in this post.
+
+1.  **Kirsanov, A. (2024).** "The Key Equation Behind Probability". *YouTube*. [Video Link](https://www.youtube.com/watch?v=KHVR587oW8I)
+    *   *Excellent visual explanation of the connection between KL divergence and entropy.*
+2.  **Wikipedia. (Accessed 2025).** "Bregman Divergence". *Wikipedia, The Free Encyclopedia*. [Link](https://en.wikipedia.org/wiki/Bregman_divergence)
+    *   *A comprehensive overview of Bregman divergences and their properties.*
+3.  **Nielsen, F. (2022).** "The Many Faces of Information Geometry". *Notices of the American Mathematical Society*, 69(1), 36-45. [PDF Link](https://www.ams.org/journals/notices/202201/rnoti-p36.pdf)
+    *   *A great, very short and readable introduction to Information Geometry concepts.*
+4.  **Nielsen, F. (2021).** "Bregman Divergences, dual information geometry, and generalized convexity". *Personal Course Notes/Slides*. [PDF Link](https://franknielsen.github.io/BregmanDivergenceDualIGGenConvexity-25Nov2021.pdf)
+5.  **Nielsen, F., & Nock, R. (2007).** "On the Centroids of Symmetrized Bregman Divergences". *arXiv preprint arXiv:0711.3242*. [arXiv Link](https://arxiv.org/abs/0711.3242)
+6.  **Banerjee, A., Guo, X., & Wang, H. (2005).** "On the optimality of conditional expectation as a Bregman predictor". *IEEE Transactions on Information Theory*, 51(7), 2664-2669. [IEEE Xplore Link](https://ieeexplore.ieee.org/document/1459065)
+    *   *Formalizes the connection between conditional expectation and Bregman divergences.*
+7.  **Banerjee, A., Guo, X., & Wang, H. (2004).** "Optimal Bregman prediction and Jensen's equality". *Proceedings of the International Symposium on Information Theory (ISIT 2004)*, p. 169. [DOI: 10.1109/ISIT.2004.1365205](https://doi.org/10.1109/ISIT.2004.1365205), [ResearchGate Link](https://www.researchgate.net/publication/224754032_Optimal_Bregman_prediction_and_Jensen's_equality)
+    *   *Single page paper on optimality of conditional expectation as a Bregman predictor.*
+8.  **Chodrow, P. S. (2022).** "The Short Story of Bregman Information for Measuring Segregation". *Personal Blog*. [Blog Post Link](https://www.philchodrow.prof/posts/2022-06-24-bregman/)
+    *   *An accessible introduction to Bregman information in a specific context.*
+9.  **Reid, M. (2013).** "Meet the Bregman Divergences". *Personal Blog*. [Blog Post Link](https://mark.reid.name/blog/meet-the-bregman-divergences.html)
+    *   *A classic blog post introducing Bregman divergences.*
