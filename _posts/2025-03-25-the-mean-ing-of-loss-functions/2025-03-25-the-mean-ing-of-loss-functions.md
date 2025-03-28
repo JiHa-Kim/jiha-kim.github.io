@@ -2,7 +2,7 @@
 layout: post
 title: The Mean-ing of Loss Functions
 date: 2025-03-25 20:32 -0400
-description: Surface-level introduction to information geometry, exploration of basic loss functions encoding deep assumptions about our data and the goals of learning.
+description: Introduction to Bregman projections in information geometry, exploration connections between basic loss functions and the mean as a predictor.
 image: /assets/2025-03-25-the-mean-ing-of-loss-functions/The_Mean_ing_of_Loss_Functions.svg 
 category: Machine Learning
 tags: [loss functions, machine learning, information theory, statistics, optimization, bregman divergence, information geometry]
@@ -688,58 +688,14 @@ Let's carefully understand each term:
 2.  **Bias ($$\text{Bias}[\hat{f}(x_0)] = E_{\mathcal{D}}[\hat{f}(x_0)] - f(x_0)$$):** This is the difference between the *average prediction* of our model at $$x_0$$ (if we were to train it on many different datasets $$\mathcal{D}$$ and average the predictions) and the *true* value $$f(x_0)$$. Squared bias measures how much our model's average prediction deviates from the truth. High bias suggests the model is systematically wrong, perhaps because it's too simple to capture the underlying structure (e.g., fitting a line to a curve). This leads to **underfitting**.
 3.  **Variance ($$\text{Variance}[\hat{f}(x_0)] = E_{\mathcal{D}} [(\hat{f}(x_0) - E_{\mathcal{D}}[\hat{f}(x_0)])^2]$$):** This measures how much the model's prediction $$\hat{f}(x_0)$$ tends to vary *around its own average prediction* as we train it on different datasets $$\mathcal{D}$$. High variance indicates that the model is very sensitive to the specific training data; small changes in the data lead to large changes in the model's predictions. This often happens with overly complex models that fit the noise in the training data. This leads to **overfitting**.
 
-<script type="text/tikz">
-\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+![Target Practice Analogy](target_practice.png)
+_Figure: Target Practice Analogy. Imagine you're trying to hit a target. The irreducible error is the size of the target itself (the inherent noise). The bias is how far your average shot lands from the target. The variance is how much your shots vary from the average._
 
-\begin{document}
-\begin{tikzpicture}[
-    target/.style={circle, draw, minimum size=1.5cm},
-    shot/.style={cross out, draw=red, thick, minimum size=2pt, inner sep=0pt}
-    ]
+![Bias-Variance Plot](bias_variance_plot.png)
+_Figure: Bias-Variance Plot_
 
-    % Define coordinates for centers
-    \coordinate (c1) at (0,0);
-    \coordinate (c2) at (3.5,0);
-    \coordinate (c3) at (0,-3.5);
-    \coordinate (c4) at (3.5,-3.5);
-
-    % Target 1: Low Bias, Low Variance
-    \node[target] at (c1) {};
-    \node[anchor=north] at (c1  \vert - 0,-1) {Low Bias, Low Var};
-    \foreach \i in {1,...,5} {
-        \node[shot] at ($(c1) + (rand*0.2, rand*0.2)$) {};
-    }
-    \node[star, fill=blue, minimum size=3pt, inner sep=0pt] at (c1) {}; % Bullseye
-
-    % Target 2: High Bias, Low Variance
-    \node[target] at (c2) {};
-    \node[anchor=north] at (c2  \vert - 0,-1) {High Bias, Low Var};
-    \coordinate (bias_offset2) at (0.5, 0.3); % Consistent offset for shots
-    \foreach \i in {1,...,5} {
-        \node[shot] at ($(c2) + bias_offset2 + (rand*0.2, rand*0.2)$) {};
-    }
-     \node[star, fill=blue, minimum size=3pt, inner sep=0pt] at (c2) {}; % Bullseye
-
-    % Target 3: Low Bias, High Variance
-    \node[target] at (c3) {};
-    \node[anchor=north] at (c3  \vert - 0,-1) {Low Bias, High Var};
-     \foreach \i in {1,...,5} {
-        \node[shot] at ($(c3) + (rand*0.6, rand*0.6)$) {};
-    }
-    \node[star, fill=blue, minimum size=3pt, inner sep=0pt] at (c3) {}; % Bullseye
-
-    % Target 4: High Bias, High Variance
-    \node[target] at (c4) {};
-    \node[anchor=north] at (c4  \vert - 0,-1) {High Bias, High Var};
-     \coordinate (bias_offset4) at (0.4, -0.4); % Consistent offset for shots' center
-    \foreach \i in {1,...,5} {
-        \node[shot] at ($(c4) + bias_offset4 + (rand*0.6, rand*0.6)$) {};
-    }
-    \node[star, fill=blue, minimum size=3pt, inner sep=0pt] at (c4) {}; % Bullseye
-
-\end{tikzpicture}
-\end{document}
-</script>
+![Underfitting vs Overfitting](underfitting_vs_overfitting.png)
+_Figure: Underfitting vs Overfitting example with polynomials_
 
 <blockquote class="prompt-warning">
 The <b>Bias-Variance Tradeoff</b> highlights a fundamental challenge in modeling: decreasing bias (by making the model more complex/flexible) often increases variance, and decreasing variance (by simplifying the model or using regularization) often increases bias. The goal is to find a model complexity that balances these two sources of error to minimize the total expected prediction error (\( \text{Bias}^2 + \text{Variance} \)).
@@ -1037,7 +993,7 @@ L_{CE}(\theta) = - \frac{1}{N} \sum_{i=1}^N \log (\hat{y}_{ic_i})
 $$
 
 <blockquote class="prompt-tip">
-Minimizing cross-entropy loss is equivalent to performing **Maximum Likelihood Estimation (MLE)** for a classification model that outputs probabilities.
+Minimizing cross-entropy loss is equivalent to performing <b>Maximum Likelihood Estimation (MLE)</b> for a classification model that outputs probabilities.
 </blockquote>
 
 ---
