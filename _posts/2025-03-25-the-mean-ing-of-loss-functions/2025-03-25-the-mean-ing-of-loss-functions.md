@@ -40,8 +40,6 @@ block
 
 like so. Also, HTML markers must be used rather than markdown, e.g. <b>bold</b> rather than **bold**.
 
-Within the TikZ environment, it is necessary to omit the \documentclass line.
-
 -->
 
 ## Introduction
@@ -190,40 +188,8 @@ $$
 
 The term $$ \Vert y - \hat{y}\Vert _2^2 = \sum_{i=1}^N (y_i - \bar{y})^2 $$ is exactly the sum of squared errors (or residuals) that we minimized. This quantity is related to the sample variance ($$ s^2 = \frac{1}{N-1} \Vert y - \hat{y}\Vert _2^2 $$).
 
-<script type="text/tikz">
-\usetikzlibrary{decorations.pathreplacing,angles,quotes}
-
-\begin{document}
-\begin{tikzpicture}[scale=1.0]
-
-% Axes (for context, optional)
-\draw[->] (0,0) -- (4,0) node[right] {$y_1$};
-\draw[->] (0,0) -- (0,4) node[above] {$y_2$};
-
-% Constant subspace (y=x line)
-\draw[thick] (0,0) -- (3.5,3.5) node[above right] {Subspace of constant vectors};
-
-% Original vector y
-\draw[thick,->] (0,0) -- (3,1.5) node[right] {$y=(y_1,y_2)$};
-
-% Projection line (orthogonal)
-\draw[dashed] (3,1.5) -- (2.25,2.25);
-
-% Projected vector (y_hat)
-\draw[thick,->] (0,0) -- (2.25,2.25) node[above left] {$\hat{y}=(\bar{y},\bar{y})$};
-
-% Residual vector (error)
-\draw[thick,->,red] (2.25,2.25) -- (3,1.5) node[midway,right] {$y-\hat{y}$};
-
-% Orthogonality right-angle mark
-\draw (2.25,2.25) ++(0.2,-0.2) -- ++(0.2,0.2) -- ++(-0.2,0.2);
-
-% Optional labels for clarity
-\node at (1.4,0.5) [rotate=25] {projection};
-
-\end{tikzpicture}
-\end{document}
-</script>
+![2D Mean as Projection onto Diagonal Subspace](./2d_mean_diagonal_projection.svg)
+_Figure: 2D Mean as Projection onto Diagonal Subspace_
 
 This shows that squared loss has deep geometric roots: minimizing it is equivalent to orthogonally projecting $$ y $$ onto a subspace, and the mean arises as the optimal point in that subspace. This perspective will resurface again when we look at linear regression more generally.
 
@@ -303,82 +269,8 @@ So, the conditional expectation function is $$f(x) = x/2$$ for $$x \in [0, 1]$$.
 
 Let's visualize the discrete example 2 and the continuous example 3.
 
-<script type="text/tikz">
-\usetikzlibrary{arrows.meta, positioning, calc, shapes.geometric} % Removed backgrounds library
-
-\begin{document}
-
-\begin{tikzpicture}[
-    x=1.5cm, y=0.7cm, % Scale the axes
-    axis/.style={->, >=Latex},
-    grid/.style={help lines, very thin, color=gray!30},
-    thick_dashed/.style={thick, dashed},
-    lbl/.style={font=\small},
-    point/.style={circle, fill=blue, inner sep=1pt, opacity=0.6},
-    cond_point/.style={circle, fill=orange, inner sep=1.5pt},
-    cond_exp_marker/.style={star, star points=7, fill=green, inner sep=2.5pt}
-  ]
-
-    % Parameters
-    \def\xmax{4.5}
-    \def\ymax{10.5}
-    \def\xcond{3} % Conditioning value
-    \pgfmathsetmacro{\ycondexp}{2*\xcond} % E[Y\vert X=3] = 6
-
-    % --- Drawing in Sequence ---
-
-    % Draw Grid First
-    \draw[grid] (0.5,0) grid (\xmax, \ymax);
-
-    % Draw Axes
-    \draw[axis] (0,0) -- (\xmax + 0.2, 0) node[anchor=west] {$X$};
-    \draw[axis] (0,0) -- (0, \ymax + 0.5) node[anchor=south] {$Y$};
-
-    % Draw Tick Marks and Labels
-    \foreach \x in {1, 2, 3, 4} { \draw (\x, -0.1) -- (\x, 0.1) node[anchor=north, lbl] {$\x$}; }
-    \foreach \y in {1, 3, 5, 6, 7, 9} { \draw (-0.05, \y) -- (0.05, \y) node[anchor=east, lbl] {$\y$}; }
-
-    % Plot illustrative data points (excluding those exactly at x=3)
-    \node[point] at (1,1) {}; \node[point] at (1,3) {};
-    \node[point] at (2,3) {}; \node[point] at (2,5) {};
-    \node[point] at (4,7) {}; \node[point] at (4,9) {};
-    % Optional duplicates
-    \node[point] at (1,1) {}; \node[point] at (1,3) {};
-    \node[point] at (2,3) {}; \node[point] at (2,5) {};
-    \node[point] at (4,7) {}; \node[point] at (4,9) {};
-
-    % Highlight the conditioning line X=3
-    \draw[red, thick_dashed] (\xcond, 0) -- (\xcond, \ymax);
-    % Label the X=3 line (positioned carefully)
-    \node[red, anchor=east, lbl, xshift=-2pt] at (\xcond, \ymax * 0.95) {$X=\xcond$};
-
-    % Plot the true conditional expectation function y=2x
-    \draw[green, thick_dashed] plot[domain=0.5:\xmax, samples=40] (\x, {2*\x});
-    % Label the function line
-    \node[green, anchor=west, lbl] at (\xmax, {2*\xmax}) {$f(x)=2x$};
-
-    % --- Draw Markers and Labels at X=3 LAST ---
-    % Use label syntax directly on the node command
-
-    % Orange point at y=5 with label to the right
-    \node[cond_point, label={[lbl, anchor=west, xshift=3pt]right:{$y=5$ (Prob 0.5)}}]
-          at (\xcond, 5) {};
-
-    % Orange point at y=7 with label to the right
-    \node[cond_point, label={[lbl, anchor=west, xshift=3pt]right:{$y=7$ (Prob 0.5)}}]
-          at (\xcond, 7) {};
-
-    % Green star at y=6 with label shifted above-left
-    \node[cond_exp_marker, label={[lbl, anchor=east, xshift=-3pt, yshift=2pt]north west:{$E[Y\vert X=3] = \pgfmathprintnumber{\ycondexp}$}}]
-          at (\xcond, \ycondexp) {};
-
-
-    % Add title (drawn near the end, but check placement)
-    \node[anchor=south] at (\xmax/2 + 0.25, \ymax + 0.1) {Conditional Expectation (Discrete: $Y=2X+\epsilon$)};
-
-\end{tikzpicture}
-\end{document}
-</script>
+![Example 2: Discrete Conditional Mean](./conditional_mean_ex2_discrete.png)
+_Figure: Example 2: Discrete Conditional Mean_
 
 **Explanation of Diagram 1:**
 1.  The blue dots represent possible data points $$(x, y)$$ generated from the model $$Y = 2X + \epsilon$$.
@@ -389,68 +281,10 @@ Let's visualize the discrete example 2 and the continuous example 3.
 
 **Diagram 2: Continuous Case (Example 3: $$Y \sim U[0, x]$$)**
 
-This diagram illustrates finding
-$$E[Y \vert X=x]$$ where $$Y$$ is uniformly distributed on $$[0, x]$$, given $$X=x$$. We pick a specific value, say $$x=0.8$$. Given $$X=0.8$$, $$Y$$ is uniform on $$[0, 0.8]$$. The conditional expectation $$E[Y \vert X=0.8]$$ is the midpoint of this interval, which is $$0.8 / 2 = 0.4$$.
+This diagram illustrates finding $$E[Y \vert X=x]$$ where $$Y$$ is uniformly distributed on $$[0, x]$$, given $$X=x$$. We pick a specific value, say $$x=0.8$$. Given $$X=0.8$$, $$Y$$ is uniform on $$[0, 0.8]$$. The conditional expectation $$E[Y \vert X=0.8]$$ is the midpoint of this interval, which is $$0.8 / 2 = 0.4$$.
 
-<script type="text/tikz">
-\usetikzlibrary{arrows.meta, positioning, calc, decorations.pathreplacing, patterns, shapes.geometric}
-
-\begin{document}
-\begin{tikzpicture}[
-    x=7cm, y=7cm, % Scale the axes (adjust as needed)
-    axis/.style={->, >=Latex},
-    grid/.style={help lines, very thin, color=gray!30},
-    thick_dashed/.style={thick, dashed},
-    lbl/.style={font=\small}
-  ]
-
-    % Parameters
-    \def\xmax{1.2}
-    \def\ymax{1.2}
-    \def\xval{0.8} % The specific x value we are conditioning on
-    \pgfmathsetmacro{\condexp}{\xval/2} % Calculate E[Y\vert X=x] = x/2
-
-    % Draw Grid (optional)
-    \draw[grid] (0,0) grid (\xmax, \ymax);
-
-    % Draw Axes
-    \draw[axis] (0,0) -- (\xmax + 0.1, 0) node[anchor=west] {$X$};
-    \draw[axis] (0,0) -- (0, \ymax + 0.1) node[anchor=south] {$Y$};
-
-    % Draw Ticks
-    \foreach \x in {0, 0.8, 1} { \draw (\x, -0.01) -- (\x, 0.01) node[anchor=north, lbl] {$\x$}; }
-    \foreach \y in {0, 0.4, 0.8, 1} { \draw (-0.01, \y) -- (0.01, \y) node[anchor=east, lbl] {$\y$}; }
-
-    % Highlight the conditioning line X=x
-    \draw[red, thick_dashed] (\xval, 0) -- (\xval, \ymax) node[anchor=south, pos=1, lbl] {$X=x=\xval$};
-
-    % Indicate the support of the conditional distribution Y \vert X=x (thick blue line)
-    \draw[blue, line width=2pt] (\xval, 0) -- (\xval, \xval);
-    % Label for the distribution
-    \node[blue, anchor=south west, align=left, lbl, xshift=2pt] at (\xval, \xval) {Given $X=x$, \\ $Y \sim U[0, x]$};
-
-    % Draw Brace - Use 'mirror' to ensure it faces outward (right)
-    \draw[decoration={brace, amplitude=4pt, mirror}, decorate, blue]
-        (\xval+0.02, 0) -- (\xval+0.02, \xval) % Shifted slightly right
-        node[midway, right, xshift=4pt, lbl] {Range of $Y$};
-
-    % Plot the true conditional expectation function y=x/2
-    \draw[green, thick_dashed] plot[domain=0:\xmax, samples=50] (\x, {\x/2});
-    % Add label for the function line - positioned near the end of the line
-    \node[green, anchor=west, lbl] at (\xmax, {\xmax/2}) {$f(x)=x/2$};
-
-    % Mark the conditional expectation E[Y \vert X=x] = x/2
-    % Position label 'above left' to avoid line intersection
-    \node[star, star points=7, fill=green, inner sep=2.5pt,
-          label={[lbl, label distance=0.05cm]above left:{$E[Y\vert X=x] = x/2 = \pgfmathprintnumber{\condexp}$}}]
-          at (\xval, \condexp) {};
-
-    % Add title (optional)
-    \node[anchor=south] at (\xmax/2, \ymax + 0.05) {Conditional Expectation (Continuous: $Y \sim U[0, X]$)};
-
-\end{tikzpicture}
-\end{document}
-</script>
+![Example 3: Continuous Conditional Mean](./conditional_mean_ex3_continuous.png)
+_Figure: Example 3: Continuous Conditional Mean_
 
 **Explanation of Diagram 2:**
 1.  We focus on a specific value $$x=0.8$$. The vertical dashed red line indicates this condition.
