@@ -1000,6 +1000,7 @@ Thanks to:
 - Artem Kirsanov for his video on KL divergence and entropy. His explanations are very clear and easy to understand.
 - Datta Nimmaturi for pointing out the rendering error of Tikz diagrams in the post.
 - @toe_of_frege on X for pointing out the limitations of the bias-variance tradeoff diagram.
+- Gemini 2.5 Pro for writing a large portion of the post.
 
 ---
 
