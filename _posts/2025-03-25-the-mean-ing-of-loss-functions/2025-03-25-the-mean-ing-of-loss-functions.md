@@ -267,10 +267,10 @@ $$
 
 So, the conditional expectation function is $$f(x) = x/2$$ for $$x \in [0, 1]$$.
 
-Let's visualize the discrete example 2 and the continuous example 3.
+Let's visualize some examples.
 
-![Example 2: Discrete Conditional Mean](./conditional_mean_ex2_discrete.png)
-_Figure: Example 2: Discrete Conditional Mean_
+![Example: Discrete Conditional Mean](./conditional_mean_ex2_discrete.png)
+_Figure: Example: Discrete Conditional Mean_
 
 **Explanation of Diagram 1:**
 1.  The blue dots represent possible data points $$(x, y)$$ generated from the model $$Y = 2X + \epsilon$$.
@@ -283,8 +283,8 @@ _Figure: Example 2: Discrete Conditional Mean_
 
 This diagram illustrates finding $$E[Y \vert X=x]$$ where $$Y$$ is uniformly distributed on $$[0, x]$$, given $$X=x$$. We pick a specific value, say $$x=0.8$$. Given $$X=0.8$$, $$Y$$ is uniform on $$[0, 0.8]$$. The conditional expectation $$E[Y \vert X=0.8]$$ is the midpoint of this interval, which is $$0.8 / 2 = 0.4$$.
 
-![Example 3: Continuous Conditional Mean](./conditional_mean_ex3_continuous.png)
-_Figure: Example 3: Continuous Conditional Mean_
+![Example: Continuous Conditional Mean](./conditional_mean_ex3_continuous.png)
+_Figure: Example: Continuous Conditional Mean_
 
 **Explanation of Diagram 2:**
 1.  We focus on a specific value $$x=0.8$$. The vertical dashed red line indicates this condition.
@@ -989,6 +989,17 @@ Z^\ast = E[Y \vert X]
 $$
 
 This rigorously proves that the optimal predictor function $$f^\ast(x)$$ that minimizes $$E[(Y - f(X))^2]$$ is the conditional expectation function, $$f^\ast(x) = E[Y \vert X=x]$$.
+
+---
+
+## Acknowledgements
+
+Thanks to:
+
+- Frank Nielsen for his excellent explanations of Bregman divergences and their applications to machine learning. His work is a great source of inspiration for this post.
+- Artem Kirsanov for his video on KL divergence and entropy. His explanations are very clear and easy to understand.
+- Datta Nimmaturi for pointing out the rendering error of Tikz diagrams in the post.
+- @toe_of_frege on X for pointing out the limitations of the bias-variance tradeoff diagram.
 
 ---
 
