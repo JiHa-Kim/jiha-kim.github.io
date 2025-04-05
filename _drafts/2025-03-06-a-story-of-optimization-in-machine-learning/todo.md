@@ -14,7 +14,7 @@ Adam is a very popular optimizer not only because it works well in practice but 
 
 4. **Variance Adaptation Viewpoint:**  
    Some researchers argue that the second-moment term in Adam isn’t so much capturing curvature as it is adapting to the variance (i.e. noise) in the gradient estimates. Under this interpretation, the algorithm reduces the step size in directions where the gradient signal is noisy, thereby stabilizing the update. This explanation helps understand why Adam often works well even in settings with sparse or highly variable gradients.  
-   (See discussions such as those in citeturn0search11)
+   (See discussions such as those in)
 
 5. **Mirror Descent and Online Learning Perspective:**  
    Adam can also be connected to the framework of mirror descent—a generalization of gradient descent that uses a divergence (or distance measure) other than Euclidean distance. In this context, the bias-corrected moment estimates in Adam can be seen as adapting the update to a “dual” space, where the geometry is more favorable for optimization. This perspective links Adam to ideas in online convex optimization and can help explain its favorable empirical convergence properties.
