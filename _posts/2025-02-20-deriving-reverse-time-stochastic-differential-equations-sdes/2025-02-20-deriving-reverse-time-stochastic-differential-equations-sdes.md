@@ -4,8 +4,8 @@ title: Deriving Reverse-Time Stochastic Differential Equations (SDEs)
 date: 2025-02-20 08:58 +0000
 description: "A derivation of the reverse-time stochastic differential equation used in Score-Based Generative Modeling."
 categories:
+  - Applied Mathematics
   - Stochastic Calculus
-  - Machine Learning
 tags:
   - Score-Based Generative Modeling
   - Stochastic Differential Equations

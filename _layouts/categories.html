@@ -1,0 +1,272 @@
+---
+layout: page
+# All the Categories of posts
+---
+
+{% include lang.html %}
+
+{% assign HEAD_PREFIX = 'h_' %}
+{% assign LIST_PREFIX = 'l_' %}
+
+{% assign group_index = 0 %}
+
+{% assign sort_categories = site.categories | sort %}
+
+{% comment %}
+  Now build the category tree for display
+{% endcomment %}
+{% assign top_level_categories = '' | split: '' %}
+
+{% for category in sort_categories %}
+  {% assign category_name = category | first %}
+  {% assign posts_of_category = category | last %}
+  
+  {% comment %} 
+    Check if this is a top-level category, which would be the first element in a post's categories array
+  {% endcomment %}
+  {% assign is_top_level = false %}
+  
+  {% for post in posts_of_category %}
+    {% assign post_categories = post.categories | default: post.category %}
+    
+    {% comment %}
+      Normalize post.categories to always be an array
+    {% endcomment %}
+    {% if post_categories.first %}
+      {% assign post_categories_array = post_categories %}
+    {% else %}
+      {% assign post_categories_array = post_categories | split: ',' %}
+    {% endif %}
+    
+    {% if post_categories_array.first == category_name %}
+      {% assign is_top_level = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+  
+  {% if is_top_level %}
+    {% assign category_exists = false %}
+    {% for existing_category in top_level_categories %}
+      {% if existing_category == category_name %}
+        {% assign category_exists = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+    
+    {% unless category_exists %}
+      {% assign top_level_categories = top_level_categories | push: category_name %}
+    {% endunless %}
+  {% endif %}
+{% endfor %}
+
+{% assign top_level_categories = top_level_categories | sort %}
+
+{% for top_category in top_level_categories %}
+  {% assign sub_categories = '' | split: '' %}
+  {% assign direct_posts_count = 0 %}
+  
+  {% comment %}
+    Find subcategories for this top category
+  {% endcomment %}
+  {% for category in sort_categories %}
+    {% assign category_name = category | first %}
+    {% assign posts_of_category = category | last %}
+    
+    {% comment %}
+      Check if this category is a direct child of top_category
+    {% endcomment %}
+    {% assign is_sub_category = false %}
+    
+    {% for post in posts_of_category %}
+      {% assign post_categories = post.categories | default: post.category %}
+      
+      {% comment %}
+        Normalize post.categories to always be an array
+      {% endcomment %}
+      {% if post_categories.first %}
+        {% assign post_categories_array = post_categories %}
+      {% else %}
+        {% assign post_categories_array = post_categories | split: ',' %}
+      {% endif %}
+      
+      {% if post_categories_array.size >= 2 and post_categories_array[0] == top_category and post_categories_array[1] == category_name and top_category != category_name %}
+        {% assign is_sub_category = true %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+    
+    {% if is_sub_category %}
+      {% assign category_exists = false %}
+      {% for existing_category in sub_categories %}
+        {% if existing_category == category_name %}
+          {% assign category_exists = true %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+      
+      {% unless category_exists %}
+        {% assign sub_categories = sub_categories | push: category_name %}
+      {% endunless %}
+    {% endif %}
+  {% endfor %}
+  
+  {% comment %}
+    Count posts that belong directly to the top category (not to subcategories)
+  {% endcomment %}
+  {% for post in site.posts %}
+    {% assign post_categories = post.categories | default: post.category %}
+    
+    {% comment %}
+      Normalize post.categories to always be an array
+    {% endcomment %}
+    {% if post_categories.first %}
+      {% assign post_categories_array = post_categories %}
+    {% else %}
+      {% assign post_categories_array = post_categories | split: ',' %}
+    {% endif %}
+    
+    {% if post_categories_array.size == 1 and post_categories_array[0] == top_category %}
+      {% assign direct_posts_count = direct_posts_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+  
+  {% assign sub_categories = sub_categories | sort %}
+  {% assign sub_categories_size = sub_categories | size %}
+
+  <div class="card categories">
+    <!-- top-category -->
+    <div
+      id="{{ HEAD_PREFIX }}{{ group_index }}"
+      class="card-header d-flex justify-content-between hide-border-bottom"
+    >
+      <span class="ms-2">
+        <i class="far fa-folder{% if sub_categories_size > 0 %}-open{% endif %} fa-fw"></i>
+
+        {% capture _category_url %}/categories/{{ top_category | slugify | url_encode }}/{% endcapture %}
+        <a href="{{ _category_url | relative_url }}" class="mx-2">{{ top_category }}</a>
+
+        <!-- content count -->
+        <span class="text-muted small font-weight-light">
+          {% if sub_categories_size > 0 %}
+            {{ sub_categories_size }}
+            {% if sub_categories_size > 1 %}
+              {{ 
+                site.data.locales[lang].categories.category_measure.plural
+                | default: site.data.locales[lang].categories.category_measure
+              }}
+            {% else %}
+              {{ 
+                site.data.locales[lang].categories.category_measure.singular
+                | default: site.data.locales[lang].categories.category_measure
+              }}
+            {% endif -%}
+            , 
+          {% endif %}
+
+          {{ direct_posts_count }}
+
+          {% if direct_posts_count > 1 %}
+            {{ 
+              site.data.locales[lang].categories.post_measure.plural
+              | default: site.data.locales[lang].categories.post_measure
+            }}
+          {% else %}
+            {{ 
+              site.data.locales[lang].categories.post_measure.singular
+              | default: site.data.locales[lang].categories.post_measure
+            }}
+          {% endif %}
+        </span>
+      </span>
+
+      <!-- arrow -->
+      {% if sub_categories_size > 0 %}
+        <a
+          href="#{{ LIST_PREFIX }}{{ group_index }}"
+          data-bs-toggle="collapse"
+          aria-expanded="true"
+          aria-label="{{ HEAD_PREFIX }}{{ group_index }}-trigger"
+          class="category-trigger hide-border-bottom"
+        >
+          <i class="fas fa-fw fa-angle-down"></i>
+        </a>
+      {% else %}
+        <span data-bs-toggle="collapse" class="category-trigger hide-border-bottom disabled">
+          <i class="fas fa-fw fa-angle-right"></i>
+        </span>
+      {% endif %}
+    </div>
+    <!-- .card-header -->
+
+    <!-- Sub-categories -->
+    {% if sub_categories_size > 0 %}
+      <div id="{{ LIST_PREFIX }}{{ group_index }}" class="collapse show" aria-expanded="true">
+        <ul class="list-group">
+          {% for sub_category in sub_categories %}
+            {% assign sub_category_posts_count = 0 %}
+            {% assign combined_category = top_category | append: '-' | append: sub_category %}
+            
+            {% comment %}
+              Count posts that belong directly to this subcategory
+              (exactly 2 levels deep: [top_category, sub_category])
+            {% endcomment %}
+            {% for post in site.posts %}
+              {% assign post_categories = post.categories | default: post.category %}
+              
+              {% comment %}
+                Normalize post.categories to always be an array
+              {% endcomment %}
+              {% if post_categories.first %}
+                {% assign post_categories_array = post_categories %}
+              {% else %}
+                {% assign post_categories_array = post_categories | split: ',' %}
+              {% endif %}
+              
+              {% if post_categories_array.size == 2 and post_categories_array[0] == top_category and post_categories_array[1] == sub_category %}
+                {% assign sub_category_posts_count = sub_category_posts_count | plus: 1 %}
+              {% endif %}
+            {% endfor %}
+            
+            <li class="list-group-item">
+              <i class="far fa-folder fa-fw"></i>
+
+              {% comment %}
+                Either use a tag-based approach to combine parent-child categories
+                or create filter to display all posts matching both categories
+              {% endcomment %}
+              {% capture _combined_ctg_url %}/categories/{{ combined_category | slugify | url_encode }}/{% endcapture %}
+              {% assign tag_based_url = _combined_ctg_url %}
+              
+              {% comment %}
+                Fallback to separate category filtering if combined categories don't work
+              {% endcomment %}
+              {% capture _sub_ctg_url %}/categories/{{ sub_category | slugify | url_encode }}/{% endcapture %}
+              {% assign final_url = tag_based_url %}
+              
+              <a href="{{ final_url | relative_url }}" class="mx-2" data-parent="{{ top_category }}">{{ sub_category }}</a>
+
+              <span class="text-muted small font-weight-light">
+                {{ sub_category_posts_count }}
+
+                {% if sub_category_posts_count > 1 %}
+                  {{ 
+                    site.data.locales[lang].categories.post_measure.plural
+                    | default: site.data.locales[lang].categories.post_measure
+                  }}
+                {% else %}
+                  {{ 
+                    site.data.locales[lang].categories.post_measure.singular
+                    | default: site.data.locales[lang].categories.post_measure
+                  }}
+                {% endif %}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+  <!-- .card -->
+
+  {% assign group_index = group_index | plus: 1 %}
+{% endfor %}

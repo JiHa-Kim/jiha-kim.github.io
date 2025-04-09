@@ -4,10 +4,9 @@ title: "What Problem is Machine Learning Trying to Solve? A Formal Look"
 date: 2025-04-08 8:05 +0000
 description: "Formalizing the core optimization problem in supervised ML, its pitfalls, and why it often works."
 image: # Add an image path here if you have one
-categories: ["Machine Learning", "Optimization", "A Story of Optimization In Machine Learning"]
+categories: ["Machine Learning", "Optimization Series"]
 tags: ["Formalism", "Supervised Learning", "Empirical Risk Minimization", "Optimization", "Overfitting", "Generalization", "Statistical Learning Theory"]
 math: true
-tikz: true # Assuming you might add TikZ diagrams later
 ---
 
 Before actually exploring the theory behind optimization in machine learning, we have to first understand what problem we are even optimizing to begin with. This is something that was explored significantly, but is often glossed over in more modern texts. Let's break it down.
@@ -209,3 +208,4 @@ The concepts discussed here form the foundation of statistical learning theory a
     *   Another comprehensive textbook with a strong probabilistic focus, covering a vast range of topics. Similar to Bishop, it provides detailed explanations of the Bayesian approach, likelihoods, priors, and MAP estimation in the context of various models.
 
 These books delve much deeper into the mathematics of risk minimization, generalization bounds, specific algorithms, the role of priors, and the trade-offs involved in building effective machine learning models.
+
