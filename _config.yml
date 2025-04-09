@@ -230,14 +230,72 @@ jekyll_compose:
     drafts:
       description:
       image:
-      category:
+      categories:
       tags:
       math: true
-      tikz: true
+      # tikz: true
+      llm-instructions: |
+        I am using the Chirpy theme in Jekyll.
+        Please use the Kramdown MathJax syntax.
+
+        In regular Markdown, please use the following syntax:
+
+        Inline equations are surrounded by dollar signs on the same line: $$inline$$
+
+        Block equations are isolated by two newlines above and below, and newlines between the delimiters and the equation:
+
+        $$
+        block
+        $$
+
+        like so. Note that sometimes, if you have an inline equation following text in the first sentence of a paragraph (this includes lists), you must escape the leftmost delimiter with a backslash. But sometimes you are not supposed to escape it, I am not sure when. I believe that you are supposed to escape it when there are characters that might be parsed as HTML or Markdown, such as an underscore like a vertical bar like in conditional expectation or probability. I am not sure if this is a bug or a feature. It is thus preferable to use the LaTeX syntax for symbols as much as possible such as $$\vert$$ or $$\ast$$. Actually, after changing all instances of a vertical bar to \vert, it seems to have fixed the issue for the ones with underscores. So please avoid using the vertical bar symbol, only use \vert, \Vert.
+
+        The syntax for lists is:
+        1. $$inline$$ item
+        2. item $$inline$$
+
+        Inside HTML environments (like blockquotes), please use the following syntax:
+
+        \( inline \)
+
+        \[
+        block
+        \]
+
+        like so. Also, HTML markers must be used rather than markdown, e.g. <b>bold</b> rather than **bold**.
     posts:
       description:
       image:
-      category:
+      categories:
       tags:
       math: true
-      tikz: true
+      # tikz: true
+      llm-instructions: |
+        I am using the Chirpy theme in Jekyll.
+        Please use the Kramdown MathJax syntax.
+
+        In regular Markdown, please use the following syntax:
+
+        Inline equations are surrounded by dollar signs on the same line: $$inline$$
+
+        Block equations are isolated by two newlines above and below, and newlines between the delimiters and the equation:
+
+        $$
+        block
+        $$
+
+        like so. Note that sometimes, if you have an inline equation following text in the first sentence of a paragraph (this includes lists), you must escape the leftmost delimiter with a backslash. But sometimes you are not supposed to escape it, I am not sure when. I believe that you are supposed to escape it when there are characters that might be parsed as HTML or Markdown, such as an underscore like a vertical bar like in conditional expectation or probability. I am not sure if this is a bug or a feature. It is thus preferable to use the LaTeX syntax for symbols as much as possible such as $$\vert$$ or $$\ast$$. Actually, after changing all instances of a vertical bar to \vert, it seems to have fixed the issue for the ones with underscores. So please avoid using the vertical bar symbol, only use \vert, \Vert.
+
+        The syntax for lists is:
+        1. $$inline$$ item
+        2. item $$inline$$
+
+        Inside HTML environments (like blockquotes), please use the following syntax:
+
+        \( inline \)
+
+        \[
+        block
+        \]
+
+        like so. Also, HTML markers must be used rather than markdown, e.g. <b>bold</b> rather than **bold**.
