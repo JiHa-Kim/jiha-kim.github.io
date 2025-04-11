@@ -4,7 +4,9 @@ title: "What Problem is Machine Learning Trying to Solve? A Formal Look"
 date: 2025-04-08 8:05 +0000
 description: "Formalizing the core optimization problem in supervised ML, its pitfalls, and why it often works."
 image: # Add an image path here if you have one
-categories: ["Machine Learning", "Optimization Series"]
+categories:
+- Machine Learning
+- Mathematical Optimization
 tags: ["Formalism", "Supervised Learning", "Empirical Risk Minimization", "Optimization", "Overfitting", "Generalization", "Statistical Learning Theory"]
 math: true
 ---

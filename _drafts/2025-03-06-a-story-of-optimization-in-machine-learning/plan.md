@@ -1,3 +1,9 @@
+I am writing a blog post on mathematical optimization theory applied to machine learning. The target audience is machine learning practitioners and mathematical enthusiasts. Assume familiarity with linear algebra and calculus. The goal is to motivate theory from concrete problem examples arising in real-world situations and then studying them in-depth to develop a deeper understanding and then leverage this in applications.
+
+Plan the post to be well-structured and easily readable, write the draft and put it in a code block. You must carefully take care to think from the perspective of someone who is new to these concepts: thus, what motivating problems bring the need for this theory, and why do we choose some names or notation over others, what does it do? You must therefore lead with a concrete example, with either some natural language reasoning or some small number crunching for physical intuition, that then leads to generalize and summarize the ideas into a precise formal definition. You need to define or explain notation or terminology (at least superficially) to avoid leaving the reader confused after facing a new unknown concept.
+
+---
+
 Optimization theory in ML
 
 list v1
@@ -5,8 +11,8 @@ list v1
 2. Problem formulation
 3. Returning to roots in physics: overview of Newtonian mechanics (vectors) vs Lagrangian mechanics (scalars)
 4. gradient flow ODE, forward Euler discretization = gradient descent
-5. Legendre transform (Lagrangian vs Hamiltonian), hint to convex duality
-6. Present bra-ket notation, Einstein summation (covariant vs contravariant components)
+5. Present bra-ket notation, Einstein summation (covariant vs contravariant components)
+6. Legendre transform (Lagrangian vs Hamiltonian), hint to convex duality
 7. Basics of convex optimization (duality, barrier, KKT conditions, etc.)
 8. Variational formulation of gradient flow, backward Euler discretization: proximal point algorithm (special case: projected gradient descent), Moreau envelope
 9. Proximal gradient descent, mirror descent, Bregman divergences (defer to other post)
