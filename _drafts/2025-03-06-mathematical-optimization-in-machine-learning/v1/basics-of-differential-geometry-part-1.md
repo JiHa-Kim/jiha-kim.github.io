@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Basics of Differential Geometry - Why Your Descriptions Change
+title: Basics of Differential Geometry - Part 1 - Why Your Descriptions Change
 date: 2025-04-10 00:00 -0400
 description: An introduction to the fundamental concepts of differential geometry, starting with why coordinate changes affect descriptions (covariance/contravariance) and building up to manifolds, tangent spaces, and the metric tensor.
 image:
@@ -309,25 +309,73 @@ This makes sense intuitively:
 </ul>
 </blockquote>
 
-## The Dot Product and Why We Need Einstein Notation
 
-Let’s tie it all together with an operation you already know: the **dot product** between a covector and a vector.
+## How Descriptions Change: Contravariance and Covariance Formalized
 
-Given a covector $$\omega = \omega_i \epsilon^i$$ and a vector $$v = v^j e_j$$, we define the pairing:
-
-$$
-\omega(v) = \omega_i v^j \epsilon^i(e_j)
-$$
-
-Using the identity $$\epsilon^i(e_j) = \delta^i_j$$:
+Let's formalize the transformation rules we alluded to. Suppose we change from an old basis $$\{e_i\}$$ to a new basis $$\{\tilde{e}_j\}$$. Since both are bases for the same space, each new basis vector can be written as a linear combination of the old ones, and vice versa. Let's write the *new* basis in terms of the *old*:
 
 $$
-\omega(v) = \omega_i v^j \delta^i_j = \omega_i v^i
+\tilde{e}_j = (M^{-1})^i_{\; j} e_i
 $$
 
-Here is the magic: the repeated index $$i$$ appears once up, once down — so we **sum over it**, no need to write $$\sum_i$$ explicitly.
+And the *old* basis in terms of the *new*:
 
-This expression is the **scalar** output of applying a covector to a vector — a number that doesn’t depend on coordinates. The structure of the indices makes this transformation behavior transparent.
+$$
+e_i = M^j_{\; i} \tilde{e}_j
+$$
+
+Here, $$M^j_{\; i}$$ are the entries of an invertible matrix $$M$$ (the change-of-basis matrix), and $$(M^{-1})^i_{\; j}$$ are the entries of its inverse. Notice the index positions: $$M^j_{\; i}$$ takes an old index $$i$$ (lower) and gives a new index $$j$$ (lower), consistent with transforming basis vectors (which carry lower indices).
+
+1.  **Vector Components (Contravariant):**
+    The vector $$v$$ itself is invariant: $$v = v^i e_i = \tilde{v}^j \tilde{e}_j$$. Let's substitute $$e_i = M^k_{\; i} \tilde{e}_k$$ into the first expression:
+    $$
+    v = v^i (M^k_{\; i} \tilde{e}_k) = (M^k_{\; i} v^i) \tilde{e}_k
+    $$
+    Comparing this with $$v = \tilde{v}^j \tilde{e}_j$$, and relabelling the dummy index $$k$$ to $$j$$, we find the transformation rule for the components:
+    $$
+    \tilde{v}^j = M^j_{\; i} v^i
+    $$
+    The components $$v^i$$ transform using the matrix $$M$$. Since the basis vectors transformed using $$M^{-1}$$, the components transform "contrary" to the basis. This is **contravariant transformation**. (Upper index components).
+
+2.  **Covector Components (Covariant):**
+    Similarly, the covector $$\omega$$ is invariant: $$\omega = \omega_i \epsilon^i = \tilde{\omega}_j \tilde{\epsilon}^j$$. The dual basis transforms inversely to the primal basis: $$\tilde{\epsilon}^j = M^j_{\; i} \epsilon^i$$. (Exercise: derive this from $$\tilde{\epsilon}^j(e_k) = \delta^j_k$$ and the basis transformations).
+    Substituting $$\epsilon^i = (M^{-1})^i_{\; k} \tilde{\epsilon}^k$$ into the first expression for $$\omega$$:
+    $$
+    \omega = \omega_i ((M^{-1})^i_{\; k} \tilde{\epsilon}^k) = (\omega_i (M^{-1})^i_{\; k}) \tilde{\epsilon}^k
+    $$
+    Comparing this with $$\omega = \tilde{\omega}_j \tilde{\epsilon}^j$$, and relabelling the dummy index $$k$$ to $$j$$, we get:
+    $$
+    \tilde{\omega}_j = \omega_i (M^{-1})^i_{\; j}
+    $$
+    The components $$\omega_i$$ transform using the inverse matrix $$M^{-1}$$. Since the basis vectors $$e_i$$ transformed using $$M$$ (from new to old), the covector components transform in the *same* way as the basis vectors. This is **covariant transformation**. (Lower index components).
+
+### Pairing Covectors and Vectors
+
+How does a covector $$\omega$$ measure a vector $$v$$? We evaluate the linear map $$\omega$$ on the input $$v$$. Using our basis expansions and Einstein notation:
+
+$$
+\omega(v) = (\omega_j \epsilon^j) (v^i e_i)
+$$
+
+By linearity, we can pull the components out:
+
+$$
+\omega(v) = \omega_j v^i \epsilon^j(e_i)
+$$
+
+Now use the definition of the dual basis, $$\epsilon^j(e_i) = \delta^j_i$$:
+
+$$
+\omega(v) = \omega_j v^i \delta^j_i
+$$
+
+The Kronecker delta $$\delta^j_i$$ is zero unless $$j=i$$. When $$j=i$$, it's 1, and we just replace $$j$$ with $$i$$ (or vice versa) in the expression. So, the sum over $$i$$ and $$j$$ collapses to a single sum:
+
+$$
+\omega(v) = \omega_i v^i \quad (\text{or equivalently } \omega_j v^j)
+$$
+
+The result is a **scalar** – a single number representing the "measurement." Notice how the Einstein notation naturally handles this: the upper index of the vector component $$v^i$$ contracts with the lower index of the covector component $$\omega_i$$, leaving no free indices, which signifies a scalar quantity. This value is *invariant*; it doesn't depend on the basis chosen, even though the individual components $$v^i$$ and $$\omega_i$$ do change with the basis.
 
 Now you see why Einstein notation is so valuable:
 
@@ -445,3 +493,164 @@ Let’s collect all our players with their index conventions:
 | Linear Transform | $$(T(v))^i = A^i_{\; j} v^j$$    | Maps vectors to vectors (type $$(1,1)$$) | Mixed indices $$A^i_{\; j}$$             |
 
 Every contraction (summation) must pair **one upper** and **one lower** index. Einstein notation enforces this type checking without clutter.
+
+---
+
+## From Vectors to Tangent Spaces: Enter the Manifold
+
+So far, everything we’ve discussed happens in flat vector spaces — like the familiar $$\mathbb{R}^n$$. But real-world geometries often live on **curved surfaces**.
+
+Think back to the flight from London to Tokyo. The surface of the Earth is not $$\mathbb{R}^2$$ — it's a **sphere**, a 2D surface embedded in 3D space. We can't globally "flatten" it without distortion, as any cartographer knows. But **locally**, it's flat — each patch looks like a plane, just like standing on Earth feels flat in your immediate surroundings.
+
+This leads us to the foundational idea in differential geometry:
+
+<blockquote class="prompt-definition">
+A <b>manifold</b> is a space that <i>locally</i> looks like \( \mathbb{R}^n \), but may be curved or twisted globally.
+</blockquote>
+
+At every point on a manifold, there exists a little patch — a **coordinate chart** — that acts like flat Euclidean space. And just like in flat space, we can define vectors. But we must be careful:
+
+- In flat $$\mathbb{R}^n$$, vectors can be freely moved around.
+- On a manifold, vectors are **attached to points** — they only make sense at a specific location.
+
+So we define:
+
+<blockquote class="prompt-definition">
+The <b>tangent space</b> at a point \( p \) on a manifold \( M \), denoted \( T_pM \), is the vector space of all tangent vectors at that point.
+</blockquote>
+
+The collection of all tangent spaces forms the **tangent bundle**, denoted \( TM \), a new space pairing every point with every direction at that point.
+
+---
+
+## Vectors on Manifolds as Derivatives
+
+There’s a beautiful connection here with calculus.
+
+A vector at point $$p \in M$$ can be thought of not just as an arrow, but as a **directional derivative** operator. That is, a vector acts on a smooth function \( f : M \to \mathbb{R} \) by producing the directional rate of change of \( f \) in the direction of that vector.
+
+\[
+v(f) = \text{rate of change of } f \text{ in the direction } v
+\]
+
+This connects the **geometric** idea of a vector (an arrow) with the **analytic** idea of differentiation. Every tangent vector is a derivation — a linear map that satisfies the Leibniz rule:
+
+\[
+v(fg) = f \cdot v(g) + g \cdot v(f)
+\]
+
+This viewpoint becomes essential as we define more abstract constructions — because we’re now describing vectors purely in terms of their action on functions, independent of coordinates.
+
+---
+
+## Covectors as Gradients: Duality on Manifolds
+
+Recall that to every vector space \( V \), there is a **dual space** \( V^\ast \) — the space of linear maps from \( V \) to \( \mathbb{R} \). These are covectors, or **1-forms**.
+
+On a manifold, the dual to the tangent space \( T_pM \) is the **cotangent space** \( T_p^\ast M \).
+
+Each covector acts on a tangent vector to produce a real number. In coordinates, we write:
+
+\[
+\omega = \omega_i \, \mathrm{d}x^i
+\]
+
+and it acts on a vector \( v = v^j \partial_j \) as:
+
+\[
+\omega(v) = \omega_i v^i
+\]
+
+This is the same contraction we saw earlier — and it still represents a measurement. The most important example of a covector is the **gradient** of a function:
+
+\[
+\mathrm{d}f_p(v) = v(f)
+\]
+
+<blockquote class="prompt-tip">
+The gradient \( \mathrm{d}f \) is a <b>covector</b>. It eats a vector \( v \) and returns how much the function increases in that direction — exactly like a <b>ruler measuring a pencil</b>.
+</blockquote>
+
+---
+
+## Why We Need a Metric: Measuring Lengths and Angles
+
+So far, we’ve talked about directions and rates of change, but we haven’t said how to **measure distances or angles**. This requires more structure — the **metric tensor**.
+
+At every point \( p \in M \), a **metric** \( g_p \) is a bilinear map:
+
+\[
+g_p : T_pM \times T_pM \to \mathbb{R}
+\]
+
+that satisfies:
+
+- Symmetry: \( g_p(u, v) = g_p(v, u) \)
+- Positive-definiteness: \( g_p(v, v) > 0 \) for all \( v \neq 0 \)
+
+In coordinates, we write:
+
+\[
+g = g_{ij} \, \mathrm{d}x^i \otimes \mathrm{d}x^j
+\]
+
+Given a vector \( v = v^i \partial_i \), the **squared length** of the vector is:
+
+\[
+\Vert v \Vert^2 = g_{ij} v^i v^j
+\]
+
+You can also compute **angles** and **project components**, just as you would in Euclidean space.
+
+But even more importantly: the metric lets us move between vectors and covectors.
+
+- To **lower an index** (convert a vector to a covector):
+
+\[
+v_i = g_{ij} v^j
+\]
+
+- To **raise an index** (convert a covector to a vector):
+
+\[
+\omega^i = g^{ij} \omega_j
+\]
+
+where \( g^{ij} \) is the inverse of the matrix \( g_{ij} \).
+
+<blockquote class="prompt-tip">
+This is why we need the metric — it’s the dictionary between pencils and rulers. Without it, you can’t compare lengths or angles, and you can’t convert between vectors and covectors.
+</blockquote>
+
+---
+
+## Geometry Is in the Metric
+
+Once you have a metric, your manifold isn't just a shapeless cloud of points — it has structure:
+
+- You can compute **geodesics** — the shortest paths between points.
+- You can measure **curvature**, which tells you how space bends.
+- You can define **volumes**, angles, and even perform optimization on curved domains.
+
+This is crucial in many fields:
+
+- In physics: spacetime is a 4D Lorentzian manifold, and the **metric tensor is gravity**.
+- In machine learning: information geometry uses the **Fisher information metric** to measure sensitivity to parameters.
+- In robotics and control: geodesics represent minimal-energy trajectories.
+
+---
+
+## What’s Coming Next: Covariant Derivatives and Curvature
+
+On a manifold, we can define tangent vectors at a point — but how do we talk about a **change in a vector field**?
+
+We need a way to “differentiate” a vector field along another vector field — while staying within the manifold’s curved geometry. This leads to:
+
+- **Connections**: rules for comparing vectors at nearby points.
+- **Covariant derivatives**: derivatives that respect the manifold's structure.
+- **Parallel transport**: moving a vector along a path without twisting or stretching.
+- **Curvature tensors**: measuring the failure of parallel transport to return a vector unchanged around a loop.
+
+<blockquote class="prompt-info">
+Just like we needed directional derivatives for functions, we'll soon define derivatives of vector fields — and see how geometry gets encoded in the very way vectors change.
+</blockquote>

@@ -284,6 +284,8 @@ jekyll_compose:
 
           where \(\cdot\) is the <b>dot product</b> of two vectors.
         </blockquote>
+
+        Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
     posts:
       description:
       image:
@@ -299,17 +301,25 @@ jekyll_compose:
 
         Inline equations are surrounded by dollar signs on the same line: $$inline$$
 
-        Block equations are isolated by two newlines above and below, and newlines between the delimiters and the equation:
+        Block equations are isolated by two newlines above and below, and newlines between the delimiters and the equation (even in lists):
 
         $$
         block
         $$
-
-        like so. Note that sometimes, if you have an inline equation following text in the first sentence of a paragraph (this includes lists), you must escape the leftmost delimiter with a backslash. But sometimes you are not supposed to escape it, I am not sure when. I believe that you are supposed to escape it when there are characters that might be parsed as HTML or Markdown, such as an underscore like a vertical bar like in conditional expectation or probability. I am not sure if this is a bug or a feature. It is thus preferable to use the LaTeX syntax for symbols as much as possible such as $$\vert$$ or $$\ast$$. Actually, after changing all instances of a vertical bar to \vert, it seems to have fixed the issue for the ones with underscores. So please avoid using the vertical bar symbol, only use \vert, \Vert.
+        
+        Use LaTeX commands for symbols as much as possible such as $$\vert$$ or $$\ast$$. For instance, please avoid using the vertical bar symbol, only use \vert for absolute value, and \Vert for norm.
 
         The syntax for lists is:
         1. $$inline$$ item
         2. item $$inline$$
+        3. item
+
+          $$
+          block
+          $$
+
+          (continued) item
+
 
         Inside HTML environments (like blockquotes), please use the following syntax:
 
@@ -319,4 +329,19 @@ jekyll_compose:
         block
         \]
 
-        like so. Also, HTML markers must be used rather than markdown, e.g. <b>bold</b> rather than **bold**.
+        like so. Also, HTML markers must be used rather than markdown, e.g. <b>bold</b> rather than **bold**, and <i>italic</i> rather than *italic*.
+
+        Example:
+
+        <blockquote class="prompt-info">
+          <b>Definition (Vector Space):</b>
+          A vector space \(V\) is a set of vectors equipped with a <b>scalar multiplication</b> operation:
+
+          \[
+          \forall v, w \in V, \quad \forall \alpha \in \mathbb{R}, \quad v \cdot (w \cdot \alpha) = v \cdot (\alpha \cdot w)
+          \]
+
+          where \(\cdot\) is the <b>dot product</b> of two vectors.
+        </blockquote>
+
+        Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
