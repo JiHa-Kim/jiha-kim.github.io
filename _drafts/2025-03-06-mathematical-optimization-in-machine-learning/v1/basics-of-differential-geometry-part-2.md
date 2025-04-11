@@ -1,23 +1,22 @@
 ---
 layout: post
-title: Basics of Differential Geometry - Part 2 - How Space Curves and Objects Move
-date: 2025-04-10 23:00 -0400
-description: In Part 2 of our differential geometry series, we explore how geometry evolves through space. This includes pushforwards, pullbacks, tensor fields, vector bundles, Lie derivatives, and differential forms — setting the stage for curvature, symmetry, and advanced geometric learning.
+title: Geometric Optimization in Machine Learning - Beyond Euclidean Space
+date: 2025-04-10 10:00 -0400
+description: Learn how concepts from differential geometry like manifolds, metrics, geodesics, and retractions lead to powerful optimization algorithms like Natural Gradient Descent and Riemannian optimization, crucial for modern ML.
 image:
 categories:
   - Machine Learning
   - Mathematical Optimization
 tags:
   - Differential Geometry
-  - Tensor Fields
-  - Vector Bundles
-  - Pullback
-  - Pushforward
-  - Exterior Calculus
-  - Lie Derivative
-  - Differential Forms
-  - Manifold Learning
   - Optimization
+  - Manifolds
+  - Riemannian Optimization
+  - Natural Gradient Descent
+  - Fisher Information Metric
+  - Geodesics
+  - Retractions
+  - Machine Learning Theory
 math: true
 llm-instructions: |
   I am using the Chirpy theme in Jekyll.
@@ -60,6 +59,249 @@ llm-instructions: |
   Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
 ---
 
+## Why Standard Optimization Isn't Always Enough
+
+In machine learning, we often minimize a loss function $$ \mathcal{L}(\theta) $$ using gradient descent:
+
+$$
+\theta^{(t+1)} = \theta^{(t)} - \eta \nabla \mathcal{L}(\theta^{(t)})
+$$
+
+This works beautifully when our parameters $$ \theta $$ live in a simple Euclidean space $$ \mathbb{R}^n $$. But what happens when the parameters have inherent structure or constraints?
+
+Consider these scenarios:
+
+1.  **Constrained Parameters:** Maybe $$ \theta $$ represents an orthogonal matrix (e.g., in dimensionality reduction or RNNs), a positive-definite matrix (covariance matrices), or points on a sphere. Simple gradient steps will likely violate these constraints.
+2.  **Parameter Space Geometry:** Sometimes the space of parameters *itself* has a natural geometry that isn't Euclidean. A prime example is the space of probability distributions, where distance isn't just the Euclidean difference between parameters but relates to how distinguishable the distributions are.
+
+In these cases, standard gradient descent can be slow, unstable, or simply incorrect. We need tools that respect the underlying **geometry** of the parameter space. This is where **differential geometry** comes into play, leading to **Riemannian optimization**.
+
+---
+
+## Manifolds: Spaces Beyond Flatness
+
+The first concept we need is a **manifold**.
+
+<blockquote class="prompt-info">
+A <b>manifold</b> \( M \) is a space that locally resembles Euclidean space \( \mathbb{R}^n \). Think of the surface of the Earth: globally curved, but any small patch looks approximately flat.
+</blockquote>
+
+Many parameter spaces in ML are naturally manifolds:
+
+-   **Sphere $$ S^{n-1} $$:** Unit vectors in $$ \mathbb{R}^n $$. Used in directional statistics, normalization layers.
+-   **Stiefel Manifold $$ \mathrm{St}(n, k) $$:** Set of $$ n \times k $$ matrices with orthonormal columns ($$ W^T W = I_k $$). Arises in PCA, orthogonal RNNs.
+-   **Grassmann Manifold $$ \mathrm{Gr}(n, k) $$:** Set of $$ k $$-dimensional subspaces in $$ \mathbb{R}^n $$. Used in subspace tracking, representation learning.
+-   **Symmetric Positive Definite (SPD) Matrices $$ \mathrm{Sym}^+(n) $$:** Used for covariance matrices, kernel methods, diffusion tensor imaging.
+-   **Statistical Manifolds:** Spaces where each point represents a probability distribution $$ p(x | \theta) $$. The geometry reflects relationships between distributions.
+
+Working directly on these curved spaces requires new tools.
+
+---
+
+## Measuring on Manifolds: The Metric Tensor
+
+On a manifold, distances and angles aren't uniform like in $$ \mathbb{R}^n $$. We need a way to measure locally. This is done using the **metric tensor**.
+
+<blockquote class="prompt-info">
+A <b>Riemannian metric</b> \( g \) on a manifold \( M \) assigns an inner product \( g_p(\cdot, \cdot) \) to each <b>tangent space</b> \( T_pM \) (the space of possible velocity vectors at point \( p \)). This allows us to measure lengths of vectors and angles between them locally.
+</blockquote>
+
+In local coordinates $$ (x^1, \dots, x^n) $$, the metric is represented by a matrix $$ g_{ij}(x) $$ such that the squared length of a tangent vector $$ v = v^i \partial_i $$ is:
+
+$$
+\Vert v \Vert^2 = g_p(v, v) = g_{ij}(p) v^i v^j
+$$
+
+(using Einstein summation convention).
+
+### The Fisher Information Metric: Geometry of Probability
+
+For ML, the most important example is the **Fisher Information Metric** on a statistical manifold. If $$ \theta $$ parameters a probability distribution $$ p(x|\theta) $$, the Fisher metric is:
+
+$$
+g_{ij}(\theta) = \mathbb{E}_{p(x|\theta)} \left[ \frac{\partial \log p(x | \theta)}{\partial \theta^i} \frac{\partial \log p(x | \theta)}{\partial \theta^j} \right]
+$$
+
+<blockquote class="prompt-tip">
+The Fisher metric measures the <b>sensitivity</b> of the distribution \( p(x|\theta) \) to changes in parameters \( \theta \). A small step in parameter space might correspond to a large change in the distribution (high metric value) or a small change (low metric value). This metric captures the natural geometry of statistical models.
+</blockquote>
+
+---
+
+## Directions and Gradients: Tangent Spaces
+
+To talk about movement or gradients on a manifold, we need the **tangent space**.
+
+<blockquote class="prompt-info">
+The <b>tangent space</b> \( T_pM \) at a point \( p \in M \) is a vector space that represents all possible "velocities" or "directions" one can move in from \( p \). It's the best linear approximation of the manifold near \( p \).
+</blockquote>
+
+Think of the tangent plane to a sphere at a point.
+
+The **gradient** of a function $$ f: M \to \mathbb{R} $$ at point $$ p $$ is defined as the unique vector $$ \text{grad} f(p) \in T_pM $$ such that for any tangent vector $$ v \in T_pM $$:
+
+$$
+g_p(\text{grad} f(p), v) = \mathrm{d}f_p(v) \approx f(p + \epsilon v) - f(p)
+$$
+
+This $$ \text{grad} f(p) $$ is the **Riemannian gradient**. It points in the direction of steepest ascent *according to the manifold's geometry (metric)*.
+
+<blockquote class="prompt-info">
+In local coordinates, the Riemannian gradient relates to the standard Euclidean gradient \( \nabla f = (\partial_1 f, \dots, \partial_n f) \) via the inverse metric: \( (\text{grad} f)^i = g^{ij} \partial_j f \), where \( g^{ij} \) is the inverse matrix of \( g_{ij} \).
+</blockquote>
+
+---
+
+## "Straight" Paths: Geodesics
+
+In Euclidean space, the shortest path between two points is a straight line. On a manifold, the analogous concept is a **geodesic**.
+
+<blockquote class="prompt-info">
+A <b>geodesic</b> is a curve \( \gamma(t) \) on a manifold that is "as straight as possible." Formally, its tangent vector \( \dot{\gamma}(t) \) is parallel transported along itself: \( \nabla_{\dot{\gamma}(t)} \dot{\gamma}(t) = 0 \), where \( \nabla \) is the covariant derivative (a way to differentiate vectors along curves respecting the manifold's geometry).
+</blockquote>
+
+Geodesics locally minimize distance (or more technically, an "energy" functional related to length).
+
+<blockquote class="prompt-tip">
+Think of great circles on a sphere – they are the geodesics. Following a geodesic is like moving "straight ahead" without turning, given the curvature of the space. In optimization, geodesics represent the ideal path an update step would follow if it perfectly accounted for curvature.
+</blockquote>
+
+---
+
+## The Practical Challenge: Moving Back with Retractions
+
+Optimization algorithms typically compute an update direction $$ v \in T_pM $$ (like the negative gradient) in the tangent space. But the next iterate $$ p_{new} $$ must lie *on the manifold* $$ M $$, not in the tangent space. How do we map $$ v $$ back to $$ M $$?
+
+The theoretically ideal map is the **exponential map** $$ \mathrm{Exp}_p(v) $$, which follows the geodesic starting at $$ p $$ in direction $$ v $$ for unit time. However, computing the exponential map can be expensive or lack a closed-form expression.
+
+<blockquote class="prompt-info">
+A <b>retraction</b> \( R_p: T_pM \to M \) is a smooth map that approximates the exponential map. It takes a tangent vector \( v \) and maps it back onto the manifold \( M \) such that:
+1. \( R_p(0) = p \) (zero vector stays put).
+2. The differential of \( R_p \) at \( 0 \) is the identity map (it matches the tangent space directions locally).
+</blockquote>
+
+Retractions provide a computationally cheaper way to perform the update step while staying (approximately) on the manifold. Common examples include projecting onto the manifold after a Euclidean step.
+
+---
+
+## Riemannian Optimization: The Algorithm
+
+Putting it together, a typical **Riemannian optimization** algorithm looks like this:
+
+1.  **Compute Gradient:** Given the current point $$ \theta^{(t)} \in M $$ and loss $$ \mathcal{L} $$, compute the Riemannian gradient $$ \text{grad} \mathcal{L}(\theta^{(t)}) \in T_{\theta^{(t)}}M $$. (This might involve computing the Euclidean gradient and then using the metric or projection).
+2.  **Determine Update Direction:** Choose a direction $$ v^{(t)} \in T_{\theta^{(t)}}M $$, usually related to the negative gradient. For simple Riemannian Gradient Descent: $$ v^{(t)} = -\eta \, \text{grad} \mathcal{L}(\theta^{(t)}) $$. More advanced methods (like conjugate gradient or Newton) compute directions differently within the tangent space.
+3.  **Retract:** Update the parameters by moving along the chosen direction using a retraction:
+    $$
+    \theta^{(t+1)} = R_{\theta^{(t)}}(v^{(t)})
+    $$
+
+This ensures that $$ \theta^{(t+1)} $$ remains on the manifold $$ M $$.
+
+---
+
+## Application 1: Natural Gradient Descent
+
+Natural Gradient Descent is perhaps the most well-known application of geometric optimization in ML. It applies specifically when the parameter space is a **statistical manifold** endowed with the **Fisher Information Metric** $$ G(\theta) = [g_{ij}(\theta)] $$.
+
+Standard gradient descent implicitly assumes the Euclidean metric ($$ I $$). This means it treats all parameter directions as equally important. However, in a statistical manifold, some parameter changes barely alter the distribution, while others change it dramatically.
+
+The **Natural Gradient** corrects for this by using the Fisher metric:
+
+$$
+\tilde{\nabla} \mathcal{L}(\theta) = G(\theta)^{-1} \nabla \mathcal{L}(\theta)
+$$
+
+Here, $$ \nabla \mathcal{L} $$ is the standard Euclidean gradient, and $$ G(\theta)^{-1} $$ is the inverse Fisher Information Matrix. The update rule becomes:
+
+$$
+\theta^{(t+1)} = \theta^{(t)} - \eta \, G(\theta^{(t)})^{-1} \nabla \mathcal{L}(\theta^{(t)})
+$$
+
+<blockquote class="prompt-tip">
+The Natural Gradient \( \tilde{\nabla} \mathcal{L} \) is essentially the <b>Riemannian gradient</b> with respect to the Fisher metric. Multiplying by \( G^{-1} \) "undoes" the distortion caused by the parameter space geometry, pointing the update towards the direction of steepest descent in terms of <b>distributional change</b>, not just parameter change. This often leads to much faster convergence, especially in deep learning.
+</blockquote>
+
+Computing $$ G^{-1} $$ exactly can be hard, leading to approximations like K-FAC.
+
+---
+
+## Application 2: Optimization with Constraints
+
+Consider optimizing a function $$ \mathcal{L}(W) $$ where $$ W $$ must be an orthogonal matrix (i.e., $$ W \in \mathrm{St}(n, k) $$).
+
+A Riemannian optimization approach would:
+
+1.  Compute the Euclidean gradient $$ \nabla \mathcal{L}(W) $$.
+2.  Project this gradient onto the tangent space $$ T_W \mathrm{St}(n, k) $$ to get the Riemannian gradient $$ \text{grad} \mathcal{L}(W) $$. The tangent space consists of matrices $$ Z $$ such that $$ W^T Z + Z^T W = 0 $$.
+3.  Choose an update direction, e.g., $$ V = -\eta \, \text{grad} \mathcal{L}(W) \in T_W \mathrm{St}(n, k) $$.
+4.  Apply a retraction $$ R_W(V) $$ to get the updated orthogonal matrix $$ W_{new} $$. Common retractions for the Stiefel manifold involve QR decomposition or polar decomposition of $$ W + V $$.
+
+This ensures that each iterate $$ W^{(t)} $$ remains orthogonal. Similar procedures exist for SPD matrices, spheres, etc.
+
+---
+
+## Curvature: Why Geometry Matters
+
+Why go to all this trouble? Because **curvature** matters.
+
+On a curved manifold, "straight lines" (geodesics) behave differently than in flat space. Parallel lines might converge or diverge. Moving around a small loop might rotate a vector (this is related to the Riemann curvature tensor, though we don't need its full formula here).
+
+<blockquote class="prompt-info">
+Curvature means that Euclidean gradient steps, which assume flatness, can lead you "off course" relative to the manifold's intrinsic geometry. Riemannian methods, by using the metric, geodesics (or approximations via retractions), inherently account for this curvature, often leading to more direct and stable paths to the minimum.
+</blockquote>
+
+---
+
+## (Briefly) Transforming Geometry: Pushforwards and Pullbacks
+
+When dealing with maps between manifolds, $$ F: M \to N $$, geometry tells us how vectors and functions transform.
+
+-   **Pushforward ($$ F_\ast $$):** Maps tangent vectors from $$ T_pM $$ to $$ T_{F(p)}N $$. In coordinates, it uses the Jacobian matrix $$ J = (\partial y^i / \partial x^j) $$: $$ (F_\ast v)^i = J^i_j v^j $$.
+-   **Pullback ($$ F^\ast $$):** Maps functions or covectors (linear maps on tangent vectors) from $$ N $$ back to $$ M $$. For functions, $$ F^\ast f = f \circ F $$. For covectors, it uses the transpose Jacobian: $$ (F^\ast \omega)_j = \omega_i J^i_j $$.
+
+These concepts are important for understanding coordinate changes and how densities transform under mappings (e.g., in normalizing flows using the change of variables formula involving the Jacobian determinant).
+
+---
+
+## Broader Connections: Geometric Deep Learning
+
+The ideas of manifolds, metrics, and symmetry are foundational to **Geometric Deep Learning (GDL)**. GDL aims to build neural networks that explicitly incorporate the structure of the input domain (e.g., graphs, meshes, manifolds).
+
+-   **Equivariance:** Models that respect symmetries (like rotation or permutation) often use concepts from Lie group theory (groups that are also manifolds).
+-   **Graph Neural Networks:** Can be viewed as operating on graph Laplacians, which discretize geometric operators. Message passing can be seen as a form of information transport along edges.
+-   **Manifold Networks:** CNNs adapted to operate on data defined on manifolds (e.g., spherical CNNs for cosmology).
+
+While this post focuses on optimization, the underlying geometric principles are becoming increasingly central to ML model design itself.
+
+---
+
+## Conclusion: Geometry-Aware Optimization
+
+Standard optimization algorithms often rely on an implicit Euclidean geometry. When our data or parameters live in spaces with richer structure—constraints, non-uniform scaling, curvature—leveraging the tools of differential geometry leads to more robust, efficient, and principled methods.
+
+By understanding manifolds, metrics (like Fisher Information), tangent spaces, gradients, geodesics, and retractions, we can design optimization algorithms like Natural Gradient and Riemannian SGD that respect the inherent geometry of ML problems. This geometric perspective provides deeper insights and practical advantages in tackling complex machine learning tasks.
+
+---
+
+## Cheat Sheet: Key Concepts for Geometric Optimization
+
+| Concept                      | Description                                                                             | Relevance to ML Optimization                                                                         |
+| ---------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Manifold $$ M $$**         | Space that is locally Euclidean but globally curved.                                    | Parameter spaces with constraints (Stiefel, SPD) or inherent structure (statistical manifolds).      |
+| **Metric Tensor $$ g $$**    | Assigns local inner product $$ g_p(\cdot, \cdot) $$ to each tangent space $$ T_pM $$.   | Defines local distances/angles. **Fisher Information Metric** for statistical manifolds.             |
+| **Tangent Space $$ T_pM $$** | Vector space of possible directions/velocities at point $$ p $$.                        | Space where gradients and update directions live.                                                    |
+| **Riemannian Gradient**      | Gradient vector $$ \text{grad} f \in T_pM $$ respecting the metric $$ g $$.             | Direction of steepest ascent on the manifold. Related to Euclidean gradient via $$ g^{-1} $$.        |
+| **Geodesic $$ \gamma(t) $$** | "Straightest" possible path on the manifold; $$ \nabla_{\dot{\gamma}}\dot{\gamma}=0 $$. | Ideal optimization path; locally minimizes distance/energy.                                          |
+| **Retraction $$ R_p $$**     | Map from $$ T_pM $$ back to $$ M $$, approximating the exponential map.                 | Practical way to update parameters: $$ \theta^{(t+1)} = R_{\theta^{(t)}}(v^{(t)}) $$.                |
+| **Natural Gradient**         | Riemannian gradient using the Fisher Information Metric.                                | Update step $$ - \eta G^{-1} \nabla \mathcal{L} $$; often faster convergence for statistical models. |
+| **Riemannian Optimization**  | Optimization algorithms respecting manifold geometry (gradient + retraction).           | Handles constraints naturally, adapts to parameter space curvature.                                  |
+
+---
+
+---
+
+# Appendix: More on Differential Geometry
+
 ## Differentiating on Manifolds: The Need for a Connection
 
 In flat Euclidean space, taking derivatives is straightforward — everything lives in one global coordinate system. But on a **curved manifold**, tangent spaces at different points are distinct. There’s no natural way to “subtract” vectors living at different points.
@@ -74,7 +316,7 @@ We need a new kind of derivative that:
 
 This is the **covariant derivative**.
 
-<blockquote class="prompt-definition">
+<blockquote class="prompt-info">
 A <b>connection</b> (or covariant derivative) is a rule \( \nabla \) that tells you how to differentiate vector fields along other vector fields in a way that respects the manifold’s structure.
 </blockquote>
 
