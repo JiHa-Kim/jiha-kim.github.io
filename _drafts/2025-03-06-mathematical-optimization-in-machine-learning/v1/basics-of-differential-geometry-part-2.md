@@ -92,7 +92,7 @@ Many parameter spaces in ML are naturally manifolds:
 -   **Stiefel Manifold $$ \mathrm{St}(n, k) $$:** Set of $$ n \times k $$ matrices with orthonormal columns ($$ W^T W = I_k $$). Arises in PCA, orthogonal RNNs.
 -   **Grassmann Manifold $$ \mathrm{Gr}(n, k) $$:** Set of $$ k $$-dimensional subspaces in $$ \mathbb{R}^n $$. Used in subspace tracking, representation learning.
 -   **Symmetric Positive Definite (SPD) Matrices $$ \mathrm{Sym}^+(n) $$:** Used for covariance matrices, kernel methods, diffusion tensor imaging.
--   **Statistical Manifolds:** Spaces where each point represents a probability distribution $$ p(x | \theta) $$. The geometry reflects relationships between distributions.
+-   **Statistical Manifolds:** Spaces where each point represents a probability distribution $$ p(x \vert \theta) $$. The geometry reflects relationships between distributions.
 
 Working directly on these curved spaces requires new tools.
 
@@ -116,14 +116,14 @@ $$
 
 ### The Fisher Information Metric: Geometry of Probability
 
-For ML, the most important example is the **Fisher Information Metric** on a statistical manifold. If $$ \theta $$ parameters a probability distribution $$ p(x|\theta) $$, the Fisher metric is:
+For ML, the most important example is the **Fisher Information Metric** on a statistical manifold. If $$ \theta $$ parameters a probability distribution $$ p(x \vert \theta) $$, the Fisher metric is:
 
 $$
-g_{ij}(\theta) = \mathbb{E}_{p(x|\theta)} \left[ \frac{\partial \log p(x | \theta)}{\partial \theta^i} \frac{\partial \log p(x | \theta)}{\partial \theta^j} \right]
+g_{ij}(\theta) = \mathbb{E}_{p(x \vert \theta)} \left[ \frac{\partial \log p(x \vert \theta)}{\partial \theta^i} \frac{\partial \log p(x \vert \theta)}{\partial \theta^j} \right]
 $$
 
 <blockquote class="prompt-tip">
-The Fisher metric measures the <b>sensitivity</b> of the distribution \( p(x|\theta) \) to changes in parameters \( \theta \). A small step in parameter space might correspond to a large change in the distribution (high metric value) or a small change (low metric value). This metric captures the natural geometry of statistical models.
+The Fisher metric measures the <b>sensitivity</b> of the distribution \( p(x \vert \theta) \) to changes in parameters \( \theta \). A small step in parameter space might correspond to a large change in the distribution (high metric value) or a small change (low metric value). This metric captures the natural geometry of statistical models.
 </blockquote>
 
 ---
