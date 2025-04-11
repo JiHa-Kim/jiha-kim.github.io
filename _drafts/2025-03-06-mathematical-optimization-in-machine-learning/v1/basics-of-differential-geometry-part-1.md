@@ -71,6 +71,8 @@ llm-instructions: |
 
     where \(\cdot\) is the <b>dot product</b> of two vectors.
   </blockquote>
+
+  Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
 ---
 
 Differential geometry is the mathematical language used to describe curved spaces and the objects living within them. It pops up everywhere – from mapping the Earth or charting the cosmos in physics, to understanding the complex 'shape' of probability distributions or loss landscapes in machine learning. It builds heavily on calculus and linear algebra, but extends them to settings where the familiar flat Euclidean space is replaced by something potentially curved.
