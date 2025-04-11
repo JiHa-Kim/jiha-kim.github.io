@@ -204,7 +204,6 @@ layout: page
         <ul class="list-group">
           {% for sub_category in sub_categories %}
             {% assign sub_category_posts_count = 0 %}
-            {% assign combined_category = top_category | append: '-' | append: sub_category %}
             
             {% comment %}
               Count posts that belong directly to this subcategory
@@ -231,19 +230,11 @@ layout: page
               <i class="far fa-folder fa-fw"></i>
 
               {% comment %}
-                Either use a tag-based approach to combine parent-child categories
-                or create filter to display all posts matching both categories
-              {% endcomment %}
-              {% capture _combined_ctg_url %}/categories/{{ combined_category | slugify | url_encode }}/{% endcapture %}
-              {% assign tag_based_url = _combined_ctg_url %}
-              
-              {% comment %}
-                Fallback to separate category filtering if combined categories don't work
+                Generate URL for the subcategory that works with Jekyll's routing
+                Use the subcategory slug directly instead of nested paths
               {% endcomment %}
               {% capture _sub_ctg_url %}/categories/{{ sub_category | slugify | url_encode }}/{% endcapture %}
-              {% assign final_url = tag_based_url %}
-              
-              <a href="{{ final_url | relative_url }}" class="mx-2" data-parent="{{ top_category }}">{{ sub_category }}</a>
+              <a href="{{ _sub_ctg_url | relative_url }}" class="mx-2">{{ sub_category }}</a>
 
               <span class="text-muted small font-weight-light">
                 {{ sub_category_posts_count }}
