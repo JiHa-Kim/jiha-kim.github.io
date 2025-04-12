@@ -69,11 +69,11 @@ I will present the structure of this blog post series.
 
 ## Goal
 
-Optimization is a cornerstone in modern machine learning. Whether we are fitting a model to data, tuning hyperparameters, or learning weights in a neural network, we are solving optimization problems that are often large, noisy, and non-convex.
+Optimization is a cornerstone in modern machine learning. When training a large-scale neural network for image recognition, a simple tweak in the optimizer can mean the difference between hours and days of training. But why does Adam sometimes converge where SGD fails? And what’s really going on under the hood?
+
+Whether we are fitting a model to data, tuning hyperparameters, or learning weights in a neural network, we are solving optimization problems that are often large, noisy, and non-convex.
 
 Yet, there tends to be a significant disconnect between the theory and practice of optimization in machine learning. This blog post series aims to explore the mathematical landscape of **optimization theory** applied to machine learning.
-
-The series is mostly intended to be a **self-contained introduction**, theoretically grounded and accessible.
 
 Our goal is not just to apply optimization algorithms, but to **understand** them. Throughout this series, we will see how many concepts of optimization theory are inspired and cleverly re-used from physics and mathematics, and how they relate to machine learning. We will explore:
 - The **intuition** behind optimization algorithms and how they emerged through connections to other fields.
@@ -99,12 +99,16 @@ We draw from diverse perspectives:
 - **Continuous-time and physical analogies**.
 - **Modern adaptive optimizers and deep learning practices**.
 
+At the end of each post, we will provide a **summary** of the main ideas, a **cheat sheet** for quick reference, and a **reflection** on the post’s contributions.
+
 ## Prerequisites
 
 This series is designed for readers with:
 - A working knowledge of **linear algebra** and **calculus**.
 - Comfort with **mathematical notation and reasoning**.
 - Basic familiarity with **machine learning terminology** (e.g., regression, classification, neural networks).
+
+The series is mostly intended to be a **self-contained introduction**, that is to say, topics that are covered will be explained mostly from scratch, but many topics will be omitted for brevity.
 
 We build from foundational principles, but we don't shy away from depth. Expect equations, proofs, and careful arguments — always in service of clarity and insight.
 

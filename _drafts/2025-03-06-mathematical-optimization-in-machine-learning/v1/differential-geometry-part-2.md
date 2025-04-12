@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Geometric Optimization in Machine Learning - Beyond Euclidean Space
+title: Differential Geometry - Part 2 - Beyond Euclidean Space
 date: 2025-04-10 10:00 -0400
 description: Learn how concepts from differential geometry like manifolds, metrics, geodesics, and retractions lead to powerful optimization algorithms like Natural Gradient Descent and Riemannian optimization, crucial for modern ML.
 image:
@@ -300,7 +300,7 @@ By understanding manifolds, metrics (like Fisher Information), tangent spaces, g
 
 ---
 
-# Appendix: More on Differential Geometry
+# Appendix: More on Differential Geometry (Optional)
 
 ## Differentiating on Manifolds: The Need for a Connection
 
@@ -882,190 +882,6 @@ Tensors don’t float in space — they live in bundles. Geometry becomes concre
 
 ---
 
-## Principal Bundles and Gauge Fields
-
-So far, we've worked with **vector bundles**, where each fiber is a vector space. But many structures in geometry — especially in physics — are more **symmetry-driven** than linear.
-
-Enter **principal bundles**: bundles whose fibers are **Lie groups**. These are essential in **gauge theory**, **connections**, and **fields** in both differential geometry and theoretical physics.
-
----
-
-### From Vector Bundles to Principal Bundles
-
-A **principal bundle** is a more abstract kind of bundle — instead of attaching a vector space to each point, we attach a **group of symmetries**.
-
-Given:
-
-- A manifold $$ M $$
-- A Lie group $$ G $$ (the **structure group**)
-
-A **principal $$ G $$-bundle** is a manifold $$ P $$ (the **total space**) with:
-
-1. A projection map:
-
-  
-   $$
-   \pi: P \to M
-   $$
-
-  
-2. A **free and transitive right action** of $$ G $$ on each fiber:
-
-  
-   $$
-   R_g: P \to P, \quad u \mapsto u \cdot g
-   $$
-
-  
-Each fiber $$ \pi^{-1}(p) $$ looks like the group $$ G $$ itself, and $$ G $$ acts **smoothly and freely** on it.
-
-<blockquote class="prompt-info">
-Principal bundles capture <b>frames of reference</b> or <b>gauges</b> — ways of describing things that are physically equivalent but represented differently.
-</blockquote>
-
----
-
-### Examples of Principal Bundles
-
-1. **Frame bundle** of a manifold:
-   - Fiber over each point = all bases of the tangent space.
-   - Structure group = $$ \mathrm{GL}(n, \mathbb{R}) $$ or $$ \mathrm{O}(n) $$ for orthonormal frames.
-   - Used to define **spin structures**, **connections**, and more.
-
-2. **Gauge bundle** in physics:
-   - Fiber = a Lie group like $$ U(1) $$, $$ SU(2) $$, $$ SU(3) $$.
-   - Describes **internal symmetries** (e.g. electromagnetism, weak/strong forces).
-
-3. **Circle bundles**:
-   - $$ G = U(1) $$, total space is like a "twisted" product of a circle over space.
-   - Important in complex geometry and topology.
-
----
-
-### Sections and Trivializations
-
-A **section** of a principal bundle is a smooth map:
-
-  
-$$
-s: M \to P
-$$
-
-  
-such that $$ \pi \circ s = \text{id}_M $$.
-
-- A section picks out one group element per fiber.
-- A principal bundle is **trivial** if it admits a global section that turns it into a product space:
-
-  
-$$
-P \cong M \times G
-$$
-
-  
-Most bundles are only **locally trivial** — they look like products in small patches, but twist globally.
-
-<blockquote class="prompt-tip">
-Principal bundles generalize the idea of choosing coordinates or bases — you can always do it locally, but globally it may be impossible without twisting.
-</blockquote>
-
----
-
-### Connections on Principal Bundles
-
-Just as vector bundles have **covariant derivatives**, principal bundles have **connections**.
-
-A **connection** on a principal bundle lets you:
-
-- Compare fibers at different points.
-- Define **parallel transport** of symmetry information.
-- Differentiate fields that transform under the group $$ G $$.
-
-This connection is encoded in a **connection 1-form**:
-
-  
-$$
-\omega \in \Omega^1(P, \mathfrak{g})
-$$
-
-  
-where $$ \mathfrak{g} $$ is the Lie algebra of $$ G $$. It satisfies two key properties:
-
-1. **Equivariance**: it behaves nicely under the group action.
-2. **Reproduction**: it encodes the infinitesimal group action on each fiber.
-
----
-
-### Curvature and Gauge Fields
-
-The **curvature** of a connection is defined by the **structure equation**:
-
-$$
-\Omega = \mathrm{d}\omega + \frac{1}{2}[\omega, \omega]
-$$
-
-This 2-form $$ \Omega $$ measures the failure of parallel transport to be path-independent — just like the Riemann tensor, but now in the language of symmetries.
-
-In physics, this curvature is called the **field strength**:
-
-- For electromagnetism:
-  
-  $$
-  F = \mathrm{d}A
-  $$  
-
-  where $$ A $$ is the electromagnetic potential (a connection form).
-
-- For Yang-Mills theory:  
-  
-  $$
-  F = \mathrm{d}A + A \wedge A
-  $$  
-
-  where $$ A $$ takes values in a non-abelian Lie algebra.
-
-<blockquote class="prompt-info">
-A gauge field is just a <b>connection</b> on a principal bundle. Its curvature describes physical quantities like electric and magnetic fields, or gluon interactions.
-</blockquote>
-
----
-
-### Pullbacks and Gauge Transformations
-
-If you change the section $$ s $$ (your choice of gauge), you modify the connection:
-
-$$
-A \mapsto A^g = g^{-1} A g + g^{-1} \mathrm{d}g
-$$
-
-This is a **gauge transformation**. It doesn’t change the physics — only the description.
-
-The curvature form transforms covariantly:
-
-$$
-F \mapsto g^{-1} F g
-$$
-
-  
-so gauge-invariant quantities can be built from **traces**, **norms**, and **characteristic classes**.
-
----
-
-### Why Principal Bundles Matter
-
-Principal bundles are the natural setting for:
-
-- **Gauge theories** in physics
-- **Symmetry-aware architectures** in machine learning
-- **Topological invariants** (like Chern classes, holonomy)
-- **Connections and curvature** beyond vector fields
-
-<blockquote class="prompt-info">
-While vector bundles describe “what” you carry (like tensors or forms), principal bundles describe “how” you carry it — through rules of symmetry, twisting, and gauge.
-</blockquote>
-
----
-
 ## Lie Groups and Symmetry
 
 Much of differential geometry — and physics — revolves around **symmetry**. The mathematical language of symmetry is built on **Lie groups** and their actions on manifolds.
@@ -1181,72 +997,6 @@ satisfying:
 
 This means that $$ G $$ acts as **symmetries** of the manifold $$ M $$. At each point, the group moves you to another point on the manifold in a smooth, structured way.
 
----
-
-### Orbits and Stabilizers
-
-Given an action $$ \Phi $$:
-
-- The **orbit** of a point $$ p \in M $$ is:
-
-  
-  $$
-  \mathcal{O}_p = \{ \Phi(g, p) \mid g \in G \}
-  $$
-
-  
-  This is the set of all points you can reach from $$ p $$ via the group action.
-
-- The **stabilizer** of $$ p $$ is:
-
-  
-  $$
-  G_p = \{ g \in G \mid \Phi(g, p) = p \}
-  $$
-
-  
-  This is the subgroup that leaves $$ p $$ fixed.
-
-By the **orbit-stabilizer theorem**, the orbit is diffeomorphic to the quotient:
-
-  
-$$
-\mathcal{O}_p \cong G / G_p
-$$
-
-<blockquote class="prompt-info">
-Group actions carve up a manifold into orbits — geometric patterns of symmetry. These are the building blocks of homogeneous spaces and quotient geometry.
-</blockquote>
-
----
-
-### Invariant Vector Fields and Flows
-
-On a Lie group $$ G $$, you can define **left-invariant** vector fields:
-
-- A vector field $$ X $$ is **left-invariant** if:
-
-  
-  $$
-  (L_g)_\ast X_h = X_{gh}
-  $$
-
-  
-  where $$ L_g: G \to G $$ is left multiplication.
-
-These vector fields form a basis for the Lie algebra $$ \mathfrak{g} $$, and their **flows** correspond to one-parameter subgroups of the Lie group.
-
----
-
-### Applications of Lie Groups
-
-1. **Physics**: Continuous symmetries imply conservation laws via Noether’s theorem.
-2. **Differential geometry**: Homogeneous spaces and symmetric spaces are modeled on group actions.
-3. **Machine learning**: Equivariant neural networks use group actions to preserve structure (e.g. rotations, translations).
-4. **Robotics and control**: Lie groups model orientation, rigid body motion (e.g., $$ \mathrm{SE}(3) $$), and more.
-
----
-
 ### Summary
 
 Lie groups unify geometry and algebra through symmetry:
@@ -1257,11 +1007,6 @@ Lie groups unify geometry and algebra through symmetry:
 | $$ \mathfrak{g} $$ | Lie algebra: infinitesimal structure at identity |
 | $$ \exp $$         | Exponential map from algebra to group            |
 | Group action       | Smooth way to apply symmetry to manifolds        |
-| Orbits / quotients | Geometry shaped by symmetry                      |
-
-<blockquote class="prompt-info">
-Symmetry is structure. Lie groups tell us how things move, what stays invariant, and how complex systems can still have order.
-</blockquote>
 
 ## Noether’s Theorem and Conservation Laws
 
@@ -1485,29 +1230,9 @@ In GNNs, messages passed between nodes are like parallel transport: you move fea
 
 ---
 
-### Gauge Equivariance and Principal Bundles
-
-In some advanced architectures, the fiber isn’t just a vector space — it’s a **group**. This leads to **gauge-equivariant networks**, modeled on **principal bundles**.
-
-- Features transform under local symmetries:  
-  $$
-  x_i \mapsto g_i \cdot x_i
-  $$
-
-- Models are **invariant** or **equivariant** under these local gauge changes.
-- This is mathematically the same structure as a **gauge theory** in physics.
-
-Applications include:
-
-- Molecular modeling (3D equivariance)
-- Cosmology and spherical CNNs
-- Lattice gauge equivariant networks (QFT-inspired architectures)
-
----
-
 ### Manifold Learning and Information Geometry
 
-Sometimes, the data **lives on a manifold**:
+Data **lives on a manifold**:
 
 - Images vary smoothly = lie near a low-dimensional manifold
 - Latent spaces in VAEs, diffusion models, etc.
@@ -1543,7 +1268,6 @@ In this case, you can use:
 <blockquote class="prompt-info">
 Geometric deep learning turns abstract geometry into practical computation. Symmetry, structure, and smoothness aren’t just theory — they’re optimization, architecture, and generalization.
 </blockquote>
-
 
 ---
 

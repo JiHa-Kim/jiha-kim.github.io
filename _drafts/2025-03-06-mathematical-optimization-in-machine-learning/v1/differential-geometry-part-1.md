@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Basics of Differential Geometry - Part 1 - Why Your Descriptions Change
+title: Differential Geometry - Part 1 - Why Your Descriptions Change
 date: 2025-04-10 00:00 -0400
 description: An introduction to the fundamental concepts of differential geometry, starting with why coordinate changes affect descriptions (covariance/contravariance) and building up to manifolds, tangent spaces, and the metric tensor.
 image:
@@ -639,6 +639,72 @@ This is crucial in many fields:
 - In physics: spacetime is a 4D Lorentzian manifold, and the **metric tensor is gravity**.
 - In machine learning: information geometry uses the **Fisher information metric** to measure sensitivity to parameters.
 - In robotics and control: geodesics represent minimal-energy trajectories.
+
+---
+
+## What’s Coming Next: Covariant Derivatives and Curvature
+
+On a manifold, we can define tangent vectors at a point — but how do we talk about a **change in a vector field**?
+
+We need a way to “differentiate” a vector field along another vector field — while staying within the manifold’s curved geometry. This leads to:
+
+- **Connections**: rules for comparing vectors at nearby points.
+- **Covariant derivatives**: derivatives that respect the manifold's structure.
+- **Parallel transport**: moving a vector along a path without twisting or stretching.
+- **Curvature tensors**: measuring the failure of parallel transport to return a vector unchanged around a loop.
+
+<blockquote class="prompt-info">
+Just like we needed directional derivatives for functions, we'll soon define derivatives of vector fields — and see how geometry gets encoded in the very way vectors change.
+</blockquote>
+
+## Summary and Cheat Sheets
+
+Here's a recap of the key concepts we've covered:
+
+*   **Coordinate Dependence:** The description (components) of geometric objects like vectors changes depending on the coordinate system (basis) chosen, even though the object itself remains invariant.
+*   **Contravariance vs. Covariance:** Vector components transform *contravariantly* (using the change-of-basis matrix $$M$$) relative to the basis vectors (which transform using $$M^{-1}$$). Covector components transform *covariantly* (using $$M^{-1}$$, the same way as basis vectors).
+*   **Index Notation:** Upper indices denote contravariant components/basis elements, while lower indices denote covariant components/basis elements. Einstein summation convention simplifies formulas by implying summation over repeated upper/lower index pairs.
+*   **Manifolds and Tangent Spaces:** Manifolds are spaces that locally resemble Euclidean space $$\mathbb{R}^n$$. At each point $$p$$, the tangent space $$T_pM$$ is the vector space of possible directions (tangent vectors) at that point. Vectors are often interpreted as directional derivatives.
+*   **Duality:** The cotangent space $$T_p^\ast M$$ is the dual space to $$T_pM$$, containing covectors (1-forms) which measure vectors. The gradient $$df$$ of a function $$f$$ is a prime example of a covector.
+*   **Metric Tensor:** The metric tensor $$g_{ij}$$ provides the structure needed to measure lengths, angles, and distances on the manifold. It defines an inner product on each tangent space and allows conversion between vectors and covectors (raising/lowering indices).
+
+### Cheat Sheet: Key Objects and Transformations
+
+| Object              | Typical Notation (Components) | Typical Notation (Basis)  | Index Position |  Transformation Type  | Interpretation                             |
+| :------------------ | :---------------------------: | :-----------------------: | :------------: | :-------------------: | :----------------------------------------- |
+| Vector              |            $$v^i$$            |          $$e_i$$          | Upper (Comp.)  |     Contravariant     | Direction, Velocity, "Pencil"              |
+|                     |                               | $$\partial/\partial x^i$$ | Lower (Basis)  |       Covariant       | Coordinate Direction (Derivative Operator) |
+| Covector (1-Form)   |         $$\omega_i$$          |      $$\epsilon^i$$       | Lower (Comp.)  |       Covariant       | Gradient, Measurement Axis, "Ruler"        |
+|                     |                               |         $$dx^i$$          | Upper (Basis)  |     Contravariant     | Coordinate Differential                    |
+| Linear Map (V to V) |         $$A^i_{\;j}$$         |                           |     Mixed      |         Mixed         | Transformation (Rotation, Scaling, etc.)   |
+| Metric Tensor       |          $$g_{ij}$$           |   $$dx^i \otimes dx^j$$   | Lower (Comp.)  |   Covariant (twice)   | Measures Length/Angle, Inner Product       |
+| Inverse Metric      |          $$g^{ij}$$           |                           | Upper (Comp.)  | Contravariant (twice) | Used to raise indices                      |
+
+### Cheat Sheet: Transformation Rules Under Basis Change
+
+Let the old basis be $$\{e_i\}$$ and the new basis be $$\{\tilde{e}_j\}$$.
+Let the change-of-basis matrix from old to new components be $$M$$, so $$\tilde{v}^j = M^j_{\; i} v^i$$.
+Let the transformation from new basis vectors to old basis vectors be $$M$$, so $$e_i = M^j_{\; i} \tilde{e}_j$$.
+Let the transformation from old basis vectors to new basis vectors be $$M^{-1}$$, so $$\tilde{e}_j = (M^{-1})^i_{\; j} e_i$$.
+
+| Quantity            |                      Components Transformation                       |              Basis Transformation              | Type           | Index |
+| :------------------ | :------------------------------------------------------------------: | :--------------------------------------------: | :------------- | :---- |
+| Vector Components   |                   $$\tilde{v}^j = M^j_{\; i} v^i$$                   |                      N/A                       | Contravariant  | Upper |
+| Basis Vectors       |                                 N/A                                  |    $$\tilde{e}_j = (M^{-1})^i_{\; j} e_i$$     | Covariant      | Lower |
+| Covector Components |          $$\tilde{\omega}_j = \omega_i (M^{-1})^i_{\; j}$$           |                      N/A                       | Covariant      | Lower |
+| Dual Basis Vectors  |                                 N/A                                  | $$\tilde{\epsilon}^j = M^j_{\; i} \epsilon^i$$ | Contravariant  | Upper |
+| Metric Tensor Comp. |   $$\tilde{g}_{kl} = g_{ij} (M^{-1})^i_{\; k} (M^{-1})^j_{\; l}$$    |                      N/A                       | Covariant (x2) | Lower |
+| Linear Map Comp.    | $$\tilde{A}^k_{\; l} = (M^k_{\; i}) A^i_{\; j} ((M^{-1})^j_{\; l})$$ |                      N/A                       | Mixed          | Mixed |
+
+### Cheat Sheet: Metric Tensor Operations
+
+| Operation          | Formula                                                              | Description                                                  |
+| :----------------- | :------------------------------------------------------------------- | :----------------------------------------------------------- |
+| Vector Length      | $$\Vert v \Vert^2 = g_{ij} v^i v^j$$                                 | Computes the squared magnitude of a vector.                  |
+| Angle Between u, v | $$\cos \theta = \frac{g_{ij} u^i v^j}{\Vert u \Vert \Vert v \Vert}$$ | Computes the angle between two vectors.                      |
+| Lowering Index     | $$v_i = g_{ij} v^j$$                                                 | Converts a vector $$v^j$$ into a covector $$v_i$$.           |
+| Raising Index      | $$\omega^i = g^{ij} \omega_j$$                                       | Converts a covector $$\omega_j$$ into a vector $$\omega^i$$. |
+| Inner Product      | $$g(u, v) = g_{ij} u^i v^j$$                                         | Computes the inner product (dot product) of u and v.         |
 
 ---
 

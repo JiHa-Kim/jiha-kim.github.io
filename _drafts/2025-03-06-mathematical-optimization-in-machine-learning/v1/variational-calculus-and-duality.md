@@ -82,6 +82,8 @@ This choice is fundamental for describing a vast range of physical systems, part
 
 This framework models systems whose future state is determined by their current position and velocity, which covers almost all of classical mechanics (particles, rigid bodies, oscillators, fields under certain approximations). It doesn't typically handle systems where the fundamental laws depend directly on acceleration ($$\ddot{q}$$) or higher derivatives, although extensions exist.
 
+In differential geometry terms, the Lagrangian is a function from the tangent space of the manifold to the real numbers. The action is the integral of the Lagrangian over the manifold.
+
 ### The Calculus of Variations: Finding the Optimal Path
 
 Our goal is to find the path $$q(t)$$ such that the action $$S[q]$$ is **stationary** (usually a minimum). This means that if we make a tiny change to the path $$q(t)$$, the change in the action $$S$$ should be zero (to first order).

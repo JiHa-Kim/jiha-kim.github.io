@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Basics of Convex Analysis
+title: Convex Analysis
 date: 2025-04-11 19:02 -0400
 description:
 image:
