@@ -331,12 +331,14 @@ where the notation emphasizes that $$x$$ must be expressed as a function of $$p$
 #### The Invertibility Requirement and Convexity
 
 Crucially, **Property 3 (Invertibility)** is essential for the Legendre transform to be well-defined and useful. For the relationship $$p = f'(x)$$ to be locally invertible, allowing us to uniquely determine $$x$$ for a given $$p$$ (i.e., write $$x=x(p)$$), the derivative $$f'(x)$$ must be strictly monotonic. This occurs when the second derivative does not change sign, meaning $$f''(x)$$ is either always positive or always negative (excluding points where it's zero).
-*   If $$f''(x) > 0$$, the function $$f(x)$$ is **strictly convex**.
-*   If $$f''(x) < 0$$, the function $$f(x)$$ is **strictly concave**.
+*   If $$f''(x) > 0$$, the function $$f(x)$$ is **strictly convex**, i.e. its graph curves strictly upwards.
+*   If $$f''(x) < 0$$, the function $$f(x)$$ is **strictly concave**, i.e. its graph curves strictly downwards.
 
 The standard Legendre transform typically assumes the function $$f(x)$$ is **strictly convex**. This ensures $$p = f'(x)$$ is a strictly increasing function and thus uniquely invertible.
 
 In the context of the Lagrangian $$L(q, \dot{q}, t)$$ transformed with respect to $$\dot{q}$$, the invertibility condition means that the mapping from velocities $$\dot{q}$$ to momenta $$p$$ defined by $$p_i = \partial L / \partial \dot{q}_i$$ must be invertible. This requires the **Hessian matrix** of $$L$$ with respect to the velocities, $$W_{ij} = \frac{\partial^2 L}{\partial \dot{q}_i \partial \dot{q}_j}$$, to be **invertible** (non-singular). If this matrix is also positive definite (which corresponds to convexity of $$L$$ as a function of $$\dot{q}$$), the inversion is typically well-behaved. For most standard mechanical systems where $$L=T-V$$ and $$T$$ is quadratic in velocities, this condition holds.
+
+We will cover more about convexity in future posts.
 
 #### Applying the Legendre Transform to the Lagrangian
 
@@ -505,9 +507,11 @@ Finding the stationary points of this *unconstrained* function $$\mathcal{L}$$ w
 2.  $$\frac{\partial \mathcal{L}}{\partial \lambda} = h(x) = 0$$ (Recovers the original constraint)
 
 For multiple equality constraints $$h_j(x)=0$$, $$j=1,...,p$$, we introduce a multiplier $$\lambda_j$$ for each and form:
+
 $$
 \mathcal{L}(x, \lambda) = f(x) + \sum_{j=1}^p \lambda_j h_j(x)
 $$
+
 The stationarity conditions become $$\nabla_x \mathcal{L} = 0$$ and $$h_j(x) = 0$$ for all $$j$$.
 
 ### From Multipliers to Duality: The Lagrangian Dual Problem

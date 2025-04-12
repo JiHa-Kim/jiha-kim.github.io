@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "What Problem is Machine Learning Trying to Solve? A Formal Look"
-date: 2025-03-06
+date: 2025-03-06 12:00:00 +0000
 description: "Formalizing the core optimization problem in supervised ML, its pitfalls, and why it often works."
 image: assets\2025-03-06-mathematical-optimization-in-machine-learning\thumbnail.png
 categories:
