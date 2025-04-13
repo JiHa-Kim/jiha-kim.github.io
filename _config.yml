@@ -261,29 +261,7 @@ jekyll_compose:
 
           (continued) item
 
-
-        Inside HTML environments (like blockquotes), please use the following syntax:
-
-        \( inline \)
-
-        \[
-        block
-        \]
-
-        like so. Also, HTML markers must be used rather than markdown, e.g. <b>bold</b> rather than **bold**, and <i>italic</i> rather than *italic*.
-
-        Example:
-
-        <blockquote class="prompt-info">
-          <b>Definition (Vector Space):</b>
-          A vector space \(V\) is a set of vectors equipped with a <b>scalar multiplication</b> operation:
-
-          \[
-          \forall v, w \in V, \quad \forall \alpha \in \mathbb{R}, \quad v \cdot (w \cdot \alpha) = v \cdot (\alpha \cdot w)
-          \]
-
-          where \(\cdot\) is the <b>dot product</b> of two vectors.
-        </blockquote>
+        Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
         Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
     posts:
@@ -320,28 +298,6 @@ jekyll_compose:
 
           (continued) item
 
-
-        Inside HTML environments (like blockquotes), please use the following syntax:
-
-        \( inline \)
-
-        \[
-        block
-        \]
-
-        like so. Also, HTML markers must be used rather than markdown, e.g. <b>bold</b> rather than **bold**, and <i>italic</i> rather than *italic*.
-
-        Example:
-
-        <blockquote class="prompt-info">
-          <b>Definition (Vector Space):</b>
-          A vector space \(V\) is a set of vectors equipped with a <b>scalar multiplication</b> operation:
-
-          \[
-          \forall v, w \in V, \quad \forall \alpha \in \mathbb{R}, \quad v \cdot (w \cdot \alpha) = v \cdot (\alpha \cdot w)
-          \]
-
-          where \(\cdot\) is the <b>dot product</b> of two vectors.
-        </blockquote>
+        Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
         Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".

@@ -4,7 +4,9 @@ title: Variational Calculus and Duality
 date: 2025-04-10 03:32 -0400
 description: Exploring variational principles, Lagrangian and Hamiltonian mechanics, and the Legendre transform connection to convex duality.
 image:
-categories: optimization mechanics
+categories:
+- Machine Learning
+- Mathematical Optimization
 tags: variational-calculus lagrangian hamiltonian legendre-transform duality convex-optimization physics machine-learning
 math: true
 llm-instructions: |

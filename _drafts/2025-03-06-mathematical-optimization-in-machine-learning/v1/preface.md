@@ -2,9 +2,11 @@
 layout: post
 title: Preface
 date: 2025-03-06 00:00:00 +0000
-description:
+description: Preliminary information for the blog post series on machine learning and optimization.
 image:
 categories:
+- Machine Learning
+- Mathematical Optimization
 tags:
 math: true
 llm-instructions: |
@@ -99,7 +101,7 @@ We draw from diverse perspectives:
 - **Continuous-time and physical analogies**.
 - **Modern adaptive optimizers and deep learning practices**.
 
-At the end of each post, we will provide a **summary** of the main ideas, a **cheat sheet** for quick reference, and a **reflection** on the post’s contributions.
+At the end of each post, we will provide a **summary** of the main ideas, a **cheat sheet** in table format for quick reference, and a **reflection** on the post’s contributions.
 
 ## Prerequisites
 
