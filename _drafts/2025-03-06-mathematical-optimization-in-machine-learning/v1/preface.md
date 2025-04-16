@@ -85,21 +85,21 @@ Our goal is not just to apply optimization algorithms, but to **understand** the
 
 ## Approach
 
-This series takes a **problem-first, theory-second** top-down approach. The presentation is centered on mathematical derivations rather than code or implementation details. The order of presentation is intended to be:
+This series takes a **problem-first, theory-second** top-down approach. The presentation is centered on mathematical derivations rather than code or implementation details.
+
+I iterated through several iterations and decided to cut down on the breadth and depth of the topics covered because it was getting too long. Ultimately, I decided on the following.
+
+This series is not a textbook. It is intended to be a **self-contained introduction**, that is to say, topics that are covered will be explained mostly from scratch, but many topics and proofs will be omitted for brevity. My goal is to scratch the surface as broadly as possible, by introducing the basic concepts and their accompanying definitions and theorems.
+
+If you achieve to properly master these concepts, you **need** to work through exercises and examples, whether that be from a textbook or somewhere else. If you simply read this series without additional effort, you might earn a very rough intuition of the connections between different perspectives and concepts, but you cannot expect to be able to apply these ideas to real-world problems.
+
+The order of presentation is intended to be:
 
 1. Real-world problem
 2. Intuition with a concrete example
 3. Investigating desired properties
 4. Formalizing the theory
 5. Applying the theory to practical problems
-
-We draw from diverse perspectives:
-- **First-order methods** like SGD and Adam.
-- **Second-order insights** from Newton’s method.
-- **Bayesian interpretations** of regularization.
-- **Convex duality and variational principles**.
-- **Continuous-time and physical analogies**.
-- **Modern adaptive optimizers and deep learning practices**.
 
 At the end of each post, we will provide a **summary** of the main ideas, a **cheat sheet** in table format for quick reference, and a **reflection** on the post’s contributions.
 
@@ -108,13 +108,19 @@ At the end of each post, we will provide a **summary** of the main ideas, a **ch
 This series is designed for readers with:
 - A working knowledge of **linear algebra** and **calculus**.
 - Comfort with **mathematical notation and reasoning**.
-- Basic familiarity with **machine learning terminology** (e.g., regression, classification, neural networks).
+- (Optional) Basic familiarity with **machine learning terminology** (e.g., regression, classification, neural networks). This is mostly for the sake of context and applications, but it is not strictly required to follow the math.
 
-The series is mostly intended to be a **self-contained introduction**, that is to say, topics that are covered will be explained mostly from scratch, but many topics will be omitted for brevity.
-
-We build from foundational principles, but we don't shy away from depth. Expect equations, proofs, and careful arguments — always in service of clarity and insight.
+As said, the series is mostly intended to be self-contained beyond these items.
 
 ## Series Outline
+
+We draw from diverse perspectives:
+- **First-order methods** like SGD and Adam.
+- **Second-order insights** from Newton’s method.
+- **Bayesian interpretations** of regularization.
+- **Convex duality and variational principles**.
+- **Continuous-time and physical analogies**.
+- **Modern adaptive optimizers and deep learning practices**.
 
 <b>What to Expect:</b> Here's a preview of the full series.
 

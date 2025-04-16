@@ -6,7 +6,36 @@ Plan the post to be well-structured and easily readable, write the draft and put
 
 Optimization theory in ML
 
-list v1
+list v2
+1. Preface
+2. problem formulation
+3. brief, surface-level overview of modern but mature optimizers (gradient descent, heavy ball, RMSProp, Adagrad, Adam, AdamW, etc.) algorithmic details but no theory
+4. challenges of non-convex optimization, local vs global
+5. regularization, weight decay as Bayesian prior
+6. gradient flow, convergence, continuous dynamics vs discrete dynamics
+7. momentum, Nesterov momentum, accelerated gradient descent, Adagrad, RMSProp, Adam
+8. physics: Newtonian vs Lagrangian mechanics, Hamiltonian mechanics, Euler-Lagrange equations
+9. convex analysis
+   1. convex sets, norms (probably need basic real analysis/point-set topology)
+   2. convex functions, Bregman divergences (defer to other post)
+   3. subdifferential calculus
+   4. convex optimization formulation
+   5. Lagrangian duality
+   6. Fenchel duality, strong duality, KKT conditions
+   7. gradient-based methods (Gradient, Subgradient, SGD/SSD, Mirror Descent)
+   8. proximal methods
+   9. convex relaxations, ML applications
+10. online learning
+   1.  PLAN TBD - online convex optimization, effects of noise and stochastic gradient descent, online-to-batch, OCO and OLO, AdaGrad as scale-free (epsilon correction unnecessary), Adam as FTRL
+11. diff geo basics
+12. info theory/info geo basics
+    1.  PLAN TBD - entropy, cross-entropy, KL divergence, mutual information, information geometry, Fisher information, connection to differential geometry
+13. Adam as diagonal Fisher approximation (FAdam)
+14. preconditioning, whitening special case of mirror descent with quadratic norm
+15. modern practices, practical considerations & bleeding-edge optimizers: Shampoo, Muon
+16. summary with tables, knowledge graphs, and references
+
+list v0
 1. short description of modern optimizers (gradient descent, heavy ball, RMSProp, Adagrad, Adam, AdamW, etc.)
 2. Problem formulation
 3. Returning to roots in physics: overview of Newtonian mechanics (vectors) vs Lagrangian mechanics (scalars)
@@ -23,7 +52,7 @@ list v1
 14. Online learning: online convex optimization, effects of noise and stochastic gradient descent
 15. Adam as FTRL
 
-list v2
+list v1
 
 Okay, here is the final, detailed plan for the blog post series, maintaining the level of detail discussed previously, including the variational perspective and Bayesian interpretation of regularization.
 
