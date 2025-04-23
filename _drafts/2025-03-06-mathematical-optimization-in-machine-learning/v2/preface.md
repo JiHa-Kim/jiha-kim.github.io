@@ -99,7 +99,7 @@ The order of presentation is intended to be:
 2. Intuition with a concrete example
 3. Investigating desired properties
 4. Formalizing the theory
-5. Applying the theory to practical problems
+5. Leveraging the theory to make meaningful connections
 
 At the end of each post, we will provide a **summary** of the main ideas, a **cheat sheet** in table format for quick reference, and a **reflection** on the post’s contributions.
 

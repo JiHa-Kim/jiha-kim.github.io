@@ -123,11 +123,13 @@ Consider the function formed by maximizing $$\mathcal{L}$$ over the feasible mul
 *   If $$x$$ is feasible ($$h_j(x)=0, g_k(x) \leq 0$$), then $$\lambda_j h_j(x) = 0$$. Since $$\mu_k \geq 0$$ and $$g_k(x) \leq 0$$, we have $$\mu_k g_k(x) \leq 0$$. The supremum is achieved when $$\mu_k = 0$$ for any inactive constraint ($$g_k(x) < 0$$), resulting in $$\sup_{\lambda, \mu \geq 0} \mathcal{L}(x, \lambda, \mu) = f(x)$$.
 *   If $$x$$ is infeasible (e.g., $$h_j(x) \neq 0$$ or $$g_k(x) > 0$$), one can choose multipliers to make $$\mathcal{L}$$ arbitrarily large. For instance, if $$g_k(x) > 0$$, letting $$\mu_k \to +\infty$$ makes $$\mathcal{L} \to +\infty$$.
 Thus,
+
 $$
 \sup_{\lambda, \mu \geq 0} \mathcal{L}(x, \lambda, \mu) = \begin{cases} f(x) & \text{if } x \text{ is feasible} \\ +\infty & \text{otherwise} \end{cases}
 $$
 
 The primal problem can then be written as an unconstrained minimax problem:
+
 $$
 p^* = \inf_{x} \sup_{\lambda, \mu \geq 0} \mathcal{L}(x, \lambda, \mu)
 $$
@@ -158,15 +160,19 @@ Let the optimal value of the dual problem be $$d^*$$. This is always a convex op
 #### 5. Weak Duality
 
 **Weak Duality Theorem:** The optimal dual value is always less than or equal to the optimal primal value:
+
 $$
 d^* \leq p^*
 $$
+
 This holds universally. The difference $$p^* - d^* \geq 0$$ is the **duality gap**.
 
 **Proof Sketch:** For any primal feasible $$x'$$ ($$h_j(x')=0, g_k(x') \le 0$$) and any dual feasible $$(\lambda', \mu')$$ ($$\mu'_k \ge 0$$):
+
 $$
 g(\lambda', \mu') = \inf_x \mathcal{L}(x, \lambda', \mu') \le \mathcal{L}(x', \lambda', \mu') = f(x') + \sum \lambda'_j h_j(x') + \sum \mu'_k g_k(x')
 $$
+
 Since $$h_j(x')=0$$ and $$\mu'_k g_k(x') \le 0$$, we have $$\mathcal{L}(x', \lambda', \mu') \le f(x')$$.
 Thus $$g(\lambda', \mu') \le f(x')$$. Taking the supremum over $$(\lambda', \mu')$$ and infimum over $$x'$$ gives $$d^* \le p^*$$.
 
@@ -186,13 +192,3 @@ If strong duality holds and the functions are differentiable, then any pair of p
 4.  **Stationarity:** $$\nabla_x \mathcal{L}(x^*, \lambda^*, \mu^*) = \nabla f(x^*) + \sum \lambda_j^* \nabla h_j(x^*) + \sum \mu_k^* \nabla g_k(x^*) = 0$$
 
 For convex problems satisfying constraint qualifications, the KKT conditions are necessary and sufficient for optimality. They generalize the Lagrange multiplier method to include inequality constraints.
-
-#### 8. Significance in Machine Learning
-
-Lagrangian duality is a fundamental tool in machine learning:
-*   **Support Vector Machines (SVMs):** The SVM algorithm is typically derived and solved via its dual problem, which reveals the concept of support vectors through complementary slackness.
-*   **Regularization:** Understanding regularization methods like Lasso often involves dual formulations.
-*   **Algorithm Design:** The dual problem might possess structure exploitable by specific algorithms (e.g., decomposition methods, coordinate ascent).
-*   **Theoretical Insight:** Duality provides deeper understanding of optimization problems and their solutions.
-
-This journey from the physical principle of least action through Lagrangian and Hamiltonian mechanics reveals the origins of variational methods. Applying these ideas to constrained optimization leads directly to Lagrange multipliers and the powerful framework of Lagrangian duality, which finds wide application in modern machine learning and optimization theory.

@@ -50,7 +50,7 @@ Many problems in science, engineering, and even machine learning involve not jus
 
 Consider a simple physical system, like a ball rolling down a hill. Newtonian mechanics describes its motion using forces and acceleration (vectors). This works incredibly well, but sometimes we want a different perspective.
 
-1.  **Energy Minimization:** Physical systems often tend towards states of lower energy. The path a system *actually* takes between two states in a given time often minimizes (or makes stationary) a quantity related to energy, integrated over time. This is known as the **Principle of Least Action**.
+1.  **Energy Minimization:** Physical systems often tend towards states of lower energy. The path a system *actually* takes between two states in a given time often minimizes (or makes stationary) a quantity related to energy, integrated over time. This is known as the **Principle of Stationary Action**.
 2.  **Scalar Quantities:** Instead of juggling vector forces, this principle often involves integrating a *scalar* quantity (called the Lagrangian density) along possible paths. The path integral yields a single number (the "action") for each path. Finding the path that minimizes this scalar action is often simpler conceptually and calculationally than solving vector differential equations directly. This is called the **path integral formulation**.
 3.  **Coordinate Invariance:** The action integral, being based on scalar quantities like energy, is often independent of the coordinate system you choose to describe the system. This is a powerful feature, making the approach highly flexible and applicable to complex systems where Cartesian coordinates might be awkward (like using angles for a pendulum).
 
@@ -88,79 +88,53 @@ In differential geometry terms, the Lagrangian is a function from the tangent sp
 
 ### The Calculus of Variations: Finding the Optimal Path
 
-Our goal is to find the path $$q(t)$$ such that the action $$S[q]$$ is **stationary** (usually a minimum). This means that if we make a tiny change to the path $$q(t)$$, the change in the action $$S$$ should be zero (to first order).
+Our goal is to find the path $$q(t)$$ that makes the action $$S[q] = \int_{t_1}^{t_2} L(t, q, \dot{q}) dt$$ stationary. This means that for any small, arbitrary variation $$\eta(t)$$ away from the true path $$q(t)$$, the *first-order change* in the action, denoted $$\delta S$$, must be zero. We require the variation to vanish at the endpoints: $$\eta(t_1) = \eta(t_2) = 0$$, since the start and end points of the path are fixed. I'll gloss over some of the details, but the key steps are:
 
-Let the optimal path be $$q(t)$$. Consider a nearby "varied" path:
+1.  **Vary the Action:** The variation of the action is the integral of the variation of the Lagrangian:
 
-$$
-q_{\epsilon}(t) = q(t) + \epsilon \eta(t)
-$$
+    $$
+    \delta S = \delta \int_{t_1}^{t_2} L(t, q, \dot{q}) \, dt = \int_{t_1}^{t_2} \delta L \, dt
+    $$
 
-where:
-*   $$\epsilon$$ is a small parameter.
-*   $$\eta(t)$$ is an arbitrary smooth function called the **variation**, representing the deviation from the optimal path.
-*   Crucially, we assume the start and end points are fixed: $$q(t_1) = q_1$$ and $$q(t_2) = q_2$$. To ensure the varied path also connects these points, we require $$\eta(t_1) = 0$$ and $$\eta(t_2) = 0$$.
+    Using the chain rule, the variation $$\delta L$$ depends on the variations $$\delta q$$ (which is just $$\eta(t)$$) and $$\delta \dot{q}$$ (which is $$\frac{d}{dt}\delta q = \dot{\eta}(t)$$) :
+    
+    $$
+    \delta L = \frac{\partial L}{\partial q} \delta q + \frac{\partial L}{\partial \dot{q}} \delta \dot{q} = \frac{\partial L}{\partial q} \eta(t) + \frac{\partial L}{\partial \dot{q}} \dot{\eta}(t)
+    $$
 
-The action for the varied path is $$S[q_\epsilon]$$. Since we want $$q(t)$$ to be a stationary path, the action should be minimal (or maximal, or saddle) at $$\epsilon = 0$$. Just like in ordinary calculus where we find minima by setting the derivative to zero, here we require:
+    Substituting this back into the action variation:
+    
+    $$
+    \delta S = \int_{t_1}^{t_2} \left( \frac{\partial L}{\partial q} \eta(t) + \frac{\partial L}{\partial \dot{q}} \dot{\eta}(t) \right) dt
+    $$
 
-$$
-\delta S := \frac{d S[q_\epsilon]}{d \epsilon} \bigg\vert _{\epsilon=0} = 0
-$$
+2.  **Integrate by Parts:** The key step is to handle the $$\dot{\eta}(t)$$ term. We use integration by parts on the second term: $$\int u \, dv = uv - \int v \, du$$, with $$u = \frac{\partial L}{\partial \dot{q}}$$ and $$dv = \dot{\eta}(t) dt$$ (so $$v = \eta(t)$$).
+    
+    $$
+    \int_{t_1}^{t_2} \frac{\partial L}{\partial \dot{q}} \dot{\eta}(t) \, dt = \underbrace{\left[ \frac{\partial L}{\partial \dot{q}} \eta(t) \right]_{t_1}^{t_2}}_{=0} - \int_{t_1}^{t_2} \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}}\right) \eta(t) \, dt
+    $$
 
-This derivative is often denoted as the **variation** of the functional, $$\delta S$$. So, we want $$\delta S = 0$$.
+    The boundary term vanishes because $$\eta(t_1) = \eta(t_2) = 0$$.
 
-Let's calculate this variation:
+3.  **Combine and Apply the Fundamental Lemma:** Substituting the result of the integration by parts back into the expression for $$\delta S$$ gives:
 
-$$
-\delta S = \delta \int_{t_1}^{t_2} L(t, q, \dot{q}) \, dt = \int_{t_1}^{t_2} \delta L(t, q, \dot{q}) \, dt
-$$
+    $$
+    \delta S = \int_{t_1}^{t_2} \left( \frac{\partial L}{\partial q} \eta(t) - \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}}\right) \eta(t) \right) dt = \int_{t_1}^{t_2} \left( \frac{\partial L}{\partial q} - \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}}\right) \right) \eta(t) \, dt
+    $$
 
-Using the chain rule for variations (similar to differentials):
-$$
-\delta L = \frac{\partial L}{\partial q} \delta q + \frac{\partial L}{\partial \dot{q}} \delta \dot{q}
-$$
+    For the action to be stationary, we require $$\delta S = 0$$ for *any* permissible variation $$\eta(t)$$. The **Fundamental Lemma of the Calculus of Variations** states that if $$\int_a^b f(t) \eta(t) dt = 0$$ for all well-behaved $$\eta(t)$$ vanishing at the boundaries, then the function $$f(t)$$ must be identically zero. Applying this here means the term multiplying $$\eta(t)$$ inside the integral must be zero.
 
-From $$q_\epsilon = q + \epsilon \eta$$, we have $$\delta q = \frac{\partial q_\epsilon}{\partial \epsilon} \big\vert _{\epsilon=0} = \eta(t)$$.
-Also, $$\dot{q}_\epsilon = \dot{q} + \epsilon \dot{\eta}$$, so $$\delta \dot{q} = \frac{\partial \dot{q}_\epsilon}{\partial \epsilon} \big\vert _{\epsilon=0} = \dot{\eta}(t)$$.
+4.  **The Euler-Lagrange Equation:** This leads directly to the condition that the optimal path $$q(t)$$ must satisfy:
 
-Substituting these into the integral for $$\delta S$$:
-$$
-\delta S = \int_{t_1}^{t_2} \left( \frac{\partial L}{\partial q} \eta(t) + \frac{\partial L}{\partial \dot{q}} \dot{\eta}(t) \right) dt = 0
-$$
+    $$
+    \boxed{ \frac{\partial L}{\partial q} - \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}}\right) = 0 }
+    $$
 
-Now, we use **integration by parts** on the second term:
-$$
-\int_{t_1}^{t_2} \frac{\partial L}{\partial \dot{q}} \dot{\eta}(t) \, dt = \left[ \frac{\partial L}{\partial \dot{q}} \eta(t) \right]_{t_1}^{t_2} - \int_{t_1}^{t_2} \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}}\right) \eta(t) \, dt
-$$
+    This is the **Euler-Lagrange equation**. It's a differential equation whose solution gives the path $$q(t)$$ that makes the action integral stationary. For systems with multiple coordinates $$q_i$$, we get one such equation for each $$i$$:
 
-The boundary term $$\left[ \frac{\partial L}{\partial \dot{q}} \eta(t) \right]_{t_1}^{t_2}$$ is zero because $$\eta(t_1) = \eta(t_2) = 0$$.
-
-Substituting back into the expression for $$\delta S$$:
-$$
-\delta S = \int_{t_1}^{t_2} \left( \frac{\partial L}{\partial q} - \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}}\right) \right) \eta(t) \, dt = 0
-$$
-
-### The Fundamental Lemma and the Euler-Lagrange Equation
-
-Now we invoke a key result: the **Fundamental Lemma of the Calculus of Variations**. It states that if
-
-$$
-\int_{a}^{b} f(t) \eta(t) \, dt = 0
-$$
-
-for *all* sufficiently smooth functions $$\eta(t)$$ such that $$\eta(a) = \eta(b) = 0$$, then it must be that $$f(t) = 0$$ for all $$t \in [a, b]$$.
-
-Applying this lemma to our result for $$\delta S = 0$$, the expression inside the parentheses must be zero:
-
-$$
-\frac{\partial L}{\partial q} - \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}}\right) = 0
-$$
-
-This is the celebrated **Euler-Lagrange equation**. It is a differential equation that the optimal path $$q(t)$$ must satisfy. If the system has $$n$$ generalized coordinates $$q = (q_1, ..., q_n)$$, then there is one Euler-Lagrange equation for each coordinate $$q_i$$:
-
-$$
-\frac{\partial L}{\partial q_i} - \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}_i}\right) = 0 \quad \text{for } i = 1, ..., n
-$$
+    $$
+    \frac{\partial L}{\partial q_i} - \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}_i}\right) = 0 \quad \text{for } i = 1, ..., n
+    $$
 
 ### Deriving the Lagrangian from Newtonian Mechanics
 
@@ -224,18 +198,15 @@ $$
 
 For these two equations to be equivalent for any path $$q(t)$$, the corresponding terms must be equal. This gives us two conditions that $$L(q, \dot{q})$$ must satisfy:
 
-1.  $$ 
-\begin{equation}
+1.  $$\begin{equation}
     \frac{\partial L}{\partial q} = -\frac{\partial V}{\partial q}
     \label{eq:condition-1} 
-\end{equation}
-$$
-2.  $$ 
-\begin{equation}
+\end{equation}$$
+
+2.  $$\begin{equation}
     \frac{\partial L}{\partial \dot{q}} = m \dot{q}
     \label{eq:condition-2}
-\end{equation}
-$$
+\end{equation}$$
 
 Let's find a function $$L$$ that satisfies both. Integrating $$\eqref{eq:condition-2}$$ with respect to $$\dot{q}$$ (treating $$q$$ as constant during this partial integration):
 
@@ -289,16 +260,6 @@ This formulation has significant advantages:
 
 Thus, Lagrangian mechanics provides a profound and elegant reformulation of classical mechanics, rooted in the fundamental principle of optimizing a path integral – the action. This variational perspective is not just useful in physics but also provides foundational ideas for optimization in other fields, including machine learning.
 
-### Changing Gears: From Velocity to Momentum via Differentials
-
-The Lagrangian formulation uses coordinates $$q$$ and velocities $$\dot{q}$$ as the fundamental variables describing the system's state at any instant. The Euler-Lagrange equations involve both $$\frac{\partial L}{\partial q}$$ and $$\frac{\partial L}{\partial \dot{q}}$$. The latter term, as we saw, plays a special role and leads us to define the **generalized momentum**:
-
-$$
-p_i = \frac{\partial L}{\partial \dot{q}_i}
-$$
-
-This suggests that perhaps ($$q, p$$) could be an alternative, equally valid set of variables to describe the system. Can we find a new function, analogous to the Lagrangian, whose natural variables are ($$q, p$$) and whose properties yield the equations of motion? This transformation is achieved via the **Legendre Transform**, and its structure arises naturally from analyzing the differential of the Lagrangian.
-
 ### Changing Gears: The Legendre Transform from Velocity to Momentum
 
 The Lagrangian $$L(q, \dot{q}, t)$$ describes mechanics using generalized coordinates $$q$$ and velocities $$\dot{q}$$. A key quantity derived from the Lagrangian is the **generalized momentum** $$p$$, conjugate to $$q$$:
@@ -314,9 +275,17 @@ This relationship suggests viewing the momentum $$p$$ as a new variable derived 
 Let's consider the Legendre transform as an operation $$\ast$$ that takes a function $$f(x)$$ and produces a new function $$f^\ast (p)$$. We desire this transform to have the following properties:
 
 1.  **Derivative Relationship:** The new variable $$p$$ is the derivative of the original function with respect to the original variable:
-    $$ p = \frac{df}{dx} $$
-2.  **Symmetric Derivative Relationship (Involutivity):** The original variable $$x$$ should be recoverable as the derivative of the *transformed* function $$f^\ast $$ with respect to the *new* variable $$p$:
-    $$ x = \frac{df^\ast }{dp} $$
+    
+    $$
+    p = \frac{df}{dx} 
+    $$
+
+2.  **Symmetric Derivative Relationship (Involutivity):** The original variable $$x$$ should be recoverable as the derivative of the *transformed* function $$f^\ast $$ with respect to the *new* variable $$p$$:
+
+    $$ 
+    x = \frac{df^\ast }{dp}
+    $$
+
 3.  **Invertibility:** To express $$f^\ast $$ purely as a function of $$p$$, the relationship $$p = f'(x)$$ must be invertible, allowing us to write $$x = x(p)$$. Similarly, to transform back, $$x = (f^\ast )'(p)$$ must be invertible.
 
 #### Deriving the Form of the Legendre Transform
@@ -401,11 +370,13 @@ H = 2T - (T - V) = T + V
 $$
 Thus, for these standard systems, the Hamiltonian $$H$$ represents the **total energy** (kinetic plus potential) of the system.
 
-### Symmetries and Conservation Principles: Noether's Insight
+### (Extra) Symmetries and Conservation Principles: Noether's Insight
 
 One of the most profound insights arising from the Lagrangian and Hamiltonian formulations is the direct connection between **symmetries** of the system and **conserved quantities**. This relationship is formalized by **Noether's Theorem**, a cornerstone of modern physics. While we won't derive the theorem in its full generality, we can easily see how specific symmetries lead to familiar conservation laws using the equations we already have.
 
 The core idea is: If the Lagrangian (and thus the physics it describes) remains unchanged under a certain transformation (like shifting in time, translating in space, or rotating), then there must be a corresponding quantity that remains constant throughout the system's motion.
+
+This is interesting, since many physical systems of interest are invariant under certain transformations. For instance, images should be invariant under translations, rotations, and possibly reflections. So this has implications for image processing, for instance.
 
 #### 1. Conservation of Energy: Time Translation Symmetry
 

@@ -27,13 +27,14 @@ list v2
    9. convex relaxations, ML applications
 10. online learning
    1.  PLAN TBD - online convex optimization, effects of noise and stochastic gradient descent, online-to-batch, OCO and OLO, AdaGrad as scale-free (epsilon correction unnecessary), Adam as FTRL
-11. diff geo basics
-12. info theory/info geo basics
+11. parameter-free algorithms
+12. diff geo basics
+13. info theory/info geo basics
     1.  PLAN TBD - entropy, cross-entropy, KL divergence, mutual information, information geometry, Fisher information, connection to differential geometry
-13. Adam as diagonal Fisher approximation (FAdam)
-14. preconditioning, whitening special case of mirror descent with quadratic norm
-15. modern practices, practical considerations & bleeding-edge optimizers: Shampoo, Muon
-16. summary with tables, knowledge graphs, and references
+14. Adam as diagonal Fisher approximation (FAdam)
+15. preconditioning, whitening special case of mirror descent with quadratic norm
+16. modern practices, practical considerations & bleeding-edge optimizers: Shampoo, Muon
+17. summary with tables, knowledge graphs, and references
 
 list v0
 1. short description of modern optimizers (gradient descent, heavy ball, RMSProp, Adagrad, Adam, AdamW, etc.)
