@@ -16,177 +16,243 @@ math: true
 
 ## Introduction
 
-Calculus can be quite tedious when computed symbolically by hand. In many modern applications (for example, in machine learning), automatic differentiation is used to efficiently compute derivatives. The key idea is that when performing differentiation, only first‐order (linear) infinitesimal terms survive; higher-order infinitesimals vanish. In other words, if we denote an infinitesimal by \(dt\), then any term like \(dt^k\) with \(k>1\) is negligible in the limit.
+Calculus can be quite tedious when computed symbolically by hand. In many modern applications (for example, in machine learning), automatic differentiation is used to efficiently compute derivatives. The key idea is that when performing differentiation, only first‐order (linear) infinitesimal terms survive; higher-order infinitesimals vanish. In other words, if we denote an infinitesimal by $$dt$$, then any term like $$dt^k$$ with $$k>1$$ is negligible in the limit.
 
 From the definition of the derivative,
-\[
+
+$$
 \lim_{dt\to 0}\frac{f(t+dt)-f(t)}{dt},
-\]
+$$
+
 we see that for each small increment, we only need to keep track of the function’s value and its linear change.
 
 This is formalized by working in the ring of dual numbers,
-\[
+
+$$
 \mathbb{R}[\epsilon]/\epsilon^2,
-\]
-where we think of \(\epsilon\) as our infinitesimal with the property \(\epsilon^2 = 0\) (analogous to \(dt^2 \to 0\)).
+$$
+
+where we think of $$\epsilon$$ as our infinitesimal with the property $$\epsilon^2 = 0$$ (analogous to $$dt^2 \to 0$$).
 
 For example, consider the product of two dual numbers:
-\[
-(a+a'\epsilon)(b+b'\epsilon)=ab+(ab'+a'b)\epsilon+a'b'\epsilon^2.
-\]
-Since \(\epsilon^2=0\), the term \(a'b'\epsilon^2\) vanishes, leaving
-\[
-(a+a'\epsilon)(b+b'\epsilon)=ab+(ab'+a'b)\epsilon.
-\]
-This naturally encodes the product rule: \((ab)' = a b' + a' b\).
 
-In stochastic calculus, however, a key difference arises: the quadratic variation of a Brownian motion \(B_t\) is nonzero. In fact, if we define
-\[
+$$
+(a+a'\epsilon)(b+b'\epsilon)=ab+(ab'+a'b)\epsilon+a'b'\epsilon^2.
+$$
+
+Since $$\epsilon^2=0$$, the term $$a'b'\epsilon^2$$ vanishes, leaving
+
+$$
+(a+a'\epsilon)(b+b'\epsilon)=ab+(ab'+a'b)\epsilon.
+$$
+
+This naturally encodes the product rule: $$(ab)' = a b' + a' b$$.
+
+In stochastic calculus, however, a key difference arises: the quadratic variation of a Brownian motion $$B_t$$ is nonzero. In fact, if we define
+
+$$
 \Delta B_t := B_t - B_0 \sim N(0,t),
-\]
+$$
+
 then symbolically we have
-\[
+
+$$
 dB_t^2 = dt.
-\]
-This means that when differentiating functions of a Brownian path, second-order terms cannot be dropped as in the deterministic case. To capture this behavior algebraically, we use a larger number system. Instead of \(\mathbb{R}[\epsilon]/\epsilon^2\), we work in
-\[
+$$
+
+This means that when differentiating functions of a Brownian path, second-order terms cannot be dropped as in the deterministic case. To capture this behavior algebraically, we use a larger number system. Instead of $$\mathbb{R}[\epsilon]/\epsilon^2$$, we work in
+
+$$
 \mathbb{R}[\epsilon]/\epsilon^3,
-\]
+$$
+
 with the following interpretation:
-- We set the “base differential” \(dB_t \sim \epsilon\) (so that the linear term corresponds to the Brownian increment).
-- Since \(dB_t^2 \sim dt\), we interpret \(\epsilon^2 \sim dt\).
-- All higher-order terms vanish: \(\epsilon^3 = 0\).
+- We set the “base differential” $$dB_t \sim \epsilon$$ (so that the linear term corresponds to the Brownian increment).
+- Since $$dB_t^2 \sim dt$$, we interpret $$\epsilon^2 \sim dt$$.
+- All higher-order terms vanish: $$\epsilon^3 = 0$$.
 
 Then, for a stochastic differential equation such as
-\[
+
+$$
 dX_t = \mu\, dt + \sigma\, dB_t,
-\]
+$$
+
 we write
-\[
+
+$$
 dX_t = \sigma\,\epsilon + \mu\,\epsilon^2.
-\]
-Functions \(f(X_t,t)\) are differentiated by writing
-\[
+$$
+
+Functions $$f(X_t,t)$$ are differentiated by writing
+
+$$
 df(X_t,t) = f(X_t+dX_t, t+dt) - f(X_t,t)
-\]
-and extracting the coefficients of \(\epsilon\) and \(\epsilon^2\).
+$$
+
+and extracting the coefficients of $$\epsilon$$ and $$\epsilon^2$$.
 
 For example, using this framework you can derive Itô’s lemma.
 
 ### Deriving Itô’s Lemma
 
-Using \(\mathbb{R}[\epsilon]/\epsilon^3\) with
-\[
+Using $$\mathbb{R}[\epsilon]/\epsilon^3$$ with
+
+$$
 \epsilon \sim dB_t,\quad \epsilon^2 \sim dt,\quad \epsilon^3=0,
-\]
+$$
+
 and writing
-\[
+
+$$
 dX_t = \mu\,dt + \sigma\,dB_t = \mu\,\epsilon^2 + \sigma\,\epsilon,
-\]
-for a function \(f(X_t,t)\) we have
-\[
+$$
+
+for a function $$f(X_t,t)$$ we have
+
+$$
 f(X_t+dX_t, t+dt) = f\Bigl(X_t+\sigma\epsilon+\mu\epsilon^2,\,t+\epsilon^2\Bigr).
-\]
-A Taylor expansion up to \(\epsilon^2\) gives:
-\[
+$$
+
+A Taylor expansion up to $$\epsilon^2$$ gives:
+
+$$
 f(X_t+dX_t,t+dt) = f + f_x (\sigma\epsilon+\mu\epsilon^2) + f_t\,\epsilon^2 + \frac{1}{2} f_{xx} (\sigma\epsilon+\mu\epsilon^2)^2,
-\]
+$$
+
 and since
-\[
+
+$$
 (\sigma\epsilon+\mu\epsilon^2)^2 = \sigma^2\epsilon^2,
-\]
+$$
+
 this simplifies to
-\[
+
+$$
 f(X_t+dX_t,t+dt) = f + f_x\sigma\epsilon + \Bigl(f_x\mu+f_t+\frac{1}{2}f_{xx}\sigma^2\Bigr)\epsilon^2.
-\]
+$$
+
 Thus, we identify
-\[
+
+$$
 df = f_x\sigma\,\epsilon + \Bigl(f_t+f_x\mu+\frac{1}{2}f_{xx}\sigma^2\Bigr)\epsilon^2,
-\]
-which, upon interpreting \(\epsilon\) as \(dB_t\) and \(\epsilon^2\) as \(dt\), gives the familiar Itô’s lemma:
-\[
+$$
+
+which, upon interpreting $$\epsilon$$ as $$dB_t$$ and $$\epsilon^2$$ as $$dt$$, gives the familiar Itô’s lemma:
+
+$$
 df(X_t,t) = f_x\,\sigma\,dB_t + \Bigl(f_t+f_x\mu+\frac{1}{2}f_{xx}\sigma^2\Bigr)dt.
-\]
+$$
+
 
 ## Stochastic Calculus as Algebra with Dual Numbers
 
-In deterministic automatic differentiation we work with \(\mathbb{R}[\epsilon]/\epsilon^2\) (since \(\epsilon^2=0\)). For stochastic calculus, because of the nonzero quadratic variation of Brownian motion, we extend our system to
-\[
+In deterministic automatic differentiation we work with $$\mathbb{R}[\epsilon]/\epsilon^2$$ (since $$\epsilon^2=0$$). For stochastic calculus, because of the nonzero quadratic variation of Brownian motion, we extend our system to
+
+$$
 \mathbb{R}[\epsilon]/\epsilon^3,
-\]
+$$
+
 with:
-- \(\epsilon \sim dB_t\) (the Brownian increment), with the property that \(\epsilon^2 \sim dt\),
-- \(\epsilon^3 = 0\) (all higher-order terms vanish).
+- $$\epsilon \sim dB_t$$ (the Brownian increment), with the property that $$\epsilon^2 \sim dt$$,
+- $$\epsilon^3 = 0$$ (all higher-order terms vanish).
 
 Then, as noted, the SDE
-\[
+
+$$
 dX_t = \mu\,dt + \sigma\,dB_t
-\]
+$$
+
 is encoded as
-\[
+
+$$
 dX_t = \sigma\,\epsilon + \mu\,\epsilon^2.
-\]
-For a function \(f(X_t,t)\), the differential is computed as
-\[
+$$
+
+For a function $$f(X_t,t)$$, the differential is computed as
+
+$$
 df(X_t,t) = f(X_t+dX_t, t+dt) - f(X_t,t),
-\]
-and the coefficients of \(\epsilon\) and \(\epsilon^2\) give the \(dB_t\) and \(dt\) components respectively. This algebraic viewpoint immediately yields Itô’s lemma as shown above.
+$$
+
+and the coefficients of $$\epsilon$$ and $$\epsilon^2$$ give the $$dB_t$$ and $$dt$$ components respectively. This algebraic viewpoint immediately yields Itô’s lemma as shown above.
 
 ## Stratonovich Equivalence
 
 In many applications—especially in physics—the chain rule in its classical form is desirable. In Itô calculus the chain rule acquires an extra correction term. In Stratonovich calculus the definition is modified so that the chain rule holds as in ordinary calculus.
 
-To motivate this, note that when using the Itô discretization, the Taylor expansion of a function \(f(X_t)\) yields
-\[
+To motivate this, note that when using the Itô discretization, the Taylor expansion of a function $$f(X_t)$$ yields
+
+$$
 df = f'(X_t)dX_t + \frac{1}{2} f''(X_t)(dX_t)^2,
-\]
-with \((dB_t)^2\sim dt\) so that the second-order term is nonzero. In order to recover the familiar chain rule,
-\[
+$$
+
+with $$(dB_t)^2\sim dt$$ so that the second-order term is nonzero. In order to recover the familiar chain rule,
+
+$$
 df = f'(X_t)\circ dX_t,
-\]
+$$
+
 we modify the increment by using a midpoint (or symmetric) evaluation. In our algebraic language this means that we define the stochastic increment in the Stratonovich sense as
-\[
+
+$$
 dX = \sigma\Bigl(\epsilon+\frac{1}{2}\epsilon^2\Bigr) + \mu\,\epsilon^2.
-\]
+$$
+
 Notice that now
-\[
+
+$$
 dX = \sigma\,\epsilon + \Bigl(\frac{1}{2}\sigma+\mu\Bigr)\epsilon^2.
-\]
+$$
+
 When you Taylor expand
-\[
+
+$$
 f\Bigl(X+\sigma\epsilon+ \Bigl(\frac{1}{2}\sigma+\mu\Bigr)\epsilon^2\Bigr),
-\]
+$$
+
 you obtain
-\[
+
+$$
 f(X) + f'(X)\,\sigma\epsilon + \Bigl[f'(X)\Bigl(\frac{1}{2}\sigma+\mu\Bigr)+\frac{1}{2} f''(X)\sigma^2\Bigr]\epsilon^2.
-\]
-Interpreting \(\epsilon\) as \(dB_t\) and \(\epsilon^2\) as \(dt\), this means
-\[
+$$
+
+Interpreting $$\epsilon$$ as $$dB_t$$ and $$\epsilon^2$$ as $$dt$$, this means
+
+$$
 df = f'(X)\sigma\,dB_t + \Bigl[f'(X)\Bigl(\frac{1}{2}\sigma+\mu\Bigr)+\frac{1}{2} f''(X)\sigma^2\Bigr]dt.
-\]
+$$
+
 By design, the Stratonovich integral is defined so that the chain rule appears in its usual form:
-\[
+
+$$
 df = f'(X)\circ dX,
-\]
-which means that the \(dt\) component is taken to be simply
-\[
+$$
+
+which means that the $$dt$$ component is taken to be simply
+
+$$
 f'(X)\Bigl(\frac{1}{2}\sigma+\mu\Bigr)dt,
-\]
-with no additional correction. In other words, the extra term \(\frac{1}{2}f''(X)\sigma^2\,dt\) that appears in the Itô expansion is exactly canceled by the modification in the discretization scheme. This is why many texts write the conversion between the Itô and Stratonovich differentials as
-\[
+$$
+
+with no additional correction. In other words, the extra term $$\frac{1}{2}f''(X)\sigma^2\,dt$$ that appears in the Itô expansion is exactly canceled by the modification in the discretization scheme. This is why many texts write the conversion between the Itô and Stratonovich differentials as
+
+$$
 dX_{\text{Itô}} = dX_{\text{Strat}} + \frac{1}{2}\sigma\,\sigma'\,dt,
-\]
-where the extra term accounts for the curvature of the function \(f\).
+$$
+
+where the extra term accounts for the curvature of the function $$f$$.
 
 ## Why It’s Neat
 
-Encoding both Itô and Stratonovich calculus in the algebraic system \(\mathbb{R}[\epsilon]/\epsilon^3\) (using \(\epsilon\) for \(dB_t\) and \(\epsilon^2\) for \(dt\)) makes stochastic calculus more accessible to computer algebra systems. In this unified framework the differences between the two interpretations are captured simply by a slight modification of the differential \(dX\). In the Stratonovich formulation one uses
-\[
+Encoding both Itô and Stratonovich calculus in the algebraic system $$\mathbb{R}[\epsilon]/\epsilon^3$$ (using $$\epsilon$$ for $$dB_t$$ and $$\epsilon^2$$ for $$dt$$) makes stochastic calculus more accessible to computer algebra systems. In this unified framework the differences between the two interpretations are captured simply by a slight modification of the differential $$dX$$. In the Stratonovich formulation one uses
+
+$$
 dX = \sigma\Bigl(\epsilon+\frac{1}{2}\epsilon^2\Bigr) + \mu\,\epsilon^2,
-\]
+$$
+
 which is equivalent to applying a midpoint rule. As a result, the usual (deterministic) chain rule holds without any extra correction.
 
-Here is a complete example using Python and SymPy for the function \(f(X)=X^2\).
+Here is a complete example using Python and SymPy for the function $$f(X)=X^2$$.
 
 ```py
 from sympy import symbols, expand, collect
@@ -205,58 +271,76 @@ print(df)  # 2*X*sigma*e + (2*X*mu + sigma**2)*e**2
 ```
 
 This outputs:
-\[
+
+$$
 df = 2X\sigma\,\epsilon + \Bigl(2X\mu+\sigma^2\Bigr)\epsilon^2,
-\]
+$$
+
 which we interpret as
-\[
+
+$$
 df = 2X\sigma\,dB_t + \Bigl(2X\mu+\sigma^2\Bigr)dt,
-\]
-matching Itô’s lemma (with the term \(\sigma^2dt\) coming from \((dB_t)^2 = dt\)).
+$$
+
+matching Itô’s lemma (with the term $$\sigma^2dt$$ coming from $$(dB_t)^2 = dt$$).
 
 ## Stratonovich Example
 
 For the Stratonovich version, we adjust the increment:
-\[
+
+$$
 dX = \sigma\Bigl(\epsilon+\frac{1}{2}\epsilon^2\Bigr) + \mu\,\epsilon^2.
-\]
-Then, for any smooth function \(f(X)\), a Taylor expansion yields
-\[
+$$
+
+Then, for any smooth function $$f(X)$$, a Taylor expansion yields
+
+$$
 f(X+dX)= f(X) + f'(X)\sigma\epsilon + \left[f'(X)\Bigl(\frac{1}{2}\sigma+\mu\Bigr) + \frac{1}{2}f''(X)\sigma^2\right]\epsilon^2.
-\]
-Interpreting \(\epsilon\) as \(dB_t\) and \(\epsilon^2\) as \(dt\), the differential becomes
-\[
+$$
+
+Interpreting $$\epsilon$$ as $$dB_t$$ and $$\epsilon^2$$ as $$dt$$, the differential becomes
+
+$$
 df = f'(X)\sigma\,dB_t + \left[f'(X)\Bigl(\frac{1}{2}\sigma+\mu\Bigr)+\frac{1}{2}f''(X)\sigma^2\right]dt.
-\]
+$$
+
 In the Stratonovich framework the chain rule is taken to hold in its usual form:
-\[
+
+$$
 df = f'(X)\circ dX,
-\]
-which implies that the \(dt\) term is interpreted as \(f'(X)(\frac{1}{2}\sigma+\mu)dt\) (i.e. without the extra \(\frac{1}{2}f''(X)\sigma^2\,dt\) term). The difference between the Itô and Stratonovich interpretations is precisely the contribution of that extra term, which is “absorbed” by the modified discretization in the Stratonovich case.
+$$
 
-In one dimension, notice that the derivative of \(\sigma\) can be written as
+which implies that the $$dt$$ term is interpreted as $$f'(X)(\frac{1}{2}\sigma+\mu)dt$$ (i.e. without the extra $$\frac{1}{2}f''(X)\sigma^2\,dt$$ term). The difference between the Itô and Stratonovich interpretations is precisely the contribution of that extra term, which is “absorbed” by the modified discretization in the Stratonovich case.
 
-\[
+In one dimension, notice that the derivative of $$\sigma$$ can be written as
+
+
+$$
 \sigma'(X_t) = \sigma(X_t) \, \frac{d}{dX}\log\sigma(X_t),
-\]
+$$
+
 
 so that
 
-\[
+
+$$
 \frac{1}{2}\sigma(X_t)\sigma'(X_t) = \frac{1}{2}\sigma(X_t)^2 \, \frac{d}{dX}\log\sigma(X_t).
-\]
+$$
 
-Thus, the conversion term \(\frac{1}{2}\sigma\sigma'\) is equivalently written as
 
-\[
+Thus, the conversion term $$\frac{1}{2}\sigma\sigma'$$ is equivalently written as
+
+
+$$
 \frac{1}{2}\sigma^2 \nabla\log\sigma,
-\]
+$$
 
-where \(\nabla\log\sigma\) is simply the derivative of \(\log\sigma\) in one dimension. This is a compact way to express the impact of the state-dependent noise amplitude on the drift when switching from the Itô to the Stratonovich interpretation.
+
+where $$\nabla\log\sigma$$ is simply the derivative of $$\log\sigma$$ in one dimension. This is a compact way to express the impact of the state-dependent noise amplitude on the drift when switching from the Itô to the Stratonovich interpretation.
 
 ## Complete Dual Number Example
 
-Below is a more complete Python example implementing dual numbers to derive Itô’s lemma for \(f(X)=X^2\):
+Below is a more complete Python example implementing dual numbers to derive Itô’s lemma for $$f(X)=X^2$$:
 
 ```py
 import math
