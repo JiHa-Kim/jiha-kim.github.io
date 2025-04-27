@@ -8,10 +8,10 @@ categories:
 - Machine Learning
 - Mathematical Optimization
 tags:
-- Lagrangian Duality
-- Convex Analysis
-- Convex Optimization
-- Convex Duality
+- lagrangian duality
+- convex analysis
+- convex optimization
+- convex duality
 math: true
 llm-instructions: |
   I am using the Chirpy theme in Jekyll.
