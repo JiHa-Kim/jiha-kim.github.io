@@ -4,8 +4,6 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-# About
-
 Hi, I'm Ji-Ha. This site is my space for exploring concepts in Mathematics and Machine Learning that I find compelling. My primary motivation is to solidify my own understanding by articulating these ideas.
 
 ## What This Blog Is (and Isn't)
