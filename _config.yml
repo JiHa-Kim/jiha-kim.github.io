@@ -259,7 +259,7 @@ jekyll_compose:
 
         Inline equations are surrounded by dollar signs on the same line: $$inline$$
 
-        Block equations are isolated by two newlines above and below, and newlines between the delimiters and the equation (even in lists):
+        Block equations are isolated by a newlines between the text above and below, and newlines between the delimiters and the equation (even in lists):
 
         $$
         block
@@ -286,9 +286,11 @@ jekyll_compose:
       description:
       image:
       categories:
+      - 
+      - 
       tags:
+      - 
       math: true
-      # tikz: true
       llm-instructions: |
         I am using the Chirpy theme in Jekyll.
 
@@ -303,7 +305,7 @@ jekyll_compose:
 
         Inline equations are surrounded by dollar signs on the same line: $$inline$$
 
-        Block equations are isolated by two newlines above and below, and newlines between the delimiters and the equation (even in lists):
+        Block equations are isolated by a newlines between the text above and below, and newlines between the delimiters and the equation (even in lists):
 
         $$
         block
@@ -346,7 +348,7 @@ jekyll_compose:
 
         Inline equations are surrounded by dollar signs on the same line: $$inline$$
 
-        Block equations are isolated by two newlines above and below, and newlines between the delimiters and the equation (even in lists):
+        Block equations are isolated by a newlines between the text above and below, and newlines between the delimiters and the equation (even in lists):
 
         $$
         block
