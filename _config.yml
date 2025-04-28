@@ -191,10 +191,10 @@ defaults:
     values:
       comments: false
   - scope:
-      type: notes         # targets the collection
+      type: notes # targets the collection
     values:
-      layout: note        # so you don’t have to repeat it
-      math: true          # <-- loads MathJax/KaTeX for every note
+      layout: note # so you don’t have to repeat it
+      math: true # <-- loads MathJax/KaTeX for every note
   - scope:
       path: ""
       type: tabs # see `site.collections`
@@ -227,6 +227,9 @@ exclude:
 
 jekyll-archives:
   enabled: [categories, tags]
+  collections:
+    - posts
+    - notes
   layouts:
     category: category
     tag: tag
@@ -240,10 +243,10 @@ jekyll_compose:
       description:
       image:
       categories:
-      - 
-      - 
+        -
+        -
       tags:
-      - 
+        -
       math: true
       llm-instructions: |
         I am using the Chirpy theme in Jekyll.
@@ -264,7 +267,7 @@ jekyll_compose:
         $$
         block
         $$
-        
+
         Use LaTeX commands for symbols as much as possible such as $$\vert$$ or $$\ast$$. For instance, please avoid using the vertical bar symbol, only use \vert for absolute value, and \Vert for norm.
 
         The syntax for lists is:
@@ -286,10 +289,10 @@ jekyll_compose:
       description:
       image:
       categories:
-      - 
-      - 
+        -
+        -
       tags:
-      - 
+        -
       math: true
       llm-instructions: |
         I am using the Chirpy theme in Jekyll.
@@ -310,7 +313,7 @@ jekyll_compose:
         $$
         block
         $$
-        
+
         Use LaTeX commands for symbols as much as possible such as $$\vert$$ or $$\ast$$. For instance, please avoid using the vertical bar symbol, only use \vert for absolute value, and \Vert for norm.
 
         The syntax for lists is:
@@ -328,11 +331,11 @@ jekyll_compose:
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
         Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
-    notes:                 # <- collection name == folder name (_notes)
-      layout: note         # so you don’t type it each time
-      math: true           # always load MathJax
-      categories: 
-      - Notes  # optional: puts every note on its own shelf
+    notes: # <- collection name == folder name (_notes)
+      layout: note # so you don’t type it each time
+      math: true # always load MathJax
+      categories:
+        - Notes # optional: puts every note on its own shelf
       tags:
       llm-instructions: |
         I am using the Chirpy theme in Jekyll.
@@ -353,7 +356,7 @@ jekyll_compose:
         $$
         block
         $$
-        
+
         Use LaTeX commands for symbols as much as possible such as $$\vert$$ or $$\ast$$. For instance, please avoid using the vertical bar symbol, only use \vert for absolute value, and \Vert for norm.
 
         The syntax for lists is:

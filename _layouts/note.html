@@ -9,7 +9,6 @@ tail_includes:
 script_includes:
   - comment
 ---
-
 {% include lang.html %}
 
 {% include toc-status.html %}
@@ -132,7 +131,8 @@ script_includes:
 
   <div class="post-tail-wrapper text-muted">
     <!-- categories -->
-    {% if page.collection == 'posts' and if page.categories.size > 0 %}
+    {% if page.collection == 'posts' and page.categories.size > 0 %}
+      {# Corrected line #}
       <div class="post-meta mb-3">
         <i class="far fa-folder-open fa-fw me-1"></i>
         {% for category in page.categories %}
