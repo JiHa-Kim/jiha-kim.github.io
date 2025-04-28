@@ -1,21 +1,20 @@
 ---
 layout: post
 title: A Quick Look at Optimization Algorithms in Machine Learning
-date:  # Or leave blank
+date: 2025-03-10 # Or leave blank
 description: A surface-level overview of popular gradient-based optimization algorithms like Momentum, AdaGrad, RMSProp, Adam, and AdamW used in machine learning.
 image: # TBD
 categories:
  - Machine Learning
  - Mathematical Optimization
 tags:
- - optimization
- - gradient descent
- - momentum
- - adagrad
- - rmsprop
- - adam
- - adamw
- - machine learning
+ - Optimization
+ - Gradient Descent
+ - Momentum
+ - AdaGrad
+ - RMSProp
+ - Adam
+ - AdamW
 math: true
 ---
 
