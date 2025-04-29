@@ -143,7 +143,7 @@ script_includes:
     {% endif %}
 
     <!-- tags -->
-    {% if page.tags.size > 0 %}
+    {% if page.collection == 'posts' and page.tags.size > 0 %}
       <div class="post-tags">
         <i class="fa fa-tags fa-fw me-1"></i>
         {% for tag in page.tags %}

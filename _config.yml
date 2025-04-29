@@ -336,7 +336,6 @@ jekyll_compose:
       math: true # always load MathJax
       categories:
         - Notes # optional: puts every note on its own shelf
-      tags:
       llm-instructions: |
         I am using the Chirpy theme in Jekyll.
 
