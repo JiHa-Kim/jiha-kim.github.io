@@ -58,9 +58,7 @@ I have not explored the topic of Bayesian thinking in detail. I plan to do so. H
 
 As always, I would like to be able to see probability through a lens of the most familiar and natural topics to me, biologically, such as physics, geometry and algebra, something tangible or visualizable. I want a treatment that is easy to grasp conceptually.
 
-The first thing to ask is, why should we care about probability? Probability provides a **principled way to reason about and quantify uncertainty**. Since the world is full of randomness and incomplete information, probability allows us to make **informed predictions, manage risk, and make better decisions** despite not knowing outcomes for sure.
-
-Although it finds its roots in gambling within games of chance, its applications today are endless. Here are some examples:
+The first thing to ask is, why should we care about probability? Probability provides a **principled way to reason about and quantify uncertainty**. Since the world is full of randomness and incomplete information, probability allows us to make **informed predictions, manage risk, and make better decisions** despite not knowing outcomes for sure. Although it finds its roots in gambling within games of chance, its applications today are endless. Here are some examples:
 
 1.  **Medicine:** Is a drug effective or are results just chance? Probability quantifies this and side-effect risk, informing treatment **decisions**.
 2.  **Insurance:** What's the chance of a car crash or house fire? Probability helps calculate premiums to **manage financial risk**.
@@ -68,13 +66,15 @@ Although it finds its roots in gambling within games of chance, its applications
 4.  **Weather:** What's the chance of rain tomorrow? Probability provides forecasts to help people **plan**.
 5.  **AI:** Is this email spam? AI uses probability to make **predictions** under uncertainty.
 
+Essentially, understanding probability gives us the tools to navigate and make sense of an inherently uncertain world. Now, how can we build an intuition for these tools?
+
 Probability theory is typically built on Kolgomorov's axioms and measure theory. The fundamental starting point is commonly chosen to be probability. However, an alternate perspective has also arised to start from expectation instead. Let's investigate both viewpoints.
 
-### A Purely Material World Analogy
+### Analogy: A Purely Material World
 
-I want to imagine a very simple world, where we only care about masses and volumes. Let's say, we start by picking a Euclidean space, and inside it, we will find some objects.
+I want to imagine a very simple world, where we only care about masses and volumes. Let's say, we start by picking a universe, and inside it, we will find some objects.
 
-In an abstract view, our mass would represent a **level of importance** or likelihood of our object, or the region it occupies.
+In an abstract view, our mass would represent a **level of importance** or likelihood of our object, or the region it occupies. Our objects would be *events* in probability theory.
 
 A fundamental question, then, is: How do we measure the mass of an object? As in, how do we assign a numerical value to each object in some part of our world?
 
@@ -114,6 +114,49 @@ Given a measurable space $$(\Omega, \mathcal{F})$$ where $$\Omega$$ is the *samp
 </blockquote>
 
 The triple $$(\Omega, \mathcal{F}, P)$$ is called a *probability space*.
+
+From these fundamental axioms, we can derive several useful properties:
+
+1.  **Probability of the Empty Set:** The probability of the impossible event (the empty set $$\emptyset$$) is zero: $$P(\emptyset) = 0$$.
+    *   *(Mass Analogy: An empty region has zero mass.)*
+    *   *Derivation:* Take $$E_1 = \Omega$$ and $$E_i = \emptyset$$ for $$i \ge 2$$. These are disjoint, and their union is $$\Omega$$. By countable additivity, $$P(\Omega) = P(\Omega) + P(\emptyset) + P(\emptyset) + \dots$$. Since $$P(\Omega)=1$$, this implies $$P(\emptyset)$$ must be 0. (A simpler argument: Let $$E_1, E_2, \dots$$ all be $$\emptyset$$. They are disjoint, their union is $$\emptyset$$. So $$P(\emptyset) = \sum_{i=1}^\infty P(\emptyset)$$. This equation holds only if $$P(\emptyset)=0$$.)
+
+2.  **Finite Additivity:** For any *finite* sequence of pairwise disjoint events $$E_1, E_2, \dots, E_n$$ in $$\mathcal{F}$$,
+    $$
+    P\left(\bigcup_{i=1}^{n} E_i\right) = \sum_{i=1}^{n} P(E_i)
+    $$
+    *   *(Mass Analogy: Combining a finite number of non-overlapping objects results in a total mass equal to the sum of individual masses.)*
+    *   *Derivation:* This follows from countable additivity by setting $$E_i = \emptyset$$ for all $$i > n$$, and using the fact that $$P(\emptyset) = 0$$.
+
+3.  **Probability of the Complement:** For any event $$E \in \mathcal{F}$$, the probability of its complement $$E^c = \Omega \setminus E$$ (i.e., "not E") is:
+    $$
+    P(E^c) = 1 - P(E)
+    $$
+    *   *(Mass Analogy: The mass outside a region is the total mass (1) minus the mass inside the region.)*
+    *   *Derivation:* The events $$E$$ and $$E^c$$ are disjoint, and their union is $$E \cup E^c = \Omega$$. By finite additivity, $$P(E \cup E^c) = P(E) + P(E^c)$$. Since $$P(E \cup E^c) = P(\Omega) = 1$$, we have $$1 = P(E) + P(E^c)$$, which rearranges to the desired result.
+
+4.  **Monotonicity:** If event $$A$$ is a subset of event $$B$$ ($$A \subseteq B$$), then the probability of $$A$$ is less than or equal to the probability of $$B$$:
+    $$
+    A \subseteq B \implies P(A) \le P(B)
+    $$
+    *   *(Mass Analogy: An object cannot have less mass than one of its parts.)*
+    *   *Derivation:* We can write $$B$$ as the union of two disjoint sets: $$B = A \cup (B \setminus A)$$. By finite additivity, $$P(B) = P(A) + P(B \setminus A)$$. Since $$P(B \setminus A) \ge 0$$ by the non-negativity axiom, we must have $$P(B) \ge P(A)$$.
+
+5.  **Probability Bounds:** For any event $$E \in \mathcal{F}$$, its probability is between 0 and 1, inclusive:
+    $$
+    0 \le P(E) \le 1
+    $$
+    *   *(Mass Analogy: The mass fraction of any part must be between 0 and 1.)*
+    *   *Derivation:* The lower bound $$P(E) \ge 0$$ is Axiom 1. The upper bound $$P(E) \le 1$$ follows from monotonicity, since $$E \subseteq \Omega$$ implies $$P(E) \le P(\Omega) = 1$$.
+
+6.  **Inclusion-Exclusion Principle (for two events):** For any two events $$A, B \in \mathcal{F}$$ (not necessarily disjoint), the probability of their union is:
+    $$
+    P(A \cup B) = P(A) + P(B) - P(A \cap B)
+    $$
+    *   *(Mass Analogy: If you add the masses of two potentially overlapping objects, you've double-counted the mass in their overlapping region, so you need to subtract it once.)*
+    *   *Derivation:* We can write $$A \cup B$$ as the union of disjoint sets: $$A \cup B = (A \setminus B) \cup (B \setminus A) \cup (A \cap B)$$. Then $$P(A \cup B) = P(A \setminus B) + P(B \setminus A) + P(A \cap B)$$. Also, $$A = (A \setminus B) \cup (A \cap B)$$ (disjoint), so $$P(A) = P(A \setminus B) + P(A \cap B)$$, which means $$P(A \setminus B) = P(A) - P(A \cap B)$$. Similarly, $$P(B \setminus A) = P(B) - P(A \cap B)$$. Substituting these into the expression for $$P(A \cup B)$$ gives $$P(A \cup B) = (P(A) - P(A \cap B)) + (P(B) - P(A \cap B)) + P(A \cap B) = P(A) + P(B) - P(A \cap B)$$.
+
+These properties form the basic toolkit for manipulating probabilities.
 
 #### Mass Distribution
 
@@ -226,3 +269,12 @@ ideas
 - 
 - discrete outcome spaces, direct manipulation
 - 
+
+
+## Further Reading
+
+- [Betancourt (2018) - Probability Theory (For Scientists and Engineers)](https://betanalpha.github.io/assets/case_studies/probability_theory.html)
+- [Bernstein (2019) - Demystifying measure-theoretic probability theory (part 1: probability spaces)](https://mbernste.github.io/posts/measure_theory_1/)
+- [Pollard (2002) - A User's Guide to Measure Theoretic Probability](https://api.pageplace.de/preview/DT0400.9781139239066_A23867160/preview-9781139239066_A23867160.pdf)
+- [Beck (2018) - Density w.r.t. counting measure and probability mass function (discrete rv)](https://math.stackexchange.com/questions/2847421/density-w-r-t-counting-measure-and-probability-mass-function-discrete-rv)
+- [Harremoës (2025) - Probability via Expectation Measures](https://www.mdpi.com/1099-4300/27/2/102)
