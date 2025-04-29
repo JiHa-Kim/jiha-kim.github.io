@@ -2,7 +2,6 @@
 layout: default
 refactor: true
 ---
-
 {% include lang.html %}
 
 {%- comment -%}
@@ -15,9 +14,22 @@ refactor: true
 {%- endif -%}
 
 {%- comment -%}
-  Grab all non-hidden notes
+  1) Filter out hidden notes
+  2) Tertiary sort: title A→Z
+  3) Secondary sort: date newest→oldest
+  4) Primary sort: weight low→high
 {%- endcomment -%}
-{% assign notes = site.notes | where_exp: "n", "n.hidden != true" %}
+
+{%- assign notes = site.notes | where_exp: 'n', 'n.hidden != true' -%}
+
+{%- comment -%} tertiary sort: title A→Z {%- endcomment -%}
+{%- assign notes = notes | sort: 'title' -%}
+
+{%- comment -%} secondary sort: date newest→oldest {%- endcomment -%}
+{%- assign notes = notes | sort: 'date' -%}
+
+{%- comment -%} primary sort: weight low→high {%- endcomment -%}
+{%- assign notes = notes | sort: 'weight' -%}
 
 <div id="post-list" class="flex-grow-1 px-xl-1">
   {%- for note in notes -%}
@@ -28,7 +40,7 @@ refactor: true
         {%- if note.image -%}
           {% assign src = note.image.path | default: note.image %}
           {% unless src contains '//' %}
-            {% assign src = note.media_subpath | append: '/' | append: src | replace: '//','/' %}
+            {% assign src = note.media_subpath | append: '/' | append: src | replace: '//', '/' %}
           {% endunless %}
           <div class="col-md-5">
             <img src="{{ src }}" alt="{{ note.image.alt | default: 'Preview Image' }}">
@@ -38,18 +50,13 @@ refactor: true
 
         <div class="col-md-{{ card_body_col }}">
           <div class="card-body d-flex flex-column">
-
-            {%- comment -%} badge to label these as notes {%- endcomment -%}
             <span class="badge rounded-pill bg-info text-uppercase mb-1">Note</span>
 
             <h1 class="card-title my-2 mt-md-0">{{ note.title }}</h1>
 
             <div class="card-text content mt-0 mb-3">
               <p>
-                {{ note.description
-                   | default: note.excerpt
-                   | strip_html
-                   | truncate: 160 }}
+                {{ note.description | default: note.excerpt | strip_html | truncate: 160 }}
               </p>
             </div>
 
@@ -62,16 +69,20 @@ refactor: true
                   <i class="far fa-folder-open fa-fw ms-3 me-1"></i>
                   <span class="categories">
                     {% for category in note.categories %}
-                      {{ category }}{% unless forloop.last %},{% endunless %}
+                      {{ category -}}
+                      {%- unless forloop.last %},{% endunless %}
                     {% endfor %}
                   </span>
                 {% endif %}
               </div>
-            </div><!-- .post-meta -->
-
-          </div><!-- .card-body -->
-        </div><!-- .col -->
+            </div>
+            <!-- .post-meta -->
+          </div>
+          <!-- .card-body -->
+        </div>
+        <!-- .col -->
       </a>
     </article>
   {%- endfor -%}
-</div><!-- #post-list -->
+</div>
+<!-- #post-list -->

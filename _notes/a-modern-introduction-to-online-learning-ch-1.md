@@ -1,7 +1,7 @@
 ---
 layout: note
 title: A Modern Introduction to Online Learning - Ch 1
-date: 2025-04-28 22:17 +0000 # Or use a dynamic date if preferred: {{ site.time | date_to_xmlschema }}
+date: 2025-04-29 02:08 +0000 # Or use a dynamic date if preferred: {{ site.time | date_to_xmlschema }}
 math: true
 categories:
 - Machine Learning
@@ -53,47 +53,6 @@ llm-instructions: |-
 These are notes for the text A Modern Introduction to Online Learning by Francesco Orabona on [ArXiV](https://arxiv.org/abs/1912.13213).
 
 ## Chapter 1 - What is Online Learning?
-
-First, contrast with offline learning:
-
-<blockquote class="prompt-info" markdown="1">
-### Definition - Offline Learning (Batch Learning)
-
-A learning paradigm where the model is trained using the **entire available dataset at once** (in a "batch"). The learning process is completed *before* the model is deployed to make predictions. 
-
-Updates typically require periodic retraining on the full (potentially augmented) dataset, making it slow to adapt to new data patterns.
-</blockquote>
-
-<blockquote class="prompt-info" markdown="1">
-### Definition - Online Learning (Incremental / Sequential Learning)
-
-A learning paradigm where the model learns **sequentially**, updating itself **incrementally** as new data points (or small mini-batches) arrive one by one or in small groups. 
-
-Learning is continuous and interleaved with the prediction process, allowing the model to adapt rapidly to new patterns or changes in data streams without needing the entire dataset upfront.
-</blockquote>
-
-**Analogy:**
-
-*   **Offline Learning:** Reading an entire textbook cover-to-cover, taking a final exam, and then using that knowledge. To learn updates, you need to get a whole new edition of the textbook and study it again.
-*   **Online Learning:** Reading news articles one by one as they are published and constantly updating your understanding of current events based on each new piece of information.
-
-**Here's a table summarizing the key differences:**
-
-| Feature                  | Online Learning                      | Offline Learning (Batch Learning)          |
-| :----------------------- | :----------------------------------- | :----------------------------------------- |
-| **Data Requirement**     | Data arrives sequentially (streams)  | Entire dataset needed upfront              |
-| **Model Update**         | Incremental, per instance/mini-batch | On the entire dataset, periodically        |
-| **Training Phase**       | Continuous / Interleaved with use    | Distinct, separate from deployment         |
-| **Adaptability**         | High, fast adaptation to change      | Low, slow adaptation (requires retraining) |
-| **Memory Usage**         | Low (per update)                     | High (during batch training)               |
-| **Computation (Update)** | Low per update                       | High during batch training                 |
-| **Handling Large Data**  | Excellent                            | Challenging if data exceeds memory         |
-| **Concept Drift**        | Handles well                         | Handles poorly without retraining          |
-| **Data Order**           | Can be sensitive                     | Less sensitive (often shuffled)            |
-| **"Forgetting"**         | Potential issue (catastrophic)       | Less prone (sees all data repeatedly)      |
-
-In essence, **offline learning** is suitable for static environments where batch processing is feasible, while **online learning** excels in dynamic environments with streaming data where continuous adaptation is crucial.
-
 
 The core idea of Online Learning in this context is presented through a repeated game framework where the goal is to minimize **Regret**.
 
