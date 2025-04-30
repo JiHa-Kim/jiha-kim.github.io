@@ -227,9 +227,6 @@ exclude:
 
 jekyll-archives:
   enabled: [categories, tags]
-  collections:
-    - posts
-    - notes
   layouts:
     category: category
     tag: tag
@@ -271,16 +268,43 @@ jekyll_compose:
         Use LaTeX commands for symbols as much as possible such as $$\vert$$ or $$\ast$$. For instance, please avoid using the vertical bar symbol, only use \vert for absolute value, and \Vert for norm.
 
         The syntax for lists is:
-        1. $$inline$$ item
-        2. item $$inline$$
-        3. item
+        1. $$inline$$ text $$inline$$
+        2. text
 
           $$
           block
           $$
 
-          (continued) item
-        4. item
+          (continued) text
+        3. text
+
+        The following syntax does NOT work:
+
+        1. text
+          $$
+          block
+          $$
+          text
+
+        nor this syntax:
+
+        1. text
+          $$
+          text
+          $$
+
+          text
+
+        Again, you MUST correctly separate the block equation by newlines:
+
+        1. text
+
+          $$
+          block
+          $$
+
+          (continued) text
+
 
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
@@ -317,16 +341,43 @@ jekyll_compose:
         Use LaTeX commands for symbols as much as possible such as $$\vert$$ or $$\ast$$. For instance, please avoid using the vertical bar symbol, only use \vert for absolute value, and \Vert for norm.
 
         The syntax for lists is:
-        1. $$inline$$ item
-        2. item $$inline$$
-        3. item
+        1. $$inline$$ text $$inline$$
+        2. text
 
           $$
           block
           $$
 
-          (continued) item
-        4. item
+          (continued) text
+        3. text
+
+        The following syntax does NOT work:
+
+        1. text
+          $$
+          block
+          $$
+          text
+
+        nor this syntax:
+
+        1. text
+          $$
+          text
+          $$
+
+          text
+
+        Again, you MUST correctly separate the block equation by newlines:
+
+        1. text
+
+          $$
+          block
+          $$
+
+          (continued) text
+
 
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
@@ -359,16 +410,43 @@ jekyll_compose:
         Use LaTeX commands for symbols as much as possible such as $$\vert$$ or $$\ast$$. For instance, please avoid using the vertical bar symbol, only use \vert for absolute value, and \Vert for norm.
 
         The syntax for lists is:
-        1. $$inline$$ item
-        2. item $$inline$$
-        3. item
+        1. $$inline$$ text $$inline$$
+        2. text
 
           $$
           block
           $$
 
-          (continued) item
-        4. item
+          (continued) text
+        3. text
+
+        The following syntax does NOT work:
+
+        1. text
+          $$
+          block
+          $$
+          text
+
+        nor this syntax:
+
+        1. text
+          $$
+          text
+          $$
+
+          text
+
+        Again, you MUST correctly separate the block equation by newlines:
+
+        1. text
+
+          $$
+          block
+          $$
+
+          (continued) text
+
 
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 

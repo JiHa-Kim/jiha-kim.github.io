@@ -3,7 +3,7 @@ layout: post
 title: Thinking About Probability
 date: 2025-04-29 05:19 +0000
 description: Developing an intuition for probability using analogies from physics, geometry, and algebra, focusing on mass distributions and centers of mass.
-image: 
+image:
 categories:
 - Probability and Statistics
 - Foundations
@@ -36,16 +36,43 @@ llm-instructions: |
   Use LaTeX commands for symbols as much as possible such as $$\vert$$ or $$\ast$$. For instance, please avoid using the vertical bar symbol, only use \vert for absolute value, and \Vert for norm.
 
   The syntax for lists is:
-  1. $$inline$$ item
-  2. item $$inline$$
-  3. item
+  1. $$inline$$ text $$inline$$
+  2. text
 
     $$
     block
     $$
 
-    (continued) item
-  4. item
+    (continued) text
+  3. text
+
+  The following syntax does NOT work:
+
+  1. text
+     $$
+     block
+     $$
+     text
+
+  nor this syntax:
+
+  1. text
+     $$
+     text
+     $$
+
+     text
+
+  Again, you MUST correctly separate the block equation by newlines:
+
+  1. text
+
+     $$
+     block
+     $$
+
+     (continued) text
+
 
   Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
@@ -92,7 +119,7 @@ $$
 
 That means that the largest possible measure of mass we can assign would be $$1$$: if we consider the total mass in the world relative to itself, then it would hold up all of it. At the same time, an empty object would have no mass at all. So our possible values of our measure lie in the unit interval $$[0,1]$$.
 
-Mathematically, if we treat our *universe* or *sample space* as a set $$\Omega$$, then our objects inside of it are "events" taken to be subsets $$E \subseteq \Omega$$. We can form a set of all objects of interest, the *sigma-algebra* or *sigma-field* $$\mathcal{F}$$ that satisfies some properties I'll omit for now. As the names suggest, it is both an algebra and a field. Importantly, the set of all subsets of $$\Omega$$, called the power set and denoted $$\mathcal{P}(\Omega)$$ or $$2^\Omega$$, is a valid sigma-algebra. The latter notation will be justified later when we cover indicator functions.
+Mathematically, if we treat our *universe* or *sample space* as a set $$\Omega$$, then our objects inside of it are "events" taken to be subsets $$E \subseteq \Omega$$. We can form a set of all objects of interest, the *sigma-algebra* or *sigma-field* $$\mathcal{F}$$ that satisfies some properties I'll omit for now. Importantly, the set of all subsets of $$\Omega$$, called the power set and denoted $$\mathcal{P}(\Omega)$$ or $$2^\Omega$$, is a valid sigma-algebra. The latter notation will be justified later when we cover indicator functions.
 
 A probability measure is literally function that assigns a normalized mass to each object (event). Formally:
 
@@ -162,17 +189,20 @@ These properties form the basic toolkit for manipulating probabilities.
 
 How is this "probability mass" distributed across our universe $$\Omega$$?
 
-*   **Continuous Case:** If $$\Omega$$ is a continuous space (like an interval $$[a, b]$$ or a region in $$\mathbb{R}^n$$), we often describe the distribution using a **probability density function (PDF)**, denoted $$p(x)$$ or $$f_X(x)$$. This is analogous to the **mass density** $$\rho(x)$$ (mass per unit length/area/volume).
+*   **Continuous Case:** If $$\Omega$$ is a continuous space (like an interval $$[a, b]$$ or a region in $$\mathbb{R}^n$$), we often describe the distribution using a **probability density function (PDF)**, denoted $$p(x)$$ or $$f_X(x)$$. This is analogous to the **mass density** $$\rho(x)$$ (mass per unit length/area/volume). In our case, the density is the mass/mass ratio.
     *   The density $$p(x)$$ must be non-negative: $$p(x) \ge 0$$ for all $$x \in \Omega$$.
     *   The total mass must integrate to 1: $$\int_{\Omega} p(x) dx = 1$$.
     *   The probability (mass) of an event (region) $$E$$ is found by integrating the density over that region:
+        
         $$
         P(E) = \int_E p(x) dx
         $$
+
 *   **Discrete Case:** If $$\Omega$$ is a discrete set (like the outcomes of a die roll $$\{1, 2, 3, 4, 5, 6\}$$ or the integers $$\mathbb{Z}$$), we use a **probability mass function (PMF)**, denoted $$P(x)$$ or $$p_X(x)$$. This is analogous to having **point masses** at specific locations.
     *   The mass at each point $$x_i \in \Omega$$ is $$P(x_i) \ge 0$$.
     *   The total mass must sum to 1: $$\sum_{x_i \in \Omega} P(x_i) = 1$$.
     *   The probability (mass) of an event (subset) $$E$$ is found by summing the point masses within that subset:
+        
         $$
         P(E) = \sum_{x_i \in E} P(x_i)
         $$
@@ -180,6 +210,8 @@ How is this "probability mass" distributed across our universe $$\Omega$$?
 In both cases, $$P(E)$$ represents the fraction of the total "probability mass" contained within the region or subset $$E$$.
 
 ### Expectation as Center of Mass
+
+TODO: needs revamp, better, more clear, explicit motivation for random variables in physical interpretation, defining expectations from scratch rather than through probability (axioms from Daniell's integration theory)
 
 Now, let's shift perspective slightly. Instead of focusing first on the mass $$P(E)$$ of different regions $$E$$, let's think about the properties of our universe. Suppose each point $$\omega$$ in our universe $$\Omega$$ has some numerical value associated with it, let's call this value $$X(\omega)$$. In probability, $$X$$ is called a **random variable**.
 
@@ -193,16 +225,32 @@ The **expected value** (or expectation) of a random variable $$X$$, denoted $$E[
 <blockquote class="prompt-info" markdown="1">
 #### Definition - Expected Value
 
-*   **Continuous Case:** If $$X$$ has PDF $$p(x)$$, its expected value is:
+*   **Continuous Case:** If $$X$$ takes values in $$\mathbb{R}$$ and has PDF $$p(x)$$ on $$\Omega$$, its expected value is:
+    
+    $$
+    E[X] = \int_{\Omega} X(\omega) p(\omega) d\omega
+    $$
+
+    If $$X$$ itself represents the position (e.g., $$X(\omega) = \omega$$ for $$\Omega \subseteq \mathbb{R}$$), then this simplifies to:
+    
     $$
     E[X] = \int_{\Omega} x p(x) dx
     $$
-    *(This is exactly the formula for the center of mass, $$\int x dm = \int x \rho(x) dx$$, given that the total mass $$\int \rho(x) dx = 1$.)*
-*   **Discrete Case:** If $$X$$ has PMF $$P(x_i)$$, its expected value is:
+
+    *(This is exactly the formula for the center of mass, $$\int x dm = \int x \rho(x) dx$$, given that the total mass $$\int \rho(x) dx = 1$$.)*
+*   **Discrete Case:** If $$X$$ takes values $$x_i$$ corresponding to outcomes $$\omega_i \in \Omega$$ with PMF $$P(\omega_i)$$, its expected value is:
+    
+    $$
+    E[X] = \sum_{\omega_i \in \Omega} X(\omega_i) P(\omega_i)
+    $$
+    
+    If the outcomes themselves are the values (e.g., $$\Omega=\{1, 2, 3, 4, 5, 6\}$$ and $$X(\omega_i) = \omega_i$$), this simplifies to:
+    
     $$
     E[X] = \sum_{x_i \in \Omega} x_i P(x_i)
     $$
-    *(This is the formula for the center of mass of a system of point masses $$m_i = P(x_i)$$ located at positions $$x_i$$, given total mass $$\sum m_i = 1$.)*
+    
+    *(This is the formula for the center of mass of a system of point masses $$m_i = P(x_i)$$ located at positions $$x_i$$, given total mass $$\sum m_i = 1$$.)*
 
 </blockquote>
 
@@ -214,7 +262,7 @@ We now have two core concepts:
 1.  **Probability $$P(E)$$: The normalized mass within a region $$E$$.**
 2.  **Expectation $$E[X]$$: The center of mass of the distribution, considering values $$X$$.**
 
-Can we connect them more directly? Yes, using a clever tool called the **indicator function** (also known as the characteristic function).
+Can we connect them more directly? Yes, using a clever tool called the **indicator function** (also known as the characteristic function in some contexts, though that term often refers to a different concept in probability).
 
 For any event (region/subset) $$E \subseteq \Omega$$, the indicator function $$I_E: \Omega \to \{0, 1\}$$ is defined as:
 
@@ -222,22 +270,25 @@ $$
 I_E(\omega) = \begin{cases} 1 & \text{if } \omega \in E \\ 0 & \text{if } \omega \notin E \end{cases}
 $$
 
-Think of $$I_E$$ as a "filter" or a "mask" that is "on" (value 1) inside the region $$E$$ and "off" (value 0) outside it.
+Think of $$I_E$$ as a "filter" or a "mask" that is "on" (value 1) inside the region $$E$$ and "off" (value 0) outside it. It's a random variable that tells us whether a given outcome $$\omega$$ falls within the event $$E$$ or not.
 
 *(Side note: This binary nature is why the power set $$\mathcal{P}(\Omega)$$ is sometimes denoted $$2^\Omega$$. Each subset $$E$$ corresponds uniquely to an indicator function mapping elements of $$\Omega$$ to $$\{0, 1\}$, essentially representing the subset as a binary string or function.)*
 
 Now, let's treat the indicator function $$I_E$$ as a random variable itself. What is its expected value $$E[I_E]$$?
 
-*   **Continuous Case:**
+*   **Continuous Case:** Let $$p(\omega)$$ be the PDF over $$\Omega$$.
+    
     $$
-    E[I_E] = \int_{\Omega} I_E(x) p(x) dx = \int_{E} 1 \cdot p(x) dx + \int_{\Omega \setminus E} 0 \cdot p(x) dx = \int_E p(x) dx
+    E[I_E] = \int_{\Omega} I_E(\omega) p(\omega) d\omega = \int_{E} 1 \cdot p(\omega) d\omega + \int_{\Omega \setminus E} 0 \cdot p(\omega) d\omega = \int_E p(\omega) d\omega
     $$
-*   **Discrete Case:**
+
+*   **Discrete Case:** Let $$P(\omega_i)$$ be the PMF over $$\Omega$$.
+    
     $$
     E[I_E] = \sum_{\omega_i \in \Omega} I_E(\omega_i) P(\omega_i) = \sum_{\omega_i \in E} 1 \cdot P(\omega_i) + \sum_{\omega_i \in \Omega \setminus E} 0 \cdot P(\omega_i) = \sum_{\omega_i \in E} P(\omega_i)
     $$
 
-In both cases, we arrive at a remarkable result:
+In both cases, we recognize the right-hand side as the definition of the probability of event $$E$$ based on its mass distribution (integrating the density over the region or summing the point masses in the subset). We arrive at a remarkable result:
 
 $$
 E[I_E] = P(E)
@@ -245,36 +296,18 @@ $$
 
 **The probability of an event $$E$$ is precisely the expected value of its indicator function.**
 
-This provides a powerful connection:
-*   From the "probability first" perspective, $$P(E)$$ is the fundamental measure of mass/likelihood.
-*   From the "expectation first" perspective, expectation (calculating weighted averages / centers of mass) is fundamental. Probability $$P(E)$$ is then *defined* as the expectation of the indicator $$I_E$$.
+This provides a powerful connection and an alternative philosophical foundation:
+*   From the "probability first" perspective, $$P(E)$$ is the fundamental measure of mass/likelihood, defined axiomatically. Expectation $$E[X]$$ is derived from it as a weighted average.
+*   From the "expectation first" perspective, expectation (calculating weighted averages / centers of mass) is fundamental. Probability $$P(E)$$ is then *defined* as the expectation of the indicator $$I_E$$. One would start by postulating the properties of the expectation operator (like linearity) and then derive the axioms of probability from the definition $$P(E) = E[I_E]$$.
 
-This second perspective is appealing because it grounds probability in the arguably more operational concept of averaging. The physical intuition remains: $$P(E) = E[I_E]$$ is the "average value" of the indicator function across the universe, weighted by the mass distribution. Since the indicator is 1 in region $$E$$ and 0 outside, this average value simply picks out the total mass within region $$E$$, which is exactly our original definition of $$P(E)$$.
+This second perspective is appealing because it grounds probability in the arguably more operational concept of averaging. The physical intuition remains robust: $$P(E) = E[I_E]$$ is the "average value" of the indicator function across the universe, weighted by the mass distribution. Since the indicator is 1 in region $$E$$ and 0 outside, this average value naturally isolates the total normalized mass within region $$E$$, which is exactly our original definition of $$P(E)$$.
 
-So, whether you start by defining the normalized mass $$P(E)$$ of regions, or by defining the center-of-mass operation $$E[X]$$ and applying it to indicators, you arrive at the same consistent framework, beautifully captured by the physical analogy of mass distributions.
-
-ideas
-- purely material world: continuous mass and volume
-  - volume is treated equally, mass represents importance
-- two perspectives: constructing from probability vs expectation
-  1. probability
-    - a natural measurement of mass?
-      - mass units like SI, imperial change values based on arbitrary definitions
-      - a canonical scale-free measure of mass, importance
-  2. expectation
-    - indicator function: looking at some space in the world
-    - expectation: center of massof of an object
-    - probabiliy: center of mass of  the indicator
-- 
-- 
-- discrete outcome spaces, direct manipulation
-- 
-
+So, whether you start by defining the normalized mass $$P(E)$$ of regions using Kolmogorov's axioms, or by defining the center-of-mass operation $$E[X]$$ as fundamental and applying it to indicators, you arrive at the same consistent and powerful framework, beautifully captured by the physical analogy of mass distributions. This connection helps demystify the formal definitions by grounding them in tangible concepts.
 
 ## Further Reading
 
-- [Betancourt (2018) - Probability Theory (For Scientists and Engineers)](https://betanalpha.github.io/assets/case_studies/probability_theory.html)
-- [Bernstein (2019) - Demystifying measure-theoretic probability theory (part 1: probability spaces)](https://mbernste.github.io/posts/measure_theory_1/)
-- [Pollard (2002) - A User's Guide to Measure Theoretic Probability](https://api.pageplace.de/preview/DT0400.9781139239066_A23867160/preview-9781139239066_A23867160.pdf)
-- [Beck (2018) - Density w.r.t. counting measure and probability mass function (discrete rv)](https://math.stackexchange.com/questions/2847421/density-w-r-t-counting-measure-and-probability-mass-function-discrete-rv)
-- [Harremoës (2025) - Probability via Expectation Measures](https://www.mdpi.com/1099-4300/27/2/102)
+- [Betancourt (2018) - Probability Theory (For Scientists and Engineers)](https://betanalpha.github.io/assets/case_studies/probability_theory.html) - A comprehensive introduction with a focus on intuition.
+- [Bernstein (2019) - Demystifying measure-theoretic probability theory (part 1: probability spaces)](https://mbernste.github.io/posts/measure_theory_1/) - Explains the measure-theoretic foundations.
+- [Pollard (2002) - A User's Guide to Measure Theoretic Probability](https://api.pageplace.de/preview/DT0400.9781139239066_A23867160/preview-9781139239066_A23867160.pdf) - A classic text on the subject (link is to a preview).
+- [Beck (2018) - Density w.r.t. counting measure and probability mass function (discrete rv)](https://math.stackexchange.com/questions/2847421/density-w-r-t-counting-measure-and-probability-mass-function-discrete-rv) - StackExchange discussion connecting discrete and continuous views via measure theory.
+- [Harremoës (2025) - Probability via Expectation Measures](https://www.mdpi.com/1099-4300/27/2/102) - Explores the "expectation first" approach.
