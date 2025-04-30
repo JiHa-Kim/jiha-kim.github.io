@@ -1,8 +1,8 @@
 ---
 layout: post
-title: Deriving Reverse-Time Stochastic Differential Equations (SDEs)
+title: Deriving the Reverse-Time Stochastic Differential Equation (SDE)
 date: 2025-02-20 08:58 +0000
-description: "A derivation of the reverse-time stochastic differential equation used in Score-Based Generative Modeling."
+description: "A corrected, self-contained derivation of the reverse-time stochastic differential equation used in Score-Based Generative Modeling."
 categories:
   - Applied Mathematics
   - Stochastic Calculus
@@ -17,46 +17,49 @@ math: true
 
 ## Introduction
 
-The **reverse-time formulation of a diffusion process** is central to many applications, including **score-based generative modeling**. While the forward process is governed by a stochastic differential equation (SDE), the corresponding reverse-time process also follows an SDE with a modified drift term. However, deriving this reverse SDE requires careful handling of time reversal in stochastic calculus.
+The **reverse-time formulation of a diffusion process** is a cornerstone concept in many fields, notably in **score-based generative modeling (SGMs)**. While a forward diffusion process is typically defined by a standard stochastic differential equation (SDE), its time-reversed counterpart also follows an SDE, albeit with a different drift term. Accurately deriving this reverse-time SDE is crucial for understanding and implementing algorithms like SGMs.
 
-In their work on **score-based generative modeling**, [Song et al., 2021](https://arxiv.org/abs/2011.13456) rely on the reverse-time SDE but do not derive it explicitly, instead referring to an earlier source ([Anderson, 1982](https://core.ac.uk/download/pdf/82826666.pdf)). This post provides a **self-contained derivation** in modern MathJax notation, making the result clear and concise.
+Prominent works, such as [Song et al., 2021](https://arxiv.org/abs/2011.13456) on score-based generative modeling, utilize the reverse-time SDE result, often referencing foundational work like [Anderson, 1982](https://core.ac.uk/download/pdf/82826666.pdf). This post aims to provide a **clear, accurate, and self-contained derivation** of the reverse-time SDE using the Fokker-Planck equation, presented with modern notation.
 
 ---
 
 # Main Derivation: Reverse-Time SDE
 
-We consider a forward diffusion process in $$\mathbb{R}^d$$ on the time interval $$[0,T]$$, given by:
+Consider a forward diffusion process $${X_t}$$ in $$\mathbb{R}^d$$ evolving over the time interval $$[0,T]$$, governed by the Itô SDE:
 
 $$
 dX_t \;=\; f(X_t,t)\,dt \;+\; g(X_t,t)\,dW_t,
-\quad X_0 \text{ given},
+\quad X_0 \sim p_0(x),
 $$
 where:
-- $$W_t$$ is a standard $$d$$-dimensional Wiener process (Brownian motion) on the forward filtration $$\{\mathcal{F}_t\}_{t\in[0,T]}$$.
-- $$f(\cdot,\cdot)$$ and $$g(\cdot,\cdot)$$ satisfy suitable conditions (e.g., global Lipschitz, linear growth, uniform ellipticity), ensuring existence and uniqueness of strong solutions.
-- $$p(x,t)$$ denotes the transition density of $$X_t$$, assumed to be smooth and strictly positive.
+- $$W_t$$ is a standard $$d$$-dimensional Wiener process (Brownian motion) adapted to the forward filtration $$\{\mathcal{F}_t\}_{t\in[0,T]}$$.
+- $$f: \mathbb{R}^d \times [0,T] \to \mathbb{R}^d$$ is the drift coefficient.
+- $$g: \mathbb{R}^d \times [0,T] \to \mathbb{R}$$ is the scalar diffusion coefficient. *(Note: For simplicity, we treat $$g$$ as scalar, equivalent to $$g(x,t)I_d$$. The derivation extends to matrix-valued $$g$$, but notation becomes more complex.)*
+- $$f$$ and $$g$$ satisfy conditions (e.g., Lipschitz continuity, linear growth) ensuring existence and uniqueness of a strong solution.
+- The probability density of $$X_t$$ is denoted by $$p(x,t)$$, assumed sufficiently smooth and strictly positive ($$p(x,t) > 0$$) for $$t \in (0, T]$$.
 
-Under these assumptions, the density $$p(x,t)$$ satisfies the Fokker–Planck (forward Kolmogorov) equation, whose derivation is in [Appendix A.1](#a1-sketch-of-the-fokkerplanck-derivation):
+Under these assumptions, the density $$p(x,t)$$ satisfies the **Fokker–Planck equation** (also known as the forward Kolmogorov equation). A sketch of its derivation via Itô's lemma is provided in [Appendix A.1](#a1-sketch-of-the-fokkerplanck-derivation):
 
 $$
 \frac{\partial p}{\partial t}(x,t)
 \;=\; -\nabla \cdot \bigl( f(x,t)\,p(x,t)\bigr)
 \;+\; \tfrac12 \,\Delta\!\Bigl( g(x,t)^2\,p(x,t)\Bigr).
 $$
+Here, $$\nabla \cdot$$ is the divergence operator and $$\Delta$$ is the Laplacian operator, both acting with respect to the spatial variable $$x$$.
 
 ---
 
 ## 1. Introducing Reverse Time
 
-Define the reverse-time variable: $$s \;=\; T - t, \quad \text{so that} \quad t \;=\; T - s.$$
-We restrict $$s\in [0,T]$$. The **reverse-time process** is given by
-
+Let's define a **reverse-time variable** $$s$$ and the **reverse-time process** $$Y_s$$:
+$$
+s \;=\; T - t, \quad \text{so that} \quad t \;=\; T - s.
+$$
+As $$t$$ goes from $$0$$ to $$T$$, $$s$$ goes from $$T$$ to $$0$$. The reverse process is:
 $$
 Y_s \;:=\; X_{T-s}.
 $$
-
-To avoid clutter, we define:
-
+To simplify notation in the reverse-time context, we define:
 $$
 F(x,s) \;:=\; f\bigl(x,\;T-s\bigr),
 \quad
@@ -64,61 +67,60 @@ G(x,s) \;:=\; g\bigl(x,\;T-s\bigr),
 \quad
 q(x,s) \;:=\; p\bigl(x,\;T-s\bigr).
 $$
+Note that $$q(x,s)$$ is the probability density of $$Y_s$$.
 
-Rewriting the forward Fokker–Planck equation in terms of $$(x,s)$$, one obtains:
+Now, we rewrite the forward Fokker–Planck equation using these reverse-time variables. Using the chain rule for the time derivative, $$\frac{\partial}{\partial t} = \frac{\partial s}{\partial t} \frac{\partial}{\partial s} = (-1) \frac{\partial}{\partial s}$$, we get:
 
 $$
 -\frac{\partial q}{\partial s}(x,s)
 \;=\;
 -\nabla \cdot \Bigl(F(x,s)\,q(x,s)\Bigr)
-\;+\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr),
+\;+\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr).
 $$
-
-or equivalently,
-
+Multiplying by $$-1$$, we obtain the evolution equation for the density $$q$$ in terms of the reverse time $$s$$:
 $$
 \frac{\partial q}{\partial s}(x,s)
 \;=\;
 \nabla \cdot \Bigl(F(x,s)\,q(x,s)\Bigr)
-\;-\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr).
+\;-\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr). \quad (*)
 $$
 
 ---
 
 ## 2. Postulating an SDE for the Reverse Process
 
-We *postulate* that $$Y_s$$ satisfies a stochastic differential equation with respect to a new Wiener process $$\widetilde{W}_s$$ (defined on a reversed filtration):
+We hypothesize that the reverse process $$Y_s$$ also satisfies an Itô SDE, but evolving "backwards" in $$s$$ (from $$s=T$$ down to $$s=0$$). This requires a *backward* filtration and a corresponding *backward* Wiener process $$\widetilde{W}_s$$ (see [Appendix A.2](#a2-why-the-reverse-process-follows-an-sde)). The postulated SDE form is:
 
 $$
-dY_s
-\;=\; b(Y_s,s)\,ds \;+\; G(Y_s,s)\,d\widetilde{W}_s.
+dY_s \;=\; b(Y_s,s)\,ds \;+\; G(Y_s,s)\,d\widetilde{W}_s.
 $$
+Here:
+- $$b(x,s)$$ is the unknown **reverse drift**.
+- $$G(x,s)$$ is the **same diffusion coefficient** as in the forward SDE (reparameterized by $$s$$). This is a key result from the theory of time reversal of diffusions.
+- $$d\widetilde{W}_s$$ represents the increment of the backward Wiener process.
 
-The density $$q(x,s)$$ of $$Y_s$$ must then satisfy the associated Fokker–Planck equation:
-
+If $$Y_s$$ follows this SDE, its density $$q(x,s)$$ must satisfy the corresponding Fokker–Planck equation:
 $$
 \frac{\partial q}{\partial s}(x,s)
 \;=\;
 -\nabla\cdot\Bigl(b(x,s)\,q(x,s)\Bigr)
-\;+\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr).
+\;+\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr). \quad (**)
 $$
+*(Note the signs: the drift term enters with a minus divergence, and the diffusion term with a plus Laplacian, matching the standard Fokker-Planck structure.)*
 
 ---
 
-## 3. Matching the Density Evolutions
+## 3. Matching the Density Evolutions and Deriving the Drift
 
-For consistency, we require that the “reparameterized” Fokker–Planck equation in reverse time matches the one from the above SDE:
+For the postulated reverse SDE to be consistent with the time-reversed forward process, the density $$q(x,s)$$ must evolve according to both equations ($*$) and ($**$). Equating the right-hand sides of these two PDEs gives:
 
 $$
--\nabla \cdot \Bigl(b(x,s)\,q(x,s)\Bigr)
-\;+\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr)
+\nabla \cdot \Bigl(F(x,s)\,q(x,s)\Bigr) \;-\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr)
 \;=\;
-\nabla \cdot \Bigl(F(x,s)\,q(x,s)\Bigr)
-\;-\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr).
+-\nabla\cdot\Bigl(b(x,s)\,q(x,s)\Bigr) \;+\; \tfrac12\,\Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr).
 $$
 
-Combining the $$\Delta\bigl(G^2\,q\bigr)$$ terms, we get:
-
+Rearranging the terms to isolate the unknown drift $$b$$:
 $$
 -\nabla \cdot \Bigl(b(x,s)\,q(x,s)\Bigr)
 \;=\;
@@ -126,49 +128,90 @@ $$
 \;-\; \Delta\!\Bigl(G(x,s)^2\,q(x,s)\Bigr).
 $$
 
-A formal integration by parts argument (see [Appendix A.1](#a1-sketch-of-the-fokkerplanck-derivation) for the analogous derivation in the forward direction) shows that for all test functions $$\varphi$$, this identity implies:
+To solve for $$b$$, we can convert this PDE relationship into an algebraic one using the **weak formulation**. Multiply by an arbitrary smooth test function $$\phi(x)$$ with compact support ($$\phi \in \mathcal{C}^\infty_c(\mathbb{R}^d)$$) and integrate over $$x \in \mathbb{R}^d$$. Applying integration by parts (divergence theorem), and noting that boundary terms vanish due to the compact support of $$\phi$$, we get:
 
 $$
-b(x,s)\,q(x,s)
+\int \bigl( b(x,s) q(x,s) \bigr) \cdot \nabla \phi(x) \, dx
 \;=\;
--\,F(x,s)\,q(x,s)
+- \int \bigl( F(x,s) q(x,s) \bigr) \cdot \nabla \phi(x) \, dx
 \;+\;
-G(x,s)^2\,\nabla q(x,s).
+\int \nabla \bigl( G(x,s)^2 q(x,s) \bigr) \cdot \nabla \phi(x) \, dx.
 $$
+*(Recall: $$\int \nabla \cdot \mathbf{v} \, \phi \, dx = - \int \mathbf{v} \cdot \nabla \phi \, dx$$ and $$\int \Delta u \, \phi \, dx = \int \nabla \cdot (\nabla u) \, \phi \, dx = - \int \nabla u \cdot \nabla \phi \, dx$$. Applying the first identity to the terms with $$b$$ and $$F$$, and the second followed by the first to the term with $$\Delta(G^2 q)$$, yields the equation above).*
 
-Since $$q(x,s)>0$$, we divide both sides by $$q(x,s)$$ to obtain the **reverse drift**:
+Since this equality must hold for *all* test functions $$\phi$$, the vector fields multiplying $$\nabla \phi$$ inside the integrals must be equal (in a distributional sense, which implies pointwise equality under our smoothness assumptions):
 
 $$
-b(x,s)
+b(x, s) q(x, s)
 \;=\;
--\,F(x,s)
+- F(x, s) q(x, s)
 \;+\;
-G(x,s)^2\,\nabla \log q(x,s).
+\nabla \Bigl( G(x,s)^2 q(x, s) \Bigr).
 $$
+
+Now, we apply the product rule for the gradient to the last term:
+$$
+\nabla \bigl( G(x,s)^2 q(x,s) \bigr)
+\;=\;
+\nabla \bigl( G(x,s)^2 \bigr) q(x,s)
+\;+\;
+G(x,s)^2 \nabla q(x,s).
+$$
+Substituting this back gives:
+$$
+b(x, s) q(x, s)
+\;=\;
+- F(x, s) q(x, s)
+\;+\;
+\nabla \bigl( G(x,s)^2 \bigr) q(x,s)
+\;+\;
+G(x,s)^2 \nabla q(x,s).
+$$
+
+Finally, since we assumed $$q(x,s) > 0$$, we can divide by $$q(x,s)$$ to isolate the reverse drift $$b(x,s)$$. Using the identity $$\nabla \log q(x,s) = \nabla q(x,s) / q(x,s)$$, we obtain:
+
+$$
+\boxed{
+b(x,s) \;=\; -F(x,s) \;+\; \nabla\bigl(G(x,s)^2\bigr) \;+\; G(x,s)^2\,\nabla \log q(x,s).
+}
+$$
+
+**Important Note:** The term $$\nabla(G(x,s)^2)$$ involves the spatial gradient of the squared diffusion coefficient. This term is often omitted in simplified presentations but is present in the general case where $$g$$ (and thus $$G$$) depends on the state $$x$$.
+
+**Common Simplification:** If the original diffusion coefficient $$g$$ depends only on time, $$g=g(t)$$, then $$G(x,s) = g(T-s)$$ also depends only on time ($$s$$). In this case, its spatial gradient is zero: $$\nabla(G(s)^2) = \nabla_x(G(s)^2) = \mathbf{0}$$. The reverse drift then simplifies to the commonly cited formula:
+$$
+b(x,s) \;=\; -F(x,s) \;+\; G(s)^2\,\nabla \log q(x,s).
+$$
+This simplified form is frequently used in score-based modeling where $$g(t)$$ is often chosen to be independent of $$x$$.
 
 ---
 
 ## 4. Final Form of the Reverse-Time SDE
 
-Thus, the reverse-time SDE for $$Y_s$$ is:
+Substituting the derived drift $$b(x,s)$$ back into the postulated reverse SDE, we get the final equation for the reverse process $$Y_s$$:
 
 $$
 dY_s
 \;=\;
-\Bigl[-\,F(Y_s,s) \;+\; G(Y_s,s)^2\,\nabla \log q(Y_s,s)\Bigr]\,ds
+\Bigl[-\,F(Y_s,s) \;+\; \nabla\bigl(G(Y_s,s)^2\bigr) \;+\; G(Y_s,s)^2\,\nabla \log q(Y_s,s)\Bigr]\,ds
 \;+\;
 G(Y_s,s)\,d\widetilde{W}_s.
 $$
 
-Recalling that $$F(x,s) = f(x,T-s)$$, $$G(x,s)=g(x,T-s)$$, and $$q(x,s)=p(x,T-s)$$, we can write:
+Rewriting this entirely in terms of the original forward SDE functions $$f, g$$ and the forward density $$p$$:
 
 $$
+\boxed{
 dY_s
 \;=\;
-\Bigl[-\,f\bigl(Y_s,\;T-s\bigr) \;+\; g\bigl(Y_s,\;T-s\bigr)^2\,\nabla \log p\bigl(Y_s,\;T-s\bigr)\Bigr]\,ds
+\Bigl[-\,f(Y_s, T-s) \;+\; \nabla\bigl(g(Y_s, T-s)^2\bigr) \;+\; g(Y_s, T-s)^2\,\nabla \log p(Y_s, T-s)\Bigr]\,ds
 \;+\;
-g\bigl(Y_s,\;T-s\bigr)\,d\widetilde{W}_s.
+g(Y_s, T-s)\,d\widetilde{W}_s.
+}
 $$
+where $$Y_s = X_{T-s}$$ and the gradient $$\nabla$$ is with respect to the first argument (the spatial variable) of the functions.
+
+The term $$\nabla \log p(x,t)$$ is often called the **score function** of the density $$p$$ at time $$t$$. The reverse drift is thus expressed in terms of the negative forward drift, the score function scaled by the diffusion squared, and an additional term related to the spatial variation of the diffusion coefficient.
 
 ---
 
@@ -177,124 +220,70 @@ $$
 ## A.1. Sketch of the Fokker–Planck Derivation
 
 For the forward SDE
-
 $$
 dX_t \;=\; f(X_t,t)\,dt \;+\; g(X_t,t)\,dW_t,
 $$
-
-let $$\varphi\in C_c^\infty(\mathbb{R}^d)$$ be a test function. *(Recall that test functions are smooth (infinitely differentiable) and have compact support, meaning they vanish outside some bounded region, which makes them ideal for probing the behavior of densities without boundary complications.)* By Itô’s formula:
-
+let $$\phi \in C_c^\infty(\mathbb{R}^d)$$ be a test function. By Itô’s formula (assuming scalar $$g$$ for simplicity):
 $$
-d\,\varphi(X_t)
+d\,\phi(X_t)
 \;=\;
-\Bigl[f(X_t,t)\cdot\nabla\varphi(X_t)
+\Bigl[ f(X_t,t)\cdot\nabla\phi(X_t) \;+\; \tfrac12\,g(X_t,t)^2\,\Delta\phi(X_t) \Bigr]\,dt
 \;+\;
-\tfrac12\,g(X_t,t)^2\,\Delta\varphi(X_t)\Bigr]\,dt
-\;+\;
-g(X_t,t)\,\nabla\varphi(X_t)\,dW_t.
+g(X_t,t)\,\nabla\phi(X_t)\cdot dW_t.
 $$
-
-Taking expectations and noting that the Itô integral has mean zero, we get:
-
+Taking expectations, the Itô integral term vanishes:
 $$
-\frac{d}{dt}\,\mathbb{E}[\varphi(X_t)]
+\frac{d}{dt}\,\mathbb{E}[\phi(X_t)]
 \;=\;
-\mathbb{E}\Bigl[f(X_t,t)\cdot\nabla\varphi(X_t)
-\;+\;
-\tfrac12\,g(X_t,t)^2\,\Delta\varphi(X_t)\Bigr].
+\mathbb{E}\Bigl[f(X_t,t)\cdot\nabla\phi(X_t) \;+\; \tfrac12\,g(X_t,t)^2\,\Delta\phi(X_t)\Bigr].
 $$
-
-Expressing $$\mathbb{E}[\varphi(X_t)]$$ in terms of the density $$p(x,t)$$:
-
+Writing expectations using the density $$p(x,t)$$:
 $$
-\mathbb{E}[\varphi(X_t)]
+\int \phi(x)\,\frac{\partial p}{\partial t}(x,t)\,dx
 \;=\;
-\int \varphi(x)\,p(x,t)\,dx,
-\quad
-\frac{d}{dt}\,\mathbb{E}[\varphi(X_t)]
+\int \Bigl[f(x,t)\cdot\nabla\phi(x) \;+\; \tfrac12\,g(x,t)^2\,\Delta\phi(x)\Bigr]\, p(x,t)\,dx.
+$$
+Integrating the right-hand side by parts (moving derivatives from $$\phi$$ to the other terms, using $$\int v \cdot \nabla \phi \, dx = -\int (\nabla \cdot v) \phi \, dx$$ and $$\int u \Delta \phi \, dx = \int (\Delta u) \phi \, dx$$ assuming sufficient decay at infinity):
+$$
+\int \phi(x)\,\frac{\partial p}{\partial t}(x,t)\,dx
 \;=\;
-\int \varphi(x)\,\frac{\partial p}{\partial t}(x,t)\,dx.
+\int \phi(x) \Bigl[-\nabla\cdot\bigl(f(x,t)\,p(x,t)\bigr) \;+\; \tfrac12\,\Delta\!\bigl(g(x,t)^2\,p(x,t)\bigr) \Bigr]\,dx.
 $$
-
-Equating the two expressions and performing an integration by parts (assuming sufficient smoothness and decay at infinity so that boundary terms vanish) yields:
-
-$$
-\int \varphi(x)\,\frac{\partial p}{\partial t}(x,t)\,dx
-\;=\;
-\int \Bigl[f(x,t)\cdot\nabla\varphi(x)
-\;+\;
-\tfrac12\,g(x,t)^2\,\Delta\varphi(x)\Bigr]\,
-p(x,t)\,dx.
-$$
-
-Since this holds for all $$\varphi$$, we deduce the Fokker–Planck equation:
-
+Since this holds for all test functions $$\phi$$, the integrands must be equal, yielding the Fokker–Planck equation:
 $$
 \frac{\partial p}{\partial t}(x,t) \;=\; -\nabla\cdot\bigl(f(x,t)\,p(x,t)\bigr) \;+\; \tfrac12\,\Delta\!\Bigl(g(x,t)^2\,p(x,t)\Bigr).
 $$
 
 ## A.2. Why the Reverse Process Follows an SDE
 
-### A.2.1. Markov Property and Martingale Representation
+The assertion that the reverse process $$Y_s = X_{T-s}$$ satisfies an SDE of the form $$dY_s = b\,ds + G\,d\widetilde{W}_s$$ is non-trivial and relies on deeper results from stochastic calculus and Markov process theory. Key points include:
 
-- **Markov Property:**
-  The process $$X_t$$ is Markov in forward time. One can show (see, e.g., Anderson, 1982) that under smoothness and nondegeneracy conditions, the reversed process $$Y_s := X_{T-s}$$ is also Markov with respect to the *reverse filtration* (i.e., the $$\sigma$$-algebras that shrink as $$s$$ increases). Informally, this is often deduced via Bayes’ rule, but a full measure-theoretic proof requires careful handling of conditioning on future events in reverse time.
+1.  **Markov Property Preservation:** Under sufficient regularity conditions on $$f$$ and $$g$$ (like smoothness, uniform ellipticity for $$g^2$$), the forward process $$X_t$$ is Markov. It can be shown that time reversal preserves the Markov property, meaning $$Y_s$$ is also a Markov process, but with respect to a *backward filtration* $$\{\mathcal{G}_s\}_{s\in[0,T]}$$ (roughly, $$\mathcal{G}_s$$ contains information about the process from time $$T-s$$ to $$T$$).
 
-- **Martingale Representation Theorem:**
-  With uniform ellipticity, $$Y_s$$ is a nondegenerate Markov process. By the martingale representation theorem, any local martingale (with respect to the reversed filtration) can be represented as a stochastic integral with respect to a (new) Brownian motion $$\widetilde{W}_s$$. This theorem underlies the statement that
-  $$
-  dY_s \;=\; \text{(drift)}\,ds \;+\; \text{(diffusion)}\,d\widetilde{W}_s
-  $$
-  for some adapted $$\widetilde{W}_s$$.
+2.  **Martingale Representation Theorem:** For a process driven by Brownian motion, the Martingale Representation Theorem states that any martingale adapted to the Brownian filtration can be represented as a stochastic integral with respect to that Brownian motion. A similar theorem exists for backward filtrations. The process $$M_s = Y_s - Y_T - \int_s^T \hat{b}(Y_u, u) du$$ (for some predictable process $$\hat{b}$$) can be shown to be a backward martingale under suitable conditions. The backward Martingale Representation Theorem then implies that $$M_s$$ can be written as a stochastic integral $$\int_s^T G(Y_u, u) d\widetilde{W}_u$$ for some backward Brownian motion $$\widetilde{W}$$. Differentiating this leads heuristically to the SDE form $$dY_s = \hat{b}(Y_s,s)\,ds + G(Y_s,s)\,d\widetilde{W}_s$$.
 
-### A.2.2. Construction of the Backward Wiener Process
+3.  **Identification of Diffusion Coefficient:** A key result (e.g., Haussmann & Pardoux, 1986) shows that the diffusion coefficient $$G$$ for the reverse process is the same (up to time reparameterization) as the forward diffusion coefficient $$g$$.
 
-- **Decreasing Family of $$\sigma$$-Algebras:**
-  In forward time, we have $$\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots \subseteq \mathcal{F}_T$$. In reverse time, we consider a *decreasing* filtration $$\{\mathcal{G}_s\}_{s\in[0,T]}$$ with $$\mathcal{G}_s = \mathcal{F}_{T-s}$$. One defines a process $$\widetilde{W}_s$$ that is a Brownian motion w.r.t. $$\{\mathcal{G}_s\}$$. This involves showing that increments $$\widetilde{W}_{t} - \widetilde{W}_s$$ are independent of $$\mathcal{G}_{s}$$ for $$t > s$$, in analogy to how standard Brownian motion is built in forward time.
+4.  **Construction of Backward Brownian Motion:** The existence and properties of the backward Brownian motion $$\widetilde{W}_s$$ and the associated backward Itô calculus are rigorously established in the literature.
 
-- **Backward Itô Integral:**
-  With $$\widetilde{W}_s$$ so constructed, one can define backward Itô integrals. Formally, the reverse-time SDE
-  $$
-  dY_s \;=\; b(Y_s,s)\,ds \;+\; G(Y_s,s)\,d\widetilde{W}_s
-  $$
-  is interpreted with respect to the reversed filtration and $$\widetilde{W}_s$$. The consistency with the density evolution (Fokker–Planck in reverse time) forces the specific form of $$b$$.
+The derivation in the main text relies on these foundational results, particularly the existence of the SDE form and the fact that the diffusion coefficient remains $$G(x,s)$$. The core task performed here was determining the specific form of the reverse drift $$b(x,s)$$ by ensuring consistency between the Fokker-Planck equations.
 
-### A.2.3. References
+### Key References:
 
-- **Anderson, W.J. (1982)**:
-  *Reverse-time diffusion equations and applications*. This text is a classic reference on the rigorous construction of reversed diffusions, including the reversed filtration and Brownian motion.
-
-- **Haussmann, U.G. & Pardoux, E. (1986)**:
-  *Time Reversal of Diffusions*. *The Annals of Probability*, 14(4), 1188–1205. Another key reference for time-reversal of diffusion processes, with full measure-theoretic details.
+-   **Anderson, B. D. O. (1982).** *Reverse-time diffusion equation models*. Stochastic Processes and their Applications, 12(3), 313-326. (Provides an early derivation and justification).
+-   **Haussmann, U. G., & Pardoux, E. (1986).** *Time Reversal of Diffusions*. The Annals of Probability, 14(4), 1188–1205. (A rigorous measure-theoretic treatment).
+-   **Föllmer, H. (1988).** *Time Reversal on Wiener Space*. In Stochastic Processes - Mathematics and Physics II (pp. 119-129). Springer Berlin Heidelberg. (Provides insights using entropy methods).
 
 ---
 
 # Final Summary
 
-1. **Forward SDE & Fokker–Planck:**
-   The forward process $$X_t$$ solves $$dX_t = f(X_t,t)\,dt + g(X_t,t)\,dW_t$$, with a smooth, strictly positive density $$p(x,t)$$.
+1.  **Forward SDE & Fokker–Planck:** Started with a forward process $$X_t$$ solving $$dX_t = f\,dt + g\,dW_t$$ with density $$p(x,t)$$ satisfying the Fokker-Planck equation.
+2.  **Reverse-Time Definition & PDE:** Defined $$Y_s = X_{T-s}$$ and derived the PDE governing its density $$q(x,s) = p(x, T-s)$$.
+3.  **Reverse SDE Postulate & PDE:** Postulated a reverse SDE $$dY_s = b\,ds + G\,d\widetilde{W}_s$$ and wrote its corresponding Fokker-Planck equation.
+4.  **Matching and Derivation:** Equated the two Fokker-Planck equations for $$q(x,s)$$. Used integration by parts (weak form) and the product rule to solve for the reverse drift $$b(x,s)$$.
+5.  **Result:** The reverse drift is $$b(x,s) = -F(x,s) + \nabla(G(x,s)^2) + G(x,s)^2\,\nabla \log q(x,s)$$, where $$F, G, q$$ are the time-reversed versions of $$f, g, p$$. This includes a term $$\nabla(G^2)$$ that vanishes if $$g$$ depends only on time.
+6.  **Final SDE:** The reverse-time SDE is fully specified with the derived drift.
+7.  **Justification (Appendix):** Briefly outlined why the reverse process follows an SDE structure, referencing Markov properties and martingale representation.
 
-2. **Reverse-Time Definition:**
-   $$Y_s := X_{T-s}$$. Reparameterize $$f,g,p$$ as $$\,F,G,q$$ in terms of the reverse time $$s$$.
-
-3. **Reverse SDE:**
-   By matching the Fokker–Planck equation for the reparameterized forward process to that of a putative SDE, we obtain
-
-   $$
-   b(x,s) = -\,F(x,s) + G(x,s)^2\,\nabla \log q(x,s).
-   $$
-
-   Hence,
-
-   $$
-   dY_s  = \bigl[b(Y_s,s)\bigr]\,ds + G(Y_s,s)\,d\widetilde{W}_s,
-   $$
-
-   with the explicit drift given above.
-
-4. **Why This is an SDE (Appendix A.2):**
-   - Time reversal preserves the Markov property under smooth, nondegenerate conditions.
-   - The martingale representation theorem ensures a Brownian motion $$\widetilde{W}_s$$ exists for the reversed filtration.
-   - Thus, $$Y_s$$ can be written in SDE form with drift and diffusion terms determined by matching densities.
-
-In practice, these results are heavily used in score-based diffusion models (machine learning) and other applications requiring a reverse-time formulation of diffusions. The references provided discuss the full technical details of constructing the backward Wiener process and reversed filtration.
+This derivation provides the general form of the reverse-time SDE drift, crucial for applications where the diffusion coefficient might depend spatially.
