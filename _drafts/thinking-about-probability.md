@@ -1,8 +1,8 @@
 ---
 layout: post
-title: Thinking About Probability
+title: Thinking About Probability - Two Foundational Perspectives
 date: 2025-04-29 05:19 +0000
-description: Developing an intuition for probability using analogies from physics, geometry, and algebra, focusing on mass distributions and centers of mass.
+description: Developing an intuition for probability using analogies from physics (mass distributions, centers of mass), exploring both the standard measure-theoretic and the expectation-first foundations.
 image:
 categories:
 - Probability and Statistics
@@ -12,6 +12,7 @@ tags:
 - Expectation
 - Physics
 - Intuition
+- Measure Theory
 math: true
 llm-instructions: |
   I am using the Chirpy theme in Jekyll.
@@ -68,7 +69,11 @@ llm-instructions: |
   1. text
 
      $$
-     block
+     block 1
+     $$
+
+     $$
+     block 2
      $$
 
      (continued) text
@@ -77,6 +82,8 @@ llm-instructions: |
   Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
   Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
+
+  Please do not modify the sources, references, further reading material without explicit request.
 ---
 
 Probability is a fundamental concept in mathematics and statistics. Yet, it can be hard to understand intuitively.
@@ -95,219 +102,300 @@ The first thing to ask is, why should we care about probability? Probability pro
 
 Essentially, understanding probability gives us the tools to navigate and make sense of an inherently uncertain world. Now, how can we build an intuition for these tools?
 
-Probability theory is typically built on Kolgomorov's axioms and measure theory. The fundamental starting point is commonly chosen to be probability. However, an alternate perspective has also arised to start from expectation instead. Let's investigate both viewpoints.
+Probability theory is typically built on Kolgomorov's axioms and measure theory. The fundamental starting point is commonly chosen to be the **probability measure** itself. However, an alternate perspective, akin to the Daniell integral approach in analysis, is to start from **expectation** instead. Let's investigate both viewpoints, grounding them in our physical intuition.
 
-### Analogy: A Purely Material World
+## Perspective 1: Probability as Normalized Mass (The Standard Approach)
 
-I want to imagine a very simple world, where we only care about masses and volumes. Let's say, we start by picking a universe, and inside it, we will find some objects.
+Let's imagine a simple world, our *universe* or *sample space* $$\Omega$$. This space contains various *objects* or regions, which we'll call *events* $$E$. Think of $$\Omega$$ as a block of material, perhaps of varying density, and events $$E$$ as specific parts or sub-regions within that block.
 
-In an abstract view, our mass would represent a **level of importance** or likelihood of our object, or the region it occupies. Our objects would be *events* in probability theory.
+A fundamental question is: How much "stuff" or **mass** does a given region $$E$$ contain?
 
-A fundamental question, then, is: How do we measure the mass of an object? As in, how do we assign a numerical value to each object in some part of our world?
+In physics, we measure mass using units like kilograms. But these units are relative to arbitrary standards. Furthermore, the absolute mass depends on the total size of our universe. If we scale the entire universe up, maintaining the same density distribution, the mass of every object increases proportionally.
 
-What we did in science was to create units of measurement, such as grams in standard international units, or pounds in imperial units. Yet the numerical values they give stem from arbitrary definitions relative to some arbitrary basic point of reference.
-
-In addition, if expand our world with the same densities, but scale everything to be twice as big, then everything will have twice the mass.
-
-Is there a canonical measurement of mass we can define that is invariant to scaling our world?
-
-Probability, then, is the choice of a measure of mass that is independent of the scale of our world. Fundamentally, it uses the total mass in the world as an absolute reference, and every object's mass is measured relative to it. Therefore, we normalize all numerical values to:
+Is there a way to measure the "amount" of an object that's independent of the overall scale? Yes: we can measure its mass *relative* to the total mass of the universe. This gives us a normalized measure:
 
 $$
-\text{probability} = \frac{\text{mass of object}}{\text{total mass in world}}
+\text{Relative Mass of } E = \frac{\text{Mass of object } E}{\text{Total Mass of Universe } \Omega}
 $$
 
-That means that the largest possible measure of mass we can assign would be $$1$$: if we consider the total mass in the world relative to itself, then it would hold up all of it. At the same time, an empty object would have no mass at all. So our possible values of our measure lie in the unit interval $$[0,1]$$.
+This relative mass is what we call **probability**. By definition, the probability of the entire universe $$\Omega$$ relative to itself is 1. The probability of an empty region (containing no mass) is 0. All other regions will have a probability between 0 and 1.
 
-Mathematically, if we treat our *universe* or *sample space* as a set $$\Omega$$, then our objects inside of it are "events" taken to be subsets $$E \subseteq \Omega$$. We can form a set of all objects of interest, the *sigma-algebra* or *sigma-field* $$\mathcal{F}$$ that satisfies some properties I'll omit for now. Importantly, the set of all subsets of $$\Omega$$, called the power set and denoted $$\mathcal{P}(\Omega)$$ or $$2^\Omega$$, is a valid sigma-algebra. The latter notation will be justified later when we cover indicator functions.
+<blockquote class="prompt-warning" markdown="1">
+Note that in doing so, we give up the notion of absolute size. Scaling up our entire universe proportionally doesn't change the probabilities (relative masses) of its parts. Probability focuses on proportions.
+</blockquote>
 
-A probability measure is literally function that assigns a normalized mass to each object (event). Formally:
+Mathematically, we need to formalize which "regions" or "objects" we can actually assign a probability to.
+*   The *sample space* $$\Omega$$ is the set of all possible fundamental outcomes.
+*   *Events* are the specific subsets of $$\Omega$$ for which we want to define a probability. We can't necessarily assign a well-behaved probability to *every* conceivable subset of $$\Omega$$ (especially in continuous spaces, due to technical paradoxes like Banach-Tarski, although these are rarely encountered in practical probability). We need a well-behaved collection of measurable subsets.
+
+**Building the Collection of Measurable Events ($$\mathcal{F}$$):**
+
+Imagine we can partition our universe $$\Omega$$ into a set of basic, non-overlapping "chunks" or "atoms" $$A_1, A_2, \dots$$ such that $$\Omega = \cup_{i} A_i$$ and $$A_i \cap A_j = \emptyset$$ for $$i \neq j$$. This could be a finite or countably infinite partition. Think of these as the fundamental building blocks we can directly measure or distinguish.
+
+If we can assign a probability (mass) $$P(A_i)$$ to each basic chunk $$A_i$$, what other sets should we logically be able to determine the probability of?
+
+1.  **Unions of Chunks:** Any set formed by combining some of these basic chunks, like $$E = A_1 \cup A_3 \cup A_7$$, should be measurable. Its probability should be the sum of the probabilities of the constituent chunks (due to additivity). This includes finite and *countable* unions.
+2.  **The Whole Space:** The entire universe $$\Omega$$ is the union of all chunks, so it must be measurable (and have probability 1).
+3.  **The Empty Set:** The "union" of zero chunks, the empty set $$\emptyset$$, must be measurable (and have probability 0).
+4.  **Complements:** If we can measure a set $$E$$ formed by some collection of chunks (say, $$E = \cup_{j \in J} A_j$$), we should also be able to measure what's *left over*, its complement $$E^c = \Omega \setminus E$$. This complement is just the union of all the *other* chunks ($$E^c = \cup_{i \notin J} A_i$$), so it should also be measurable. Its probability should be $$1 - P(E)$$.
+
+The collection of all subsets that can be formed by taking countable unions of the partition elements $$A_i$$ (including the empty union $$\emptyset$$ and the union of all elements $$\Omega$$) satisfies these closure properties. This collection is called the **sigma-algebra generated by the partition** $$\{A_i\}$$.
+
+More generally, we don't always start with a partition. We might start with an initial collection $$\mathcal{C}$$ of events we are interested in (e.g., for a die roll, $$\mathcal{C} = \{\{1,3,5\}, \{2,4,6\}\}$$, the events "odd" and "even"). We then want our collection of measurable sets, $$\mathcal{F}$$, to include $$\mathcal{C}$$ and be closed under the operations needed for logical consistency: complement ("not"), countable union ("or"), and countable intersection ("and", which follows from complement and union via De Morgan's laws).
+
+The **sigma-algebra** (or **sigma-field**) $$\mathcal{F}$$ is formally defined as a collection of subsets of $$\Omega$$ that satisfies:
+1.  $$\Omega \in \mathcal{F}$$ (The whole universe is measurable).
+2.  If $$E \in \mathcal{F}$$, then $$E^c \in \mathcal{F}$$ (Closed under complementation).
+3.  If $$E_1, E_2, \dots \in \mathcal{F}$$, then $$\bigcup_{i=1}^\infty E_i \in \mathcal{F}$$ (Closed under countable unions).
+
+This structure ensures that if we start with some basic measurable sets, we can perform standard logical and limiting operations and still end up with measurable sets whose probabilities are well-defined. The partition example provides a concrete way to visualize how such a structure arises naturally from breaking down the space.
+
+With the sample space $$\Omega$$ and the sigma-algebra $$\mathcal{F}$$ of measurable events defined, we can now introduce the probability measure $$P$$.
 
 <blockquote class="prompt-info" markdown="1">
-#### Definition - Probability Measure
+#### Definition - Probability Measure (Kolmogorov Axioms)
 
-Given a measurable space $$(\Omega, \mathcal{F})$$ where $$\Omega$$ is the *sample space* (our universe) and $$\mathcal{F}$$ is a *sigma-algebra* of *events* (our objects $$E \subseteq \Omega$$), a *probability measure* $$P: \mathcal{F} \to [0, 1]$$ is a function that satisfies the following axioms:
+Given a measurable space $$(\Omega, \mathcal{F})$$, a *probability measure* $$P: \mathcal{F} \to [0, 1]$$ is a function satisfying:
 
 1.  **Non-negativity:** For any event $$E \in \mathcal{F}$$, $$P(E) \ge 0$$.
     *   *(Mass Analogy: Mass cannot be negative.)*
 2.  **Normalization:** $$P(\Omega) = 1$$.
     *   *(Mass Analogy: The total mass of the entire universe is normalized to 1 unit.)*
 3.  **Countable Additivity:** For any countable sequence of pairwise disjoint events $$E_1, E_2, \dots$$ in $$\mathcal{F}$$ (meaning $$E_i \cap E_j = \emptyset$$ for $$i \neq j$$), we have:
+    
     $$
     P\left(\bigcup_{i=1}^{\infty} E_i\right) = \sum_{i=1}^{\infty} P(E_i)
     $$
-    *   *(Mass Analogy: If you combine objects that don't overlap, their total mass is simply the sum of their individual masses. This extends even to infinitely many objects.)*
+    
+    *   *(Mass Analogy: If you combine objects (regions) that don't overlap, their total mass is simply the sum of their individual masses. This holds even for combining infinitely many non-overlapping measurable regions.)*
 
 </blockquote>
 
 The triple $$(\Omega, \mathcal{F}, P)$$ is called a *probability space*.
 
-From these fundamental axioms, we can derive several useful properties:
+From these axioms, rooted in the idea of normalized, additive mass, we can derive familiar properties:
 
-1.  **Probability of the Empty Set:** The probability of the impossible event (the empty set $$\emptyset$$) is zero: $$P(\emptyset) = 0$$.
-    *   *(Mass Analogy: An empty region has zero mass.)*
-    *   *Derivation:* Take $$E_1 = \Omega$$ and $$E_i = \emptyset$$ for $$i \ge 2$$. These are disjoint, and their union is $$\Omega$$. By countable additivity, $$P(\Omega) = P(\Omega) + P(\emptyset) + P(\emptyset) + \dots$$. Since $$P(\Omega)=1$$, this implies $$P(\emptyset)$$ must be 0. (A simpler argument: Let $$E_1, E_2, \dots$$ all be $$\emptyset$$. They are disjoint, their union is $$\emptyset$$. So $$P(\emptyset) = \sum_{i=1}^\infty P(\emptyset)$$. This equation holds only if $$P(\emptyset)=0$$.)
+*   $$P(\emptyset) = 0$$ (An empty region has zero mass).
+*   Finite Additivity: $$P(\cup_{i=1}^n E_i) = \sum_{i=1}^n P(E_i)$$ for disjoint $$E_i$$ (Mass of finite non-overlapping combination is sum of masses).
+*   $$P(E^c) = 1 - P(E)$$ (Mass outside a region = Total mass - Mass inside).
+*   If $$A \subseteq B$$, then $$P(A) \le P(B)$$ (A part cannot have more mass than the whole).
+*   $$0 \le P(E) \le 1$$ (Relative mass is between 0% and 100%).
+*   $$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$ (Inclusion-Exclusion: Add masses, subtract the double-counted overlap).
 
-2.  **Finite Additivity:** For any *finite* sequence of pairwise disjoint events $$E_1, E_2, \dots, E_n$$ in $$\mathcal{F}$$,
-    $$
-    P\left(\bigcup_{i=1}^{n} E_i\right) = \sum_{i=1}^{n} P(E_i)
-    $$
-    *   *(Mass Analogy: Combining a finite number of non-overlapping objects results in a total mass equal to the sum of individual masses.)*
-    *   *Derivation:* This follows from countable additivity by setting $$E_i = \emptyset$$ for all $$i > n$$, and using the fact that $$P(\emptyset) = 0$$.
-
-3.  **Probability of the Complement:** For any event $$E \in \mathcal{F}$$, the probability of its complement $$E^c = \Omega \setminus E$$ (i.e., "not E") is:
-    $$
-    P(E^c) = 1 - P(E)
-    $$
-    *   *(Mass Analogy: The mass outside a region is the total mass (1) minus the mass inside the region.)*
-    *   *Derivation:* The events $$E$$ and $$E^c$$ are disjoint, and their union is $$E \cup E^c = \Omega$$. By finite additivity, $$P(E \cup E^c) = P(E) + P(E^c)$$. Since $$P(E \cup E^c) = P(\Omega) = 1$$, we have $$1 = P(E) + P(E^c)$$, which rearranges to the desired result.
-
-4.  **Monotonicity:** If event $$A$$ is a subset of event $$B$$ ($$A \subseteq B$$), then the probability of $$A$$ is less than or equal to the probability of $$B$$:
-    $$
-    A \subseteq B \implies P(A) \le P(B)
-    $$
-    *   *(Mass Analogy: An object cannot have less mass than one of its parts.)*
-    *   *Derivation:* We can write $$B$$ as the union of two disjoint sets: $$B = A \cup (B \setminus A)$$. By finite additivity, $$P(B) = P(A) + P(B \setminus A)$$. Since $$P(B \setminus A) \ge 0$$ by the non-negativity axiom, we must have $$P(B) \ge P(A)$$.
-
-5.  **Probability Bounds:** For any event $$E \in \mathcal{F}$$, its probability is between 0 and 1, inclusive:
-    $$
-    0 \le P(E) \le 1
-    $$
-    *   *(Mass Analogy: The mass fraction of any part must be between 0 and 1.)*
-    *   *Derivation:* The lower bound $$P(E) \ge 0$$ is Axiom 1. The upper bound $$P(E) \le 1$$ follows from monotonicity, since $$E \subseteq \Omega$$ implies $$P(E) \le P(\Omega) = 1$$.
-
-6.  **Inclusion-Exclusion Principle (for two events):** For any two events $$A, B \in \mathcal{F}$$ (not necessarily disjoint), the probability of their union is:
-    $$
-    P(A \cup B) = P(A) + P(B) - P(A \cap B)
-    $$
-    *   *(Mass Analogy: If you add the masses of two potentially overlapping objects, you've double-counted the mass in their overlapping region, so you need to subtract it once.)*
-    *   *Derivation:* We can write $$A \cup B$$ as the union of disjoint sets: $$A \cup B = (A \setminus B) \cup (B \setminus A) \cup (A \cap B)$$. Then $$P(A \cup B) = P(A \setminus B) + P(B \setminus A) + P(A \cap B)$$. Also, $$A = (A \setminus B) \cup (A \cap B)$$ (disjoint), so $$P(A) = P(A \setminus B) + P(A \cap B)$$, which means $$P(A \setminus B) = P(A) - P(A \cap B)$$. Similarly, $$P(B \setminus A) = P(B) - P(A \cap B)$$. Substituting these into the expression for $$P(A \cup B)$$ gives $$P(A \cup B) = (P(A) - P(A \cap B)) + (P(B) - P(A \cap B)) + P(A \cap B) = P(A) + P(B) - P(A \cap B)$$.
-
-These properties form the basic toolkit for manipulating probabilities.
+This framework is powerful and forms the standard foundation of modern probability theory. It views probability fundamentally as a *measure* – a way to assign "size" or "mass" to sets (events).
 
 #### Mass Distribution
 
-How is this "probability mass" distributed across our universe $$\Omega$$?
+How is this probability mass distributed?
+*   **Continuous:** Like density $$\rho(x)$$ in physics, a **probability density function (PDF)** $$p(x)$$ describes mass per unit length/area/volume. Total mass is $$\int_\Omega p(x) dx = 1$$. Mass of region $$E$$ is $$P(E) = \int_E p(x) dx$$.
+*   **Discrete:** Like point masses $$m_i$$ at locations $$x_i$$, a **probability mass function (PMF)** $$P(x_i)$$ gives the mass at each point. Total mass is $$\sum_{x_i \in \Omega} P(x_i) = 1$$. Mass of a set of points $$E$$ is $$P(E) = \sum_{x_i \in E} P(x_i)$$.
 
-*   **Continuous Case:** If $$\Omega$$ is a continuous space (like an interval $$[a, b]$$ or a region in $$\mathbb{R}^n$$), we often describe the distribution using a **probability density function (PDF)**, denoted $$p(x)$$ or $$f_X(x)$$. This is analogous to the **mass density** $$\rho(x)$$ (mass per unit length/area/volume). In our case, the density is the mass/mass ratio.
-    *   The density $$p(x)$$ must be non-negative: $$p(x) \ge 0$$ for all $$x \in \Omega$$.
-    *   The total mass must integrate to 1: $$\int_{\Omega} p(x) dx = 1$$.
-    *   The probability (mass) of an event (region) $$E$$ is found by integrating the density over that region:
-        
-        $$
-        P(E) = \int_E p(x) dx
-        $$
+## Perspective 2: Expectation as Center of Mass (An Alternative Foundation)
 
-*   **Discrete Case:** If $$\Omega$$ is a discrete set (like the outcomes of a die roll $$\{1, 2, 3, 4, 5, 6\}$$ or the integers $$\mathbb{Z}$$), we use a **probability mass function (PMF)**, denoted $$P(x)$$ or $$p_X(x)$$. This is analogous to having **point masses** at specific locations.
-    *   The mass at each point $$x_i \in \Omega$$ is $$P(x_i) \ge 0$$.
-    *   The total mass must sum to 1: $$\sum_{x_i \in \Omega} P(x_i) = 1$$.
-    *   The probability (mass) of an event (subset) $$E$$ is found by summing the point masses within that subset:
-        
-        $$
-        P(E) = \sum_{x_i \in E} P(x_i)
-        $$
+Now, let's shift our thinking. Instead of focusing first on the *mass of regions* ($$P(E)$$), let's consider *properties* defined across our universe $$\Omega$$.
 
-In both cases, $$P(E)$$ represents the fraction of the total "probability mass" contained within the region or subset $$E$$.
+Suppose each point $$\omega$$ in our universe has some numerical value associated with it, representing a property we care about. We denote this property by a function $$X: \Omega \to \mathbb{R}$$. In probability, $$X$$ is called a **random variable**.
 
-### Expectation as Center of Mass
+*   **Example (Physics):** Let $$\Omega$$ be a non-uniform rod along the x-axis, from $$x=0$$ to $$x=L$$. Let $$\omega$$ be a point on the rod. The position itself is a property: $$X(\omega) = \omega$$. The density of the rod at point $$\omega$$ defines our "mass distribution" $$\rho(\omega)$$.
+*   **Example (Games):** Let $$\Omega$$ be the set of outcomes of rolling two dice, $$\Omega = \{(1,1), (1,2), ..., (6,6)\}$$. Each outcome $$\omega = (d_1, d_2)$$ is a point. The sum of the dice is a property: $$X(\omega) = d_1 + d_2$$. Assuming fair dice, each of the 36 outcomes has equal mass $$1/36$$.
+*   **Example (Measurements):** Let $$\Omega$$ be the space of possible configurations of a physical system. Let $$\omega$$ be one configuration. The energy of the system in that configuration is a property: $$X(\omega) = \text{Energy}(\omega)$$. The probability (normalized mass) of a configuration might be given by a Boltzmann distribution.
 
-TODO: needs revamp, better, more clear, explicit motivation for random variables in physical interpretation, defining expectations from scratch rather than through probability (axioms from Daniell's integration theory)
+Given a mass distribution over $$\Omega$$ and a property $$X$$ defined on $$\Omega$$, a fundamental concept from physics is the **center of mass**. It represents the *average value* of the property $$X$$, weighted by the mass at each point.
 
-Now, let's shift perspective slightly. Instead of focusing first on the mass $$P(E)$$ of different regions $$E$$, let's think about the properties of our universe. Suppose each point $$\omega$$ in our universe $$\Omega$$ has some numerical value associated with it, let's call this value $$X(\omega)$$. In probability, $$X$$ is called a **random variable**.
+If $$\rho(\omega)$$ is the mass density (mass per unit "volume" in $$\Omega$$), the center of mass for property $$X$$ is:
 
-*   Example: If $$\Omega$$ is the set of outcomes for rolling two dice, $$\omega = (d_1, d_2)$$, a random variable $$X$$ could be the sum $$X(\omega) = d_1 + d_2$$.
-*   Example: If $$\Omega$$ is a physical object, $$\omega$$ is a point in the object, and $$X(\omega)$$ could be its coordinate along the x-axis.
+$$
+\text{Center of Mass}_X = \frac{\int_{\Omega} X(\omega) \rho(\omega) d\omega}{\int_{\Omega} \rho(\omega) d\omega} = \frac{\text{Total moment for } X}{\text{Total Mass}}
+$$
 
-Given our mass distribution ($$p(x)$$ or $$P(\omega_i)$$), what is the "average value" of $$X$$ over the entire universe? In physics, this concept corresponds precisely to the **center of mass**.
+For discrete point masses $$m_i$$ at locations $$\omega_i$$ where the property has value $$X(\omega_i)$$:
 
-The **expected value** (or expectation) of a random variable $$X$$, denoted $$E[X]$$, is the weighted average of its possible values, where the weights are given by the probability (mass) distribution.
+$$
+\text{Center of Mass}_X = \frac{\sum_i X(\omega_i) m_i}{\sum_i m_i}
+$$
+
+Now, let's assume our mass distribution is already **normalized**, meaning the total mass is 1 (i.e., $$\int_\Omega \rho(\omega) d\omega = 1$$ or $$\sum_i m_i = 1$$). This normalized mass distribution is precisely what a probability measure $$P$$ represents.
+
+In this context, the center of mass calculation simplifies. We call this the **expected value** or **expectation** of the random variable $$X$$, denoted $$E[X]$$.
+
+$$
+E[X] = \text{Center of Mass for } X \text{ (with Total Mass = 1)}
+$$
+
+*   Continuous case (with PDF $$p(\omega)$$): $$E[X] = \int_{\Omega} X(\omega) p(\omega) d\omega$$
+*   Discrete case (with PMF $$P(\omega_i)$$): $$E[X] = \sum_{\omega_i \in \Omega} X(\omega_i) P(\omega_i)$$
+
+The expectation $$E[X]$$ is the **balance point** of the distribution along the axis defined by the values of $$X$$. It's the average value of the property $$X$$, weighted by the probability (normalized mass) at each point.
+
+### Expectation as the Foundational Concept
+
+Here's the crucial idea: What if we consider the concept of **averaging** (finding the center of mass) as more fundamental than the concept of measuring the mass of regions? Can we *start* with expectation?
+
+This is the spirit of the Daniell integral approach. We postulate the existence of an **expectation operator** $$E[\cdot]$$ that takes a function (random variable) $$X$$ and returns its average value. We define $$E$$ not via an existing probability measure, but by its fundamental properties, inspired directly by our intuition about averaging and centers of mass.
 
 <blockquote class="prompt-info" markdown="1">
-#### Definition - Expected Value
+#### Axioms of Expectation (Intuitive Properties of Averaging)
 
-*   **Continuous Case:** If $$X$$ takes values in $$\mathbb{R}$$ and has PDF $$p(x)$$ on $$\Omega$$, its expected value is:
-    
-    $$
-    E[X] = \int_{\Omega} X(\omega) p(\omega) d\omega
-    $$
+Let $$\mathcal{H}$$ be a suitable class of functions (random variables) $$X: \Omega \to \mathbb{R}$$ for which we can define an average. The **expectation operator** $$E: \mathcal{H} \to \mathbb{R}$$ satisfies:
 
-    If $$X$$ itself represents the position (e.g., $$X(\omega) = \omega$$ for $$\Omega \subseteq \mathbb{R}$$), then this simplifies to:
+1.  **Linearity:** For any $$X, Y \in \mathcal{H}$$ and constants $$a, b \in \mathbb{R}$$, if $$aX + bY \in \mathcal{H}$$, then:
     
     $$
-    E[X] = \int_{\Omega} x p(x) dx
-    $$
-
-    *(This is exactly the formula for the center of mass, $$\int x dm = \int x \rho(x) dx$$, given that the total mass $$\int \rho(x) dx = 1$$.)*
-*   **Discrete Case:** If $$X$$ takes values $$x_i$$ corresponding to outcomes $$\omega_i \in \Omega$$ with PMF $$P(\omega_i)$$, its expected value is:
-    
-    $$
-    E[X] = \sum_{\omega_i \in \Omega} X(\omega_i) P(\omega_i)
+    E[aX + bY] = aE[X] + bE[Y]
     $$
     
-    If the outcomes themselves are the values (e.g., $$\Omega=\{1, 2, 3, 4, 5, 6\}$$ and $$X(\omega_i) = \omega_i$$), this simplifies to:
+    *   *(Center of Mass / Averaging Intuition: If you scale all property values by $$a$$, the average scales by $$a$$. The average of a sum of properties is the sum of their averages. This is fundamental to how averages behave.)*
+    
+2.  **Positivity (Monotonicity):** If $$X \in \mathcal{H}$$ and $$X(\omega) \ge 0$$ for all $$\omega \in \Omega$$, then:
     
     $$
-    E[X] = \sum_{x_i \in \Omega} x_i P(x_i)
+    E[X] \ge 0
     $$
     
-    *(This is the formula for the center of mass of a system of point masses $$m_i = P(x_i)$$ located at positions $$x_i$$, given total mass $$\sum m_i = 1$$.)*
+    *   *(Intuition: If a property is always non-negative, its average value cannot be negative.)*
+    *   *Consequence:* If $$X(\omega) \ge Y(\omega)$$ for all $$\omega$$, then $$E[X] \ge E[Y]$$. (The average of the bigger property must be at least as large as the average of the smaller one).
+    
+3.  **Normalization (Constant Preservation):** The constant function $$1$$ (where $$1(\omega) = 1$$ for all $$\omega$$) is in $$\mathcal{H}$$, and:
+    
+    $$
+    E[1] = 1
+    $$
+    
+    *   *(Intuition: The average value of a property that is always 1 must be 1. This reflects the normalization of the underlying "mass" or "influence".)*
+    
+4.  **Monotone Convergence:** If $$X_1, X_2, \dots$$ is a sequence of functions in $$\mathcal{H}$$ such that $$0 \le X_1(\omega) \le X_2(\omega) \le \dots$$ for all $$\omega$$, and $$X(\omega) = \lim_{n\to\infty} X_n(\omega)$$ exists and is in $$\mathcal{H}$$, then:
+    
+    $$
+    E[X] = E[\lim_{n\to\infty} X_n] = \lim_{n\to\infty} E[X_n]
+    $$
+    
+    *   *(Intuition: This technical axiom ensures consistency. If a sequence of non-negative properties increases towards a limit, their average values should converge to the average value of the limit. It allows extending the definition of E from simple functions to more complex ones.)*
 
 </blockquote>
 
-The expected value $$E[X]$$ gives us the "balance point" of the probability distribution along the axis defined by the values of $$X$$. It's a single number summarizing the central tendency of the random variable.
+These axioms attempt to capture the essential algebraic and analytic properties of an averaging process.
 
-### Linking Expectation and Probability: The Indicator Function
+### Defining Probability from Expectation
 
-We now have two core concepts:
-1.  **Probability $$P(E)$$: The normalized mass within a region $$E$$.**
-2.  **Expectation $$E[X]$$: The center of mass of the distribution, considering values $$X$$.**
+If expectation is fundamental, how do we recover the concept of probability $$P(A)$$ for an event (region) $$A \subseteq \Omega$$? We use the brilliant device of the **indicator function**.
 
-Can we connect them more directly? Yes, using a clever tool called the **indicator function** (also known as the characteristic function in some contexts, though that term often refers to a different concept in probability).
-
-For any event (region/subset) $$E \subseteq \Omega$$, the indicator function $$I_E: \Omega \to \{0, 1\}$$ is defined as:
+Recall the indicator function $$I_A: \Omega \to \{0, 1\}$$:
 
 $$
-I_E(\omega) = \begin{cases} 1 & \text{if } \omega \in E \\ 0 & \text{if } \omega \notin E \end{cases}
+I_A(\omega) = \begin{cases} 1 & \text{if } \omega \in A \\ 0 & \text{if } \omega \notin A \end{cases}
 $$
 
-Think of $$I_E$$ as a "filter" or a "mask" that is "on" (value 1) inside the region $$E$$ and "off" (value 0) outside it. It's a random variable that tells us whether a given outcome $$\omega$$ falls within the event $$E$$ or not.
+Think of $$I_A$$ as a random variable representing the property "being inside region A". It's like a switch: ON (1) inside $$A$$, OFF (0) outside $$A$$.
 
-*(Side note: This binary nature is why the power set $$\mathcal{P}(\Omega)$$ is sometimes denoted $$2^\Omega$$. Each subset $$E$$ corresponds uniquely to an indicator function mapping elements of $$\Omega$$ to $$\{0, 1\}$, essentially representing the subset as a binary string or function.)*
+We can now *define* the probability of $$A$$ as the expected value (the average value) of this "in-A-ness" property:
 
-Now, let's treat the indicator function $$I_E$$ as a random variable itself. What is its expected value $$E[I_E]$$?
+<blockquote class="prompt-tip" markdown="1">
+#### Definition - Probability via Expectation
 
-*   **Continuous Case:** Let $$p(\omega)$$ be the PDF over $$\Omega$$.
+For an event $$A \subseteq \Omega$$ such that its indicator function $$I_A$$ is in the domain of the expectation operator $$E$$ (i.e., $$I_A \in \mathcal{H}$$ or can be handled by extension), the **probability** of $$A$$ is defined as:
+
+$$
+P(A) \equiv E[I_A]
+$$
+
+</blockquote>
+
+**Intuition:** What is the average value of a function that is 1 on region $$A$$ and 0 elsewhere, weighted by the underlying (normalized) mass distribution? It's precisely the total normalized mass contained within region $$A$$. So, $$E[I_A]$$ naturally captures the concept of $$P(A)$$ as the relative mass of $$A$$.
+
+### Deriving Kolmogorov's Axioms from Expectation Axioms
+
+Let's verify that this definition of $$P(A)$$ satisfies the standard Kolmogorov axioms, assuming the expectation axioms hold for $$E$$. Let $$\mathcal{F}$$ be the collection of events $$A$$ for which $$E[I_A]$$ is defined.
+
+1.  **Non-negativity:** $$I_A(\omega)$$ is always 0 or 1, so $$I_A(\omega) \ge 0$$. By the Positivity axiom of $$E$$,
     
     $$
-    E[I_E] = \int_{\Omega} I_E(\omega) p(\omega) d\omega = \int_{E} 1 \cdot p(\omega) d\omega + \int_{\Omega \setminus E} 0 \cdot p(\omega) d\omega = \int_E p(\omega) d\omega
+    P(A) = E[I_A] \ge 0
     $$
+    *(Satisfied)*
 
-*   **Discrete Case:** Let $$P(\omega_i)$$ be the PMF over $$\Omega$$.
+2.  **Normalization:** The indicator of the whole space is $$I_\Omega(\omega) = 1$$ for all $$\omega$$. By the Normalization axiom of $$E$$,
     
     $$
-    E[I_E] = \sum_{\omega_i \in \Omega} I_E(\omega_i) P(\omega_i) = \sum_{\omega_i \in E} 1 \cdot P(\omega_i) + \sum_{\omega_i \in \Omega \setminus E} 0 \cdot P(\omega_i) = \sum_{\omega_i \in E} P(\omega_i)
+    P(\Omega) = E[I_\Omega] = E[1] = 1
     $$
+    *(Satisfied)*
 
-In both cases, we recognize the right-hand side as the definition of the probability of event $$E$$ based on its mass distribution (integrating the density over the region or summing the point masses in the subset). We arrive at a remarkable result:
+3.  **Countable Additivity:** Let $$A_1, A_2, \dots$$ be pairwise disjoint events in $$\mathcal{F}$$. Let $$A = \cup_{i=1}^\infty A_i$$, and assume $$A \in \mathcal{F}$$. We need $$P(A) = \sum_{i=1}^\infty P(A_i)$$.
+    *   Define partial sum indicators $$S_n = \sum_{i=1}^n I_{A_i}$$. Since $$A_i$$ are disjoint, $$S_n(\omega)$$ is 1 if $$\omega$$ is in one of $$A_1, \dots, A_n$$, and 0 otherwise. So, $$S_n = I_{\cup_{i=1}^n A_i}$$.
+    *   By Linearity of $$E$$, $$E[S_n] = \sum_{i=1}^n E[I_{A_i}] = \sum_{i=1}^n P(A_i)$$.
+    *   The sequence $$S_n(\omega)$$ is non-decreasing ($$0 \le S_n \le S_{n+1}$$) because we are adding non-negative terms.
+    *   The pointwise limit is $$\lim_{n\to\infty} S_n(\omega) = \sum_{i=1}^\infty I_{A_i}(\omega)$$. Since the sets are disjoint, this sum is 1 if $$\omega \in A_i$$ for some $$i$$, and 0 otherwise. Thus, $$\lim_{n\to\infty} S_n(\omega) = I_A(\omega)$$.
+    *   By the Monotone Convergence axiom of $$E$$, $$E[I_A] = E[\lim_{n\to\infty} S_n] = \lim_{n\to\infty} E[S_n]$$.
+    *   Substituting: $$P(A) = \lim_{n\to\infty} \sum_{i=1}^n P(A_i) = \sum_{i=1}^\infty P(A_i)$$.
+    *(Satisfied)*
 
-$$
-E[I_E] = P(E)
-$$
+We have successfully derived the standard axioms of probability starting from axioms about the averaging process (expectation).
 
-**The probability of an event $$E$$ is precisely the expected value of its indicator function.**
+### Explorations: Properties via Expectation
 
-This provides a powerful connection and an alternative philosophical foundation:
-*   From the "probability first" perspective, $$P(E)$$ is the fundamental measure of mass/likelihood, defined axiomatically. Expectation $$E[X]$$ is derived from it as a weighted average.
-*   From the "expectation first" perspective, expectation (calculating weighted averages / centers of mass) is fundamental. Probability $$P(E)$$ is then *defined* as the expectation of the indicator $$I_E$$. One would start by postulating the properties of the expectation operator (like linearity) and then derive the axioms of probability from the definition $$P(E) = E[I_E]$$.
+Let's see how intuitive properties of probability arise directly from manipulating expectations of indicator functions.
 
-This second perspective is appealing because it grounds probability in the arguably more operational concept of averaging. The physical intuition remains robust: $$P(E) = E[I_E]$$ is the "average value" of the indicator function across the universe, weighted by the mass distribution. Since the indicator is 1 in region $$E$$ and 0 outside, this average value naturally isolates the total normalized mass within region $$E$$, which is exactly our original definition of $$P(E)$$.
+1.  **$$P(\emptyset) = 0$$?**
+    *   Indicator: $$I_\emptyset(\omega) = 0$$ for all $$\omega$$. The function is identically zero.
+    *   Expectation: By linearity, $$E[0] = E[0 \cdot 1] = 0 \cdot E[1] = 0$$.
+    *   Result: $$P(\emptyset) = E[I_\emptyset] = E[0] = 0$$. (The average value of zero is zero).
 
-So, whether you start by defining the normalized mass $$P(E)$$ of regions using Kolmogorov's axioms, or by defining the center-of-mass operation $$E[X]$$ as fundamental and applying it to indicators, you arrive at the same consistent and powerful framework, beautifully captured by the physical analogy of mass distributions. This connection helps demystify the formal definitions by grounding them in tangible concepts.
+2.  **$$P(A^c) = 1 - P(A)$$?**
+    *   Indicators: $$I_A(\omega) + I_{A^c}(\omega) = 1$$ for all $$\omega$$. So, $$I_A + I_{A^c} = 1$$ (as functions).
+    *   Expectation: Apply $$E$$ to both sides. By linearity and normalization:
+        
+        $$
+        E[I_A + I_{A^c}] = E[1]
+        $$
+        
+        $$
+        E[I_A] + E[I_{A^c}] = 1
+        $$
+    *   Result: $$P(A) + P(A^c) = 1$$. (The average "in A" plus the average "not in A" must be 1).
+
+3.  **If $$A \subseteq B$$, then $$P(A) \le P(B)$$?**
+    *   Indicators: If $$A \subseteq B$$, then whenever $$I_A(\omega) = 1$$, we must have $$I_B(\omega) = 1$$. If $$I_A(\omega) = 0$$, $$I_B(\omega)$$ could be 0 or 1. In all cases, $$I_A(\omega) \le I_B(\omega)$$. So the function $$I_A$$ is pointwise less than or equal to $$I_B$$.
+    *   Expectation: By Positivity/Monotonicity of $$E$$ (if $$X \le Y$$, then $$E[X] \le E[Y]$$),
+        
+        $$
+        I_A \le I_B \implies E[I_A] \le E[I_B]
+        $$
+    *   Result: $$P(A) \le P(B)$$. (If region A is smaller than B, its average "in-ness" cannot be larger).
+
+4.  **$$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$?**
+    *   Indicators: Crucial identity: $$I_{A \cup B} = I_A + I_B - I_{A \cap B}$$. Verify this pointwise:
+        *   If $$\omega \notin A \cup B$$, then $$0 = 0 + 0 - 0$$.
+        *   If $$\omega \in A$$ only ($$\omega \in A \setminus B$$), then $$1 = 1 + 0 - 0$$.
+        *   If $$\omega \in B$$ only ($$\omega \in B \setminus A$$), then $$1 = 0 + 1 - 0$$.
+        *   If $$\omega \in A \cap B$$, then $$1 = 1 + 1 - 1$$.
+    *   Expectation: Apply $$E$$ to $$I_{A \cup B} = I_A + I_B - I_{A \cap B}$$. By linearity:
+        
+        $$
+        E[I_{A \cup B}] = E[I_A] + E[I_B] - E[I_{A \cap B}]
+        $$
+    *   Result: $$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$. (Follows directly from indicator algebra and linearity of averaging).
+
+These examples demonstrate how the algebra of events (union, intersection, complement) translates into the algebra of indicator functions, and how the properties of expectation (linearity, positivity) directly yield the rules of probability.
+
+## Conclusion: Two Sides of the Same Coin
+
+We've explored two perspectives on the foundations of probability theory:
+
+1.  **Probability Measure First:** Starts with axioms for assigning normalized, additive mass $$P(E)$$ to regions (events) $$E$$. Expectation $$E[X]$$ is then derived as a weighted average using $$P$$. This aligns well with measure theory.
+2.  **Expectation First:** Starts with axioms for an averaging operator $$E[X]$$ (center of mass) based on intuitive properties like linearity and positivity. Probability $$P(A)$$ is then *defined* as the average of the indicator function, $$P(A) = E[I_A]$$.
+
+Both approaches lead to the same powerful and consistent mathematical framework. However, grounding probability in **expectation**, viewed as a generalized **center of mass** or **weighted average**, provides a arguably more direct link to physical intuition and operational meaning (averaging measurements). The axioms of expectation feel concrete, describing how averages should behave. Defining $$P(A) = E[I_A]$$ beautifully connects the "mass" of a region to the average value of the property "being in that region".
+
+Thinking in terms of centers of mass, weighted averages, and the properties of the expectation operator can significantly aid in building a deeper, more tangible understanding of probability theory and its applications. It highlights that probability itself is a special case of expectation – the expected value of a binary question.
 
 ## Further Reading
 
-- [Betancourt (2018) - Probability Theory (For Scientists and Engineers)](https://betanalpha.github.io/assets/case_studies/probability_theory.html) - A comprehensive introduction with a focus on intuition.
-- [Bernstein (2019) - Demystifying measure-theoretic probability theory (part 1: probability spaces)](https://mbernste.github.io/posts/measure_theory_1/) - Explains the measure-theoretic foundations.
-- [Pollard (2002) - A User's Guide to Measure Theoretic Probability](https://api.pageplace.de/preview/DT0400.9781139239066_A23867160/preview-9781139239066_A23867160.pdf) - A classic text on the subject (link is to a preview).
-- [Beck (2018) - Density w.r.t. counting measure and probability mass function (discrete rv)](https://math.stackexchange.com/questions/2847421/density-w-r-t-counting-measure-and-probability-mass-function-discrete-rv) - StackExchange discussion connecting discrete and continuous views via measure theory.
-- [Harremoës (2025) - Probability via Expectation Measures](https://www.mdpi.com/1099-4300/27/2/102) - Explores the "expectation first" approach.
+- [Betancourt (2018) - Probability Theory (For Scientists and Engineers)](https://betanalpha.github.io/assets/case_studies/probability_theory.html)
+ - [Bernstein (2019) - Demystifying measure-theoretic probability theory (part 1: probability spaces)](https://mbernste.github.io/posts/measure_theory_1/)
+ - [Pollard (2002) - A User's Guide to Measure Theoretic Probability](https://api.pageplace.de/preview/DT0400.9781139239066_A23867160/preview-9781139239066_A23867160.pdf)
+ - [Beck (2018) - Density w.r.t. counting measure and probability mass function (discrete rv)](https://math.stackexchange.com/questions/2847421/density-w-r-t-counting-measure-and-probability-mass-function-discrete-rv)
+- [Whittle, Peter. *Probability via Expectation*. Springer Science & Business Media, 2000.](https://link.springer.com/book/10.1007/978-1-4612-0509-8) - The classic text formalizing the expectation-centric approach.
+- [Daniell, P. J. "A General Form of Integral." *Annals of Mathematics* (1918): 279-294.](https://www.jstor.org/stable/1967495) - The original work on defining integration via a functional (similar to expectation).
+- [Harremoës, Peter. "Probability via Expectation Measures." *Entropy* 27.2 (2025): 102.](https://www.mdpi.com/1099-4300/27/2/102) - A more recent exploration of this foundation.
+- [Harremoës, Peter. "Probability via Expectation Measures." *Entropy* 27.2 (2025): 102.](https://www.mdpi.com/1099-4300/27/2/102)
+- [Terence Tao. *An Introduction to Measure Theory*. American Mathematical Society, 2011.](https://terrytao.files.wordpress.com/2012/12/gsm-126-tao5-measure-book.pdf)

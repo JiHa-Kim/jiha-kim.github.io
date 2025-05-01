@@ -300,7 +300,11 @@ jekyll_compose:
         1. text
 
           $$
-          block
+          block 1
+          $$
+
+          $$
+          block 2
           $$
 
           (continued) text
@@ -309,6 +313,8 @@ jekyll_compose:
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
         Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
+
+        Please do not modify the sources, references, further reading material without explicit request.
     posts:
       description:
       image:
@@ -373,7 +379,11 @@ jekyll_compose:
         1. text
 
           $$
-          block
+          block 1
+          $$
+
+          $$
+          block 2
           $$
 
           (continued) text
@@ -382,6 +392,8 @@ jekyll_compose:
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
         Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
+
+        Please do not modify the sources, references, further reading material without explicit request.
     notes: # <- collection name == folder name (_notes)
       layout: note # so you don’t type it each time
       math: true # always load MathJax
@@ -442,7 +454,11 @@ jekyll_compose:
         1. text
 
           $$
-          block
+          block 1
+          $$
+
+          $$
+          block 2
           $$
 
           (continued) text
@@ -451,3 +467,5 @@ jekyll_compose:
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
         Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
+
+        Please do not modify the sources, references, further reading material without explicit request.
