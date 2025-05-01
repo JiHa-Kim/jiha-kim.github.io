@@ -103,13 +103,13 @@ Probability theory is typically built on Kolgomorov's axioms and measure theory.
 
 ## Perspective 1: Probability as Normalized Mass (The Standard Approach)
 
+For some pictures, [Betancourt (2018) - Probability Theory (For Scientists and Engineers)](https://betanalpha.github.io/assets/case_studies/probability_theory.html) and - [Bernstein (2019) - Demystifying measure-theoretic probability theory (part 1: probability spaces)](https://mbernste.github.io/posts/measure_theory_1/) are great.
+
 Let's imagine a simple world, our *universe* or *sample space* $$\Omega$$. This space contains various *objects* or regions, which we'll call *events* $$E$$. Think of $$\Omega$$ as a block of material, perhaps of varying density, and events $$E$$ as specific parts or sub-regions within that block.
 
 A fundamental question is: How much "stuff" or **mass** does a given region $$E$$ contain?
 
-In physics, we measure mass using units like kilograms. But these units are relative to arbitrary standards. Furthermore, the absolute mass depends on the total size of our universe. If we scale the entire universe up, maintaining the same density distribution, the mass of every object increases proportionally.
-
-Is there a way to measure the "amount" of an object that's independent of the overall scale? Yes: we can measure its mass *relative* to the total mass of the universe. This gives us a normalized measure:
+In physics, we measure mass using units like kilograms or pounds. But these units are relative to arbitrary standards and definitions. Is there a way to measure the "amount" of an object that's independent of the overall scale? Yes: we can measure its mass *relative* to the total mass of the universe. This gives us a normalized measure:
 
 $$
 \text{Relative Mass of } E = \frac{\text{Mass of object } E}{\text{Total Mass of Universe } \Omega}
@@ -123,32 +123,36 @@ Note that in doing so, we give up the notion of absolute size. Scaling up our en
 
 Mathematically, we need to formalize which "regions" or "objects" we can actually assign a probability to.
 *   The *sample space* $$\Omega$$ is the set of all possible fundamental outcomes.
-*   *Events* are the specific subsets of $$\Omega$$ for which we want to define a probability. We can't necessarily assign a well-behaved probability to *every* conceivable subset of $$\Omega$$ (especially in continuous spaces, due to technical paradoxes like Banach-Tarski, although these are rarely encountered in practical probability). We need a well-behaved collection of measurable subsets.
+*   *Events* are the specific subsets of $$\Omega$$ for which we want to define a probability. We can't necessarily assign a well-behaved probability to *every* conceivable subset of $$\Omega$$ (especially in continuous spaces, due to technical paradoxes like Banach-Tarski, although these are rarely encountered in practical probability). We need a well-behaved collection of *measurable* subsets.
 
 **Building the Collection of Measurable Events ($$\mathcal{F}$$):**
 
-Imagine we can partition our universe $$\Omega$$ into a set of basic, indivisible, non-overlapping elements called **atoms**, $$A_1, A_2, \dots$$ such that $$\Omega = \cup_{i} A_i$$ and $$A_i \cap A_j = \emptyset$$ for $$i \neq j$$. This could be a finite or countably infinite partition. Think of these atoms as the fundamental building blocks of our space – the smallest possible pieces we can distinguish and measure in this context.
+We need a collection of subsets (events) that is "rich enough" to work with, allowing us to combine and manipulate events in logical ways. We might start with a set of basic "building block" events we care about (e.g., intervals on the real line). Then, we need to ensure that we can perform natural operations on these events and still have a measurable result. What properties should this collection of measurable sets, denoted $$\mathcal{F}$$, have?
 
-*   **Example (Discrete):** For a single die roll, $$\Omega = \{1, 2, 3, 4, 5, 6\}$$. The natural partition is into the individual outcomes: $$A_1=\{1\}, A_2=\{2\}, ..., A_6=\{6\}$$. These are the atoms.
-*   **Example (Continuous):** If $$\Omega = [0, 1]$$ and we are only interested in whether the outcome is in $$[0, 0.5]$$ or $$(0.5, 1]$$, then $$A_1 = [0, 0.5]$$ and $$A_2 = (0.5, 1]$$ act as the atoms *for the specific questions we are asking*. Any measurable set in the generated sigma-algebra will be a union of these two atoms (or $$\emptyset$$ or $$\Omega$$).
+1.  We need to be able to measure the whole space $$\Omega$$.
+2.  If we can measure an event $$E$$, we should be able to measure its complement $$E^c$$ ("not E").
+3.  If we can measure a sequence of events $$E_1, E_2, \dots$$, we should be able to measure their union $$\cup E_i$$ ("E1 or E2 or ..."). Importantly, this needs to hold even for *countably infinite* sequences to handle limits and continuous spaces properly.
 
-If we can assign a probability (mass) $$P(A_i)$$ to each basic atom $$A_i$$, what other sets should we logically be able to determine the probability of?
+These requirements lead to the definition of a sigma-algebra.
 
-1.  **Unions of Atoms:** Any set formed by combining some of these basic atoms, like $$E = A_1 \cup A_3 \cup A_7$$, should be measurable. Its probability should be the sum of the probabilities of the constituent atoms (due to additivity). This must hold for finite and *countable* unions of atoms.
-2.  **The Whole Space:** The entire universe $$\Omega$$ is the union of all atoms, so it must be measurable (and have probability 1).
-3.  **The Empty Set:** The "union" of zero atoms, the empty set $$\emptyset$$, must be measurable (and have probability 0).
-4.  **Complements:** If we can measure a set $$E$$ formed by some collection of atoms (say, $$E = \cup_{j \in J} A_j$$), we should also be able to measure what's *left over*, its complement $$E^c = \Omega \setminus E$$. This complement is just the union of all the *other* atoms ($$E^c = \cup_{i \notin J} A_i$$), so it should also be measurable. Its probability should be $$1 - P(E)$$.
+<blockquote class="prompt-info" markdown="1">
+#### Definition - Sigma-Algebra (Collection of Measurable Events)
 
-The collection of all subsets that can be formed by taking countable unions of the partition elements (the atoms $$A_i$$), including the empty union $$\emptyset$$ and the union of all elements $$\Omega$$, satisfies these closure properties. This collection is called the **sigma-algebra generated by the partition** $$\{A_i\}$$. It represents all the "events" whose occurrence can be determined just by knowing which atom $$A_i$$ the outcome $$\omega$$ belongs to.
+Let $$\Omega$$ be the sample space. A collection $$\mathcal{F}$$ of subsets of $$\Omega$$ is called a **sigma-algebra** (or **sigma-field**) if it satisfies the following properties, motivated by the need to combine and dissect measurable regions:
 
-More generally, we don't always start with an atomic partition. We might start with an initial collection $$\mathcal{C}$$ of events we are interested in (e.g., for the interval $$[0,1]$$, perhaps $$\mathcal{C}$$ is the collection of all intervals $$[a,b]$$). We then need our collection of measurable sets, $$\mathcal{F}$$, to include $$\mathcal{C}$$ and be the smallest collection that is closed under the operations needed for logical and measure-theoretic consistency: complement ("not"), countable union ("or"), and countable intersection ("and", which follows from complement and union via De Morgan's laws). This generated sigma-algebra might not have obvious "atoms" in the same way a simple partition does (like the Borel sigma-algebra on the real line).
+1.  **Contains the Whole:** $$\Omega \in \mathcal{F}$$.
+    *   *(Intuition: The entire universe must be measurable.)*
+2.  **Closed under Complementation:** If $$E \in \mathcal{F}$$, then its complement $$E^c = \Omega \setminus E$$ is also in $$\mathcal{F}$$.
+    *   *(Intuition: If we can measure a region, we can measure what's outside it - "not E".)*
+3.  **Closed under Countable Unions:** If $$E_1, E_2, \dots$$ is a countable sequence of sets in $$\mathcal{F}$$, then their union $$\bigcup_{i=1}^\infty E_i$$ is also in $$\mathcal{F}$$.
+    *   *(Intuition: If we can measure individual building blocks (even infinitely many), we can measure the region formed by combining them - "E1 or E2 or ...".)*
 
-The **sigma-algebra** (or **sigma-field**) $$\mathcal{F}$$ is formally defined as a collection of subsets of $$\Omega$$ that satisfies:
-1.  $$\Omega \in \mathcal{F}$$ (The whole universe is measurable).
-2.  If $$E \in \mathcal{F}$$, then $$E^c \in \mathcal{F}$$ (Closed under complementation).
-3.  If $$E_1, E_2, \dots \in \mathcal{F}$$, then $$\bigcup_{i=1}^\infty E_i \in \mathcal{F}$$ (Closed under countable unions).
+*(Note: Closure under countable intersections, "E1 and E2 and ...", follows from properties 2 and 3 via De Morgan's laws: $$\cap E_i = (\cup E_i^c)^c$$)*.
 
-This structure ensures that if we start with some basic measurable sets (like atoms of a partition, or intervals), we can perform standard logical and limiting operations and still end up with measurable sets whose probabilities are well-defined.
+Often, we start with a basic collection $$\mathcal{C}$$ of events we want to measure (e.g., intervals). The sigma-algebra $$\mathcal{F}$$ used is typically the **smallest** collection that contains $$\mathcal{C}$$ and satisfies the above axioms. This is called the *sigma-algebra generated by* $$\mathcal{C}$$, denoted $$\sigma(\mathcal{C})$$. It represents all the events constructible from the initial building blocks $$\mathcal{C}$$ using the allowed operations (complement, countable union/intersection). It ensures we have a consistent framework for assigning probabilities.
+</blockquote>
+
+This structure ensures that our collection of measurable sets $$\mathcal{F}$$ is stable under the fundamental operations needed to build complex events from simpler ones, reflecting our intuition about measuring combined or remaining parts of objects.
 
 With the sample space $$\Omega$$ and the sigma-algebra $$\mathcal{F}$$ of measurable events defined, we can now introduce the probability measure $$P$$.
 
@@ -194,7 +198,7 @@ How is this probability mass distributed?
 
 Now, let's shift our thinking. Instead of focusing first on the *mass of regions* ($$P(E)$$), let's consider *properties* defined across our universe $$\Omega$$.
 
-Suppose each point $$\omega$$ in our universe has some numerical value associated with it, representing a property we care about. We denote this property by a function $$X: \Omega \to \mathbb{R}$$. In probability, $$X$$ is called a **random variable**.
+Suppose each point $$\omega$$ in our universe has some numerical value associated with it, representing a property we care about. We denote this property by a function $$X: \Omega \to \mathbb{R}$$. In probability, $$X$$ is called a **random variable**. (Technically, for $$X$$ to be a random variable, it must be *measurable*, meaning that the pre-image of any interval $$(-\infty, x]$$ must be an event in $$\mathcal{F}$$. This ensures we can ask questions like "What is the probability that $$X \le x$$?")
 
 *   **Example (Physics):** Let $$\Omega$$ be a non-uniform rod along the x-axis, from $$x=0$$ to $$x=L$$. Let $$\omega$$ be a point on the rod. The position itself is a property: $$X(\omega) = \omega$$. The density of the rod at point $$\omega$$ defines our "mass distribution" $$\rho(\omega)$$.
 *   **Example (Games):** Let $$\Omega$$ be the set of outcomes of rolling two dice, $$\Omega = \{(1,1), (1,2), ..., (6,6)\}$$. Each outcome $$\omega = (d_1, d_2)$$ is a point. The sum of the dice is a property: $$X(\omega) = d_1 + d_2$$. Assuming fair dice, each of the 36 outcomes has equal mass $$1/36$$.
@@ -214,7 +218,7 @@ $$
 \text{Center of Mass}_X = \frac{\sum_i X(\omega_i) m_i}{\sum_i m_i}
 $$
 
-Now, let's assume our mass distribution is already **normalized**, meaning the total mass is 1 (i.e., $$\int_\Omega \rho(\omega) d\omega = 1$$ or $$\sum_i m_i = 1$$). This normalized mass distribution is precisely what a probability measure $$P$$ represents.
+Now, let's assume our mass distribution is already **normalized**, meaning the total mass is 1 (i.e., $$\int_\Omega \rho(\omega) d\omega = 1$$ or $$\sum_i m_i = 1$$). This normalized mass distribution is precisely what a probability measure $$P$$ represents (where $$P(d\omega) = \rho(\omega)d\omega$$ in the continuous case or $$P(\omega_i)=m_i$$ in the discrete case).
 
 In this context, the center of mass calculation simplifies. We call this the **expected value** or **expectation** of the random variable $$X$$, denoted $$E[X]$$.
 
@@ -224,6 +228,7 @@ $$
 
 *   Continuous case (with PDF $$p(\omega)$$): $$E[X] = \int_{\Omega} X(\omega) p(\omega) d\omega$$
 *   Discrete case (with PMF $$P(\omega_i)$$): $$E[X] = \sum_{\omega_i \in \Omega} X(\omega_i) P(\omega_i)$$
+*   General measure-theoretic definition: $$E[X] = \int_{\Omega} X(\omega) dP(\omega)$$ (This is the Lebesgue integral of $$X$$ with respect to the measure $$P$$).
 
 The expectation $$E[X]$$ is the **balance point** of the distribution along the axis defined by the values of $$X$$. It's the average value of the property $$X$$, weighted by the probability (normalized mass) at each point.
 
@@ -246,14 +251,14 @@ Let $$\mathcal{H}$$ be a suitable class of functions (random variables) $$X: \Om
     
     *   *(Center of Mass / Averaging Intuition: If you scale all property values by $$a$$, the average scales by $$a$$. The average of a sum of properties is the sum of their averages. This is fundamental to how averages behave.)*
     
-2.  **Positivity (Monotonicity):** If $$X \in \mathcal{H}$$ and $$X(\omega) \ge 0$$ for all $$\omega \in \Omega$$, then:
+2.  **Non-negativity (Monotonicity):** If $$X \in \mathcal{H}$$ and $$X(\omega) \ge 0$$ for all $$\omega \in \Omega$$, then:
     
     $$
     E[X] \ge 0
     $$
     
     *   *(Intuition: If a property is always non-negative, its average value cannot be negative.)*
-    *   *Consequence:* If $$X(\omega) \ge Y(\omega)$$ for all $$\omega$$, then $$E[X] \ge E[Y]$$. (The average of the bigger property must be at least as large as the average of the smaller one).
+    *   *Consequence:* By linearity, if $$X(\omega) \ge Y(\omega)$$ for all $$\omega$$, then $$E[X] \ge E[Y]$$. (The average of the bigger property must be at least as large as the average of the smaller one).
     
 3.  **Normalization (Constant Preservation):** The constant function $$1$$ (where $$1(\omega) = 1$$ for all $$\omega$$) is in $$\mathcal{H}$$, and:
     
@@ -285,7 +290,7 @@ $$
 I_A(\omega) = \begin{cases} 1 & \text{if } \omega \in A \\ 0 & \text{if } \omega \notin A \end{cases}
 $$
 
-Think of $$I_A$$ as a random variable representing the property "being inside region A". It's like a switch: ON (1) inside $$A$$, OFF (0) outside $$A$$.
+Think of $$I_A$$ as a random variable representing the property "being inside region A". It's like a switch: ON (1) inside $$A$$, OFF (0) outside $$A$$. For this to work, the indicator function $$I_A$$ must be in the class $$\mathcal{H}$$ for which the expectation is defined (or be approximable by functions in $$\mathcal{H}$$). The set of all such $$A$$ will form our sigma-algebra $$\mathcal{F}$$.
 
 We can now *define* the probability of $$A$$ as the expected value (the average value) of this "in-A-ness" property:
 
@@ -304,9 +309,9 @@ $$
 
 ### Deriving Kolmogorov's Axioms from Expectation Axioms
 
-Let's verify that this definition of $$P(A)$$ satisfies the standard Kolmogorov axioms, assuming the expectation axioms hold for $$E$$. Let $$\mathcal{F}$$ be the collection of events $$A$$ for which $$E[I_A]$$ is defined.
+Let's verify that this definition of $$P(A)$$ satisfies the standard Kolmogorov axioms, assuming the expectation axioms hold for $$E$$. Let $$\mathcal{F}$$ be the collection of events $$A$$ for which $$E[I_A]$$ is defined (this collection can be shown to be a sigma-algebra).
 
-1.  **Non-negativity:** $$I_A(\omega)$$ is always 0 or 1, so $$I_A(\omega) \ge 0$$. By the Positivity axiom of $$E$$,
+1.  **Non-negativity:** $$I_A(\omega)$$ is always 0 or 1, so $$I_A(\omega) \ge 0$$. By the Non-negativity axiom of $$E$$,
     
     $$
     P(A) = E[I_A] \ge 0
@@ -318,12 +323,12 @@ Let's verify that this definition of $$P(A)$$ satisfies the standard Kolmogorov 
     P(\Omega) = E[I_\Omega] = E[1] = 1
     $$
 
-3.  **Countable Additivity:** Let $$A_1, A_2, \dots$$ be pairwise disjoint events in $$\mathcal{F}$$. Let $$A = \cup_{i=1}^\infty A_i$$, and assume $$A \in \mathcal{F}$$. We need $$P(A) = \sum_{i=1}^\infty P(A_i)$$.
+3.  **Countable Additivity:** Let $$A_1, A_2, \dots$$ be pairwise disjoint events in $$\mathcal{F}$$. Let $$A = \cup_{i=1}^\infty A_i$$, and assume $$A \in \mathcal{F}$$ (which it will be if $$\mathcal{F}$$ is the sigma-algebra induced by $$E$$). We need $$P(A) = \sum_{i=1}^\infty P(A_i)$$.
     *   Define partial sum indicators $$S_n = \sum_{i=1}^n I_{A_i}$$. Since $$A_i$$ are disjoint, $$S_n(\omega)$$ is 1 if $$\omega$$ is in one of $$A_1, \dots, A_n$$, and 0 otherwise. So, $$S_n = I_{\cup_{i=1}^n A_i}$$.
     *   By Linearity of $$E$$, $$E[S_n] = \sum_{i=1}^n E[I_{A_i}] = \sum_{i=1}^n P(A_i)$$.
-    *   The sequence $$S_n(\omega)$$ is non-decreasing ($$0 \le S_n \le S_{n+1}$$) because we are adding non-negative terms.
-    *   The pointwise limit is $$\lim_{n\to\infty} S_n(\omega) = \sum_{i=1}^\infty I_{A_i}(\omega)$$. Since the sets are disjoint, this sum is 1 if $$\omega \in A_i$$ for some $$i$$, and 0 otherwise. Thus, $$\lim_{n\to\infty} S_n(\omega) = I_A(\omega)$$.
-    *   By the Monotone Convergence axiom of $$E$$, $$E[I_A] = E[\lim_{n\to\infty} S_n] = \lim_{n\to\infty} E[S_n]$$.
+    *   The sequence $$S_n(\omega)$$ is non-decreasing ($$0 \le S_n(\omega) \le S_{n+1}(\omega)$$) because we are adding non-negative indicator functions.
+    *   The pointwise limit is $$\lim_{n\to\infty} S_n(\omega) = \sum_{i=1}^\infty I_{A_i}(\omega)$$. Since the sets are disjoint, this sum is 1 if $$\omega \in A_i$$ for some $$i$$ (i.e., $$\omega \in A$$), and 0 otherwise. Thus, $$\lim_{n\to\infty} S_n(\omega) = I_A(\omega)$$.
+    *   By the Monotone Convergence axiom of $$E$$ (applied to the non-negative, increasing sequence $$S_n$$ converging to $$I_A$$), we have $$E[I_A] = E[\lim_{n\to\infty} S_n] = \lim_{n\to\infty} E[S_n]$$.
     *   Substituting: $$P(A) = \lim_{n\to\infty} \sum_{i=1}^n P(A_i) = \sum_{i=1}^\infty P(A_i)$$.
 
 We have successfully derived the standard axioms of probability starting from axioms about the averaging process (expectation).
@@ -352,7 +357,7 @@ Let's see how intuitive properties of probability arise directly from manipulati
 
 3.  **If $$A \subseteq B$$, then $$P(A) \le P(B)$$?**
     *   Indicators: If $$A \subseteq B$$, then whenever $$I_A(\omega) = 1$$, we must have $$I_B(\omega) = 1$$. If $$I_A(\omega) = 0$$, $$I_B(\omega)$$ could be 0 or 1. In all cases, $$I_A(\omega) \le I_B(\omega)$$. So the function $$I_A$$ is pointwise less than or equal to $$I_B$$.
-    *   Expectation: By Positivity/Monotonicity of $$E$$ (if $$X \le Y$$, then $$E[X] \le E[Y]$$),
+    *   Expectation: By Non-negativity/Monotonicity of $$E$$ (if $$X \le Y$$, then $$E[X] \le E[Y]$$),
         
         $$
         I_A \le I_B \implies E[I_A] \le E[I_B]
@@ -364,7 +369,7 @@ Let's see how intuitive properties of probability arise directly from manipulati
         *   If $$\omega \notin A \cup B$$, then $$0 = 0 + 0 - 0$$.
         *   If $$\omega \in A$$ only ($$\omega \in A \setminus B$$), then $$1 = 1 + 0 - 0$$.
         *   If $$\omega \in B$$ only ($$\omega \in B \setminus A$$), then $$1 = 0 + 1 - 0$$.
-        *   If $$\omega \in A \cap B$$, then $$1 = 1 + 1 - 1$$.
+        *   If $$\omega \in A \cap B$$, then $$1 = 1 + 1 - 1$.
     *   Expectation: Apply $$E$$ to $$I_{A \cup B} = I_A + I_B - I_{A \cap B}$$. By linearity:
         
         $$
@@ -372,27 +377,31 @@ Let's see how intuitive properties of probability arise directly from manipulati
         $$
     *   Result: $$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$. (Follows directly from indicator algebra and linearity of averaging).
 
-These examples demonstrate how the algebra of events (union, intersection, complement) translates into the algebra of indicator functions, and how the properties of expectation (linearity, positivity) directly yield the rules of probability.
+These examples demonstrate how the algebra of events (union, intersection, complement) translates into the algebra of indicator functions, and how the properties of expectation (linearity, non-negativity) directly yield the rules of probability.
 
 ## Conclusion: Two Sides of the Same Coin
 
 We've explored two perspectives on the foundations of probability theory:
 
-1.  **Probability Measure First:** Starts with axioms for assigning normalized, additive mass $$P(E)$$ to regions (events) $$E$$. Expectation $$E[X]$$ is then derived as a weighted average using $$P$$. This aligns well with measure theory.
-2.  **Expectation First:** Starts with axioms for an averaging operator $$E[X]$$ (center of mass) based on intuitive properties like linearity and positivity. Probability $$P(A)$$ is then *defined* as the average of the indicator function, $$P(A) = E[I_A]$$.
+1.  **Probability Measure First:** Starts with axioms for assigning normalized, additive mass $$P(E)$$ to regions (events) $$E$$. Expectation $$E[X]$$ is then derived as a weighted average (Lebesgue integral) using $$P$$. This aligns well with measure theory and focuses on the "size" of sets.
+2.  **Expectation First:** Starts with axioms for an averaging operator $$E[X]$$ (center of mass) based on intuitive properties like linearity and non-negativity. Probability $$P(A)$$ is then *defined* as the average of the indicator function, $$P(A) = E[I_A]$$. This connects closely to the physical idea of averaging properties.
 
 Both approaches lead to the same powerful and consistent mathematical framework. However, grounding probability in **expectation**, viewed as a generalized **center of mass** or **weighted average**, provides a arguably more direct link to physical intuition and operational meaning (averaging measurements). The axioms of expectation feel concrete, describing how averages should behave. Defining $$P(A) = E[I_A]$$ beautifully connects the "mass" of a region to the average value of the property "being in that region".
 
-Thinking in terms of centers of mass, weighted averages, and the properties of the expectation operator can significantly aid in building a deeper, more tangible understanding of probability theory and its applications. It highlights that probability itself is a special case of expectation – the expected value of a binary question.
+Thinking in terms of centers of mass, weighted averages, and the properties of the expectation operator can significantly aid in building a deeper, more tangible understanding of probability theory and its applications. It highlights that probability itself is a special case of expectation – the expected value of a binary (indicator) random variable.
 
 ## Further Reading
 
-- [Betancourt (2018) - Probability Theory (For Scientists and Engineers)](https://betanalpha.github.io/assets/case_studies/probability_theory.html)
-- [Bernstein (2019) - Demystifying measure-theoretic probability theory (part 1: probability spaces)](https://mbernste.github.io/posts/measure_theory_1/)
-- [Pollard (2002) - A User's Guide to Measure Theoretic Probability](https://api.pageplace.de/preview/DT0400.9781139239066_A23867160/preview-9781139239066_A23867160.pdf)
-- [Beck (2018) - Density w.r.t. counting measure and probability mass function (discrete rv)](https://math.stackexchange.com/questions/2847421/density-w-r-t-counting-measure-and-probability-mass-function-discrete-rv)
+Visual examples
+- [Betancourt (2018) - Probability Theory (For Scientists and Engineers)](https://betanalpha.github.io/assets/case_studies/probability_theory.html) - Fairly comprehensive introduction to basics of formal probability theory
+- [Bernstein (2019) - Demystifying measure-theoretic probability theory (part 1: probability spaces)](https://mbernste.github.io/posts/measure_theory_1/) - Three-part series giving many helpful diagrams illustrating probability and measure theory concepts
+
+Books
 - [Whittle, Peter. *Probability via Expectation*. Springer Science & Business Media, 2000.](https://link.springer.com/book/10.1007/978-1-4612-0509-8) - The classic text formalizing the expectation-centric approach.
+- [Pollard (2002) - A User's Guide to Measure Theoretic Probability](https://api.pageplace.de/preview/DT0400.9781139239066_A23867160/preview-9781139239066_A23867160.pdf)
+- [Terence Tao. *An Introduction to Measure Theory*. American Mathematical Society, 2011.](https://terrytao.files.wordpress.com/2012/12/gsm-126-tao5-measure-book.pdf)
+
+Miscellaneous
+- [Beck (2018) - Density w.r.t. counting measure and probability mass function (discrete rv)](https://math.stackexchange.com/questions/2847421/density-w-r-t-counting-measure-and-probability-mass-function-discrete-rv) - Gives a useful list of definitions and an example of the counting measure.
 - [Daniell, P. J. "A General Form of Integral." *Annals of Mathematics* (1918): 279-294.](https://www.jstor.org/stable/1967495) - The original work on defining integration via a functional (similar to expectation).
 - [Harremoës, Peter. "Probability via Expectation Measures." *Entropy* 27.2 (2025): 102.](https://www.mdpi.com/1099-4300/27/2/102) - A more recent exploration of this foundation.
-- [Harremoës, Peter. "Probability via Expectation Measures." *Entropy* 27.2 (2025): 102.](https://www.mdpi.com/1099-4300/27/2/102)
-- [Terence Tao. *An Introduction to Measure Theory*. American Mathematical Society, 2011.](https://terrytao.files.wordpress.com/2012/12/gsm-126-tao5-measure-book.pdf)
