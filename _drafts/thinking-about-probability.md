@@ -88,9 +88,7 @@ llm-instructions: |
 
 Probability is a fundamental concept in mathematics and statistics. Yet, it can be hard to understand intuitively.
 
-I have not explored the topic of Bayesian thinking in detail. I plan to do so. However, before that happens, I would therefore like to write down and develop my current perspective on probability and any intuition behind it, independent of external philosophical motivations.
-
-As always, I would like to be able to see probability through a lens of the most familiar and natural topics to me, biologically, such as physics, geometry and algebra, something tangible or visualizable. I want a treatment that is easy to grasp conceptually.
+As always, I would like to be able to see probability through a lens of the most familiar and natural topics to me, such as physics, geometry and algebra, something tangible or visualizable. I want a treatment that is easy to grasp conceptually based on existing, familiar knowledge.
 
 The first thing to ask is, why should we care about probability? Probability provides a **principled way to reason about and quantify uncertainty**. Since the world is full of randomness and incomplete information, probability allows us to make **informed predictions, manage risk, and make better decisions** despite not knowing outcomes for sure. Although it finds its roots in gambling within games of chance, its applications today are endless. Here are some examples:
 
