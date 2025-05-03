@@ -13,6 +13,8 @@ tags:
 - Intuition
 - Measure Theory
 - Kolmogorov Axioms
+- Conditional Probability
+- Conditional Expectation
 math: true
 llm-instructions: |
   I am using the Chirpy theme in Jekyll.
@@ -143,7 +145,7 @@ Now, a subtle but crucial point arises: can we consistently assign a mass (or le
 *   **Motivation:** We need a way to specify which regions are "well-behaved" enough that we *can* consistently assign them a measure (mass). We need to restrict our attention to a collection of subsets for which our measurement rules work without contradiction.
 *   **Motivation for Countable Operations:** Furthermore, many concepts in probability and analysis involve limits or infinite sequences (e.g., flipping a coin infinitely many times). Our collection of measurable regions needs to be closed under *countable* unions and intersections to handle these limiting processes rigorously.
 
-*   **Analogy & Interpretation:** We need to define the **resolution** or **granularity** of our measurement system. This is done by specifying a collection $$\mathcal{F}$$ of subsets of $$\Omega$$, called a **sigma-algebra**. Only the regions $$E$$ that belong to $$\mathcal{F}$$ are considered **measurable** – meaning, only these are the regions our function $$\mu$$ can reliably assign a mass to. If a subset isn't in $$\mathcal{F}$$, it's below the resolution of our system; we cannot meaningfully ask for its mass within this framework. It's like defining the pixels on a screen; we can measure regions composed of whole pixels, but not sub-pixel areas.
+*   **Analogy & Interpretation:** We need to define the **resolution** or **granularity** of our measurement system. This is done by specifying a collection $$\mathcal{F}$$ of subsets of $$\Omega$$, called a **sigma-algebra**. Only the regions $$E$$ that belong to $$\mathcal{F}$$ are considered **measurable** – meaning, only these are the regions our function $$\mu$$ can reliably assign a mass to. If a subset isn't in $$\mathcal{F}$$, it's below the resolution of our system; we cannot meaningfully ask for its mass within this framework. It's like defining the pixels on a screen; we can measure regions composed of whole pixels, but not sub-pixel areas. A sigma-algebra ensures our collection of measurable regions is mathematically consistent (closed under necessary operations like complements and countable unions).
 
 *   **Formal Definition:**
 
@@ -219,6 +221,8 @@ A *probability measure* $$P$$ on a measurable space $$(\Omega, \mathcal{F})$$ is
     P\left(\bigcup_{i=1}^{\infty} E_i\right) = \sum_{i=1}^{\infty} P(E_i)
     $$
 </blockquote>
+
+*   **Analogy:** The probability measure $$P$$ represents the **normalized mass distribution** on our object. It tells us the *fraction* of the total mass located within any measurable region $$E$$. The normalization axiom $$P(\Omega)=1$$ simply states that the total normalized mass of the entire object is 1 (or 100%).
 
 *   **Why These Axioms Solve the Problems:**
     *   **Normalization ($$P(\Omega)=1$$):** This axiom *imposes* the finite, unitless total measure of 1 directly onto the probability space, creating the canonical scale and bypassing issues with infinite underlying measures or arbitrary physical units.
@@ -366,7 +370,129 @@ Given our object with its mass distribution $$P$$ and a measurable property $$X$
                 *   The probability density $$p(x)$$ with the (normalized) mass density $$\rho(x)$$.
                 *   The expected value $$E[X]$$ with the center of mass $$x_c$$.
         4.  **Intuitive Meaning:** The moment of inertia is larger when more mass is distributed *farther away* from the axis of rotation ($$x_c$$). Similarly, the variance is larger when more probability mass is assigned to values of $$X$$ *farther away* from the mean ($$E[X]$$). Both quantities use the squared distance term ($$(X - E[X])^2$$ or $$(x_i - x_c)^2$$) to heavily weight these distant contributions.
-        5.  **Summary:** Variance ($$Var(X)$$) is the direct mathematical analogue of the moment of inertia of the probability distribution (viewed as a normalized mass distribution) calculated around its center of mass ($$E[X]$$). It quantifies how "spread out" or "dispersed" the probability mass is around the average value, just like the moment of inertia quantifies how spread out physical mass is around the center of mass in terms of resistance to rotation. A high variance distribution is like a flywheel with most mass near the rim (high moment of inertia, spread out); a low variance distribution is like a compact object with mass near the center (low moment of inertia, concentrated).
+
+## Updating Beliefs: Conditional Probability ($$P(A \mid B)$$)
+
+Often, we receive partial information about the outcome of a random phenomenon, and we need to update our probabilities accordingly. For instance, if we rolled the die, and someone tells us the result was an even number, how does this change the probability that the result was a 2? This leads to the concept of **conditional probability**.
+
+*   **Motivation:** We want to formalize how knowledge of one event ($$B$$ occurring) influences the likelihood of another event ($$A$$).
+*   **Analogy: Zooming In on Mass:** Receiving information that event $$B$$ occurred is like **zooming in** on our object ($$\Omega$$) and focusing *only* on the region $$B$$. We discard everything outside $$B$$ and examine the mass distribution *within* this new, smaller world. Conditional probability $$P(A \mid B)$$ represents the fraction of the *remaining* mass (within $$B$$) that corresponds to event $$A$$. It's the **re-normalized mass distribution** when our view is restricted to region $$B$$.
+*   **Formal Definition:** The **conditional probability** of event $$A$$ occurring *given* that event $$B$$ has occurred (where $$P(B) > 0$$) is defined as:
+
+<blockquote class="prompt-tip" markdown="1">
+#### Definition - Conditional Probability
+
+$$
+P(A \mid B) = \frac{P(A \cap B)}{P(B)}
+$$
+</blockquote>
+*   **Interpretation:**
+    *   $$P(A \cap B)$$ is the probability (original normalized mass) contained in the region where *both* A and B occur (the overlap).
+    *   $$P(B)$$ is the total probability (original normalized mass) contained in the region $$B$$.
+    *   The ratio $$P(A \mid B)$$ represents the fraction of the mass *within region B* that *also* belongs to region A. It's essentially **re-normalizing** the probability measure to the subspace defined by event $$B$$. The universe shrinks to $$B$$, and $$P(A \mid B)$$ is the measure of $$A$$ in this new universe.
+
+*   **Running Example (Die Roll):** Let $$A = \{2\}$$ (rolling a 2) and $$B = \{2, 4, 6\}$$ (rolling an even number). We know $$P(\{i\}) = 1/6$$ for all $$i$$.
+    *   $$P(B) = P(\{2\}) + P(\{4\}) + P(\{6\}) = 1/6 + 1/6 + 1/6 = 3/6 = 1/2$$.
+    *   $$A \cap B = \{2\}$$. So, $$P(A \cap B) = P(\{2\}) = 1/6$$.
+    *   Therefore, the conditional probability is:
+        
+        $$
+        P(A \mid B) = P(\text{Roll = 2} \mid \text{Roll is Even}) = \frac{P(A \cap B)}{P(B)} = \frac{1/6}{3/6} = \frac{1}{3}
+        $$
+        
+    *   *Analogy:* We focus only on the region $$B = \{2, 4, 6\}$$. The total mass in this region is $$3/6$$. Within this region, the mass corresponding to event $$A = \{2\}$$ is $$1/6$$. The fraction of the mass in $$B$$ that is also in $$A$$ is $$(1/6) / (3/6) = 1/3$$. Knowing the roll is even triples the probability that it's a 2 (from 1/6 to 1/3).
+
+*   **Connection to Independence:** Two events $$A$$ and $$B$$ are **independent** if knowing $$B$$ occurred doesn't change the probability of $$A$$, i.e., $$P(A \mid B) = P(A)$$. Plugging this into the definition gives $$P(A) = P(A \cap B) / P(B)$$, which rearranges to the standard definition of independence: $$P(A \cap B) = P(A) P(B)$$.
+    *   *Analogy:* Independence means the relative concentration of mass for region $$A$$ is the same *within* region $$B$$ as it is within the whole object $$\Omega$$. Knowing we are in $$B$$ provides no information about whether we are also in $$A$$.
+
+## Updating Averages: Conditional Expectation ($$E[X \mid \dots]$$)
+
+Just as probabilities can be updated with new information, expected values can also be updated. If we know event $$B$$ occurred, what is the *new* expected value of our random variable $$X$$?
+
+### 1. Conditional Expectation Given an Event ($$E[X \mid B]$$)
+
+This is the simpler case, directly paralleling conditional probability.
+
+*   **Motivation:** Given that the die roll was even (event $$B$$), what is the *average* value we now expect?
+*   **Analogy: Center of Mass within a Sub-Region:** This is like calculating the **center of mass** of the property $$X$$, but considering *only* the mass distribution *within the sub-region B*. We ignore all mass outside $$B$$ and find the average value of $$X$$ weighted by the re-normalized mass inside $$B$$.
+*   **Formal Definition:** The **conditional expectation** of $$X$$ given event $$B$$ (where $$P(B) > 0$$) is the expected value of $$X$$ calculated using the conditional probability measure $$P(\cdot \mid B)$$. It can be calculated as:
+
+<blockquote class="prompt-tip" markdown="1">
+#### Definition - Conditional Expectation Given an Event
+
+$$
+E[X \mid B] = \int_{\Omega} X(\omega) \, dP(\omega \mid B) = \frac{1}{P(B)} \int_{B} X(\omega) \, dP(\omega) = \frac{E[X \cdot I_B]}{P(B)}
+$$
+
+where $$I_B$$ is the indicator function of $$B$$.
+</blockquote>
+*   **Interpretation:** We integrate (or sum, in the discrete case) the value $$X(\omega)$$ against the *conditional* probability distribution. The formula $$E[X \cdot I_B] / P(B)$$ makes the analogy clear:
+    *   $$X \cdot I_B$$ is a new random variable that equals $$X$$ inside region $$B$$ and 0 outside.
+    *   $$E[X \cdot I_B]$$ is the average value of this new variable over the *whole* space $$\Omega$$ (equivalent to $$\int_B X dP$$). It's like the "total moment" (value * mass) contributed by region $$B$$.
+    *   Dividing by $$P(B)$$ (the total mass in region $$B$$) gives the average value *per unit of mass* within region $$B$$, which is the center of mass of $$X$$ within that region.
+
+*   **Running Example (Die Roll):** Let $$X(\omega) = \omega$$ be the face value. Let $$B = \{2, 4, 6\}$$ (even roll). We want $$E[X \mid B]$$. We know $$P(B) = 1/2$$.
+    *   Using the summation form for the discrete case:
+        $$
+        E[X \mid B] = \sum_{\omega \in \Omega} X(\omega) P(\{\omega\} \mid B) = \sum_{i \in B} X(i) \frac{P(\{i\})}{P(B)}
+        $$
+        $$
+        E[X \mid B] = 2 \cdot \frac{1/6}{1/2} + 4 \cdot \frac{1/6}{1/2} + 6 \cdot \frac{1/6}{1/2}
+        $$
+        $$
+        E[X \mid B] = 2 \cdot \frac{1}{3} + 4 \cdot \frac{1}{3} + 6 \cdot \frac{1}{3} = \frac{2 + 4 + 6}{3} = \frac{12}{3} = 4
+        $$
+    *   *Analogy:* We focus only on the masses at positions 2, 4, 6, each originally 1/6. Re-normalizing within this region, each now has a relative mass of $$(1/6)/(1/2) = 1/3$$. The center of mass for equal (1/3 unit) masses at 2, 4, 6 is $$(2+4+6)/3 = 4$$. The original center of mass was 3.5, but knowing the roll is even shifts the expected average value up to 4.
+
+### 2. Conditional Expectation Given Partial Information ($$E[X \mid \mathcal{G}]$$)
+
+This is a more general and powerful concept, crucial in areas like stochastic processes and statistical modeling. Instead of conditioning on a single, specific event *happening* (like "the roll was even"), we condition on the *information available* to us, which might be less precise than knowing the exact outcome. This available information is represented mathematically by a **sub-sigma-algebra** $$\mathcal{G}$$ of $$\mathcal{F}$$.
+
+*   **Motivation: Imperfect Measurement:** Imagine our random experiment involves selecting a person ($$\omega$$) from a population ($$\Omega$$). We are interested in their exact **height** ($$X(\omega)$$). This is our random variable $$X$$. Our full probability space $$(\Omega, \mathcal{F}, P)$$ allows us, in principle, to consider events related to exact heights.
+    However, suppose our measuring tool isn't perfectly precise. Instead of the exact height, we only get to know the person's **shoe size category** (e.g., Small, Medium, Large). Let $$Y(\omega)$$ be this measurement. This measurement gives us *some* information about their height (people with large shoe sizes tend to be taller), but it's not the complete picture.
+
+*   **Defining the Information Sigma-Algebra ($$\mathcal{G}$$):** The information we get from the shoe size measurement corresponds to a coarser partition of the sample space.
+    *   Let $$B_S = \{\omega \in \Omega \mid Y(\omega) = \text{Small}\}$$.
+    *   Let $$B_M = \{\omega \in \Omega \mid Y(\omega) = \text{Medium}\}$$.
+    *   Let $$B_L = \{\omega \in \Omega \mid Y(\omega) = \text{Large}\}$$.
+    These three sets form a partition of $$\Omega$$ (assuming everyone falls into one category). The sigma-algebra $$\mathcal{G}$$ generated by this partition represents the information we have:
+    $$
+    \mathcal{G} = \{\emptyset, B_S, B_M, B_L, B_S \cup B_M, B_S \cup B_L, B_M \cup B_L, \Omega\}
+    $$
+    Knowing the information in $$\mathcal{G}$$ means, for any person $$\omega$$, we only know whether they belong to $$B_S$$, $$B_M$$, or $$B_L$$. We cannot distinguish between two people who are both in, say, $$B_M$$. This $$\mathcal{G}$$ is a sub-sigma-algebra of the full $$\mathcal{F}$$ (which could potentially distinguish individuals or exact heights).
+
+*   **The Goal: Best Estimate of Height Given Shoe Size Category:** Now, we ask: Given only the shoe size category (i.e., given the information in $$\mathcal{G}$$), what is the best estimate or prediction for the person's *actual* height $$X$$? This "best estimate" is the **conditional expectation $$E[X \mid \mathcal{G}]$$**.
+
+*   **Analogy: Averaging Height within Coarse Pixels:** Think of the full space $$\Omega$$ with its fine details accessible via $$\mathcal{F}$$. The shoe size measurement imposes a coarser view, like looking at the population through glasses that only resolve into three blurry "pixels": Small, Medium, Large (these are the sets $$B_S, B_M, B_L$$ in $$\mathcal{G}$$).
+    The conditional expectation $$E[X \mid \mathcal{G}]$$ is a **new random variable**, let's call it $$Z$$.
+    *   Because its value must depend *only* on the information in $$\mathcal{G}$$, $$Z$$ must be **constant** within each coarse pixel. If a person $$\omega$$ is in the "Medium" category ($$\omega \in B_M$$), $$Z(\omega)$$ must have the same value as for any other person in $$B_M$$.
+    *   What should that constant value be? It should be the **average height** of all people *within that specific shoe size category*.
+        *   If $$\omega \in B_S$$, then $$Z(\omega) = \text{Average height of people with Small shoe size} = E[X \mid B_S]$$.
+        *   If $$\omega \in B_M$$, then $$Z(\omega) = \text{Average height of people with Medium shoe size} = E[X \mid B_M]$$.
+        *   If $$\omega \in B_L$$, then $$Z(\omega) = \text{Average height of people with Large shoe size} = E[X \mid B_L]$$.
+
+*   **Formal Definition (via Characterizing Properties):** Abstractly, $$Z = E[X \mid \mathcal{G}]$$ is defined as the unique (up to sets of measure zero) random variable $$Z$$ that satisfies:
+    1.  **$$\mathcal{G}$$-Measurability:** $$Z$$ is measurable with respect to $$\mathcal{G}$$.
+        *   *Interpretation (Height Example):* The value $$Z(\omega)$$ only depends on which set ($$B_S, B_M$$, or $$B_L$$) the person $$\omega$$ belongs to. It's constant across each shoe size category.
+    2.  **Partial Averaging:** For every set $$A \in \mathcal{G}$$,
+        $$
+        \int_A Z \, dP = \int_A X \, dP
+        $$
+        *   *Interpretation (Height Example):* If we take any region $$A$$ definable by shoe size categories (e.g., $$A = B_S$$ or $$A = B_M \cup B_L$$), the average value of our estimate $$Z$$ over that region must equal the *true* average height $$X$$ over that same region. For example, $$\int_{B_M} Z \, dP$$ (which is just $$E[X \mid B_M] \cdot P(B_M)$$) must equal $$\int_{B_M} X \, dP$$ (the sum of heights of all people in $$B_M$$, weighted by probability). This ensures $$Z$$ correctly reflects the average of $$X$$ at the resolution level of $$\mathcal{G}$$.
+
+*   **Summary of the Example:** $$E[X \mid \mathcal{G}]$$ is a random variable representing the best prediction of a person's height ($$X$$) if you only know their shoe size category (the information in $$\mathcal{G}$$). Its value for any person is the average height of all people sharing the same shoe size category. It effectively smooths out the original $$X$$ by averaging it over the regions defined by the available information $$\mathcal{G}$$.
+
+*   **Interpretation: Best Estimate / Projection:** $$Z = E[X \mid \mathcal{G}]$$ is mathematically the **orthogonal projection** of $$X$$ onto the space of $$\mathcal{G}$$-measurable functions. It's the "closest" $$\mathcal{G}$$-measurable function to $$X$$ in the least-squares sense, making it the optimal prediction based on the limited information.
+
+*   **Law of Total Expectation (Tower Property):** A fundamental property linking conditional and unconditional expectation is:
+    
+    $$
+    E[E[X \mid \mathcal{G}]] = E[X]
+    $$
+    
+    *   *Analogy (Height Example):* If you take the average height within each shoe size category ($$E[X \mid \mathcal{G}]$$), and then compute the overall average of these category averages (weighting each category average by the proportion of people $$P$$ in that category), you recover the original overall average height $$E[X]$$ across the entire population. It's like finding the center of mass of the whole population by averaging the centers of mass of the Small, Medium, and Large groups, weighted by the size of each group.
+
+This concrete example hopefully illustrates how conditioning on a sigma-algebra corresponds to finding the average value of a quantity ($$X$$) given only partial information, represented by the coarser "pixels" or categories defined by $$\mathcal{G}$$.
 
 ## Perspective 2: Expectation First (Averaging is Fundamental)
 
@@ -435,29 +561,36 @@ $$
         $$
     So, $$P(\{1, 2\}) = 1/3$$. This matches the result obtained from the measure-first approach, demonstrating consistency. The expectation-first definition successfully recovers the probability value.
 
+*   **(Conditional Expectation in the Expectation-First View):** Whittle's approach also defines conditional expectation axiomatically, essentially as an operator $$E_{\mathcal{G}}$$ that maps any expectable $$X$$ to $$E[X \mid \mathcal{G}]$$, satisfying properties analogous to the unconditional $$E$$ but restricted by the information in $$\mathcal{G}$$. The key property becomes $$E[Z X] = E[Z E[X \mid \mathcal{G}]]$$ for any $$\mathcal{G}$$-measurable $$Z$$. Conditional probability $$P(A \mid \mathcal{G})$$ is then defined as $$E[I_A \mid \mathcal{G}]$$.
+
 ## Synthesis and Conclusion
 
 We've explored two foundational paths to modern probability theory:
 
-1.  **Measure First (Kolmogorov):** Object ($$\Omega$$) $$\to$$ Regions ($$E$$) $$\to$$ Physical Mass ($$\mu$$) $$\to$$ Measurable Resolution ($$\mathcal{F}$$) $$\to$$ Normalized Mass ($$P = \mu/\mu(\Omega)$$) $$\to$$ Properties ($$X$$) $$\to$$ Average/Center of Mass ($$E[X]$$). Emphasizes measuring regions and the crucial role of distribution.
-2.  **Expectation First (Whittle/Daniell):** Averaging Operator ($$E$$ defined by axioms) $$\to$$ Probability ($$P(A) = E[I_A]$$) $$\to$$ (Implies consistent $$\Omega, \mathcal{F}, P, X$$ structure). Emphasizes the operational meaning of averaging.
+1.  **Measure First (Kolmogorov):** Object ($$\Omega$$) $$\to$$ Regions ($$E$$) $$\to$$ Physical Mass ($$\mu$$) $$\to$$ Measurable Resolution ($$\mathcal{F}$$) $$\to$$ Normalized Mass ($$P = \mu/\mu(\Omega)$$) $$\to$$ Properties ($$X$$) $$\to$$ Average/Center of Mass ($$E[X]$$) $$\to$$ Conditioning (Zooming/Re-normalizing $$P$$ and $$E$$). Emphasizes measuring regions and the crucial role of distribution.
+2.  **Expectation First (Whittle/Daniell):** Averaging Operator ($$E$$ defined by axioms) $$\to$$ Probability ($$P(A) = E[I_A]$$) $$\to$$ Conditioning (via axioms on conditional operator $$E_{\mathcal{G}}$$ or derived properties) $$\to$$ (Implies consistent $$\Omega, \mathcal{F}, P, X$$ structure). Emphasizes the operational meaning of averaging.
 
-Both lead to the same framework. The **physical analogy** of mass distributions provides a unifying intuition:
+Both lead to the same rich framework. The **physical analogy** of mass distributions provides a unifying intuition:
+
 
 <blockquote class="prompt-tip" markdown="1">
 #### Analogy Summary
 
-*   **Sample Space ($$\Omega$$):** The physical object/system.
-*   **Event ($$E \in \mathcal{F}$$):** A measurable region within the object.
-*   **Unnormalized Measure ($$\mu$$):** The physical mass (e.g., in kg) within a region.
-*   **Sigma-Algebra ($$\mathcal{F}$$):** Defines the object's **resolution/granularity**; the collection of all regions whose mass can be consistently measured.
-*   **Probability Measure ($$P$$):** The **normalized mass distribution** ($$P(E) = \mu(E)/\mu(\Omega)$$, total mass = 1), indicating relative likelihood.
-*   **Random Variable ($$X$$):** A **measurable physical property** (e.g., temperature, position) respecting the object's resolution ($$\mathcal{F}$$).
-*   **Expectation ($$E[X]$$):** The **center of mass** or **weighted average** value of property $$X$$ across the object, using the normalized mass distribution $$P$$.
-*   **Variance ($$Var(X)$$):** The **moment of inertia** measuring the spread of normalized mass around the center $$E[X]$$, along the $$X$$ axis.
+*   **Sample Space ($$\Omega$$):** The physical object/system (e.g., a population).
+*   **Event ($$E \in \mathcal{F}$$):** A measurable region within the object (e.g., people taller than 180cm).
+*   **Unnormalized Measure ($$\mu$$):** The physical mass (or count) within a region.
+*   **Sigma-Algebra ($$\mathcal{F}$$):** Defines the object's **finest resolution/granularity** (e.g., distinguishing individuals/exact heights).
+*   **Probability Measure ($$P$$):** The **normalized mass distribution** (total mass = 1), indicating relative likelihood/proportion.
+*   **Random Variable ($$X$$):** A **measurable physical property** (e.g., exact height) respecting the object's resolution ($$\mathcal{F}$$).
+*   **Expectation ($$E[X]$$):** The **center of mass** or **overall weighted average** value of property $$X$$ (e.g., average height in the population).
+*   **Variance ($$Var(X)$$):** The **moment of inertia** measuring the spread of normalized mass around the center $$E[X]$$.
+*   **Conditional Probability ($$P(A \mid B)$$):** Re-normalized mass distribution focused **within region $$B$$** (e.g., proportion of people taller than 180cm *among those in region B*).
+*   **Conditional Expectation ($$E[X \mid B]$$):** Center of mass (average value of $$X$$) calculated **within region $$B$$** (e.g., average height *among those in region B*).
+*   **Sub-Sigma-Algebra ($$\mathcal{G}$$):** A **coarser resolution** based on partial information (e.g., knowing only shoe size category Small/Medium/Large).
+*   **Conditional Expectation ($$E[X \mid \mathcal{G}]$$):** A new property (random variable) whose value is the **average value (center of mass) of $$X$$ calculated within each coarser "pixel"** defined by the information $$\mathcal{G}$$ (e.g., a variable whose value is the average height for the Small category if you're Small, average height for Medium if you're Medium, etc.).
 </blockquote>
 
-Thinking in terms of objects, their measurable structure, how physical mass is distributed, how this leads to normalized probability, the properties defined on them, and how to average those properties provides a tangible path to probability's core concepts. Remember the analogy's limits – probability is ultimately about information and uncertainty – but the shared mathematical structure of distribution and averaging makes the physical intuition powerful.
+Thinking in terms of objects, their measurable structure, how physical mass is distributed, how this leads to normalized probability, the properties defined on them, how to average those properties, and how to update these quantities when focusing on sub-regions provides a tangible path to probability's core concepts. Remember the analogy's limits – probability is ultimately about information and uncertainty – but the shared mathematical structure of distribution and averaging makes the physical intuition powerful.
 
 This robust framework serves as the common language for different interpretations (Frequentism, Bayesianism). The mathematics, illuminated by physical analogy starting with concrete mass, provides the consistent foundation.
 
@@ -477,6 +610,9 @@ Variance and moment of inertia
 - [Gundersen (2020) - Understanding Moments](https://gregorygundersen.com/blog/2020/04/11/moments/)
 - [Laurent (2013) - Schematizing the variance as a moment of inertia](https://stla.github.io/stlapblog/posts/Variance_inertia.html)
 - [Glen_b (2014) - Stats StackExchange: What could it mean to "Rotate" a distribution?](https://stats.stackexchange.com/a/85447)
+
+Conditional Probability/Expectation
+- [Wikipedia (2025) - Conditional expectation](https://en.wikipedia.org/wiki/Conditional_expectation)
 
 Miscellaneous
 - [Beck (2018) - Density w.r.t. counting measure and probability mass function (discrete rv)](https://math.stackexchange.com/questions/2847421/density-w-r-t-counting-measure-and-probability-mass-function-discrete-rv) - Gives a useful list of definitions and an example of the counting measure.
