@@ -260,7 +260,7 @@ The "mass" analogy inherently handles this non-uniform weighting. Likelihood isn
 
     1.  **Random Endpoints Method:** (Uniform mass distribution on pairs of circumference points). Leads to $$P = \mathbf{1/3}$$. Calculation: Fix one point; the other must land in the opposite 1/3 of the circumference. Probability = (Favorable arc length) / (Total arc length) = (1/3) / 1.
     2.  **Random Radius Method:** (Uniform mass distribution on distance $$d \in [0, R]$$ of midpoint from center). Leads to $$P = \mathbf{1/2}$$. Calculation: Chord is longer if midpoint distance $$d < R/2$$. Probability = (Favorable interval length) / (Total interval length) = (R/2) / R.
-    3.  **Random Midpoint Method:** (Uniform mass distribution over the *area* of the circle for the midpoint). Leads to $$P = \mathbf{1/4}$$. Calculation: Chord is longer if midpoint is in inner circle radius $$R/2$. Probability = (Favorable area) / (Total area) = $$(\pi(R/2)^2) / (\pi R^2)$$.
+    3.  **Random Midpoint Method:** (Uniform mass distribution over the *area* of the circle for the midpoint). Leads to $$P = \mathbf{1/4}$$. Calculation: Chord is longer if midpoint is in inner circle radius $$R/2$$. Probability = (Favorable area) / (Total area) = $$(\pi(R/2)^2) / (\pi R^2)$$.
 
     *   **The Lesson:** "Randomly" is ambiguous. Each method specifies a different way mass is distributed over the possible chords *before* normalization. The choice of the underlying measure $$\mu$$ (how mass is spread) dictates the final probabilities $$P$$. Probability requires specifying the distribution, not just the space.
 
@@ -524,7 +524,7 @@ Our mass analogy extends naturally when considering multiple random variables (p
     *   **Analogy:** The joint distribution of two variables ($$X, Y$$) corresponds to a **normalized mass distribution on a 2D object** (like a metal plate in the xy-plane, where the axes represent height and weight). The total mass of the plate is 1. The **joint probability** $$P(X \in A, Y \in B)$$ is the amount of normalized mass contained within the 2D region defined by $$A \times B$$ on the plate. For continuous variables with a joint PDF $$p(x, y)$$, this is analogous to a surface mass density ($$\mathrm{kg/m^2}$$), and $$P(X \in A, Y \in B) = \iint_{A \times B} p(x, y) \, dx \, dy$$.
 
 *   **Marginal Distributions: Compressing the Mass:**
-    *   **Motivation:** Often, from a joint distribution of $$X$$ and $$Y$$, we want to recover the distribution of just $$X$$ alone, irrespective of $$Y$. This is the **marginal distribution** of $$X$$.
+    *   **Motivation:** Often, from a joint distribution of $$X$$ and $$Y$$, we want to recover the distribution of just $$X$$ alone, irrespective of $$Y$$. This is the **marginal distribution** of $$X$$.
     *   **Analogy:** Obtaining the marginal distribution of $$X$$ from the joint distribution is like taking our 2D metal plate and **compressing all its mass onto the x-axis**. The resulting 1D mass distribution along the x-axis *is* the marginal distribution of $$X$$. Mathematically, this corresponds to integrating (or summing) out the other variable: $$p_X(x) = \int_{-\infty}^{\infty} p(x, y) \, dy$$ (integrating the 2D density over all possible y-values for a fixed x). The total mass remains 1.
 
 *   **Conditional Distributions: Slicing the Mass:**
@@ -604,7 +604,69 @@ $$
   
     So, $$P(\{1, 2\}) = 1/3$$. This matches the result obtained from the measure-first approach, demonstrating consistency. The expectation-first definition successfully recovers the probability value.
 
-*   **(Conditional Expectation in the Expectation-First View):** Whittle's approach also defines conditional expectation axiomatically, essentially as an operator $$E_{\mathcal{G}}$$ that maps any expectable $$X$$ to $$E[X \mid \mathcal{G}]$$, satisfying properties analogous to the unconditional $$E$$ but restricted by the information in $$\mathcal{G}$$. The key property becomes $$E[Z X] = E[Z E[X \mid \mathcal{G}]]$$ for any $$\mathcal{G}$$-measurable $$Z$$. Conditional probability $$P(A \mid \mathcal{G})$$ is then defined as $$E[I_A \mid \mathcal{G}]$$.
+*   For more examples on applications of this representation, e.g. deriving the Principle of Inclusion-Exclusion very simply through algebra and more, see my [other blog post](https://jiha-kim.github.io/posts/reducing-probability-to-arithmetic/).
+
+### Conditioning in the Expectation-First View
+
+One area where the expectation-first perspective can offer a particularly appealing intuition is in **conditioning**. Instead of defining conditional probability via ratios of measures and then deriving conditional expectation, we can try to define conditional expectation directly based on the idea of **updating our average** given new information.
+
+#### 1. Conditioning on an Event ($$E[X \mid B]$$)
+
+Suppose we have our averaging operator $$E$$ representing the overall average across $$\Omega$$. Now, we learn that a specific event $$B$$ (where $$E[I_B] = P(B) > 0$$) has occurred. How should we define the *new* average value of $$X$$, denoted $$E[X \mid B]$$, given this information?
+
+*   **Intuition:** We are now interested in the average value of $$X$$ *only considering the part of the world where $$B$$ is true*. We want to restrict our averaging process to the "sub-universe" defined by $$B$$ and re-normalize.
+*   **Using the Operator $$E$$:** How can we achieve this using the original operator $$E$$ which averages over the *whole* space?
+    *   Consider the random variable $$X \cdot I_B$$. This variable is equal to $$X$$ inside $$B$$ and zero outside. Its expectation, $$E[X \cdot I_B]$$, represents the *total contribution* to the average of $$X$$ that comes from within region $$B$$.
+    *   The "size" or total probability weight of region $$B$$ is $$P(B) = E[I_B]$$.
+    *   To find the average value of $$X$$ *per unit of probability mass within B*, we should take the total contribution from $$B$$ and divide by the total mass within $$B$$.
+
+*   **Formal Definition:** This leads directly to defining the conditional expectation given an event $$B$$ as:
+
+<blockquote class="prompt-info" markdown="1">
+#### Definition - Conditional Expectation Given an Event (via E)
+
+For an event $$B$$ with $$E[I_B] > 0$$, the conditional expectation of $$X$$ given $$B$$ is:
+
+$$
+E[X \mid B] = \frac{E[X I_B]}{E[I_B]}
+$$
+</blockquote>
+
+*   **Connection to Conditional Probability:** What about conditional probability $$P(A \mid B)$$? Since probability is the expectation of the indicator function, we can define it consistently:
+
+    $$
+    P(A \mid B) \equiv E[I_A \mid B] = \frac{E[I_A I_B]}{E[I_B]}
+    $$
+
+    Since $$I_A I_B = I_{A \cap B}$$, this gives:
+
+    $$
+    P(A \mid B) = \frac{E[I_{A \cap B}]}{E[I_B]} = \frac{P(A \cap B)}{P(B)}
+    $$
+
+    This perfectly recovers the standard definition of conditional probability, showing the consistency of defining conditional expectation first via the averaging principle.
+
+#### 2. Conditioning on Partial Information ($$E[X \mid \mathcal{G}]$$)
+
+The more general and powerful concept involves conditioning not on a single event occurring, but on the *available information*, represented by a sub-sigma-algebra $$\mathcal{G}$$. As discussed previously, $$\mathcal{G}$$ represents a coarser view of the outcome space (like knowing only the shoe size category, not the exact person).
+
+*   **Intuition:** We want to find the "best estimate" or "updated average" of $$X$$ given only the information permitted by $$\mathcal{G}$$. This estimate cannot depend on details finer than $$\mathcal{G}$$ allows; it must be a $$\mathcal{G}$$-measurable random variable. Let's call this estimate $$Z$$. What property should uniquely define $$Z$$?
+*   **The Averaging Principle:** The core idea is that the estimate $$Z$$ should behave like $$X$$ *on average*, specifically when averaged over any region definable by the available information $$\mathcal{G}$$. More generally, if we take *any* property $$W$$ that depends only on the coarse information (i.e., $$W$$ is $$\mathcal{G}$$-measurable), then calculating the average of $$W \cdot X$$ across the whole space should give the *same result* as calculating the average of $$W \cdot Z$$. The estimate $$Z$$ must preserve the average value of $$X$$ when viewed through the lens of $$\mathcal{G}$$.
+
+*   **Formal Definition (via Characterizing Property):** The conditional expectation $$Z = E[X \mid \mathcal{G}]$$ is defined as the unique (up to P-null sets) random variable $$Z$$ such that:
+    1.  $$Z$$ is $$\mathcal{G}$$-measurable (its value only depends on the information in $$\mathcal{G}$$).
+    2.  For any bounded $$\mathcal{G}$$-measurable random variable $$W$$,
+
+        $$
+        E[W X] = E[W Z]
+        $$
+
+*   **Interpretation:** This defining property $$E[W X] = E[W E[X \mid \mathcal{G}]]$$ captures the essence of $$E[X \mid \mathcal{G}]$$ being the best approximation of $$X$$ based on $$\mathcal{G}$$. It states that for any calculation involving averaging against a function $$W$$ that respects the information constraint $$\mathcal{G}$$, replacing $$X$$ with its conditional expectation $$E[X \mid \mathcal{G}]$$ yields the same average.
+*   **Operational Meaning:** As seen in the height/shoe size example, if $$\mathcal{G}$$ is generated by a partition ($$B_1, B_2, \dots$$), then for any outcome $$\omega$$ falling into partition element $$B_i$$, the value of $$E[X \mid \mathcal{G}](\omega)$$ is simply $$E[X \mid B_i]$$ (calculated using the formula from the previous section). It's the average of $$X$$ within the specific information category $$\omega$$ belongs to.
+*   **Conditional Probability:** Conditional probability given $$\mathcal{G}$$ is then naturally defined as $$P(A \mid \mathcal{G}) = E[I_A \mid \mathcal{G}]$$. This gives the probability of event $$A$$ occurring, based on the partial information available in $$\mathcal{G}$$.
+*   **Tower Property:** The fundamental property $$E[E[X \mid \mathcal{G}]] = E[X]$$ also emerges naturally. It states that averaging the conditional averages (weighted appropriately by the probability of each information state) recovers the original overall average.
+
+In this expectation-centric view, conditioning is fundamentally about refining the averaging process based on available information. The definitions for $$E[X \mid B]$$ and $$E[X \mid \mathcal{G}]$$ flow directly from asking "What should the average be *now*?" and ensuring consistency with the overall averaging operator $$E$$. This can feel more direct and operationally motivated than the measure-theoretic approach of defining conditional probability first.
 
 ## Synthesis and Conclusion
 
