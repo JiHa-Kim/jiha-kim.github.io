@@ -175,7 +175,7 @@ Given a measurable space $$(\Omega, \mathcal{F})$$, a **measure** $$\mu$$ is a f
 1.  **Non-negativity:** $$\mu(E) \ge 0$$ for all $$E \in \mathcal{F}$$. (Matches physical mass).
 2.  **Null Empty Set:** $$\mu(\emptyset) = 0$$. (The region with nothing in it has zero mass).
 3.  **Countable Additivity:** For any sequence of *pairwise disjoint* sets $$E_1, E_2, \dots$$ in $$\mathcal{F}$$,
-    
+
     $$
     \mu\left(\bigcup_{i=1}^{\infty} E_i\right) = \sum_{i=1}^{\infty} \mu(E_i)
     $$
@@ -299,7 +299,7 @@ The rigorous definition of measure and probability, especially for continuous sp
 
 Now that we have our object ($$\Omega$$), its measurable structure ($$\mathcal{F}$$), and its normalized mass distribution ($$P$$), we often want to measure *properties* associated with the outcomes.
 
-*   **Motivation:** We roll the die ($\omega$ occurs) – what number $$X(\omega)$$ appears? We measure a person's height ($\omega$ occurs) – what is their height $$X(\omega)$$ in cm?
+*   **Motivation:** We roll the die ($$\omega$$ occurs) – what number $$X(\omega)$$ appears? We measure a person's height ($$\omega$$ occurs) – what is their height $$X(\omega)$$ in cm?
 *   **Analogy:** A **random variable $$X$$** corresponds to assigning a **measurable physical property** (like temperature $$T(\omega)$$, position $$x(\omega)$$, or the numerical value itself) to each point $$\omega$$ in our object $$\Omega$$.
 *   **Formal Definition:** A **random variable** is a function $$X: \Omega \to \mathbb{R}$$.
 *   **Running Example (Die Roll):** Let $$X$$ be the face value shown: $$X(\omega) = \omega$$ for $$\omega \in \{1, ..., 6\}$$.
@@ -352,27 +352,27 @@ Given our object with its mass distribution $$P$$ and a measurable property $$X$
     While expectation $$E[X]$$ gives us the average value or center of mass of the distribution of $$X$$, it doesn't tell us how spread out the values are around this average. Two distributions can have the same mean but vastly different shapes. The **variance** quantifies this spread.
 
     *   **Definition:** The variance of a random variable $$X$$ is defined as the expected value of the *squared deviation* from the mean:
-        
+
         $$
         Var(X) = E\left[ (X - E[X])^2 \right]
         $$
-        
+
         The square ensures that deviations in both directions (above and below the mean) contribute positively to the measure of spread, and it heavily penalizes values far from the mean. The **standard deviation**, $$\sigma_X = \sqrt{Var(X)}$$, brings this measure back to the original units of $$X$$.
 
     *   **Analogy: Moment of Inertia:** This definition has a striking parallel in physics with the **moment of inertia ($$I$$)**.
         1.  **Recall Center of Mass:** We established that $$E[X]$$ is analogous to the center of mass ($$x_c$$) of our object, considering the distribution of the property $$X$$ weighted by the normalized mass $$P$$.
         2.  **Moment of Inertia Definition:** In physics, the moment of inertia measures an object's resistance to rotational acceleration about a given axis. For a collection of point masses $$m_i$$ at positions $$x_i$$, the moment of inertia about an axis at $$x_c$$ is given by:
-            
+
             $$
             I = \sum_i m_i (x_i - x_c)^2
             $$
-            
+
             For a continuous object with mass density $$\rho(x)$$, it's:
-            
+
             $$
             I = \int (x - x_c)^2 \rho(x) \, dx
             $$
-            
+
             Crucially, this is the resistance to rotation *about the point $$x_c$$*.
         3.  **The Connection:** Now, compare the variance formula to the moment of inertia formula, specifically when calculated *about the center of mass ($$x_c = E[X]$$)*:
             *   **Discrete Case:** $$Var(X) = \sum_{x_i} (x_i - E[X])^2 P(X=x_i)$$. This is identical in form to $$I = \sum_i (x_i - x_c)^2 m_i$$, if we identify:
@@ -409,11 +409,11 @@ $$
     *   $$P(B) = P(\{2\}) + P(\{4\}) + P(\{6\}) = 1/6 + 1/6 + 1/6 = 3/6 = 1/2$$.
     *   $$A \cap B = \{2\}$$. So, $$P(A \cap B) = P(\{2\}) = 1/6$$.
     *   Therefore, the conditional probability is:
-        
+
         $$
         P(A \mid B) = P(\text{Roll = 2} \mid \text{Roll is Even}) = \frac{P(A \cap B)}{P(B)} = \frac{1/6}{3/6} = \frac{1}{3}
         $$
-        
+
     *   *Analogy:* We focus only on the region $$B = \{2, 4, 6\}$$. The total mass in this region is $$3/6$$. Within this region, the mass corresponding to event $$A = \{2\}$$ is $$1/6$$. The fraction of the mass in $$B$$ that is also in $$A$$ is $$(1/6) / (3/6) = 1/3$$. Knowing the roll is even triples the probability that it's a 2 (from 1/6 to 1/3).
 
 *   **Connection to Independence:** Two events $$A$$ and $$B$$ are **independent** if knowing $$B$$ occurred doesn't change the probability of $$A$$, i.e., $$P(A \mid B) = P(A)$$. Plugging this into the definition gives $$P(A) = P(A \cap B) / P(B)$$, which rearranges to the standard definition of independence: $$P(A \cap B) = P(A) P(B)$$.
@@ -452,13 +452,15 @@ where $$I_B$$ is the indicator function of $$B$$.
         $$
         E[X \mid B] = \sum_{\omega \in \Omega} X(\omega) P(\{\omega\} \mid B) = \sum_{i \in B} X(i) \frac{P(\{i\})}{P(B)}
         $$
+
         $$
         E[X \mid B] = 2 \cdot \frac{1/6}{1/2} + 4 \cdot \frac{1/6}{1/2} + 6 \cdot \frac{1/6}{1/2}
         $$
+
         $$
         E[X \mid B] = 2 \cdot \frac{1}{3} + 4 \cdot \frac{1}{3} + 6 \cdot \frac{1}{3} = \frac{2 + 4 + 6}{3} = \frac{12}{3} = 4
         $$
-  
+
     *   *Analogy:* We focus only on the masses at positions 2, 4, 6, each originally 1/6. Re-normalizing within this region, each now has a relative mass of $$(1/6)/(1/2) = 1/3$$. The center of mass for equal (1/3 unit) masses at 2, 4, 6 is $$(2+4+6)/3 = 4$$. The original center of mass was 3.5, but knowing the roll is even shifts the expected average value up to 4.
 
 ### 2. Conditional Expectation Given Partial Information ($$E[X \mid \mathcal{G}]$$)
@@ -506,11 +508,11 @@ This is a more general and powerful concept, crucial in areas like stochastic pr
 *   **Interpretation: Best Estimate / Projection:** $$Z = E[X \mid \mathcal{G}]$$ is mathematically the **orthogonal projection** of $$X$$ onto the space of $$\mathcal{G}$$-measurable functions. It's the "closest" $$\mathcal{G}$$-measurable function to $$X$$ in the least-squares sense, making it the optimal prediction based on the limited information.
 
 *   **Law of Total Expectation (Tower Property):** A fundamental property linking conditional and unconditional expectation is:
-    
+
     $$
     E[E[X \mid \mathcal{G}]] = E[X]
     $$
-    
+
     *   *Analogy (Height Example):* If you take the average height within each shoe size category ($$E[X \mid \mathcal{G}]$$), and then compute the overall average of these category averages (weighting each category average by the proportion of people $$P$$ in that category), you recover the original overall average height $$E[X]$$ across the entire population. It's like finding the center of mass of the whole population by averaging the centers of mass of the Small, Medium, and Large groups, weighted by the size of each group.
 
 This concrete example hopefully illustrates how conditioning on a sigma-algebra corresponds to finding the average value of a quantity ($$X$$) given only partial information, represented by the coarser "pixels" or categories defined by $$\mathcal{G}$$.
@@ -528,7 +530,7 @@ Our mass analogy extends naturally when considering multiple random variables (p
     *   **Analogy:** Obtaining the marginal distribution of $$X$$ from the joint distribution is like taking our 2D metal plate and **compressing all its mass onto the x-axis**. The resulting 1D mass distribution along the x-axis *is* the marginal distribution of $$X$$. Mathematically, this corresponds to integrating (or summing) out the other variable: $$p_X(x) = \int_{-\infty}^{\infty} p(x, y) \, dy$$ (integrating the 2D density over all possible y-values for a fixed x). The total mass remains 1.
 
 *   **Conditional Distributions: Slicing the Mass:**
-    *   **Motivation:** We want to know the distribution of one variable ($$Y$$) *given* a specific value of the other ($$X=x$). This is the **conditional distribution** $$P(Y \in B \mid X=x)$$ (or its density $$p(y \mid x)$$).
+    *   **Motivation:** We want to know the distribution of one variable ($$Y$$) *given* a specific value of the other ($$X=x$$). This is the **conditional distribution** $$P(Y \in B \mid X=x)$$ (or its density $$p(y \mid x)$$).
     *   **Analogy:** Finding the conditional distribution $$p(y \mid x)$$ corresponds to taking an infinitesimally thin **vertical slice** through our 2D mass distribution at the specific location $$X=x$$. We look at the 1D mass distribution profile along this slice (in the y-direction). Since the total mass along this thin slice might be very small (or zero if conditioning on a single point in a continuous space requires careful limits), we **re-normalize** the mass distribution *along the slice* so that its total mass becomes 1. This re-normalized 1D distribution along the slice represents $$p(y \mid x)$$. Mathematically, $$p(y \mid x) = p(x, y) / p_X(x)$$, which is analogous to $$P(A \mid B) = P(A \cap B) / P(B)$$ – dividing the joint density (intersection mass) by the marginal density (mass in the conditioning "region").
 
 This extension shows how the physical intuition of mass distribution, projection, and slicing can clarify the relationships between joint, marginal, and conditional probabilities in higher dimensions.
@@ -598,10 +600,11 @@ $$
         $$
         E[I_A] = \sum_{i=1}^{6} I_A(i) P(\{i\}) = I_A(1)\frac{1}{6} + I_A(2)\frac{1}{6} + I_A(3)\frac{1}{6} + \dots + I_A(6)\frac{1}{6}
         $$
+
         $$
         E[I_A] = 1 \cdot \frac{1}{6} + 1 \cdot \frac{1}{6} + 0 \cdot \frac{1}{6} + 0 \cdot \frac{1}{6} + 0 \cdot \frac{1}{6} + 0 \cdot \frac{1}{6} = \frac{1}{6} + \frac{1}{6} = \frac{2}{6} = \frac{1}{3}
         $$
-  
+
     So, $$P(\{1, 2\}) = 1/3$$. This matches the result obtained from the measure-first approach, demonstrating consistency. The expectation-first definition successfully recovers the probability value.
 
 *   For more examples on applications of this representation, e.g. deriving the Principle of Inclusion-Exclusion very simply through algebra and more, see my [other blog post](https://jiha-kim.github.io/posts/reducing-probability-to-arithmetic/).
@@ -676,7 +679,6 @@ We've explored two foundational paths to modern probability theory:
 2.  **Expectation First (Whittle/Daniell):** Averaging Operator ($$E$$ defined by axioms) $$\to$$ Probability ($$P(A) = E[I_A]$$) $$\to$$ Conditioning (via axioms on conditional operator $$E_{\mathcal{G}}$$ or derived properties) $$\to$$ (Implies consistent $$\Omega, \mathcal{F}, P, X$$ structure). Emphasizes the operational meaning of averaging.
 
 Both lead to the same rich framework. The **physical analogy** of mass distributions provides a unifying intuition:
-
 
 <blockquote class="prompt-tip" markdown="1">
 #### Analogy Summary
