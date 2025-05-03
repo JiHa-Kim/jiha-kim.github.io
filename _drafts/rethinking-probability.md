@@ -8,7 +8,6 @@ categories:
 - Mathematics
 - Probability and Statistics
 tags:
-- Bayesianism
 - Expectation
 - Physics
 - Intuition
@@ -178,6 +177,44 @@ Given $$(\Omega, \mathcal{F})$$, a *probability measure* $$P: \mathcal{F} \to [0
 </blockquote>
 *   **Running Example (Die Roll):** For a fair die, the mass is distributed equally. We define $$P$$ by assigning mass $$1/6$$ to each elementary outcome: $$P(\{i\}) = 1/6$$ for $$i=1..6$$. This satisfies the axioms: probabilities are non-negative; the total mass is $$P(\Omega) = \sum_{i=1}^6 P(\{i\}) = 6 \times (1/6) = 1$$; additivity holds (e.g., $$P(\{1,2\}) = P(\{1\}) + P(\{2\}) = 1/6 + 1/6 = 1/3$$). The mass of any region $$E$$ is $$P(E) = \vert E \vert / 6$$.
 *   The triple $$(\Omega, \mathcal{F}, P)$$ is a **probability space**: our object, with its defined resolution, and a specific normalized mass distribution.
+
+#### Why "Mass" and Not Just "Size"?
+
+At first glance, especially when dealing with geometric spaces, it might seem natural to think of the probability measure $$P(E)$$ as quantifying the "size" (length, area, volume) of the region $$E$$, relative to the total size of $$\Omega$$. Actually, this was what was done historically. But taking analogy to physics, not every material has the same mass to volume density.
+
+Thus, while this works perfectly well for **uniform** probability distributions where likelihood is spread evenly according to geometric measure, the analogy breaks down in the general case and can even be ambiguous if "uniform" isn't precisely defined. The "mass" analogy proves more robust and insightful.
+
+*   **Physical Analogy: Size vs. Mass:** Consider a 1-meter metal rod ($$\Omega = [0, 1]$$).
+    *   Its **length ("size")** is uniformly distributed. The length of any segment $$[a, b]$$ is simply $$b-a$$. The "length density" is constant.
+    *   Now, imagine its **mass** is distributed non-uniformly. Perhaps the rod is made of an alloy that is much denser near the end $$x=1$$. Let $$\rho(x)$$ be the mass density (kg/m) at position $$x$$. The total mass is $$M = \int_0^1 \rho(x) dx$$. The mass of the segment $$[a, b]$$ is $$\int_a^b \rho(x) dx$$. Critically, this mass is *not* necessarily proportional to the length $$b-a$$. A short segment near $$x=1$$ might contain much more mass than a longer segment near $$x=0$$.
+
+*   **Connecting to Probability:** A probability measure $$P$$ on $$\Omega$$ acts like this mass distribution (but normalized, so the total mass $$P(\Omega) = 1$$).
+    *   For a **uniform distribution** on $$[0, 1]$$, the probability density function (PDF) is $$p(x) = 1$$ for $$x \in [0, 1]$$. Then $$P([a, b]) = \int_a^b 1 \, dx = b-a$$. Here, probability *is* proportional to length ("size"). This corresponds to a rod of uniform density.
+    *   For a **non-uniform distribution**, say with PDF $$p(x) = 2x$$ on $$[0, 1]$$ (note $$\int_0^1 2x \, dx = 1$$), the probability is concentrated towards $$x=1$$. Then $$P([0, 0.5]) = \int_0^{0.5} 2x \, dx = [x^2]_0^{0.5} = 0.25$$, while $$P([0.5, 1]) = \int_{0.5}^1 2x \, dx = [x^2]_{0.5}^1 = 1 - 0.25 = 0.75$$. Although both intervals have the same length (0.5), the second interval contains three times as much probability "mass". This corresponds to the rod denser at one end.
+
+The "mass" analogy inherently accommodates this **non-uniform weighting**, which is fundamental to probability. Likelihood isn't always spread evenly across the possibilities. This has real impact on calculations, which would otherwise land you problems like Bertrand's paradox.
+
+*   **Comparison: Buffon's Needle Problem:** This classic problem asks for the probability that a needle of length $$L$$, dropped randomly onto a floor with parallel lines spaced $$D$$ apart ($$L \le D$$), will cross one of the lines. The famous result is $$P(\text{cross}) = \frac{2L}{\pi D}$$.
+    *   This problem beautifully connects probability to geometry ($$\pi$$!). The sample space $$\Omega$$ involves the needle's center position and its orientation angle.
+    *   Crucially, the "random drop" assumes a **specific, well-defined uniform probability distribution** over this geometric configuration space (uniformity in position relative to the lines, and uniform random angle). Because this underlying measure is uniform with respect to the standard geometric way of measuring "size" (area in the configuration space), the probability *can* be calculated using ratios of areas – aligning well with the "size" intuition in this specific instance.
+
+*   **Contrast: Bertrand's Paradox:** This paradox starkly reveals the danger of relying solely on geometric intuition or vague notions of "randomness" without specifying the probability measure ($$P$$) precisely. Consider the question: *What is the probability that a randomly chosen chord of a circle is longer than the side of the inscribed equilateral triangle?* Bertrand showed that at least three different, seemingly reasonable interpretations of "randomly chosen chord" lead to three different answers, precisely because they imply different probability *distributions*:
+
+    1.  **Random Endpoints Method:** Choose two points uniformly and independently at random on the circumference and connect them.
+        *   *Justification:* Fix the first point $$A$$. The side of the inscribed equilateral triangle starting at $$A$$ subtends an arc of $$1/3$$ of the circumference ($$120^\circ$$). For the chord $$AB$$ to be longer than this side, the second point $$B$$ must fall on the arc directly opposite $$A$$ that also covers $$1/3$$ of the circumference. Since $$B$$ is chosen uniformly on the *entire* circumference, the probability is the ratio of the favorable arc length to the total circumference: $$(1/3) / 1 = \mathbf{1/3}$$.
+        *   *Implied Distribution:* This method gives higher probability mass to longer chords.
+
+    2.  **Random Radius Method:** Choose a radius of the circle uniformly at random. Choose a point uniformly at random on this radius. Construct the chord through this point perpendicular to the radius.
+        *   *Justification:* Let the circle have radius $$R$$. A chord's length is determined by the distance $$d$$ of its midpoint from the center ($$0 \le d \le R$$). The side of the inscribed equilateral triangle has its midpoint at distance $$d_T = R/2$$ from the center. The chord is longer than this side if $$d < R/2$$. This method effectively chooses the midpoint distance $$d$$ uniformly from $$[0, R]$$. The probability is the ratio of the favorable interval length to the total interval length: $$(R/2) / R = \mathbf{1/2}$$.
+        *   *Implied Distribution:* This method gives uniform probability mass with respect to the radial distance of the chord's midpoint.
+
+    3.  **Random Midpoint Method:** Choose a point uniformly at random *within the area* of the circle and consider it the midpoint of the chord.
+        *   *Justification:* Again, the chord is longer than the side of the inscribed equilateral triangle if its midpoint lies within a distance $$R/2$$ from the center. This means the midpoint must fall within a smaller concentric circle of radius $$R/2$. Since the midpoint is chosen uniformly over the *area* of the large circle (radius $$R$$), the probability is the ratio of the areas: $$Area(radius=R/2) / Area(radius=R) = (\pi (R/2)^2) / (\pi R^2) = (\pi R^2 / 4) / (\pi R^2) = \mathbf{1/4}$$.
+        *   *Implied Distribution:* This method gives higher probability mass to shorter chords (since more area corresponds to midpoints further from the center).
+
+    *   **The Lesson:** The ambiguity lies entirely in the phrase "randomly chosen chord". Each method corresponds to a different underlying random process and implicitly defines a **different probability space**, specifically a **different probability measure ($$P$$)** on the set of possible chords. They distribute the "probability mass" differently. There is no single "correct" answer without rigorously specifying the mechanism (the measure $$P$$). This powerfully demonstrates that probability is fundamentally about the *distribution of mass/likelihood ($$P$$)*, not just the underlying geometric set ($$\Omega$, the "size").
+
+In summary, while "size" works for specific, clearly defined uniform distributions (like in Buffon's setup), **"mass" is a more general and fitting analogy for probability measures**. It emphasizes that $$P(E)$$ measures the *amount of likelihood* contained within $$E$$, which might be densely packed or sparsely spread, reflecting a specific underlying random process or weighting (as highlighted by Bertrand's paradox), irrespective of $$E$$'s simple geometric extent.
 
 ### (E) Mass Distribution Types
 
