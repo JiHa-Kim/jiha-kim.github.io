@@ -80,6 +80,26 @@ We take a leap of faith: we hope that the function $$ \hat{f} $$ that performs b
 
 Why might this be true? Intuitively, if our training sample $$ D $$ is large and representative of the true distribution $$ P $$, then the empirical risk $$ \hat{R}_D(f) $$ should be a good approximation of the true risk $$ R(f) $$. Statistical learning theory provides the formal backing for this intuition. This is also why we use separate test sets – to estimate how well $$ \hat{f} $$ actually generalizes.
 
+<blockquote class="prompt-warning" markdown="1">
+I should note that it is not immediately obvious that the arithmetic mean of the sample data is the best approximation of the population data. Luckily, this is the case for the mean, but not for the variance.
+
+A somewhat surprising fact in statistics shows that the best approximation to population variance with sample data, called the sample variance, is not the same as the variance applied on the sample data.
+
+Given a sample $$X_1, \dots, X_n$$ from the population, the sample variance is:
+
+$$
+\sigma^2_\text{sample} = \frac{1}{n-1} \sum_{i=1}^{n} (X_i - \bar{X})^2 = \frac{n-1}{n} \text{Var}_\text{data} (X)
+$$
+
+where 
+
+$$
+\bar{X} = \mathbb{E}_\text{data}[X] = \frac{1}{n} \sum_{i=1}^{n} X_i
+$$
+
+denotes the sample mean.
+</blockquote>
+
 **Recap: Knowns vs. Unknowns**
 
 *   **We Know:** Training Data ($$D$$), Input/Output Spaces ($$\mathcal{X}, \mathcal{Y}$$), Hypothesis Space ($$\mathcal{H}$$), Loss Function ($$L$$).

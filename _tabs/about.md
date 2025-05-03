@@ -121,9 +121,4 @@ Mathematical and scientific discovery is often messy: it starts with observation
 *   **Step 5.1: Proofread:** Read specifically for typos, grammar, and punctuation errors. Reading aloud helps.
 *   **Step 5.2: Check Metadata & Links:** Verify front matter (`icon`, `order`, etc.) and ensure all internal/external links function correctly.
 
-**Phase 6: Publication & Iteration**
-
-*   **Step 6.1: Publish:** Make the post live.
-*   **Step 6.2: Frame for Feedback:** Include the standard preamble/footer emphasizing this is part of a learning journey ("understanding at time of writing") and explicitly welcome corrections and suggestions, acknowledging that understanding (like discovery) is iterative.
-
 This template provides a concrete sequence, guiding the transformation from initial, potentially non-linear understanding and exploration into a clear, structured, and polished piece of writing.
