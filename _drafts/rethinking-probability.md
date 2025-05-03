@@ -330,8 +330,43 @@ Given our object with its mass distribution $$P$$ and a measurable property $$X$
 
 *   **Other Interpretations:** Long-run average (Law of Large Numbers), fair price.
 
-*   **Variance:** Measures spread around the average. $$Var(X) = E\left[ (X - E[X])^2 \right]$$.
-    *   *Analogy:* $$Var(X)$$ is analogous to the **moment of inertia** relative to the center of mass $$E[X]$$, measuring how spread out the mass is along the $$X$$ dimension.
+*   **Variance: Measuring Spread Around the Average**
+    While expectation $$E[X]$$ gives us the average value or center of mass of the distribution of $$X$$, it doesn't tell us how spread out the values are around this average. Two distributions can have the same mean but vastly different shapes. The **variance** quantifies this spread.
+
+    *   **Definition:** The variance of a random variable $$X$$ is defined as the expected value of the *squared deviation* from the mean:
+        
+        $$
+        Var(X) = E\left[ (X - E[X])^2 \right]
+        $$
+        
+        The square ensures that deviations in both directions (above and below the mean) contribute positively to the measure of spread, and it heavily penalizes values far from the mean. The **standard deviation**, $$\sigma_X = \sqrt{Var(X)}$$, brings this measure back to the original units of $$X$$.
+
+    *   **Analogy: Moment of Inertia:** This definition has a striking parallel in physics with the **moment of inertia ($$I$$)**.
+        1.  **Recall Center of Mass:** We established that $$E[X]$$ is analogous to the center of mass ($$x_c$$) of our object, considering the distribution of the property $$X$$ weighted by the normalized mass $$P$$.
+        2.  **Moment of Inertia Definition:** In physics, the moment of inertia measures an object's resistance to rotational acceleration about a given axis. For a collection of point masses $$m_i$$ at positions $$x_i$$, the moment of inertia about an axis at $$x_c$$ is given by:
+            
+            $$
+            I = \sum_i m_i (x_i - x_c)^2
+            $$
+            
+            For a continuous object with mass density $$\rho(x)$$, it's:
+            
+            $$
+            I = \int (x - x_c)^2 \rho(x) \, dx
+            $$
+            
+            Crucially, this is the resistance to rotation *about the point $$x_c$$*.
+        3.  **The Connection:** Now, compare the variance formula to the moment of inertia formula, specifically when calculated *about the center of mass ($$x_c = E[X]$$)*:
+            *   **Discrete Case:** $$Var(X) = \sum_{\omega_i} (X(\omega_i) - E[X])^2 P(\{\omega_i\})$$. This is identical in form to $$I = \sum_i (x_i - x_c)^2 m_i$$, if we identify:
+                *   The value $$X(\omega_i)$$ with the position $$x_i$$.
+                *   The probability $$P(\{\omega_i\})$$ with the (normalized) mass $$m_i$$.
+                *   The expected value $$E[X]$$ with the center of mass $$x_c$$.
+            *   **Continuous Case:** $$Var(X) = \int (x - E[X])^2 p(x) \, dx$$. This is identical in form to $$I = \int (x - x_c)^2 \rho(x) \, dx$$, if we identify:
+                *   The value $$x$$ with the position $$x$$.
+                *   The probability density $$p(x)$$ with the (normalized) mass density $$\rho(x)$$.
+                *   The expected value $$E[X]$$ with the center of mass $$x_c$$.
+        4.  **Intuitive Meaning:** The moment of inertia is larger when more mass is distributed *farther away* from the axis of rotation ($$x_c$$). Similarly, the variance is larger when more probability mass is assigned to values of $$X$$ *farther away* from the mean ($$E[X]$$). Both quantities use the squared distance term ($$(X - E[X])^2$$ or $$(x_i - x_c)^2$$) to heavily weight these distant contributions.
+        5.  **Summary:** Variance ($$Var(X)$$) is the direct mathematical analogue of the moment of inertia of the probability distribution (viewed as a normalized mass distribution) calculated around its center of mass ($$E[X]$$). It quantifies how "spread out" or "dispersed" the probability mass is around the average value, just like the moment of inertia quantifies how spread out physical mass is around the center of mass in terms of resistance to rotation. A high variance distribution is like a flywheel with most mass near the rim (high moment of inertia, spread out); a low variance distribution is like a compact object with mass near the center (low moment of inertia, concentrated).
 
 ## Perspective 2: Expectation First (Averaging is Fundamental)
 
