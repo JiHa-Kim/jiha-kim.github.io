@@ -1,0 +1,105 @@
+/*  Math ColorBoxes — extends Chirpy’s prompt system */
+
+@charset "utf-8";
+
+/* generic mix-in (same geometry as colourbox example) */
+@mixin math-colorbox(
+  $border,
+  // left bar
+  $accent,
+  // icon & title colour
+  $bg,
+  // background
+  $icon,
+  // Font-Awesome glyph
+  $default-title: null,
+  // text to inject when no .title element
+  $fa-style: 'solid' // ’solid’ | ’regular’ | ’brands’
+) {
+  border-left: 0.25rem solid $border;
+  border-radius: 0.25rem;
+  background: $bg;
+  margin: 1.25rem 0;
+  padding: 0.8rem 1rem 0.8rem 3.2rem;
+  position: relative;
+  color: var(--text-color);
+  box-shadow: var(--language-border-color) 1px 1px 2px 1px;
+
+  /* icon */
+  &::before {
+    content: $icon;
+    font: var(--fa-font-#{$fa-style});
+    position: absolute;
+    top: 0.8rem;
+    left: 1rem;
+    color: $accent;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* user-supplied title bar */
+  > .title {
+    background: $bg;
+    color: $accent;
+    font-weight: 600;
+    margin: -0.8rem -1rem 0.8rem -3.2rem;
+    padding: 0.55rem 0.6rem 0.55rem 3.5rem;
+    border-bottom: 1px solid rgba($accent, 0.15);
+  }
+
+  /* automatic title when .title is missing (modern browsers) */
+  @if $default-title {
+    &:not(:has(> .title))::after {
+      content: $default-title;
+      font-weight: 600;
+      position: absolute;
+      top: 0.8rem;
+      left: 3.5rem;
+      color: $accent;
+    }
+  }
+
+  /* trim last <p> */
+  > p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ── concrete boxes ───────────────────────────────────────── */
+
+.box-definition {
+  @include math-colorbox(
+    #2563eb,
+    #2563eb,
+    rgba(#2563eb, 0.08),
+    '\f02e',
+    'Definition'
+  );
+}
+.box-lemma {
+  @include math-colorbox(
+    #16a34a,
+    #16a34a,
+    rgba(#16a34a, 0.08),
+    '\f022',
+    'Lemma'
+  );
+}
+.box-proposition {
+  @include math-colorbox(
+    #eab308,
+    #eab308,
+    rgba(#eab308, 0.08),
+    '\f0eb',
+    'Proposition'
+  );
+}
+.box-theorem {
+  @include math-colorbox(
+    #dc2626,
+    #dc2626,
+    rgba(#dc2626, 0.08),
+    '\f091',
+    'Theorem'
+  );
+}

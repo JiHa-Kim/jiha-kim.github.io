@@ -1,0 +1,84 @@
+/* Taken from https://github.com/cotes2020/jekyll-theme-chirpy/discussions/1707*/
+/* colorbox style */
+/* define box-info, box-tip, box-warning, box-danger 4 colorboxes */
+@mixin colorbox(
+  $border-color,
+  $icon-color,
+  $icon-content,
+  $bg-color,
+  $fa-style: 'solid'
+) {
+  border-left: 0.2rem solid $border-color;
+  border-radius: 0.25rem;
+  color: var(--text-color);
+  padding: 0.6rem 1rem 0.6rem 1.5rem;
+  box-shadow: var(--language-border-color) 1px 1px 2px 1px;
+  position: relative;
+  margin-bottom: 1rem;
+
+  > div.title::before {
+    content: $icon-content;
+    color: $icon-color;
+    font: var(--fa-font-#{$fa-style});
+    text-align: center;
+    width: 3rem;
+    position: absolute;
+    left: 0.2rem;
+    margin-top: 0.4rem;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  > div.title {
+    background-color: $bg-color;
+    color: $icon-color;
+    padding: 0.5rem 0.6rem 0.5rem 3rem;
+    margin: -0.6rem -1rem 0.6rem -1.5rem;
+    font-weight: 600;
+  }
+
+  > p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* box-info blue */
+.box-info {
+  @include colorbox(
+    var(--prompt-info-icon-color),
+    var(--prompt-info-icon-color),
+    '\f06a',
+    var(--prompt-info-bg)
+  );
+}
+
+/* box-tip green */
+.box-tip {
+  @include colorbox(
+    var(--prompt-tip-icon-color),
+    var(--prompt-tip-icon-color),
+    '\f0eb',
+    var(--prompt-tip-bg),
+    'regular'
+  );
+}
+
+/* box-warning yellow */
+.box-warning {
+  @include colorbox(
+    var(--prompt-warning-icon-color),
+    var(--prompt-warning-icon-color),
+    '\f06a',
+    var(--prompt-warning-bg)
+  );
+}
+
+/* box-danger red */
+.box-danger {
+  @include colorbox(
+    var(--prompt-danger-icon-color),
+    var(--prompt-danger-icon-color),
+    '\f071',
+    var(--prompt-danger-bg)
+  );
+}
