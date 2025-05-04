@@ -86,6 +86,7 @@ An algorithm is considered successful ("wins the game") if $$\text{Regret}_T$$ g
 *   At each round $$t$$, the algorithm chooses an action $$x_t$$ from a feasible set $$V \subseteq \mathbb{R}^d$$.
 *   It incurs a loss $$\ell_t(x_t)$$, where the loss function $$\ell_t$$ can be chosen arbitrarily (adversarially) at each round.
 *   The goal is to minimize the regret compared to the best *fixed* competitor $$u \in V$$ in hindsight.
+    *   Basically, we want to capture the difficulty of the problem, so we want a comparison, and a fixed competitor is the simplest way to do that. Only our algorithm will be adapting over time to keep analysis simple.
 
 <blockquote class="prompt-info" markdown="1">
 ### Definition - Regret (General)
@@ -103,7 +104,7 @@ The online algorithm does *not* know $$u$$ or the future losses when making its 
 
 **A Strategy: Follow-the-Leader (FTL)**
 
-A natural strategy is to choose the action at time $$t$$ that would have been optimal for the *past* rounds $$1, \dots, t-1$$.
+A natural strategy is to choose the action at time $$t$$ that would have been optimal for the *past* rounds $$1, \dots, t-1$$. This uses all information available (from past rounds).  
 
 *   In the example game: The best action in hindsight after $$T$$ rounds is $$x^*_T = \frac{1}{T} \sum_{t=1}^T y_t$$.
 *   FTL Strategy: $$x_t = x^*_{t-1} = \frac{1}{t-1} \sum_{i=1}^{t-1} y_i$$ (for $$t > 1$$).
@@ -111,14 +112,18 @@ A natural strategy is to choose the action at time $$t$$ that would have been op
 **Analysis of FTL for the Guessing Game:**
 
 *   **Lemma 1.2 (Hannan's Lemma):** Let $$x^*_t = \arg\min_{x \in V} \sum_{i=1}^t \ell_i(x)$$. Then for any sequence of loss functions $$\ell_t$$:
+
     $$
     \sum_{t=1}^T \ell_t(x^*_t) \le \sum_{t=1}^T \ell_t(x^*_T)
     $$
+
     (Playing adaptively based on past data is no worse than playing the single best action in hindsight).
 *   **Theorem 1.3:** For the number guessing game ($$\ell_t(x)=(x-y_t)^2, y_t \in [0,1]$$), the FTL strategy ($$x_t = x^*_{t-1}$$) achieves:
+
     $$
     \text{Regret}_T \le 4 + 4 \ln T
     $$
+
     This is sublinear in $$T$$, so FTL "wins" this specific game.
 *   **Proof Idea:** Use Lemma 1.2 to bound the regret against the *sequence* $$x^*_1, \dots, x^*_T$$. Then bound the difference between consecutive optimal actions $$|x^*_{t-1} - x^*_t|$$. Show this difference decreases quickly enough (like $$O(1/t)$$), and the sum is bounded by $$O(\ln T)$$.
 
@@ -128,8 +133,3 @@ A natural strategy is to choose the action at time $$t$$ that would have been op
 *   It is computationally efficient (only requires maintaining a running average).
 *   It **does not use gradients**.
 *   Online learning is distinct from statistical learning; concepts like overfitting don't directly apply.
-
-**History Bits:**
-
-*   Savage (1951): Introduced the concept of "loss" (regret) in statistical decision problems based on Wald (1950).
-*   Hannan (1957): Designed the first randomized algorithm for repeated games with vanishing average regret; proved Lemma 1.2.

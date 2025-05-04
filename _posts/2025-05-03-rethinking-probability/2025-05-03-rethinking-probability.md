@@ -222,6 +222,7 @@ A *probability measure* $$P$$ on a measurable space $$(\Omega, \mathcal{F})$$ is
     $$
     P\left(\bigcup_{i=1}^{\infty} E_i\right) = \sum_{i=1}^{\infty} P(E_i)
     $$
+
 </blockquote>
 
 *   **Density vs. Point Mass (PDF/PMF):** The way probability $$P$$ is assigned relates directly to the type of space:
@@ -313,6 +314,7 @@ A function $$X: \Omega \to \mathbb{R}$$ is **measurable** w.r.t. $$\mathcal{F}$$
 $$
 \{\omega \in \Omega \mid X(\omega) \le x\} \in \mathcal{F}
 $$
+
 </blockquote>
 *   **Running Example (Die Roll):** Our $$X(\omega) = \omega$$ is measurable w.r.t. the power set $$\mathcal{F}$$. For any $$x$$, the set $$\{\omega \mid \omega \le x\}$$ is a subset of $$\{1, ..., 6\}$$, and all subsets are in $$\mathcal{F}$$.
 
@@ -399,6 +401,7 @@ Often, we receive partial information about the outcome of a random phenomenon, 
 $$
 P(A \mid B) = \frac{P(A \cap B)}{P(B)}
 $$
+
 </blockquote>
 *   **Interpretation:**
     *   $$P(A \cap B)$$ is the probability (original normalized mass) contained in the region where *both* A and B occur (the overlap).
@@ -586,6 +589,7 @@ For an event $$A$$ (such that its indicator function $$I_A$$ is in the class $$\
 $$
 P(A) \equiv E[I_A]
 $$
+
 </blockquote>
 
 *   **Intuition/Analogy Recap:** The probability of a region is simply the average value of the property "being in that region". The $$E$$ operator, embodying the averaging process (like finding a center of mass), directly gives us this value when applied to the indicator function.
@@ -633,6 +637,7 @@ For an event $$B$$ with $$E[I_B] > 0$$, the conditional expectation of $$X$$ giv
 $$
 E[X \mid B] = \frac{E[X I_B]}{E[I_B]}
 $$
+
 </blockquote>
 
 *   **Connection to Conditional Probability:** What about conditional probability $$P(A \mid B)$$? Since probability is the expectation of the indicator function, we can define it consistently:

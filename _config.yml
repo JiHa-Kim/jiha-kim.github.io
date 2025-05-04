@@ -312,7 +312,18 @@ jekyll_compose:
 
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
-        Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
+        Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger". Example:
+
+        <blockquote class="prompt-info" markdown="1">
+        ### Definition - Math Concept
+        Intuitively, math concept is ...
+        Formally, given ..., we define *math concept* as:
+
+        $$
+        block
+        $$
+
+        </blockquote>
 
         Please do not modify the sources, references, further reading material without explicit request.
     posts:
@@ -391,7 +402,18 @@ jekyll_compose:
 
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
-        Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
+        Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger". Example:
+
+        <blockquote class="prompt-info" markdown="1">
+        ### Definition - Math Concept
+        Intuitively, math concept is ...
+        Formally, given ..., we define *math concept* as:
+
+        $$
+        block
+        $$
+
+        </blockquote>
 
         Please do not modify the sources, references, further reading material without explicit request.
     notes: # <- collection name == folder name (_notes)
@@ -466,6 +488,17 @@ jekyll_compose:
 
         Inside HTML environments, like blockquotes, you must make sure to add the attribute `markdown="1"` to the opening tag. This will ensure that the syntax is parsed correctly.
 
-        Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
+        Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger". Example:
+
+        <blockquote class="prompt-info" markdown="1">
+        ### Definition - Math Concept
+        Intuitively, math concept is ...
+        Formally, given ..., we define *math concept* as:
+
+        $$
+        block
+        $$
+
+        </blockquote>
 
         Please do not modify the sources, references, further reading material without explicit request.

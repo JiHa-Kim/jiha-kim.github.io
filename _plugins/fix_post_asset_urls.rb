@@ -15,7 +15,7 @@
 
 Jekyll::Hooks.register :documents, :post_render do |doc|
   # Only process HTML output for posts (adjust if you also want to process pages)
-  if doc.output_ext == ".html" && doc.collection.label == "posts"
+  if doc.output_ext == ".html" && (doc.collection.label == "posts" || doc.collection.label == "notes")
     post_url = doc.url # e.g., "/posts/test/"
     # Ensure post_url ends with a slash
     post_url += "/" unless post_url.end_with?("/")
