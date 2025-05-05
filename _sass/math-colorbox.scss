@@ -103,3 +103,12 @@
     'Theorem'
   );
 }
+.box-example {
+  @include math-colorbox(
+    #8b5cf6,              // border & accent: violet
+    #8b5cf6,              // icon & title colour
+    rgba(#8b5cf6, 0.08),  // light violet background
+    '\f0eb',              // Font-Awesome lightbulb
+    'Example'             // default title
+  );
+}

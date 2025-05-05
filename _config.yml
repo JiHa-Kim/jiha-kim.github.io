@@ -306,26 +306,44 @@ jekyll_compose:
           $$
           block 1
           $$
-
           $$
           block 2
           $$
 
           (continued) text
 
-        Inside HTML environments, like blockquotes, you **must** add the attribute
+        Inside HTML environments, like blockquotes or details blocks, you **must** add the attribute
         `markdown="1"` to the opening tag so that MathJax and Markdown are parsed correctly.
 
         Here are some blockquote templates you can use:
 
-        <blockquote class="prompt-info" markdown="1">
-        **Definition.** A metric space is …
+        <blockquote class="box-definition" markdown="1">
+        <div class="title" markdown="1">
+          **Definition.** The natural numbers $$\mathbb{N}$$
+        </div>
+        The natural numbers are defined as $$inline$$.
+
+        $$
+        block
+        $$
+
         </blockquote>
 
-        <blockquote class="box-definition" markdown="1">
-        <div class="title" markdown="1">**Definition.** The natural numbers $$\mathbb{N}$$</div>
-        For every $$\varepsilon > 0$$ …
-        </blockquote>
+        And a details block template:
+
+        <details class="details-block" markdown="1">
+        <summary markdown="1">
+          **Tip.** A concise title goes here.
+        </summary>
+        Here is content that can include **Markdown**, inline math $$a + b$$,
+        and block math.
+
+        $$
+        E = mc^2
+        $$
+
+        More explanatory text.
+        </details>
 
         The stock blockquote classes are:
           - prompt-info
@@ -333,17 +351,23 @@ jekyll_compose:
           - prompt-warning
           - prompt-danger
 
-        Your newly added math-specific classes can include:
+        Your newly added math-specific prompt classes can include:
           - prompt-definition
           - prompt-lemma
           - prompt-proposition
           - prompt-theorem
+          - prompt-example          # for worked examples or illustrative notes
 
         Similarly, for boxed environments you can define:
           - box-definition
           - box-lemma
           - box-proposition
           - box-theorem
+          - box-example             # for example blocks with lightbulb icon
+
+        For details blocks, use:
+          - details-block           # main wrapper (styled like prompt-tip)
+          - the `<summary>` inside will get tip/book icons automatically
 
         Please do not modify the sources, references, or further reading material
         without an explicit request.
@@ -417,26 +441,44 @@ jekyll_compose:
           $$
           block 1
           $$
-
           $$
           block 2
           $$
 
           (continued) text
 
-        Inside HTML environments, like blockquotes, you **must** add the attribute
+        Inside HTML environments, like blockquotes or details blocks, you **must** add the attribute
         `markdown="1"` to the opening tag so that MathJax and Markdown are parsed correctly.
 
         Here are some blockquote templates you can use:
 
-        <blockquote class="prompt-info" markdown="1">
-        **Definition.** A metric space is …
+        <blockquote class="box-definition" markdown="1">
+        <div class="title" markdown="1">
+          **Definition.** The natural numbers $$\mathbb{N}$$
+        </div>
+        The natural numbers are defined as $$inline$$.
+
+        $$
+        block
+        $$
+
         </blockquote>
 
-        <blockquote class="box-definition" markdown="1">
-        <div class="title" markdown="1">**Definition.** The natural numbers $$\mathbb{N}$$</div>
-        For every $$\varepsilon > 0$$ …
-        </blockquote>
+        And a details block template:
+
+        <details class="details-block" markdown="1">
+        <summary markdown="1">
+          **Tip.** A concise title goes here.
+        </summary>
+        Here is content that can include **Markdown**, inline math $$a + b$$,
+        and block math.
+
+        $$
+        E = mc^2
+        $$
+
+        More explanatory text.
+        </details>
 
         The stock blockquote classes are:
           - prompt-info
@@ -444,17 +486,23 @@ jekyll_compose:
           - prompt-warning
           - prompt-danger
 
-        Your newly added math-specific classes can include:
+        Your newly added math-specific prompt classes can include:
           - prompt-definition
           - prompt-lemma
           - prompt-proposition
           - prompt-theorem
+          - prompt-example          # for worked examples or illustrative notes
 
         Similarly, for boxed environments you can define:
           - box-definition
           - box-lemma
           - box-proposition
           - box-theorem
+          - box-example             # for example blocks with lightbulb icon
+
+        For details blocks, use:
+          - details-block           # main wrapper (styled like prompt-tip)
+          - the `<summary>` inside will get tip/book icons automatically
 
         Please do not modify the sources, references, or further reading material
         without an explicit request.
@@ -524,26 +572,44 @@ jekyll_compose:
           $$
           block 1
           $$
-
           $$
           block 2
           $$
 
           (continued) text
 
-        Inside HTML environments, like blockquotes, you **must** add the attribute
+        Inside HTML environments, like blockquotes or details blocks, you **must** add the attribute
         `markdown="1"` to the opening tag so that MathJax and Markdown are parsed correctly.
 
         Here are some blockquote templates you can use:
 
-        <blockquote class="prompt-info" markdown="1">
-        **Definition.** A metric space is …
+        <blockquote class="box-definition" markdown="1">
+        <div class="title" markdown="1">
+          **Definition.** The natural numbers $$\mathbb{N}$$
+        </div>
+        The natural numbers are defined as $$inline$$.
+
+        $$
+        block
+        $$
+
         </blockquote>
 
-        <blockquote class="box-definition" markdown="1">
-        <div class="title" markdown="1">**Definition.** The natural numbers $$\mathbb{N}$$</div>
-        For every $$\varepsilon > 0$$ …
-        </blockquote>
+        And a details block template:
+
+        <details class="details-block" markdown="1">
+        <summary markdown="1">
+          **Tip.** A concise title goes here.
+        </summary>
+        Here is content that can include **Markdown**, inline math $$a + b$$,
+        and block math.
+
+        $$
+        E = mc^2
+        $$
+
+        More explanatory text.
+        </details>
 
         The stock blockquote classes are:
           - prompt-info
@@ -551,17 +617,23 @@ jekyll_compose:
           - prompt-warning
           - prompt-danger
 
-        Your newly added math-specific classes can include:
+        Your newly added math-specific prompt classes can include:
           - prompt-definition
           - prompt-lemma
           - prompt-proposition
           - prompt-theorem
+          - prompt-example          # for worked examples or illustrative notes
 
         Similarly, for boxed environments you can define:
           - box-definition
           - box-lemma
           - box-proposition
           - box-theorem
+          - box-example             # for example blocks with lightbulb icon
+
+        For details blocks, use:
+          - details-block           # main wrapper (styled like prompt-tip)
+          - the `<summary>` inside will get tip/book icons automatically
 
         Please do not modify the sources, references, or further reading material
         without an explicit request.

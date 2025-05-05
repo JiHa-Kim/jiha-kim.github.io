@@ -66,14 +66,13 @@ llm-instructions: |
      $$
      block 1
      $$
-
      $$
      block 2
      $$
 
      (continued) text
 
-  Inside HTML environments, like blockquotes, you **must** add the attribute
+  Inside HTML environments, like blockquotes or details blocks, you **must** add the attribute
   `markdown="1"` to the opening tag so that MathJax and Markdown are parsed correctly.
 
   Here are some blockquote templates you can use:
@@ -81,8 +80,7 @@ llm-instructions: |
   <blockquote class="box-definition" markdown="1">
   <div class="title" markdown="1">
     **Definition.** The natural numbers $$\mathbb{N}$$
-  
-</div>
+  </div>
   The natural numbers are defined as $$inline$$.
 
   $$
@@ -91,23 +89,45 @@ llm-instructions: |
 
   </blockquote>
 
+  And a details block template:
+
+  <details class="details-block" markdown="1">
+  <summary markdown="1">
+    **Tip.** A concise title goes here.
+  </summary>
+  Here is content that can include **Markdown**, inline math $$a + b$$,
+  and block math.
+
+  $$
+  E = mc^2
+  $$
+
+  More explanatory text.
+  </details>
+
   The stock blockquote classes are:
     - prompt-info
     - prompt-tip
     - prompt-warning
     - prompt-danger
 
-  Your newly added math-specific classes can include:
+  Your newly added math-specific prompt classes can include:
     - prompt-definition
     - prompt-lemma
     - prompt-proposition
     - prompt-theorem
+    - prompt-example          # for worked examples or illustrative notes
 
   Similarly, for boxed environments you can define:
     - box-definition
     - box-lemma
     - box-proposition
     - box-theorem
+    - box-example             # for example blocks with lightbulb icon
+
+  For details blocks, use:
+    - details-block           # main wrapper (styled like prompt-tip)
+    - the `<summary>` inside will get tip/book icons automatically
 
   Please do not modify the sources, references, or further reading material
   without an explicit request.
@@ -260,3 +280,75 @@ TODO: Image not working in notes
 <!-- 
 ![Figure 2.2: Epigraph of convex (left) and non-convex functions (right)](./image.png)
 _Figure 2.2: Epigraph of convex (left) and non-convex functions (right)_   -->
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Definition.** Norm of a vector
+</summary>
+Given a vector space $$\mathcal{V}$$ over a subfield $$\mathbb{F}$$ of $$\mathbb{C}$$, a **norm** on $$\mathcal{V}$$ is a real-valued function $$\Vert\cdot\Vert: \mathcal{V} \to \mathbb{R}$$. Then, for all vectors $$x,y \in \mathcal{V}$$, scalars $$s \in \mathbb{F}$$, the norm satisfies the following:
+
+1. Subadditivity/Triangle inequality.
+
+  $$
+  \|x+y\| \le \Vert x\Vert + \Vert y\Vert
+  $$
+
+2. Absolute homogeneity: 
+
+  $$
+  \Vert sx \Vert = \vert s \vert \Vert x \Vert
+  $$
+
+3. Positive definiteness/Point-seperating:
+
+  $$
+  \Vert x \Vert = 0 \implies x=0
+  $$
+</details>
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example 2.5.** Convex functions: affine functions.
+</div>
+
+The simplest convex functions are affine functions:
+
+$$
+f(x) = \langle \textbf{z},\textbf{x} \rangle + b
+$$
+
+</blockquote>
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example 2.6.** Convex functions: norms.
+</div>
+
+
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Proof.** Norms are convex
+</summary>
+
+
+
+</details>
+
+</blockquote>
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem 2.7.** ([Rockafellar, 1970, Theorem 25.1 and Corollary 25.1.1])
+</div>
+
+Given a convex function $$f: \mathbb{R}^d \to (-\infty,+\infty]$$ with $$f$$ differentiable at $$x \in \text{int dom } f
+</blockquote>
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem 2.7.** ([Rockafellar, 1970, Theorem 25.1 and Corollary 25.1.1])
+</div>
+
+Given a convex function $$f: \mathbb{R}^d \to (-\infty,+\infty]$$ with $$f$$ differentiable at $$x \in \text{int dom } f
+</blockquote>
