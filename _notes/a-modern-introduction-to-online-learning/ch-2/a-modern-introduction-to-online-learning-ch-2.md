@@ -66,6 +66,7 @@ llm-instructions: |
      $$
      block 1
      $$
+
      $$
      block 2
      $$
@@ -143,7 +144,7 @@ The general online learning problem:
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-Definition - Online Learning Game
+**Definition.** Online Learning Game
 </div>
 - For $$t = 1, \dots, T \in \mathbb{N}$$  
   - Output $$x_t \in \mathcal{V} \subseteq \mathbb{R}^d$$  
@@ -156,7 +157,7 @@ Goal: minimize regret.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-Definition - Regret (General)
+**Definition.** Regret (General)
 </div>
 For a sequence of loss functions $$\ell_1, \dots, \ell_T$$ and algorithm predictions $$x_1, \dots, x_T$$, the regret with respect to a competitor $$u \in \mathcal{V}$$ is:
 
@@ -194,7 +195,7 @@ $$
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-Definition - Extended Real Number Line
+**Definition.** Extended Real Number Line
 </div>
 
 $$
@@ -205,7 +206,7 @@ $$
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-Definition - Domain of a Function
+**Definition.** Domain of a Function
 </div>
 
 $$
@@ -216,7 +217,7 @@ $$
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-Definition - Indicator Function of a Set
+**Definition.** Indicator Function of a Set
 </div>
 
 $$
@@ -231,7 +232,7 @@ $$
 
 <blockquote class="prompt-tip" markdown="1">
 <div class="title" markdown="1">
-Tip - Constrained to Unconstrained Formulation
+**Tip.** Constrained to Unconstrained Formulation
 </div>
 The indicator function and extended real number line allow us to convert a constrained optimization problem into an unconstrained one:
 
@@ -245,7 +246,7 @@ $$
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-Definition - Epigraph of a Function
+**Definition.** Epigraph of a Function
 </div>
 The epigraph of $$f: \mathcal{V} \subseteq \mathbb{R}^d \to [-\infty,+\infty]$$ is the set of all points above its graph:
 
@@ -258,14 +259,14 @@ $$
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-Definition - Convex Function
+**Definition 2.3.** Convex Function
 </div>
 A function $$f: \mathcal{V}\subseteq\mathbb{R}^d \to [-\infty,+\infty]$$ is convex iff its epigraph $$\mathrm{epi}\,f$$ is convex.  Implicitly, its domain must therefore be convex.
 </blockquote>
 
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
-Tip - Sum of Convex Function and Indicator
+**Tip.** Sum of Convex Function and Indicator
 </div>
 If $$f: \mathcal{V}\subseteq\mathbb{R}^d \to [-\infty,+\infty]$$ is convex, then
 
@@ -280,6 +281,50 @@ TODO: Image not working in notes
 <!-- 
 ![Figure 2.2: Epigraph of convex (left) and non-convex functions (right)](./image.png)
 _Figure 2.2: Epigraph of convex (left) and non-convex functions (right)_   -->
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem 2.4.** ([Rockafellar, 1970, Theorem 4.1])
+</div>
+
+Let $$f: \mathbb{R}^d \to (-\infty,+\infty]$$ where $$\text{dom }f$$ is a convex set. Then the following are equivalent:
+
+$$
+f \text{ convex}
+$$
+
+$$
+\iff
+$$
+
+$$
+\forall \lambda \in (0,1), \forall x,y \in \text{dom }f,
+$$
+
+$$
+f(\lambda x + (1-\lambda)y) \le \lambda f(x) + (1-\lambda) f(y).
+$$
+
+</blockquote>
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example 2.5.** Convex functions: affine functions.
+</div>
+
+The simplest convex functions are affine functions:
+
+$$
+f(x) = \langle \textbf{z},\textbf{x} \rangle + b
+$$
+
+</blockquote>
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example 2.6.** Convex functions: norms.
+</div>
+
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
@@ -306,43 +351,19 @@ Given a vector space $$\mathcal{V}$$ over a subfield $$\mathbb{F}$$ of $$\mathbb
   $$
 </details>
 
-<blockquote class="box-example" markdown="1">
-<div class="title" markdown="1">
-**Example 2.5.** Convex functions: affine functions.
-</div>
-
-The simplest convex functions are affine functions:
-
-$$
-f(x) = \langle \textbf{z},\textbf{x} \rangle + b
-$$
-
-</blockquote>
-
-<blockquote class="box-example" markdown="1">
-<div class="title" markdown="1">
-**Example 2.6.** Convex functions: norms.
-</div>
-
-
-
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof.** Norms are convex
 </summary>
 
+It is sufficient to show that:
 
+$$
+
+$$
 
 </details>
 
-</blockquote>
-
-<blockquote class="box-theorem" markdown="1">
-<div class="title" markdown="1">
-**Theorem 2.7.** ([Rockafellar, 1970, Theorem 25.1 and Corollary 25.1.1])
-</div>
-
-Given a convex function $$f: \mathbb{R}^d \to (-\infty,+\infty]$$ with $$f$$ differentiable at $$x \in \text{int dom } f
 </blockquote>
 
 <blockquote class="box-theorem" markdown="1">

@@ -11,7 +11,7 @@ details.details-block {
   border-left: .25rem solid var(--prompt-tip-icon-color);
   box-shadow: var(--language-border-color) 1px 1px 2px 1px;
   margin: 1rem 0;
-  padding: .6rem 1rem .6rem 1.5rem;
+  padding: .6rem 1rem 0 1.5rem;
 
   /* clip the inside so the summary bar can sit flush */
   overflow: hidden;
@@ -27,7 +27,7 @@ details.details-block > summary {
   list-style: none;                 /* hide default ▸ triangle        */
   position: relative;
 
-  margin: 0 -1rem  1rem -1.5rem;
+  margin: -.6rem -1rem 0 -1.5rem;
   padding: .55rem 2.8rem .55rem 1.25rem;
 
   font-weight: 600;

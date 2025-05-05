@@ -306,6 +306,7 @@ jekyll_compose:
           $$
           block 1
           $$
+
           $$
           block 2
           $$
@@ -441,6 +442,7 @@ jekyll_compose:
           $$
           block 1
           $$
+
           $$
           block 2
           $$
@@ -572,6 +574,7 @@ jekyll_compose:
           $$
           block 1
           $$
+
           $$
           block 2
           $$
