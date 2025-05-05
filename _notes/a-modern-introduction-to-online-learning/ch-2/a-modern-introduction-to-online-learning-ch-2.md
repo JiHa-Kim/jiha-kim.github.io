@@ -349,6 +349,7 @@ Given a vector space $$\mathcal{V}$$ over a subfield $$\mathbb{F}$$ of $$\mathbb
   $$
   \Vert x \Vert = 0 \implies x=0
   $$
+
 </details>
 
 <details class="details-block" markdown="1">
@@ -356,11 +357,25 @@ Given a vector space $$\mathcal{V}$$ over a subfield $$\mathbb{F}$$ of $$\mathbb
 **Proof.** Norms are convex
 </summary>
 
-It is sufficient to show that:
+It is sufficient to show that for $$x,y \in \mathbb{R}^d$$, $$\lambda \in (0,1)$$:
 
 $$
+\Vert \lambda x + (1-\lambda)y \Vert \le \lambda \Vert x \Vert + (1-\lambda) \Vert y \Vert
+$$
+
+First, apply the triangle inequality (sub-additivity):
 
 $$
+\Vert \lambda x + (1-\lambda)y \Vert \le \Vert \lambda x \Vert + \Vert (1-\lambda) y \Vert
+$$
+
+Then, apply absolute homogeneity:
+
+$$
+\Vert \lambda x \Vert + \Vert (1-\lambda) y \Vert \le \vert \lambda \vert \Vert x \Vert + \vert 1-\lambda \vert \Vert y \Vert
+$$
+
+Since $$\lambda \in (0,1)$$, then $$0<\lambda$$ and $$0<1-\lambda$$. Hence, $$\vert \lambda \vert = \lambda$$ and $$\vert 1-\lambda \vert = 1-\lambda$$. Chaining the inequalities gives the desired result. 
 
 </details>
 
