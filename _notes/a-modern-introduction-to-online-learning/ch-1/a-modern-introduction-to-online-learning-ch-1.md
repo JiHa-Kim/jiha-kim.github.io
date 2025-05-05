@@ -50,7 +50,7 @@ llm-instructions: |-
   Blockquote classes are "prompt-info", "prompt-tip", "prompt-warning", and "prompt-danger".
 ---
 
-These are notes for the text A Modern Introduction to Online Learning by Francesco Orabona on [ArXiV](https://arxiv.org/abs/1912.13213).
+These are notes for the text A Modern Introduction to Online Learning by Francesco Orabona on [arXiv](https://arxiv.org/abs/1912.13213).
 
 ## Chapter 1 - What is Online Learning?
 

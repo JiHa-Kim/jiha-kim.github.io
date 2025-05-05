@@ -134,7 +134,7 @@ llm-instructions: |
   without an explicit request.
 ---
 
-These are notes for the text *A Modern Introduction to Online Learning* by Francesco Orabona on [ArXiV](https://arxiv.org/abs/1912.13213).
+These are notes for the text *A Modern Introduction to Online Learning* by Francesco Orabona on [arXiv](https://arxiv.org/abs/1912.13213).
 
 ### Chapter 2 - Online Subgradient Descent
 
@@ -177,9 +177,37 @@ Plausible:
 Implausible:
 - Knowing future
 
+Why do we need more information when we developed FTL that worked in our first game? Here is an example failure case in a different game.
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example 2.10.** Failure of FTL
+</div>
+
+Intuitively, we will construct two pendulums that are out of sync. Or you can imagine a player in a sport constantly juking a naive opponent who always lags one step behind in the wrong direction.
+
+Let $$\mathcal{V}=[-1,1]$$. Consider the sequences of losses $$\ell_t(x)=z_t x$$, where $$z_t=-0.5,1,-1,1,-1,\dots$$. On the first round, we let FTL predict $$x_1$$ arbitrarily since we have no past history. Then, FTL will predict $$x_1,-1,1,-1,1,\dots$$. Overall, the cumulative loss becomes:
+
+$$
+\begin{aligned}
+\sum_{t=1}^{T} \ell_t(x_t)
+&=\underbrace{-0.5x_1}_\text{1 round}+\underbrace{(-1)(1)+(1)(-1)+\dots}_{T-1\text{ rounds}}
+\\
+&=-0.5x_1+T-1
+\end{aligned}
+$$
+
+Meanwhile, the fixed competitor $$u=0$$ yields $$0$$ cumulative loss. Thus:
+
+$$
+\text{Regret}_T(u=0)=T-1-0.5x_1\ge T-1.5.
+$$
+
+</blockquote>
+
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-Definition 2.2 - Convex Set
+**Definition 2.2.** Convex Set
 </div>
 A set $$\mathcal{V} \subseteq \mathbb{R}^d$$ is **convex** iff it contains the line segment between any two points in the set.
 
@@ -335,7 +363,7 @@ Given a vector space $$\mathcal{V}$$ over a subfield $$\mathbb{F}$$ of $$\mathbb
 1. Subadditivity/Triangle inequality.
 
   $$
-  \|x+y\| \le \Vert x\Vert + \Vert y\Vert
+  \Vert x+y\Vert  \le \Vert x\Vert + \Vert y\Vert
   $$
 
 2. Absolute homogeneity: 
@@ -383,8 +411,164 @@ Since $$\lambda \in (0,1)$$, then $$0<\lambda$$ and $$0<1-\lambda$$. Hence, $$\v
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
-**Theorem 2.7.** ([Rockafellar, 1970, Theorem 25.1 and Corollary 25.1.1])
+**Theorem 2.7.** First-order condition for convexity ([Rockafellar, 1970, Theorem 25.1 and Corollary 25.1.1])
 </div>
 
-Given a convex function $$f: \mathbb{R}^d \to (-\infty,+\infty]$$ with $$f$$ differentiable at $$x \in \text{int dom } f
+Given a convex function $$f: \mathbb{R}^d \to (-\infty,+\infty]$$ with $$f$$ differentiable at $$x \in \text{int dom } f$$, we have
+
+$$
+f(y)-f(x)-\langle \nabla f(x),y-x \rangle \ge 0 \quad \forall y \in \mathbb{R}^d.
+$$
+
+(**Remark.** This is actually an iff when $$y\in \text{dom }f$$.)
+
+</blockquote>
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem 2.8.** First-order optimality condition for differentiable convex functions.
+</div>
+
+Let $$\mathcal{V}$$ be a convex non-empty set, $$x^\ast \in \mathcal{V}$$, and $$f: \mathcal{V} \to \mathbb{R}$$ a convex function, differentiable over an open set that contains $$\mathcal{V}$$. Then, 
+
+$$
+x^\ast \in \arg\min_{x \in \mathcal{V}} f(x)
+$$
+
+$$
+\iff
+$$
+
+$$
+\langle \nabla f(x^\ast), y-x^\ast \rangle \ge 0, \forall y\in \mathcal{V}.
+$$
+
+Moreover, if $$x^\ast \in \text{int } \mathcal{V}$$, by choosing $$\epsilon$$ enough such that $$y=x^\ast-\epsilon \nabla f(x^\ast) \in \mathcal{V}$$, $$x^\ast$$ is a minimum iff $$\nabla f(x^\ast)=0$$.
+
+(**Remark.** Intuitively, this means that there no a feasible directional derivative $$\nabla_{y-x^\ast} f(x^\ast)$$ in which we can take a step that will decrease the function. There is no feasible step that will make an acute angle with the negative gradient. Furthermore, if $$x^\ast \in \text{int } \mathcal{V}$$, by definition, any direction must be feasible, so it is only possible that no direction results in a decrease.)
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Proof.**
+</summary>
+
+$$(\Rightarrow)$$:
+
+Let $$x^\ast \in \arg\min_{x \in \mathcal{V}} f(x)$$. By definition, this means $$f(x^\ast) \le f(x),\, \forall y \in \mathcal{V}$$. Also, since $$\mathcal{V}$$ is convex and non-empty, it must contain all line segments between two points.
+
+Formally, since the line segment given by points $$z(\lambda)=x^\ast+\lambda(y-x^\ast) \in \mathcal{V}$$, where $$0 \lt \lambda \lt 1$$, we have by assumption of the optimality of $$x^\ast$$ that
+
+$$
+f(x^\ast) \le f(z(\lambda)).
+$$
+
+This implies, since $$0\lt\lambda$$:
+
+$$
+0 \le \frac{f(x^\ast+\lambda(y-x))-f(x^\ast)}{\lambda}
+$$
+
+Since $$f$$ is differentiable, the limit as $$\lambda \downarrow 0$$ exists and is precisely equal to the directional derivative $$\langle \nabla f(x^\ast),y-x^\ast\rangle$$.
+
+$$\diamond$$
+
+$$(\Leftarrow)$$:
+
+Assume $$0 \le \langle \nabla f(x^\ast),y-x^\ast\rangle$$. By the first-order condition for convexity, we have:
+
+$$
+0\le f(y)-f(x^\ast)-\langle \nabla f(x^\ast),y-x^\ast \rangle \le f(y)-f(x^\ast).
+$$
+
+Thus $$f(x^\ast)\le f(y)$$, which is the definition of a minimizer.
+
+$$\diamond$$
+
+Now, we prove the "Moreover" part: if $$x^\ast \in \text{int }\mathcal{V}$$, then
+
+$$
+x^\ast \in \arg\min_{x\in\mathcal{V}} f(x) \iff \nabla f(x^\ast)=0.
+$$
+
+$$(\Rightarrow)$$:
+
+Assume $$x^\ast \in \text{int }\mathcal{V}$$ and $$x^\ast \in \arg\min_{x\in\mathcal{V}} f(x)$$. 
+
+By definition of an interior point, there exists for some radius $$r>0$$, an open ball $$B(x^\ast,r)=\{z \mid \Vert z-x^\ast \Vert \lt r \} \subseteq \mathcal{V}$$.
+
+Consider a gradient descent step $$y=x^\ast-\epsilon \nabla f(x^\ast)$$, which we want to stay in $$\mathcal{V}$$. In other words,
+
+$$
+\Vert y-x^\ast \Vert = \epsilon \Vert \nabla f(x^\ast) \Vert \lt r.
+$$
+
+If $$\nabla f(x^\ast)=0$$, then we are done. Else, choose small enough epsilon for the statement to hold:
+
+$$
+0 \lt \epsilon \lt r/\Vert \nabla f(x^\ast) \Vert.
+$$
+
+By the first part of the theorem, we have:
+
+$$
+\begin{aligned}
+0 &\le \langle \nabla f(x^\ast),y-x^\ast \rangle 
+\\
+&= \langle \nabla f(x^\ast),-\epsilon \nabla f(x^\ast) \rangle 
+\\
+&= -\epsilon \Vert \nabla f(x^\ast) \Vert^2.
+\end{aligned}
+$$
+
+But also, since $$0\lt\epsilon$$ and $$0\le\Vert\nabla f(x^\ast)\Vert^2$$, it follows that
+
+$$
+0 \le \Vert \nabla f(x^\ast) \Vert \le 0 \iff \nabla f(x^\ast) = 0.  
+$$
+
+$$\diamond$$
+
+$$(\Leftarrow)$$:
+
+Assume $$x^\ast \in \text{int }\mathcal{V}$$ and $$\nabla f(x^\ast)=0$$.
+
+We must verify the optimality of $$x^\ast$$:
+
+$$
+x^\ast \in \arg\min_{x\in\mathcal{V}} \iff f(x^\ast)\le f(x), \forall x\in\mathcal{V}.
+$$
+
+But from the first-order optimality condition, we satisfy
+
+$$
+0\le f(x)-f(x^\ast)-\langle \nabla f(x^\ast),x-x^\ast\rangle=f(x)-f(x^\ast)
+$$
+
+thus $$f(x^\ast)\le f(x)$$.
+
+$$\blacksquare$$
+
+</details>
+
+</blockquote>
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem 2.9.** Jensen's Inequality
+</div>
+
+Let $$f: \mathbb{R}^d \to (-\infty,+\infty]$$ be a measurable convex function and $$x$$ be an $$\mathbb{R}^d$$-valued random element on some probability space such that $$\mathbb{E}[x]$$ exists and $$x \in \text{dom }f$$ with probability $$1$$. Then
+
+$$
+\mathbb{E}[f(x)]\le f(\mathbb{E}[x]).
+$$
+
+(**Remark.** To remember the direction, simply test with a discrete probability distribution (Bernoulli) on two points, which once again gives the equivalent definition of convexity:
+
+$$
+f(\lambda x+(1-\lambda)y) \le \lambda f(x) + (1-\lambda)f(y).
+$$
+
+Visually, set $$\lambda=0.5$$ and imagine an upward parabola (convex). The midpoint of the line segment joining two points should lie above the function evaluated at the horizontal midpoint.)
+
 </blockquote>
