@@ -1,6 +1,6 @@
-/* Taken from https://github.com/cotes2020/jekyll-theme-chirpy/discussions/1707*/
-/* colorbox style */
-/* define box-info, box-tip, box-warning, box-danger 4 colorboxes */
+/* Taken from https://github.com/cotes2020/jekyll-theme-chirpy/discussions/1707 */
+/* colour-box style --------------------------------------------------------- */
+
 @mixin colorbox(
   $border-color,
   $icon-color,
@@ -8,77 +8,57 @@
   $bg-color,
   $fa-style: 'solid'
 ) {
-  border-left: 0.2rem solid $border-color;
-  border-radius: 0.25rem;
-  color: var(--text-color);
-  padding: 0.6rem 1rem 0.6rem 1.5rem;
-  box-shadow: var(--language-border-color) 1px 1px 2px 1px;
-  position: relative;
+  border-left : .2rem solid $border-color;
+  border-radius: .25rem;
+  color       : var(--text-color);
+  padding     : .6rem 1rem .6rem 1.5rem;
+  box-shadow  : var(--language-border-color) 1px 1px 2px 1px;
+  position    : relative;
   margin-bottom: 1rem;
 
+  /* -- title bar ----------------------------------------------- */
+  > div.title {
+    position   : relative;          /* context for the icon */
+    background : $bg-color;
+    color      : $icon-color;
+    font-weight: 600;
+
+    /* centre the row */
+    display    : flex;
+    align-items: center;
+    line-height: 1.15;
+
+    /* room for the icon (3 rem) + comfy block-padding         */
+    padding    : .55rem .8rem .55rem 3rem;
+    margin     : -.6rem -1rem .6rem -1.5rem;
+
+    /* kill Markdown’s default <p> margins */
+    > p { margin: 0; }
+  }
+
+  /* icon: absolutely centred left */
   > div.title::before {
-    content: $icon-content;
-    color: $icon-color;
-    font: var(--fa-font-#{$fa-style});
-    text-align: center;
-    width: 3rem;
-    position: absolute;
-    left: 0.2rem;
-    margin-top: 0.4rem;
+    content : $icon-content;
+    font    : var(--fa-font-#{$fa-style});
+    color   : $icon-color;
+
+    position : absolute;
+    top      : 50%;                 /* true vertical centre */
+    left     : .8rem;               /* aligns with left edge */
+    transform: translateY(-50%);
+
+    line-height: 1;                 /* no extra glyph space */
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
   }
 
-  > div.title {
-    background-color: $bg-color;
-    color: $icon-color;
-    padding: 0.5rem 0.6rem 0.5rem 3rem;
-    margin: -0.6rem -1rem 0.6rem -1.5rem;
-    font-weight: 600;
-  }
-
-  > p:last-child {
-    margin-bottom: 0;
-  }
+  /* cancel bottom-margin of the last paragraph inside the box */
+  > p:last-child { margin-bottom: 0; }
 }
 
-/* box-info blue */
-.box-info {
-  @include colorbox(
-    var(--prompt-info-icon-color),
-    var(--prompt-info-icon-color),
-    '\f06a',
-    var(--prompt-info-bg)
-  );
-}
+/* concrete variants ------------------------------------------------------- */
 
-/* box-tip green */
-.box-tip {
-  @include colorbox(
-    var(--prompt-tip-icon-color),
-    var(--prompt-tip-icon-color),
-    '\f0eb',
-    var(--prompt-tip-bg),
-    'regular'
-  );
-}
-
-/* box-warning yellow */
-.box-warning {
-  @include colorbox(
-    var(--prompt-warning-icon-color),
-    var(--prompt-warning-icon-color),
-    '\f06a',
-    var(--prompt-warning-bg)
-  );
-}
-
-/* box-danger red */
-.box-danger {
-  @include colorbox(
-    var(--prompt-danger-icon-color),
-    var(--prompt-danger-icon-color),
-    '\f071',
-    var(--prompt-danger-bg)
-  );
-}
+.box-info     { @include colorbox(var(--prompt-info-icon-color   ), var(--prompt-info-icon-color   ), '\f06a', var(--prompt-info-bg   )); }
+.box-tip      { @include colorbox(var(--prompt-tip-icon-color    ), var(--prompt-tip-icon-color    ), '\f0eb', var(--prompt-tip-bg    ), 'regular'); }
+.box-warning  { @include colorbox(var(--prompt-warning-icon-color), var(--prompt-warning-icon-color), '\f06a', var(--prompt-warning-bg)); }
+.box-danger   { @include colorbox(var(--prompt-danger-icon-color ), var(--prompt-danger-icon-color ), '\f071', var(--prompt-danger-bg )); }
