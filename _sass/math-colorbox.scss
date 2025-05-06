@@ -1,148 +1,148 @@
-// /*
-//   Math ColorBoxes
-//   -- vertical-centering fix that isolates the icon --
-// */
+/*
+  Math ColorBoxes
+  -- vertical-centering fix that isolates the icon --
+*/
 
-// @charset "utf-8";
+@charset "utf-8";
 
-// /* ----------------------------------------------------------- */
-// /* Generic mix-in                                              */
-// /* ----------------------------------------------------------- */
-// @mixin math-colorbox(
-//   $border,
-//   $accent,
-//   $bg,
-//   $icon,
-//   $default-title:null,
-//   $fa-style:'solid'
-// ) {
-//   /* wrapper -------------------------------------------------- */
-//   border-left : 0.25rem solid $border;
-//   border-radius: 0.25rem;
-//   background  : $bg;
-//   margin      : 1rem 0;
-//   padding     : 0.6rem 1rem;
-//   position    : relative;
-//   color       : var(--text-color);
-//   box-shadow  : var(--language-border-color) 1px 1px 2px 1px;
+/* ----------------------------------------------------------- */
+/* Generic mix-in                                              */
+/* ----------------------------------------------------------- */
+@mixin math-colorbox(
+  $border,
+  $accent,
+  $bg,
+  $icon,
+  $default-title:null,
+  $fa-style:'solid'
+) {
+  /* wrapper -------------------------------------------------- */
+  border-left : 0.25rem solid $border;
+  border-radius: 0.25rem;
+  background  : $bg;
+  margin      : 1rem 0;
+  padding     : 0.6rem 1rem;
+  position    : relative;
+  color       : var(--text-color);
+  box-shadow  : var(--language-border-color) 1px 1px 2px 1px;
 
-//   /* title-bar ------------------------------------------------ */
-// > .title {
-//   background  : $bg;
-//   color       : $accent;
-//   font-weight : 600;
+  /* title-bar ------------------------------------------------ */
+> .title {
+  background  : $bg;
+  color       : $accent;
+  font-weight : 600;
 
-//   /* layout */
-//   display     : flex;
-//   align-items : center;
-//   gap         : 0.75rem;
+  /* layout */
+  display     : flex;
+  align-items : center;
+  gap         : 0.75rem;
 
-//   /* ⬇︎  Add breathing-room: 0.55 rem top & bottom, 1 rem sides */
-//   padding     : 0.55rem 1rem;
+  /* ⬇︎  Add breathing-room: 0.55 rem top & bottom, 1 rem sides */
+  padding     : 0.55rem 1rem;
 
-//   /* …or, if you’re using the absolute-positioned icon version: */
-//   /* padding     : 0.55rem 1rem 0.55rem 2.5rem; */
+  /* …or, if you’re using the absolute-positioned icon version: */
+  /* padding     : 0.55rem 1rem 0.55rem 2.5rem; */
 
-//   margin      : -0.6rem -1rem 0.6rem -1rem;
-//   border-bottom: 1px solid rgba($accent, .15);
+  margin      : -0.6rem -1rem 0.6rem -1rem;
+  border-bottom: 1px solid rgba($accent, .15);
 
-//   /* keep the text line snug but not cramped */
-//   line-height : 1.15;
+  /* keep the text line snug but not cramped */
+  line-height : 1.15;
 
-//   /* knock out Markdown’s default <p> margins */
-//   > p { margin: 0; }
+  /* knock out Markdown’s default <p> margins */
+  > p { margin: 0; }
 
-//   /* icon (unchanged) */
-//   &::before {
-//     content : $icon;
-//     font    : var(--fa-font-#{$fa-style});
-//     line-height: 1;
-//     text-rendering: auto;
-//     -webkit-font-smoothing: antialiased;
-//   }
-// }
+  /* icon (unchanged) */
+  &::before {
+    content : $icon;
+    font    : var(--fa-font-#{$fa-style});
+    line-height: 1;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+}
 
-//   /* automatic title (when .title is missing) ----------------- */
-//   @if $default-title {
-//     &:not(:has(> .title)) {
-//       padding-top: 2rem;
+  /* automatic title (when .title is missing) ----------------- */
+  @if $default-title {
+    &:not(:has(> .title)) {
+      padding-top: 2rem;
 
-//       &::before {
-//         content : $icon;
-//         font    : var(--fa-font-#{$fa-style});
-//         position: absolute;
-//         top     : 0.7rem;
-//         left    : 1rem;
-//         color   : $accent;
-//         line-height: 1;
-//       }
+      &::before {
+        content : $icon;
+        font    : var(--fa-font-#{$fa-style});
+        position: absolute;
+        top     : 0.7rem;
+        left    : 1rem;
+        color   : $accent;
+        line-height: 1;
+      }
 
-//       &::after {
-//         content : $default-title;
-//         font-weight : 600;
-//         position: absolute;
-//         top     : 0.7rem;
-//         left    : 2.5rem;
-//         color   : $accent;
-//       }
-//     }
-//   }
+      &::after {
+        content : $default-title;
+        font-weight : 600;
+        position: absolute;
+        top     : 0.7rem;
+        left    : 2.5rem;
+        color   : $accent;
+      }
+    }
+  }
 
-//   /* paragraph tweaks ---------------------------------------- */
-//   > p:first-child  { margin-top    : 0; }
-//   > p:last-child   { margin-bottom : 0; }
-// }
+  /* paragraph tweaks ---------------------------------------- */
+  > p:first-child  { margin-top    : 0; }
+  > p:last-child   { margin-bottom : 0; }
+}
 
-// /* ----------------------------------------------------------- */
-// /* Concrete variants                                           */
-// /* ----------------------------------------------------------- */
+/* ----------------------------------------------------------- */
+/* Concrete variants                                           */
+/* ----------------------------------------------------------- */
 
-// .box-definition {
-//   @include math-colorbox(
-//     #2563eb,
-//     #2563eb,
-//     rgba(#2563eb, 0.08),
-//     '\f02e',
-//     'Definition'
-//   );
-// }
+.box-definition {
+  @include math-colorbox(
+    #2563eb,
+    #2563eb,
+    rgba(#2563eb, 0.08),
+    '\f02e',
+    'Definition'
+  );
+}
 
-// .box-lemma {
-//   @include math-colorbox(
-//     #16a34a,
-//     #16a34a,
-//     rgba(#16a34a, 0.08),
-//     '\f022',
-//     'Lemma'
-//   );
-// }
+.box-lemma {
+  @include math-colorbox(
+    #16a34a,
+    #16a34a,
+    rgba(#16a34a, 0.08),
+    '\f022',
+    'Lemma'
+  );
+}
 
-// .box-proposition {
-//   @include math-colorbox(
-//     #eab308,
-//     #eab308,
-//     rgba(#eab308, 0.08),
-//     '\f0eb',
-//     'Proposition'
-//   );
-// }
+.box-proposition {
+  @include math-colorbox(
+    #eab308,
+    #eab308,
+    rgba(#eab308, 0.08),
+    '\f0eb',
+    'Proposition'
+  );
+}
 
-// .box-theorem {
-//   @include math-colorbox(
-//     #dc2626,
-//     #dc2626,
-//     rgba(#dc2626, 0.08),
-//     '\f091',
-//     'Theorem'
-//   );
-// }
+.box-theorem {
+  @include math-colorbox(
+    #dc2626,
+    #dc2626,
+    rgba(#dc2626, 0.08),
+    '\f091',
+    'Theorem'
+  );
+}
 
-// .box-example {
-//   @include math-colorbox(
-//     #8b5cf6,
-//     #8b5cf6,
-//     rgba(#8b5cf6, 0.08),
-//     '\f0eb',
-//     'Example'
-//   );
-// }
+.box-example {
+  @include math-colorbox(
+    #8b5cf6,
+    #8b5cf6,
+    rgba(#8b5cf6, 0.08),
+    '\f0eb',
+    'Example'
+  );
+}
