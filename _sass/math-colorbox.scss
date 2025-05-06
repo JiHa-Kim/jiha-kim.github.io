@@ -1,85 +1,101 @@
-/*  
+/*
   Math ColorBoxes
-  Adapted from https://github.com/cotes2020/jekyll-theme-chirpy/discussions/1707
+  ── vertical-centering fix that isolates the icon ──
 */
 
 @charset "utf-8";
 
-/* generic mix-in (same geometry as colourbox example) */
+/* ----------------------------------------------------------- */
+/* Generic mix-in                                              */
+/* ----------------------------------------------------------- */
 @mixin math-colorbox(
   $border,
-  // left bar
   $accent,
-  // icon & title colour
   $bg,
-  // background
   $icon,
-  // Font-Awesome glyph
-  $default-title: null,
-  // text to inject when no .title element
-  $fa-style: 'solid' // ’solid’ | ’regular’ | ’brands’
+  $default-title:null,
+  $fa-style:'solid'
 ) {
-  border-left: 0.25rem solid $border;
+  /* wrapper -------------------------------------------------- */
+  border-left : 0.25rem solid $border;
   border-radius: 0.25rem;
-  background: $bg;
-  margin: 1.25rem 0;
-  padding: 0.8rem 1rem 0.8rem 3.2rem;
-  position: relative;
-  color: var(--text-color);
-  box-shadow: var(--language-border-color) 1px 1px 2px 1px;
+  background  : $bg;
+  margin      : 1rem 0;
+  padding     : 0.6rem 1rem;
+  position    : relative;
+  color       : var(--text-color);
+  box-shadow  : var(--language-border-color) 1px 1px 2px 1px;
 
-  /* icon */
+  /* title-bar ------------------------------------------------ */
+> .title {
+  background  : $bg;
+  color       : $accent;
+  font-weight : 600;
+
+  /* layout */
+  display     : flex;
+  align-items : center;
+  gap         : 0.75rem;
+
+  /* ⬇︎  Add breathing-room: 0.55 rem top & bottom, 1 rem sides */
+  padding     : 0.55rem 1rem;
+
+  /* …or, if you’re using the absolute-positioned icon version: */
+  /* padding     : 0.55rem 1rem 0.55rem 2.5rem; */
+
+  margin      : -0.6rem -1rem 0.6rem -1rem;
+  border-bottom: 1px solid rgba($accent, .15);
+
+  /* keep the text line snug but not cramped */
+  line-height : 1.15;
+
+  /* knock out Markdown’s default <p> margins */
+  > p { margin: 0; }
+
+  /* icon (unchanged) */
   &::before {
-    content: $icon;
-    font: var(--fa-font-#{$fa-style});
-    position: absolute;
-    top: 0.8rem;
-    left: 1rem;
-    color: $accent;
+    content : $icon;
+    font    : var(--fa-font-#{$fa-style});
+    line-height: 1;
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
   }
+}
 
-  /* user-supplied title bar */
-  > .title {
-    background: $bg;
-    color: $accent;
-    font-weight: 600;
-
-    /* symmetric horizontal offsets */
-    margin: -0.8rem   /* top */
-            -3.2rem  /* right */
-            0.8rem   /* bottom */
-            -3.2rem; /* left */
-
-    /* adjust right padding to match new right margin */
-    padding: 0.55rem  /* top */
-             3.2rem  /* right */
-             0.55rem /* bottom */
-             3.5rem; /* left (for the icon indent) */
-
-    border-bottom: 1px solid rgba($accent, 0.15);
-  }
-
-  /* automatic title when .title is missing (modern browsers) */
+  /* automatic title (when .title is missing) ----------------- */
   @if $default-title {
-    &:not(:has(> .title))::after {
-      content: $default-title;
-      font-weight: 600;
-      position: absolute;
-      top: 0.8rem;
-      left: 3.5rem;
-      color: $accent;
+    &:not(:has(> .title)) {
+      padding-top: 2rem;
+
+      &::before {
+        content : $icon;
+        font    : var(--fa-font-#{$fa-style});
+        position: absolute;
+        top     : 0.7rem;
+        left    : 1rem;
+        color   : $accent;
+        line-height: 1;
+      }
+
+      &::after {
+        content : $default-title;
+        font-weight : 600;
+        position: absolute;
+        top     : 0.7rem;
+        left    : 2.5rem;
+        color   : $accent;
+      }
     }
   }
 
-  /* trim last <p> */
-  > p:last-child {
-    margin-bottom: 0;
-  }
+  /* paragraph tweaks ---------------------------------------- */
+  > p:first-child  { margin-top    : 0; }
+  > p:last-child   { margin-bottom : 0; }
 }
 
-/* ── concrete boxes ───────────────────────────────────────── */
+/* ----------------------------------------------------------- */
+/* Concrete variants                                           */
+/* ----------------------------------------------------------- */
 
 .box-definition {
   @include math-colorbox(
@@ -90,6 +106,7 @@
     'Definition'
   );
 }
+
 .box-lemma {
   @include math-colorbox(
     #16a34a,
@@ -99,6 +116,7 @@
     'Lemma'
   );
 }
+
 .box-proposition {
   @include math-colorbox(
     #eab308,
@@ -108,6 +126,7 @@
     'Proposition'
   );
 }
+
 .box-theorem {
   @include math-colorbox(
     #dc2626,
@@ -117,12 +136,13 @@
     'Theorem'
   );
 }
+
 .box-example {
   @include math-colorbox(
-    #8b5cf6,              // border & accent: violet
-    #8b5cf6,              // icon & title colour
-    rgba(#8b5cf6, 0.08),  // light violet background
-    '\f0eb',              // Font-Awesome lightbulb
-    'Example'             // default title
+    #8b5cf6,
+    #8b5cf6,
+    rgba(#8b5cf6, 0.08),
+    '\f0eb',
+    'Example'
   );
 }

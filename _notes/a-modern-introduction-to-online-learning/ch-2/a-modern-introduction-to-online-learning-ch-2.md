@@ -205,6 +205,11 @@ $$
 
 </blockquote>
 
+<details class="details-block" markdown="1">
+<summary markdown="1">
+Basic theory of convex analysis
+</summary>
+
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 2.2.** Convex Set
@@ -572,3 +577,5 @@ $$
 Visually, set $$\lambda=0.5$$ and imagine an upward parabola (convex). The midpoint of the line segment joining two points should lie above the function evaluated at the horizontal midpoint.)
 
 </blockquote>
+
+</details>
