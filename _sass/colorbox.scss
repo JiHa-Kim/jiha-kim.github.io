@@ -1,64 +1,64 @@
-/* Taken from https://github.com/cotes2020/jekyll-theme-chirpy/discussions/1707 */
-/* colour-box style --------------------------------------------------------- */
+// /* Taken from https://github.com/cotes2020/jekyll-theme-chirpy/discussions/1707 */
+// /* colour-box style --------------------------------------------------------- */
 
-@mixin colorbox(
-  $border-color,
-  $icon-color,
-  $icon-content,
-  $bg-color,
-  $fa-style: 'solid'
-) {
-  border-left : .2rem solid $border-color;
-  border-radius: .25rem;
-  color       : var(--text-color);
-  padding     : .6rem 1rem .6rem 1.5rem;
-  box-shadow  : var(--language-border-color) 1px 1px 2px 1px;
-  position    : relative;
-  margin-bottom: 1rem;
+// @mixin colorbox(
+//   $border-color,
+//   $icon-color,
+//   $icon-content,
+//   $bg-color,
+//   $fa-style: 'solid'
+// ) {
+//   border-left : .2rem solid $border-color;
+//   border-radius: .25rem;
+//   color       : var(--text-color);
+//   padding     : .6rem 1rem .6rem 1.5rem;
+//   box-shadow  : var(--language-border-color) 1px 1px 2px 1px;
+//   position    : relative;
+//   margin-bottom: 1rem;
 
-  /* -- title bar ----------------------------------------------- */
-  > div.title {
-    position   : relative;          /* context for the icon */
-    background : $bg-color;
-    color      : $icon-color;
-    font-weight: 600;
+//   /* -- title bar ----------------------------------------------- */
+//   > div.title {
+//     position   : relative;          /* context for the icon */
+//     background : $bg-color;
+//     color      : $icon-color;
+//     font-weight: 600;
 
-    /* centre the row */
-    display    : flex;
-    align-items: center;
-    line-height: 1.15;
+//     /* centre the row */
+//     display    : flex;
+//     align-items: center;
+//     line-height: 1.15;
 
-    /* room for the icon (3 rem) + comfy block-padding         */
-    padding    : .55rem .8rem .55rem 3rem;
-    margin     : -.6rem -1rem .6rem -1.5rem;
+//     /* room for the icon (3 rem) + comfy block-padding         */
+//     padding    : .55rem .8rem .55rem 3rem;
+//     margin     : -.6rem -1rem .6rem -1.5rem;
 
-    /* kill Markdown’s default <p> margins */
-    > p { margin: 0; }
-  }
+//     /* kill Markdown’s default <p> margins */
+//     > p { margin: 0; }
+//   }
 
-  /* icon: absolutely centred left */
-  > div.title::before {
-    content : $icon-content;
-    font    : var(--fa-font-#{$fa-style});
-    color   : $icon-color;
+//   /* icon: absolutely centred left */
+//   > div.title::before {
+//     content : $icon-content;
+//     font    : var(--fa-font-#{$fa-style});
+//     color   : $icon-color;
 
-    position : absolute;
-    top      : 50%;                 /* true vertical centre */
-    left     : .8rem;               /* aligns with left edge */
-    transform: translateY(-50%);
+//     position : absolute;
+//     top      : 50%;                 /* true vertical centre */
+//     left     : .8rem;               /* aligns with left edge */
+//     transform: translateY(-50%);
 
-    line-height: 1;                 /* no extra glyph space */
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
-  }
+//     line-height: 1;                 /* no extra glyph space */
+//     text-rendering: auto;
+//     -webkit-font-smoothing: antialiased;
+//   }
 
-  /* cancel bottom-margin of the last paragraph inside the box */
-  > p:last-child { margin-bottom: 0; }
-}
+//   /* cancel bottom-margin of the last paragraph inside the box */
+//   > p:last-child { margin-bottom: 0; }
+// }
 
-/* concrete variants ------------------------------------------------------- */
+// /* concrete variants ------------------------------------------------------- */
 
-.box-info     { @include colorbox(var(--prompt-info-icon-color   ), var(--prompt-info-icon-color   ), '\f06a', var(--prompt-info-bg   )); }
-.box-tip      { @include colorbox(var(--prompt-tip-icon-color    ), var(--prompt-tip-icon-color    ), '\f0eb', var(--prompt-tip-bg    ), 'regular'); }
-.box-warning  { @include colorbox(var(--prompt-warning-icon-color), var(--prompt-warning-icon-color), '\f06a', var(--prompt-warning-bg)); }
-.box-danger   { @include colorbox(var(--prompt-danger-icon-color ), var(--prompt-danger-icon-color ), '\f071', var(--prompt-danger-bg )); }
+// .box-info     { @include colorbox(var(--prompt-info-icon-color   ), var(--prompt-info-icon-color   ), '\f06a', var(--prompt-info-bg   )); }
+// .box-tip      { @include colorbox(var(--prompt-tip-icon-color    ), var(--prompt-tip-icon-color    ), '\f0eb', var(--prompt-tip-bg    ), 'regular'); }
+// .box-warning  { @include colorbox(var(--prompt-warning-icon-color), var(--prompt-warning-icon-color), '\f06a', var(--prompt-warning-bg)); }
+// .box-danger   { @include colorbox(var(--prompt-danger-icon-color ), var(--prompt-danger-icon-color ), '\f071', var(--prompt-danger-bg )); }

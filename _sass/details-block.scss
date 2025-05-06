@@ -1,73 +1,73 @@
-/* Details-Block for Jekyll Chirpy
- * ------------------------------------------------------------------------- */
+// /* Details-Block for Jekyll Chirpy
+//  * ------------------------------------------------------------------------- */
 
-/* -- main wrapper ---------------------------------------------------------- */
-details.details-block {
-  border-radius: .25rem;
-  border-left : .25rem solid var(--prompt-tip-icon-color);
-  box-shadow  : var(--language-border-color) 1px 1px 2px 1px;
-  margin      : 1rem 0;
-  padding     : .6rem 1rem 0 1.5rem;
-  overflow    : hidden;          /* let the summary bar sit flush        */
+// /* -- main wrapper ---------------------------------------------------------- */
+// details.details-block {
+//   border-radius: .25rem;
+//   border-left : .25rem solid var(--prompt-tip-icon-color);
+//   box-shadow  : var(--language-border-color) 1px 1px 2px 1px;
+//   margin      : 1rem 0;
+//   padding     : .6rem 1rem 0 1.5rem;
+//   overflow    : hidden;          /* let the summary bar sit flush        */
 
-  > p:last-child { margin-bottom: 0; }
-}
+//   > p:last-child { margin-bottom: 0; }
+// }
 
-/* -- summary bar ----------------------------------------------------------- */
-details.details-block > summary {
-  cursor   : pointer;
-  list-style: none;            /* hide default ▸ triangle               */
-  position : relative;
+// /* -- summary bar ----------------------------------------------------------- */
+// details.details-block > summary {
+//   cursor   : pointer;
+//   list-style: none;            /* hide default ▸ triangle               */
+//   position : relative;
 
-  /* original margins & padding */
-  margin   : -.6rem -1rem 0 -1.5rem;
-  padding  : .55rem 2.8rem .55rem 1.25rem;
+//   /* original margins & padding */
+//   margin   : -.6rem -1rem 0 -1.5rem;
+//   padding  : .55rem 2.8rem .55rem 1.25rem;
 
-  /* only real change — let flex do the centring */
-  display  : flex;
-  align-items: center;
-  > p { margin: 0; }
+//   /* only real change — let flex do the centring */
+//   display  : flex;
+//   align-items: center;
+//   > p { margin: 0; }
 
-  font-weight : 600;
-  line-height : 1.15;          /* keeps text nicely balanced            */
-  color       : var(--prompt-tip-icon-color);
-  background  : var(--prompt-tip-bg);
-  text-decoration: underline;
-  user-select : none;
-}
+//   font-weight : 600;
+//   line-height : 1.15;          /* keeps text nicely balanced            */
+//   color       : var(--prompt-tip-icon-color);
+//   background  : var(--prompt-tip-bg);
+//   text-decoration: underline;
+//   user-select : none;
+// }
 
-/* everything below is identical to the original ------------------------- */
+// /* everything below is identical to the original ------------------------- */
 
-/* remove built-in markers on WebKit & Firefox */
-details.details-block > summary::-webkit-details-marker,
-details.details-block > summary::marker { display: none; }
+// /* remove built-in markers on WebKit & Firefox */
+// details.details-block > summary::-webkit-details-marker,
+// details.details-block > summary::marker { display: none; }
 
-/* LEFT icon – book/book-open swap */
-details.details-block > summary::before,
-details.details-block[open] > summary::before {
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 900;          /* solid */
-  margin-right: .5rem;
-  display: inline-block;
-  speak: none;
-}
+// /* LEFT icon – book/book-open swap */
+// details.details-block > summary::before,
+// details.details-block[open] > summary::before {
+//   font-family: 'Font Awesome 6 Free';
+//   font-weight: 900;          /* solid */
+//   margin-right: .5rem;
+//   display: inline-block;
+//   speak: none;
+// }
 
-details.details-block > summary::before       { content: "\f02e"; } /* book      */
-details.details-block[open] > summary::before { content: "\f518"; } /* book-open */
+// details.details-block > summary::before       { content: "\f02e"; } /* book      */
+// details.details-block[open] > summary::before { content: "\f518"; } /* book-open */
 
-/* RIGHT chevron – rotates on open */
-details.details-block > summary::after,
-details.details-block[open] > summary::after {
-  font-family: 'Font Awesome 6 Free';
-  font-weight: 900;
-  content: "\f105";          /* angle-right */
-  position: absolute;
-  right: 1rem; top: 50%; transform: translateY(-50%);
-  transition: transform .2s ease;
-}
+// /* RIGHT chevron – rotates on open */
+// details.details-block > summary::after,
+// details.details-block[open] > summary::after {
+//   font-family: 'Font Awesome 6 Free';
+//   font-weight: 900;
+//   content: "\f105";          /* angle-right */
+//   position: absolute;
+//   right: 1rem; top: 50%; transform: translateY(-50%);
+//   transition: transform .2s ease;
+// }
 
-details.details-block[open] > summary::after { transform: translateY(-50%) rotate(90deg); }
+// details.details-block[open] > summary::after { transform: translateY(-50%) rotate(90deg); }
 
-/* tiny bounce on opening (unchanged) */
-@keyframes bop { 50% { transform: scale(1.12); } }
-details.details-block[open] > summary::before { animation: bop .18s ease-out; }
+// /* tiny bounce on opening (unchanged) */
+// @keyframes bop { 50% { transform: scale(1.12); } }
+// details.details-block[open] > summary::before { animation: bop .18s ease-out; }
