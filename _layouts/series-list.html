@@ -1,0 +1,72 @@
+---
+layout: default
+refactor: true
+---
+{% include lang.html %}
+
+<h1 class="text-center mb-5">All Series</h1>
+
+{%- if content != '' -%}
+  <div class="mb-4">{{ content }}</div>
+{%- endif -%}
+
+{%- comment -%}
+  Group all items (landing page + sub-posts) by the “slug” folder
+{%- endcomment -%}
+{% assign grouped = site.series | group_by_exp: 'doc', "doc.url | split: '/' | slice: 2, 1 | first" %}
+
+<div id="series-list" class="flex-grow-1 px-xl-1">
+  {%- for grp in grouped -%}
+    {% assign slug = grp.name %}
+    {% capture prefix %}/series/{{ slug }}/{% endcapture %}
+
+    {%- comment -%} grab the landing‐page for this slug {%- endcomment -%}
+    {% assign series_page = site.series | where: 'url', prefix | first %}
+    {% assign meta = series_page %}
+
+    {%- comment -%} sort all items (landing + posts) by your custom “order” field {%- endcomment -%}
+    {% assign ordered = grp.items | sort: 'order' %}
+    {% assign first_item = ordered | first %}
+
+    <article class="card-wrapper card">
+      <a
+        href="{{ first_item.url | relative_url }}"
+        class="post-preview row g-0 flex-md-row-reverse"
+      >
+        {% assign body_col = '12' %}
+        {%- if meta.cover -%}
+          <div class="col-md-5">
+            <img src="{{ meta.cover }}" alt="{{ meta.title }}">
+          </div>
+          {% assign body_col = '7' %}
+        {%- endif -%}
+
+        <div class="col-md-{{ body_col }}">
+          <div class="card-body d-flex flex-column">
+            <h1 class="card-title my-2 mt-md-0">
+              {{ meta.title | default: slug | replace: '-', ' ' | capitalize }}
+            </h1>
+
+            <div class="card-text content mt-0 mb-3">
+              <p>{{ meta.description | strip_html | truncate: 160 }}</p>
+            </div>
+
+            <div class="post-meta flex-grow-1 d-flex align-items-end">
+              <div class="me-auto">
+                <i class="far fa-file-alt fa-fw me-1"></i>
+                <span>{{ ordered.size | minus: 1 }} posts</span>
+
+                {% if meta.categories %}
+                  <i class="far fa-folder-open fa-fw ms-3 me-1"></i>
+                  <span class="categories">
+                    {{ meta.categories | join: ', ' }}
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </article>
+  {%- endfor -%}
+</div>

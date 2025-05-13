@@ -181,7 +181,7 @@ collections:
     output: true
     permalink: /series/:path/
 
-  crash_courses:
+  crash-courses:
     output: true
     permalink: /crash-courses/:path/
 
@@ -213,9 +213,9 @@ defaults:
       math: true
 
   - scope:                # every file in the crash-courses collection
-      type: crash_courses
+      type: crash-courses
     values:
-      layout: crash_course
+      layout: crash-course
       math: true
 
   - scope:                # sidebar “tabs”
@@ -247,6 +247,11 @@ exclude:
   - purgecss.js
   - rollup.config.js
   - "package*.json"
+
+incremental: true
+
+plugins:
+  - jekyll-include-cache
 
 jekyll-archives:
   enabled: [categories, tags]
@@ -627,7 +632,7 @@ jekyll_compose:
         <summary markdown="1">
           **Tip.** A concise title goes here.
         </summary>
-        Here is content that can include **Markdown**, inline math $$a + b$$,
+        Here is content thatl can include **Markdown**, inline math $$a + b$$,
         and block math.
 
         $$

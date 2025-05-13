@@ -1,0 +1,37 @@
+---
+layout: default
+refactor: true
+---
+{% include lang.html %}
+
+<h1 class="text-center mb-5">Crash Courses</h1>
+
+{%- if content != '' -%}
+  <div class="mb-4">
+    {{ content }}
+  </div>
+{%- endif -%}
+
+{%- comment -%}
+  Group all items (landing page + lessons) by the “slug” folder name
+{%- endcomment -%}
+{% assign grouped = site['crash-courses'] | group_by_exp: 'doc', "doc.url | split: '/' | slice: 2, 1 | first" %}
+
+<div id="post-list" class="flex-grow-1 px-xl-1">
+  {%- for grp in grouped -%}
+    {% assign slug = grp.name %}
+    {% capture prefix %}/crash-courses/{{ slug }}/{% endcapture %}
+    {% assign course_page = site['crash-courses'] | where: 'url', prefix | first %}
+    {% assign meta = course_page %}
+    {% assign ordered = grp.items | sort: 'course_index' %}
+    {% assign first_lesson = ordered | first %}
+
+    {%
+      include course-card.html
+      meta=meta
+      ordered=ordered
+      first_lesson=first_lesson
+      slug=slug
+    %}
+  {%- endfor -%}
+</div>

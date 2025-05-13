@@ -1,34 +1,40 @@
 ---
 layout: default
 ---
-<div class="post-content">
-  <h1 class="pl-lg-2">Series</h1>
+{% include lang.html %}
+{% include toc-status.html %}
 
-  {% assign grouped = site.series | group_by_exp: 'doc', "doc.url | split: '/' | slice: 2, 1 | first" %}
+<article class="px-1" data-toc="{{ enable_toc }}">
+  <header>
+    <h1 data-toc-skip>{{ page.title }}</h1>
 
-  {% for grp in grouped %}
-    {% assign slug = grp.name %}
+    {% if page.description %}
+      <p class="post-desc fw-light mb-4">{{ page.description }}</p>
+    {% endif %}
+
+    {%- comment -%}  optional cover pulled from data file  {%- endcomment -%}
+    {% assign slug = page.url | split: '/' | slice: 2, 1 | first %}
     {% assign meta = site.data.series[slug] %}
-    {% assign items = grp.items | sort: 'series_index' %}
+    {% if meta.cover %}
+      <div class="mb-3">
+        <img src="{{ meta.cover }}" alt="{{ meta.title }}" class="w-100">
+      </div>
+    {% endif %}
+  </header>
 
-    <section id="{{ slug }}" class="pt-4">
-      <h2>{{ meta.title | default: slug }}</h2>
+  <div class="content">
+    {{ content }}
+  </div>
 
-      {% if meta.cover %}
-        <img src="{{ meta.cover }}" alt="{{ meta.title }}" class="my-2">
-      {% endif %}
-      {% if meta.desc %}
-        <p>{{ meta.desc }}</p>
-      {% endif %}
+  <hr>
 
-      <ol class="pl-3">
-        {% for p in items %}
-          <li>
-            <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
-          </li>
-        {% endfor %}
-      </ol>
-    </section>
-    <hr>
-  {% endfor %}
-</div>
+  <h2 class="h4 mt-5">Parts</h2>
+  <ol class="ps-3">
+    {%- assign parts = site.series | where_exp: 'p', "p.url contains '/{{ slug }}/'" | sort: 'series_index' -%}
+    {% for p in parts %}
+      <li class="mb-1">
+        <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
+      </li>
+    {% endfor %}
+  </ol>
+</article>

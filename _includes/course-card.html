@@ -1,0 +1,58 @@
+{%- comment -%}
+  course-card.html
+  Expects:
+    include.meta         – the landing-page front-matter
+    include.ordered      – the sorted list of lesson docs
+    include.first_lesson – ordered | first
+{%- endcomment -%}
+
+<article class="card-wrapper card">
+  <a
+    href="{{ include.first_lesson.url | relative_url }}"
+    class="post-preview row g-0 flex-md-row-reverse"
+  >
+    {% assign body_col = '12' %}
+    {%- if include.meta.cover -%}
+      <div class="col-md-5">
+        <img
+          src="{{ include.meta.cover }}"
+          alt="{{ include.meta.title }}"
+        >
+      </div>
+      {% assign body_col = '7' %}
+    {%- endif -%}
+
+    <div class="col-md-{{ body_col }}">
+      <div class="card-body d-flex flex-column">
+        <h1 class="card-title my-2 mt-md-0">
+          {{ include.meta.title | default: include.slug | replace: '-', ' ' | capitalize }}
+        </h1>
+
+        <div class="card-text content mt-0 mb-3">
+          <p>
+            {{ include.meta.description | strip_html | truncate: 160 }}
+          </p>
+        </div>
+
+        <div class="post-meta flex-grow-1 d-flex align-items-end">
+          <div class="me-auto">
+            <i class="far fa-file-alt fa-fw me-1"></i>
+            <span>{{ include.ordered.size | minus: 1 }} lessons</span>
+
+            {% if include.meta.level %}
+              <i class="fas fa-signal fa-fw ms-3 me-1"></i>
+              <span class="level">{{ include.meta.level }}</span>
+            {% endif %}
+
+            {% if include.meta.categories %}
+              <i class="far fa-folder-open fa-fw ms-3 me-1"></i>
+              <span class="categories">
+                {{ include.meta.categories | join: ', ' }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</article>
