@@ -1,40 +1,44 @@
 ---
 layout: default
+refactor: false
+panel_includes:
+  - toc
+tail_includes:
+  - related-posts
+  - post-nav
+  - footer
+script_includes:
+  - comment
 ---
 {% include lang.html %}
-{% include toc-status.html %}
 
-<article class="px-1" data-toc="{{ enable_toc }}">
-  <header>
-    <h1 data-toc-skip>{{ page.title }}</h1>
-
+<article class="post-content" data-toc="{{ page.toc }}">
+  <header class="post-header mb-6">
+    <h1 class="post-title" data-toc-skip>{{ page.title }}</h1>
     {% if page.description %}
-      <p class="post-desc fw-light mb-4">{{ page.description }}</p>
-    {% endif %}
-
-    {%- comment -%}  optional cover pulled from data file  {%- endcomment -%}
-    {% assign slug = page.url | split: '/' | slice: 2, 1 | first %}
-    {% assign meta = site.data.series[slug] %}
-    {% if meta.cover %}
-      <div class="mb-3">
-        <img src="{{ meta.cover }}" alt="{{ meta.title }}" class="w-100">
-      </div>
+      <p class="post-desc lead mb-4">{{ page.description }}</p>
     {% endif %}
   </header>
 
-  <div class="content">
+  <div class="content mb-8">
     {{ content }}
   </div>
 
-  <hr>
+  <div class="post-tail text-muted mt-8">
+    <div class="post-meta">
+      <span class="me-4">
+        <i class="far fa-calendar fa-fw"></i>
+        {% include datetime.html date=page.date lang=page.lang %}
+      </span>
+      {% if page.last_modified_at and page.last_modified_at != page.date %}
+        <span>
+          <i class="fas fa-edit fa-fw"></i>
+          {% include datetime.html date=page.last_modified_at lang=page.lang %}
+        </span>
+      {% endif %}
+    </div>
 
-  <h2 class="h4 mt-5">Parts</h2>
-  <ol class="ps-3">
-    {%- assign parts = site.series | where_exp: 'p', "p.url contains '/{{ slug }}/'" | sort: 'series_index' -%}
-    {% for p in parts %}
-      <li class="mb-1">
-        <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
-      </li>
-    {% endfor %}
-  </ol>
+    {% include related-posts.html %}
+    {% include post-nav.html %}
+  </div>
 </article>

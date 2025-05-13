@@ -1,0 +1,75 @@
+{% comment %}
+  collection-card.html
+  Expects these locals:
+    • meta         → the landing‐page doc
+    • ordered      → an array of lesson/episode docs (sorted)
+    • first_item   → the first lesson/episode in ordered
+    • slug         → the folder slug
+{% endcomment %}
+
+<article class="card-wrapper card mb-4">
+  <a
+    href="{{ meta.url | relative_url }}"
+    class="post-preview row g-0 flex-md-row-reverse"
+  >
+    {% assign body_col = '12' %}
+    {% if meta.cover %}
+      {% assign src = meta.cover %}
+      {% unless src contains '//' %}
+        {% assign src = src | relative_url %}
+      {% endunless %}
+      <div class="col-md-5">
+        <img
+          src="{{ src }}"
+          alt="{{ meta.title | xml_escape }}"
+        >
+      </div>
+      {% assign body_col = '7' %}
+    {% endif %}
+
+    <div class="col-md-{{ body_col }}">
+      <div class="card-body d-flex flex-column">
+        <!-- Title -->
+        <h2 class="card-title my-2 mt-md-0">
+          {{ meta.title | default: slug | replace: '-', ' ' | capitalize }}
+        </h2>
+
+        <!-- Truncated Description -->
+        {% if meta.description %}
+          <div class="card-text content mt-0 mb-2">
+            <p>
+              {{ meta.description | strip_html | truncatewords: 30 }}
+            </p>
+          </div>
+        {% endif %}
+
+        <!-- Difficulty / Level Badge -->
+        {% if meta.level %}
+          <div class="mb-3">
+            <span class="badge bg-secondary">
+              {{ meta.level }}
+            </span>
+          </div>
+        {% endif %}
+
+        <!-- Count & Categories -->
+        <div class="post-meta flex-grow-1 d-flex align-items-end">
+          <div class="me-auto">
+            <i class="far fa-file-alt fa-fw me-1"></i>
+            <span>
+              {{ ordered.size }}
+              {% if ordered.size == 1 %}item{% else %}items{% endif %}
+            </span>
+
+            {% if meta.categories %}
+              <i class="far fa-folder-open fa-fw ms-3 me-1"></i>
+              <span class="categories">
+                {{ meta.categories | join: ', ' }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+</article>

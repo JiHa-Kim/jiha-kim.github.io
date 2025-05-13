@@ -5,33 +5,24 @@ refactor: true
 {% include lang.html %}
 
 <h1 class="text-center mb-5">Crash Courses</h1>
+{{ content }}
 
-{%- if content != '' -%}
-  <div class="mb-4">
-    {{ content }}
-  </div>
-{%- endif -%}
-
-{%- comment -%}
-  Group all items (landing page + lessons) by the “slug” folder name
-{%- endcomment -%}
-{% assign grouped = site['crash-courses'] | group_by_exp: 'doc', "doc.url | split: '/' | slice: 2, 1 | first" %}
+{% assign grouped = site['crash-courses'] | group_by_exp: 'doc', "doc.url | split: '/' | slice: 2,1 | first" %}
 
 <div id="post-list" class="flex-grow-1 px-xl-1">
-  {%- for grp in grouped -%}
+  {% for grp in grouped %}
     {% assign slug = grp.name %}
-    {% capture prefix %}/crash-courses/{{ slug }}/{% endcapture %}
-    {% assign course_page = site['crash-courses'] | where: 'url', prefix | first %}
-    {% assign meta = course_page %}
-    {% assign ordered = grp.items | sort: 'course_index' %}
-    {% assign first_lesson = ordered | first %}
+
+    {% assign meta = grp.items | where: 'layout', 'crash-course-landing' | first %}
+    {% assign ordered = grp.items | where_exp: 'item', "item.layout != 'crash-course-landing'" | sort: 'course_index' %}
+    {% assign first_item = ordered | first %}
 
     {%
-      include course-card.html
+      include collection-card.html
       meta=meta
       ordered=ordered
-      first_lesson=first_lesson
+      first_item=first_item
       slug=slug
     %}
-  {%- endfor -%}
+  {% endfor %}
 </div>

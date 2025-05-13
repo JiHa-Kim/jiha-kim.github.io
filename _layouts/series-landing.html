@@ -4,23 +4,17 @@ refactor: true
 ---
 {% include lang.html %}
 
-{%- comment -%}
-  Determine slug (front-matter or URL)
-{%- endcomment -%}
 {% if page.slug %}
   {% assign slug = page.slug %}
 {% else %}
   {% assign slug = page.url | split: '/' | slice: 2, 1 | first %}
 {% endif %}
 
-{%- comment -%}
-  Gather & sort lessons (exclude the landing page itself)
-{%- endcomment -%}
-{% capture prefix %}/crash-courses/{{ slug }}/{% endcapture %}
-{% assign lessons = site['crash-courses']
+{% capture prefix %}/series/{{ slug }}/{% endcapture %}
+{% assign lessons = site.series
   | where_exp: 'l', 'l.url contains prefix'
   | where_exp: 'l', 'l.url != page.url'
-  | sort: 'course_index'
+  | sort: 'series_index'
 %}
 
 {%
