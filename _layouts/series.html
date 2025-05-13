@@ -1,0 +1,34 @@
+---
+layout: default
+---
+<div class="post-content">
+  <h1 class="pl-lg-2">Series</h1>
+
+  {% assign grouped = site.series | group_by_exp: 'doc', "doc.url | split: '/' | slice: 2, 1 | first" %}
+
+  {% for grp in grouped %}
+    {% assign slug = grp.name %}
+    {% assign meta = site.data.series[slug] %}
+    {% assign items = grp.items | sort: 'series_index' %}
+
+    <section id="{{ slug }}" class="pt-4">
+      <h2>{{ meta.title | default: slug }}</h2>
+
+      {% if meta.cover %}
+        <img src="{{ meta.cover }}" alt="{{ meta.title }}" class="my-2">
+      {% endif %}
+      {% if meta.desc %}
+        <p>{{ meta.desc }}</p>
+      {% endif %}
+
+      <ol class="pl-3">
+        {% for p in items %}
+          <li>
+            <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
+          </li>
+        {% endfor %}
+      </ol>
+    </section>
+    <hr>
+  {% endfor %}
+</div>
