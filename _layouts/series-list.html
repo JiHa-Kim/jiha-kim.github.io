@@ -13,11 +13,7 @@ refactor: true
   {% for grp in grouped %}
     {% assign slug = grp.name %}
 
-    {%
-      assign meta       = grp.items
-      | where: "layout", "series-landing"    # or whatever your landing layout is
-      | first
-    %}
+    {% assign meta = grp.items | where: 'layout', 'series-landing' | first %}
     {% assign ordered = grp.items | where_exp: 'item', "item.layout != 'series-landing'" | sort: 'series_index' %}
     {% assign first_item = ordered | first %}
 
