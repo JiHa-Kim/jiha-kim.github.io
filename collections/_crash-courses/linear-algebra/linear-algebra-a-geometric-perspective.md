@@ -991,7 +991,7 @@ This can also be written as $$(A\vec{x})^T \vec{y} = \vec{x}^T (A^T \vec{y})$$.
 *   The right side $$\vec{x} \cdot (A^T \vec{y})$$ measures the component of the original vector $$\vec{x}$$ (in the input space $$\mathbb{R}^n$$) along the direction of $$A^T\vec{y}$$.
 The transpose $$A^T$$ defines a transformation that maps directions from the output space back to the input space in such a way that these two projection measurements are identical. It links the geometry of the input and output spaces of $$A$$ through the dot product. This establishes a form of "duality" between the transformation $$A$$ and its transpose $$A^T$$ concerning projections.
 
-The transpose is crucial for understanding the **Four Fundamental Subspaces** associated with a matrix $$A$:
+The transpose is crucial for understanding the **Four Fundamental Subspaces** associated with a matrix $$A$$:
 1.  **Column Space (Col(A)):** Span of columns of $$A$$. Lives in $$\mathbb{R}^m$$. This is the image or range of $$A$$. The dimension of $$\text{Col}(A)$$ is the **rank** of $$A$$.
 2.  **Null Space (Nul(A)):** Set of $$\vec{x}$$ such that $$A\vec{x}=\vec{0}$$. Lives in $$\mathbb{R}^n$$. This is the kernel of $$A$$. The dimension of $$\text{Nul}(A)$$ is the **nullity** of $$A$$.
 3.  **Row Space (Row(A)):** Span of rows of $$A$$ (which is Col($$A^T$$)). Lives in $$\mathbb{R}^n$$.
@@ -1081,7 +1081,7 @@ We usually express vectors in terms of the standard basis. However, sometimes pr
 <div class="title" markdown="1">
 **Definition.** Change of Basis
 </div>
-Let $$\mathcal{B} = \{\vec{b}_1, \dots, \vec{b}_n\}$$ be a basis for $$\mathbb{R}^n$$. Any vector $$\vec{x}$$ can be written uniquely as $$\vec{x} = c_1\vec{b}_1 + \dots + c_n\vec{b}_n$$. The coefficients $$(c_1, \dots, c_n)$$ are the **coordinates of $$\vec{x}$$ relative to basis $$\mathcal{B}$**, denoted $$[\vec{x}]_{\mathcal{B}} = \begin{pmatrix} c_1 \\ \vdots \\ c_n \end{pmatrix}$$.
+Let $$\mathcal{B} = \{\vec{b}_1, \dots, \vec{b}_n\}$$ be a basis for $$\mathbb{R}^n$$. Any vector $$\vec{x}$$ can be written uniquely as $$\vec{x} = c_1\vec{b}_1 + \dots + c_n\vec{b}_n$$. The coefficients $$(c_1, \dots, c_n)$$ are the **coordinates of $$\vec{x}$$ relative to basis $$\mathcal{B}$$**, denoted $$[\vec{x}]_{\mathcal{B}} = \begin{pmatrix} c_1 \\ \vdots \\ c_n \end{pmatrix}$$.
 
 The **change-of-basis matrix** $$P_{\mathcal{B}}$$ from basis $$\mathcal{B}$$ to the standard basis $$\mathcal{E}$$ has the vectors of $$\mathcal{B}$$ as its columns: $$P_{\mathcal{B}} = \begin{pmatrix} \vec{b}_1 & \dots & \vec{b}_n \end{pmatrix}$$.
 Then $$\vec{x} = P_{\mathcal{B}} [\vec{x}]_{\mathcal{B}}$$. (This is $$\vec{x}$$ in standard coordinates).
@@ -1397,7 +1397,7 @@ $$
 = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix} \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}
 $$
 
-This matches the form $$\begin{pmatrix} a & -b \\ b & a \end{pmatrix}$$ with $$a=0, b=1$$. This matrix represents a rotation by $$\arg(\lambda) = \arg(i) = 90^\circ$$ and scaling by $$\vert\lambda\vert = \vert i \vert = 1$. This is consistent with the original matrix $$A$$.
+This matches the form $$\begin{pmatrix} a & -b \\ b & a \end{pmatrix}$$ with $$a=0, b=1$$. This matrix represents a rotation by $$\arg(\lambda) = \arg(i) = 90^\circ$$ and scaling by $$\vert\lambda\vert = \vert i \vert = 1$$. This is consistent with the original matrix $$A$$.
 </blockquote>
 
 ### 14.4. Complex Vector Spaces (A Glimpse)
@@ -1410,7 +1410,7 @@ Linear algebra can be generalized to **complex vector spaces** where vectors hav
     \langle \vec{z}, \vec{w} \rangle = \vec{z}^T \overline{\vec{w}} = \sum_{k=1}^n z_k \overline{w_k}
     $$
 
-    (Note: $\overline{w_k}$ is the complex conjugate of $$w_k$$. Another convention is $$\vec{z}^* \vec{w} = \sum \overline{z_k} w_k$$, where $$\vec{z}^*$$ is the conjugate transpose. The key is one vector is conjugated.)
+    (Note: $$\overline{w_k}$$ is the complex conjugate of $$w_k$$. Another convention is $$\vec{z}^* \vec{w} = \sum \overline{z_k} w_k$$, where $$\vec{z}^*$$ is the conjugate transpose. The key is one vector is conjugated.)
     Then, squared norm is $$ \Vert \vec{z} \Vert ^2 = \langle \vec{z}, \vec{z} \rangle = \sum z_k \overline{z_k} = \sum \vert z_k \vert^2 \ge 0$$.
 *   **Orthogonality:** $$\vec{z}$$ and $$\vec{w}$$ are orthogonal if $$\langle \vec{z}, \vec{w} \rangle = 0$$.
 *   **Unitary Matrices:** A complex square matrix $$U$$ is unitary if $$U^*U = I$$, where $$U^* = \overline{U}^T$$ (conjugate transpose or Hermitian transpose). Unitary matrices preserve the Hermitian inner product and norms, acting as generalized rotations in $$\mathbb{C}^n$$. Orthogonal matrices are real unitary matrices.
