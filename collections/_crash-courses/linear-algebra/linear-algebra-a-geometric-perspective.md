@@ -149,7 +149,7 @@ Despite focusing on geometric interpretations, I decided not to include images, 
 
 ## 1. The Stage: Vectors and Vector Spaces
 
-Our journey begins with the fundamental objects of linear algebra: vectors.
+Our discussion begins with the fundamental objects of linear algebra: vectors.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
@@ -243,7 +243,7 @@ $$\begin{cases}
 \theta \in (\pi/2, \pi] & \Rightarrow \vec{u} \cdot \vec{v} \lt 0
 \end{cases}$$
 
-In words, an acute angle between two vectors means they are positively correlated, an obtuse angle means they are negatively correlated, and a right angle means they are uncorrelated.
+In words, an acute angle between two vectors means they are positively correlated, an obtuse angle means they are negatively correlated, and a right angle means they are uncorrelated (orthogonal).
 </blockquote>
 
 <details class="details-block" markdown="1">
@@ -276,7 +276,7 @@ $$
 Substituting these into the equation for $$2 (\vec{a} \cdot \vec{b})_{\text{geom}}$$:
 
 $$
-2 (\vec{a} \cdot \vec{b})_{\text{geom}} = (a_1^2 + a_2^2) + (b_1^2 + b_2^2) - (b_1^2 - 2a_1b_1 + a_1^2 + b_2^2 - 2a_2b_2 - a_2^2)
+2 (\vec{a} \cdot \vec{b})_{\text{geom}} = (a_1^2 + a_2^2) + (b_1^2 + b_2^2) - (b_1^2 - 2a_1b_1 + a_1^2 + b_2^2 - 2a_2b_2 + a_2^2)
 $$
 
 $$
@@ -478,9 +478,9 @@ is $$c_1 = c_2 = \dots = c_k = 0$$.
 If there is any other solution, the set is **linearly dependent**.
 
 Geometrically, a set of vectors is linearly independent if no vector in the set can be expressed as a linear combination of the others (i.e., no vector lies in the span of the remaining vectors). They each add a new "dimension" to the span.
-*   Two non-zero vectors are linearly dependent if and only if they are collinear (being scalar multiples of each other, they lie on the same line, which has dimension 1 as we'll right after).
+*   Two non-zero vectors are linearly dependent if and only if they are collinear (being scalar multiples of each other, they lie on the same line, which has dimension 1).
 *   Three vectors in $$\mathbb{R}^3$$ are linearly dependent if and only if they are coplanar (lie on the same plane through the origin, which has dimension 2).
-Thus, for $$k$$ vectors, if they are linearly independent, we have $$\dim \mathrm{Span}(\vec{v}_1, \dots, \vec{v}_k) < k$$.
+Thus, for $$k$$ vectors, if they are linearly *dependent*, we have $$\dim \mathrm{Span}(\vec{v}_1, \dots, \vec{v}_k) < k$$. Conversely, if $$k$$ vectors are linearly *independent*, they span a $$k$$-dimensional space: $$\dim \mathrm{Span}(\vec{v}_1, \dots, \vec{v}_k) = k$$.
 </blockquote>
 
 <blockquote class="box-definition" markdown="1">
@@ -525,7 +525,7 @@ Let $$\vec{v}_1 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}$$ and $$\vec{v}_2 = \begi
     c_1 \begin{pmatrix} 1 \\ 1 \end{pmatrix} + c_2 \begin{pmatrix} -1 \\ 2 \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \end{pmatrix}
     $$
 
-    This is the same system as above with $$x=0, y=0$$. So, $$c_2 = (0-0)/3 = 0$$ and $$c_1 = (0+0)/3 = 0$$.
+    This is the same system as above with $$x=0, y=0$$. So, $$c_2 = (0-0)/3 = 0$$ and $$c_1 = (2(0)+0)/3 = 0$$.
     Yes, they are linearly independent.
 
 Since $$\{\vec{v}_1, \vec{v}_2\}$$ are linearly independent and span $$\mathbb{R}^2$$, they form a basis for $$\mathbb{R}^2$$.
@@ -1506,23 +1506,25 @@ Once we establish that a set (like polynomials or functions) forms a vector spac
 *   **Linear Transformations:** The differentiation operator $$D(f) = f'$$ is a linear transformation from $$\mathcal{P}_n$$ to $$\mathcal{P}_{n-1}$$. An integral operator $$I(f) = \int_0^x f(t)dt$$ is also a linear transformation. We can find matrices for these transformations with respect to chosen bases!
 *   **Inner Products:** We can define generalized "dot products" (inner products) for these spaces. For functions, $$\langle f, g \rangle = \int_a^b f(x)g(x)dx$$ is a common inner product, leading to notions of orthogonality for functions (e.g., Fourier series).
 
-This abstraction elevates linear algebra from a tool for solving systems of equations and geometric problems in $$\mathbb{R}^n$$ to a fundamental language for understanding structure and transformations across many areas of mathematics, science, and engineering. In particular, when these abstract vector spaces are infinite-dimensional (like spaces of functions) and equipped with a notion of "length" or "distance" (a norm, often derived from an inner product), we enter the realm of **Functional Analysis**. This field builds directly upon the foundations of linear algebra to analyze operators and equations in these more general settings, a topic we will explore in a future crash course.
+This abstraction elevates linear algebra from a tool for solving systems of equations and geometric problems in $$\mathbb{R}^n$$ to a fundamental language for understanding structure and transformations across many areas of mathematics, science, and engineering. In particular, when these abstract vector spaces are infinite-dimensional (like spaces of functions) and equipped with a notion of "length" or "distance" (a norm, often derived from an inner product), we enter the realm of **Functional Analysis**. This field builds directly upon the foundations of linear algebra to analyze operators and equations in these more general settings, a topic for future exploration.
 
-## 16. Conclusion: The Geometric Tapestry of Linear Algebra
+## 16. Conclusion: The Geometric Perspective in Linear Algebra
 
-This expanded journey through linear algebra, always guided by geometric intuition, reveals a rich tapestry where abstract algebraic rules correspond to tangible spatial manipulations. Vectors are not just lists of numbers but directed segments that can span lines, planes, or entire spaces. Matrices are not just arrays but powerful engines that rotate, scale, shear, and project these spaces.
+Linear algebra is really powerful, but its origins really are geometric. So, while we will do the computations using algebra, it's useful to keep the visual perspective in mind, as some facts become much more intuitive (but be careful of counterintuitive phenomena in higher dimensions!).
 
-Key geometric insights:
-*   Linear transformations preserve the "grid-like" structure of space, a uniformity stemming from their definition by action on basis vectors (local information) which then dictates global behavior.
-*   The columns of a matrix tell you where the basis vectors land, defining the transformation.
-*   Determinants measure the scaling factor of area/volume and orientation changes; this local definition (action on the unit hypercube) becomes a global scaling factor due to linearity.
-*   Eigenvectors are special directions that remain invariant (up to scaling) under a transformation, defining its "natural axes" globally. Real matrices can have complex eigenvalues, corresponding to rotational actions on 2D subspaces.
-*   Spectral analysis, including eigendecomposition and SVD, reveals these fundamental scaling behaviors and principal directions, demonstrating how local characteristics (eigenvalues, singular values) define the global geometry of a transformation.
-*   Solving systems of equations ($$A\vec{x}=\vec{b}$$) can be viewed as finding an input vector that maps to a target, or checking if the target is reachable (in the column space), or finding intersections of geometric objects.
-*   Changing basis is like changing your coordinate grid, offering different perspectives on the same geometric reality. Diagonalization simplifies transformations by aligning with these natural axes.
-*   Orthogonality (including orthogonal matrices) and the transpose provide powerful frameworks for simplifying problems, from finding coordinates and projections (Gram-Schmidt) to understanding the fundamental relationships between key subspaces (column space, null space, row space).
-*   The complex plane offers a direct link between 2D transformations (rotations and scaling) and complex number arithmetic, and helps interpret the behavior of real matrices with complex eigenvalues.
-*   Matrix decompositions like SVD show that even complex transformations can be broken down into sequences of simpler geometric actions: rotations, scalings, and reflections, revealing the fundamental "principal components" of a transformation.
-*   The abstract definition of a vector space, formalizing the familiar properties of Euclidean vectors, allows all these concepts and theorems to be applied to a vast array of other mathematical objects, such as functions and polynomials. This immensely broadens the reach and power of linear algebra, and directly sets the stage for **Functional Analysis**, which extends these ideas to infinite-dimensional spaces.
+Key geometric insights from this course include:
+*   Linear transformations preserve the underlying grid structure of space. This uniformity, originating from their definition by action on basis vectors (local information), dictates their global behavior.
+*   The columns of a matrix reveal the destination of the basis vectors, thereby defining the entire transformation.
+*   Determinants quantify the scaling factor of area or volume and indicate changes in orientation. This measure, defined locally by the transformation of the unit hypercube, becomes a global scaling factor due to the principle of linearity.
+*   Eigenvectors represent special directions that remain invariant (up to scaling) under a transformation, thus defining its "natural axes" on a global scale. Real matrices can possess complex eigenvalues, which correspond to rotational actions on 2D subspaces.
+*   Spectral analysis, encompassing eigendecomposition and Singular Value Decomposition (SVD), uncovers these fundamental scaling behaviors and principal directions. It demonstrates how local characteristics, such as eigenvalues and singular values, define the global geometry of a transformation.
+*   Solving systems of equations ($$A\vec{x}=\vec{b}$$) can be viewed geometrically as finding an input vector that maps to a target, determining if the target is within the transformation's reach (the column space), or identifying the intersection points of geometric objects.
+*   Changing basis is analogous to shifting one's coordinate system, offering alternative perspectives on the same underlying geometric reality. Diagonalization, in particular, simplifies transformations by aligning the coordinate system with these natural axes.
+*   Orthogonality, exemplified by orthogonal matrices and processes like Gram-Schmidt orthogonalization, provides a robust framework for simplifying problems. This ranges from finding coordinates and projections to understanding the fundamental relationships between key subspaces (column space, null space, and row space).
+*   The complex plane offers a direct link between 2D transformations (rotations and scaling) and complex number arithmetic, and aids in interpreting the behavior of real matrices that have complex eigenvalues.
+*   Matrix decompositions, such as SVD, demonstrate that even complex transformations can be broken down into sequences of simpler geometric actions: rotations, scalings, and reflections, revealing the fundamental "principal components" of a transformation.
+*   The abstract definition of a vector space, which formalizes the familiar properties of Euclidean vectors, allows these concepts and theorems to be applied to a vast array of other mathematical objects, such as functions and polynomials. This significantly broadens the applicability and power of linear algebra, and naturally leads to the study of **Functional Analysis**, which extends these ideas to infinite-dimensional spaces.
 
-Understanding these geometric underpinnings, coupled with the power of algebraic abstraction, demystifies linear algebra and provides a solid foundation for tackling more advanced topics and applications, from computer graphics and physics simulations to data analysis, quantum mechanics, and electrical engineering. The interplay between algebraic precision and geometric visualization is what makes linear algebra such a beautiful and powerful field, providing essential tools for many disciplines and a natural gateway to the study of **Functional Analysis**.
+Understanding these geometric underpinnings, coupled with the power of algebraic abstraction, demystifies linear algebra and provides a solid foundation for tackling more advanced topics and applications across diverse fields such as computer graphics, physics, data analysis, quantum mechanics, and engineering. 
+
+Following this, **Functional Analysis** will build largely on applying linear algebra on functions in order to perform mathematical analysis. Indeed, we can add and scale functions with scalars, just like Euclidean vectors, which is one great motivation for using the abstract definition of a vector space. In doing so, we can re-use so many incredible theorems and techniques for free!
