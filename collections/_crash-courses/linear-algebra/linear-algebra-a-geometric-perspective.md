@@ -170,7 +170,7 @@ Vectors can be manipulated through two primary operations:
     *   If $$c < 0$$, the direction is reversed.
     *   If $$c = 0$$, the result is the **zero vector** $$\vec{0}$$ (a point at the origin).
 
-A **vector space** is a collection of vectors where these operations (addition and scalar multiplication) are well-defined and follow a set of axioms (associativity, commutativity, distributivity, existence of a zero vector, additive inverses, etc.). For our purposes, $$\mathbb{R}^n$$ with the standard vector addition and scalar multiplication is the quintessential vector space. We will explore the formal definition of a vector space and its implications more broadly towards the end of this course.
+A **vector space** is a collection of vectors where these operations (addition and scalar multiplication) are well-defined and follow a set of axioms (associativity, commutativity, distributivity, existence of a zero vector, additive inverses, etc.). For our purposes, $$\mathbb{R}^n$$ with the standard vector addition and scalar multiplication is the quintessential vector space. We will explore the formal definition of a vector space and its implications more broadly towards the end of this course (Section 15).
 
 <blockquote class="box-example" markdown="1">
 <div class="title" markdown="1">
@@ -741,7 +741,7 @@ For **square matrices** $$A$$ (representing $$T: \mathbb{R}^n \to \mathbb{R}^n$$
 <div class="title" markdown="1">
 **Definition (Geometric).** Determinant
 </div>
-The **determinant** of an $$n \times n$$ matrix $$A$$, denoted $$\det(A)$$ or $$\vert A \vert$$, is the **signed volume** of the parallelepiped formed by the images of the standard basis vectors (thus the unit hypercube $$$$) under the transformation $$T(\vec{x}) = A\vec{x}$$. (These images are the columns of $$A$$).
+The **determinant** of an $$n \times n$$ matrix $$A$$, denoted $$\det(A)$$ or $$\vert A \vert$$, is the **signed volume** of the parallelepiped formed by the images of the standard basis vectors (thus the unit hypercube $$[0,1]^n$$) under the transformation $$T(\vec{x}) = A\vec{x}$$. (These images are the columns of $$A$$).
 The "volume" refers to area in $$\mathbb{R}^2$$, volume in $$\mathbb{R}^3$$, and hypervolume in $$\mathbb{R}^n$$.
 </blockquote>
 
@@ -840,8 +840,8 @@ In essence, because a linear transformation warps space consistently everywhere,
 
 **3. Spectral Analysis: Eigenvalues, Eigenvectors, and Singular Values**
 This principle extends to spectral analysis:
-*   **Eigenvalues and Eigenvectors (Section 7):** These are found by solving $$(A-\lambda I)\vec{v} = \vec{0}$$. An eigenvector $$\vec{v}$$ represents a direction that is preserved by the transformation $$A$$; it's only scaled by the eigenvalue $$\lambda$$. This scaling isn't just local to the tip of $$\vec{v}$$ if it's a unit vector; *any* vector along the line defined by $$\vec{v}$$ (i.e., $$c\vec{v}$$) is transformed to $$A(c\vec{v}) = c(A\vec{v}) = c(\lambda\vec{v}) = \lambda(c\vec{v})$$. The entire line (or subspace, if there are multiple eigenvectors for $$\lambda$$) is mapped onto itself, scaled globally by $$\lambda$$.
-*   **Singular Value Decomposition (SVD) (Section 9):** $$A = U\Sigma V^T$$. This decomposition tells us that any linear transformation can be viewed as a rotation ($$V^T$$), followed by scaling along new orthogonal axes ($$\Sigma$$), followed by another rotation ($$U$$). The singular values in $$\Sigma$$ are the scaling factors along these principal axes (defined by the columns of $$V$$ and $$U$$). Again, these scalings are global along those specific directions. The "local" choice of principal axes and their associated scaling factors dictate the transformation's behavior everywhere.
+*   **Eigenvalues and Eigenvectors (Section 9):** These are found by solving $$(A-\lambda I)\vec{v} = \vec{0}$$. An eigenvector $$\vec{v}$$ represents a direction that is preserved by the transformation $$A$$; it's only scaled by the eigenvalue $$\lambda$$. This scaling isn't just local to the tip of $$\vec{v}$$ if it's a unit vector; *any* vector along the line defined by $$\vec{v}$$ (i.e., $$c\vec{v}$$) is transformed to $$A(c\vec{v}) = c(A\vec{v}) = c(\lambda\vec{v}) = \lambda(c\vec{v})$$. The entire line (or subspace, if there are multiple eigenvectors for $$\lambda$$) is mapped onto itself, scaled globally by $$\lambda$$.
+*   **Singular Value Decomposition (SVD) (Section 12):** $$A = U\Sigma V^T$$. This decomposition tells us that any linear transformation can be viewed as a rotation ($$V^T$$), followed by scaling along new orthogonal axes ($$\Sigma$$), followed by another rotation ($$U$$). The singular values in $$\Sigma$$ are the scaling factors along these principal axes (defined by the columns of $$V$$ and $$U$$). Again, these scalings are global along those specific directions. The "local" choice of principal axes and their associated scaling factors dictate the transformation's behavior everywhere.
 
 **4. Structure of Solution Sets to Linear Systems ($$A\vec{x}=\vec{b}$$)**
 The very definition of a matrix transformation $$T(\vec{x}) = A\vec{x}$$ is linear. This fundamental local property has profound global consequences for the structure of solutions to $$A\vec{x}=\vec{b}$$.
@@ -870,7 +870,159 @@ Thus, the response to a highly localized input (the impulse response) provides a
 
 This "local determines global" characteristic is a cornerstone of why linear algebra is so powerful and predictable. A few key pieces of information (the matrix elements, the determinant, eigenvalues/vectors, singular values/vectors) provide a complete global description of the transformation.
 
-## 7. Invariant Directions: Eigenvalues and Eigenvectors
+## 7. Orthogonality and Projections
+
+Orthogonality (perpendicularity) is a very special and useful geometric property, deeply connected to the dot product.
+
+### 7.1. Orthogonal Bases and Orthogonal Matrices
+A basis $$\{\vec{u}_1, \dots, \vec{u}_n\}$$ is **orthogonal** if every pair of distinct basis vectors is orthogonal: $$\vec{u}_i \cdot \vec{u}_j = 0$$ for $$i \neq j$$.
+If, in addition, each basis vector has length 1 ($$ \Vert \vec{u}_i \Vert  = 1$$ for all $$i$$), the basis is **orthonormal**. The standard basis is orthonormal.
+
+Working with orthonormal bases is very convenient:
+*   **Finding coordinates:** If $$\mathcal{B} = \{\vec{u}_1, \dots, \vec{u}_n\}$$ is an orthonormal basis, and $$\vec{x} = c_1\vec{u}_1 + \dots + c_n\vec{u}_n$$, then the coordinates $$c_i$$ are easily found by projection: $$c_i = \vec{x} \cdot \vec{u}_i$$.
+    <details class="details-block" markdown="1">
+    <summary markdown="1">
+**Derivation for coordinates in orthonormal basis**
+    </summary>
+    Take the dot product of $$\vec{x} = \sum_{j=1}^n c_j \vec{u}_j$$ with $$\vec{u}_i$$:
+
+    $$
+    \vec{x} \cdot \vec{u}_i = \left(\sum_{j=1}^n c_j \vec{u}_j\right) \cdot \vec{u}_i = \sum_{j=1}^n c_j (\vec{u}_j \cdot \vec{u}_i)
+    $$
+
+    Since the basis is orthonormal, $$\vec{u}_j \cdot \vec{u}_i = 0$$ if $$j \neq i$$, and $$\vec{u}_i \cdot \vec{u}_i =  \Vert \vec{u}_i \Vert ^2 = 1$$.
+    So, the sum simplifies to $$c_i (\vec{u}_i \cdot \vec{u}_i) = c_i(1) = c_i$$.
+    Thus, $$c_i = \vec{x} \cdot \vec{u}_i$$.
+    </details>
+*   **Matrices with Orthonormal Columns:** When a basis is orthonormal, the change-of-basis matrix $$Q$$ (whose columns are these orthonormal basis vectors) has a remarkable property. If $$\mathcal{B} = \{\vec{u}_1, \dots, \vec{u}_n\}$$ is an orthonormal basis, and $$Q = \begin{pmatrix} \vec{u}_1 & \dots & \vec{u}_n \end{pmatrix}$$, then the entry $$(i,j)$$ of $$Q^T Q$$ is $$\vec{u}_i^T \vec{u}_j = \vec{u}_i \cdot \vec{u}_j$$. Since the basis is orthonormal, this is 1 if $$i=j$$ and 0 if $$i \neq j$$. Thus, $$Q^T Q = I$$. This implies that $$Q^{-1} = Q^T$$.
+
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition.** Orthogonal Matrix
+</div>
+A square matrix $$Q$$ is called an **orthogonal matrix** if its columns form an orthonormal set. Equivalently, $$Q$$ is orthogonal if its transpose is its inverse:
+
+$$
+Q^T Q = I
+$$
+
+This also implies $$Q Q^T = I$$ (meaning its rows also form an orthonormal set) and $$Q^{-1} = Q^T$$.
+Orthogonal matrices represent transformations that preserve lengths and angles (isometries), such as rotations and reflections. We will explore their geometric properties further in Section 11.
+</blockquote>
+
+### 7.2. Projection onto a Subspace
+Given a subspace $$W$$ of $$\mathbb{R}^n$$, any vector $$\vec{x} \in \mathbb{R}^n$$ can be uniquely written as $$\vec{x} = \text{proj}_W \vec{x} + \vec{x}^\perp$$, where $$\text{proj}_W \vec{x}$$ is in $$W$$ (the **orthogonal projection** of $$\vec{x}$$ onto $$W$$) and $$\vec{x}^\perp$$ is orthogonal to every vector in $$W$$ ($$\vec{x}^\perp$$ is in $$W^\perp$$, the orthogonal complement of $$W$$).
+Geometrically, $$\text{proj}_W \vec{x}$$ is the vector in $$W$$ that is "closest" to $$\vec{x}$$.
+
+If $$\{\vec{u}_1, \dots, \vec{u}_k\}$$ is an *orthonormal basis* for $$W$$, then the projection formula is simple:
+
+$$
+\text{proj}_W \vec{x} = (\vec{x} \cdot \vec{u}_1)\vec{u}_1 + (\vec{x} \cdot \vec{u}_2)\vec{u}_2 + \dots + (\vec{x} \cdot \vec{u}_k)\vec{u}_k
+$$
+
+Each term $$(\vec{x} \cdot \vec{u}_i)\vec{u}_i$$ is the projection of $$\vec{x}$$ onto the line spanned by $$\vec{u}_i$$.
+If the basis $$\{\mathbf{w}_1, \dots, \mathbf{w}_k\}$$ for $$W$$ is just orthogonal (not necessarily orthonormal), the formula is:
+
+$$
+\text{proj}_W \vec{x} = \frac{\vec{x} \cdot \vec{w}_1}{ \Vert \vec{w}_1 \Vert ^2}\vec{w}_1 + \dots + \frac{\vec{x} \cdot \vec{w}_k}{ \Vert \vec{w}_k \Vert ^2}\vec{w}_k
+$$
+
+### 7.3. Gram-Schmidt Process
+The Gram-Schmidt process is an algorithm to convert any basis $$\{\vec{v}_1, \dots, \vec{v}_k\}$$ for a subspace $$W$$ into an *orthogonal* basis $$\{\vec{u}_1, \dots, \vec{u}_k\}$$ for $$W$$. One can then normalize each $$\vec{u}_i$$ to get an orthonormal basis.
+Geometrically, it works by iteratively taking each vector $$\vec{v}_i$$ and subtracting its projections onto the already-found orthogonal vectors $$\vec{u}_1, \dots, \vec{u}_{i-1}$$. This leaves the component of $$\vec{v}_i$$ that is orthogonal to the subspace spanned by $$\vec{u}_1, \dots, \vec{u}_{i-1}$$.
+
+The process:
+1.  $$\vec{u}_1 = \vec{v}_1$$
+2.  $$\vec{u}_2 = \vec{v}_2 - \text{proj}_{\vec{u}_1} \vec{v}_2$$
+3.  $$\vec{u}_3 = \vec{v}_3 - \text{proj}_{\vec{u}_1} \vec{v}_3 - \text{proj}_{\vec{u}_2} \vec{v}_3$$
+4.  ...and so on: $$\vec{u}_k = \vec{v}_k - \sum_{j=1}^{k-1} \text{proj}_{\vec{u}_j} \vec{v}_k = \vec{v}_k - \sum_{j=1}^{k-1} \frac{\vec{v}_k \cdot \vec{u}_j}{ \Vert \vec{u}_j \Vert ^2} \vec{u}_j$$
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example.** Gram-Schmidt (2 vectors).
+</div>
+Let $$\vec{v}_1 = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$, $$\vec{v}_2 = \begin{pmatrix} 2 \\ 2 \end{pmatrix}$$. These form a basis for $$\mathbb{R}^2$$.
+1.  Set $$\vec{u}_1 = \vec{v}_1 = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$.
+2.  Find $$\vec{u}_2$$:
+
+    $$
+    \vec{u}_2 = \vec{v}_2 - \text{proj}_{\vec{u}_1} \vec{v}_2 = \vec{v}_2 - \frac{\vec{v}_2 \cdot \vec{u}_1}{\vec{u}_1 \cdot \vec{u}_1} \vec{u}_1
+    $$
+
+    $$\vec{v}_2 \cdot \vec{u}_1 = (2)(3) + (2)(1) = 6 + 2 = 8$$
+    $$\vec{u}_1 \cdot \vec{u}_1 = (3)(3) + (1)(1) = 9 + 1 = 10$$
+
+    $$
+    \text{proj}_{\vec{u}_1} \vec{v}_2 = \frac{8}{10} \begin{pmatrix} 3 \\ 1 \end{pmatrix} = \frac{4}{5} \begin{pmatrix} 3 \\ 1 \end{pmatrix} = \begin{pmatrix} 12/5 \\ 4/5 \end{pmatrix}
+    $$
+
+    $$
+    \vec{u}_2 = \begin{pmatrix} 2 \\ 2 \end{pmatrix} - \begin{pmatrix} 12/5 \\ 4/5 \end{pmatrix} = \begin{pmatrix} 10/5 - 12/5 \\ 10/5 - 4/5 \end{pmatrix} = \begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix}
+    $$
+
+So, an orthogonal basis is $$\left\{ \begin{pmatrix} 3 \\ 1 \end{pmatrix}, \begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix} \right\}$$. We can check $$\vec{u}_1 \cdot \vec{u}_2 = 3(-2/5) + 1(6/5) = -6/5 + 6/5 = 0$$.
+To make it orthonormal, normalize:
+$$ \Vert \vec{u}_1 \Vert  = \sqrt{10}$$. $$\hat{\vec{u}}_1 = \frac{1}{\sqrt{10}}\begin{pmatrix} 3 \\ 1 \end{pmatrix}$$.
+$$ \Vert \vec{u}_2 \Vert  = \sqrt{(-2/5)^2 + (6/5)^2} = \sqrt{4/25 + 36/25} = \sqrt{40/25} = \frac{\sqrt{40}}{5} = \frac{2\sqrt{10}}{5}$$.
+$$\hat{\vec{u}}_2 = \frac{5}{2\sqrt{10}}\begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix} = \frac{1}{2\sqrt{10}}\begin{pmatrix} -2 \\ 6 \end{pmatrix} = \frac{1}{\sqrt{10}}\begin{pmatrix} -1 \\ 3 \end{pmatrix}$$.
+Orthonormal basis: $$\left\{ \frac{1}{\sqrt{10}}\begin{pmatrix} 3 \\ 1 \end{pmatrix}, \frac{1}{\sqrt{10}}\begin{pmatrix} -1 \\ 3 \end{pmatrix} \right\}$$.
+</blockquote>
+
+**Orthogonality Exercises:**
+1.  Are the vectors $$\vec{u} = \begin{pmatrix} 1 \\ -1 \\ 0 \end{pmatrix}$$, $$\vec{v} = \begin{pmatrix} 1 \\ 1 \\ 1 \end{pmatrix}$$, $$\vec{w} = \begin{pmatrix} 1 \\ 1 \\ -2 \end{pmatrix}$$ mutually orthogonal? Do they form an orthogonal basis for $$\mathbb{R}^3$$?
+2.  Let $$W$$ be the line in $$\mathbb{R}^2$$ spanned by $$\vec{u} = \begin{pmatrix} 4 \\ 3 \end{pmatrix}$$. Find the orthogonal projection of $$\vec{x} = \begin{pmatrix} 1 \\ 7 \end{pmatrix}$$ onto $$W$$.
+3.  Use the Gram-Schmidt process to find an orthonormal basis for the subspace of $$\mathbb{R}^3$$ spanned by $$\vec{v}_1 = \begin{pmatrix} 1 \\ 1 \\ 0 \end{pmatrix}$$ and $$\vec{v}_2 = \begin{pmatrix} 1 \\ 0 \\ 1 \end{pmatrix}$$.
+4.  If $$Q$$ is an orthogonal matrix, what is $$\det(Q)$$? (Hint: $$Q^T Q = I$$ and $$\det(A^T)=\det(A)$$, $$\det(AB)=\det(A)\det(B)$$).
+5.  Let $$W$$ be a subspace of $$\mathbb{R}^n$$. Show that the projection operator $$P_W(\vec{x}) = \text{proj}_W \vec{x}$$ is a linear transformation. If $$P$$ is the matrix for this projection, show that $$P^2 = P$$. Interpret this geometrically.
+
+## 8. Changing Perspective: Change of Basis
+
+We usually express vectors in terms of the standard basis. However, sometimes problems are simpler in a different basis.
+
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition.** Change of Basis
+</div>
+Let $$\mathcal{B} = \{\vec{b}_1, \dots, \vec{b}_n\}$$ be a basis for $$\mathbb{R}^n$$. Any vector $$\vec{x}$$ can be written uniquely as $$\vec{x} = c_1\vec{b}_1 + \dots + c_n\vec{b}_n$$. The coefficients $$(c_1, \dots, c_n)$$ are the **coordinates of $$\vec{x}$$ relative to basis $$\mathcal{B}$$**, denoted $$[\vec{x}]_{\mathcal{B}} = \begin{pmatrix} c_1 \\ \vdots \\ c_n \end{pmatrix}$$.
+
+The **change-of-basis matrix** $$P_{\mathcal{B}}$$ from basis $$\mathcal{B}$$ to the standard basis $$\mathcal{E}$$ has the vectors of $$\mathcal{B}$$ as its columns: $$P_{\mathcal{B}} = \begin{pmatrix} \vec{b}_1 & \dots & \vec{b}_n \end{pmatrix}$$.
+Then $$\vec{x} = P_{\mathcal{B}} [\vec{x}]_{\mathcal{B}}$$. (This is $$\vec{x}$$ in standard coordinates).
+And $$[\vec{x}]_{\mathcal{B}} = P_{\mathcal{B}}^{-1} \vec{x}$$.
+</blockquote>
+
+If a linear transformation $$T$$ is represented by matrix $$A$$ in the standard basis ($$T(\vec{x}) = A\vec{x}$$), its matrix $$A'$$ in the basis $$\mathcal{B}$$ is given by:
+
+$$
+A' = P_{\mathcal{B}}^{-1} A P_{\mathcal{B}}
+$$
+
+The matrices $$A$$ and $$A'$$ are **similar**. They represent the same geometric transformation, just viewed from different coordinate systems. Diagonalization (where $$A'$$ becomes a diagonal matrix $$D$$ because $$\mathcal{B}$$ is an eigenbasis, as we will see in Section 9) is a prime example of how changing to a "natural" basis simplifies the representation of the transformation.
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example.** Change of Basis for a Vector
+</div>
+Let the standard basis be $$\mathcal{E} = \left\{ \vec{e}_1 = \begin{pmatrix} 1 \\ 0 \end{pmatrix}, \vec{e}_2 = \begin{pmatrix} 0 \\ 1 \end{pmatrix} \right\}$$.
+Let a new basis be $$\mathcal{B} = \left\{ \vec{b}_1 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}, \vec{b}_2 = \begin{pmatrix} 1 \\ -1 \end{pmatrix} \right\}$$.
+The change-of-basis matrix from $$\mathcal{B}$$ to $$\mathcal{E}$$ is $$P_{\mathcal{B}} = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}$$.
+Consider a vector $$\vec{x} = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$ (in standard coordinates). What are its coordinates $$[\vec{x}]_{\mathcal{B}}$$ relative to $$\mathcal{B}$$?
+We need $$[\vec{x}]_{\mathcal{B}} = P_{\mathcal{B}}^{-1} \vec{x}$$.
+First, find $$P_{\mathcal{B}}^{-1}$$. $$\det(P_{\mathcal{B}}) = (1)(-1) - (1)(1) = -2$$.
+$$P_{\mathcal{B}}^{-1} = \frac{1}{-2} \begin{pmatrix} -1 & -1 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix}$$.
+So, $$[\vec{x}]_{\mathcal{B}} = \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix} \begin{pmatrix} 3 \\ 1 \end{pmatrix} = \begin{pmatrix} (1/2)(3) + (1/2)(1) \\ (1/2)(3) + (-1/2)(1) \end{pmatrix} = \begin{pmatrix} 2 \\ 1 \end{pmatrix}$$.
+Thus, $$[\vec{x}]_{\mathcal{B}} = \begin{pmatrix} 2 \\ 1 \end{pmatrix}$$. This means $$\vec{x} = 2\vec{b}_1 + 1\vec{b}_2$$.
+Let's check: $$2\begin{pmatrix} 1 \\ 1 \end{pmatrix} + 1\begin{pmatrix} 1 \\ -1 \end{pmatrix} = \begin{pmatrix} 2 \\ 2 \end{pmatrix} + \begin{pmatrix} 1 \\ -1 \end{pmatrix} = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$. It matches.
+</blockquote>
+
+**Change of Basis Exercises:**
+
+1.  Let $$\mathcal{B} = \left\{ \begin{pmatrix} 1 \\ 1 \end{pmatrix}, \begin{pmatrix} 1 \\ -1 \end{pmatrix} \right\}$$ be a basis for $$\mathbb{R}^2$$. Find the coordinates of $$\vec{x} = \begin{pmatrix} 3 \\ 5 \end{pmatrix}$$ relative to $$\mathcal{B}$$.
+2.  Let $$T$$ be reflection across the line $$y=x$$ in $$\mathbb{R}^2$$. Find its matrix $$A$$ in the standard basis. Then find a basis $$\mathcal{B}$$ of eigenvectors (see Section 9 for eigenvectors) and the matrix $$A'$$ of $$T$$ in this basis.
+3.  If $$A = PDP^{-1}$$, show that $$A^k = PD^kP^{-1}$$. Why is this useful for computing powers of $$A$$?
+4.  Not all matrices are diagonalizable (over $$\mathbb{R}$$). Give an example of a $$2 \times 2$$ matrix that cannot be diagonalized over $$\mathbb{R}$$ (Hint: a shear matrix, or a rotation matrix without real eigenvalues - see Section 14).
+5.  If $$A$$ and $$B$$ are similar matrices ($$B = P^{-1}AP$$), show they have the same determinant and the same eigenvalues. (Hint for eigenvalues: consider $$\det(B-\lambda I)$$).
+
+## 9. Invariant Directions: Eigenvalues and Eigenvectors
 
 When a linear transformation acts on space, are there any special directions that are left unchanged, merely being scaled?
 
@@ -951,14 +1103,39 @@ So, the eigenvalues are $$\lambda_1 = 0$$ and $$\lambda_2 = 1$$.
 <div class="title" markdown="1">
 Practical concerns
 </div>
-In practice, numerical eigendecomposition is not done through the characteristic equation, as there are much more efficient and stable algorithms. 
+In practice, numerical eigendecomposition is not done through the characteristic equation, as there are much more efficient and stable algorithms.
 </blockquote>
 
-### 7.1. Eigenbasis and Diagonalization
-If an $$n \times n$$ matrix $$A$$ has $$n$$ linearly independent eigenvectors, they form a basis for $$\mathbb{R}^n$$ (or $$\mathbb{C}^n$$ if complex) called an **eigenbasis**. If you express vectors in this eigenbasis, the transformation $$A$$ becomes very simple: it just scales along these basis directions. This is called **diagonalization**.
-If $$P$$ is the matrix whose columns are the eigenvectors, and $$D$$ is the diagonal matrix of eigenvalues (in corresponding order), then $$A = PDP^{-1}$$, or $$D = P^{-1}AP$$. $$D$$ represents the transformation in the eigenbasis.
+### 9.1. Eigenbasis and Diagonalization
+If an $$n \times n$$ matrix $$A$$ has $$n$$ linearly independent eigenvectors, they form a basis for $$\mathbb{R}^n$$ (or $$\mathbb{C}^n$$ if complex numbers are involved, see Section 14) called an **eigenbasis**. If you express vectors in this eigenbasis, or equivalently, change the coordinate system to one defined by the eigenvectors (as discussed in Section 8), the transformation $$A$$ becomes very simple: it just scales along these new basis directions. This process is called **diagonalization**.
 
-Eigenvalues and eigenvectors are crucial for understanding the dynamics of linear systems, diagonalization, and principal component analysis. (See Section 14 for complex perspective on eigenvalues).
+If $$P$$ is the matrix whose columns are the $$n$$ linearly independent eigenvectors $$\{\vec{p}_1, \dots, \vec{p}_n\}$$, and $$D$$ is the diagonal matrix whose diagonal entries are the corresponding eigenvalues $$\lambda_1, \dots, \lambda_n$$ (in the same order as their eigenvectors in $$P$$), then the relationship $$A\vec{p}_i = \lambda_i\vec{p}_i$$ for each eigenvector can be written in matrix form as $$AP = PD$$.
+Since the eigenvectors form a basis, $$P$$ is invertible. Multiplying by $$P^{-1}$$ on the right gives $$A = PDP^{-1}$$. Multiplying by $$P^{-1}$$ on the left (for $$P^{-1}AP = D$$) shows how $$A$$ is transformed into a diagonal matrix $$D$$ when viewed in the eigenbasis.
+The matrix $$P$$ is the change-of-basis matrix from the eigenbasis $$\mathcal{B}=\{\vec{p}_1, \dots, \vec{p}_n\}$$ to the standard basis. The matrix $$D = P^{-1}AP$$ is the matrix of the transformation $$A$$ with respect to the eigenbasis $$\mathcal{B}$$.
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example.** Diagonalizing a Matrix
+</div>
+Let $$A = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$$. Suppose its eigenvalues are $$\lambda_1=4, \lambda_2=2$$ with eigenvectors $$\vec{v}_1 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}, \vec{v}_2 = \begin{pmatrix} 1 \\ -1 \end{pmatrix}$$.
+These eigenvectors are linearly independent and can form an eigenbasis $$\mathcal{B} = \{\vec{v}_1, \vec{v}_2\}$$.
+The change-of-basis matrix from $$\mathcal{B}$$ to the standard basis is $$P = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}$$.
+Its inverse is $$P^{-1} = \frac{1}{(1)(-1) - (1)(1)} \begin{pmatrix} -1 & -1 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix}$$.
+The matrix of the transformation $$A$$ in the eigenbasis $$\mathcal{B}$$ is $$D = P^{-1}AP$$:
+
+$$
+\begin{aligned}
+D &= \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix} \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix} \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} \\
+&= \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix} \begin{pmatrix} 4 & 2 \\ 4 & -2 \end{pmatrix} \\
+&= \begin{pmatrix} 4 & 0 \\ 0 & 2 \end{pmatrix}
+\end{aligned}
+$$
+
+This is a diagonal matrix with the eigenvalues on the diagonal, corresponding to the order of eigenvectors in $$P$$.
+We also have $$A = PDP^{-1}$$.
+</blockquote>
+
+Eigenvalues and eigenvectors are crucial for understanding the dynamics of linear systems, solving differential equations, and in many data analysis techniques like Principal Component Analysis (PCA).
 
 **Eigenvalue/Eigenvector Exercises:**
 
@@ -966,9 +1143,9 @@ Eigenvalues and eigenvectors are crucial for understanding the dynamics of linea
 2.  What are the eigenvalues of $$A = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$$ (rotation by $$90^\circ$$)? Do real eigenvectors exist? Interpret. (See Section 14 for complex perspective).
 3.  Show that if $$\lambda$$ is an eigenvalue of $$A$$, then $$\lambda^k$$ is an eigenvalue of $$A^k$$ for any positive integer $$k$$.
 4.  If a matrix is triangular (all entries above or below the main diagonal are zero), what are its eigenvalues?
-5.  Can $$\lambda=0$$ be an eigenvalue? What does it imply about the matrix $$A$$?
+5.  Can $$\lambda=0$$ be an eigenvalue? What does it imply about the matrix $$A$$? (Hint: think about $$(A-0I)\vec{v}=\vec{0}$$ and invertibility).
 
-## 8. The Transpose: Duality and Geometric Connections
+## 10. The Transpose: Duality and Geometric Connections
 
 The **transpose** of a matrix $$A$$, denoted $$A^T$$, is obtained by swapping its rows and columns. While algebraically simple, its geometric meaning is subtle and deep, especially concerning the dot product.
 
@@ -1035,9 +1212,36 @@ The transpose appears in many contexts, like **least squares approximations** (s
 4.  Show that $$(AB)^T = B^T A^T$$. (This is important!)
 5.  If $$A$$ is an invertible matrix, show that $$(A^T)^{-1} = (A^{-1})^T$$.
 
-## 9. Decomposing Transformations: Matrix Factorizations
+## 11. Special Kinds of Transformations (Matrices)
 
-Matrix factorizations break down a matrix (and thus a linear transformation) into a product of simpler, more structured matrices. This reveals geometric insights and aids computation. Eigendecomposition ($$A=PDP^{-1}$$), discussed in the context of eigenbases, is one such powerful factorization for diagonalizable matrices. Another universally applicable one is the Singular Value Decomposition.
+Certain types of matrices correspond to transformations with distinct geometric properties.
+
+*   **Orthogonal Matrices ($$Q^TQ = I$$ or $$Q^{-1} = Q^T$$):**
+    *   As defined in Section 7.1, an orthogonal matrix $$Q$$ has orthonormal columns (and rows).
+    *   **Geometry:** Represent **rigid transformations**: rotations and reflections. They preserve lengths ($$ \Vert Q\vec{x} \Vert  =  \Vert \vec{x} \Vert $$) and angles between vectors ($$(Q\vec{x}) \cdot (Q\vec{y}) = \vec{x} \cdot \vec{y}$$).
+    *   $$\det(Q) = \pm 1$$. ($$+1$$ for pure rotation, $$-1$$ if a reflection is involved).
+    *   **Example:** Rotation matrix $$\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$$.
+
+*   **Symmetric Matrices ($$A = A^T$$):**
+    *   **Geometry (Spectral Theorem):** Always have real eigenvalues and possess a full set of **orthogonal eigenvectors**. This means they can be diagonalized by an orthogonal matrix: $$A = Q D Q^T$$, where $$Q$$ is an orthogonal matrix (whose columns are the orthonormal eigenvectors of $$A$$) and $$D$$ is a diagonal matrix with the real eigenvalues of $$A$$ on its diagonal.
+    *   Represents stretching/compression along a set of orthogonal axes (the eigenvectors).
+    *   **Example:** $$A = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$$ from Section 9.1 is symmetric. Its eigenvectors $$\begin{pmatrix} 1 \\ 1 \end{pmatrix}$$ and $$\begin{pmatrix} 1 \\ -1 \end{pmatrix}$$ are orthogonal. (They can be normalized to form the columns of $$Q$$).
+
+*   **Positive Definite Matrices (Symmetric $$A$$ with $$\vec{x}^T A \vec{x} > 0$$ for all $$\vec{x} \neq \vec{0}$$):**
+    *   **Geometry:** Symmetric matrices with all *positive* eigenvalues. Represents a transformation that purely stretches along orthogonal axes (no reflections or collapses to lower dimensions). The quadratic form $$\vec{x}^T A \vec{x}$$ defines an "elliptical bowl" shape (level sets are ellipsoids).
+    *   Arise in optimization (Hessians at minima), defining metrics, covariance matrices (positive semi-definite).
+
+**Special Matrices Exercises:**
+
+1.  Show that if $$Q$$ is orthogonal, then $$ \Vert Q\vec{x} \Vert  =  \Vert \vec{x} \Vert $$ for any vector $$\vec{x}$$.
+2.  Is the matrix for shear $$A = \begin{pmatrix} 1 & k \\ 0 & 1 \end{pmatrix}$$ (for $$k \neq 0$$) orthogonal? Symmetric?
+3.  If $$A$$ is symmetric, show that eigenvectors corresponding to distinct eigenvalues are orthogonal.
+4.  What can you say about the eigenvalues of a projection matrix (which is symmetric)? (Hint: $$P^2=P$$)
+5.  Give an example of a $$2 \times 2$$ rotation matrix and a $$2 \times 2$$ reflection matrix. Verify they are orthogonal.
+
+## 12. Decomposing Transformations: Matrix Factorizations
+
+Matrix factorizations break down a matrix (and thus a linear transformation) into a product of simpler, more structured matrices. This reveals geometric insights and aids computation. Eigendecomposition ($$A=PDP^{-1}$$), discussed in Section 9 for diagonalizable matrices, is one such powerful factorization. Another universally applicable one is the Singular Value Decomposition.
 
 **Singular Value Decomposition (SVD): The Master Decomposition**
 Any $$m \times n$$ matrix $$A$$ can be factored as:
@@ -1047,9 +1251,9 @@ A = U \Sigma V^T
 $$
 
 where:
-*   $$U$$ is an $$m \times m$$ orthogonal matrix ($$U^T U = I$$). Its columns are orthonormal eigenvectors of $$AA^T$$ (left singular vectors).
+*   $$U$$ is an $$m \times m$$ **orthogonal matrix** (defined in Section 7.1, satisfying $$U^T U = I$$). Its columns are orthonormal eigenvectors of $$AA^T$$ (left singular vectors).
 *   $$\Sigma$$ (Sigma) is an $$m \times n$$ matrix (same dimensions as $$A$$) that is diagonal in a sense: its only non-zero entries are on the main diagonal $$(\Sigma_{ii})$$, and these are non-negative real numbers called **singular values** ($$\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$$, where $$r$$ is the rank of $$A$$). These $$\sigma_i$$ are the square roots of the non-zero eigenvalues of $$A^T A$$ (or $$AA^T$$).
-*   $$V$$ is an $$n \times n$$ orthogonal matrix ($$V^T V = I$$). Its columns are orthonormal eigenvectors of $$A^T A$$ (right singular vectors).
+*   $$V$$ is an $$n \times n$$ **orthogonal matrix** ($$V^T V = I$$). Its columns are orthonormal eigenvectors of $$A^T A$$ (right singular vectors).
 
 **Geometric Interpretation of $$A\vec{x} = U\Sigma V^T \vec{x}$$:**
 The transformation $$A$$ applied to a vector $$\vec{x}$$ can be seen as a sequence of three simpler geometric operations:
@@ -1063,69 +1267,17 @@ SVD has vast applications, including Principal Component Analysis (PCA), image c
 
 Other important factorizations include:
 *   **LU Decomposition ($$A=LU$$):** Lower triangular $$L \times$$ Upper triangular $$U$$. Encodes Gaussian elimination. Used for solving $$A\vec{x}=\vec{b}$$ efficiently.
-*   **QR Decomposition ($$A=QR$$):** Orthogonal $$Q \times$$ Upper triangular $$R$$. Related to Gram-Schmidt orthogonalization. Numerically stable, used in least-squares and eigenvalue algorithms.
+*   **QR Decomposition ($$A=QR$$):** Orthogonal $$Q \times$$ Upper triangular $$R$$. Related to Gram-Schmidt orthogonalization (Section 7.3). Numerically stable, used in least-squares and eigenvalue algorithms.
 
 **Matrix Factorization Exercises:**
 
 1.  If $$A = U\Sigma V^T$$, what is $$A^T$$ in terms of $$U, \Sigma, V$$?
-2.  For a symmetric matrix $$A$$, how does its SVD relate to its eigendecomposition $$A=PDP^{-1}$$ (where $$P$$ is orthogonal and $$D$$ has eigenvalues)? (Hint: Consider positive eigenvalues for $$A$$ initially).
+2.  For a symmetric matrix $$A$$, how does its SVD relate to its eigendecomposition $$A=PDP^{-1}$$ (where $$P$$ is orthogonal and $$D$$ has eigenvalues, as per Section 11)? (Hint: Consider positive eigenvalues for $$A$$ initially).
 3.  The rank of a matrix is the number of non-zero singular values. What is the rank of $$\Sigma = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{pmatrix}$$?
 4.  What are the singular values of an orthogonal matrix $$Q$$? (Hint: $$Q^TQ=I$$).
 5.  Describe the geometric effect of $$A = \begin{pmatrix} 2 & 0 \\ 0 & -3 \end{pmatrix}$$ using the SVD idea (it's already diagonal, so $$U, V$$ are simple, but consider the negative sign).
 
-## 10. Changing Perspective: Change of Basis
-
-We usually express vectors in terms of the standard basis. However, sometimes problems are simpler in a different basis.
-
-<blockquote class="box-definition" markdown="1">
-<div class="title" markdown="1">
-**Definition.** Change of Basis
-</div>
-Let $$\mathcal{B} = \{\vec{b}_1, \dots, \vec{b}_n\}$$ be a basis for $$\mathbb{R}^n$$. Any vector $$\vec{x}$$ can be written uniquely as $$\vec{x} = c_1\vec{b}_1 + \dots + c_n\vec{b}_n$$. The coefficients $$(c_1, \dots, c_n)$$ are the **coordinates of $$\vec{x}$$ relative to basis $$\mathcal{B}$$**, denoted $$[\vec{x}]_{\mathcal{B}} = \begin{pmatrix} c_1 \\ \vdots \\ c_n \end{pmatrix}$$.
-
-The **change-of-basis matrix** $$P_{\mathcal{B}}$$ from basis $$\mathcal{B}$$ to the standard basis $$\mathcal{E}$$ has the vectors of $$\mathcal{B}$$ as its columns: $$P_{\mathcal{B}} = \begin{pmatrix} \vec{b}_1 & \dots & \vec{b}_n \end{pmatrix}$$.
-Then $$\vec{x} = P_{\mathcal{B}} [\vec{x}]_{\mathcal{B}}$$. (This is $$\vec{x}$$ in standard coordinates).
-And $$[\vec{x}]_{\mathcal{B}} = P_{\mathcal{B}}^{-1} \vec{x}$$.
-</blockquote>
-
-If a linear transformation $$T$$ is represented by matrix $$A$$ in the standard basis ($$T(\vec{x}) = A\vec{x}$$), its matrix $$A'$$ in the basis $$\mathcal{B}$$ is given by:
-
-$$
-A' = P_{\mathcal{B}}^{-1} A P_{\mathcal{B}}
-$$
-
-The matrices $$A$$ and $$A'$$ are **similar**. They represent the same geometric transformation, just viewed from different coordinate systems. Diagonalization (where $$A'$$ becomes a diagonal matrix $$D$$ because $$\mathcal{B}$$ is an eigenbasis, as seen in Section 7) is a prime example of how changing to a "natural" basis simplifies the representation of the transformation.
-
-<blockquote class="box-example" markdown="1">
-<div class="title" markdown="1">
-**Example.** Diagonalizing a Matrix
-</div>
-Let $$A = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$$. Suppose its eigenvalues are $$\lambda_1=4, \lambda_2=2$$ with eigenvectors $$\vec{v}_1 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}, \vec{v}_2 = \begin{pmatrix} 1 \\ -1 \end{pmatrix}$$.
-Let the basis $$\mathcal{B}$$ be these eigenvectors. So, $$P_{\mathcal{B}} = P = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}$$.
-Then $$P^{-1} = \frac{1}{(1)(-1) - (1)(1)} \begin{pmatrix} -1 & -1 \\ -1 & 1 \end{pmatrix} = \frac{1}{-2} \begin{pmatrix} -1 & -1 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix}$$.
-
-$$
-\begin{aligned}
-A' = D = P^{-1}AP &= \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix} \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix} \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix} \\
-&= \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix} \begin{pmatrix} 3(1)+1(1) & 3(1)+1(-1) \\ 1(1)+3(1) & 1(1)+3(-1) \end{pmatrix} \\
-&= \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix} \begin{pmatrix} 4 & 2 \\ 4 & -2 \end{pmatrix} \\
-&= \begin{pmatrix} (1/2)(4)+(1/2)(4) & (1/2)(2)+(1/2)(-2) \\ (1/2)(4)+(-1/2)(4) & (1/2)(2)+(-1/2)(-2) \end{pmatrix} \\
-&= \begin{pmatrix} 2+2 & 1-1 \\ 2-2 & 1+1 \end{pmatrix} = \begin{pmatrix} 4 & 0 \\ 0 & 2 \end{pmatrix}
-\end{aligned}
-$$
-
-This is a diagonal matrix with the eigenvalues on the diagonal, corresponding to the order of eigenvectors in $$P$$.
-</blockquote>
-
-**Change of Basis Exercises:**
-
-1.  Let $$\mathcal{B} = \left\{ \begin{pmatrix} 1 \\ 1 \end{pmatrix}, \begin{pmatrix} 1 \\ -1 \end{pmatrix} \right\}$$ be a basis for $$\mathbb{R}^2$$. Find the coordinates of $$\vec{x} = \begin{pmatrix} 3 \\ 5 \end{pmatrix}$$ relative to $$\mathcal{B}$$.
-2.  Let $$T$$ be reflection across the line $$y=x$$ in $$\mathbb{R}^2$$. Find its matrix $$A$$ in the standard basis. Then find a basis $$\mathcal{B}$$ of eigenvectors and the matrix $$A'$$ of $$T$$ in this basis.
-3.  If $$A = PDP^{-1}$$, show that $$A^k = PD^kP^{-1}$$. Why is this useful for computing powers of $$A$$?
-4.  Not all matrices are diagonalizable (over $$\mathbb{R}$$). Give an example of a $$2 \times 2$$ matrix that cannot be diagonalized over $$\mathbb{R}$$ (Hint: a shear matrix, or a rotation matrix without real eigenvalues).
-5.  If $$A$$ and $$B$$ are similar matrices ($$B = P^{-1}AP$$), show they have the same determinant and the same eigenvalues.
-
-## 11. Solving Problems: Systems of Linear Equations
+## 13. Solving Problems: Systems of Linear Equations
 
 A system of linear equations can be written in matrix form as $$A\vec{x} = \vec{b}$$. Having explored transformations, determinants, and eigenvalues, we can interpret this geometrically with more depth.
 
@@ -1135,7 +1287,7 @@ A system of linear equations can be written in matrix form as $$A\vec{x} = \vec{
 </div>
 1.  **Transformation View:** We are looking for a vector $$\vec{x}$$ in the input space that the transformation $$A$$ maps to the vector $$\vec{b}$$ in the output space.
     *   If $$\det(A) \neq 0$$ (for square $$A$$), $$A$$ is invertible. The transformation maps $$\mathbb{R}^n$$ to $$\mathbb{R}^n$$ without loss of dimension. A unique $$\vec{x} = A^{-1}\vec{b}$$ exists. Geometrically, $$A^{-1}$$ "undoes" the transformation of $$A$$.
-    *   If $$\det(A) = 0$$ (for square $$A$$) or if $$A$$ is not square, the transformation might collapse space. A solution exists if and only if $$\vec{b}$$ is in the **column space** of $$A$$ (the span of the columns of $$A$$, i.e., the image of the transformation). If a solution exists, it might not be unique (if the null space of A is non-trivial).
+    *   If $$\det(A) = 0$$ (for square $$A$$) or if $$A$$ is not square, the transformation might collapse space. A solution exists if and only if $$\vec{b}$$ is in the **column space** of $$A$$ (the span of the columns of $$A$$, i.e., the image of the transformation, see Section 10). If a solution exists, it might not be unique (if the null space of A is non-trivial, see Section 10).
 2.  **Linear Combination View:** Let the columns of $$A$$ be $$\vec{a}_1, \dots, \vec{a}_n$$. Then $$A\vec{x} = x_1\vec{a}_1 + \dots + x_n\vec{a}_n$$. So, $$A\vec{x} = \vec{b}$$ asks: "Is $$\vec{b}$$ a linear combination of the columns of $$A$$? If so, what are the coefficients $$x_1, \dots, x_n$$?" In other words, is $$\vec{b}$$ in the column space of $$A$$?
 3.  **Geometric Intersection View (for $$\mathbb{R}^2, \mathbb{R}^3$$):** Each equation in the system represents a line (in $$\mathbb{R}^2$$) or a plane (in $$\mathbb{R}^3$$). Solving the system means finding the point(s) of intersection of these geometric objects.
     *   Unique solution: Lines/planes intersect at a single point. (Corresponds to $$\det(A) \neq 0$$ for $$n \times n$$ systems).
@@ -1164,124 +1316,6 @@ The transformation $$A$$ maps the plane to itself without collapsing it. We are 
 3.  If $$A\vec{x}=\vec{b}$$ has a unique solution for a square matrix $$A$$, what does this imply about the columns of $$A$$? What does it imply about the transformation $$T(\vec{x})=A\vec{x}$$? What is $$\det(A)$$?
 4.  Describe the solution set of $$A\vec{x}=\vec{0}$$ (the homogeneous system). What is the geometric meaning of this set (the null space of $$A$$)?
 5.  If $$\vec{p}$$ is a particular solution to $$A\vec{x}=\vec{b}$$, and $$\vec{h}$$ is any solution to $$A\vec{x}=\vec{0}$$, show that $$\vec{p}+\vec{h}$$ is also a solution to $$A\vec{x}=\vec{b}$$. Geometrically, this means the solution set to $$A\vec{x}=\vec{b}$$ is a translation of the null space.
-
-## 12. Special Kinds of Transformations (Matrices)
-
-Certain types of matrices correspond to transformations with distinct geometric properties.
-
-*   **Orthogonal Matrices ($$Q^TQ = I$$ or $$Q^{-1} = Q^T$$):**
-    *   **Geometry:** Represent **rigid transformations**: rotations and reflections. They preserve lengths ($$ \Vert Q\vec{x} \Vert  =  \Vert \vec{x} \Vert $$) and angles between vectors ($$(Q\vec{x}) \cdot (Q\vec{y}) = \vec{x} \cdot \vec{y}$$).
-    *   Columns (and rows) form an orthonormal basis.
-    *   $$\det(Q) = \pm 1$$. ($$+1$$ for pure rotation, $$-1$$ if a reflection is involved).
-    *   **Example:** Rotation matrix $$\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$$.
-
-*   **Symmetric Matrices ($$A = A^T$$):**
-    *   **Geometry (Spectral Theorem):** Always have real eigenvalues and possess a full set of **orthogonal eigenvectors**. This means they can be diagonalized by an orthogonal matrix: $$A = Q D Q^T$$, where $$Q$$ is orthogonal and $$D$$ is diagonal with real eigenvalues.
-    *   Represents stretching/compression along a set of orthogonal axes (the eigenvectors).
-    *   **Example:** $$A = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$$ from earlier is symmetric. Its eigenvectors $$\begin{pmatrix} 1 \\ 1 \end{pmatrix}$$ and $$\begin{pmatrix} 1 \\ -1 \end{pmatrix}$$ are orthogonal.
-
-*   **Positive Definite Matrices (Symmetric $$A$$ with $$\vec{x}^T A \vec{x} > 0$$ for all $$\vec{x} \neq \vec{0}$$):**
-    *   **Geometry:** Symmetric matrices with all *positive* eigenvalues. Represents a transformation that purely stretches along orthogonal axes (no reflections or collapses to lower dimensions). The quadratic form $$\vec{x}^T A \vec{x}$$ defines an "elliptical bowl" shape (level sets are ellipsoids).
-    *   Arise in optimization (Hessians at minima), defining metrics, covariance matrices (positive semi-definite).
-
-**Special Matrices Exercises:**
-
-1.  Show that if $$Q$$ is orthogonal, then $$ \Vert Q\vec{x} \Vert  =  \Vert \vec{x} \Vert $$ for any vector $$\vec{x}$$.
-2.  Is the matrix for shear $$A = \begin{pmatrix} 1 & k \\ 0 & 1 \end{pmatrix}$$ (for $$k \neq 0$$) orthogonal? Symmetric?
-3.  If $$A$$ is symmetric, show that eigenvectors corresponding to distinct eigenvalues are orthogonal.
-4.  What can you say about the eigenvalues of a projection matrix (which is symmetric)? (Hint: $$P^2=P$$)
-5.  Give an example of a $$2 \times 2$$ rotation matrix and a $$2 \times 2$$ reflection matrix. Verify they are orthogonal.
-
-## 13. Orthogonality and Projections
-
-Orthogonality (perpendicularity) is a very special and useful geometric property, deeply connected to the dot product.
-
-### 13.1. Orthogonal Bases
-A basis $$\{\vec{u}_1, \dots, \vec{u}_n\}$$ is **orthogonal** if every pair of distinct basis vectors is orthogonal: $$\vec{u}_i \cdot \vec{u}_j = 0$$ for $$i \neq j$$.
-If, in addition, each basis vector has length 1 ($$ \Vert \vec{u}_i \Vert  = 1$$ for all $$i$$), the basis is **orthonormal**. The standard basis is orthonormal.
-
-Working with orthonormal bases is very convenient:
-*   **Finding coordinates:** If $$\mathcal{B} = \{\vec{u}_1, \dots, \vec{u}_n\}$$ is an orthonormal basis, and $$\vec{x} = c_1\vec{u}_1 + \dots + c_n\vec{u}_n$$, then the coordinates $$c_i$$ are easily found by projection: $$c_i = \vec{x} \cdot \vec{u}_i$$.
-    <details class="details-block" markdown="1">
-    <summary markdown="1">
-**Derivation for coordinates in orthonormal basis**
-    </summary>
-    Take the dot product of $$\vec{x} = \sum_{j=1}^n c_j \vec{u}_j$$ with $$\vec{u}_i$$:
-
-    $$
-    \vec{x} \cdot \vec{u}_i = \left(\sum_{j=1}^n c_j \vec{u}_j\right) \cdot \vec{u}_i = \sum_{j=1}^n c_j (\vec{u}_j \cdot \vec{u}_i)
-    $$
-
-    Since the basis is orthonormal, $$\vec{u}_j \cdot \vec{u}_i = 0$$ if $$j \neq i$$, and $$\vec{u}_i \cdot \vec{u}_i =  \Vert \vec{u}_i \Vert ^2 = 1$$.
-    So, the sum simplifies to $$c_i (\vec{u}_i \cdot \vec{u}_i) = c_i(1) = c_i$$.
-    Thus, $$c_i = \vec{x} \cdot \vec{u}_i$$.
-    </details>
-*   **Change-of-basis matrix:** If $$P$$ is the matrix whose columns are orthonormal basis vectors, then $$P^T P = I$$. This means $$P^{-1} = P^T$$. Such a matrix $$P$$ is called an **orthogonal matrix** (as seen in Section 12). Geometrically, an orthogonal matrix represents a transformation that preserves lengths and angles (a rotation, reflection, or combination).
-
-### 13.2. Projection onto a Subspace
-Given a subspace $$W$$ of $$\mathbb{R}^n$$, any vector $$\vec{x} \in \mathbb{R}^n$$ can be uniquely written as $$\vec{x} = \text{proj}_W \vec{x} + \vec{x}^\perp$$, where $$\text{proj}_W \vec{x}$$ is in $$W$$ (the **orthogonal projection** of $$\vec{x}$$ onto $$W$$) and $$\vec{x}^\perp$$ is orthogonal to every vector in $$W$$ ($$\vec{x}^\perp$$ is in $$W^\perp$$, the orthogonal complement of $$W$$).
-Geometrically, $$\text{proj}_W \vec{x}$$ is the vector in $$W$$ that is "closest" to $$\vec{x}$$.
-
-If $$\{\vec{u}_1, \dots, \vec{u}_k\}$$ is an *orthonormal basis* for $$W$$, then the projection formula is simple:
-
-$$
-\text{proj}_W \vec{x} = (\vec{x} \cdot \vec{u}_1)\vec{u}_1 + (\vec{x} \cdot \vec{u}_2)\vec{u}_2 + \dots + (\vec{x} \cdot \vec{u}_k)\vec{u}_k
-$$
-
-Each term $$(\vec{x} \cdot \vec{u}_i)\vec{u}_i$$ is the projection of $$\vec{x}$$ onto the line spanned by $$\vec{u}_i$$.
-If the basis $$\{\mathbf{w}_1, \dots, \mathbf{w}_k\}$$ for $$W$$ is just orthogonal (not necessarily orthonormal), the formula is:
-
-$$
-\text{proj}_W \vec{x} = \frac{\vec{x} \cdot \vec{w}_1}{ \Vert \vec{w}_1 \Vert ^2}\vec{w}_1 + \dots + \frac{\vec{x} \cdot \vec{w}_k}{ \Vert \vec{w}_k \Vert ^2}\vec{w}_k
-$$
-
-### 13.3. Gram-Schmidt Process
-The Gram-Schmidt process is an algorithm to convert any basis $$\{\vec{v}_1, \dots, \vec{v}_k\}$$ for a subspace $$W$$ into an *orthogonal* basis $$\{\vec{u}_1, \dots, \vec{u}_k\}$$ for $$W$$. One can then normalize each $$\vec{u}_i$$ to get an orthonormal basis.
-Geometrically, it works by iteratively taking each vector $$\vec{v}_i$$ and subtracting its projections onto the already-found orthogonal vectors $$\vec{u}_1, \dots, \vec{u}_{i-1}$$. This leaves the component of $$\vec{v}_i$$ that is orthogonal to the subspace spanned by $$\vec{u}_1, \dots, \vec{u}_{i-1}$$.
-
-The process:
-1.  $$\vec{u}_1 = \vec{v}_1$$
-2.  $$\vec{u}_2 = \vec{v}_2 - \text{proj}_{\vec{u}_1} \vec{v}_2$$
-3.  $$\vec{u}_3 = \vec{v}_3 - \text{proj}_{\vec{u}_1} \vec{v}_3 - \text{proj}_{\vec{u}_2} \vec{v}_3$$
-4.  ...and so on: $$\vec{u}_k = \vec{v}_k - \sum_{j=1}^{k-1} \text{proj}_{\vec{u}_j} \vec{v}_k = \vec{v}_k - \sum_{j=1}^{k-1} \frac{\vec{v}_k \cdot \vec{u}_j}{ \Vert \vec{u}_j \Vert ^2} \vec{u}_j$$
-
-<blockquote class="box-example" markdown="1">
-<div class="title" markdown="1">
-**Example.** Gram-Schmidt (2 vectors).
-</div>
-Let $$\vec{v}_1 = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$, $$\vec{v}_2 = \begin{pmatrix} 2 \\ 2 \end{pmatrix}$$. These form a basis for $$\mathbb{R}^2$$.
-1.  Set $$\vec{u}_1 = \vec{v}_1 = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$.
-2.  Find $$\vec{u}_2$$:
-
-    $$
-    \vec{u}_2 = \vec{v}_2 - \text{proj}_{\vec{u}_1} \vec{v}_2 = \vec{v}_2 - \frac{\vec{v}_2 \cdot \vec{u}_1}{\vec{u}_1 \cdot \vec{u}_1} \vec{u}_1
-    $$
-
-    $$\vec{v}_2 \cdot \vec{u}_1 = (2)(3) + (2)(1) = 6 + 2 = 8$$
-    $$\vec{u}_1 \cdot \vec{u}_1 = (3)(3) + (1)(1) = 9 + 1 = 10$$
-
-    $$
-    \text{proj}_{\vec{u}_1} \vec{v}_2 = \frac{8}{10} \begin{pmatrix} 3 \\ 1 \end{pmatrix} = \frac{4}{5} \begin{pmatrix} 3 \\ 1 \end{pmatrix} = \begin{pmatrix} 12/5 \\ 4/5 \end{pmatrix}
-    $$
-
-    $$
-    \vec{u}_2 = \begin{pmatrix} 2 \\ 2 \end{pmatrix} - \begin{pmatrix} 12/5 \\ 4/5 \end{pmatrix} = \begin{pmatrix} 10/5 - 12/5 \\ 10/5 - 4/5 \end{pmatrix} = \begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix}
-    $$
-
-So, an orthogonal basis is $$\left\{ \begin{pmatrix} 3 \\ 1 \end{pmatrix}, \begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix} \right\}$$. We can check $$\vec{u}_1 \cdot \vec{u}_2 = 3(-2/5) + 1(6/5) = -6/5 + 6/5 = 0$$.
-To make it orthonormal, normalize:
-$$ \Vert \vec{u}_1 \Vert  = \sqrt{10}$$. $$\hat{\vec{u}}_1 = \frac{1}{\sqrt{10}}\begin{pmatrix} 3 \\ 1 \end{pmatrix}$$.
-$$ \Vert \vec{u}_2 \Vert  = \sqrt{(-2/5)^2 + (6/5)^2} = \sqrt{4/25 + 36/25} = \sqrt{40/25} = \frac{\sqrt{40}}{5} = \frac{2\sqrt{10}}{5}$$.
-$$\hat{\vec{u}}_2 = \frac{5}{2\sqrt{10}}\begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix} = \frac{1}{2\sqrt{10}}\begin{pmatrix} -2 \\ 6 \end{pmatrix} = \frac{1}{\sqrt{10}}\begin{pmatrix} -1 \\ 3 \end{pmatrix}$$.
-Orthonormal basis: $$\left\{ \frac{1}{\sqrt{10}}\begin{pmatrix} 3 \\ 1 \end{pmatrix}, \frac{1}{\sqrt{10}}\begin{pmatrix} -1 \\ 3 \end{pmatrix} \right\}$$.
-</blockquote>
-
-**Orthogonality Exercises:**
-1.  Are the vectors $$\vec{u} = \begin{pmatrix} 1 \\ -1 \\ 0 \end{pmatrix}$$, $$\vec{v} = \begin{pmatrix} 1 \\ 1 \\ 1 \end{pmatrix}$$, $$\vec{w} = \begin{pmatrix} 1 \\ 1 \\ -2 \end{pmatrix}$$ mutually orthogonal? Do they form an orthogonal basis for $$\mathbb{R}^3$$?
-2.  Let $$W$$ be the line in $$\mathbb{R}^2$$ spanned by $$\vec{u} = \begin{pmatrix} 4 \\ 3 \end{pmatrix}$$. Find the orthogonal projection of $$\vec{x} = \begin{pmatrix} 1 \\ 7 \end{pmatrix}$$ onto $$W$$.
-3.  Use the Gram-Schmidt process to find an orthonormal basis for the subspace of $$\mathbb{R}^3$$ spanned by $$\vec{v}_1 = \begin{pmatrix} 1 \\ 1 \\ 0 \end{pmatrix}$$ and $$\vec{v}_2 = \begin{pmatrix} 1 \\ 0 \\ 1 \end{pmatrix}$$.
-4.  If $$Q$$ is an orthogonal matrix, what is $$\det(Q)$$? (Hint: $$Q^T Q = I$$ and $$\det(A^T)=\det(A)$$, $$\det(AB)=\det(A)\det(B)$$).
-5.  Let $$W$$ be a subspace of $$\mathbb{R}^n$$. Show that the projection operator $$P_W(\vec{x}) = \text{proj}_W \vec{x}$$ is a linear transformation. If $$P$$ is the matrix for this projection, show that $$P^2 = P$$. Interpret this geometrically.
 
 ## 14. The Complex Perspective: Rotations and Beyond
 
@@ -1334,7 +1368,7 @@ $$
 
 ### 14.3. Complex Eigenvalues for Real Matrices
 
-When we solve the characteristic equation $$\det(A-\lambda I)=0$$ for a real matrix $$A$$, the polynomial has real coefficients. This means any non-real roots (eigenvalues) must come in **complex conjugate pairs**: if $$\lambda = a+ib$$ (with $$b \neq 0$$) is an eigenvalue, then so is its conjugate $$\bar{\lambda} = a-ib$$.
+When we solve the characteristic equation $$\det(A-\lambda I)=0$$ for a real matrix $$A$$ (as in Section 9), the polynomial has real coefficients. This means any non-real roots (eigenvalues) must come in **complex conjugate pairs**: if $$\lambda = a+ib$$ (with $$b \neq 0$$) is an eigenvalue, then so is its conjugate $$\bar{\lambda} = a-ib$$.
 
 The corresponding eigenvectors will also be complex and come in conjugate pairs. If $$\vec{v}$$ is an eigenvector for $$\lambda$$, then $$\bar{\vec{v}}$$ (conjugate of each component) is an eigenvector for $$\bar{\lambda}$$.
 Let $$\lambda = a+ib$$ and its eigenvector be $$\vec{v} = \vec{u} + i\vec{w}$$, where $$\vec{u}$$ and $$\vec{w}$$ are real vectors.
@@ -1460,7 +1494,7 @@ You'll notice that these are precisely the properties we've been using for vecto
 *   **Euclidean Space $$\mathbb{R}^n$$:** The quintessential example. Vectors are n-tuples of real numbers.
 *   **Space of Polynomials $$\mathcal{P}_n$$:** The set of all polynomials of degree at most $$n$$. For example, $$p(t) = a_0 + a_1t + \dots + a_nt^n$$. Addition of polynomials and multiplication by a scalar follow the vector space axioms.
     A "vector" here is a polynomial like $$2+3t-t^2$$.
-*   **Space of Continuous Functions $$C[a,b]$$:** The set of all real-valued continuous functions on an interval $$[a,b]$$$. If $$f(x)$$ and $$g(x)$$ are continuous, so is $$(f+g)(x) = f(x)+g(x)$$ and $$(cf)(x) = cf(x)$$.
+*   **Space of Continuous Functions $$C[a,b]$$:** The set of all real-valued continuous functions on an interval $$[a,b]$$. If $$f(x)$$ and $$g(x)$$ are continuous, so is $$(f+g)(x) = f(x)+g(x)$$ and $$(cf)(x) = cf(x)$$.
     A "vector" here is a function like $$\sin(x)$$ or $$e^x$$.
 *   **Space of $$m \times n$$ Matrices $$M_{m \times n}$$:** The set of all $$m \times n$$ matrices with real (or complex) entries. Matrix addition and scalar multiplication of matrices satisfy the axioms.
     A "vector" here is an entire matrix.
@@ -1472,9 +1506,9 @@ Once we establish that a set (like polynomials or functions) forms a vector spac
 *   **Linear Transformations:** The differentiation operator $$D(f) = f'$$ is a linear transformation from $$\mathcal{P}_n$$ to $$\mathcal{P}_{n-1}$$. An integral operator $$I(f) = \int_0^x f(t)dt$$ is also a linear transformation. We can find matrices for these transformations with respect to chosen bases!
 *   **Inner Products:** We can define generalized "dot products" (inner products) for these spaces. For functions, $$\langle f, g \rangle = \int_a^b f(x)g(x)dx$$ is a common inner product, leading to notions of orthogonality for functions (e.g., Fourier series).
 
-This abstraction elevates linear algebra from a tool for solving systems of equations and geometric problems in $$\mathbb{R}^n$$ to a fundamental language for understanding structure and transformations across many areas of mathematics, science, and engineering.
+This abstraction elevates linear algebra from a tool for solving systems of equations and geometric problems in $$\mathbb{R}^n$$ to a fundamental language for understanding structure and transformations across many areas of mathematics, science, and engineering. In particular, when these abstract vector spaces are infinite-dimensional (like spaces of functions) and equipped with a notion of "length" or "distance" (a norm, often derived from an inner product), we enter the realm of **Functional Analysis**. This field builds directly upon the foundations of linear algebra to analyze operators and equations in these more general settings, a topic we will explore in a future crash course.
 
-## Conclusion: The Geometric Tapestry of Linear Algebra
+## 16. Conclusion: The Geometric Tapestry of Linear Algebra
 
 This expanded journey through linear algebra, always guided by geometric intuition, reveals a rich tapestry where abstract algebraic rules correspond to tangible spatial manipulations. Vectors are not just lists of numbers but directed segments that can span lines, planes, or entire spaces. Matrices are not just arrays but powerful engines that rotate, scale, shear, and project these spaces.
 
@@ -1486,9 +1520,9 @@ Key geometric insights:
 *   Spectral analysis, including eigendecomposition and SVD, reveals these fundamental scaling behaviors and principal directions, demonstrating how local characteristics (eigenvalues, singular values) define the global geometry of a transformation.
 *   Solving systems of equations ($$A\vec{x}=\vec{b}$$) can be viewed as finding an input vector that maps to a target, or checking if the target is reachable (in the column space), or finding intersections of geometric objects.
 *   Changing basis is like changing your coordinate grid, offering different perspectives on the same geometric reality. Diagonalization simplifies transformations by aligning with these natural axes.
-*   Orthogonality and the transpose provide powerful frameworks for simplifying problems, from finding coordinates and projections (Gram-Schmidt) to understanding the fundamental relationships between key subspaces (column space, null space, row space).
+*   Orthogonality (including orthogonal matrices) and the transpose provide powerful frameworks for simplifying problems, from finding coordinates and projections (Gram-Schmidt) to understanding the fundamental relationships between key subspaces (column space, null space, row space).
 *   The complex plane offers a direct link between 2D transformations (rotations and scaling) and complex number arithmetic, and helps interpret the behavior of real matrices with complex eigenvalues.
 *   Matrix decompositions like SVD show that even complex transformations can be broken down into sequences of simpler geometric actions: rotations, scalings, and reflections, revealing the fundamental "principal components" of a transformation.
-*   The abstract definition of a vector space, formalizing the familiar properties of Euclidean vectors, allows all these concepts and theorems to be applied to a vast array of other mathematical objects, such as functions and polynomials, immensely broadening the reach and power of linear algebra.
+*   The abstract definition of a vector space, formalizing the familiar properties of Euclidean vectors, allows all these concepts and theorems to be applied to a vast array of other mathematical objects, such as functions and polynomials. This immensely broadens the reach and power of linear algebra, and directly sets the stage for **Functional Analysis**, which extends these ideas to infinite-dimensional spaces.
 
-Understanding these geometric underpinnings, coupled with the power of algebraic abstraction, demystifies linear algebra and provides a solid foundation for tackling more advanced topics and applications, from computer graphics and physics simulations to data analysis, quantum mechanics, and electrical engineering. The interplay between algebraic precision and geometric visualization is what makes linear algebra such a beautiful and powerful field.
+Understanding these geometric underpinnings, coupled with the power of algebraic abstraction, demystifies linear algebra and provides a solid foundation for tackling more advanced topics and applications, from computer graphics and physics simulations to data analysis, quantum mechanics, and electrical engineering. The interplay between algebraic precision and geometric visualization is what makes linear algebra such a beautiful and powerful field, providing essential tools for many disciplines and a natural gateway to the study of **Functional Analysis**.
