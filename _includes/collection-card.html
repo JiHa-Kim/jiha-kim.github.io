@@ -1,11 +1,11 @@
-{% comment %}
+{%- comment -%}
   collection-card.html
   Expects these locals:
     • meta         → the landing‐page doc
     • ordered      → an array of lesson/episode docs (sorted)
     • first_item   → the first lesson/episode in ordered
     • slug         → the folder slug
-{% endcomment %}
+{%- endcomment -%}
 
 <article class="card-wrapper card mb-4">
   <a
@@ -29,9 +29,13 @@
 
     <div class="col-md-{{ body_col }}">
       <div class="card-body d-flex flex-column">
-        <!-- Title -->
+        <!-- Title: use the raw front-matter title (or pretty-print the slug) -->
         <h2 class="card-title my-2 mt-md-0">
-          {{ meta.title | default: slug | replace: '-', ' ' | capitalize }}
+          {% if meta.title %}
+            {{ meta.title }}
+          {% else %}
+            {{ slug | replace: '-', ' ' | capitalize }}
+          {% endif %}
         </h2>
 
         <!-- Truncated Description -->

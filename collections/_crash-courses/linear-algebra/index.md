@@ -1,10 +1,10 @@
 ---
 layout: crash-course-landing
 slug: linear-algebra
-title:  "Linear Algebra – A Geometric Perspective"
+title: "Linear Algebra – A Geometric Perspective"
 description: "A crash course starting from the geometric viewpoint"
-cover:       
-level:       "Intermediate"
+cover:
+level: "Intermediate"
 categories:
   - Math
   - Algebra
