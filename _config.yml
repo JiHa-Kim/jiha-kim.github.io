@@ -186,49 +186,57 @@ collections:
     permalink: /crash-courses/:path/
 
 defaults:
-  # 1) Global: applies to every content document
+  # 1) Global: everything uses "post" layout with TOC on
   - scope:
-      path: ""           # empty → all files in your site
-    values:
-      toc: true
-      math: true
-
-  # 2) Your existing per-type defaults
-  - scope:
-      path: ""           # all posts
-      type: posts
+      path: ""           # applies to every content document
     values:
       layout: post
+      toc: true
+      math: true
+      panel_includes:
+        - toc
+
+  # 2) Posts still get comments + custom permalink
+  - scope:
+      path: ""
+      type: posts
+    values:
       comments: true
       permalink: /posts/:title/
 
+  # 3) Drafts turn comments off + custom permalink
   - scope:
       path: _drafts
     values:
       comments: false
+      permalink: /drafts/:title/
 
+  # 4) Notes permalink override (layout: post inherited)
   - scope:
       type: notes
     values:
-      layout: note
+      permalink: /notes/:path/
 
+  # 5) Series permalink override
   - scope:
       type: series
     values:
-      layout: series
+      permalink: /series/:path/
 
+  # 6) Crash-courses permalink override
   - scope:
       type: crash-courses
     values:
-      layout: crash-course
+      permalink: /crash-courses/:path/
 
+  # 7) Tabs: switch back to "page" layout, TOC off
   - scope:
-      path: ""
       type: tabs
     values:
       layout: page
       permalink: /:title/
       toc: false
+      panel_includes: []
 
 sass:
   style: compressed

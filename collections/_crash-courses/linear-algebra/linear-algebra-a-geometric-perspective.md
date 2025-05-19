@@ -3,7 +3,6 @@ title: Linear Algebra - A Geometric Crash Course
 date: 2025-05-12 20:45 -0400
 description: A crash course starting from the geometric perspective on linear algebra, covering vectors, matrices, transformations, determinants, eigenvalues, SVD, orthogonality, complex numbers, and more.
 image: # Add an image path here if you have one
-math: true
 llm-instructions: |
     I am using the Chirpy theme in Jekyll.
 
@@ -51,13 +50,13 @@ llm-instructions: |
 
     Here are examples of syntaxes that do **not** work:
 
-    1. text
+    5. text
       $$
       block
       $$
       text
 
-    2. text
+    6. text
       $$
       text
       $$
@@ -66,7 +65,7 @@ llm-instructions: |
 
     And the correct way to include multiple block equations in a list item:
 
-    1. text
+    7. text
 
       $$
       block 1
