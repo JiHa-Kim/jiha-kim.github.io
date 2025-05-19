@@ -190,6 +190,7 @@ defaults:
   - scope:
       path: ""           # empty → all files in your site
     values:
+      toc: true
       math: true
 
   # 2) Your existing per-type defaults
@@ -199,7 +200,6 @@ defaults:
     values:
       layout: post
       comments: true
-      toc: true
       permalink: /posts/:title/
 
   - scope:
@@ -228,6 +228,7 @@ defaults:
     values:
       layout: page
       permalink: /:title/
+      toc: false
 
 sass:
   style: compressed
