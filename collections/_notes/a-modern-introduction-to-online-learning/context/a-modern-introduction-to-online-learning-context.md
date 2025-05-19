@@ -1,5 +1,4 @@
 ---
-layout: note
 title: A Modern Introduction to Online Learning - Context
 date: 2025-04-29 02:09 +0000
 math: true

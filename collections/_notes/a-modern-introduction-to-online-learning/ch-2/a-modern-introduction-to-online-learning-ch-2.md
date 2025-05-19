@@ -1,5 +1,4 @@
 ---
-layout: note
 title: A Modern Introduction to Online Learning - Ch 2
 date: 2025-04-29 02:07 +0000
 math: true

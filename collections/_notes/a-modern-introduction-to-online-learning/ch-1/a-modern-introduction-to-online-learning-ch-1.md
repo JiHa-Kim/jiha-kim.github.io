@@ -1,5 +1,4 @@
 ---
-layout: note
 title: A Modern Introduction to Online Learning - Ch 1
 date: 2025-04-29 02:08 +0000 # Or use a dynamic date if preferred: {{ site.time | date_to_xmlschema }}
 math: true
