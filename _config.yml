@@ -264,8 +264,7 @@ exclude:
 incremental: true
 
 plugins:
-  - jekyll-include-cache
-  - jekyll-archives
+  - jekyll-tagories
 
 jekyll-archives:
   enabled:
