@@ -265,20 +265,20 @@ incremental: true
 
 plugins:
   - jekyll-include-cache
+  - jekyll-archives
 
 jekyll-archives:
-  enabled: [categories, tags]
-
-  collections:
+  enabled:
+    - categories
+    - tags
+  collections:                     # tell it which collections to scan
     - posts
     - notes
     - series
     - crash-courses
-
   layouts:
     category: category
     tag: tag
-
   permalinks:
     tag: /tags/:name/
     category: /categories/:name/
