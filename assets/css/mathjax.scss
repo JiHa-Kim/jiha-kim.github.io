@@ -1,0 +1,6 @@
+// Extending base MathJax scss
+
+mjx-container { // Target display math specifically
+    overflow-x: auto;         /* Allow horizontal scrolling when content overflows */
+    padding-bottom: 8px;      /* Optional: add a little space for the scrollbar */
+  }
