@@ -631,7 +631,9 @@ Let $$T: \mathbb{R}^2 \to \mathbb{R}^2$$ be a transformation that rotates every 
 **Example.** A Non-Linear Transformation
 </div>
 Consider $$T: \mathbb{R}^2 \to \mathbb{R}^2$$ defined by $$T\begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} x+1 \\ y \end{pmatrix}$$. This is a translation (shift).
+
 Let's check $$T(\vec{0})$$: $$T\begin{pmatrix} 0 \\ 0 \end{pmatrix} = \begin{pmatrix} 0+1 \\ 0 \end{pmatrix} = \begin{pmatrix} 1 \\ 0 \end{pmatrix} \neq \vec{0}$$.
+
 Since the origin is not fixed (or by failing homogeneity/additivity), this transformation is **not linear**.
 </blockquote>
 
@@ -652,7 +654,9 @@ A key insight is that any linear transformation $$T: \mathbb{R}^n \to \mathbb{R}
 **Derivation.** Matrix of a Linear Transformation
 </div>
 Let $$\{\vec{e}_1, \dots, \vec{e}_n\}$$ be the standard basis for $$\mathbb{R}^n$$.
+
 Any vector $$\vec{x} \in \mathbb{R}^n$$ can be written as $$\vec{x} = x_1\vec{e}_1 + x_2\vec{e}_2 + \dots + x_n\vec{e}_n$$.
+
 Applying a linear transformation $$T$$:
 
 $$
@@ -678,6 +682,7 @@ So, $$T(\vec{x}) = A\vec{x}$$.
 **Theorem.** Matrix Representation of Linear Transformations
 </div>
 For any linear transformation $$T: \mathbb{R}^n \to \mathbb{R}^m$$, there exists a **unique** $$m \times n$$ matrix $$A$$ such that $$T(\vec{x}) = A\vec{x}$$ for all $$\vec{x}$$ in $$\mathbb{R}^n$$. The columns of this matrix $$A$$ are the images of the standard basis vectors under $$T$$: $$A = \begin{pmatrix} T(\vec{e}_1) & T(\vec{e}_2) & \dots & T(\vec{e}_n) \end{pmatrix}$$.
+
 Conversely, any transformation defined by $$T(\vec{x}) = A\vec{x}$$ for some matrix $$A$$ is a linear transformation.
 </blockquote>
 This establishes a fundamental link: matrices *are* linear transformations (in finite Euclidean spaces relative to standard bases).
@@ -687,9 +692,12 @@ This establishes a fundamental link: matrices *are* linear transformations (in f
 **Example.** Matrix for $$90^\circ$$ Rotation
 </div>
 Consider the $$90^\circ$$ counter-clockwise rotation $$T: \mathbb{R}^2 \to \mathbb{R}^2$$.
+
 The standard basis vectors are $$\vec{e}_1 = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$$ and $$\vec{e}_2 = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$$.
+
 *   $$T(\vec{e}_1) = T\begin{pmatrix} 1 \\ 0 \end{pmatrix} = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$$ (rotating $$(1,0)$$ by $$90^\circ$$ CCW lands on $$(0,1)$$).
 *   $$T(\vec{e}_2) = T\begin{pmatrix} 0 \\ 1 \end{pmatrix} = \begin{pmatrix} -1 \\ 0 \end{pmatrix}$$ (rotating $$(0,1)$$ by $$90^\circ$$ CCW lands on $$(-1,0)$$).
+
 The matrix $$A$$ has these as columns:
 
 $$
@@ -824,14 +832,23 @@ Let's explore this with concrete examples.
 **Why the determinant is a global scaling factor**
 </summary>
 The property that $$T(a\vec{x}+b\vec{y}) = aT(\vec{x})+bT(\vec{y})$$ means the transformation is uniform across space.
+
 Imagine any shape in 2D. We can approximate its area by tiling it with many tiny squares. Let each tiny square have sides $$\delta x \vec{e}_1$$ and $$\delta y \vec{e}_2$$, so its area is $$\delta x \delta y$$ times the area of the unit square (which is 1).
+
 A linear transformation $$T$$ (matrix $$A$$) maps this tiny square to a tiny parallelogram.
+
 The vectors forming the sides of this original tiny square are $$\delta x \vec{e}_1$$ and $$\delta y \vec{e}_2$$.
+
 Under the transformation $$T$$, these become $$T(\delta x \vec{e}_1) = \delta x T(\vec{e}_1)$$ and $$T(\delta y \vec{e}_2) = \delta y T(\vec{e}_2)$$.
+
 The area of the parallelogram formed by $$T(\vec{e}_1)$$ and $$T(\vec{e}_2)$$ is, by definition, $$\det(A)$$ (for 2D, using the absolute value for area).
+
 The area of the parallelogram formed by $$\delta x T(\vec{e}_1)$$ and $$\delta y T(\vec{e}_2)$$ is $$(\delta x)(\delta y) \times \text{Area}(T(\vec{e}_1), T(\vec{e}_2)) = (\delta x \delta y) \vert\det(A)\vert$$.
+
 So, each tiny piece of area $$\text{Area}_{\text{orig}} = \delta x \delta y$$ gets transformed into a tiny piece of area $$\text{Area}_{\text{new}} = \vert\det(A)\vert \text{Area}_{\text{orig}}$$.
+
 Summing (integrating) over all these tiny pieces, the total area of any shape is scaled by $$\vert\det(A)\vert$$.
+
 The same logic applies to volumes in 3D using tiny cubes and hypervolumes in $$\mathbb{R}^n$$ with tiny hypercubes. The sign of the determinant additionally tells us about orientation globally.
 This shows that the local property (scaling of the unit square/cube at the origin) becomes a global property (scaling of any area/volume anywhere) precisely because the transformation is linear and thus uniform.
 </details>
@@ -950,9 +967,13 @@ Let $$\vec{v}_1 = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$, $$\vec{v}_2 = \begin{p
 
 So, an orthogonal basis is $$\left\{ \begin{pmatrix} 3 \\ 1 \end{pmatrix}, \begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix} \right\}$$. We can check $$\vec{u}_1 \cdot \vec{u}_2 = 3(-2/5) + 1(6/5) = -6/5 + 6/5 = 0$$.
 To make it orthonormal, normalize:
-$$ \Vert \vec{u}_1 \Vert  = \sqrt{10}$$. $$\hat{\vec{u}}_1 = \frac{1}{\sqrt{10}}\begin{pmatrix} 3 \\ 1 \end{pmatrix}$$.
-$$ \Vert \vec{u}_2 \Vert  = \sqrt{(-2/5)^2 + (6/5)^2} = \sqrt{4/25 + 36/25} = \sqrt{40/25} = \frac{\sqrt{40}}{5} = \frac{2\sqrt{10}}{5}$$.
-$$\hat{\vec{u}}_2 = \frac{5}{2\sqrt{10}}\begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix} = \frac{1}{2\sqrt{10}}\begin{pmatrix} -2 \\ 6 \end{pmatrix} = \frac{1}{\sqrt{10}}\begin{pmatrix} -1 \\ 3 \end{pmatrix}$$.
+
+$$ \Vert \vec{u}_1 \Vert  = \sqrt{10}$$. $$\hat{\vec{u}}_1 = \frac{1}{\sqrt{10}}\begin{pmatrix} 3 \\ 1 \end{pmatrix}$$
+
+$$ \Vert \vec{u}_2 \Vert  = \sqrt{(-2/5)^2 + (6/5)^2} = \sqrt{4/25 + 36/25} = \sqrt{40/25} = \frac{\sqrt{40}}{5} = \frac{2\sqrt{10}}{5}$$
+
+$$\hat{\vec{u}}_2 = \frac{5}{2\sqrt{10}}\begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix} = \frac{1}{2\sqrt{10}}\begin{pmatrix} -2 \\ 6 \end{pmatrix} = \frac{1}{\sqrt{10}}\begin{pmatrix} -1 \\ 3 \end{pmatrix}$$
+
 Orthonormal basis: $$\left\{ \frac{1}{\sqrt{10}}\begin{pmatrix} 3 \\ 1 \end{pmatrix}, \frac{1}{\sqrt{10}}\begin{pmatrix} -1 \\ 3 \end{pmatrix} \right\}$$.
 </blockquote>
 
@@ -991,14 +1012,23 @@ The matrices $$A$$ and $$A'$$ are **similar**. They represent the same geometric
 **Example.** Change of Basis for a Vector
 </div>
 Let the standard basis be $$\mathcal{E} = \left\{ \vec{e}_1 = \begin{pmatrix} 1 \\ 0 \end{pmatrix}, \vec{e}_2 = \begin{pmatrix} 0 \\ 1 \end{pmatrix} \right\}$$.
+
 Let a new basis be $$\mathcal{B} = \left\{ \vec{b}_1 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}, \vec{b}_2 = \begin{pmatrix} 1 \\ -1 \end{pmatrix} \right\}$$.
+
 The change-of-basis matrix from $$\mathcal{B}$$ to $$\mathcal{E}$$ is $$P_{\mathcal{B}} = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}$$.
+
 Consider a vector $$\vec{x} = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$ (in standard coordinates). What are its coordinates $$[\vec{x}]_{\mathcal{B}}$$ relative to $$\mathcal{B}$$?
+
 We need $$[\vec{x}]_{\mathcal{B}} = P_{\mathcal{B}}^{-1} \vec{x}$$.
+
 First, find $$P_{\mathcal{B}}^{-1}$$. $$\det(P_{\mathcal{B}}) = (1)(-1) - (1)(1) = -2$$.
+
 $$P_{\mathcal{B}}^{-1} = \frac{1}{-2} \begin{pmatrix} -1 & -1 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix}$$.
+
 So, $$[\vec{x}]_{\mathcal{B}} = \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix} \begin{pmatrix} 3 \\ 1 \end{pmatrix} = \begin{pmatrix} (1/2)(3) + (1/2)(1) \\ (1/2)(3) + (-1/2)(1) \end{pmatrix} = \begin{pmatrix} 2 \\ 1 \end{pmatrix}$$.
+
 Thus, $$[\vec{x}]_{\mathcal{B}} = \begin{pmatrix} 2 \\ 1 \end{pmatrix}$$. This means $$\vec{x} = 2\vec{b}_1 + 1\vec{b}_2$$.
+
 Let's check: $$2\begin{pmatrix} 1 \\ 1 \end{pmatrix} + 1\begin{pmatrix} 1 \\ -1 \end{pmatrix} = \begin{pmatrix} 2 \\ 2 \end{pmatrix} + \begin{pmatrix} 1 \\ -1 \end{pmatrix} = \begin{pmatrix} 3 \\ 1 \end{pmatrix}$$. It matches.
 </blockquote>
 
@@ -1098,7 +1128,9 @@ In practice, numerical eigendecomposition is not done through the characteristic
 If an $$n \times n$$ matrix $$A$$ has $$n$$ linearly independent eigenvectors, they form a basis for $$\mathbb{R}^n$$ (or $$\mathbb{C}^n$$ if complex numbers are involved, see Section 14) called an **eigenbasis**. If you express vectors in this eigenbasis, or equivalently, change the coordinate system to one defined by the eigenvectors (as discussed in Section 8), the transformation $$A$$ becomes very simple: it just scales along these new basis directions. This process is called **diagonalization**.
 
 If $$P$$ is the matrix whose columns are the $$n$$ linearly independent eigenvectors $$\{\vec{p}_1, \dots, \vec{p}_n\}$$, and $$D$$ is the diagonal matrix whose diagonal entries are the corresponding eigenvalues $$\lambda_1, \dots, \lambda_n$$ (in the same order as their eigenvectors in $$P$$), then the relationship $$A\vec{p}_i = \lambda_i\vec{p}_i$$ for each eigenvector can be written in matrix form as $$AP = PD$$.
+
 Since the eigenvectors form a basis, $$P$$ is invertible. Multiplying by $$P^{-1}$$ on the right gives $$A = PDP^{-1}$$. Multiplying by $$P^{-1}$$ on the left (for $$P^{-1}AP = D$$) shows how $$A$$ is transformed into a diagonal matrix $$D$$ when viewed in the eigenbasis.
+
 The matrix $$P$$ is the change-of-basis matrix from the eigenbasis $$\mathcal{B}=\{\vec{p}_1, \dots, \vec{p}_n\}$$ to the standard basis. The matrix $$D = P^{-1}AP$$ is the matrix of the transformation $$A$$ with respect to the eigenbasis $$\mathcal{B}$$.
 
 <blockquote class="box-example" markdown="1">
@@ -1106,9 +1138,13 @@ The matrix $$P$$ is the change-of-basis matrix from the eigenbasis $$\mathcal{B}
 **Example.** Diagonalizing a Matrix
 </div>
 Let $$A = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$$. Suppose its eigenvalues are $$\lambda_1=4, \lambda_2=2$$ with eigenvectors $$\vec{v}_1 = \begin{pmatrix} 1 \\ 1 \end{pmatrix}, \vec{v}_2 = \begin{pmatrix} 1 \\ -1 \end{pmatrix}$$.
+
 These eigenvectors are linearly independent and can form an eigenbasis $$\mathcal{B} = \{\vec{v}_1, \vec{v}_2\}$$.
+
 The change-of-basis matrix from $$\mathcal{B}$$ to the standard basis is $$P = \begin{pmatrix} 1 & 1 \\ 1 & -1 \end{pmatrix}$$.
+
 Its inverse is $$P^{-1} = \frac{1}{(1)(-1) - (1)(1)} \begin{pmatrix} -1 & -1 \\ -1 & 1 \end{pmatrix} = \begin{pmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{pmatrix}$$.
+
 The matrix of the transformation $$A$$ in the eigenbasis $$\mathcal{B}$$ is $$D = P^{-1}AP$$:
 
 $$
@@ -1288,8 +1324,12 @@ A system of linear equations can be written in matrix form as $$A\vec{x} = \vec{
 **Example.** System of Equations
 </div>
 Consider the system:
-$$ x + 2y = 5 $$
-$$ 3x - y = 1 $$
+
+$$\begin{cases} 
+x + 2y = 5
+\\
+3x - y = 1 \end{cases}$$
+
 In matrix form: $$\begin{pmatrix} 1 & 2 \\ 3 & -1 \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} 5 \\ 1 \end{pmatrix}$$.
 Let $$A = \begin{pmatrix} 1 & 2 \\ 3 & -1 \end{pmatrix}$$, $$\vec{x} = \begin{pmatrix} x \\ y \end{pmatrix}$$, $$\vec{b} = \begin{pmatrix} 5 \\ 1 \end{pmatrix}$$.
 Here, $$\det(A) = (1)(-1) - (2)(3) = -1 - 6 = -7 \neq 0$$. So, A is invertible and a unique solution exists.
@@ -1371,14 +1411,22 @@ A\vec{u} + iA\vec{w} = (a\vec{u} - b\vec{w}) + i(b\vec{u} + a\vec{w})
 $$
 
 Equating real and imaginary parts (since $$\vec{u}, \vec{w}, A\vec{u}, A\vec{w}$$ are all real vectors):
+
 1.  $$A\vec{u} = a\vec{u} - b\vec{w}$$
 2.  $$A\vec{w} = b\vec{u} + a\vec{w}$$
 
 **Geometric Interpretation:**
 These two equations show how the real matrix $$A$$ acts on the real vectors $$\vec{u}$$ and $$\vec{w}$$. If $$\vec{u}$$ and $$\vec{w}$$ are linearly independent (which they are if $$b \neq 0$$), they span a 2D plane in $$\mathbb{R}^n$$. The transformation $$A$$ maps this plane to itself.
 If we consider the basis $$\mathcal{C} = \{\vec{w}, \vec{u}\}$$ for this plane (note the order for a standard rotation-scaling matrix form), the transformation $$A$$ (restricted to this plane) has the matrix representation relative to $$\mathcal{C}$$:
-$$ [A\vec{w}]_\mathcal{C} = \begin{pmatrix} a \\ b \end{pmatrix} $$ (since $$A\vec{w} = a\vec{w} + b\vec{u}$$)
-$$ [A\vec{u}]_\mathcal{C} = \begin{pmatrix} -b \\ a \end{pmatrix} $$ (since $$A\vec{u} = a\vec{u} - b\vec{w}$$)
+
+$$ [A\vec{w}]_\mathcal{C} = \begin{pmatrix} a \\ b \end{pmatrix} $$ 
+
+(since $$A\vec{w} = a\vec{w} + b\vec{u}$$)
+
+$$ [A\vec{u}]_\mathcal{C} = \begin{pmatrix} -b \\ a \end{pmatrix} $$ 
+
+(since $$A\vec{u} = a\vec{u} - b\vec{w}$$)
+
 So the matrix of the transformation in this plane, with respect to basis $$\{\vec{w}, \vec{u}\}$$, is:
 
 $$
@@ -1403,12 +1451,19 @@ $$
 $$
 
 $$-iv_1 - v_2 = 0 \implies v_2 = -iv_1$$. Let $$v_1=1$$, then $$v_2=-i$$.
+
 Eigenvector $$\vec{v}_1 = \begin{pmatrix} 1 \\ -i \end{pmatrix} = \begin{pmatrix} 1 \\ 0 \end{pmatrix} + i\begin{pmatrix} 0 \\ -1 \end{pmatrix}$$.
+
 So, $$\vec{u} = \begin{pmatrix} 1 \\ 0 \end{pmatrix} = \vec{e}_1$$ and $$\vec{w} = \begin{pmatrix} 0 \\ -1 \end{pmatrix} = -\vec{e}_2$$.
+
 The plane spanned by $$\vec{u}$$ and $$\vec{w}$$ is the entire $$\mathbb{R}^2$$ plane.
+
 Using the basis $$\mathcal{C} = \{\vec{w}, \vec{u}\} = \{-\vec{e}_2, \vec{e}_1\}$$. The change of basis matrix is $$P = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}$$.
+
 Then $$P^{-1} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$$.
+
 The matrix of $$A$$ in this basis should be $$\begin{pmatrix} a & -b \\ b & a \end{pmatrix} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix}$$.
+
 Let's verify:
 
 $$
