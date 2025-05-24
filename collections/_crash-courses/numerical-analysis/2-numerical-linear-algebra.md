@@ -1,7 +1,7 @@
 ---
 title: "Crash Course: Numerical Linear Algebra for Optimization"
 date: 2025-05-17 # Or current date
-# series-index: # This might be a "CC-Y" or an auxiliary post
+course-index: 2
 mermaid: true
 description: "A primer on key concepts from Numerical Linear Algebra crucial for understanding advanced optimization algorithms, focusing on conditioning, solving linear systems, and preconditioning."
 image:
