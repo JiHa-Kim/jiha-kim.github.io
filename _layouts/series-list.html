@@ -1,28 +1,8 @@
 ---
-layout: default
-refactor: true
+layout: generic-collection-list
+collection_name: 'series'
+collection_landing_layout: 'series-landing'
+collection_sort_field: 'series_index'
+page_title: "{{ page.title }}"
 ---
-{% include lang.html %}
-
-<h1 class="text-center mb-5">{{ page.title }}</h1>
 {{ content }}
-
-{% assign grouped = site.series | group_by_exp: 'doc', "doc.url | split: '/' | slice: 2,1 | first" %}
-
-<div id="post-list" class="flex-grow-1 px-xl-1">
-  {% for grp in grouped %}
-    {% assign slug = grp.name %}
-
-    {% assign meta = grp.items | where: 'layout', 'series-landing' | first %}
-    {% assign ordered = grp.items | where_exp: 'item', "item.layout != 'series-landing'" | sort: 'series_index' %}
-    {% assign first_item = ordered | first %}
-
-    {%
-      include collection-card.html
-      meta=meta
-      ordered=ordered
-      first_item=first_item
-      slug=slug
-    %}
-  {% endfor %}
-</div>
