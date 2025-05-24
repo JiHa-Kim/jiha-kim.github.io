@@ -107,7 +107,7 @@ llm-instructions: |
   <summary markdown="1">
   **Tip.** A concise title goes here.
   </summary>
-  Here is content thatl can include **Markdown**, inline math $$a + b$$,
+  Here is content that can include **Markdown**, inline math $$a + b$$,
   and block math.
 
   $$
@@ -149,8 +149,7 @@ llm-instructions: |
   without an explicit request.
 ---
 
-
-Here is present the structure of this blog post series.
+Here is the structure of this blog post series on mathematical optimization theory in ML.
 
 1. Goal
 2. Approach
@@ -203,32 +202,33 @@ config:
   theme: redux
 ---
 flowchart TD
-    A(["Start"]) --> B["Linear Algebra"]
-    B --> C["Functional Analysis"]
-    C --> D["Tensor Calculus"] & E["Variational Calculus"]
-    D --> n1["Differential Geometry"] & n3["Statistics and Information Theory"]
-    E --> n2["Convex Sets"]
-    n3 --> n4["Information Geometry"]
-    n2 --> n5["Convex Optimization"]
-    n5 --> n6["Online Learning"]
+    A(["Start"]) --> LA["Linear Algebra"]
+
+    LA --> EFA["Functional Analysis & Matrix Spectral Theory"]
+    LA --> NA["Numerical Analysis"]
+
+    EFA --> TC["Tensor Calculus"]
+    EFA --> VC["Variational Calculus"]
+
+    TC --> DG["Differential Geometry"]
+    TC --> SIT["Statistics and Information Theory"]
+    VC --> CA["Convex Analysis"]
+
+    SIT --> IG["Information Geometry"]
+    CO --> OL["Online Learning"]
 ```
 
 If the mermaid flowchart does not render:
-1. Linear Algebra
-2. Functional Analysis
-
-Then two branches:
-Branch 1:
-1. Tensor Calculus
-2. Differential Geometry
-3. Statistics and Information Theory
-4. Information Geometry
-
-Branch 2:
-1. Variational Calculus
-2. Convex Sets
-3. Convex Optimization
-4. Online Learning
+1. `Linear Algebra`
+2. Parallel branches from `Linear Algebra`:
+    1. `Elementary Functional Analysis`
+    2. `Numerical Analysis`
+3. From `Functional Analysis & Matrix Spectral Theory`, two branches:
+    1. `Tensor Calculus`, which leads to:
+        1. `Differential Geometry`
+        2. `Statistics and Information Theory` (which then leads to `Information Geometry`)
+    2. `Variational Calculus`, which leads to:
+        1. `Convex Analysis` (which then leads to `Online Learning`)
 
 The series is mostly intended to be self-contained beyond these items.
 
@@ -242,12 +242,13 @@ I have inserted an example reading order between the series and the crash course
 2. Iterative methods: gradient-free vs. gradient-based optimization
 3. Speedrun of common gradient-based ML optimizers
 4. Problem formalization
-5. Gradient descent
+   - Numerical Analysis
+5. Gradient descent and gradient flow
    - Functional Analysis
 6. Challenges of high-dimensional non-convex optimization in deep learning
 7. Adaptive methods
 8. Momentum
-9. Soft inductive biases (regularization)
+9.  Soft inductive biases (regularization)
    - Tensor Calculus
    - Differential Geometry
    - Statistics and Information Theory
@@ -257,5 +258,5 @@ I have inserted an example reading order between the series and the crash course
    - Convex Analysis
    - Online Learning
 11. Adam optimizer, online learning view: Follow-The-Regularized-Leader
-12. Approximate second-order optimizers (Shampoo/Muon)
+12. Metrized deep learning and preconditioning (Iso/IsoAdam, Shampoo, Muon)
 13. Parameter-free optimization

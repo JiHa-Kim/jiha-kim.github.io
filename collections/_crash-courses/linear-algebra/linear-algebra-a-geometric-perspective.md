@@ -1,6 +1,7 @@
 ---
-title: Linear Algebra - A Geometric Crash Course
+title: Linear Algebra - A Geometric Perspective
 date: 2025-05-12 20:45 -0400
+course-index: 1
 description: A crash course starting from the geometric perspective on linear algebra, covering vectors, matrices, transformations, determinants, eigenvalues, SVD, orthogonality, complex numbers, and more.
 image: # Add an image path here if you have one
 llm-instructions: |
@@ -1129,7 +1130,7 @@ If an $$n \times n$$ matrix $$A$$ has $$n$$ linearly independent eigenvectors, t
 
 If $$P$$ is the matrix whose columns are the $$n$$ linearly independent eigenvectors $$\{\vec{p}_1, \dots, \vec{p}_n\}$$, and $$D$$ is the diagonal matrix whose diagonal entries are the corresponding eigenvalues $$\lambda_1, \dots, \lambda_n$$ (in the same order as their eigenvectors in $$P$$), then the relationship $$A\vec{p}_i = \lambda_i\vec{p}_i$$ for each eigenvector can be written in matrix form as $$AP = PD$$.
 
-Since the eigenvectors form a basis, $$P$$ is invertible. Multiplying by $$P^{-1}$$ on the right gives $$A = PDP^{-1}$$. Multiplying by $$P^{-1}$$ on the left (for $$P^{-1}AP = D$$) shows how $$A$$ is transformed into a diagonal matrix $$D$$ when viewed in the eigenbasis.
+Since the eigenvectors form a basis, $$P$$ is invertible. Multiplying by $$P^{-1}$$ on the right gives $$A = PDP^{-1}$$. Multiplying by $$P^{-1}$$ on the left (for $$P^{-1}AP = D$$) shows how $$A$$ is transformed into a diagonal matrix $$D$$ when viewed in the eigenbasis. The conditions under which a matrix is diagonalizable, especially the important case of symmetric matrices having an orthogonal eigenbasis (the Spectral Theorem), will be explored more deeply in the context of self-adjoint operators in Functional Analysis. For now, we focus on the basic definition and computation.
 
 The matrix $$P$$ is the change-of-basis matrix from the eigenbasis $$\mathcal{B}=\{\vec{p}_1, \dots, \vec{p}_n\}$$ to the standard basis. The matrix $$D = P^{-1}AP$$ is the matrix of the transformation $$A$$ with respect to the eigenbasis $$\mathcal{B}$$.
 
@@ -1247,7 +1248,7 @@ Certain types of matrices correspond to transformations with distinct geometric 
     *   **Example:** Rotation matrix $$\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$$.
 
 *   **Symmetric Matrices ($$A = A^T$$):**
-    *   **Geometry (Spectral Theorem):** Always have real eigenvalues and possess a full set of **orthogonal eigenvectors**. This means they can be diagonalized by an orthogonal matrix: $$A = Q D Q^T$$, where $$Q$$ is an orthogonal matrix (whose columns are the orthonormal eigenvectors of $$A$$) and $$D$$ is a diagonal matrix with the real eigenvalues of $$A$$ on its diagonal.
+    *   **Geometry (Spectral Theorem):** Symmetric matrices have remarkable properties regarding their eigenvalues and eigenvectors. Specifically, they always have **real eigenvalues**, and their eigenvectors corresponding to distinct eigenvalues are **orthogonal**. Furthermore, they are always **orthogonally diagonalizable**, meaning there exists an orthogonal matrix $$Q$$ (whose columns are orthonormal eigenvectors of $$A$$) and a diagonal matrix $$D$$ (with the real eigenvalues of $$A$$ on its diagonal) such that $$A = Q D Q^T$$. This is a cornerstone of the **Spectral Theorem** for symmetric matrices, a result whose broader context (self-adjoint operators) is explored in Functional Analysis. Geometrically, this means a symmetric transformation corresponds to stretching/compressing space along a set of orthogonal axes (defined by the eigenvectors).
     *   Represents stretching/compression along a set of orthogonal axes (the eigenvectors).
     *   **Example:** $$A = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$$ from Section 9.1 is symmetric. Its eigenvectors $$\begin{pmatrix} 1 \\ 1 \end{pmatrix}$$ and $$\begin{pmatrix} 1 \\ -1 \end{pmatrix}$$ are orthogonal. (They can be normalized to form the columns of $$Q$$).
 
@@ -1285,7 +1286,7 @@ The transformation $$A$$ applied to a vector $$\vec{x}$$ can be seen as a sequen
 2.  **Scaling ($$\Sigma (V^T\vec{x})$$):** $$\Sigma$$ scales the components along these new axes by the singular values $$\sigma_i$$. If some $$\sigma_i=0$$ (or if $$m \neq n$$ causing zero rows/columns in $$\Sigma$$), dimensions are squashed or dimensions change.
 3.  **Rotation/Reflection ($$U (\Sigma V^T\vec{x})$$):** $$U$$ rotates or reflects the scaled vector in $$\mathbb{R}^m$$ to its final position, aligning it with principal output directions (the columns of $$U$$, called left singular vectors).
 
-SVD reveals that any linear transformation can be decomposed into a rotation/reflection, a scaling along orthogonal axes (possibly with change of dimension), and another rotation/reflection. The singular values quantify the "strength" or "magnification" of the transformation along its principal directions. As discussed in Section 6, the identification of these principal directions (singular vectors) and scaling factors (singular values) provides a global description of the transformation's geometry.
+SVD reveals that any linear transformation can be decomposed into a rotation/reflection, a scaling along orthogonal axes (possibly with change of dimension), and another rotation/reflection. The singular values quantify the "strength" or "magnification" of the transformation along its principal directions. As discussed in Section 6, the identification of these principal directions (singular vectors) and scaling factors (singular values) provides a global description of the transformation's geometry. SVD can be seen as a generalization of the spectral decomposition to arbitrary rectangular matrices and will also be revisited in the context of compact operators in Functional Analysis.
 
 SVD has vast applications, including Principal Component Analysis (PCA), image compression, recommendation systems, and calculating pseudo-inverses.
 
@@ -1566,8 +1567,8 @@ Key geometric insights from this course include:
 *   Orthogonality, exemplified by orthogonal matrices and processes like Gram-Schmidt orthogonalization, provides a robust framework for simplifying problems. This ranges from finding coordinates and projections to understanding the fundamental relationships between key subspaces (column space, null space, and row space).
 *   The complex plane offers a direct link between 2D transformations (rotations and scaling) and complex number arithmetic, and aids in interpreting the behavior of real matrices that have complex eigenvalues.
 *   Matrix decompositions, such as SVD, demonstrate that even complex transformations can be broken down into sequences of simpler geometric actions: rotations, scalings, and reflections, revealing the fundamental "principal components" of a transformation.
-*   The abstract definition of a vector space, which formalizes the familiar properties of Euclidean vectors, allows these concepts and theorems to be applied to a vast array of other mathematical objects, such as functions and polynomials. This significantly broadens the applicability and power of linear algebra, and naturally leads to the study of **Functional Analysis**, which extends these ideas to infinite-dimensional spaces.
+*   The abstract definition of a vector space, which formalizes the familiar properties of Euclidean vectors, allows these concepts and theorems to be applied to a vast array of other mathematical objects, such as functions and polynomials. This significantly broadens the applicability and power of linear algebra.
 
 Understanding these geometric underpinnings, coupled with the power of algebraic abstraction, demystifies linear algebra and provides a solid foundation for tackling more advanced topics and applications across diverse fields such as computer graphics, physics, data analysis, quantum mechanics, and engineering. 
 
-On its own, linear algebra in Euclidean spaces is already very powerful. Following this, **Functional Analysis** will build largely on applying linear algebra on functions in order to perform mathematical analysis. Indeed, we can add and scale functions with scalars, just like Euclidean vectors, which is one great motivation for using the abstract definition of a vector space. In doing so, we can re-use so many incredible theorems and techniques for free!
+On its own, linear algebra in Euclidean spaces is already very powerful. Following this, **Functional Analysis** will build upon these foundations, extending concepts like vector spaces, norms, inner products, and notably, **spectral theory**, to infinite-dimensional spaces (often spaces of functions). This allows us to analyze operators and solve problems in much broader contexts, reusing and generalizing many of the powerful theorems and techniques initially encountered in linear algebra.

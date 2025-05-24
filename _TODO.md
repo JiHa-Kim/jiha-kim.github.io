@@ -1,0 +1,1 @@
+- [ ] fix index.md landing page of crash course not working when deployed to GitHub pages (works locally) e.g. https://jiha-kim.github.io/crash-courses/linear-algebra/index/ will give 404 error
