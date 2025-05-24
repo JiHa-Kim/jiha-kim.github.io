@@ -1,5 +1,24 @@
 ---
-layout: generic-collection-landing
-collection_name: 'series'
-collection_sort_field: 'series_index'
+layout: default
+refactor: true
 ---
+{% include lang.html %}
+
+{% if page.slug %}
+  {% assign slug = page.slug %}
+{% else %}
+  {% assign slug = page.url | split: '/' | slice: 2, 1 | first %}
+{% endif %}
+
+{% capture prefix %}/series/{{ slug }}/{% endcapture %}
+{% assign lessons = site.series
+  | where_exp: 'l', 'l.url contains prefix'
+  | where_exp: 'l', 'l.url != page.url'
+  | sort: 'series_index'
+%}
+
+{%
+  include collection-landing.html
+  page=page
+  lessons=lessons
+%}
