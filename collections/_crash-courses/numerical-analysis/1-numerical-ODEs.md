@@ -26,8 +26,7 @@ llm-instructions: |
 
   In regular Markdown, please use the following syntax:
 
-  - Inline equations are surrounded by dollar signs on the same line:
-    $$inline$$
+  - Inline equations are surrounded by dollar signs on the same line: $$inline$$
 
   - Block equations are isolated by newlines between the text above and below,
     and newlines between the delimiters and the equation (even in lists):

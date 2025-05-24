@@ -1,7 +1,7 @@
 ---
 title: "Elementary Functional Analysis: A Crash Course for Optimization"
-date: 2025-05-22 09:00 -0400 # After LA, and before Post 5 of main series
-course-index: 2
+date: 2025-05-22 09:00 -0400
+course-index: 1
 description: An introduction to the core concepts of functional analysis essential for understanding the theory behind machine learning optimization algorithms, including normed spaces, Hilbert spaces, operator spectral theory, and derivatives in abstract spaces.
 image: # Add an image path here if you have one
 categories:
