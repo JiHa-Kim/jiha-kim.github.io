@@ -1,0 +1,98 @@
+---
+layout: default
+refactor: true
+---
+{% include lang.html %}
+
+{%- comment -%}
+  1) Figure out the “collection directory” on disk:
+     Jekyll stores e.g. crash-courses under a folder named `_crash-courses`
+{%- endcomment -%}
+{% assign coll_dir = '_' | append: page.collection_name %}
+
+{%- comment -%}
+  2) Break page.path into segments so we can grab the folder name:
+     e.g. "_crash-courses/functional-analysis/index.md"
+{%- endcomment -%}
+{% assign parts = page.path | split: '/' %}
+{% assign filename = parts | last %}
+
+{%- comment -%}
+  3) If this is an index.md (the landing page),
+     slug = the second segment (the folder name);
+     otherwise slug = the filename without .md
+{%- endcomment -%}
+{% if filename == 'index.md' %}
+  {% assign slug = parts | slice: 1, 1 | first %}
+{% else %}
+  {% assign slug = filename | remove: '.md' %}
+{% endif %}
+
+{%- comment -%}
+  4) Build the on-disk prefix to match only files in that folder
+     (e.g. "_series/my-series/")
+{%- endcomment -%}
+{% capture source_prefix %}{{ coll_dir }}/{{ slug }}/{% endcapture %}
+
+{%- comment -%}
+  5) Grab the full collection, filter by this folder,
+     exclude the landing page itself, and sort by your index field
+{%- endcomment -%}
+{%- assign lessons = site[page.collection_name]
+  | where_exp: 'item', 'item.path contains source_prefix'
+  | where_exp: 'item', 'item.path != page.path'
+  | sort: page.sort_field
+-%}
+
+<h1 class="ps-2 mb-4">{{ page.title }}</h1>
+
+{% if page.description %}
+  <p class="lead ps-2 mb-4">{{ page.description }}</p>
+{% endif %}
+
+<div id="post-list" class="flex-grow-1 px-xl-1">
+  {% for lesson in lessons %}
+    <article class="card-wrapper card mb-4">
+      <a
+        href="{{ lesson.url | relative_url }}"
+        class="post-preview row g-0 flex-md-row-reverse"
+      >
+        {% assign body_col = '12' %}
+        {% if lesson.image %}
+          {% assign src = lesson.image.path | default: lesson.image %}
+          {% unless src contains '//' %}
+            {% assign src = lesson.media_subpath | append: '/' | append: src | replace: '//', '/' %}
+          {% endunless %}
+          <div class="col-md-5">
+            <img
+              src="{{ src }}"
+              alt="{{ lesson.image.alt | default: "Preview Image" }}"
+            >
+          </div>
+          {% assign body_col = '7' %}
+        {% endif %}
+
+        <div class="col-md-{{ body_col }}">
+          <div class="card-body d-flex flex-column">
+            <h3 class="card-title my-2 mt-md-0">{{ lesson.title }}</h3>
+
+            {% if lesson.description or lesson.excerpt %}
+              <div class="card-text content mt-0 mb-3">
+                <p>
+                  {{ lesson.description | default: lesson.excerpt | strip_html | truncate: 160 }}
+                </p>
+              </div>
+            {% endif %}
+
+            <div class="post-meta flex-grow-1 d-flex align-items-end">
+              <div class="me-auto">
+                <i class="far fa-calendar fa-fw me-1"></i>
+                {% include datetime.html date=lesson.date lang=lang %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </article>
+  {% endfor %}
+</div>

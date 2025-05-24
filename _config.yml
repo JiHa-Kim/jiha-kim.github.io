@@ -217,19 +217,21 @@ defaults:
     values:
       permalink: /notes/:path/
 
-  # 5) Series permalink override
   - scope:
-      type: series
+      path: "collections/_series/*/index.md"
     values:
-      permalink: /series/:path/
+      layout: collection-landing
+      collection_name: series
+      sort_field: series_index
 
-  # 6) Crash-courses permalink override
   - scope:
-      type: crash-courses
+      path: "collections/_crash-courses/*/index.md"
     values:
-      permalink: /crash-courses/:path/
+      layout: collection-landing
+      collection_name: crash-courses
+      sort_field: course_index
 
-  # 7) Tabs: switch back to "page" layout, TOC off
+  # Tabs: switch back to "page" layout, TOC off
   - scope:
       type: tabs
     values:

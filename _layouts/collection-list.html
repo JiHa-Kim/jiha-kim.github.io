@@ -1,0 +1,34 @@
+---
+layout: default
+refactor: true
+---
+{% include lang.html %}
+<h1 class="text-center mb-5">{{ page.title }}</h1>
+{{ content }}
+
+{%- comment -%}
+  Determine collection and sort field from page variables
+{%- endcomment -%}
+{% assign collection_name = page.collection_name | default: 'posts' %}
+{% assign sort_field = page.sort_field | default: 'date' %}
+
+{%- comment -%}
+  Group items by their URL slug (2nd path segment)
+{%- endcomment -%}
+{% assign grouped = site[collection_name] | group_by_exp: 'doc', "doc.url | split: '/' | slice: 2,1 | first" %}
+
+<div id="post-list" class="flex-grow-1 px-xl-1">
+  {% for grp in grouped %}
+    {% assign slug = grp.name %}
+    {% assign meta = grp.items | where: 'layout', 'collection-landing' | first %}
+    {% assign ordered = grp.items | where_exp: 'item', "item.layout != 'collection-landing'" | sort: sort_field %}
+    {% assign first_item = ordered | first %}
+    {%
+      include collection-card.html
+      meta=meta
+      ordered=ordered
+      first_item=first_item
+      slug=slug
+    %}
+  {% endfor %}
+</div>

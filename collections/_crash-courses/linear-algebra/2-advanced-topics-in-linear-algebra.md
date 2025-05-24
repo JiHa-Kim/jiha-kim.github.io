@@ -1,7 +1,7 @@
 ---
 title: "Linear Algebra Part 2: Orthogonality, Decompositions, and Advanced Topics"
 date: 2025-05-13 20:45 -0400 # Slightly after Part 1
-course-index: 2
+course_index: 2
 description: "Part 2 of the linear algebra crash course, covering orthogonality, projections, change of basis, eigenvalues, eigenvectors, SVD, special matrices, complex numbers in linear algebra, and abstract vector spaces."
 image: # Add an image path here if you have one
 categories:

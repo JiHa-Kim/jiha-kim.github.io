@@ -1,6 +1,5 @@
 ---
-layout: crash-course-landing
-slug: functional-analysis # Or perhaps "elementary-functional-analysis"
+layout: collection-landing
 title: "Elementary Functional Analysis – A Crash Course for Optimization"
 description: "An introduction to the core concepts of functional analysis essential for understanding optimization theory in machine learning."
 cover: # Add an image path here if you have one

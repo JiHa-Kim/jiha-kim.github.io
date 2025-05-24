@@ -1,5 +1,5 @@
 ---
-layout: note-list   # <— just this line changed
+layout: note-list
 title: Notes
 icon: fas fa-book
 order: 6

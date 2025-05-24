@@ -1,6 +1,5 @@
 ---
-layout: crash-course-landing
-slug: linear-algebra
+layout: collection-landing
 title: "Linear Algebra – A Geometric Perspective"
 description: "A crash course starting from the geometric viewpoint"
 cover:

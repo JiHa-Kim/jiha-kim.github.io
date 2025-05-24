@@ -1,7 +1,7 @@
 ---
 title: "Linear Algebra Part 1: Foundations & Geometric Transformations"
 date: 2025-05-12 20:45 -0400
-course-index: 1
+course_index: 1
 description: "A crash course on the foundational concepts of linear algebra from a geometric perspective, covering vectors, vector spaces, linear transformations, matrices, determinants, and systems of linear equations."
 image: # Add an image path here if you have one
 categories:

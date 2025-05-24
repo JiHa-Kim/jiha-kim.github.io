@@ -1,7 +1,7 @@
 ---
 title: Introduction to Basic Mathematical Optimization
 date: 2025-05-18 02:56 -0400
-series-index: 1
+series_index: 1
 description: "An introduction to the core ideas of mathematical optimization and their indispensable role in machine learning. We use linear regression to build intuition around objective functions, parameters, and the fundamental problem of finding the 'best' solution."
 image: # "/assets/img/posts/intro-optimization/cover.png" # Placeholder - suggest a simple 2D plot with data points and a line of best fit, or an abstract representation of minimizing a curve (e.g., a bowl shape).
 categories:

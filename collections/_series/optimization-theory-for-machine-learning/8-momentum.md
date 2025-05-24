@@ -1,7 +1,7 @@
 ---
 title: "Momentum"
 date: 2025-05-18 02:57 -0400
-series-index: 8
+series_index: 8
 description: "Exploring momentum in optimization: how it accelerates gradient descent, dampens oscillations, and helps navigate complex loss landscapes in machine learning."
 image:
 categories:
