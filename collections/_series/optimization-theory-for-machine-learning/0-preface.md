@@ -235,7 +235,7 @@ The series is mostly intended to be self-contained beyond these items.
 
 ## Series Outline
 
-I have inserted an example reading order between the series and the crash courses.
+I have inserted an example reading order between the series and the `crash courses`.
 
 - `Linear Algebra`
 
@@ -258,6 +258,6 @@ I have inserted an example reading order between the series and the crash course
    - `Variational Calculus`
    - `Convex Analysis`
    - `Online Learning`
-11. Adam optimizer, online learning view: Follow-The-Regularized-Leader
+11. Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
 12. Metrized deep learning and preconditioning (Iso/IsoAdam, Shampoo, Muon)
 13. Parameter-free optimization
