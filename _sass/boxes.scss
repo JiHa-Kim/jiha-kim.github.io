@@ -239,6 +239,11 @@
       var(--prompt-tip-icon-color),  /* accent */
       var(--prompt-tip-bg)           /* header background (lighter tint) */
     );
+
+    /* Make summary text lighter for better contrast */
+    > summary {
+      color: #4ade80; /* medium lighter green for balanced contrast */
+    }
   }
   
   /* ===========================================================================
