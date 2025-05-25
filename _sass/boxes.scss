@@ -1,271 +1,365 @@
 /* ===========================================================================
- * Box Components for Jekyll Chirpy
- * ---------------------------------------------------------------------------*/
+ * Box Components for Jekyll Chirpy - Refactored & Unified
+ * =========================================================================== */
 
 /* --------------------------------------------------------------------------
- * Base Box Mixin – shared foundation for every box component
+ * Base Box Mixin – shared foundation for every box component
  * -------------------------------------------------------------------------- */
- @mixin base-box {
-    border-radius: 0.25rem;
-    margin: 1rem 0;
-    padding: 0.6rem 1rem;
-    position: relative;
-    color: var(--text-color);
-    box-shadow: var(--language-border-color) 1px 1px 2px 1px;
-    overflow: hidden;
-  
-    > p:first-child { margin-top: 0; }
-    > p:last-child  { margin-bottom: 0; }
+@mixin base-box {
+  border-radius: 0.25rem;
+  margin: 1rem 0;
+  padding: 0.6rem 1rem;
+  position: relative;
+  color: var(--text-color);
+  box-shadow: var(--language-border-color) 1px 1px 2px 1px;
+  overflow: hidden;
+
+  > p:first-child {
+    margin-top: 0;
   }
-  
-  /* --------------------------------------------------------------------------
-   * Standard Box Mixin – for info / tip / warning / danger
+  > p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   * Unified Title Mixin – consistent header styling for all box types
    * -------------------------------------------------------------------------- */
-  @mixin standard-box(
-    $border-color,
-    $accent-color,
-    $icon-content,
-    $bg-color,
-    $fa-style: 'solid'
-  ) {
-    @include base-box;
-    border-left: 0.2rem solid $border-color;
-    padding-left: 1.5rem;
-  
-    > .title {
-      background: $bg-color;
+@mixin box-title(
+  $accent-color,
+  $bg-color,
+  $icon-content,
+  $fa-style: 'solid',
+  $has-border: false
+) {
+  .title {
+    background: $bg-color;
+    color: $accent-color;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 1rem;
+    margin: -0.6rem -1rem 0.6rem -1rem;
+    line-height: 1.15;
+
+    @if $has-border {
+      border-bottom: 1px solid rgba($accent-color, 0.15);
+    }
+
+    > p {
+      margin: 0;
+    }
+
+    &::before {
+      content: $icon-content;
+      font: var(--fa-font-#{$fa-style});
       color: $accent-color;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      line-height: 1.15;
-      padding: 0.55rem 0.8rem 0.55rem 3rem;
-      margin: -0.6rem -1rem 0.6rem -1.5rem;
-  
-      > p { margin: 0; }
-  
-      &::before {
-        content: $icon-content;
-        font: var(--fa-font-#{$fa-style});
-        color: $accent-color;
-        position: absolute;
-        top: 50%;
-        left: 0.8rem;
-        transform: translateY(-50%);
-        line-height: 1;
-        text-rendering: auto;
-        -webkit-font-smoothing: antialiased;
-      }
+      line-height: 1;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      flex-shrink: 0; // Prevent icon from shrinking
     }
   }
-  
-  /* --------------------------------------------------------------------------
-   * Math Box Mixin – for definition / lemma / proposition / theorem / example
+}
+
+/* --------------------------------------------------------------------------
+   * Standard Box Mixin – for info / tip / warning / danger (unified with math)
    * -------------------------------------------------------------------------- */
-  @mixin math-box(
-    $border,
-    $accent,
-    $bg,
-    $icon,
-    $default-title: null,
-    $fa-style: 'solid'
-  ) {
-    @include base-box;
-    border-left: 0.25rem solid $border;
-    background: $bg;
-  
-    .title {
-      background: $bg;
-      color: $accent;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.55rem 1rem;
-      margin: -0.6rem -1rem 0.6rem -1rem;
-      border-bottom: 1px solid rgba($accent, 0.15);
-      line-height: 1.15;
-  
-      > p { margin: 0; }
-  
+@mixin standard-box(
+  $border-color,
+  $accent-color,
+  $icon-content,
+  $bg-color,
+  $fa-style: 'solid'
+) {
+  @include base-box;
+  @include box-title($accent-color, $bg-color, $icon-content, $fa-style);
+
+  border-left: 0.2rem solid $border-color;
+}
+
+/* --------------------------------------------------------------------------
+   * Math Box Mixin – for definition / lemma / proposition / theorem / example
+   * -------------------------------------------------------------------------- */
+@mixin math-box(
+  $border,
+  $accent,
+  $bg,
+  $icon,
+  $default-title: null,
+  $fa-style: 'solid'
+) {
+  @include base-box;
+  @include box-title($accent, $bg, $icon, $fa-style, true);
+
+  border-left: 0.25rem solid $border;
+  background: $bg;
+
+  // Auto-title functionality for math boxes without explicit titles
+  @if $default-title {
+    &:not(:has(> .title)) {
+      padding-top: 2rem;
+
       &::before {
         content: $icon;
         font: var(--fa-font-#{$fa-style});
-        line-height: 1;
-        text-rendering: auto;
-        -webkit-font-smoothing: antialiased;
-      }
-    }
-  
-    @if $default-title {
-      &:not(:has(> .title)) {
-        padding-top: 2rem;
-  
-        &::before {
-          content: $icon;
-          font: var(--fa-font-#{$fa-style});
-          position: absolute;
-          top: 0.7rem;
-          left: 1rem;
-          color: $accent;
-          line-height: 1;
-        }
-        &::after {
-          content: $default-title;
-          font-weight: 600;
-          position: absolute;
-          top: 0.7rem;
-          left: 2.5rem;
-          color: $accent;
-        }
-      }
-    }
-  }
-  
-  /* --------------------------------------------------------------------------
-   * Details Box Mixin – click‑to‑reveal blocks (alias: <details class="details-block">)
-   * -------------------------------------------------------------------------- */
-  @mixin details-box(
-    $border-color,
-    $accent-color,
-    $bg-color,
-    $icon-closed: '\f02e',  /* fa-book      */
-    $icon-open  : '\f518',  /* fa-book-open */
-    $fa-style   : 'solid'
-  ) {
-    @include base-box;
-    border-left: 0.25rem solid $border-color;
-    padding: 0; /* header handles its own padding */
-    color: var(--text-color);
-  
-    /* ── Summary (clickable header) ───────────────────────────────────────── */
-    > summary {
-      cursor: pointer;
-      list-style: none;            /* hide native marker */
-      position: relative;
-      padding: 0.6rem 3rem 0.6rem 2.5rem; /* room for icon */
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: $bg-color;
-      line-height: 1.15;
-      user-select: none;
-      color: $accent-color;        /* match other colour‑box headers */
-  
-      /* remove built‑in ▸/▾ markers */
-      &::-webkit-details-marker,
-      &::marker { display: none; }
-  
-      /* LEFT icon – swaps on open */
-      &::before {
-        content: $icon-closed;
-        font: var(--fa-font-#{$fa-style});
         position: absolute;
+        top: 0.7rem;
         left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: $accent-color;
+        color: $accent;
         line-height: 1;
-        text-rendering: auto;
-        -webkit-font-smoothing: antialiased;
       }
-  
-      /* RIGHT chevron – rotates on open */
       &::after {
-        content: '\f105'; /* fa-angle-right */
-        font: var(--fa-font-solid);
+        content: $default-title;
+        font-weight: 600;
         position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        transition: transform 0.2s ease;
-        color: $accent-color;
-        line-height: 1;
+        top: 0.7rem;
+        left: 2.5rem;
+        color: $accent;
       }
-  
-      > p { margin: 0; }
-    }
-  
-    /* ── Open state adjustments ──────────────────────────────────────────── */
-    &[open] > summary {
-      &::after  { transform: translateY(-50%) rotate(90deg); }
-      &::before { content: $icon-open; animation: bop 0.18s ease-out; }
-    }
-  
-    /* ── Content area ─────────────────────────────────────────────────────── */
-    > :not(summary) {
-      padding: 0.6rem 1rem;
-      color: var(--text-color);
     }
   }
-  
-  /* Bounce keyframes for the icon */
-  @keyframes bop { 50% { transform: scale(1.12); } }
-  
-  /* ===========================================================================
-   * LIGHT THEME VARIABLES & COMPONENTS
-   * =========================================================================== */
-  
-  /* Palette – CSS custom properties so we can reuse them in SCSS */
-  :root {
-    /* standard boxes */
-    --prompt-info-icon-color    : #0ea5e9;
-    --prompt-info-bg            : rgba(14, 165, 233, 0.10);
-    --prompt-tip-icon-color     : #16a34a;
-    --prompt-tip-bg             : rgba(22, 163, 74, 0.08);  /* ▸ lighter tint – improves contrast */
-    --prompt-warning-icon-color : #d97706;
-    --prompt-warning-bg         : rgba(217, 119, 6,  0.10);
-    --prompt-danger-icon-color  : #dc2626;
-    --prompt-danger-bg          : rgba(220, 38, 38,  0.10);
-  }
-  
-  /* Standard Boxes */
-  .box-info    { @include standard-box(var(--prompt-info-icon-color),    var(--prompt-info-icon-color),    '\f06a', var(--prompt-info-bg   )); }
-  .box-tip     { @include standard-box(var(--prompt-tip-icon-color),     var(--prompt-tip-icon-color),     '\f0eb', var(--prompt-tip-bg    ), 'regular'); }
-  .box-warning { @include standard-box(var(--prompt-warning-icon-color), var(--prompt-warning-icon-color), '\f06a', var(--prompt-warning-bg)); }
-  .box-danger  { @include standard-box(var(--prompt-danger-icon-color),  var(--prompt-danger-icon-color),  '\f071', var(--prompt-danger-bg )); }
-  
-  /* Math Boxes */
-  .box-definition  { @include math-box(#2563eb, #2563eb, rgba(#2563eb, 0.08), '\f02e', 'Definition'); }
-  .box-lemma       { @include math-box(#16a34a, #16a34a, rgba(#16a34a, 0.08), '\f022', 'Lemma'); }
-  .box-proposition { @include math-box(#eab308, #eab308, rgba(#eab308, 0.08), '\f0eb', 'Proposition'); }
-  .box-theorem     { @include math-box(#dc2626, #dc2626, rgba(#dc2626, 0.08), '\f091', 'Theorem'); }
-  .box-example     { @include math-box(#8b5cf6, #8b5cf6, rgba(#8b5cf6, 0.08), '\f0eb', 'Example'); }
-  
-  /* Details Box – inherits its palette from .box‑tip */
-  details.details-block {
-    @include details-box(
-      var(--prompt-tip-icon-color),  /* border */
-      var(--prompt-tip-icon-color),  /* accent */
-      var(--prompt-tip-bg)           /* header background (lighter tint) */
-    );
+}
 
-    /* Make summary text lighter for better contrast */
-    > summary {
-      color: #4ade80; /* medium lighter green for balanced contrast */
+/* --------------------------------------------------------------------------
+   * Details Box Mixin – click‑to‑reveal blocks
+   * -------------------------------------------------------------------------- */
+@mixin details-box(
+  $border-color,
+  $accent-color,
+  $bg-color,
+  $icon-closed: '\f02e',
+  /* fa-book      */ $icon-open: '\f518',
+  /* fa-book-open */ $fa-style: 'solid'
+) {
+  @include base-box;
+  border-left: 0.25rem solid $border-color;
+  padding: 0; /* header handles its own padding */
+  color: var(--text-color);
+
+  /* -- Summary (clickable header) ----------------------------------------- */
+  > summary {
+    cursor: pointer;
+    list-style: none; /* hide native marker */
+    position: relative;
+    padding: 0.55rem 3rem 0.55rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: $bg-color;
+    line-height: 1.15;
+    user-select: none;
+    color: $accent-color;
+
+    /* remove built‑in ▸/▾ markers */
+    &::-webkit-details-marker,
+    &::marker {
+      display: none;
+    }
+
+    /* LEFT icon – swaps on open */
+    &::before {
+      content: $icon-closed;
+      font: var(--fa-font-#{$fa-style});
+      color: $accent-color;
+      line-height: 1;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      flex-shrink: 0;
+    }
+
+    /* RIGHT chevron – rotates on open */
+    &::after {
+      content: '\f105'; /* fa-angle-right */
+      font: var(--fa-font-solid);
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: transform 0.2s ease;
+      color: $accent-color;
+      line-height: 1;
+    }
+
+    > p {
+      margin: 0;
     }
   }
-  
-  /* ===========================================================================
-   * DARK THEME OVERRIDES – hard‑coded hues for Math boxes plus custom‑prop palette
+
+  /* -- Open state adjustments -------------------------------------------- */
+  &[open] > summary {
+    &::after {
+      transform: translateY(-50%) rotate(90deg);
+    }
+    &::before {
+      content: $icon-open;
+      animation: bop 0.18s ease-out;
+    }
+  }
+
+  /* -- Content area ------------------------------------------------------- */
+  > :not(summary) {
+    padding: 0.6rem 1rem;
+    color: var(--text-color);
+  }
+}
+
+/* Bounce keyframes for the icon */
+@keyframes bop {
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+/* ===========================================================================
+   * THEME VARIABLES & COMPONENT INSTANCES
    * =========================================================================== */
-  @media (prefers-color-scheme: dark) {
-    /* Custom‑prop palette for standard boxes – details‑box picks these up too */
-    :root {
-      --prompt-info-icon-color    : #38bdf8;
-      --prompt-info-bg            : rgba(56, 189, 248, 0.10);
-      --prompt-tip-icon-color     : #4ade80;
-      --prompt-tip-bg             : rgba(74, 222, 128, 0.12); /* ▸ lighter dark‑theme tint */
-      --prompt-warning-icon-color : #facc15;
-      --prompt-warning-bg         : rgba(250, 204, 21,  0.10);
-      --prompt-danger-icon-color  : #f87171;
-      --prompt-danger-bg          : rgba(248, 113, 113, 0.10);
-    }
-  
-    /* Math boxes with improved dark‑mode contrast (hard‑coded borders & accents) */
-    .box-definition  { @include math-box(#1e40af, #60a5fa, rgba(#2563eb, 0.12), '\f02e', 'Definition'); }
-    .box-theorem     { @include math-box(#991b1b, #f87171, rgba(#dc2626, 0.12), '\f091', 'Theorem'   ); }
-    .box-example     { @include math-box(#6d28d9, #a78bfa, rgba(#8b5cf6, 0.12), '\f0eb', 'Example'   ); }
-    .box-lemma       { @include math-box(#15803d, #4ade80, rgba(#16a34a, 0.12), '\f022', 'Lemma'     ); }
-    .box-proposition { @include math-box(#a16207, #fbbf24, rgba(#eab308, 0.12), '\f0eb', 'Proposition'); }
+
+/* Palette – CSS custom properties for consistent theming */
+:root {
+  /* standard boxes */
+  --prompt-info-icon-color: #0ea5e9;
+  --prompt-info-bg: rgba(14, 165, 233, 0.1);
+  --prompt-tip-icon-color: #16a34a;
+  --prompt-tip-bg: rgba(22, 163, 74, 0.08);
+  --prompt-warning-icon-color: #d97706;
+  --prompt-warning-bg: rgba(217, 119, 6, 0.1);
+  --prompt-danger-icon-color: #dc2626;
+  --prompt-danger-bg: rgba(220, 38, 38, 0.1);
+}
+
+/* Standard Boxes – now using unified structure */
+.box-info {
+  @include standard-box(
+    var(--prompt-info-icon-color),
+    var(--prompt-info-icon-color),
+    '\f06a',
+    var(--prompt-info-bg)
+  );
+}
+.box-tip {
+  @include standard-box(
+    var(--prompt-tip-icon-color),
+    var(--prompt-tip-icon-color),
+    '\f0eb',
+    var(--prompt-tip-bg),
+    'regular'
+  );
+}
+.box-warning {
+  @include standard-box(
+    var(--prompt-warning-icon-color),
+    var(--prompt-warning-icon-color),
+    '\f06a',
+    var(--prompt-warning-bg)
+  );
+}
+.box-danger {
+  @include standard-box(
+    var(--prompt-danger-icon-color),
+    var(--prompt-danger-icon-color),
+    '\f071',
+    var(--prompt-danger-bg)
+  );
+}
+
+/* Math Boxes */
+.box-definition {
+  @include math-box(
+    #2563eb,
+    #2563eb,
+    rgba(#2563eb, 0.08),
+    '\f02e',
+    'Definition'
+  );
+}
+.box-lemma {
+  @include math-box(#16a34a, #16a34a, rgba(#16a34a, 0.08), '\f022', 'Lemma');
+}
+.box-proposition {
+  @include math-box(
+    #eab308,
+    #eab308,
+    rgba(#eab308, 0.08),
+    '\f0eb',
+    'Proposition'
+  );
+}
+.box-theorem {
+  @include math-box(#dc2626, #dc2626, rgba(#dc2626, 0.08), '\f091', 'Theorem');
+}
+.box-example {
+  @include math-box(#8b5cf6, #8b5cf6, rgba(#8b5cf6, 0.08), '\f0eb', 'Example');
+}
+
+/* Details Box – inherits palette from CSS custom properties */
+details.details-block {
+  @include details-box(
+    var(--prompt-tip-icon-color),
+    var(--prompt-tip-icon-color),
+    var(--prompt-tip-bg)
+  );
+
+  > summary {
+    color: #4ade80; /* medium lighter green for balanced contrast */
   }
+}
+
+/* ===========================================================================
+   * DARK THEME OVERRIDES
+   * =========================================================================== */
+@media (prefers-color-scheme: dark) {
+  /* Update CSS custom properties for standard boxes */
+  :root {
+    --prompt-info-icon-color: #38bdf8;
+    --prompt-info-bg: rgba(56, 189, 248, 0.1);
+    --prompt-tip-icon-color: #4ade80;
+    --prompt-tip-bg: rgba(74, 222, 128, 0.12);
+    --prompt-warning-icon-color: #facc15;
+    --prompt-warning-bg: rgba(250, 204, 21, 0.1);
+    --prompt-danger-icon-color: #f87171;
+    --prompt-danger-bg: rgba(248, 113, 113, 0.1);
+  }
+
+  /* Math boxes with improved dark‑mode contrast */
+  .box-definition {
+    @include math-box(
+      #1e40af,
+      #60a5fa,
+      rgba(#2563eb, 0.08),
+      '\f02e',
+      'Definition'
+    );
+  }
+  .box-theorem {
+    @include math-box(
+      #991b1b,
+      #f87171,
+      rgba(#dc2626, 0.08),
+      '\f091',
+      'Theorem'
+    );
+  }
+  .box-example {
+    @include math-box(
+      #6d28d9,
+      #a78bfa,
+      rgba(#7d48f8, 0.08),
+      '\f0eb',
+      'Example'
+    );
+  }
+  .box-lemma {
+    @include math-box(#15803d, #4ade80, rgba(#16a34a, 0.08), '\f022', 'Lemma');
+  }
+  .box-proposition {
+    @include math-box(
+      #a16207,
+      #fbbf24,
+      rgba(#eab308, 0.08),
+      '\f0eb',
+      'Proposition'
+    );
+  }
+}
