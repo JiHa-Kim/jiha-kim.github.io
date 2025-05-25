@@ -215,7 +215,8 @@ flowchart TD
     VC --> CA["Convex Analysis"]
 
     SIT --> IG["Information Geometry"]
-    CO --> OL["Online Learning"]
+    DG --> IG
+    CA --> OL["Online Learning"]
 ```
 
 If the mermaid flowchart does not render:
@@ -236,27 +237,27 @@ The series is mostly intended to be self-contained beyond these items.
 
 I have inserted an example reading order between the series and the crash courses.
 
-- Linear Algebra
+- `Linear Algebra`
 
 1. Introduction to basic mathematical optimization
 2. Iterative methods: gradient-free vs. gradient-based optimization
 3. Speedrun of common gradient-based ML optimizers
 4. Problem formalization
-   - Numerical Analysis
+   - `Numerical Analysis`
 5. Gradient descent and gradient flow
-   - Functional Analysis
+   - `Functional Analysis`
 6. Challenges of high-dimensional non-convex optimization in deep learning
 7. Adaptive methods
 8. Momentum
 9.  Soft inductive biases (regularization)
-   - Tensor Calculus
-   - Differential Geometry
-   - Statistics and Information Theory
-   - Information Geometry
+   - `Tensor Calculus`
+   - `Differential Geometry`
+   - `Statistics and Information Theory`
+   - `Information Geometry`
 10. Adam optimizer, info geo view: diagonal Fisher information approximation
-   - Variational Calculus
-   - Convex Analysis
-   - Online Learning
+   - `Variational Calculus`
+   - `Convex Analysis`
+   - `Online Learning`
 11. Adam optimizer, online learning view: Follow-The-Regularized-Leader
 12. Metrized deep learning and preconditioning (Iso/IsoAdam, Shampoo, Muon)
 13. Parameter-free optimization
