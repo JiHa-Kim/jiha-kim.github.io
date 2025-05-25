@@ -22,8 +22,12 @@ refactor: true
      slug = the second segment (the folder name);
      otherwise slug = the filename without .md
 {%- endcomment -%}
+{% assign parts = page.path | split: '/' %}
+{% assign filename = parts | last %}
+
 {% if filename == 'index.md' %}
-  {% assign slug = parts | slice: 1, 1 | first %}
+  {%- comment -%} Use the last segment of the directory path {%- endcomment -%}
+  {% assign slug = page.dir | split: '/' | last %}
 {% else %}
   {% assign slug = filename | remove: '.md' %}
 {% endif %}
