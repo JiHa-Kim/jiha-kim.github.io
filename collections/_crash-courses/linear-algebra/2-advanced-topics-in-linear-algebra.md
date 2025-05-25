@@ -353,6 +353,7 @@ $$
 $$
 A\vec{v} - \lambda I\vec{v} = \vec{0}
 $$
+
 (where $$I$$ is the identity matrix)
 
 $$
@@ -631,6 +632,7 @@ Vector $$\begin{pmatrix} 2 \\ 3 \end{pmatrix}$$ becomes $$\begin{pmatrix} -3 \\ 
 $$
 M_i \begin{pmatrix} 2 \\ 3 \end{pmatrix} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix} \begin{pmatrix} 2 \\ 3 \end{pmatrix} = \begin{pmatrix} -3 \\ 2 \end{pmatrix}
 $$
+
 </blockquote>
 
 ### 14.3. Complex Eigenvalues for Real Matrices

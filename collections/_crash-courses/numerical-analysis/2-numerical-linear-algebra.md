@@ -167,14 +167,18 @@ The condition number of a matrix is a fundamental concept that quantifies the se
 **Definition.** Condition Number
 </div>
 For an invertible matrix $$A \in \mathbb{R}^{n \times n}$$, the **condition number** with respect to a matrix norm $$\Vert \cdot \Vert$$ is defined as:
+
 $$
 \kappa(A) = \Vert A \Vert \Vert A^{-1} \Vert
 $$
+
 If $$A$$ is singular, $$\kappa(A) = \infty$$.
 For the matrix 2-norm (spectral norm), $$\Vert A \Vert_2 = \sigma_{\text{max}}(A)$$ (largest singular value). If $$A$$ is symmetric positive definite (SPD), its singular values are its eigenvalues $$\lambda_i > 0$$. In this case:
+
 $$
 \kappa_2(A) = \frac{\lambda_{\text{max}}(A)}{\lambda_{\text{min}}(A)}
 $$
+
 A matrix with a condition number close to 1 is **well-conditioned**. A matrix with a large condition number is **ill-conditioned**.
 </blockquote>
 
@@ -282,13 +286,17 @@ Second-order optimization methods aim to utilize curvature information (Hessian)
 
 ### 5.1. Newton's Method
 The "pure" Newton step for minimizing $$L(\theta)$$ is:
+
 $$
 \Delta \theta_k = -[H_k]^{-1} \nabla L(\theta_k)
 $$
+
 where $$H_k = \nabla^2 L(\theta_k)$$ is the Hessian at $$\theta_k$$. This step is found by solving the **Newton system**:
+
 $$
 H_k \Delta \theta_k = -\nabla L(\theta_k)
 $$
+
 *   If $$H_k$$ is SPD and well-conditioned, Newton's method can converge quadratically near a minimum.
 *   For large-scale problems, forming and storing $$H_k$$ (size $$n \times n$$) and directly inverting it ($$O(n^3)$$) is infeasible.
 *   Instead, the Newton system is often solved iteratively using **PCG**. This only requires matrix-vector products with $$H_k$$ (Hessian-vector products, or HVPs), which can sometimes be computed efficiently without forming $$H_k$$ explicitly (e.g., using finite differences or automatic differentiation tricks).

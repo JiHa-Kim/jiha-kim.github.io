@@ -354,8 +354,11 @@ The cross product is an operation between two vectors in 3D space that results i
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-**Definition.** The cross product of two vectors $$\vec{a}$$ and $$\vec{b}$$ in $$\mathbb{R}^3$$, denoted $$\vec{a} \times \vec{b}$$, is a vector $$\vec{c}$$ such that:
+**Definition.** Cross Product
 </div>
+
+The cross product of two vectors $$\vec{a}$$ and $$\vec{b}$$ in $$\mathbb{R}^3$$, denoted $$\vec{a} \times \vec{b}$$, is a vector $$\vec{c}$$ such that:
+
 1.  **Direction:** $$\vec{c}$$ is orthogonal (perpendicular) to both $$\vec{a}$$ and $$\vec{b}$$. Its specific direction is given by the right-hand rule (point fingers of right hand along $$\vec{a}$$, curl towards $$\vec{b}$$, thumb points in direction of $$\vec{a} \times \vec{b}$$).
 2.  **Magnitude:** $$ \Vert \vec{a} \times \vec{b} \Vert  =  \Vert \vec{a} \Vert   \Vert \vec{b} \Vert  \sin\theta$$, where $$\theta$$ is the angle between $$\vec{a}$$ and $$\vec{b}$$. This magnitude is equal to the area of the parallelogram spanned by $$\vec{a}$$ and $$\vec{b}$$.
 
@@ -586,6 +589,7 @@ This geometric intuition leads to precise algebraic properties:
     $$
     T(c\vec{v}) = cT(\vec{v})
     $$
+
 </blockquote>
 
 These two conditions are usually combined into a single, standard algebraic definition:

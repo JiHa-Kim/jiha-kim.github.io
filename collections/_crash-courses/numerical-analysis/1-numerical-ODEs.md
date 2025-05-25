@@ -161,14 +161,17 @@ Welcome to this crash course on numerical methods for Ordinary Differential Equa
 **Definition.** Ordinary Differential Equation (ODE)
 </div>
 An **Ordinary Differential Equation (ODE)** is an equation involving an unknown function of a single independent variable (often time, $$t$$) and its derivatives. A first-order ODE typically takes the form:
+
 $$
 \frac{dy}{dt} = f(t, y(t))
 $$
+
 Here, $$y(t)$$ is the unknown function we want to find, and $$f(t, y(t))$$ is a given function that defines the rate of change of $$y$$.
 If $$y$$ is a vector $$\mathbf{y} \in \mathbb{R}^d$$, then we have a system of ODEs.
 </blockquote>
 
 To find a unique solution to an ODE, we usually need an **Initial Condition (IC)**, specifying the value of the function at an initial time $$t_0$$. This forms an **Initial Value Problem (IVP)**:
+
 $$
 \frac{dy}{dt} = f(t, y(t)), \quad y(t_0) = y_0
 $$
@@ -177,14 +180,18 @@ $$
 
 Many optimization processes can be described by continuous-time dynamical systems. For example:
 1.  **Gradient Flow:** The path of steepest descent on a loss surface $$L(\theta)$$ can be described by the ODE:
+
     $$
     \frac{d\theta(t)}{dt} = -\nabla L(\theta(t))
     $$
+
     The solution $$\theta(t)$$ represents a continuous trajectory moving towards a minimum of $$L$$.
 2.  **Heavy Ball ODE:** Optimization with momentum can be related to a second-order ODE from physics (a ball rolling with friction):
+
     $$
     m\ddot{\theta}(t) + \gamma \dot{\theta}(t) + \nabla L(\theta(t)) = 0
     $$
+
     where $$\ddot{\theta}$$ is the second derivative (acceleration) and $$\dot{\theta}$$ is the first derivative (velocity).
 
 Since analytical solutions to these ODEs are often intractable for complex functions $$L(\theta)$$, we turn to **numerical methods** to approximate their solutions.
@@ -194,19 +201,26 @@ Since analytical solutions to these ODEs are often intractable for complex funct
 Numerical methods for ODEs work by discretizing time. Instead of finding a continuous solution $$y(t)$$, we approximate the solution at discrete time points: $$t_0, t_1, t_2, \dots, t_N$$, where $$t_{n+1} = t_n + h_n$$. The interval $$h_n$$ (often constant, $$h$$) is called the **time step** or step size. We denote the numerical approximation to $$y(t_n)$$ as $$y_n$$.
 
 The core idea is to approximate derivatives using **finite differences**. From calculus, the definition of a derivative is:
+
 $$
 \frac{dy}{dt} = \lim_{h \to 0} \frac{y(t+h) - y(t)}{h}
 $$
+
 For a small, finite $$h$$:
 *   **Forward Difference:** Approximates the derivative at $$t_n$$ using the value at $$t_{n+1}$$:
+
     $$
     y'(t_n) \approx \frac{y(t_{n+1}) - y(t_n)}{h} = \frac{y_{n+1} - y_n}{h}
     $$
+
 *   **Backward Difference:** Approximates the derivative at $$t_n$$ using the value at $$t_{n-1}$$:
+
     $$
     y'(t_n) \approx \frac{y(t_n) - y(t_{n-1})}{h} = \frac{y_n - y_{n-1}}{h}
     $$
+
 *   **Central Difference:** Often more accurate, approximates derivative at $$t_n$$ using $$t_{n+1}$$ and $$t_{n-1}$$:
+
     $$
     y'(t_n) \approx \frac{y(t_{n+1}) - y(t_{n-1})}{2h} = \frac{y_{n+1} - y_{n-1}}{2h}
     $$
@@ -223,9 +237,11 @@ One-step methods compute $$y_{n+1}$$ using only information from the previous st
 ### 3.1. Euler's Method (Explicit Euler)
 
 The simplest numerical method. To solve $$\frac{dy}{dt} = f(t,y)$$, we replace $$\frac{dy}{dt}$$ at $$t_n$$ with its forward difference approximation:
+
 $$
 \frac{y_{n+1} - y_n}{h} \approx f(t_n, y_n)
 $$
+
 Rearranging for $$y_{n+1}$$ gives the **Explicit Euler** update rule:
 
 <blockquote class="box-definition" markdown="1">
@@ -234,12 +250,15 @@ Rearranging for $$y_{n+1}$$ gives the **Explicit Euler** update rule:
 </div>
 Given an IVP $$\frac{dy}{dt} = f(t,y)$$, $$y(t_0) = y_0$$, and a step size $$h$$:
 For $$n = 0, 1, 2, \dots$$:
+
 $$
 y_{n+1} = y_n + h f(t_n, y_n)
 $$
+
 $$
 t_{n+1} = t_n + h
 $$
+
 </blockquote>
 
 Geometrically, Explicit Euler takes a step in the direction of the tangent to the solution curve at $$(t_n, y_n)$$. It has a local truncation error of $$O(h^2)$$ and a global error of $$O(h)$$, so it's a first-order method.
@@ -250,26 +269,34 @@ Geometrically, Explicit Euler takes a step in the direction of the tangent to th
 </div>
 Consider the gradient flow ODE: $$\frac{d\theta(t)}{dt} = -\nabla L(\theta(t))$$.
 Applying Explicit Euler with step size $$h$$ (which we can call the learning rate $$\alpha$$):
+
 $$
 \theta_{k+1} = \theta_k + h (-\nabla L(\theta_k))
 $$
+
 If we let $$h = \alpha$$, this is exactly the **Gradient Descent** update rule:
+
 $$
 \theta_{k+1} = \theta_k - \alpha \nabla L(\theta_k)
 $$
+
 Thus, Gradient Descent can be viewed as an Explicit Euler discretization of the gradient flow ODE.
 </blockquote>
 
 ### 3.2. Implicit Euler Method
 
 Instead of evaluating $$f$$ at $$(t_n, y_n)$$, the Implicit Euler method evaluates $$f$$ at the *next* point $$(t_{n+1}, y_{n+1})$$:
+
 $$
 \frac{y_{n+1} - y_n}{h} \approx f(t_{n+1}, y_{n+1})
 $$
+
 This gives the update rule:
+
 $$
 y_{n+1} = y_n + h f(t_{n+1}, y_{n+1})
 $$
+
 Notice that $$y_{n+1}$$ appears on both sides. If $$f$$ is non-linear, this requires solving an algebraic equation (often iteratively) for $$y_{n+1}$$ at each step, making it computationally more expensive than explicit methods. However, implicit methods often have better **stability properties**, especially for "stiff" ODEs (where solutions change on very different time scales).
 
 <details class="details-block" markdown="1">
@@ -298,34 +325,45 @@ Many real-world problems involve systems of coupled first-order ODEs or single h
 
 A $$k$$-th order ODE of the form $$y^{(k)}(t) = g(t, y, \dot{y}, \dots, y^{(k-1)})$$ can be converted into a system of $$k$$ first-order ODEs.
 Let:
+
 $$
 z_1(t) = y(t)
 $$
+
 $$
 z_2(t) = \dot{y}(t)
 $$
+
 $$
 \vdots
 $$
+
 $$
 z_k(t) = y^{(k-1)}(t)
 $$
+
 Then the system becomes:
+
 $$
 \dot{z}_1 = z_2
 $$
+
 $$
 \dot{z}_2 = z_3
 $$
+
 $$
 \vdots
 $$
+
 $$
 \dot{z}_{k-1} = z_k
 $$
+
 $$
 \dot{z}_k = g(t, z_1, z_2, \dots, z_k)
 $$
+
 This system, $$\dot{\mathbf{z}}(t) = \mathbf{F}(t, \mathbf{z}(t))$$, can then be solved using methods like Euler's, applied component-wise to the vector $$\mathbf{z}$$.
 
 <blockquote class="prompt-example" markdown="1">
@@ -333,9 +371,11 @@ This system, $$\dot{\mathbf{z}}(t) = \mathbf{F}(t, \mathbf{z}(t))$$, can then be
 **Example.** Heavy Ball ODE Discretization
 </div>
 Consider the Heavy Ball ODE for optimization parameter $$\theta(t)$$:
+
 $$
 m\ddot{\theta}(t) + \gamma \dot{\theta}(t) + \nabla L(\theta(t)) = 0
 $$
+
 Rearrange for the highest derivative: $$\ddot{\theta}(t) = -\frac{1}{m} (\gamma \dot{\theta}(t) + \nabla L(\theta(t)))$$.
 This is a second-order ODE. Let $$x_1(t) = \theta(t)$$ (position) and $$x_2(t) = \dot{\theta}(t)$$ (velocity).
 The system of first-order ODEs is:
@@ -343,27 +383,37 @@ The system of first-order ODEs is:
 2.  $$\dot{x}_2(t) = -\frac{1}{m} (\gamma x_2(t) + \nabla L(x_1(t)))$$
 
 Now, apply Explicit Euler with step size $$h$$ to this system:
+
 $$
 x_{1, k+1} = x_{1, k} + h x_{2, k}
 $$
+
 $$
 x_{2, k+1} = x_{2, k} + h \left( -\frac{1}{m} (\gamma x_{2, k} + \nabla L(x_{1, k})) \right)
 $$
+
 Let $$\theta_k = x_{1,k}$$ be the parameter at iteration $$k$$, and let $$v_k = x_{2,k}$$ be the "velocity" term.
 The updates become:
+
 $$
-\theta_{k+1} = \theta_k + h v_k \quad (*)$$
+\theta_{k+1} = \theta_k + h v_k \quad (*)
+$$
+
 $$
 v_{k+1} = v_k - \frac{h\gamma}{m} v_k - \frac{h}{m} \nabla L(\theta_k) = (1 - \frac{h\gamma}{m}) v_k - \frac{h}{m} \nabla L(\theta_k) \quad (**)
 $$
+
 If we identify $$v_{k+1}$$ from $$(**)$$ with the step in $$(*)$$, i.e., define a slightly different velocity term for Polyak's momentum:
 Let $$v_{k+1}^{\text{Polyak}} = \theta_{k+1} - \theta_k$$. Then Polyak's momentum update is often written as:
+
 $$
 v_{k+1}^{\text{Polyak}} = \mu v_k^{\text{Polyak}} - \alpha \nabla L(\theta_k)
 $$
+
 $$
 \theta_{k+1} = \theta_k + v_{k+1}^{\text{Polyak}}
 $$
+
 Comparing this with the Euler discretization above ($$\theta_{k+1} - \theta_k = h v_k$$ for the first equation, and the update for $$v_{k+1}$$), we see a strong resemblance. If we set the "velocity" of Polyak's momentum $$v_k^{\text{Polyak}}$$ to be related to $$h v_k$$ from the Euler scheme, and align coefficients:
 - $$\mu \approx (1 - \frac{h\gamma}{m})$$
 - $$\alpha \approx \frac{h^2}{m}$$ (if we define Polyak's velocity as $$h x_{2,k}$$ for consistency with the position update)
@@ -373,9 +423,11 @@ This demonstrates that Polyak's momentum method can be seen as a specific discre
 ## 6. Linear Multistep Methods (LMMs)
 
 While one-step methods use only $$y_n$$ to find $$y_{n+1}$$, **Linear Multistep Methods (LMMs)** use information from several previous steps ($$y_n, y_{n-1}, \dots, y_{n-k+1}$$) to compute $$y_{n+1}$$. A general $$k$$-step LMM has the form:
+
 $$
 \sum_{j=0}^{k} a_j y_{n+j} = h \sum_{j=0}^{k} b_j f(t_{n+j}, y_{n+j})
 $$
+
 where $$a_j$$ and $$b_j$$ are constants defining the method, and $$a_k \neq 0$$. If $$b_k = 0$$, the method is explicit; otherwise, it's implicit.
 
 <blockquote class="prompt-info" markdown="1">
@@ -383,9 +435,11 @@ where $$a_j$$ and $$b_j$$ are constants defining the method, and $$a_k \neq 0$$.
 **Connection to Polyak's Momentum.**
 </div>
 Polyak's momentum, often written as $$\theta_{k+1} = \theta_k + \mu (\theta_k - \theta_{k-1}) - \eta \nabla L(\theta_k)$$ (where $$\eta$$ is a learning rate distinct from the momentum factor $$\mu$$), can be rearranged:
+
 $$
 \theta_{k+1} - (1+\mu)\theta_k + \mu\theta_{k-1} = - \eta \nabla L(\theta_k)
 $$
+
 This is a 2-step ($$k=2$$) explicit LMM where:
 - $$a_2 = 1, a_1 = -(1+\mu), a_0 = \mu$$
 - $$b_2 = 0, b_1 = -\eta/\text{h} \text{ (if we scale by h)}, b_0 = 0$$
