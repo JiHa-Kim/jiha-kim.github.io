@@ -258,7 +258,7 @@ In words, an acute angle between two vectors means they are positively correlate
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**Derivation: Equivalence of Geometric and Algebraic Dot Product (2D)**
+**Details.** Derivation: Equivalence of Geometric and Algebraic Dot Product (2D)
 </summary>
 Consider two vectors $$\vec{a} = \begin{pmatrix} a_1 \\ a_2 \end{pmatrix}$$ and $$\vec{b} = \begin{pmatrix} b_1 \\ b_2 \end{pmatrix}$$. Let $$\theta$$ be the angle between them.
 By the Law of Cosines on the triangle formed by $$\vec{a}$$, $$\vec{b}$$, and $$\vec{b}-\vec{a}$$:
@@ -374,7 +374,7 @@ Also, if $$\vec{a}$$ and $$\vec{b}$$ are parallel or anti-parallel ($$\theta=0^\
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**A Deeper Dive: Cross Product and the Exterior Product**
+**Details.** A Deeper Dive: Cross Product and the Exterior Product
 </summary>
 The cross product as defined for $$\mathbb{R}^3$$ is a special case of a more fundamental concept from **exterior algebra**: the **exterior product** (or **wedge product**), denoted $$\vec{u} \wedge \vec{v}$$.
 
@@ -388,7 +388,7 @@ So, while the cross product is a very useful tool in 3D geometry and physics, it
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**Pseudovectors: The "Weirdness" of Cross Product under Reflection**
+**Details.** Pseudovectors: The "Weirdness" of Cross Product under Reflection
 </summary>
 The fact that the cross product in $$\mathbb{R}^3$$ is a **pseudovector** (or axial vector) rather than a true **vector** (or polar vector) leads to some counter-intuitive behaviors under transformations that change the "handedness" of the coordinate system, like reflections.
 

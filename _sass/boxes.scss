@@ -1,10 +1,9 @@
-/* ==========================================================================
- * Consolidated Box Components for Jekyll Chirpy
- * Updated 2025-05-24 – fixes Details block contrast, icon swap & bounce
- * ========================================================================== */
+/* ===========================================================================
+ * Box Components for Jekyll Chirpy
+ * ---------------------------------------------------------------------------*/
 
 /* --------------------------------------------------------------------------
- * Base Box Mixin - Shared foundation for all box components
+ * Base Box Mixin – shared foundation for every box component
  * -------------------------------------------------------------------------- */
  @mixin base-box {
     border-radius: 0.25rem;
@@ -20,7 +19,7 @@
   }
   
   /* --------------------------------------------------------------------------
-   * Standard Box Mixin - For info/tip/warning/danger boxes
+   * Standard Box Mixin – for info / tip / warning / danger
    * -------------------------------------------------------------------------- */
   @mixin standard-box(
     $border-color,
@@ -61,7 +60,7 @@
   }
   
   /* --------------------------------------------------------------------------
-   * Math Box Mixin - For definition/theorem/example boxes
+   * Math Box Mixin – for definition / lemma / proposition / theorem / example
    * -------------------------------------------------------------------------- */
   @mixin math-box(
     $border,
@@ -124,8 +123,7 @@
   }
   
   /* --------------------------------------------------------------------------
-   * Details Box Mixin – revamped (May 2025)
-   * Provides color‑box‑style header, darker text & animated icon
+   * Details Box Mixin – click‑to‑reveal blocks (alias: <details class="details-block">)
    * -------------------------------------------------------------------------- */
   @mixin details-box(
     $border-color,
@@ -152,7 +150,7 @@
       background: $bg-color;
       line-height: 1.15;
       user-select: none;
-      color: $accent-color;        /* match other color‑box headers */
+      color: $accent-color;        /* match other colour‑box headers */
   
       /* remove built‑in ▸/▾ markers */
       &::-webkit-details-marker,
@@ -190,7 +188,7 @@
   
     /* ── Open state adjustments ──────────────────────────────────────────── */
     &[open] > summary {
-      &::after { transform: translateY(-50%) rotate(90deg); }
+      &::after  { transform: translateY(-50%) rotate(90deg); }
       &::before { content: $icon-open; animation: bop 0.18s ease-out; }
     }
   
@@ -204,9 +202,22 @@
   /* Bounce keyframes for the icon */
   @keyframes bop { 50% { transform: scale(1.12); } }
   
-  /* --------------------------------------------------------------------------
-   * Light Mode Components
-   * -------------------------------------------------------------------------- */
+  /* ===========================================================================
+   * LIGHT THEME VARIABLES & COMPONENTS
+   * =========================================================================== */
+  
+  /* Palette – CSS custom properties so we can reuse them in SCSS */
+  :root {
+    /* standard boxes */
+    --prompt-info-icon-color    : #0ea5e9;
+    --prompt-info-bg            : rgba(14, 165, 233, 0.10);
+    --prompt-tip-icon-color     : #16a34a;
+    --prompt-tip-bg             : rgba(22, 163, 74, 0.08);  /* ▸ lighter tint – improves contrast */
+    --prompt-warning-icon-color : #d97706;
+    --prompt-warning-bg         : rgba(217, 119, 6,  0.10);
+    --prompt-danger-icon-color  : #dc2626;
+    --prompt-danger-bg          : rgba(220, 38, 38,  0.10);
+  }
   
   /* Standard Boxes */
   .box-info    { @include standard-box(var(--prompt-info-icon-color),    var(--prompt-info-icon-color),    '\f06a', var(--prompt-info-bg   )); }
@@ -221,77 +232,35 @@
   .box-theorem     { @include math-box(#dc2626, #dc2626, rgba(#dc2626, 0.08), '\f091', 'Theorem'); }
   .box-example     { @include math-box(#8b5cf6, #8b5cf6, rgba(#8b5cf6, 0.08), '\f0eb', 'Example'); }
   
-  /* Details Block – inherits colour palette from .box‑tip */
+  /* Details Box – inherits its palette from .box‑tip */
   details.details-block {
     @include details-box(
-      var(--prompt-tip-icon-color), /* border */
-      var(--prompt-tip-icon-color), /* accent */
-      var(--prompt-tip-bg)          /* header bg */
+      var(--prompt-tip-icon-color),  /* border */
+      var(--prompt-tip-icon-color),  /* accent */
+      var(--prompt-tip-bg)           /* header background (lighter tint) */
     );
   }
   
-  /* --------------------------------------------------------------------------
-   * Dark Mode Overrides – only needed for math boxes with hard‑coded colours
-   * -------------------------------------------------------------------------- */
+  /* ===========================================================================
+   * DARK THEME OVERRIDES – hard‑coded hues for Math boxes plus custom‑prop palette
+   * =========================================================================== */
   @media (prefers-color-scheme: dark) {
-    /* CSS variables for standard boxes – details-box picks these up automatically */
+    /* Custom‑prop palette for standard boxes – details‑box picks these up too */
     :root {
       --prompt-info-icon-color    : #38bdf8;
       --prompt-info-bg            : rgba(56, 189, 248, 0.10);
-      --prompt-tip-icon-color     : #a78bfa;
-      --prompt-tip-bg             : rgba(167, 139, 250, 0.10);
+      --prompt-tip-icon-color     : #4ade80;
+      --prompt-tip-bg             : rgba(74, 222, 128, 0.12); /* ▸ lighter dark‑theme tint */
       --prompt-warning-icon-color : #facc15;
       --prompt-warning-bg         : rgba(250, 204, 21,  0.10);
       --prompt-danger-icon-color  : #f87171;
       --prompt-danger-bg          : rgba(248, 113, 113, 0.10);
     }
   
-    /* Math boxes with improved dark‑mode contrast */
-    .box-definition {
-      @include math-box(
-        #1e40af,
-        #60a5fa,
-        rgba(#2563eb, 0.12),
-        '\f02e',
-        'Definition'
-      );
-    }
-    .box-theorem {
-      @include math-box(
-        #991b1b,
-        #f87171,
-        rgba(#dc2626, 0.12),
-        '\f091',
-        'Theorem'
-      );
-    }
-    .box-example {
-      @include math-box(
-        #6d28d9,
-        #a78bfa,
-        rgba(#8b5cf6, 0.12),
-        '\f0eb',
-        'Example'
-      );
-    }
-    .box-lemma {
-      @include math-box(
-        #15803d,
-        #4ade80,
-        rgba(#16a34a, 0.12),
-        '\f022',
-        'Lemma'
-      );
-    }
-    .box-proposition {
-      @include math-box(
-        #a16207,
-        #fbbf24,
-        rgba(#eab308, 0.12),
-        '\f0eb',
-        'Proposition'
-      );
-    }
-    /* details‑box inherits dark theme colours via CSS variables – no override needed */
+    /* Math boxes with improved dark‑mode contrast (hard‑coded borders & accents) */
+    .box-definition  { @include math-box(#1e40af, #60a5fa, rgba(#2563eb, 0.12), '\f02e', 'Definition'); }
+    .box-theorem     { @include math-box(#991b1b, #f87171, rgba(#dc2626, 0.12), '\f091', 'Theorem'   ); }
+    .box-example     { @include math-box(#6d28d9, #a78bfa, rgba(#8b5cf6, 0.12), '\f0eb', 'Example'   ); }
+    .box-lemma       { @include math-box(#15803d, #4ade80, rgba(#16a34a, 0.12), '\f022', 'Lemma'     ); }
+    .box-proposition { @include math-box(#a16207, #fbbf24, rgba(#eab308, 0.12), '\f0eb', 'Proposition'); }
   }
-  
