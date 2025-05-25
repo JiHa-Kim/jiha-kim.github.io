@@ -5,14 +5,16 @@ refactor: true
 {% include lang.html %}
 
 {%- comment -%}
-  1) Figure out the “collection directory” on disk:
-     Jekyll stores e.g. crash-courses under a folder named `_crash-courses`
+  1) Get the collection name from the page path instead of relying on page.collection_name
+     e.g. "_crash-courses/linear-algebra/index.md" -> "crash-courses"
 {%- endcomment -%}
-{% assign coll_dir = '_' | append: page.collection_name %}
+{% assign path_parts = page.path | split: '/' %}
+{% assign collection_folder = path_parts | first %}
+{% assign collection_name = collection_folder | remove: '_' %}
 
 {%- comment -%}
   2) Break page.path into segments so we can grab the folder name:
-     e.g. "_crash-courses/functional-analysis/index.md"
+     e.g. "_crash-courses/linear-algebra/index.md"
 {%- endcomment -%}
 {% assign parts = page.path | split: '/' %}
 {% assign filename = parts | last %}
@@ -22,30 +24,38 @@ refactor: true
      slug = the second segment (the folder name);
      otherwise slug = the filename without .md
 {%- endcomment -%}
-{% assign parts = page.path | split: '/' %}
-{% assign filename = parts | last %}
-
 {% if filename == 'index.md' %}
-  {%- comment -%} Use the last segment of the directory path {%- endcomment -%}
-  {% assign slug = page.dir | split: '/' | last %}
+  {% assign slug = parts | slice: 1, 1 | first %}
 {% else %}
   {% assign slug = filename | remove: '.md' %}
 {% endif %}
 
 {%- comment -%}
   4) Build the on-disk prefix to match only files in that folder
-     (e.g. "_series/my-series/")
+     (e.g. "_crash-courses/linear-algebra/")
 {%- endcomment -%}
-{% capture source_prefix %}{{ coll_dir }}/{{ slug }}/{% endcapture %}
+{% capture source_prefix %}{{ collection_folder }}/{{ slug }}/{% endcapture %}
 
 {%- comment -%}
-  5) Grab the full collection, filter by this folder,
-     exclude the landing page itself, and sort by your index field
+  5) Get the collection using the derived collection name
+     Filter by this folder, exclude the landing page itself, and sort
 {%- endcomment -%}
-{%- assign lessons = site[page.collection_name]
+{% case collection_name %}
+  {% when 'crash-courses' %}
+    {% assign collection_items = site['crash-courses'] %}
+    {% assign sort_field = 'course_index' %}
+  {% when 'series' %}
+    {% assign collection_items = site.series %}
+    {% assign sort_field = 'series_index' %}
+  {% else %}
+    {% assign collection_items = site[collection_name] %}
+    {% assign sort_field = 'index' %}
+{% endcase %}
+
+{%- assign lessons = collection_items
   | where_exp: 'item', 'item.path contains source_prefix'
   | where_exp: 'item', 'item.path != page.path'
-  | sort: page.sort_field
+  | sort: sort_field
 -%}
 
 <h1 class="ps-2 mb-4">{{ page.title }}</h1>
