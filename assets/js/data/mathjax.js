@@ -13,7 +13,7 @@ MathJax = {
   },
   options: {
     lazyMargin: '200px',           // start typesetting 200px before in-view
-    lazyAlwaysTypeset: false       // only typeset when intersecting
+    lazyAlwaysTypeset: null       // only typeset when intersecting
   },
   tex: {
     {%- comment -%} start/end delimiter pairs for in-line math {%- endcomment -%}
