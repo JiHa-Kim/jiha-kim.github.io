@@ -218,14 +218,14 @@ defaults:
       permalink: /notes/:path/
 
   - scope:
-      path: "collections/_series/*/index.md"
+      type: series
     values:
       layout: collection-landing
       collection_name: series
       sort_field: series_index
 
   - scope:
-      path: "collections/_crash-courses/*/index.md"
+      type: crash-courses
     values:
       layout: collection-landing
       collection_name: crash-courses
