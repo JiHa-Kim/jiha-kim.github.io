@@ -255,7 +255,7 @@ $$\begin{cases}
 
 In words, an acute angle between two vectors means they are positively correlated, an obtuse angle means they are negatively correlated, and a right angle means they are uncorrelated (orthogonal).
 
-See {% cite gregorygundersonTwoFormsDot2018 --file linear-algebra-1.bib %} for in-depth explanation and geometric visualization.
+See {% cite gregorygundersonTwoFormsDot2018 --file crash-courses/linear-algebra/linear-algebra-1.bib %} for in-depth explanation and geometric visualization.
 
 </blockquote>
 
@@ -557,7 +557,7 @@ Geometrically, $$\vec{v}_1$$ and $$\vec{v}_2$$ point in different directions, so
 4.  Can a set of two vectors be a basis for $$\mathbb{R}^3$$? Why or why not?
 5.  Can a set of four vectors in $$\mathbb{R}^3$$ be linearly independent? Why or why not?
 
-See {% cite gregorygundersonLinearIndependenceBasis2021 --file linear-algebra-1.bib %} for more.
+See {% cite gregorygundersonLinearIndependenceBasis2021 --file crash-courses/linear-algebra/linear-algebra-1.bib %} for more.
 
 ## 3. The Action: Linear Transformations
 
@@ -761,7 +761,7 @@ $$T_2(-\vec{e}_1) = \begin{pmatrix} 1 & 0.5 \\ 0 & 1 \end{pmatrix} \begin{pmatri
 4.  If $$A = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$$, describe geometrically what the transformation $$T(\vec{x}) = A\vec{x}$$ does to vectors in $$\mathbb{R}^2$$.
 5.  If $$T: \mathbb{R}^n \to \mathbb{R}^m$$ and $$S: \mathbb{R}^m \to \mathbb{R}^p$$ are linear transformations with matrices $$A$$ and $$B$$ respectively, the composition $$S \circ T$$ (meaning $$S(T(\vec{x}))$$) is also a linear transformation. What is its matrix?
 
-See {% cite gregorygundersonMatricesFunctionsMatrices2022 --file linear-algebra-1.bib %} and {% cite gregorygundersonGeometricalUnderstandingMatrices2018 --file linear-algebra-1.bib %} for more.
+See {% cite gregorygundersonMatricesFunctionsMatrices2022 --file crash-courses/linear-algebra/linear-algebra-1.bib %} and {% cite gregorygundersonGeometricalUnderstandingMatrices2018 --file crash-courses/linear-algebra/linear-algebra-1.bib %} for more.
 
 ## 5. Measuring Geometric Change: Determinants
 
@@ -906,4 +906,4 @@ Make sure you're comfortable with the material here before proceeding to Part 2.
 
 ## Further Reading
 
-{% bibliography --file linear-algebra-1.bib %}
+{% bibliography --file crash-courses/linear-algebra/linear-algebra-1.bib %}

@@ -1,6 +1,6 @@
 ---
 title: "Adam Optimizer: Online Learning of Updates and Efficacy with EMA"
-date: 2025-05-27 10:00 -0400 # Placeholder date
+date: 2025-05-25 10:00 -0400 # Placeholder date
 series_index: 13 # Assuming this follows the "Online Learning" prerequisite
 mermaid: true
 description: "Exploring novel theoretical understandings of the Adam optimizer through the lens of Follow-The-Regularized-Leader for its updates, and the provable benefits of combining Adam with model exponential moving average in non-convex optimization."

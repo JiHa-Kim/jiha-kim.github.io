@@ -238,7 +238,7 @@ I have inserted an example reading order between the series and the `crash cours
 1. Introduction to basic mathematical optimization
 2. Iterative methods: gradient-free vs. gradient-based optimization
    - `Linear Algebra`
-3. Desired properties in optimizers
+3. Desirable properties of optimizers
 4. Speedrun of common gradient-based ML optimizers
 5. Problem formalization
    - `Numerical Analysis`
