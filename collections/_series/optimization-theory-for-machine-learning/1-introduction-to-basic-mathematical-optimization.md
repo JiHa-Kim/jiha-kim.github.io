@@ -196,6 +196,8 @@ Choosing to square the errors is a deliberate decision with several advantages:
 1.  **Ensuring Positive Contributions**: Squaring makes all error terms ($$e_i^2$$) non-negative, so positive and negative errors don't cancel each other out in the sum.
 2.  **Penalizing Larger Errors More**: A larger error has a disproportionately larger impact on the sum (e.g., an error of 3 contributes 9, while an error of 2 contributes 4). This often aligns with the desire to avoid large individual mistakes.
 3.  **Favorable Mathematical Properties**: The SSE function is continuous and differentiable with respect to $$m$$ and $$b$$. This smoothness is crucial for many algorithms used to find the minimum, as we'll see later.
+
+There are indeed even more profound justifications for this choice with very rich mathematical theory. Indeed, the choice of loss function is a critical aspect that significantly influences the model's training because they impose a different shape or "geometry" on the "loss landscape", i.e. the graph of the loss function.
 </details>
 
 ## Core Optimization Concepts and Their Purpose
@@ -247,22 +249,35 @@ With this vocabulary, we can express a general optimization problem in a more fo
 An **unconstrained optimization problem**, where parameters are free to take any real value, is commonly stated as:
 
 $$
-\min_{x \in \mathbb{R}^d} f(x)
+\min_{x \in \mathbb{R}^d}. f(x)
 $$
 
 Or, using notation prevalent in machine learning where $$\theta$$ represents the model parameters and $$L$$ the loss function:
 
 $$
-\min_{\theta \in \mathbb{R}^p} L(\theta)
+\min_{\theta \in \mathbb{R}^d}. L(\theta)
 $$
 
 Let's briefly parse this compact statement:
-*   $$\min$$: Denotes the operation of minimization.
+*   $$\min.$$: Stands for "minimize".
 *   $$x$$ (or $$\theta$$): Represents the vector of $$d$$ (or $$p$$) parameters that we are optimizing.
-*   $$\mathbb{R}^d$$ (or $$\mathbb{R}^p$$): Specifies that the parameters belong to the $$d$$- (or $$p$$)-dimensional space of real numbers. For our two parameters $$m$$ and $$b$$, this space is $$\mathbb{R}^2$$.
+*   $$\mathbb{R}^d$$: Specifies that the parameters belong to the $$d$$- (or $$p$$)-dimensional space of real numbers. For our two parameters $$m$$ and $$b$$, this space is $$\mathbb{R}^2$$.
 *   $$f(x)$$ (or $$L(\theta)$$): This is the objective function whose value we seek to minimize.
 
 This mathematical shorthand, $$\min_{\theta} L(\theta)$$, encapsulates the core task for a vast array of machine learning problems.
+
+<blockquote class="box-tip" markdown="1">
+<div class="title" markdown="1">
+**Tip.** What about maximization?
+</div>
+You might have noticed that we talked about "optimization", but we only formulated the problem using minimization. This is because every maximization problem can be turned into a minimization problem by negating the objective function. This arises from the properties of the maximum and minimum functions: finding the highest point in the graph is the same as flipping the graph upside down and finding the lowest point. This lowest point is then the negative of the original maximum.
+
+$$
+\max f(x) = -\min(-f(x))
+$$
+
+The reason why we choose minimization more often is due to inspiration from physics and the real world, where things like distance, energy and time are minimized as there is no maximum. However, we do use the maximization formulation as well, e.g. in reinforcement learning, where the goal is to maximize the reward, or in the case of the likelihood function in Bayesian inference, where we want to maximize the probability of observing the data given the model parameters.
+</blockquote>
 
 ### Constrained Optimization: A Brief Overview
 

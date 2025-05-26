@@ -8,8 +8,6 @@ image:
 categories:
 - Mathematical Optimization
 - Machine Learning
-tags:
--
 llm-instructions: |
   I am using the Chirpy theme in Jekyll.
 
@@ -237,10 +235,9 @@ The series is mostly intended to be self-contained beyond these items.
 
 I have inserted an example reading order between the series and the `crash courses`.
 
-- `Linear Algebra`
-
 1. Introduction to basic mathematical optimization
 2. Iterative methods: gradient-free vs. gradient-based optimization
+   - `Linear Algebra`
 3. Speedrun of common gradient-based ML optimizers
 4. Problem formalization
    - `Numerical Analysis`
@@ -249,15 +246,16 @@ I have inserted an example reading order between the series and the `crash cours
 6. Challenges of high-dimensional non-convex optimization in deep learning
    - `Tensor Calculus`
    - `Differential Geometry`
-7. Adaptive methods and preconditioning
-8. Momentum
-9.  Soft inductive biases (regularization)
+7. Stochastic Gradient Descent and effects of randomness
+8. Adaptive methods and preconditioning
+9. Momentum
+10. Soft inductive biases (regularization)
    - `Statistics and Information Theory`
    - `Information Geometry`
-10. Adam optimizer, info geo view: diagonal Fisher information approximation
+11. Adam optimizer, info geo view: diagonal Fisher information approximation
    - `Variational Calculus`
    - `Convex Analysis`
    - `Online Learning`
-11. Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
-12. Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
-13. Parameter-free optimization
+12. Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
+13. Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
+14. Parameter-free optimization
