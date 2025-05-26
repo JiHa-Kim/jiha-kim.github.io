@@ -812,4 +812,4 @@ This concludes our geometric exploration of linear algebra. With these tools, we
 
 ## Further Reading
 
-{% bibliography --file linear-algebra-2.bib %}
+{% bibliography --file crash-courses/linear-algebra/linear-algebra-2.bib %}
