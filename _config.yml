@@ -188,7 +188,7 @@ collections:
 defaults:
   # 1) Global: everything uses "post" layout with TOC on
   - scope:
-      path: ""           # applies to every content document
+      path: "" # applies to every content document
     values:
       layout: post
       toc: true
@@ -267,12 +267,18 @@ incremental: true
 
 plugins:
   - jekyll-tagories
+  - jekyll/scholar
+
+scholar:
+  style: apa # or another CSL style (e.g., chicago-fullnote-bibliography)
+  locale: en
+  bibliography: references.bib
 
 jekyll-archives:
   enabled:
     - categories
     - tags
-  collections:                     # tell it which collections to scan
+  collections: # tell it which collections to scan
     - posts
     - notes
     - series

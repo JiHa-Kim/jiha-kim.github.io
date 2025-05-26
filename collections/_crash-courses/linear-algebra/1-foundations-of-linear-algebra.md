@@ -155,7 +155,7 @@ llm-instructions: |
 
 Linear algebra is the backbone of countless scientific and engineering disciplines. This first part of our crash course explores linear algebra from a geometric viewpoint, focusing on the foundational concepts in Euclidean spaces ($$\mathbb{R}^2$$ and $$\mathbb{R}^3$$) where we can visualize them. We'll cover vectors, vector spaces, linear transformations, matrices, determinants, and how these concepts relate to solving systems of linear equations.
 
-Despite focusing on geometric interpretations, I decided not to include images, as there are great resources and visualizations on linear algebra found on Google. Therefore, if you wish to have some pictures, feel free to enter the concerned keywords in your favorite search engine.
+Despite focusing on geometric interpretations, I decided not to include images, as there are great resources and visualizations done by others. For instance, I highly recommend [Gregory Gunderson's blog](https://gregorygundersen.com/blog/tags/la/) or Grant Sanderson's (aka 3Blue1Brown) work both on [YouTube](https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab) and [Khan Academy](https://www.khanacademy.org/math/linear-algebra). Also, Fields medalist James Maynard's [Oxford lectures on Linear Algebra II](https://www.youtube.com/watch?v=pQhVDRojC1U) is incredibly insightful, really building the intuition from scratch geometrically without assuming proven theorems as obvious or axiomatic as is typical of textbooks on the topic. These inspired the general approach of this post and many of the ideas presented here.
 
 ## 1. The Stage: Vectors and Vector Spaces
 
@@ -254,12 +254,16 @@ $$\begin{cases}
 \end{cases}$$
 
 In words, an acute angle between two vectors means they are positively correlated, an obtuse angle means they are negatively correlated, and a right angle means they are uncorrelated (orthogonal).
+
+See {% cite gregorygundersonTwoFormsDot2018 --file linear-algebra-1.bib %} for in-depth explanation and geometric visualization.
+
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Details.** Derivation: Equivalence of Geometric and Algebraic Dot Product (2D)
 </summary>
+
 Consider two vectors $$\vec{a} = \begin{pmatrix} a_1 \\ a_2 \end{pmatrix}$$ and $$\vec{b} = \begin{pmatrix} b_1 \\ b_2 \end{pmatrix}$$. Let $$\theta$$ be the angle between them.
 By the Law of Cosines on the triangle formed by $$\vec{a}$$, $$\vec{b}$$, and $$\vec{b}-\vec{a}$$:
 
@@ -553,6 +557,8 @@ Geometrically, $$\vec{v}_1$$ and $$\vec{v}_2$$ point in different directions, so
 4.  Can a set of two vectors be a basis for $$\mathbb{R}^3$$? Why or why not?
 5.  Can a set of four vectors in $$\mathbb{R}^3$$ be linearly independent? Why or why not?
 
+See {% cite gregorygundersonLinearIndependenceBasis2021 --file linear-algebra-1.bib %} for more.
+
 ## 3. The Action: Linear Transformations
 
 A **transformation** $$T: \mathbb{R}^n \to \mathbb{R}^m$$ is a function that maps input vectors from $$\mathbb{R}^n$$ to output vectors in $$\mathbb{R}^m$$. Linear algebra focuses on a special class: **linear transformations**.
@@ -755,6 +761,8 @@ $$T_2(-\vec{e}_1) = \begin{pmatrix} 1 & 0.5 \\ 0 & 1 \end{pmatrix} \begin{pmatri
 4.  If $$A = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$$, describe geometrically what the transformation $$T(\vec{x}) = A\vec{x}$$ does to vectors in $$\mathbb{R}^2$$.
 5.  If $$T: \mathbb{R}^n \to \mathbb{R}^m$$ and $$S: \mathbb{R}^m \to \mathbb{R}^p$$ are linear transformations with matrices $$A$$ and $$B$$ respectively, the composition $$S \circ T$$ (meaning $$S(T(\vec{x}))$$) is also a linear transformation. What is its matrix?
 
+See {% cite gregorygundersonMatricesFunctionsMatrices2022 --file linear-algebra-1.bib %} and {% cite gregorygundersonGeometricalUnderstandingMatrices2018 --file linear-algebra-1.bib %} for more.
+
 ## 5. Measuring Geometric Change: Determinants
 
 For **square matrices** $$A$$ (representing $$T: \mathbb{R}^n \to \mathbb{R}^n$$), the determinant measures how the transformation scales volume and affects orientation.
@@ -895,3 +903,7 @@ This first part of our linear algebra crash course has laid the groundwork by in
 Understanding these foundational concepts is essential before moving on to more advanced topics. Part 2 will build upon this base to explore orthogonality, projections, change of basis, eigenvalues and eigenvectors, special types of matrices, powerful matrix decompositions like SVD, and the abstract notion of vector spaces. These further topics will reveal deeper structural properties of linear transformations and provide tools critical for many applications, including machine learning.
 
 Make sure you're comfortable with the material here before proceeding to Part 2.
+
+## Further Reading
+
+{% bibliography --file linear-algebra-1.bib %}
