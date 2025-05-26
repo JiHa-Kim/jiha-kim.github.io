@@ -157,7 +157,6 @@ llm-instructions: |
 Welcome to Part 2 of our geometric perspective on Linear Algebra! This part builds upon the foundational concepts of vectors, linear transformations, and matrices covered in [Part 1](https://jiha-kim.github.io/crash-courses/linear-algebra/1-foundations-of-linear-algebra). Here, we delve into more advanced structural aspects of linear algebra, including orthogonality, projections, change of basis, the crucial concepts of eigenvalues and eigenvectors, matrix decompositions like SVD, the role of complex numbers, and the generalization to abstract vector spaces. These topics are essential for understanding many algorithms and concepts in machine learning and optimization.
 
 ## 7. Orthogonality and Projections 
-*(This section was numbered 7 in the original single document. It's the first major topic for Part 2.)*
 
 Orthogonality (perpendicularity) is a very special and useful geometric property, deeply connected to the dot product introduced in Part 1.
 
@@ -808,3 +807,7 @@ Key advanced topics included:
 These concepts are not just theoretical constructs; they are fundamental tools in data analysis (PCA through SVD/eigen-decomposition of covariance matrices), numerical methods, physics, engineering, and of course, the theory of optimization in machine learning. The ability to decompose complex transformations into simpler components, to understand invariant properties, and to generalize these ideas to abstract settings makes linear algebra an incredibly powerful and versatile field.
 
 This concludes our geometric exploration of linear algebra. With these tools, we are better equipped to understand the mathematical underpinnings of more advanced subjects, including Functional Analysis, which further generalizes many of these concepts to infinite-dimensional spaces.
+
+## Further Reading
+
+{% bibliography --file linear-algebra-2.bib %}
