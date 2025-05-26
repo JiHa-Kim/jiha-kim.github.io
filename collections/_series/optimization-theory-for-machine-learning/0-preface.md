@@ -247,11 +247,11 @@ I have inserted an example reading order between the series and the `crash cours
 5. Gradient descent and gradient flow
    - `Functional Analysis`
 6. Challenges of high-dimensional non-convex optimization in deep learning
-7. Adaptive methods
-8. Momentum
-9.  Soft inductive biases (regularization)
    - `Tensor Calculus`
    - `Differential Geometry`
+7. Adaptive methods and preconditioning
+8. Momentum
+9.  Soft inductive biases (regularization)
    - `Statistics and Information Theory`
    - `Information Geometry`
 10. Adam optimizer, info geo view: diagonal Fisher information approximation
@@ -259,5 +259,5 @@ I have inserted an example reading order between the series and the `crash cours
    - `Convex Analysis`
    - `Online Learning`
 11. Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
-12. Metrized deep learning and preconditioning (Iso/IsoAdam, Shampoo, Muon)
+12. Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
 13. Parameter-free optimization
