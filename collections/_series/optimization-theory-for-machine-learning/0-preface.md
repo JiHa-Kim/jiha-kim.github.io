@@ -238,24 +238,25 @@ I have inserted an example reading order between the series and the `crash cours
 1. Introduction to basic mathematical optimization
 2. Iterative methods: gradient-free vs. gradient-based optimization
    - `Linear Algebra`
-3. Speedrun of common gradient-based ML optimizers
-4. Problem formalization
+3. Desired properties in optimizers
+4. Speedrun of common gradient-based ML optimizers
+5. Problem formalization
    - `Numerical Analysis`
-5. Gradient descent and gradient flow
+6. Gradient descent and gradient flow
    - `Functional Analysis`
-6. Challenges of high-dimensional non-convex optimization in deep learning
+7. Challenges of high-dimensional non-convex optimization in deep learning
    - `Tensor Calculus`
    - `Differential Geometry`
-7. Stochastic Gradient Descent and effects of randomness
-8. Adaptive methods and preconditioning
-9. Momentum
-10. Soft inductive biases (regularization)
+8. Stochastic Gradient Descent and effects of randomness
+9. Adaptive methods and preconditioning
+10. Momentum
+11. Soft inductive biases (regularization)
    - `Statistics and Information Theory`
    - `Information Geometry`
-11. Adam optimizer, info geo view: diagonal Fisher information approximation
+12. Adam optimizer, info geo view: diagonal Fisher information approximation
    - `Variational Calculus`
    - `Convex Analysis`
    - `Online Learning`
-12. Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
-13. Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
-14. Parameter-free optimization
+13. Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
+14. Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
+15. Parameter-free optimization
