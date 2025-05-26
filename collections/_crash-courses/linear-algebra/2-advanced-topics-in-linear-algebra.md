@@ -772,7 +772,9 @@ These operations must satisfy the following axioms for all vectors $$\vec{u}, \v
 8.  **Distributivity of scalar multiplication with respect to field addition:** $$(a+b)\vec{v} = a\vec{v} + b\vec{v}$$
 </blockquote>
 
-You'll notice that these are precisely the properties we've been using for vectors in $$\mathbb{R}^n$$ all along! The definition might seem overwhelming at first, but it's simply formalizing familiar rules.
+You'll notice that these are precisely the properties we've been using for vectors in $$\mathbb{R}^n$$ all along! The definition might seem overwhelming at first, but it's simply formalizing familiar rules. What we really want to emphasize is the property of **linearity**, i.e. $$f(\alpha \vec{v}+\beta \vec{w})=\alpha \vec{v}$$. So, the main thing to note is that you cannot multiply or divide vectors just from the structure of vector spaces alone; otherwise, you would end up with higher degree objects like quadratic $$\vec{v}^2$$ which does not satisfy linearity.
+
+However, the common high school myth that "you cannot multiply vectors" is false. Indeed, this is a main point of study in *multilinear algebra*, *geometric algebra*, and the dealing of *tensors*. It is simply that pure linearity does not hold anymore.
 
 **Examples of Abstract Vector Spaces:**
 *   **Euclidean Space $$\mathbb{R}^n$$:** The quintessential example. Vectors are n-tuples of real numbers.
