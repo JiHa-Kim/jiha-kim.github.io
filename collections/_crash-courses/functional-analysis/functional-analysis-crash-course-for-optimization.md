@@ -1,14 +1,15 @@
 ---
 title: "Elementary Functional Analysis: A Crash Course for Optimization"
 date: 2025-05-22 09:00 -0400
-course_index: 1
-description: An introduction to the core concepts of functional analysis essential for understanding the theory behind machine learning optimization algorithms, including normed spaces, Hilbert spaces, operator spectral theory, and derivatives in abstract spaces.
+course_index: 1 # Assuming this is the first in a potential series of courses
+description: An introduction to the core concepts of functional analysis using bra-ket notation, essential for understanding the theory behind machine learning optimization algorithms, including normed spaces, Hilbert spaces, operator spectral theory, and derivatives in abstract spaces.
 image: # Add an image path here if you have one
 categories:
 - Mathematical Foundations
 - Machine Learning
 tags:
 - Functional Analysis
+- Bra-Ket Notation
 - Normed Spaces
 - Hilbert Spaces
 - Spectral Theory
@@ -156,12 +157,14 @@ llm-instructions: |
 
 Welcome to this crash course on Elementary Functional Analysis! This post aims to equip you with the essential concepts from functional analysis that form the theoretical backbone for much of modern optimization theory, especially as applied in machine learning.
 
-**Prerequisites:** A solid understanding of Linear Algebra and basic Calculus is assumed. Familiarity with our [Linear Algebra Crash Course](https://jiha-kim.github.io/crash-courses/linear-algebra/linear-algebra-a-geometric-perspective/) is highly recommended, as this course builds upon concepts like eigenvalues, SVD, and properties of special matrices introduced there.
+**A Note on Notation:** Throughout this course, we will adopt **bra-ket notation** (also known as Dirac notation). Vectors in a vector space $$V$$ will be denoted as **kets**, e.g., $$\vert x \rangle$$. Linear functionals on $$V$$ (elements of the dual space $$V^\ast$$) will be denoted as **bras**, e.g., $$\langle f \vert$$. The action of a functional $$\langle f \vert$$ on a ket $$\vert x \rangle$$ is written as $$\langle f \vert x \rangle$$. The inner product between two kets $$\vert x \rangle$$ and $$\vert y \rangle$$ will be written as $$\langle x \vert y \rangle$$. This notation helps to visually distinguish the 'types' of mathematical objects and will be particularly beneficial for more advanced topics covered later in this series, such as tensor calculus and differential geometry.
+
+**Prerequisites:** A solid understanding of Linear Algebra and basic Calculus is assumed. Familiarity with our [Linear Algebra Crash Course](https://jiha-kim.github.io/crash-courses/linear-algebra/linear-algebra-a-geometric-perspective/) is highly recommended.
 
 ## Introduction: Why Functional Analysis for Optimization?
 
 When we talk about optimizing functions in machine learning, like minimizing a loss function, we often operate in high-dimensional spaces ($$\mathbb{R}^n$$ where $$n$$ can be millions or billions). Functional analysis provides a powerful and general framework to:
-- Rigorously define what it means for a sequence of parameters to "converge."
+- Rigorously define what it means for a sequence of parameter kets to "converge."
 - Understand the "geometry" of these high-dimensional spaces.
 - Generalize concepts from linear algebra, such as **spectral theory** (eigenvalues/eigenvectors, SVD), from matrices to more general linear operators.
 - Define derivatives (gradients) in settings more general than standard multivariate calculus.
@@ -183,17 +186,17 @@ Let's dive in!
 
 ## 1. From Vector Spaces to Normed Spaces
 
-We assume familiarity with **vector spaces** from linear algebra. These are sets where we can add vectors and scale them, like our familiar $$\mathbb{R}^n$$. To discuss concepts like convergence or "how close" two vectors are, we need a way to measure their "size" or "length," and the "distance" between them. This is where norms come in.
+We assume familiarity with **vector spaces** from linear algebra. These are sets where we can add kets (vectors) and scale them. To discuss concepts like convergence or "how close" two kets are, we need a way to measure their "size" or "length," and the "distance" between them. This is where norms come in.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 1.1: Norm**
 </div>
-A **norm** on a real (or complex) vector space $$V$$ is a function $$\Vert \cdot \Vert : V \to \mathbb{R}$$ that satisfies the following properties for all $$x, y \in V$$ and all scalars $$\alpha \in \mathbb{R}$$ (or $$\mathbb{C}$$):
-1.  **Non-negativity:** $$\Vert x \Vert \ge 0$$
-2.  **Definiteness:** $$\Vert x \Vert = 0 \iff x = \mathbf{0}$$ (the zero vector)
-3.  **Absolute homogeneity:** $$\Vert \alpha x \Vert = \vert \alpha \vert \Vert x \Vert$$
-4.  **Triangle inequality:** $$\Vert x + y \Vert \le \Vert x \Vert + \Vert y \Vert$$
+A **norm** on a real (or complex) vector space $$V$$ is a function $$\Vert \cdot \Vert : V \to \mathbb{R}$$ that associates each ket $$\vert x \rangle \in V$$ with a real number $$\Vert \vert x \rangle \Vert$$, satisfying the following properties for all kets $$\vert x \rangle, \vert y \rangle \in V$$ and all scalars $$\alpha \in \mathbb{R}$$ (or $$\mathbb{C}$$):
+1.  **Non-negativity:** $$\Vert \vert x \rangle \Vert \ge 0$$
+2.  **Definiteness:** $$\Vert \vert x \rangle \Vert = 0 \iff \vert x \rangle = \vert \mathbf{0} \rangle$$ (the zero ket)
+3.  **Absolute homogeneity:** $$\Vert \alpha \vert x \rangle \Vert = \vert \alpha \vert \Vert \vert x \rangle \Vert$$
+4.  **Triangle inequality:** $$\Vert \vert x \rangle + \vert y \rangle \Vert \le \Vert \vert x \rangle \Vert + \Vert \vert y \rangle \Vert$$
 
 A vector space equipped with a norm is called a **normed vector space** (or simply a **normed space**).
 </blockquote>
@@ -202,78 +205,80 @@ A vector space equipped with a norm is called a **normed vector space** (or simp
 <div class="title" markdown="1">
 **Example 1.2: Common Norms in $$\mathbb{R}^n$$**
 </div>
-For a vector $$x = (x_1, \dots, x_n) \in \mathbb{R}^n$$:
-- **$$\ell_2$$-norm (Euclidean norm):** $$\Vert x \Vert_2 = \sqrt{\sum_{i=1}^n x_i^2}$$
-- **$$\ell_1$$-norm (Manhattan norm):** $$\Vert x \Vert_1 = \sum_{i=1}^n \vert x_i \vert$$
-- **$$\ell_\infty$$-norm (Maximum norm):** $$\Vert x \Vert_\infty = \max_{i=1,\dots,n} \vert x_i \vert$$
+For a ket $$\vert x \rangle \in \mathbb{R}^n$$ (represented by its coordinate vector $$(x_1, \dots, x_n)$):
+- **$$\ell_2$$-norm (Euclidean norm):** $$\Vert \vert x \rangle \Vert_2 = \sqrt{\sum_{i=1}^n x_i^2}$$
+- **$$\ell_1$$-norm (Manhattan norm):** $$\Vert \vert x \rangle \Vert_1 = \sum_{i=1}^n \vert x_i \vert$$
+- **$$\ell_\infty$$-norm (Maximum norm):** $$\Vert \vert x \rangle \Vert_\infty = \max_{i=1,\dots,n} \vert x_i \vert$$
 
 These norms are crucial in machine learning for regularization (e.g., L1/L2 regularization) and defining loss functions.
 </blockquote>
 
-A norm naturally defines a **distance** (or metric) $$d(x,y) = \Vert x-y \Vert$$. This allows us to talk about the convergence of sequences: a sequence $$(x_k)_{k \in \mathbb{N}}$$ in a normed space $$V$$ converges to $$x \in V$$ if $$\lim_{k \to \infty} \Vert x_k - x \Vert = 0$$.
+A norm naturally defines a **distance** (or metric) $$d(\vert x \rangle, \vert y \rangle) = \Vert \vert x \rangle - \vert y \rangle \Vert$$. This allows us to talk about the convergence of sequences: a sequence $$(\vert x_k \rangle)_{k \in \mathbb{N}}$$ in a normed space $$V$$ converges to $$\vert x \rangle \in V$$ if $$\lim_{k \to \infty} \Vert \vert x_k \rangle - \vert x \rangle \Vert = 0$$.
 
-A **Cauchy sequence** is a sequence $$(x_k)$$ such that for any $$\epsilon > 0$$, there exists an $$N$$ such that for all $$m, k > N$$, $$\Vert x_k - x_m \Vert < \epsilon$$. Intuitively, terms in a Cauchy sequence get arbitrarily close to each other. Every convergent sequence is Cauchy.
+A **Cauchy sequence** is a sequence $$(\vert x_k \rangle)$$ such that for any $$\epsilon > 0$$, there exists an $$N$$ such that for all $$m, k > N$$, $$\Vert \vert x_k \rangle - \vert x_m \rangle \Vert < \epsilon$$. Intuitively, kets in a Cauchy sequence get arbitrarily close to each other. Every convergent sequence is Cauchy.
 
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
 **Proposition 1.3: Equivalence of Norms in Finite Dimensions**
 </div>
-In a finite-dimensional vector space (like $$\mathbb{R}^n$$), all norms are **equivalent**. This means that if a sequence converges with respect to one norm, it converges with respect to any other norm, and the limit is the same. This simplifies many analyses in ML as the specific choice of norm (among common ones) often doesn't change fundamental convergence properties, only constants.
+In a finite-dimensional vector space (like $$\mathbb{R}^n$$), all norms are **equivalent**. This means that if a sequence of kets converges with respect to one norm, it converges with respect to any other norm, and the limit ket is the same.
 </blockquote>
 
 ## 2. Completeness: Banach Spaces
 
-If a sequence is Cauchy, does it always converge to a point *within* the space? Not necessarily for all normed spaces. Spaces where this property holds are called "complete."
+If a sequence of kets is Cauchy, does it always converge to a ket *within* the space? Not necessarily for all normed spaces. Spaces where this property holds are called "complete."
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 2.1: Banach Space**
 </div>
-A **Banach space** is a normed vector space that is **complete** with respect to the metric induced by its norm. That is, every Cauchy sequence in the space converges to a limit that is also in the space.
+A **Banach space** is a normed vector space that is **complete** with respect to the metric induced by its norm. That is, every Cauchy sequence of kets in the space converges to a limit ket that is also in the space.
 </blockquote>
 
-**Why is completeness important?** Many optimization algorithms generate sequences of candidate solutions ($$x_0, x_1, x_2, \dots$$). We want to ensure that if this sequence "looks like" it's converging (i.e., it's Cauchy), then there's actually a point $$x^\ast$$ in our space that it's converging to.
+**Why is completeness important?** Many optimization algorithms generate sequences of candidate solutions ($$\vert x_0 \rangle, \vert x_1 \rangle, \vert x_2 \rangle, \dots$$). We want to ensure that if this sequence "looks like" it's converging (i.e., it's Cauchy), then there's actually a ket $$\vert x^\ast \rangle$$ in our space that it's converging to.
 
 <blockquote class="box-example" markdown="1">
 <div class="title" markdown="1">
 **Example 2.2: Banach Spaces**
 </div>
-- $$\mathbb{R}^n$$ and $$\mathbb{C}^n$$ with any $$\ell_p$$-norm ($$1 \le p \le \infty$$) are Banach spaces. This is extremely convenient for ML.
-- The space $$C([a,b])$$ of continuous real-valued functions on $$[a,b]$$ with the sup norm $$\Vert f \Vert_\infty = \sup_{t \in [a,b]} \vert f(t) \vert$$ is a Banach space.
-- The space of rational numbers $$\mathbb{Q}$$ with the usual absolute value norm is *not* complete (e.g., sequence of rationals converging to $$\sqrt{2}$$).
+- $$\mathbb{R}^n$$ and $$\mathbb{C}^n$$ with any $$\ell_p$$-norm ($$1 \le p \le \infty$$) are Banach spaces.
+- The space $$C([a,b])$$ of continuous real-valued functions on $$[a,b]$$ (where functions are considered kets) with the sup norm $$\Vert \vert f \rangle \Vert_\infty = \sup_{t \in [a,b]} \vert f(t) \vert$$ is a Banach space.
 </blockquote>
 
 ## 3. Adding More Structure: Inner Product Spaces
 
-Norms give us length and distance. Inner products give us more: a way to define angles, particularly orthogonality (perpendicularity).
+Norms give us length and distance. Inner products give us more: a way to define angles, particularly orthogonality.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 3.1: Inner Product**
 </div>
-An **inner product** on a real vector space $$V$$ is a function $$\langle \cdot, \cdot \rangle : V \times V \to \mathbb{R}$$ that satisfies for all $$x, y, z \in V$$ and scalars $$\alpha \in \mathbb{R}$$:
-1.  **Symmetry:** $$\langle x, y \rangle = \langle y, x \rangle$$
-2.  **Linearity in the first argument:** $$\langle \alpha x + y, z \rangle = \alpha \langle x, z \rangle + \langle y, z \rangle$$
-3.  **Positive-definiteness:** $$\langle x, x \rangle \ge 0$$, and $$\langle x, x \rangle = 0 \iff x = \mathbf{0}$$
+An **inner product** on a vector space $$V$$ (over field $$\mathbb{F} = \mathbb{R}$$ or $$\mathbb{C}$$) is a function $$\langle \cdot \vert \cdot \rangle : V \times V \to \mathbb{F}$$ that associates any two kets $$\vert x \rangle, \vert y \rangle \in V$$ with a scalar $$\langle x \vert y \rangle \in \mathbb{F}$$, satisfying for all kets $$\vert x \rangle, \vert y \rangle, \vert z \rangle \in V$$ and scalars $$\alpha, \beta \in \mathbb{F}$$:
+1.  **Conjugate Symmetry (or Symmetry for real spaces):** $$\langle x \vert y \rangle = \overline{\langle y \vert x \rangle}$$
+    (For real spaces, this means $$\langle x \vert y \rangle = \langle y \vert x \rangle$$).
+2.  **Linearity in the second argument (the ket):** $$\langle x \vert \alpha y + \beta z \rangle = \alpha \langle x \vert y \rangle + \beta \langle x \vert z \rangle$$
+3.  **(Implied) Conjugate linearity in the first argument (the bra):** $$\langle \alpha x + \beta y \vert z \rangle = \bar{\alpha} \langle x \vert z \rangle + \bar{\beta} \langle y \vert z \rangle$$
+    (For real spaces, this is simply linearity: $$\langle \alpha x + \beta y \vert z \rangle = \alpha \langle x \vert z \rangle + \beta \langle y \vert z \rangle$$).
+4.  **Positive-definiteness:** $$\langle x \vert x \rangle \ge 0$$ (note: $$\langle x \vert x \rangle$$ is always real by property 1), and $$\langle x \vert x \rangle = 0 \iff \vert x \rangle = \vert \mathbf{0} \rangle$$.
 
 A vector space equipped with an inner product is called an **inner product space** (or pre-Hilbert space).
-(For complex vector spaces, symmetry becomes conjugate symmetry: $$\langle x, y \rangle = \overline{\langle y, x \rangle}$$, and linearity is in the first argument, conjugate-linearity in the second).
 </blockquote>
+This definition adopts the physics convention for bra-ket inner products, which is linear in the second (ket) argument and conjugate-linear in the first (bra) argument for complex spaces. For real spaces, it is bilinear and symmetric.
 
-Every inner product induces a norm: $$\Vert x \Vert = \sqrt{\langle x, x \rangle}$$.
+Every inner product induces a norm: $$\Vert \vert x \rangle \Vert = \sqrt{\langle x \vert x \rangle}$$.
 
 <blockquote class="box-example" markdown="1">
 <div class="title" markdown="1">
 **Example 3.2: Standard Inner Product in $$\mathbb{R}^n$$**
 </div>
-For $$x = (x_1, \dots, x_n)$$ and $$y = (y_1, \dots, y_n)$$ in $$\mathbb{R}^n$$, the **standard inner product** (or dot product) is:
+For kets $$\vert x \rangle, \vert y \rangle \in \mathbb{R}^n$$, represented by column vectors $$x, y \in \mathbb{R}^n$$, the **standard inner product** is:
 
 $$
-\langle x, y \rangle = x^T y = \sum_{i=1}^n x_i y_i
+\langle x \vert y \rangle = x^T y = \sum_{i=1}^n x_i y_i
 $$
 
-The norm induced by this inner product is the $$\ell_2$$-norm.
-</blockquote>
+Here, $$\langle x \vert$$ corresponds to the row vector $$x^T$$. The norm induced is the $$\ell_2$$-norm.
+</div>
 
 A key property in inner product spaces is the **Cauchy-Schwarz Inequality**:
 
@@ -281,15 +286,15 @@ A key property in inner product spaces is the **Cauchy-Schwarz Inequality**:
 <div class="title" markdown="1">
 **Theorem 3.3: Cauchy-Schwarz Inequality**
 </div>
-For any $$x, y$$ in an inner product space $$V$$:
+For any kets $$\vert x \rangle, \vert y \rangle$$ in an inner product space $$V$$:
 
 $$
-\vert \langle x, y \rangle \vert \le \Vert x \Vert \Vert y \Vert
+\vert \langle x \vert y \rangle \vert \le \Vert \vert x \rangle \Vert \Vert \vert y \rangle \Vert
 $$
 
-Equality holds if and only if $$x$$ and $$y$$ are linearly dependent.
+Equality holds if and only if $$\vert x \rangle$$ and $$\vert y \rangle$$ are linearly dependent.
 </blockquote>
-This inequality is fundamental and appears in countless proofs in optimization and machine learning. It allows us to define the angle $$\theta$$ between two non-zero vectors via $$\cos \theta = \frac{\langle x, y \rangle}{\Vert x \Vert \Vert y \Vert}$$. Two vectors $$x, y$$ are **orthogonal** if $$\langle x, y \rangle = 0$$.
+This allows us to define the angle $$\theta$$ between two non-zero kets via $$\cos \theta = \frac{\text{Re}(\langle x \vert y \rangle)}{\Vert \vert x \rangle \Vert \Vert \vert y \rangle \Vert}$$. Two kets $$\vert x \rangle, \vert y \rangle$$ are **orthogonal** if $$\langle x \vert y \rangle = 0$$.
 
 ## 4. The Best of Both Worlds: Hilbert Spaces
 
@@ -299,223 +304,219 @@ What happens if an inner product space is also complete with respect to its indu
 <div class="title" markdown="1">
 **Definition 4.1: Hilbert Space**
 </div>
-A **Hilbert space** is an inner product space that is complete with respect to the norm induced by the inner product (i.e., it's a Banach space whose norm comes from an inner product).
+A **Hilbert space** is an inner product space that is complete with respect to the norm induced by the inner product.
 </blockquote>
 
 <blockquote class="box-example" markdown="1">
 <div class="title" markdown="1">
 **Example 4.2: Hilbert Spaces**
 </div>
-- $$\mathbb{R}^n$$ with the standard dot product is a Hilbert space. This is the primary setting for most parameter optimization in ML.
-- The space $$L_2([a,b])$$ of square-integrable functions on $$[a,b]$$ is an infinite-dimensional Hilbert space.
+- $$\mathbb{R}^n$$ with the standard inner product is a Hilbert space. This is the primary setting for most parameter optimization in ML.
+- The space $$L_2([a,b])$$ of square-integrable functions on $$[a,b]$$ (where functions are kets) is an infinite-dimensional Hilbert space.
 </blockquote>
-
-Hilbert spaces possess rich geometric structure. One of the most important results is the Projection Theorem.
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
 **Theorem 4.3: Projection Theorem onto Closed Convex Sets**
 </div>
-Let $$H$$ be a Hilbert space and $$C \subseteq H$$ be a non-empty, closed, and convex set. Then for any $$x \in H$$, there exists a **unique** point $$P_C(x) \in C$$ such that:
+Let $$H$$ be a Hilbert space and $$C \subseteq H$$ be a non-empty, closed, and convex set. Then for any ket $$\vert x \rangle \in H$$, there exists a **unique** ket $$P_C(\vert x \rangle) \in C$$ such that:
 
 $$
-\Vert x - P_C(x) \Vert = \inf_{y \in C} \Vert x - y \Vert
+\Vert \vert x \rangle - P_C(\vert x \rangle) \Vert = \inf_{\vert y \rangle \in C} \Vert \vert x \rangle - \vert y \rangle \Vert
 $$
 
-This point $$P_C(x)$$ is called the **projection** of $$x$$ onto $$C$$. Furthermore, $$P_C(x)$$ is characterized by the property that for all $$y \in C$$:
+This ket $$P_C(\vert x \rangle)$$ is called the **projection** of $$\vert x \rangle$$ onto $$C$$. Furthermore, $$P_C(\vert x \rangle)$$ is characterized by the property that for all $$\vert y \rangle \in C$$:
 
 $$
-\langle x - P_C(x), y - P_C(x) \rangle \le 0
+\text{Re} \langle \vert x \rangle - P_C(\vert x \rangle) \vert \vert y \rangle - P_C(\vert x \rangle) \rangle \le 0
 $$
+
+(For real Hilbert spaces, $$\text{Re}$$ is not needed).
 </blockquote>
-The Projection Theorem is the basis for projected gradient methods, which are common when dealing with constrained optimization problems.
 
 ## 5. Functions Between Spaces: Linear Operators and Functionals
 
-We often need to consider functions that map between normed spaces.
-A function $$T: V \to W$$ between vector spaces $$V$$ and $$W$$ is a **linear operator** if $$T(\alpha x + \beta y) = \alpha T(x) + \beta T(y)$$ for all $$x,y \in V$$ and scalars $$\alpha, \beta$$.
+A function $$T: V \to W$$ between vector spaces $$V$$ and $$W$$ is a **linear operator** if $$T(\alpha \vert x \rangle + \beta \vert y \rangle) = \alpha (T \vert x \rangle) + \beta (T \vert y \rangle)$$ for all kets $$\vert x \rangle, \vert y \rangle \in V$$ and scalars $$\alpha, \beta$$. We write $$T \vert x \rangle$$ for the action of $$T$$ on $$\vert x \rangle$$.
 
-When $$V$$ and $$W$$ are normed spaces, we are interested in **bounded linear operators**. A linear operator $$T$$ is bounded if there exists an $$M \ge 0$$ such that $$\Vert T(x) \Vert_W \le M \Vert x \Vert_V$$ for all $$x \in V$$. For linear operators, boundedness is equivalent to continuity.
-The smallest such $$M$$ is the **operator norm** of $$T$$, denoted $$\Vert T \Vert_{op}$$ or simply $$\Vert T \Vert$$:
+A linear operator $$T$$ is **bounded** if there exists an $$M \ge 0$$ such that $$\Vert T \vert x \rangle \Vert_W \le M \Vert \vert x \rangle \Vert_V$$ for all $$\vert x \rangle \in V$$. The smallest such $$M$$ is the **operator norm** of $$T$$:
 
 $$
-\Vert T \Vert = \sup_{\Vert x \Vert_V=1} \Vert T(x) \Vert_W = \sup_{x \ne \mathbf{0}} \frac{\Vert T(x) \Vert_W}{\Vert x \Vert_V}
+\Vert T \Vert = \sup_{\Vert \vert x \rangle \Vert_V=1} \Vert T \vert x \rangle \Vert_W = \sup_{\vert x \rangle \ne \vert \mathbf{0} \rangle} \frac{\Vert T \vert x \rangle \Vert_W}{\Vert \vert x \rangle \Vert_V}
 $$
 
-A **linear functional** is a linear operator $$f: V \to \mathbb{R}$$ (or $$f: V \to \mathbb{C}$$ if $$V$$ is a complex vector space).
+A **linear functional** is a linear operator from $$V$$ to its scalar field $$\mathbb{F}$$. We denote a linear functional as a **bra**, e.g., $$\langle f \vert : V \to \mathbb{F}$$. Its action on a ket $$\vert x \rangle \in V$$ is the scalar $$\langle f \vert x \rangle$$.
 
 ## 6. Introduction to Spectral Theory in Hilbert Spaces
 
-In Linear Algebra, we saw that symmetric matrices have special properties regarding their eigenvalues (real) and eigenvectors (orthogonal), leading to the Spectral Theorem ($$A=QDQ^T$$). We also encountered Singular Value Decomposition (SVD). Functional Analysis provides a more general framework for these ideas by studying operators on Hilbert spaces. This section offers a brief glimpse.
-
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-**Definition 6.1: Self-Adjoint Operator (Real Hilbert Space)**
+**Definition 6.1: Adjoint and Self-Adjoint Operator**
 </div>
-Let $$H$$ be a real Hilbert space. A bounded linear operator $$T: H \to H$$ is **self-adjoint** if $$\langle Tx, y \rangle = \langle x, Ty \rangle$$ for all $$x, y \in H$$.
-(For complex Hilbert spaces, $$T$$ is self-adjoint if $$T = T^\ast$$, where $$T^\ast$$ is the Hermitian adjoint satisfying $$\langle Tx, y \rangle = \langle x, T^\ast y \rangle$$).
+Let $$H_1, H_2$$ be Hilbert spaces. For a bounded linear operator $$T: H_1 \to H_2$$, its **adjoint** $$T^\dagger : H_2 \to H_1$$ is the unique operator satisfying:
 
-Self-adjoint operators are the generalization of symmetric matrices in $$\mathbb{R}^n$$ (since for matrices, $$\langle Ax, y \rangle = (Ax)^T y = x^T A^T y = \langle x, A^T y \rangle$$, so self-adjoint means $$A=A^T$$).
+$$
+\langle \vert y \rangle \vert T \vert x \rangle \rangle_{H_2} = \langle T^\dagger \vert y \rangle \vert \vert x \rangle \rangle_{H_1} \quad \text{for all } \vert x \rangle \in H_1, \vert y \rangle \in H_2
+$$
+
+An operator $$T: H \to H$$ on a Hilbert space $$H$$ is **self-adjoint** (or Hermitian) if $$T = T^\dagger$$. This means:
+
+$$
+\langle \vert y \rangle \vert T \vert x \rangle \rangle = \langle T \vert y \rangle \vert \vert x \rangle \rangle \quad \text{for all } \vert x \rangle, \vert y \rangle \in H
+$$
+
+(For real Hilbert spaces, this is equivalent to $$\langle T \vert x \rangle \vert \vert y \rangle \rangle = \langle \vert x \rangle \vert T \vert y \rangle \rangle$$, corresponding to symmetric matrices).
 </blockquote>
-
-Key properties of self-adjoint operators (analogous to symmetric matrices):
-*   Their eigenvalues are always real.
-*   Eigenvectors corresponding to distinct eigenvalues are orthogonal.
+Self-adjoint operators generalize symmetric (for real $$H$$) or Hermitian (for complex $$H$$) matrices. Their eigenvalues are real, and eigenvectors corresponding to distinct eigenvalues are orthogonal.
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
-**Theorem 6.2: Spectral Theorem for Compact Self-Adjoint Operators (Simplified Statement)**
+**Theorem 6.2: Spectral Theorem for Compact Self-Adjoint Operators (Simplified)**
 </div>
-If $$T: H \to H$$ is a compact self-adjoint operator on a Hilbert space $$H$$, then there exists an orthonormal basis of $$H$$ consisting of eigenvectors of $$T$$.
-More precisely, $$H$$ can be decomposed into an orthogonal direct sum of eigenspaces of $$T$$. For any $$x \in H$$, $$Tx$$ can be written as:
+If $$T: H \to H$$ is a compact self-adjoint operator on a Hilbert space $$H$$, then there exists an orthonormal basis of $$H$$ consisting of eigenvectors (eigenkets) of $$T$$. For any $$\vert x \rangle \in H$$, $$T \vert x \rangle$$ can be written as:
 
 $$
-Tx = \sum_{k} \lambda_k \langle x, \phi_k \rangle \phi_k
+T \vert x \rangle = \sum_{k} \lambda_k \vert \phi_k \rangle \langle \phi_k \vert x \rangle = \sum_{k} \lambda_k (\text{projection of } \vert x \rangle \text{ onto } \vert \phi_k \rangle) \vert \phi_k \rangle
 $$
 
-where $$(\phi_k)$$ is an orthonormal set of eigenvectors with corresponding real eigenvalues $$(\lambda_k)$$. If $$H$$ is infinite-dimensional, and there are infinitely many non-zero eigenvalues, then $$\lambda_k \to 0$$.
+where $$(\vert \phi_k \rangle)$$ is an orthonormal set of eigenkets with corresponding real eigenvalues $$(\lambda_k)$$. The term $$\vert \phi_k \rangle \langle \phi_k \vert$$ is the projection operator onto the $$\vert \phi_k \rangle$$ direction. If $$H$$ is infinite-dimensional and there are infinitely many non-zero eigenvalues, then $$\lambda_k \to 0$$.
 </blockquote>
-For finite-dimensional Hilbert spaces like $$\mathbb{R}^n$$, all linear operators are compact. Self-adjoint operators (symmetric matrices) are thus orthogonally diagonalizable, $$A = Q D Q^T$$, which is the matrix form of this theorem. The Hessian matrix of a smooth function, if symmetric, is a prime example of a self-adjoint operator in optimization.
 
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
 **Unitary and Orthogonal Operators**
 </div>
-An operator $$U: H \to H$$ is **unitary** (if $$H$$ is complex) or **orthogonal** (if $$H$$ is real) if it preserves the inner product: $$\langle Ux, Uy \rangle = \langle x, y \rangle$$. This implies $$U^\ast U = UU^\ast = I$$ (or $$U^T U = UU^T = I$$ for real $$H$$).
-These generalize orthogonal matrices and represent isometries (rotations, reflections). Their eigenvalues have modulus 1.
+An operator $$U: H \to H$$ is **unitary** (if $$H$$ is complex) or **orthogonal** (if $$H$$ is real) if it preserves the inner product: $$\langle U \vert x \rangle \vert U \vert y \rangle \rangle = \langle x \vert y \rangle$$. This implies $$U^\dagger U = UU^\dagger = I$$.
 </blockquote>
 
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
 **Singular Value Decomposition (SVD) for Compact Operators**
 </div>
-The SVD, introduced for matrices, also has a generalization for **compact operators** $$T: H_1 \to H_2$$ between Hilbert spaces. There exist orthonormal sequences $$(v_k) \subset H_1$$, $$(u_k) \subset H_2$$, and positive numbers $$(\sigma_k)$$ (singular values, with $$\sigma_k \to 0$$ if infinitely many) such that for any $$x \in H_1$$:
+For a compact operator $$T: H_1 \to H_2$$ between Hilbert spaces, there exist orthonormal sequences $$(\vert v_k \rangle) \subset H_1$$, $$(\vert u_k \rangle) \subset H_2$$, and positive numbers $$(\sigma_k)$$ (singular values, with $$\sigma_k \to 0$$ if infinitely many) such that for any $$\vert x \rangle \in H_1$$:
 
 $$
-Tx = \sum_k \sigma_k \langle x, v_k \rangle_{H_1} u_k
+T \vert x \rangle = \sum_k \sigma_k \vert u_k \rangle \langle v_k \vert x \rangle_{H_1}
 $$
-This decomposition is fundamental for understanding the "principal components" of action for an operator and is crucial in many areas, including data analysis and inverse problems.
+
 </blockquote>
-Spectral theory is a vast field. This introduction aims to show how functional analysis generalizes the core ideas from matrix algebra, providing deeper insight into the structure of linear transformations which are essential for analyzing optimization algorithms, especially those involving second-order information (Hessians).
 
 ## 7. The "Other" Space: Dual Spaces and Riesz Representation
 
-The set of all continuous (bounded) linear functionals on a normed space $$V$$ itself forms a vector space, called the **dual space** of $$V$$, denoted $$V^\ast$$. The norm on $$V^\ast$$ is the operator norm.
+The set of all continuous (bounded) linear functionals on a normed space $$V$$ forms a vector space, called the **dual space** of $$V$$, denoted $$V^\ast$$. Elements of $$V^\ast$$ are bras.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 7.1: Dual Space**
 </div>
-Let $$V$$ be a normed vector space. The **dual space** $$V^\ast$$ is the space of all continuous linear functionals $$f: V \to \mathbb{R}$$ (or $$\mathbb{C}$$), equipped with the operator norm:
+Let $$V$$ be a normed vector space. The **dual space** $$V^\ast$$ is the space of all continuous linear functionals $$\langle f \vert : V \to \mathbb{F}$$, equipped with the operator norm:
 
 $$
-\Vert f \Vert_{V^\ast} = \sup_{\Vert x \Vert_V=1} \vert f(x) \vert
+\Vert \langle f \vert \Vert_{V^\ast} = \sup_{\Vert \vert x \rangle \Vert_V=1} \vert \langle f \vert x \rangle \vert
 $$
-It turns out that $$V^\ast$$ is always a Banach space, even if $$V$$ is not.
+
+$$V^\ast$$ is always a Banach space.
 </blockquote>
-
-For Hilbert spaces, the dual space has a particularly nice characterization due to the Riesz Representation Theorem.
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
 **Theorem 7.2: Riesz Representation Theorem (for Hilbert Spaces)**
 </div>
-Let $$H$$ be a Hilbert space. For every continuous linear functional $$\phi \in H^\ast$$, there exists a **unique** vector $$y_\phi \in H$$ such that:
+Let $$H$$ be a Hilbert space. For every continuous linear functional $$\langle \phi \vert \in H^\ast$$, there exists a **unique** ket $$\vert y_\phi \rangle \in H$$ such that:
 
 $$
-\phi(x) = \langle x, y_\phi \rangle \quad \text{for all } x \in H
+\langle \phi \vert x \rangle = \langle y_\phi \vert x \rangle \quad \text{for all } \vert x \rangle \in H
 $$
 
-Furthermore, $$\Vert \phi \Vert_{H^\ast} = \Vert y_\phi \Vert_H$$.
+(The LHS is the action of the functional $$\langle \phi \vert$$ on $$\vert x \rangle$$. The RHS is the inner product of $$\vert y_\phi \rangle$$ and $$\vert x \rangle$$).
+Furthermore, $$\Vert \langle \phi \vert \Vert_{H^\ast} = \Vert \vert y_\phi \rangle \Vert_H$$.
 </blockquote>
-This theorem is profound. It states that any continuous linear "measurement" $$\phi$$ on elements of $$H$$ can be realized by taking an inner product with a specific vector $$y_\phi$$ in $$H$$ itself. This means $$H^\ast$$ is isometrically isomorphic to $$H$$.
-**For $$\mathbb{R}^n$$ with the standard dot product:** Any linear functional $$\phi: \mathbb{R}^n \to \mathbb{R}$$ can be written as $$\phi(x) = a^T x = \langle x, a \rangle$$ for some unique vector $$a \in \mathbb{R}^n$$. So, the dual of $$\mathbb{R}^n$$ is effectively $$\mathbb{R}^n$$ itself. This is a key reason why we can often identify gradients (which technically live in a dual space) with vectors in the original parameter space.
+This means $$H^\ast$$ is isometrically isomorphic to $$H$$. For $$\mathbb{R}^n$$ with the standard dot product, any linear functional $$\langle a \vert$$ (represented by row vector $$a^T$$) acting on $$\vert x \rangle$$ (column vector $$x$$) as $$a^T x$$ can be identified with the inner product $$\langle a \vert x \rangle$$, where $$\vert a \rangle$$ is the column vector $$a$$.
 
 ## 8. Calculus in Normed Spaces: Derivatives
 
-To perform optimization, we need derivatives. Functional analysis allows us to define derivatives for functions between normed spaces. Let $$X, Y$$ be normed spaces and $$U \subseteq X$$ be an open set. Consider a function $$f: U \to Y$$.
+Let $$X, Y$$ be normed spaces and $$U \subseteq X$$ be an open set. Consider a function $$f: U \to Y$$ (mapping kets in $$X$$ to kets in $$Y$$).
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 8.1: Gâteaux Derivative (Directional Derivative)**
 </div>
-The **Gâteaux derivative** of $$f$$ at $$x \in U$$ in the direction $$h \in X$$ (if it exists) is:
+The **Gâteaux derivative** of $$f$$ at $$\vert x \rangle \in U$$ in the direction $$\vert h \rangle \in X$$ (if it exists) is:
 
 $$
-Df(x;h) = \lim_{t \to 0} \frac{f(x+th) - f(x)}{t}
+Df(\vert x \rangle; \vert h \rangle) = \lim_{t \to 0} \frac{f(\vert x \rangle + t \vert h \rangle) - f(\vert x \rangle)}{t}
 $$
-If $$Df(x;h)$$ exists for all $$h \in X$$ and the map $$h \mapsto Df(x;h)$$ is a bounded linear operator, then $$f$$ is Gâteaux differentiable at $$x$$.
+
+This result is a ket in $$Y$$.
 </blockquote>
-
-A stronger notion of differentiability is the Fréchet derivative.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 8.2: Fréchet Derivative (Total Derivative)**
 </div>
-The function $$f: U \to Y$$ is **Fréchet differentiable** at $$x \in U$$ if there exists a bounded linear operator $$Df(x): X \to Y$$ such that:
+The function $$f: U \to Y$$ is **Fréchet differentiable** at $$\vert x \rangle \in U$$ if there exists a bounded linear operator $$Df(\vert x \rangle): X \to Y$$ such that:
 
 $$
-\lim_{\Vert h \Vert_X \to 0} \frac{\Vert f(x+h) - f(x) - Df(x)(h) \Vert_Y}{\Vert h \Vert_X} = 0
+\lim_{\Vert \vert h \rangle \Vert_X \to 0} \frac{\Vert f(\vert x \rangle + \vert h \rangle) - f(\vert x \rangle) - (Df(\vert x \rangle) \vert h \rangle) \Vert_Y}{\Vert \vert h \rangle \Vert_X} = 0
 $$
-This can be written as $$f(x+h) = f(x) + Df(x)(h) + o(\Vert h \Vert_X)$$. The operator $$Df(x)$$ (sometimes written $$f'(x)$$) is called the Fréchet derivative of $$f$$ at $$x$$.
+
+This can be written as $$f(\vert x \rangle + \vert h \rangle) = f(\vert x \rangle) + (Df(\vert x \rangle) \vert h \rangle) + o(\Vert \vert h \rangle \Vert_X)$$. The operator $$Df(\vert x \rangle)$$ is the Fréchet derivative.
 </blockquote>
-If $$f$$ is Fréchet differentiable at $$x$$, it is also Gâteaux differentiable at $$x$$, and $$Df(x)(h) = Df(x;h)$$.
 
 **The Gradient in Hilbert Spaces**
-Now, consider a real-valued function $$f: H \to \mathbb{R}$$ where $$H$$ is a Hilbert space. If $$f$$ is Fréchet differentiable at $$x \in H$$, its Fréchet derivative $$Df(x)$$ is a bounded linear functional from $$H$$ to $$\mathbb{R}$$, i.e., $$Df(x) \in H^\ast$$.
+Consider a real-valued function $$f: H \to \mathbb{R}$$ where $$H$$ is a Hilbert space. If $$f$$ is Fréchet differentiable at $$\vert x \rangle \in H$$, its Fréchet derivative $$Df(\vert x \rangle)$$ is a bounded linear operator from $$H$$ to $$\mathbb{R}$$. This means $$Df(\vert x \rangle)$$ is a continuous linear functional on $$H$$, i.e., an element of $$H^\ast$$. We can denote this functional as the bra $$\langle Df(\vert x \rangle) \vert$$.
 
-By the Riesz Representation Theorem (Theorem 7.2), there exists a **unique vector** in $$H$$, which we denote by $$\nabla f(x)$$, such that:
+By the Riesz Representation Theorem (Theorem 7.2), there exists a **unique ket** in $$H$$, which we denote by $$\vert \nabla f(\vert x \rangle) \rangle$$, such that for all kets $$\vert h \rangle \in H$$:
 
 $$
-Df(x)(h) = \langle \nabla f(x), h \rangle \quad \text{for all } h \in H
+\langle Df(\vert x \rangle) \vert h \rangle = \langle \nabla f(\vert x \rangle) \vert h \rangle
 $$
+
+(LHS: action of the derivative functional; RHS: inner product with the gradient ket).
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 8.3: Gradient in a Hilbert Space**
 </div>
-The vector $$\nabla f(x) \in H$$ identified via the Riesz Representation Theorem from the Fréchet derivative $$Df(x) \in H^\ast$$ is called the **gradient** of $$f$$ at $$x$$.
+The ket $$\vert \nabla f(\vert x \rangle) \rangle \in H$$ identified via the Riesz Representation Theorem from the Fréchet derivative functional $$\langle Df(\vert x \rangle) \vert \in H^\ast$$ is called the **gradient** of $$f$$ at $$\vert x \rangle$$.
 </blockquote>
-For $$f: \mathbb{R}^n \to \mathbb{R}$$, if $$f$$ is differentiable, its Fréchet derivative at $$x$$ applied to $$h$$ is $$Df(x)(h) = (\nabla_{\text{calc}} f(x))^T h = \langle \nabla_{\text{calc}} f(x), h \rangle$$, where $$\nabla_{\text{calc}} f(x) = \left( \frac{\partial f}{\partial x_1}, \dots, \frac{\partial f}{\partial x_n} \right)^T$$ is the usual gradient vector from multivariate calculus. Thus, the abstract definition matches our concrete understanding in $$\mathbb{R}^n$$.
+For $$f: \mathbb{R}^n \to \mathbb{R}$$, the functional $$\langle Df(\vert x \rangle) \vert$$ acts as $$(\nabla_{\text{calc}} f(x))^T h$$. The gradient ket $$\vert \nabla f(\vert x \rangle) \rangle$$ is the column vector $$\nabla_{\text{calc}} f(x) = \left( \frac{\partial f}{\partial x_1}, \dots, \frac{\partial f}{\partial x_n} \right)^T$$. The relation $$\langle Df(\vert x \rangle) \vert h \rangle = \langle \nabla f(\vert x \rangle) \vert h \rangle$$ becomes $$(\nabla_{\text{calc}} f(x))^T h = (\nabla_{\text{calc}} f(x))^T h$$.
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Briefly: Higher-Order Derivatives (Hessian)**
 </summary>
-If $$f: H \to \mathbb{R}$$ is twice Fréchet differentiable, its second derivative $$D^2f(x)$$ at $$x$$ can be viewed as a bounded bilinear form on $$H \times H$$, or as a bounded linear operator from $$H$$ to $$H^\ast$$. In a Hilbert space $$H$$, this operator can often be identified (again, via Riesz representation ideas) with a self-adjoint bounded linear operator $$\nabla^2 f(x): H \to H$$, called the Hessian. For $$f: \mathbb{R}^n \to \mathbb{R}$$, this corresponds to the familiar Hessian matrix of second partial derivatives. The spectral properties of this Hessian operator (e.g., its eigenvalues if it's self-adjoint) are crucial for analyzing the local geometry of $$f$$ and for second-order optimization methods.
+If $$f: H \to \mathbb{R}$$ is twice Fréchet differentiable, its second derivative $$D^2f(\vert x \rangle)$$ at $$\vert x \rangle$$ can be viewed as a bounded bilinear form on $$H \times H$$, or as a bounded linear operator from $$H$$ to $$H^\ast$$. In a Hilbert space $$H$$, this operator from $$H \to H^\ast$$ can be identified with a self-adjoint bounded linear operator $$\nabla^2 f(\vert x \rangle): H \to H$$ (the Hessian). The action of the bilinear form for kets $$\vert h_1 \rangle, \vert h_2 \rangle$$ is given by $$\langle h_2 \vert (\nabla^2 f(\vert x \rangle) \vert h_1 \rangle) \rangle$$.
 </details>
 
 ## Conclusion
 
-We've journeyed from basic vector spaces to the rich structures of Hilbert spaces, equipping ourselves with tools to measure distance (norms), define angles (inner products), ensure convergence (completeness), generalize spectral theory to operators, and extend calculus (Fréchet derivatives and gradients).
+We've journeyed from basic vector spaces to Hilbert spaces, using bra-ket notation to emphasize the types of objects. This provides tools to measure distance (norms on kets), define angles (inner products $$\langle x \vert y \rangle$$), ensure convergence (completeness), generalize spectral theory to operators, and extend calculus (Fréchet derivatives $$\langle Df \vert$$ and gradient kets $$\vert \nabla f \rangle$$).
 
-These concepts from functional analysis are not just abstract mathematical curiosities; they are fundamental to:
-- **Understanding Algorithm Behavior:** Why do gradient descent and its variants work? How fast do they converge? This often involves analyzing the spectral properties (e.g., eigenvalues) of operators like the Hessian.
-- **Defining Objective Functions and Spaces:** Especially relevant when dealing with functions of functions (as in variational methods) or infinite-dimensional parameter spaces (conceptually).
-- **Analyzing Properties of Solutions:** Existence, uniqueness, and stability of optima, often informed by the characteristics (e.g., positive definiteness) of associated operators.
-
-While many practical ML applications occur in finite-dimensional $$\mathbb{R}^n$$ (which is a very well-behaved Hilbert space), the language and insights from functional analysis provide a deeper, more unified understanding of the principles underlying optimization. This foundation will be invaluable as we explore more advanced optimization algorithms and their properties in this series.
+These concepts are fundamental to understanding optimization algorithms, defining objective functions, and analyzing solution properties. The bra-ket notation, while perhaps new to some in this context, aims to provide a clearer, more unified understanding, especially as we move to more advanced topics.
 
 ## Summary Cheat Sheet
 
-| Concept                      | Key Idea / Definition                                                                                                 | Relevance in ML/Optimization                                                                        |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Normed Space**             | Vector space with a norm $$\Vert \cdot \Vert$$ (measures length/size).                                                | Defines distance between parameter vectors, convergence criteria.                                   |
-| **Banach Space**             | Complete normed space (all Cauchy sequences converge).                                                                | Ensures iterative algorithms can converge to a point within the space.                              |
-| **Inner Product Space**      | Vector space with an inner product $$\langle \cdot, \cdot \rangle$$ (defines angles, orthogonality).                  | Dot product in $$\mathbb{R}^n$$, measures similarity, defines orthogonality of features/directions. |
-| **Hilbert Space**            | Complete inner product space.                                                                                         | $$\mathbb{R}^n$$ is our main example. Ideal setting for many optimization theories.                 |
-| **Projection Theorem**       | Unique closest point in a closed convex set $$C$$ to any point $$x \in H$$.                                           | Foundation for projected gradient descent and constrained optimization.                             |
-| **Linear Operator**          | Structure-preserving map between vector spaces. Bounded if $$\Vert T(x) \Vert \le M \Vert x \Vert$$.                  | Gradients, Hessians (as operators), transformations. Lipschitz constants.                           |
-| **Self-Adjoint Operator**    | $$T:H \to H$$ with $$\langle Tx,y \rangle = \langle x,Ty \rangle$$. Generalizes symmetric matrices.                   | Hessians are often self-adjoint. Spectral theorem applies.                                          |
-| **Spectral Theorem**         | Decomposition of self-adjoint (esp. compact) operators via eigenvectors/eigenvalues.                                  | Understanding operator properties (e.g., Hessian) for convergence analysis.                         |
-| **Dual Space $$V^\ast$$**    | Space of all continuous linear functionals on $$V$$.                                                                  | Gradients are formally elements of the dual space.                                                  |
-| **Riesz Rep. Thm.**          | In a Hilbert space $$H$$, every $$\phi \in H^\ast$$ is $$\langle \cdot, y_\phi \rangle$$ for unique $$y_\phi \in H$$. | Justifies representing gradients (dual vectors) as vectors in the original Hilbert space.           |
-| **Fréchet Derivative**       | Best linear approximation $$Df(x)(h)$$ to $$f(x+h) - f(x)$$.                                                          | Rigorous definition of derivative for functions on normed spaces.                                   |
-| **Gradient $$\nabla f(x)$$** | Unique vector in Hilbert space representing $$Df(x)$$ via inner product.                                              | The direction of steepest ascent; core of gradient-based optimization.                              |
+| Concept                                 | Key Idea / Definition (Bra-Ket)                                                                                                                                                                                     | Relevance in ML/Optimization                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Ket Vector**                          | $$\vert x \rangle \in V$$                                                                                                                                                                                           | Represents parameters, data points, functions.                                   |
+| **Bra (Dual Vector)**                   | $$\langle f \vert \in V^\ast$$ (linear functional)                                                                                                                                                                  | Represents measurements, derivative functionals.                                 |
+| **Functional Action**                   | $$\langle f \vert x \rangle \in \mathbb{F}$$ (scalar)                                                                                                                                                               | How functionals act on vectors.                                                  |
+| **Normed Space**                        | Vector space with a norm $$\Vert \cdot \Vert$$ on kets.                                                                                                                                                             | Defines distance $$\Vert \vert x \rangle - \vert y \rangle \Vert$$, convergence. |
+| **Banach Space**                        | Complete normed space.                                                                                                                                                                                              | Ensures iterative algorithms can converge.                                       |
+| **Inner Product**                       | $$\langle x \vert y \rangle \in \mathbb{F}$$ (scalar from two kets).                                                                                                                                                | Dot product in $$\mathbb{R}^n$$, measures similarity/angle.                      |
+| **Hilbert Space**                       | Complete inner product space.                                                                                                                                                                                       | $$\mathbb{R}^n$$ is main example. Ideal setting.                                 |
+| **Projection Theorem**                  | Unique closest ket $$P_C(\vert x \rangle)$$ in closed convex $$C$$ to $$\vert x \rangle \in H$$.                                                                                                                    | Basis for projected gradient descent.                                            |
+| **Linear Operator**                     | $$T: V \to W$$, acts as $$T \vert x \rangle$$.                                                                                                                                                                      | Gradients of vector-valued fns, Hessians.                                        |
+| **Adjoint Operator**                    | $$T^\dagger$$ s.t. $$\langle y \vert T x \rangle = \langle T^\dagger y \vert x \rangle$$.                                                                                                                           | Used to define self-adjoint operators.                                           |
+| **Self-Adjoint Operator**               | $$T:H \to H$$ with $$T = T^\dagger$$. Generalizes symmetric/Hermitian matrices.                                                                                                                                     | Hessians often self-adjoint. Spectral theorem applies.                           |
+| **Spectral Theorem**                    | $$T \vert x \rangle = \sum_k \lambda_k \vert \phi_k \rangle \langle \phi_k \vert x \rangle$$ for compact self-adjoint $$T$$.                                                                                        | Analysis of Hessians, convergence rates.                                         |
+| **Dual Space $$V^\ast$$**               | Space of all bras $$\langle f \vert$$.                                                                                                                                                                              | Gradients (as functionals) live here.                                            |
+| **Riesz Rep. Thm.**                     | In Hilbert $$H$$, for bra $$\langle \phi \vert \in H^\ast$$, unique ket $$\vert y_\phi \rangle \in H$$ s.t. $$\langle \phi \vert x \rangle = \langle y_\phi \vert x \rangle$$.                                      | Justifies identifying gradient functional with a gradient ket.                   |
+| **Fréchet Derivative**                  | Linear operator $$Df(\vert x \rangle)$$ or functional $$\langle Df(\vert x \rangle) \vert$$ s.t. $$f(\vert x \rangle + \vert h \rangle) \approx f(\vert x \rangle) + \langle Df(\vert x \rangle) \vert h \rangle$$. | Rigorous derivative for fns on normed spaces.                                    |
+| **Gradient $$\vert \nabla f \rangle$$** | Unique ket in Hilbert space s.t. $$\langle Df(\vert x \rangle) \vert h \rangle = \langle \nabla f(\vert x \rangle) \vert h \rangle$$.                                                                               | Direction of steepest ascent; core of gradient methods.                          |
 
 ## Reflection
 
-This crash course has laid out the elementary concepts of functional analysis that are most pertinent to understanding optimization in machine learning. We've focused on definitions and key theorems, aiming for breadth over deep proofs. While $$\mathbb{R}^n$$ is often simple enough that some of this formalism might seem like overkill, the true power of these concepts emerges when analyzing convergence more generally, dealing with non-Euclidean geometries (as in information geometry), or even conceptually bridging to infinite-dimensional problems. The generalization of matrix spectral theory to operators in Hilbert spaces, for instance, provides powerful tools for analyzing Hessians and understanding the conditioning of optimization problems.
+This crash course has laid out elementary functional analysis concepts using bra-ket notation to consistently distinguish vectors (kets) from their duals (bras). This approach, while common in physics, is adopted here to prepare for advanced topics where such distinctions are crucial. The generalization of matrix algebra to operators in Hilbert spaces, and calculus to abstract spaces, provides powerful tools for understanding optimization in ML.
 
-This foundation will allow us to discuss topics like gradient flow, convergence rates of algorithms, and the role of geometry in optimization with greater clarity and rigor. For a deeper dive, consult standard textbooks on functional analysis.
+This foundation will allow us to discuss topics like gradient flow, convergence rates, and the role of geometry in optimization with greater clarity. For a deeper dive, consult standard textbooks on functional analysis, keeping in mind the notational differences.

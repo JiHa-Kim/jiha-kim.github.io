@@ -272,7 +272,6 @@ plugins:
 scholar:
   style: apa # or another CSL style (e.g., chicago-fullnote-bibliography)
   locale: en
-  bibliography: references.bib
 
 jekyll-archives:
   enabled:

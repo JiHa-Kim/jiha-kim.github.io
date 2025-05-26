@@ -301,7 +301,7 @@ $$
 is precisely Polyak's Heavy Ball method. Here, $$\theta_{t-1} - \theta_{t-2}$$ is the previous step taken. The update is the current position plus a fraction of the previous step (the "momentum") minus the scaled current gradient.
 
 *   **Significance:** Polyak derived this method by discretizing a second-order differential equation describing the motion of a heavy ball with mass and friction rolling on a surface. This provides a strong theoretical underpinning for the physical analogy.
-*   **Perspective:** This two-step recurrence for $$\theta_t$$ (depending on $$\theta_{t-1}$$ and $$\theta_{t-2}$$) highlights that momentum is a type of **linear multi-step method**, incorporating more history than just the last position and gradient.
+*   **Perspective:** This two-step recurrence for $$\theta_t$$ (depending on $$\theta_{t-1}$$ and $$\theta_{t-2}$$) highlights that momentum is a type of **linear multi-step method** in numerical ODE simulation, incorporating more history than just the last position and gradient. Thus, the existing research on the stability of such methods can offer insights into the behavior of momentum in optimization.
 
 ### Revisiting Ill-Conditioned Landscapes
 

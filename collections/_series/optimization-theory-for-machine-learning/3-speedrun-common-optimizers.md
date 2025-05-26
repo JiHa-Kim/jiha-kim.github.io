@@ -183,6 +183,7 @@ Loop for each epoch or until convergence:
   1. For each mini-batch $$\mathcal{B}_t$$ in the training data:
      1. Compute gradient: $$g_t = \nabla_{\theta} J(\theta_t; \mathcal{B}_t)$$.
      2. Update parameters:
+
         $$
         \theta_{t+1} = \theta_t - \eta g_t
         $$
@@ -213,10 +214,13 @@ Loop for each epoch or until convergence:
   1. For each mini-batch $$\mathcal{B}_t$$ in the training data:
      1. Compute gradient: $$g_t = \nabla_{\theta} J(\theta_t; \mathcal{B}_t)$$.
      2. Update velocity:
+
         $$
         v_t = \gamma v_{t-1} + \eta g_t
         $$
+
      3. Update parameters:
+
         $$
         \theta_{t+1} = \theta_t - v_t
         $$
@@ -241,14 +245,19 @@ Initialize velocity $$v_0 = \mathbf{0}$$.
 Loop for each epoch or until convergence:
   1. For each mini-batch $$\mathcal{B}_t$$ in the training data:
      1. Compute gradient at the "look-ahead" position:
+
         $$
         g_t = \nabla_{\theta} J(\theta_t - \gamma v_{t-1}; \mathcal{B}_t)
         $$
+
      2. Update velocity:
+
         $$
         v_t = \gamma v_{t-1} + \eta g_t
         $$
+
      3. Update parameters:
+
         $$
         \theta_{t+1} = \theta_t - v_t
         $$
@@ -278,10 +287,13 @@ Loop for each epoch or until convergence:
   1. For each mini-batch $$\mathcal{B}_t$$ in the training data:
      1. Compute gradient: $$g_t = \nabla_{\theta} J(\theta_t; \mathcal{B}_t)$$.
      2. Accumulate squared gradients (element-wise):
+
         $$
         G_t = G_{t-1} + g_t \odot g_t
         $$
+
      3. Update parameters (element-wise operations for division and square root):
+
         $$
         \theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_t} + \epsilon} \odot g_t
         $$
@@ -306,10 +318,13 @@ Loop for each epoch or until convergence:
   1. For each mini-batch $$\mathcal{B}_t$$ in the training data:
      1. Compute gradient: $$g_t = \nabla_{\theta} J(\theta_t; \mathcal{B}_t)$$.
      2. Update decaying average of squared gradients (element-wise):
+
         $$
         E[g^2]_t = \beta_2 E[g^2]_{t-1} + (1-\beta_2) (g_t \odot g_t)
         $$
+
      3. Update parameters:
+
         $$
         \theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{E[g^2]_t} + \epsilon} \odot g_t
         $$
@@ -342,25 +357,35 @@ Loop for each epoch or until convergence:
      1. Increment timestep: $$t = t + 1$$.
      2. Compute gradient: $$g_t = \nabla_{\theta} J(\theta_{t-1}; \mathcal{B}_{\text{iter}})$$.
      3. Update biased first moment estimate:
+
         $$
         m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t
         $$
+
      4. Update biased second raw moment estimate (element-wise square):
+
         $$
         v_t = \beta_2 v_{t-1} + (1-\beta_2) (g_t \odot g_t)
         $$
+
      5. Compute bias-corrected first moment estimate:
+
         $$
         \hat{m}_t = \frac{m_t}{1 - \beta_1^t}
         $$
+
      6. Compute bias-corrected second raw moment estimate:
+
         $$
         \hat{v}_t = \frac{v_t}{1 - \beta_2^t}
         $$
+
      7. Update parameters:
+
         $$
         \theta_t = \theta_{t-1} - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
         $$
+
      *(Note: The parameter update here is shown from $$\theta_{t-1}$$ to $$\theta_t$$ to align with the timestep $$t$$ used for bias correction. Some presentations might show $$\theta_{t+1} = \theta_t - \dots$$; ensure consistency in indexing.)*
 
 **Empirical Performance:**
