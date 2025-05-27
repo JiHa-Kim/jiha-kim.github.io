@@ -186,19 +186,7 @@ The most basic requirement is that the optimizer should **converge** to *some* m
 <div class="title" markdown="1">
 **Example.** Getting Stuck
 </div>
-Consider minimizing the function $$f(x) = x^4 - 4x^2 + x$$. This function has multiple local minima and saddle points. An optimizer might converge to one of these, but not necessarily the global minimum.
-```mermaid
-xychart-beta
-  title "f(x) = x^4 - 4x^2 + x"
-  x-axis "x" -->
-  y-axis "f(x)" -->
-  line data:
-    x: [-2.5, -2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5]
-    y: [3.125, -2, -5.125, -4, -1.625, 0, 0.625, -2, -2.375, 1, 11.625]
-  config:
-    chartType: "line"
-```
-Ideally, our optimizer reliably finds one of the low points.
+Consider minimizing the function $$f(x) = x^4 - 4x^2 + x$$. This function has multiple local minima. An optimizer might converge to one of these, but not necessarily the global minimum.
 </blockquote>
 
 *   **Underlying Principle: The Descent Property**
@@ -274,13 +262,6 @@ The optimization landscape can be treacherous. A robust optimizer performs relia
 *   **Ill-Conditioning:**
     *   The problem is ill-conditioned if the Hessian $$\nabla^2 f(x)$$ has a high condition number (level sets are like elongated ellipses).
     *   Optimizers should handle this gracefully, avoiding excessive zig-zagging or slow convergence. Preconditioning or adaptive scaling helps.
-    ```mermaid
-    graph TD
-        A[Start] --> B{Ill-Conditioned Valley?};
-        B -- Yes --> C["Steepest Descent (GD)<br>zig-zags slowly"];
-        B -- No (Well-conditioned) --> D["Steepest Descent (GD)<br>converges well"];
-        C --> E["Optimizer with Preconditioning<br>or Adaptive Scaling<br>(e.g., Newton-like, Adam)<br>adapts step, faster convergence"];
-    ```
 
 ### 4.2. Fundamental Mathematical Robustness: Invariance Properties
 

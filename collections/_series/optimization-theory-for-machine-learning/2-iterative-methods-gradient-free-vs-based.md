@@ -201,10 +201,10 @@ The crucial difference between the major types of iterative methods lies in *how
 
 ```mermaid
 flowchart TD
-    A[Optimization Problem: Minimize f(x)] --> B[Iterative Method]
-    B --> C{What information about f(x) is used?}
-    C -->|Only function values f(x)| D[Gradient-Free Methods (Direct Search)]
-    C -->|Function values f(x) and derivatives (e.g., ∇f(x), ∇²f(x))| E[Gradient-Based Methods]
+    A["Optimization Problem: Minimize f(x)"] --> B["Iterative Method"]
+    B --> C{"What information about f(x) is used?"}
+    C -->|"Only function values f(x)"| D["Gradient-Free Methods (Direct Search)"]
+    C -->|"Function values f(x) and derivatives (e.g., grad f(x), Hessian f(x))"| E["Gradient-Based Methods"]
 ```
 
 Based on this, iterative methods are broadly classified into:
