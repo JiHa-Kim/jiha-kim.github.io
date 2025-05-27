@@ -304,7 +304,7 @@ These describe how an optimizer's behavior changes (or, ideally, doesn't) under 
     *   **Importance:** Crucial when variables have vastly different scales. Avoids the need for manual normalization.
     *   **Examples:**
         *   Newton's method (being affine invariant).
-        *   Adaptive methods like AdaGrad, RMSProp, Adam achieve a form of diagonal scaling invariance by adapting per-parameter learning rates. For AdaGrad, the update for $$x_i$$ is $x_{i, t+1} = x_{i, t} - \frac{\eta}{\sqrt{G_{ii,t} + \epsilon}} g_{i,t}$. If $x_i$ is scaled by $s_i$, its gradient $g_i$ scales by $1/s_i$, $G_{ii,t}$ by $1/s_i^2$, so $\frac{g_{i,t}}{\sqrt{G_{ii,t}}}$ is scale-invariant. Thus, the update $\Delta x_i$ is scale-invariant w.r.t. $x_i$.
+        *   Adaptive methods like AdaGrad, RMSProp, Adam achieve a form of diagonal scaling invariance by adapting per-parameter learning rates. For AdaGrad, the update for $$x_i$$ is $$x_{i, t+1} = x_{i, t} - \frac{\eta}{\sqrt{G_{ii,t}}} g_{i,t}$$. If $$x_i$$ is scaled by $$s_i$$, its gradient $$g_i$$ scales by $$1/s_i$$, $$G_{ii,t}$$ by $$1/s_i^2$$, so $$\frac{g_{i,t}}{\sqrt{G_{ii,t}}}$$ is scale-invariant. Thus, the update $\Delta x_i$ is scale-invariant w.r.t. $$x_i$$.
 
 *   **Isometry Invariance (Rotations and Translations):**
     *   **Definition:** Behavior is unchanged if coordinates are rotated ($$x' = Rx + t$$, $$R^TR=I$$) or translated.
