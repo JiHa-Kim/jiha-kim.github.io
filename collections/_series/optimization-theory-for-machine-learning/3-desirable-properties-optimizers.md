@@ -155,7 +155,7 @@ llm-instructions: |
   without an explicit request.
 ---
 
-In our [previous post on iterative methods](link-to-post-2){: .internal-link}, we explored how algorithms iteratively search for solutions to optimization problems, distinguishing between gradient-free and gradient-based approaches. Now, we face a crucial question: what makes one optimizer "better" than another? This isn't just an academic query; choosing the right optimizer can drastically impact training time, model performance, and resource consumption in machine learning.
+In our previous post on iterative methods, we explored how algorithms iteratively search for solutions to optimization problems, distinguishing between gradient-free and gradient-based approaches. Now, we face a crucial question: what makes one optimizer "better" than another? This isn't just an academic query; choosing the right optimizer can drastically impact training time, model performance, and resource consumption in machine learning.
 
 ## 1. Introduction: Why "Good" Matters in Optimization
 
@@ -442,7 +442,7 @@ Understanding these properties and their inherent trade-offs is key to selecting
 
 This exploration of desirable optimizer properties provides a critical lens for evaluating existing algorithms and a roadmap for future innovations. As we delve into specific optimizers in subsequent posts—from Gradient Descent to Adam and beyond—we will continuously refer back to this framework. We'll analyze how each method strives to embody these properties, understand its strengths and weaknesses, and appreciate the clever design choices that have propelled progress in machine learning and optimization.
 
-The quest for the "perfect" optimizer continues, driven by the ever-increasing complexity of models and datasets. By understanding what constitutes "good," we are better equipped to navigate this evolving landscape. Our next post will offer a "[Speedrun of common gradient-based ML optimizers](link-to-next-post){: .internal-link}," providing a first look at how different algorithms put these principles into practice.
+The quest for the "perfect" optimizer continues, driven by the ever-increasing complexity of models and datasets. By understanding what constitutes "good", we are better equipped to navigate this evolving landscape. Our next post will offer a "Speedrun of common gradient-based ML optimizers", providing a first look at how different algorithms put these principles into practice.
 
 ---
 

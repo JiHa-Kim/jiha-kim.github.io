@@ -152,7 +152,7 @@ llm-instructions: |
   without an explicit request.
 ---
 
-Welcome back to our exploration of mathematical optimization in machine learning! In our [previous post (Preface)](link-to-preface-post){: .internal-link}, we set the stage for why understanding optimization theory is crucial. Now, let's get our hands dirty and delve into the practical ways we find optimal solutions.
+Welcome back to our exploration of mathematical optimization in machine learning! In our previous post, we covered the basics of mathematical optimization and set the stage for why understanding optimization theory is crucial. Now, let's get our hands dirty and delve into the practical ways we find optimal solutions.
 
 ## 1. Introduction: The Quest for the Optimum
 
@@ -324,7 +324,7 @@ From this definition, it can be rigorously shown that:
 </div>
 The concepts of directional derivatives, the formal proof that the gradient (as defined above) points in the direction of steepest ascent, and its representation as the vector of partial derivatives in Cartesian coordinates are foundational topics in multivariable calculus.
 
-For a detailed treatment of these concepts, please refer to our [Crash Course: Multivariable Calculus for Optimization](link-to-calculus-crash-course){: .internal-link}. This crash course covers the necessary calculus prerequisites for this series.
+For a detailed treatment of these concepts, please refer to our [Crash Course: Multivariable Calculus for Optimization](https://jiha-kim.github.io/crash-courses/multivariable-calculus/multivariable-calculus). This crash course covers the necessary calculus prerequisites for this series.
 </blockquote>
 
 **Computing the Gradient in Practice:**
