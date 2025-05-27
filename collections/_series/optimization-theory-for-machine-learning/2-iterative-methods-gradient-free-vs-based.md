@@ -200,21 +200,11 @@ Here, $$\Delta x_k$$ is the **step** or **update vector** that modifies the curr
 The crucial difference between the major types of iterative methods lies in *how* they determine the next step $$\Delta x_k$$, or more generally, how they choose $$x_{k+1}$$. This primarily depends on the kind of information available (or that we choose to use) about the objective function $$f$$. This leads us to a fundamental branching point:
 
 ```mermaid
----
-config:
-  theme: base
-  themeVariables:
-    primaryColor: '#f9f9f9' # Light background for nodes
-    primaryTextColor: '#333' # Dark text
-    primaryBorderColor: '#777' # Border color
-    lineColor: '#555' # Edge color
-    fontSize: '16px'
----
 flowchart TD
-    A[Optimization Problem:<br>Minimize f(x)] --> B(Iterative Method);
-    B --> C{What information about f(x) is used?};
-    C -- Only function values f(x) --> D[Gradient-Free Methods<br>(Direct Search)];
-    C -- Function values f(x) AND<br>Derivatives (e.g.,∇f(x), ∇²f(x)) --> E[Gradient-Based Methods];
+    A[Optimization Problem: Minimize f(x)] --> B[Iterative Method]
+    B --> C{What information about f(x) is used?}
+    C -->|Only function values f(x)| D[Gradient-Free Methods (Direct Search)]
+    C -->|Function values f(x) and derivatives (e.g., ∇f(x), ∇²f(x))| E[Gradient-Based Methods]
 ```
 
 Based on this, iterative methods are broadly classified into:

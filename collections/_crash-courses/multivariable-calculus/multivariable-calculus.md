@@ -1,5 +1,5 @@
 ---
-title: "Crash Course: Multivariable Calculus for Optimization"
+title: "Multivariable Calculus for Optimization"
 date: 2025-05-26 10:00 -0400
 course_index: 0
 mermaid: true
@@ -205,10 +205,13 @@ To compute $$\frac{\partial f}{\partial x_i}$$, we treat all variables other tha
 **Example:**
 Let $$f(x_1, x_2) = x_1^2 + 3x_1 x_2^2 + 5x_2^3$$.
 *   To find $$\frac{\partial f}{\partial x_1}$$, treat $$x_2$$ as a constant:
+
     $$
     \frac{\partial f}{\partial x_1} = \frac{\partial}{\partial x_1}(x_1^2) + \frac{\partial}{\partial x_1}(3x_1 x_2^2) + \frac{\partial}{\partial x_1}(5x_2^3) = 2x_1 + 3x_2^2 + 0 = 2x_1 + 3x_2^2
     $$
+
 *   To find $$\frac{\partial f}{\partial x_2}$$, treat $$x_1$$ as a constant:
+
     $$
     \frac{\partial f}{\partial x_2} = \frac{\partial}{\partial x_2}(x_1^2) + \frac{\partial}{\partial x_2}(3x_1 x_2^2) + \frac{\partial}{\partial x_2}(5x_2^3) = 0 + 3x_1 (2x_2) + 15x_2^2 = 6x_1 x_2 + 15x_2^2
     $$
@@ -265,6 +268,7 @@ If $$f: \mathbb{R}^n \to \mathbb{R}$$ is differentiable at $$x$$, then its gradi
 $$
 \nabla f(x) = \begin{bmatrix} \frac{\partial f}{\partial x_1}(x) \\ \frac{\partial f}{\partial x_2}(x) \\ \vdots \\ \frac{\partial f}{\partial x_n}(x) \end{bmatrix}
 $$
+
 </blockquote>
 
 <details class="details-block" markdown="1">
@@ -274,29 +278,38 @@ $$
 Let $$\{e_1, \dots, e_n\}$$ be the standard orthonormal basis vectors for $$\mathbb{R}^n$$, where $$e_i$$ is a vector with a $$1$$ in the $$i$$-th position and $$0$$s elsewhere.
 
 1.  The directional derivative $$D_{e_i} f(x)$$ in the direction of the basis vector $$e_i$$ is:
+
     $$
     D_{e_i} f(x) = \lim_{h \to 0^+} \frac{f(x + h e_i) - f(x)}{h}
     $$
+
     Since $$x + h e_i = (x_1, \dots, x_i+h, \dots, x_n)$$, this limit is precisely the definition of the partial derivative of $$f$$ with respect to $$x_i$$:
+
     $$
     D_{e_i} f(x) = \frac{\partial f}{\partial x_i}(x)
     $$
 
 2.  From the definition of the gradient, we also have $$D_{e_i} f(x) = \nabla f(x)^T e_i$$.
     If we write the gradient vector as $$\nabla f(x) = [g_1, g_2, \dots, g_n]^T$$, then:
+
     $$
     \nabla f(x)^T e_i = [g_1, g_2, \dots, g_n] \begin{bmatrix} 0 \\ \vdots \\ 1 \\ \vdots \\ 0 \end{bmatrix} = g_i \quad (\text{where the 1 in } e_i \text{ is at the } i\text{-th position})
     $$
+
     So, $$g_i$$ is the $$i$$-th component of the gradient vector $$\nabla f(x)$$.
 
 3.  Equating the two expressions for $$D_{e_i} f(x)$$ from step 1 and step 2, we get:
+
     $$
     g_i = \frac{\partial f}{\partial x_i}(x)
     $$
+
     Since this holds for all components $$i = 1, \dots, n$$, the gradient vector is:
+
     $$
     \nabla f(x) = \left[ \frac{\partial f}{\partial x_1}(x), \dots, \frac{\partial f}{\partial x_n}(x) \right]^T
     $$
+
 This confirms that the abstractly defined gradient vector is indeed computed as the vector of partial derivatives in Cartesian coordinates.
 </details>
 
@@ -305,9 +318,11 @@ For $$f(x_1, x_2) = x_1^2 + 3x_1 x_2^2 + 5x_2^3$$, we found:
 $$\frac{\partial f}{\partial x_1} = 2x_1 + 3x_2^2$$
 $$\frac{\partial f}{\partial x_2} = 6x_1 x_2 + 15x_2^2$$
 So, the gradient is:
+
 $$
 \nabla f(x_1, x_2) = \begin{bmatrix} 2x_1 + 3x_2^2 \\ 6x_1 x_2 + 15x_2^2 \end{bmatrix}
 $$
+
 At the point $$(1,1)$$, $$\nabla f(1,1) = \begin{bmatrix} 2(1) + 3(1)^2 \\ 6(1)(1) + 15(1)^2 \end{bmatrix} = \begin{bmatrix} 5 \\ 21 \end{bmatrix}$$.
 
 ### 4.3. Geometric Interpretation of the Gradient
@@ -347,9 +362,11 @@ The entry in the $$i$$-th row and $$j$$-th column is $$(\nabla^2 f(x))_{ij} = \f
 
 **Symmetry of the Hessian:**
 If the second partial derivatives of $$f$$ are continuous in a region, then the order of differentiation does not matter (Clairaut's Theorem or Schwarz's Theorem on equality of mixed partials):
+
 $$
 \frac{\partial^2 f}{\partial x_i \partial x_j}(x) = \frac{\partial^2 f}{\partial x_j \partial x_i}(x)
 $$
+
 This implies that if these conditions hold, the Hessian matrix $$\nabla^2 f(x)$$ is a **symmetric matrix** ($$H = H^T$$). This is usually the case for functions encountered in optimization.
 
 **Example:**
@@ -365,9 +382,11 @@ $$\frac{\partial^2 f}{\partial x_2 \partial x_1} = \frac{\partial}{\partial x_1}
 (Note that $$\frac{\partial^2 f}{\partial x_1 \partial x_2} = \frac{\partial^2 f}{\partial x_2 \partial x_1}$$, as expected.)
 
 So, the Hessian matrix is:
+
 $$
 \nabla^2 f(x_1, x_2) = \begin{bmatrix} 2 & 6x_2 \\ 6x_2 & 6x_1 + 30x_2 \end{bmatrix}
 $$
+
 At the point $$(1,1)$$, $$\nabla^2 f(1,1) = \begin{bmatrix} 2 & 6 \\ 6 & 36 \end{bmatrix}$$.
 
 The Hessian matrix is crucial for:
@@ -383,16 +402,20 @@ Let $$x = x_0 + p$$, where $$p$$ is a small displacement vector.
 
 **First-Order Taylor Expansion (Linear Approximation):**
 If $$f$$ is differentiable at $$x_0$$, then for $$p$$ small:
+
 $$
 f(x_0 + p) \approx f(x_0) + \nabla f(x_0)^T p
 $$
+
 This approximates $$f$$ near $$x_0$$ with a linear function (a hyperplane). The term $$\nabla f(x_0)^T p$$ is the first-order change.
 
 **Second-Order Taylor Expansion (Quadratic Approximation):**
 If $$f$$ is twice differentiable at $$x_0$$, then for $$p$$ small:
+
 $$
 f(x_0 + p) \approx f(x_0) + \nabla f(x_0)^T p + \frac{1}{2} p^T \nabla^2 f(x_0) p
 $$
+
 This approximates $$f$$ near $$x_0$$ with a quadratic function. The term $$\frac{1}{2} p^T \nabla^2 f(x_0) p$$ is the second-order (quadratic) change involving the Hessian.
 This quadratic approximation is the basis for Newton's method in optimization.
 
@@ -404,6 +427,7 @@ $$\nabla^2 f(x_1,x_2) = \begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix}$$, which is
 
 Let $$p = [p_1, p_2]^T$$.
 The second-order Taylor expansion around $$[1,1]^T$$ is:
+
 $$
 \begin{aligned}
 f(1+p_1, 1+p_2) &\approx f(1,1) + \nabla f(1,1)^T p + \frac{1}{2} p^T \nabla^2 f(1,1) p \\
@@ -413,6 +437,7 @@ f(1+p_1, 1+p_2) &\approx f(1,1) + \nabla f(1,1)^T p + \frac{1}{2} p^T \nabla^2 f
 &\approx 2 + 2p_1 + 2p_2 + p_1^2 + p_2^2
 \end{aligned}
 $$
+
 If we let $$x_1 = 1+p_1$$ and $$x_2 = 1+p_2$$, then $$p_1 = x_1-1$$ and $$p_2 = x_2-1$$. Substituting these back:
 $$2 + 2(x_1-1) + 2(x_2-1) + (x_1-1)^2 + (x_2-1)^2$$
 $$= 2 + 2x_1 - 2 + 2x_2 - 2 + x_1^2 - 2x_1 + 1 + x_2^2 - 2x_2 + 1$$

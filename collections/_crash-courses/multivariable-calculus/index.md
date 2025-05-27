@@ -1,6 +1,6 @@
 ---
 layout: collection-landing
-title: "Crash Course: Multivariable Calculus for Optimization"
+title: "Multivariable Calculus for Optimization"
 description: A concise review of essential multivariable calculus concepts vital for understanding mathematical optimization, including partial derivatives, gradients, Hessians, and Taylor series.
 level: Beginner
 cover:

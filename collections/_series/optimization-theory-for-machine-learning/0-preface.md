@@ -202,8 +202,10 @@ config:
 flowchart TD
     A(["Start"]) --> LA["Linear Algebra"]
 
-    LA --> EFA["Functional Analysis & Matrix Spectral Theory"]
-    LA --> NA["Numerical Analysis"]
+    LA --> CAL["Calculus"]
+
+    CAL --> EFA["Functional Analysis & Matrix Spectral Theory"]
+    CAL --> NA["Numerical Analysis"]
 
     EFA --> TC["Tensor Calculus"]
     EFA --> VC["Variational Calculus"]
@@ -219,10 +221,11 @@ flowchart TD
 
 If the mermaid flowchart does not render:
 1. `Linear Algebra`
-2. Parallel branches from `Linear Algebra`:
+2. `Multivariable Calculus`
+3. Parallel branches from `Linear Algebra`:
     1. `Elementary Functional Analysis`
     2. `Numerical Analysis`
-3. From `Functional Analysis & Matrix Spectral Theory`, two branches:
+4. From `Functional Analysis & Matrix Spectral Theory`, two branches:
     1. `Tensor Calculus`, which leads to:
         1. `Differential Geometry`
         2. `Statistics and Information Theory` (which then leads to `Information Geometry`)
@@ -236,8 +239,9 @@ The series is mostly intended to be self-contained beyond these items.
 I have inserted an example reading order between the series and the `crash courses`.
 
 1. Introduction to basic mathematical optimization
-2. Iterative methods: gradient-free vs. gradient-based optimization
+   - `Multivariable Calculus`
    - `Linear Algebra`
+2. Iterative methods: gradient-free vs. gradient-based optimization
 3. Desirable properties of optimizers
 4. Speedrun of common gradient-based ML optimizers
 5. Problem formalization

@@ -263,8 +263,6 @@ exclude:
   - rollup.config.js
   - "package*.json"
 
-incremental: true
-
 plugins:
   - jekyll-tagories
   - jekyll/scholar

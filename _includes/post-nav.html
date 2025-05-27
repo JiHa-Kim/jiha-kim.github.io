@@ -1,16 +1,44 @@
-<!-- Navigation buttons at the bottom of the post. -->
+{% assign previous = site.data.locales[include.lang].post.button.previous %}
+{% assign next = site.data.locales[include.lang].post.button.next %}
+
+{% if page.collection == 'series' %}
+  {% assign sorted = site.series | sort: 'series_index' %}
+{% elsif page.collection == 'crash-courses' %}
+  {% assign sorted = site['crash-courses'] | sort: 'course_index' %}
+{% else %}
+  {% assign sorted = site.posts %}
+{% endif %}
+
+{% assign current_index = null %}
+{% for item in sorted %}
+  {% if item.url == page.url %}
+    {% assign current_index = forloop.index0 %}
+  {% endif %}
+{% endfor %}
+
+{% assign prev_item = null %}
+{% assign next_item = null %}
+{% if current_index %}
+  {% assign prev_index = current_index | minus: 1 %}
+  {% assign next_index = current_index | plus: 1 %}
+
+  {% if prev_index >= 0 %}
+    {% assign prev_item = sorted[prev_index] %}
+  {% endif %}
+
+  {% if next_index < sorted.size %}
+    {% assign next_item = sorted[next_index] %}
+  {% endif %}
+{% endif %}
 
 <nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation">
-  {% assign previous = site.data.locales[include.lang].post.button.previous %}
-  {% assign next = site.data.locales[include.lang].post.button.next %}
-
-  {% if page.previous.url %}
+  {% if prev_item %}
     <a
-      href="{{ site.baseurl }}{{ page.previous.url }}"
+      href="{{ site.baseurl }}{{ prev_item.url }}"
       class="btn btn-outline-primary"
       aria-label="{{ previous }}"
     >
-      <p>{{ page.previous.title }}</p>
+      <p>{{ prev_item.title }}</p>
     </a>
   {% else %}
     <div class="btn btn-outline-primary disabled" aria-label="{{ previous }}">
@@ -18,13 +46,13 @@
     </div>
   {% endif %}
 
-  {% if page.next.url %}
+  {% if next_item %}
     <a
-      href="{{ site.baseurl }}{{page.next.url}}"
+      href="{{ site.baseurl }}{{ next_item.url }}"
       class="btn btn-outline-primary"
       aria-label="{{ next }}"
     >
-      <p>{{ page.next.title }}</p>
+      <p>{{ next_item.title }}</p>
     </a>
   {% else %}
     <div class="btn btn-outline-primary disabled" aria-label="{{ next }}">
