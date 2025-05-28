@@ -186,7 +186,7 @@ The most basic requirement is that the optimizer should **converge** to *some* m
 <div class="title" markdown="1">
 **Example.** Getting Stuck
 </div>
-Consider minimizing the function $$f(x) = x^4 - 4x^2 + x$$. This function has multiple local minima. An optimizer might converge to one of these, but not necessarily the global minimum.
+Consider minimizing the function $$f(x) = x^4 - 4x^2 + x$$. This function has multiple local minima (two, in fact) and one local maximum. An optimizer might converge to one of these local minima, but not necessarily the global minimum. This illustrates how non-convex functions can pose challenges.
 </blockquote>
 
 *   **Underlying Principle: The Descent Property**
@@ -203,6 +203,18 @@ Beyond just converging, the quality of the solution matters.
 *   **_ML Context: Generalization and "Good" Minima_**
     In machine learning, finding the absolute minimum of the training loss isn't the sole aim. We desire models that **generalize** well to unseen data.
     *   **"Flat" vs. "Sharp" Minima:** Optimizers that find "flatter" regions of the loss landscape (where the function value doesn't change much with small perturbations to the parameters) are often hypothesized to lead to better generalization than those converging to "sharp" minima.
+        <blockquote class="prompt-example" markdown="1">
+        <div class="title" markdown="1">
+        **Example.** Flat vs. Sharp Minima and Generalization
+        </div>
+        Imagine training a model. Optimizer A finds parameters $$w_A^\ast$$ corresponding to a minimum where the training loss $$L(w_A^\ast)=0.01$$. This minimum is very "sharp": small changes to $$w_A^\ast$$ cause the loss to increase rapidly. Optimizer B finds parameters $$w_B^\ast$$ where the training loss $$L(w_B^\ast)=0.05$$. This minimum is "flat": the loss surface is almost level around $$w_B^\ast$$.
+
+        When the model is evaluated on test data, which typically differs slightly from training data, this can be seen as evaluating the loss on a slightly perturbed version of the parameters (or, equivalently, the loss function itself is slightly different for the test set).
+        *   For model $$A$$, if the parameters are perturbed even slightly (due to the train-test shift), the sharp nature of the minimum means the loss could increase significantly (e.g., test loss becomes 0.5).
+        *   For model $$B$$, the flatness around $$w_B^\ast$$ implies that similar perturbations to the parameters result in only a small change in loss (e.g., test loss becomes 0.06).
+
+        In this scenario, optimizer B, despite achieving a slightly higher training loss, might lead to a model that generalizes better to unseen data. Stochastic Gradient Descent (SGD), due to the noise in its gradient estimates, is often observed to find flatter minima compared to some adaptive methods that might converge more aggressively to sharper minima. The precise mechanisms and guarantees linking flatness to generalization are complex and subjects of ongoing research.
+        </blockquote>
     *   **Implicit Regularization:** Some optimizers (e.g., SGD) are thought to possess an "implicit regularization" effect due to noise or specific update rules, guiding them towards solutions that generalize better, even if they don't achieve the absolute lowest training loss.
 
 ## 3. Efficiency: Speed and Resource Management
@@ -231,6 +243,20 @@ How quickly does the algorithm approach the solution?
     *   **Quadratic ($$p=2$$):** The number of correct digits roughly doubles each iteration (once close to $$x^\ast$$). Example: Newton's method.
     </blockquote>
     A higher theoretical rate is generally better but often comes with trade-offs.
+    <blockquote class="prompt-example" markdown="1">
+    <div class="title" markdown="1">
+    **Example.** Convergence Rates on $$f(x) = \frac{1}{2}x^2$$
+    </div>
+    Let's minimize the simple quadratic function $$f(x) = \frac{1}{2}x^2$$, starting from an initial point $$x_0 = 4$$. The true minimum is at $$x^\ast=0$$.
+    *   **Gradient Descent (GD):** The update rule is $$x_{k+1} = x_k - \alpha f'(x_k) = x_k - \alpha x_k = (1-\alpha)x_k$$. For this function, GD converges if $$0 < \alpha < 2$$. If we choose a learning rate $$\alpha=0.5$$, the iterates are:
+        $$x_0=4, \quad x_1=(1-0.5) \cdot 4 = 2, \quad x_2=(0.5) \cdot 2 = 1, \quad x_3=(0.5) \cdot 1 = 0.5, \quad \ldots $$
+        The error $$\vert x_k - x^\ast \vert = \vert x_k \vert$$ decreases by a constant factor of $$0.5$$ at each step ($$\vert x_{k+1} \vert / \vert x_k \vert = 0.5$$), demonstrating linear convergence.
+    *   **Newton's Method:** The update rule is $$x_{k+1} = x_k - \frac{f'(x_k)}{f''(x_k)}$$. Here, $$f'(x) = x$$ and $$f''(x) = 1$$. So,
+        $$ x_{k+1} = x_k - \frac{x_k}{1} = x_k - x_k = 0 $$
+        Starting from $$x_0 = 4$$, Newton's method converges to the minimum $$x^\ast=0$$ in a single step: $$x_1 = 0$$. This is characteristic of Newton's method on quadratic functions.
+
+    This simple example highlights the potentially faster convergence of higher-order methods, though Newton's method requires computing and inverting the Hessian, which can be costly for general functions.
+    </blockquote>
 
 *   **Practical Speed Considerations:**
     *   **Number of iterations ($$k$$):** How many steps to reach desired accuracy.
@@ -259,9 +285,45 @@ The optimization landscape can be treacherous. A robust optimizer performs relia
 *   **Non-Convexity:**
     *   **Escaping "Bad" Local Minima:** Ability to avoid getting stuck in poor local minima.
     *   **Navigating Saddle Points:** Efficiently escaping saddle points, which are prevalent in high-dimensional non-convex problems.
+        <blockquote class="prompt-example" markdown="1">
+        <div class="title" markdown="1">
+        **Example.** Navigating a Saddle Point
+        </div>
+        Consider the function $$f(x,y) = \frac{1}{2}x^2 - \frac{1}{2}y^2$$. The gradient is $$\nabla f(x,y) = (x, -y)^T$$, and the Hessian is $$\nabla^2 f(x,y) = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}$$.
+        The point $$(0,0)$$ is a critical point since $$\nabla f(0,0) = (0,0)^T$$. The Hessian at $$(0,0)$$ has one positive eigenvalue (1) and one negative eigenvalue (-1), confirming that $$(0,0)$$ is a saddle point. Along the x-axis (where $$y=0$$), the function $$f(x,0)=\frac{1}{2}x^2$$ looks like a minimum. Along the y-axis (where $$x=0$$), the function $$f(0,y)=-\frac{1}{2}y^2$$ looks like a maximum.
+
+        *   **Gradient Descent (GD):** The updates are $$x_{k+1} = x_k - \alpha x_k = (1-\alpha)x_k$$ and $$y_{k+1} = y_k - \alpha (-y_k) = (1+\alpha)y_k$$.
+            If started at $$(x_0, y_0)$$:
+            - The $$x$$ component, $$x_k = (1-\alpha)^k x_0$$, converges to 0 (assuming $$0 < \alpha < 2$$).
+            - The $$y$$ component, $$y_k = (1+\alpha)^k y_0$$, diverges from 0 if $$y_0 \neq 0$$ and $$\alpha > 0$$.
+            GD thus "slides off" the saddle along the direction of negative curvature (the y-axis for this function). However, if the initial component $$y_0$$ along the negative curvature direction is very small, convergence towards the saddle region can be slow before the diverging component eventually pushes the iterate away. In high-dimensional problems, saddle points can have many positive and negative curvature directions, making their geometry complex.
+
+        *   **Newton's Method:** Newton's method seeks points where $$\nabla f = 0$$. The update step is $$p_k = -[\nabla^2 f(x_k)]^{-1} \nabla f(x_k)$$.
+            For $$f(x,y) = \frac{1}{2}x^2 - \frac{1}{2}y^2$$, this gives $$p_k = -\begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}^{-1} \begin{pmatrix} x_k \\ -y_k \end{pmatrix} = -\begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix} \begin{pmatrix} x_k \\ -y_k \end{pmatrix} = \begin{pmatrix} -x_k \\ -y_k \end{pmatrix}$$.
+            So, the next iterate is $$x_{k+1} = x_k + p_{k,x} = x_k - x_k = 0$$ and $$y_{k+1} = y_k + p_{k,y} = y_k - y_k = 0$$.
+            From any starting point $$(x_k, y_k)$$, a pure Newton step jumps directly to the saddle point $$(0,0)$$. This occurs because Newton's method targets any stationary point where $$\nabla f=0$$. To specifically seek minima and effectively escape saddles (i.e., move towards points with lower function values), Newton-type methods often incorporate trust regions or modify the Hessian (e.g., by adding a multiple of the identity matrix if it's not positive definite) to ensure descent.
+
+        In practice, for escaping saddle points and finding local minima:
+        - **Stochastic Gradient Descent (SGD):** The noise introduced by mini-batch gradients can provide the necessary "perturbation" to move the iterates away from saddle points, especially along directions where the gradient is small or corresponds to negative curvature.
+        - **Second-order methods with modifications:** Algorithms like trust-region Newton methods or Cubic Regularized Newton's method are designed to detect and exploit negative curvature directions to efficiently escape saddles and proceed towards minima.
+        </blockquote>
 *   **Ill-Conditioning:**
     *   The problem is ill-conditioned if the Hessian $$\nabla^2 f(x)$$ has a high condition number (level sets are like elongated ellipses).
     *   Optimizers should handle this gracefully, avoiding excessive zig-zagging or slow convergence. Preconditioning or adaptive scaling helps.
+        <blockquote class="prompt-example" markdown="1">
+        <div class="title" markdown="1">
+        **Example.** Impact of Ill-Conditioning
+        </div>
+        Consider minimizing the ill-conditioned quadratic function $$f(x,y) = \frac{1}{2}(x^2 + 100y^2)$$. The minimum is at $$(0,0)$$. The Hessian matrix is $$\nabla^2 f(x,y) = \begin{pmatrix} 1 & 0 \\ 0 & 100 \end{pmatrix}$$, and its condition number (ratio of largest to smallest eigenvalue) is $$\kappa = 100/1 = 100$$. The level sets of this function are highly elongated ellipses.
+        The gradient is $$\nabla f(x,y) = (x, 100y)^T$$.
+        The Gradient Descent update is:
+        $$ \begin{pmatrix} x_{k+1} \\ y_{k+1} \end{pmatrix} = \begin{pmatrix} x_k \\ y_k \end{pmatrix} - \alpha \begin{pmatrix} x_k \\ 100y_k \end{pmatrix} = \begin{pmatrix} (1-\alpha)x_k \\ (1-100\alpha)y_k \end{pmatrix} $$
+        For stability, particularly for the $$y$$ component, the learning rate $$\alpha$$ must satisfy $$\vert 1-100\alpha \vert < 1$$, which means $$0 < 100\alpha < 2$$, or $$0 < \alpha < 0.02$$.
+        *   If we choose $$\alpha$$ close to the upper stability limit, say $$\alpha = 0.019$$, then the convergence factor for $$x$$ is $$(1-0.019) = 0.981$$ (slow), while for $$y$$ it's $$\vert 1-100 \cdot 0.019 \vert = \vert 1-1.9 \vert = 0.9$$ (faster, but oscillating as $$1-1.9 = -0.9$$).
+        *   If we pick a smaller $$\alpha$$ to ensure smooth convergence for $$y$$, e.g., $$\alpha=0.01$$, then $$x_{k+1} = 0.99 x_k$$ (very slow convergence in the $$x$$ direction) and $$y_{k+1} = (1-1)y_k = 0 \cdot y_k$$ (immediate convergence in the $$y$$ direction if $$y_0 \ne 0$$).
+        This disparity in required learning rates across different directions forces Gradient Descent to take many small steps, effectively "zig-zagging" down the narrow valley of the objective function, leading to slow overall convergence.
+        Newton's method, being affine invariant (as discussed in Section 4.2), would rescale the problem variables appropriately and converge in one step for this quadratic. Adaptive methods (like AdaGrad, Adam) also aim to mitigate this issue by effectively using different step sizes for different parameters, thereby handling the disparate scales much better.
+        </blockquote>
 
 ### 4.2. Fundamental Mathematical Robustness: Invariance Properties
 
@@ -304,7 +366,7 @@ These describe how an optimizer's behavior changes (or, ideally, doesn't) under 
     *   **Importance:** Crucial when variables have vastly different scales. Avoids the need for manual normalization.
     *   **Examples:**
         *   Newton's method (being affine invariant).
-        *   Adaptive methods like AdaGrad, RMSProp, Adam achieve a form of diagonal scaling invariance by adapting per-parameter learning rates. For AdaGrad, the update for $$x_i$$ is $$x_{i, t+1} = x_{i, t} - \frac{\eta}{\sqrt{G_{ii,t}}} g_{i,t}$$. If $$x_i$$ is scaled by $$s_i$$, its gradient $$g_i$$ scales by $$1/s_i$$, $$G_{ii,t}$$ by $$1/s_i^2$$, so $$\frac{g_{i,t}}{\sqrt{G_{ii,t}}}$$ is scale-invariant. Thus, the update $\Delta x_i$ is scale-invariant w.r.t. $$x_i$$.
+        *   Adaptive methods like AdaGrad, RMSProp, Adam achieve a form of diagonal scaling invariance by adapting per-parameter learning rates. For AdaGrad, the update for $$x_i$$ is $x_{i, t+1} = x_{i, t} - \frac{\eta}{\sqrt{G_{ii,t} + \epsilon}} g_{i,t}$. If $x_i$ is scaled by $s_i$, its gradient $g_i$ scales by $1/s_i$, $G_{ii,t}$ by $1/s_i^2$, so $\frac{g_{i,t}}{\sqrt{G_{ii,t}}}$ is scale-invariant. Thus, the update $\Delta x_i$ is scale-invariant w.r.t. $x_i$.
 
 *   **Isometry Invariance (Rotations and Translations):**
     *   **Definition:** Behavior is unchanged if coordinates are rotated ($$x' = Rx + t$$, $$R^TR=I$$) or translated.
