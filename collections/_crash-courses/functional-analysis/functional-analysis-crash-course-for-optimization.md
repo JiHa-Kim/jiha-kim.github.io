@@ -3,7 +3,7 @@ title: "Elementary Functional Analysis: A Crash Course for Optimization"
 date: 2025-05-22 09:00 -0400
 course_index: 1 # Assuming this is the first in a potential series of courses
 description: An introduction to the core concepts of functional analysis using bra-ket notation, essential for understanding the theory behind machine learning optimization algorithms, including normed spaces, Hilbert spaces, operator spectral theory, and derivatives in abstract spaces.
-image: /assets/img/placeholder_efa.png # Placeholder image path
+image: # Placeholder image path
 categories:
 - Mathematical Foundations
 - Machine Learning
