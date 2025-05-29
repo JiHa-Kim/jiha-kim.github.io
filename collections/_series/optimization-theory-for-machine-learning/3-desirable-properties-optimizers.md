@@ -129,13 +129,6 @@ llm-instructions: |
     - prompt-warning          # Icon: `\f06a` (exclamation-circle), Color: `var(--prompt-warning-icon-color)`
     - prompt-danger           # Icon: `\f071` (exclamation-triangle), Color: `var(--prompt-danger-icon-color)`
 
-  Your newly added math-specific prompt classes can include (styled like their `box-*` counterparts):
-    - prompt-definition       # Icon: `\f02e` (bookmark), Color: `#2563eb` (blue)
-    - prompt-lemma            # Icon: `\f022` (list-alt/bars-staggered), Color: `#16a34a` (green)
-    - prompt-proposition      # Icon: `\f0eb` (lightbulb), Color: `#eab308` (yellow/amber)
-    - prompt-theorem          # Icon: `\f091` (trophy), Color: `#dc2626` (red)
-    - prompt-example          # Icon: `\f0eb` (lightbulb), Color: `#8b5cf6` (purple)
-
   Similarly, for boxed environments you can define:
     - box-definition          # Icon: `\f02e` (bookmark), Color: `#2563eb` (blue)
     - box-lemma               # Icon: `\f022` (list-alt/bars-staggered), Color: `#16a34a` (green)
@@ -148,7 +141,7 @@ llm-instructions: |
     - box-danger              # Icon: `\f071` (exclamation-triangle), Color: `var(--prompt-danger-icon-color)` (theme-defined)
 
   For details blocks, use:
-    - details-block           # main wrapper (styled like prompt-tip)
+    - details-block           # main wrapper (styled like box-tip)
     - the `<summary>` inside will get tip/book icons automatically
 
   Please do not modify the sources, references, or further reading material
@@ -182,7 +175,7 @@ The most basic requirement is that the optimizer should **converge** to *some* m
     *   **Local Minimum:** A point $$x^\ast$$ such that $$f(x^\ast) \le f(x)$$ for all $$x$$ in a neighborhood around $$x^\ast$$. This implies $$\nabla f(x^\ast) = 0$$ and $$\nabla^2 f(x^\ast)$$ is positive semi-definite.
     *   **Global Minimum:** The ultimate goal: $$f(x^\ast) \le f(x)$$ for *all* $$x$$. This is very hard for non-convex functions.
 
-<blockquote class="prompt-example" markdown="1">
+<blockquote class="box-example" markdown="1">
 <div class="title" markdown="1">
 **Example.** Getting Stuck
 </div>
@@ -203,7 +196,7 @@ Beyond just converging, the quality of the solution matters.
 *   **_ML Context: Generalization and "Good" Minima_**
     In machine learning, finding the absolute minimum of the training loss isn't the sole aim. We desire models that **generalize** well to unseen data.
     *   **"Flat" vs. "Sharp" Minima:** Optimizers that find "flatter" regions of the loss landscape (where the function value doesn't change much with small perturbations to the parameters) are often hypothesized to lead to better generalization than those converging to "sharp" minima.
-        <blockquote class="prompt-example" markdown="1">
+        <blockquote class="box-example" markdown="1">
         <div class="title" markdown="1">
         **Example.** Flat vs. Sharp Minima and Generalization
         </div>
@@ -243,7 +236,7 @@ How quickly does the algorithm approach the solution?
     *   **Quadratic ($$p=2$$):** The number of correct digits roughly doubles each iteration (once close to $$x^\ast$$). Example: Newton's method.
     </blockquote>
     A higher theoretical rate is generally better but often comes with trade-offs.
-    <blockquote class="prompt-example" markdown="1">
+    <blockquote class="box-example" markdown="1">
     <div class="title" markdown="1">
     **Example.** Convergence Rates on $$f(x) = \frac{1}{2}x^2$$
     </div>
@@ -285,7 +278,7 @@ The optimization landscape can be treacherous. A robust optimizer performs relia
 *   **Non-Convexity:**
     *   **Escaping "Bad" Local Minima:** Ability to avoid getting stuck in poor local minima.
     *   **Navigating Saddle Points:** Efficiently escaping saddle points, which are prevalent in high-dimensional non-convex problems.
-        <blockquote class="prompt-example" markdown="1">
+        <blockquote class="box-example" markdown="1">
         <div class="title" markdown="1">
         **Example.** Navigating a Saddle Point
         </div>
@@ -310,7 +303,7 @@ The optimization landscape can be treacherous. A robust optimizer performs relia
 *   **Ill-Conditioning:**
     *   The problem is ill-conditioned if the Hessian $$\nabla^2 f(x)$$ has a high condition number (level sets are like elongated ellipses).
     *   Optimizers should handle this gracefully, avoiding excessive zig-zagging or slow convergence. Preconditioning or adaptive scaling helps.
-        <blockquote class="prompt-example" markdown="1">
+        <blockquote class="box-example" markdown="1">
         <div class="title" markdown="1">
         **Example.** Impact of Ill-Conditioning
         </div>
@@ -389,7 +382,7 @@ Invariance properties significantly enhance an optimizer's robustness and reduce
     *   **Adaptive/Parameter-Free Nature:** The ideal is minimal or no tuning (e.g., adaptive learning rates).
 *   **Numerical Stability:** Updates should not lead to numerical overflow or underflow (NaNs).
 
-<blockquote class="prompt-tip" markdown="1">
+<blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
 **Tip.** The Learning Rate Dilemma
 </div>
