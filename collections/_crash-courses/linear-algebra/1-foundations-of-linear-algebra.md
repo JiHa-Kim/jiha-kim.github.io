@@ -896,6 +896,65 @@ Let's explore this with concrete examples covered in this part of the course:
 
 This "local determines global" characteristic is a cornerstone of why linear algebra is so powerful and predictable. Other examples involving eigenvalues and the structure of solution sets (related to the null space and column space) will be explored in Part 2 of this Linear Algebra series.
 
+The geometric viewpoint of linear algebra is highly useful to reason about some facts that seem intuitively true, but not immediately obvious to prove. (However, beware the "curse of dimensionality", where certain intuitions in low dimensions may not hold in higher dimensions.)
+
+Here are some examples.
+
+1. Similarity in Geometry
+In geometry, it is known that scaling a shape by a factor of $$k$$ changes its volume by a factor of $$k^n$$, where $$n$$ is the dimension of the space. This feels somewhat correct, but hard to fully justify intuitively. However, with the properties of the determinant, this is obvious: we are applying a scaling transformation $$kI$$ where $$I$$ is the identity transformation, i.e. each basis vector is scaled by a factor of $$k$$. From the globality of the determinant, the whole shape's volume is scaled by $$det(kI)=k^n$$.
+
+2. Cavalier's principle
+Cavalier's principle states that two regions that differ only up to translations in a single direction have equal volume. In linear algebraic terms, is simply that a shearing transformation does not affect volume. 
+
+Here are some concrete examples of intuition it provides.
+
+1. Area of an ellipse
+You might have derived the formula for the area enclosed by an ellipse in multivariable calculus, and you would find this procedure quite tedious. However, knowing that the area of the unit disk is $$\pi$$ is sufficient to conclude that, by appropriately rotating the basis vectors and scaling them by the lengths of the semi-diagonals of the ellipse $$a$$ and $$b$$, the area of the ellipse is $$\pi \cdot a \cdot b$$.
+2. Area of a Parallelogram from its Defining Vectors
+   The definition of the determinant tells us that $$|\det(A)|$$ is the factor by which the transformation $$T(\vec{x})=A\vec{x}$$ scales areas (in 2D) or volumes (in 3D). This arises because a linear transformation maps the standard basis vectors, which form a unit square (in 2D) or unit cube (in 3D) of area/volume 1, to a parallelogram or parallelepiped whose area/volume is $$|\det(A)|$$.
+
+   We can use this directly: if we want to find the area of a parallelogram spanned by two vectors $$\vec{u}$$ and $$\vec{v}$$ in $$\mathbb{R}^2$$, we can construct a matrix $$M$$ whose columns are these vectors: $$M = [\vec{u} \ \vec{v}]$$. The linear transformation $$T(\vec{x}) = M\vec{x}$$ maps the standard basis vector $$\vec{e}_1 = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$$ to $$\vec{u}$$ and $$\vec{e}_2 = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$$ to $$\vec{v}$$.
+   Thus, the unit square spanned by $$\vec{e}_1$$ and $$\vec{e}_2$$ is transformed into the parallelogram spanned by $$\vec{u}$$ and $$\vec{v}$$. The area of this parallelogram is therefore $$|\det(M)| \times \text{Area}(\text{unit square}) = |\det(M)| \times 1 = |\det(M)|$$.
+
+   For example, if $$\vec{u} = \begin{pmatrix} a \\ b \end{pmatrix}$$ and $$\vec{v} = \begin{pmatrix} c \\ d \end{pmatrix}$$, then $$M = \begin{pmatrix} a & c \\ b & d \end{pmatrix}$$, and the area is $$|ad - bc|$$.
+   This provides a fundamental geometric interpretation for the determinant computation: it's the signed area (or volume) of the shape formed by its column vectors. This is a direct consequence of the local-to-global scaling property, applied to the specific case where the "shape" is defined by the vectors themselves relative to the origin.
+   In $$\mathbb{R}^3$$, the volume of the parallelepiped spanned by three vectors $$\vec{u}, \vec{v}, \vec{w}$$ is similarly given by $$|\det([\vec{u} \ \vec{v} \ \vec{w}])|$$.
+
+3. Transformation of the Center of Mass
+   Consider a system of $$k$$ point masses $$m_1, m_2, \dots, m_k$$ located at positions $$\vec{p}_1, \vec{p}_2, \dots, \vec{p}_k$$ in $$\mathbb{R}^n$$. The center of mass of this system is a weighted average of the positions:
+
+   $$
+   \vec{R}_{CM} = \frac{m_1\vec{p}_1 + m_2\vec{p}_2 + \dots + m_k\vec{p}_k}{m_1 + m_2 + \dots + m_k} = \frac{\sum_{i=1}^k m_i \vec{p}_i}{M_{total}}
+   $$
+
+   where $$M_{total} = \sum_{i=1}^k m_i$$ is the total mass of the system.
+
+   Now, suppose we apply a linear transformation $$T(\vec{x}) = A\vec{x}$$ to every point mass in the system, so their new positions become $$\vec{p}_i' = A\vec{p}_i$$. What is the new center of mass, $$\vec{R}_{CM}'$$?
+
+   $$
+   \vec{R}_{CM}' = \frac{\sum_{i=1}^k m_i \vec{p}_i'}{M_{total}} = \frac{\sum_{i=1}^k m_i (A\vec{p}_i)}{M_{total}}
+   $$
+
+   Using the properties of linear transformations (specifically, that scalar multiplication commutes with the transformation, $$m_i(A\vec{p}_i) = A(m_i\vec{p}_i)$$, and that the transformation distributes over vector addition, $$A(\vec{x}+\vec{y}) = A\vec{x} + A\vec{y}$$, which extends to sums), we can factor $$A$$ out of the summation:
+
+   $$
+   \sum_{i=1}^k m_i (A\vec{p}_i) = \sum_{i=1}^k A (m_i \vec{p}_i) = A \left( \sum_{i=1}^k m_i \vec{p}_i \right)
+   $$
+
+   Substituting this back into the expression for $$\vec{R}_{CM}'$$:
+
+   $$
+   \vec{R}_{CM}' = \frac{A \left(\sum_{i=1}^k m_i \vec{p}_i\right)}{M_{total}} = A \left( \frac{\sum_{i=1}^k m_i \vec{p}_i}{M_{total}} \right)
+   $$
+
+   This elegantly simplifies to:
+
+   $$
+   \vec{R}_{CM}' = A \vec{R}_{CM}
+   $$
+
+   This result demonstrates that the center of mass of the transformed system is simply the transformation of the original center of mass. Instead of recomputing the center of mass from all $$k$$ new positions (a potentially tedious "local" recalculation), we can apply the linear transformation $$A$$ just once to the original, "global" center of mass vector $$\vec{R}_{CM}$$. This powerful simplification is a direct consequence of linearity, showing how the transformation's consistent action on individual components translates to a consistent action on an aggregate property derived from them.
+
 ## Conclusion for Part 1
 
 This first part of our linear algebra crash course has laid the groundwork by introducing vectors, vector spaces, the fundamental operations, and the crucial concept of linear transformations and their matrix representations. We've seen how matrices encode geometric actions like rotations, shears, and scalings, and how determinants quantify the change in volume and orientation caused by these transformations. We also touched upon how these ideas connect to solving systems of linear equations.

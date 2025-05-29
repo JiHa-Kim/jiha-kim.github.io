@@ -584,7 +584,6 @@ Other important factorizations include:
 5.  Describe the geometric effect of $$A = \begin{pmatrix} 2 & 0 \\ 0 & -3 \end{pmatrix}$$ using the SVD idea (it's already diagonal, so $$U, V$$ are simple, but consider the negative sign).
 
 ## 14. The Complex Perspective: Rotations and Beyond
-*(This section was numbered 14 in the original single document)*
 
 While we've focused on real Euclidean spaces, complex numbers offer powerful geometric insights, especially for understanding rotations and certain types of transformations.
 
@@ -743,7 +742,6 @@ While direct visualization of $$\mathbb{C}^n$$ for $$n>1$$ is challenging (as it
 5.  Let $$\vec{z} = \begin{pmatrix} i \\ 1 \end{pmatrix}$$ and $$\vec{w} = \begin{pmatrix} 1 \\ -i \end{pmatrix}$$ be vectors in $$\mathbb{C}^2$$. Calculate their Hermitian inner product $$\langle \vec{z}, \vec{w} \rangle = z_1\bar{w_1} + z_2\bar{w_2}$$. Are they orthogonal?
 
 ## 15. The Power of Abstraction: General Vector Spaces
-*(This section was numbered 15 in the original single document)*
 
 Throughout this crash course, we've explored vectors primarily as arrows in Euclidean spaces like $$\mathbb{R}^2$$ and $$\mathbb{R}^3$$. This geometric intuition is invaluable. However, one of the great strengths of linear algebra comes from abstracting the core properties of these vectors and their operations. This allows us to apply the powerful machinery we've developed to a much wider range of mathematical objects.
 

@@ -433,9 +433,11 @@ The beauty of the abstract definition $$\langle \vert y \rangle \vert T \vert x 
 </div>
 Let $$T: H \to H$$ be a bounded linear operator on a Hilbert space $$H$$.
 -   $$T$$ is **self-adjoint** (or **Hermitian** if $$H$$ is complex) if $$T = T^\dagger$$. This means:
+
     $$
     \langle \vert y \rangle \vert T \vert x \rangle \rangle = \langle T \vert y \rangle \vert \vert x \rangle \rangle \quad \text{for all } \vert x \rangle, \vert y \rangle \in H
     $$
+
     For real Hilbert spaces, this implies $$\langle T \vert x \rangle \vert \vert y \rangle \rangle = \langle \vert x \rangle \vert T \vert y \rangle \rangle$$. A self-adjoint operator on a real finite-dimensional Hilbert space is represented by a symmetric matrix *if and only if the basis used is orthonormal*.
 -   $$T$$ is **unitary** (if $$H$$ is complex) or **orthogonal** (if $$H$$ is real) if it preserves the inner product: $$\langle T \vert x \rangle \vert T \vert y \rangle \rangle = \langle x \vert y \rangle$$ for all $$\vert x \rangle, \vert y \rangle \in H$$. This is equivalent to $$T^\dagger T = T T^\dagger = I$$ (the identity operator), meaning $$T^\dagger = T^{-1}$$.
 -   $$T$$ is **normal** if it commutes with its adjoint: $$T T^\dagger = T^\dagger T$$. Self-adjoint and unitary operators are examples of normal operators. Normal operators are precisely those that are unitarily diagonalizable (by the Spectral Theorem for normal operators).
@@ -458,6 +460,7 @@ Any ket $$\vert x \rangle \in H$$ can be written as $$\vert x \rangle = \sum_k \
 $$
 T \vert x \rangle = \sum_{k} \lambda_k \langle \phi_k \vert x \rangle \vert \phi_k \rangle = \sum_{k} \lambda_k \text{proj}_{\vert \phi_k \rangle}(\vert x \rangle)
 $$
+
 where $$\text{proj}_{\vert \phi_k \rangle}(\vert x \rangle) = \langle \phi_k \vert x \rangle \vert \phi_k \rangle$$.
 The sum can be over a finite or countably infinite set of indices. If $$H$$ is separable, the orthonormal system $$(\vert \phi_k \rangle)_k$$ together with an orthonormal basis for $$\text{Ker}(T)$$ forms an orthonormal basis for $$H$$.
 The operator $$P_k = \vert \phi_k \rangle \langle \phi_k \vert$$ (outer product notation) is the projection operator onto the one-dimensional subspace spanned by $$\vert \phi_k \rangle$$. So, $$T = \sum_k \lambda_k \vert \phi_k \rangle \langle \phi_k \vert$$.
@@ -473,6 +476,7 @@ For any compact operator $$T: H_1 \to H_2$$ between Hilbert spaces (not necessar
 $$
 T \vert x \rangle = \sum_k \sigma_k \vert u_k \rangle \langle v_k \vert x \rangle_{H_1}
 $$
+
 And $$T^\dagger \vert y \rangle = \sum_k \sigma_k \vert v_k \rangle \langle u_k \vert y \rangle_{H_2}$$.
 The kets $$\vert v_k \rangle$$ are eigenkets of $$T^\dagger T$$ (i.e., $$T^\dagger T \vert v_k \rangle = \sigma_k^2 \vert v_k \rangle$$), and $$\vert u_k \rangle$$ are eigenkets of $$T T^\dagger$$ (i.e., $$T T^\dagger \vert u_k \rangle = \sigma_k^2 \vert u_k \rangle$$). Also, $$T \vert v_k \rangle = \sigma_k \vert u_k \rangle$$ and $$T^\dagger \vert u_k \rangle = \sigma_k \vert v_k \rangle$$.
 The operator norm is $$\Vert T \Vert = \sigma_1$$ (the largest singular value).
@@ -615,5 +619,3 @@ This foundation will allow us to discuss topics like gradient flow dynamics, con
 This crash course has laid out elementary functional analysis concepts using bra-ket notation to consistently distinguish vectors (kets) from their duals (bras) and other related objects like operators. This approach, while common in physics, is adopted here to prepare for advanced topics where such distinctions are crucial for clarity (e.g., tensor calculus, differential geometry). The generalization of matrix algebra to operators in Hilbert spaces, and calculus to abstract spaces, provides powerful and elegant tools for understanding and developing optimization algorithms in machine learning.
 
 The emphasis on the coordinate-free nature of definitions like the adjoint operator, and the careful treatment of its matrix representation under different basis choices, aims to correct common misconceptions. Understanding these foundational elements is key to appreciating the mathematical underpinnings of modern ML optimizers and their theoretical guarantees. For a deeper dive, consult standard textbooks on functional analysis (e.g., by Kreyszig, Rudin, Lax, Conway), keeping in mind potential notational differences.
-Use code with caution.
-Markdown

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# fix-math.sh — ensure proper blank lines around $$…$$ blocks in Markdown
+# fix-math.sh — convert any lone $…$ into $$…$$ for Kramdown/MathJax
+#               and ensure proper blank lines around $$…$$ blocks in Markdown
 
 set -euo pipefail
 
@@ -41,17 +42,20 @@ for md in "$@"; do
     echo "Backup created: $md.bak.$ts"
   fi
 
-  # in-place fix
+  # in-place fix: first normalize stray single-$ to $$…$$, then ensure blank lines around block math
   perl -i -0777 -pe '
-    my $yaml_delim     = 0;
-    my $in_code        = 0;
-    my $in_math        = 0;
+    # convert any single-dollar math delimiters into double-dollar
+    s/(?<!\$)\$(?!\$)/\$\$/g;
+
+    my $yaml_delim      = 0;
+    my $in_code         = 0;
+    my $in_math         = 0;
     my $need_post_blank = 0;
     my @out;
 
-    for my $line (split /\n/) {
+    for my $line ( split /\n/ ) {
 
-      # YAML front-matter
+      # preserve YAML front-matter
       if ( $yaml_delim < 2 && $line =~ /^---\s*$/ ) {
         $yaml_delim++;
         push @out, $line;
@@ -62,7 +66,7 @@ for md in "$@"; do
         next;
       }
 
-      # code fences
+      # skip over fenced code blocks entirely
       if ( $line =~ /^```/ ) {
         $in_code ^= 1;
         push @out, $line;
@@ -73,23 +77,24 @@ for md in "$@"; do
         next;
       }
 
-      # after a closing $$, maybe insert blank
+      # after closing $$ block, ensure one blank line
       if ( $need_post_blank ) {
         push @out, "" unless $line =~ /^\s*$/;
         $need_post_blank = 0;
       }
 
-      # detect $$ delimiter
+      # detect standalone $$ delimiters
       if ( $line =~ /^\s*\$\$\s*$/ ) {
         if ( !$in_math ) {
           # opening $$ → ensure blank above
           push @out, "" if @out && $out[-1] !~ /^\s*$/;
           push @out, $line;
           $in_math = 1;
-        } else {
+        }
+        else {
           # closing $$ → blank below
           push @out, $line;
-          $in_math = 0;
+          $in_math         = 0;
           $need_post_blank = 1;
         }
         next;
