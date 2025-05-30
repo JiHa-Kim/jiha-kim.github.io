@@ -199,27 +199,35 @@ The core reason for distinguishing kets and bras lies in how their *components* 
 Let $$V$$ be an $$n$$-dimensional vector space.
 *   **Basis Kets:** We choose a set of $$n$$ linearly independent kets $$\{\vert e_1 \rangle, \vert e_2 \rangle, \dots, \vert e_n \rangle\}$$ to form a basis for $$V$$. We'll often write this as $$\{\vert e_i \rangle\}$$.
 *   **Ket Components:** Any ket $$\vert v \rangle \in V$$ can be uniquely written as a linear combination of these basis kets:
+
     $$
     \vert v \rangle = \sum_{i=1}^n v^i \vert e_i \rangle
     $$
+
     The scalars $$v^i$$ are the **components** of $$\vert v \rangle$$ with respect to the basis $$\{\vert e_i \rangle\}$$. We use an *upper index* for these components, a convention that becomes important when discussing transformation properties.
 
 *   **Dual Basis Bras:** To extract these components $$v^i$$ from $$\vert v \rangle$$, or more generally, to define components for bras, we introduce the **dual basis** $$\{\langle \epsilon^1 \vert, \langle \epsilon^2 \vert, \dots, \langle \epsilon^n \vert\}$$ for the space of linear functionals $$V^\ast$$. This dual basis is defined by its action on the primal basis kets:
+
     $$
     \langle \epsilon^j \vert e_i \rangle = \delta^j_i
     $$
+
     where $$\delta^j_i$$ is the Kronecker delta (1 if $$i=j$$, 0 otherwise). This definition ensures that $$\langle \epsilon^j \vert v \rangle = \langle \epsilon^j \vert \left(\sum_i v^i \vert e_i \rangle\right) = \sum_i v^i \langle \epsilon^j \vert e_i \rangle = \sum_i v^i \delta^j_i = v^j$$. So, the functional $$\langle \epsilon^j \vert$$ "picks out" the $$j$$-th component of a ket.
 
 *   **Bra Components:** Any bra $$\langle f \vert \in V^\ast$$ can be uniquely written as a linear combination of these dual basis bras:
+
     $$
     \langle f \vert = \sum_{j=1}^n f_j \langle \epsilon^j \vert
     $$
+
     The scalars $$f_j$$ are the **components** of $$\langle f \vert$$ with respect to the dual basis $$\{\langle \epsilon^j \vert\}$$. We use a *lower index* for these components.
 
 *   **Invariant Pairing:** With these definitions, the scalar result of a bra acting on a ket is:
+
     $$
     \langle f \vert v \rangle = \left( \sum_j f_j \langle \epsilon^j \vert \right) \left( \sum_i v^i \vert e_i \rangle \right) = \sum_j \sum_i f_j v^i \langle \epsilon^j \vert e_i \rangle = \sum_j \sum_i f_j v^i \delta^j_i = \sum_k f_k v^k
     $$
+
     This familiar sum-of-products form for the scalar depends on this specific relationship between the primal and dual bases.
 
 ### B. Thought Experiment: Changing Our Measuring Stick (Basis Transformation)
@@ -232,30 +240,40 @@ Let $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ for some positive scalar
     Originally: $$\vert v \rangle = \sum_i v^i \vert e_i \rangle$$.
     In the new basis: $$\vert v \rangle = \sum_i (v')^i \vert e'_i \rangle$$, where $$(v')^i$$ are the new components.
     Substituting $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ into the second expression:
+
     $$
     \vert v \rangle = \sum_i (v')^i (\alpha_i \vert e_i \rangle)
     $$
+
     Comparing the coefficients of $$\vert e_i \rangle$$ with the original expression, we must have:
+
     $$
     v^i = (v')^i \alpha_i \quad \implies \quad (v')^i = \frac{v^i}{\alpha_i}
     $$
+
     The components $$v^i$$ of the ket transform *inversely* to how the basis kets $$\vert e_i \rangle$$ were scaled. If a basis ket $$\vert e_i \rangle$$ gets longer ($$\alpha_i > 1$$), the corresponding component $$v^i$$ must get smaller to represent the same physical ket $$\vert v \rangle$$. This is called **contravariant transformation** of components. (Think: if your unit of length gets larger, the number of units needed to measure a fixed object gets smaller).
 
 2.  **Implied Transformation of Dual Basis Bras:**
     The new dual basis bras $$\{\langle (\epsilon')^j \vert\}$$ must satisfy the defining relation with the *new* basis kets: $$\langle (\epsilon')^j \vert e'_i \rangle = \delta^j_i$$.
     Substitute $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$:
+
     $$
     \langle (\epsilon')^j \vert (\alpha_i \vert e_i \rangle) = \delta^j_i \quad \implies \quad \alpha_i \langle (\epsilon')^j \vert e_i \rangle = \delta^j_i
     $$
+
     If we assume $$\langle (\epsilon')^j \vert = \beta_j \langle \epsilon^j \vert$$ for some scaling factor $$\beta_j$$ (no sum, relating corresponding dual basis elements), then:
+
     $$
     \alpha_i (\beta_j \langle \epsilon^j \vert e_i \rangle) = \delta^j_i \quad \implies \quad \alpha_i \beta_j \delta^j_i = \delta^j_i
     $$
+
     This must hold for all $$i,j$$. If $$i=j$$, then $$\alpha_j \beta_j = 1$$, so $$\beta_j = 1/\alpha_j$$. (If $$i \ne j$$, the equation is $$0=0$$).
     Thus, the new dual basis bras are related to the old ones by:
+
     $$
     \langle (\epsilon')^j \vert = \frac{1}{\alpha_j} \langle \epsilon^j \vert
     $$
+
     The dual basis bras $$\langle \epsilon^j \vert$$ also transform *contravariantly* with respect to the scaling factor $$\alpha_j$$ of their "partner" primal basis ket $$\vert e_j \rangle$$.
 
 3.  **Transformation of Bra Components ("Pencils"):**
@@ -263,13 +281,17 @@ Let $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ for some positive scalar
     Originally: $$\langle f \vert = \sum_j f_j \langle \epsilon^j \vert$$.
     In the new dual basis: $$\langle f \vert = \sum_j (f')_j \langle (\epsilon')^j \vert$$, where $$(f')_j$$ are the new components.
     Substituting $$\langle (\epsilon')^j \vert = (1/\alpha_j) \langle \epsilon^j \vert$$:
+
     $$
     \langle f \vert = \sum_j (f')_j \left( \frac{1}{\alpha_j} \langle \epsilon^j \vert \right)
     $$
+
     Comparing coefficients of $$\langle \epsilon^j \vert$$ with the original expression for $$\langle f \vert$$:
+
     $$
     f_j = \frac{(f')_j}{\alpha_j} \quad \implies \quad (f')_j = f_j \alpha_j
     $$
+
     The components $$f_j$$ of the bra transform *in the same way* (co-variantly) as the primal basis kets $$\vert e_j \rangle$$ were scaled. If the basis kets $$\vert e_j \rangle$$ get longer ($$\alpha_j > 1$$), the components $$f_j$$ of the bra must also get larger to ensure the invariant pairing $$\sum f_k v^k = \sum (f')_k (v')^k = \sum (f_k \alpha_k) (v^k/\alpha_k)$$. This is **covariant transformation** of components.
 
 <blockquote class="box-tip" markdown="1">
@@ -333,9 +355,11 @@ Completeness is vital for analysis and optimization. Many algorithms generate se
 ### C. Measuring Bras: The Dual Norm
 
 Given a normed space $$V$$ with norm $$\Vert \cdot \Vert_V$$, we are often interested in *continuous* linear functionals (bras). A linear functional $$\langle f \vert$$ is continuous if and only if it is **bounded**, meaning there exists a constant $$M \ge 0$$ such that for all $$\vert x \rangle \in V$$:
+
 $$
 \vert \langle f \vert x \rangle \vert \le M \Vert \vert x \rangle \Vert_V
 $$
+
 The set of all continuous linear functionals on $$V$$ forms the **topological dual space** (or continuous dual space), also denoted $$V^\ast$$. (From now on, $$V^\ast$$ will refer to this space of continuous functionals).
 We can define a norm on $$V^\ast$$, called the **dual norm** or operator norm:
 
@@ -348,6 +372,7 @@ For a bra $$\langle f \vert \in V^\ast$$, its **dual norm** $$\Vert \cdot \Vert_
 $$
 \Vert \langle f \vert \Vert_{V^\ast} = \sup_{\Vert \vert x \rangle \Vert_V=1, \vert x \rangle \in V} \vert \langle f \vert x \rangle \vert = \sup_{\vert x \rangle \ne \vert \mathbf{0} \rangle_V} \frac{\vert \langle f \vert x \rangle \vert}{\Vert \vert x \rangle \Vert_V}
 $$
+
 This is the smallest $$M$$ for which the boundedness condition holds.
 </blockquote>
 A key result is that $$V^\ast$$ equipped with this dual norm is *always* a Banach space, regardless of whether $$V$$ itself is complete.
@@ -371,9 +396,11 @@ An **inner product** on a vector space $$V$$ (over field $$\mathbb{F} = \mathbb{
 A vector space with an inner product is an **inner product space**.
 </blockquote>
 Crucially, every inner product *induces* a norm, called the natural norm:
+
 $$
 \Vert \vert x \rangle \Vert = \sqrt{\langle x \vert x \rangle}
 $$
+
 One can verify this satisfies the norm axioms. The **Cauchy-Schwarz Inequality** is fundamental here: $$\vert \langle x \vert y \rangle \vert \le \Vert \vert x \rangle \Vert \Vert \vert y \rangle \Vert$$. This allows defining angles between kets (in real spaces) via $$\cos \theta = \frac{\langle x \vert y \rangle}{\Vert x \Vert \Vert y \Vert}$$. Kets $$\vert x \rangle, \vert y \rangle$$ are **orthogonal** if $$\langle x \vert y \rangle = 0$$.
 
 ### B. Hilbert Spaces: The Ideal Setting
@@ -400,7 +427,7 @@ $$
 \langle \phi \vert x \rangle = \langle y_\phi \vert x \rangle \quad \text{for all } \vert x \rangle \in H
 $$
 
-(The LHS is the action of the abstract functional $$\langle \phi \vert$$ on $$\vert x \rangle$$. The RHS is the inner product of the specific ket $$\vert y_\phi \rangle$$ with $$\vert x \rangle$$ in $$H$).
+(The LHS is the action of the abstract functional $$\langle \phi \vert$$ on $$\vert x \rangle$$. The RHS is the inner product of the specific ket $$\vert y_\phi \rangle$$ with $$\vert x \rangle$$ in $$H$$).
 Furthermore, this correspondence defines an isometric anti-isomorphism between $$H^\ast$$ and $$H$$ (isometric isomorphism if $$H$$ is real): $$\Vert \langle \phi \vert \Vert_{H^\ast} = \Vert \vert y_\phi \rangle \Vert_H$$.
 </blockquote>
 **Profound Implication:** The Riesz Representation Theorem tells us that for Hilbert spaces, we can *identify* every bra $$\langle \phi \vert$$ with a unique ket $$\vert y_\phi \rangle$$ through the inner product. This is why in elementary linear algebra with $$\mathbb{R}^n$$ and the dot product, we often don't strictly distinguish between row vectors (functionals) and column vectors (vectors) – any linear functional's action $$a^T x$$ can be seen as an inner product $$\langle a \vert x \rangle$$.
@@ -431,6 +458,7 @@ Let $$H_1, H_2$$ be Hilbert spaces. For a bounded linear operator $$T: H_1 \to H
 $$
 \langle y \vert (T \vert x \rangle) \rangle_{H_2} = \langle (T^\dagger \vert y \rangle) \vert x \rangle_{H_1} \quad \text{for all } \vert x \rangle \in H_1, \vert y \rangle \in H_2
 $$
+
 (Here, by Riesz, $$\vert y \rangle$$ on the LHS represents the functional acting on $$T\vert x \rangle$$, and $$T^\dagger \vert y \rangle$$ on the RHS represents the functional acting on $$\vert x \rangle$$).
 The existence and uniqueness of $$T^\dagger$$ for any bounded $$T$$ is guaranteed (related to Riesz). Also, $$\Vert T^\dagger \Vert = \Vert T \Vert$$.
 </blockquote>
@@ -460,6 +488,7 @@ Let $$T: H \to H$$ be a compact self-adjoint operator on a Hilbert space $$H$$. 
 $$
 T = \sum_{k} \lambda_k \vert \phi_k \rangle \langle \phi_k \vert
 $$
+
 This means for any ket $$\vert x \rangle \in H$$, $$T \vert x \rangle = \sum_k \lambda_k \langle \phi_k \vert x \rangle \vert \phi_k \rangle$$.
 (The operator $$\vert \phi_k \rangle \langle \phi_k \vert$$ is the projection onto the eigenspace of $$\vert \phi_k \rangle$$).
 </blockquote>
@@ -481,13 +510,16 @@ A function $$J: U \to \mathbb{R}$$ (where $$U \subseteq V$$ is open, $$V$$ is a 
 $$
 \lim_{\Vert \vert h \rangle \Vert_V \to 0} \frac{\vert J(\vert x \rangle + \vert h \rangle) - J(\vert x \rangle) - (DJ(\vert x \rangle) \vert h \rangle) \vert}{\Vert \vert h \rangle \Vert_V} = 0
 $$
+
 This is often written as $$J(\vert x \rangle + \vert h \rangle) = J(\vert x \rangle) + (DJ(\vert x \rangle) \vert h \rangle) + o(\Vert \vert h \rangle \Vert_V)$$.
 The linear functional $$DJ(\vert x \rangle)$$ is the Fréchet derivative of $$J$$ at $$\vert x \rangle$$.
 </blockquote>
 Crucially, since $$DJ(\vert x \rangle)$$ maps kets from $$V$$ to scalars in $$\mathbb{R}$$ linearly and continuously, it is an element of the dual space $$V^\ast$$. That is, the Fréchet derivative itself is a **bra**:
+
 $$
 \langle DJ(\vert x \rangle) \vert \in V^\ast
 $$
+
 Its action on a "direction" ket $$\vert h \rangle$$ gives the directional derivative: $$(DJ(\vert x \rangle) \vert h \rangle) = \langle DJ(\vert x \rangle) \vert h \rangle$$.
 
 ### B. The Gradient Ket: From Bra to Ket via Riesz
@@ -504,6 +536,7 @@ The unique ket $$\vert \nabla J(\vert x \rangle) \rangle \in H$$ identified via 
 $$
 \underbrace{\langle DJ(\vert x \rangle) \vert h \rangle}_{\text{Action of functional}} = \underbrace{\langle \nabla J(\vert x \rangle) \vert h \rangle}_{\text{Inner product in } H} \quad \text{for all } \vert h \rangle \in H
 $$
+
 </blockquote>
 The distinction is now clear:
 *   The **Fréchet derivative** $$\langle DJ(\vert x \rangle) \vert$$ is fundamentally a bra (a covector, an element of $$H^\ast$$), describing how the function changes linearly with infinitesimal changes in input.
@@ -512,7 +545,7 @@ The distinction is now clear:
 This distinction is vital. For example, in numerical methods, the gradient descent update $$\vert x_{k+1} \rangle = \vert x_k \rangle - \eta \vert \nabla J(\vert x_k \rangle) \rangle$$ involves adding two kets, which is well-defined. We couldn't directly subtract a bra from a ket.
 
 ### C. Second Derivatives: The Hessian Operator
-If $$J: H \to \mathbb{R}$$ is twice Fréchet differentiable, its second derivative $$D^2J(\vert x \rangle)$$ can be viewed as a bounded bilinear form on $$H \times H$$, or as a linear operator from $$H$$ to $$H^\ast$$. Applying Riesz representation ideas again, this can be identified with a bounded linear operator from $$H$$ to $$H$$, denoted $$\nabla^2 J(\vert x \rangle)$$ (or Hess $$J(\vert x \rangle)$), called the **Hessian operator**. This operator is self-adjoint if $$J$$ is sufficiently smooth. The bilinear form is then expressed as $$D^2J(\vert x \rangle)(\vert h_1 \rangle, \vert h_2 \rangle) = \langle \vert h_1 \rangle \vert (\nabla^2 J(\vert x \rangle) \vert h_2 \rangle) \rangle_H$$.
+If $$J: H \to \mathbb{R}$$ is twice Fréchet differentiable, its second derivative $$D^2J(\vert x \rangle)$$ can be viewed as a bounded bilinear form on $$H \times H$$, or as a linear operator from $$H$$ to $$H^\ast$$. Applying Riesz representation ideas again, this can be identified with a bounded linear operator from $$H$$ to $$H$$, denoted $$\nabla^2 J(\vert x \rangle)$$ (or Hess $$J(\vert x \rangle)$$), called the **Hessian operator**. This operator is self-adjoint if $$J$$ is sufficiently smooth. The bilinear form is then expressed as $$D^2J(\vert x \rangle)(\vert h_1 \rangle, \vert h_2 \rangle) = \langle \vert h_1 \rangle \vert (\nabla^2 J(\vert x \rangle) \vert h_2 \rangle) \rangle_H$$.
 
 ## VII. Conclusion: The Power of Duality and Typed Thinking
 

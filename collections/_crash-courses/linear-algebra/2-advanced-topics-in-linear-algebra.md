@@ -483,9 +483,11 @@ Eigenvalues and eigenvectors are crucial for understanding the dynamics of linea
 The **transpose** of a matrix $$A$$, denoted $$A^T$$, is obtained by swapping its rows and columns. While algebraically simple, its geometric meaning is subtle and deep, especially concerning the inner product.
 
 The concept of a transpose is intimately linked to the inner product. For a linear operator $$T: V \to W$$ between inner product spaces, its **adjoint operator** $$T^*: W \to V$$ is defined by the coordinate-free relation:
+
 $$
 \langle T\vec{x}, \vec{y} \rangle_W = \langle \vec{x}, T^*\vec{y} \rangle_V
 $$
+
 for all $$\vec{x} \in V, \vec{y} \in W$$.
 The matrix transpose $$A^T$$ arises as the matrix representation of the adjoint operator $$T^*$$ *if the bases chosen for $$V$$ and $$W$$ are orthonormal*. This distinction is crucial: the adjoint is an abstract operator, while the transpose is its matrix in a specific (orthonormal) coordinate system.
 
@@ -588,6 +590,7 @@ Matrix factorizations break down a matrix (and thus a linear transformation) int
 **Singular Value Decomposition (SVD): The Master Decomposition**
 The Singular Value Decomposition provides a canonical understanding of any linear operator $$T: V \to W$$ between finite-dimensional inner product spaces. It states that there exist orthonormal bases for $$V$$ (domain) and $$W$$ (codomain) such that $$T$$ maps basis vectors from $$V$$ to scalar multiples of basis vectors in $$W$$, or to zero. These scalars are the singular values.
 In matrix form, if $$A$$ is the matrix of $$T$$ with respect to some initial orthonormal bases, the SVD is:
+
 $$
 A = U \Sigma V^T
 $$

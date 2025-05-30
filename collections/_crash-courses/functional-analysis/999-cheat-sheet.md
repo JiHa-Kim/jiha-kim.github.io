@@ -212,9 +212,11 @@ A vector space with a norm is a **normed vector space**.
 **Definition.** Dual Norm (on $$V^\ast$$)
 </div>
 For $$\langle f \vert \in V^\ast$$ (the space of continuous linear functionals on $$V$$):
+
 $$
 \Vert \langle f \vert \Vert_{V^\ast} = \sup_{\Vert \vert x \rangle \Vert_V=1, \vert x \rangle \in V} \vert \langle f \vert x \rangle \vert = \sup_{\vert x \rangle \ne \vert \mathbf{0} \rangle_V} \frac{\vert \langle f \vert x \rangle \vert}{\Vert \vert x \rangle \Vert_V}
 $$
+
 This measures the maximum "amplification" of a functional.
 </blockquote>
 
@@ -257,9 +259,11 @@ An inner product space that is **complete** with respect to its induced norm.
 **Theorem.** Riesz Representation Theorem (for Hilbert Spaces)
 </div>
 For every continuous linear functional $$\langle \phi \vert \in \mathcal{H}^\ast$$, there exists a **unique** ket $$ \vert y_\phi\rangle \in \mathcal{H}$$ such that:
+
 $$
 \langle \phi \vert x \rangle = \langle y_\phi  \vert  x \rangle \quad \text{for all }  \vert x\rangle \in \mathcal{H}
 $$
+
 And $$\Vert \langle \phi \vert \Vert_{\mathcal{H}^\ast} = \Vert \vert y_\phi \Vert_{\mathcal{H}}$$.
 - **Significance:** In Hilbert spaces, bras (functionals) can be uniquely identified with kets via the inner product. This is the "magic bridge" that often makes the distinction seem less critical in $$\mathbb{R}^n$$ with the dot product, but the underlying "types" remain different. The mapping is anti-linear for complex spaces.
 </blockquote>
@@ -272,9 +276,11 @@ And $$\Vert \langle \phi \vert \Vert_{\mathcal{H}^\ast} = \Vert \vert y_\phi \Ve
 </div>
 - **Linear Operator $$T: \mathcal{H}_1 \to \mathcal{H}_2$$:** Maps kets linearly.
 - **Adjoint Operator $$T^\dagger: \mathcal{H}_2 \to \mathcal{H}_1$$:** Defined by the relation:
+
   $$
   \langle y  \vert  (T \vert x \rangle) \rangle_{\mathcal{H}_2} = \langle (T^\dagger \vert y \rangle)  \vert  x \rangle_{\mathcal{H}_1}
   $$
+
   - The matrix of $$T^\dagger$$ is $$A^H$$ (conjugate transpose of matrix $$A$$ for $$T$$) *if and only if bases are orthonormal*. Otherwise, it involves Gram matrices ($$G_1^{-1} A^H G_2$$), highlighting the role of the metric and transformation rules.
   - **Key Types (for $$T: \mathcal{H} \to \mathcal{H}$$):**
     - **Self-Adjoint (Hermitian):** $$T = T^\dagger$$. Eigenvalues are real.
@@ -287,9 +293,11 @@ And $$\Vert \langle \phi \vert \Vert_{\mathcal{H}^\ast} = \Vert \vert y_\phi \Ve
 **Theorem.** Spectral Theorem (for Compact Self-Adjoint Operators)
 </div>
 If $$T$$ is a compact self-adjoint operator on $$\mathcal{H}$$, there's an orthonormal basis of eigenkets $$(\vert \phi_k \rangle)_k$$ with real eigenvalues $$(\lambda_k)_k$$ such that:
+
 $$
 T = \sum_k \lambda_k  \vert \phi_k\rangle \langle \phi_k  \vert 
 $$
+
 (The term $$ \vert \phi_k\rangle \langle \phi_k  \vert $$ is a projection operator). SVD is a related decomposition for general compact operators.
 </blockquote>
 
@@ -302,9 +310,11 @@ For a function $$J: V \to \mathbb{R}$$ (e.g., loss function, $$V$$ is parameter 
 **Definition.** Fréchet Derivative
 </div>
 $$J: U \subseteq V \to \mathbb{R}$$ is Fréchet differentiable at $$ \vert x\rangle \in U$$ if there's a bounded linear functional $$DJ(\vert x\rangle) : V \to \mathbb{R}$$ such that:
+
 $$
 J(\vert x \rangle + \vert h \rangle) = J(\vert x \rangle) + (DJ(\vert x \rangle) \vert h \rangle) + o(\Vert \vert h \rangle \Vert_V)
 $$
+
 - The Fréchet derivative $$DJ(\vert x\rangle)$$ is a **bra**: $$\langle DJ(\vert x\rangle) \vert \in V^\ast$$. It's a "measurement device" for the linear rate of change.
 </blockquote>
 
@@ -313,9 +323,11 @@ $$
 **Definition.** Gradient Ket (in Hilbert Space $$\mathcal{H}$$)
 </div>
 The unique ket $$\vert \nabla J(\vert x\rangle) \rangle \in \mathcal{H}$$ obtained from the Fréchet derivative bra $$\langle DJ(\vert x\rangle) \vert$$ via the Riesz Representation Theorem:
+
 $$
 \langle DJ(\vert x\rangle) \vert h \rangle = \langle \nabla J(\vert x\rangle)  \vert  h \rangle_{\mathcal{H}} \quad \text{for all }  \vert h\rangle \in \mathcal{H}
 $$
+
 - The **gradient $$\vert \nabla J(\vert x\rangle) \rangle$$** is a ket in $$\mathcal{H}$$ (direction of steepest ascent), distinct in type from the derivative functional (bra).
 - **Hessian Operator $$\nabla^2 J(\vert x\rangle)$$:** A self-adjoint operator $$\mathcal{H} \to \mathcal{H}$$ representing the second derivative, obtained by applying Riesz to the second Fréchet derivative functional.
 </blockquote>

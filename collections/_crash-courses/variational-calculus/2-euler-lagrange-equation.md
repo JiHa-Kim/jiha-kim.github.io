@@ -155,6 +155,7 @@ llm-instructions: |
 ---
 
 In Part 1, we introduced **functionals** $$J[y]$$ – functions of functions – and established that a necessary condition for a function $$y(x)$$ to extremize $$J[y]$$ is that its **first variation** must vanish for all admissible variations $$\eta(x)$$:
+
 $$
 \delta J[y; \eta] = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right|_{\epsilon=0} = 0
 $$
@@ -199,32 +200,38 @@ $$
 \delta J[y; \eta] = \int_a^b \left. \frac{d}{d\epsilon} F(x, y + \epsilon \eta, y' + \epsilon \eta') \right|_{\epsilon=0} \, dx
 $$
 
-Now, we apply the chain rule to the integrand $$F$$. Let $$Y = y + \epsilon \eta$$ and $$Y' = y' + \epsilon \eta'$$. Then $F = F(x, Y, Y')$.
+Now, we apply the chain rule to the integrand $$F$$. Let $$Y = y + \epsilon \eta$$ and $$Y' = y' + \epsilon \eta'$$. Then $$F = F(x, Y, Y')$$.
 So, $$\frac{dF}{d\epsilon} = \frac{\partial F}{\partial Y} \frac{\partial Y}{\partial \epsilon} + \frac{\partial F}{\partial Y'} \frac{\partial Y'}{\partial \epsilon}$$.
 We have:
 -   $$\frac{\partial Y}{\partial \epsilon} = \frac{\partial}{\partial \epsilon}(y + \epsilon \eta) = \eta$$
 -   $$\frac{\partial Y'}{\partial \epsilon} = \frac{\partial}{\partial \epsilon}(y' + \epsilon \eta') = \eta'$$
 
 Therefore,
+
 $$
 \frac{d}{d\epsilon} F(x, y + \epsilon \eta, y' + \epsilon \eta') = \frac{\partial F}{\partial (y + \epsilon \eta)} \eta + \frac{\partial F}{\partial (y' + \epsilon \eta')} \eta'
 $$
 
 Setting $$\epsilon = 0$$, we get:
+
 $$
 \left. \frac{d}{d\epsilon} F(x, y + \epsilon \eta, y' + \epsilon \eta') \right|_{\epsilon=0} = \frac{\partial F}{\partial y}(x, y, y') \eta(x) + \frac{\partial F}{\partial y'}(x, y, y') \eta'(x)
 $$
-For brevity, we'll write $$\frac{\partial F}{\partial y}$$ and $$\frac{\partial F}{\partial y'}$}, understanding they are evaluated at $$(x, y(x), y'(x))$$.
+
+For brevity, we'll write $$\frac{\partial F}{\partial y}$$ and $$\frac{\partial F}{\partial y'}$$}, understanding they are evaluated at $$(x, y(x), y'(x))$$.
 
 Plugging this back into the integral for $$\delta J[y; \eta]$$:
+
 $$
 \delta J[y; \eta] = \int_a^b \left( \frac{\partial F}{\partial y} \eta(x) + \frac{\partial F}{\partial y'} \eta'(x) \right) \, dx
 $$
 
 The necessary condition for an extremum is $$\delta J[y; \eta] = 0$$:
+
 $$
 \int_a^b \left( \frac{\partial F}{\partial y} \eta(x) + \frac{\partial F}{\partial y'} \eta'(x) \right) \, dx = 0
 $$
+
 This equation must hold for all admissible variation functions $$\eta(x)$$.
 
 ## 3. The Key Maneuver: Integration by Parts
@@ -235,6 +242,7 @@ Let $$u = \frac{\partial F}{\partial y'}$$ and $$dv = \eta'(x) \, dx$$.
 Then $$du = \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) \, dx$$ and $$v = \eta(x)$$.
 
 So, the second term becomes:
+
 $$
 \int_a^b \frac{\partial F}{\partial y'} \eta'(x) \, dx = \left[ \frac{\partial F}{\partial y'} \eta(x) \right]_a^b - \int_a^b \eta(x) \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) \, dx
 $$
@@ -242,6 +250,7 @@ $$
 The boundary term $$\left[ \frac{\partial F}{\partial y'} \eta(x) \right]_a^b = \frac{\partial F}{\partial y'}(b) \eta(b) - \frac{\partial F}{\partial y'}(a) \eta(a)$$.
 Recall from Part 1 that for problems with fixed endpoints $$y(a)=y_a$$ and $$y(b)=y_b$$, the admissible variations $$\eta(x)$$ must satisfy $$\eta(a) = 0$$ and $$\eta(b) = 0$$.
 Therefore, for such problems, the boundary term vanishes:
+
 $$
 \left[ \frac{\partial F}{\partial y'} \eta(x) \right]_a^b = 0
 $$
@@ -251,10 +260,13 @@ $$
 </blockquote>
 
 Substituting the result of the integration by parts (with the vanishing boundary term) back into the equation for $$\delta J = 0$$:
+
 $$
 \int_a^b \frac{\partial F}{\partial y} \eta(x) \, dx - \int_a^b \eta(x) \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) \, dx = 0
 $$
+
 Combining the integrals:
+
 $$
 \int_a^b \left( \frac{\partial F}{\partial y} - \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) \right) \eta(x) \, dx = 0
 $$
@@ -270,9 +282,11 @@ The equation we've reached is of the form $$\int_a^b g(x) \eta(x) \, dx = 0$$, w
 **Lemma.** Fundamental Lemma of Variational Calculus (du Bois-Reymond)
 </div>
 If a function $$g(x)$$ is continuous on the interval $$[a, b]$$, and if
+
 $$
 \int_a^b g(x) \eta(x) \, dx = 0
 $$
+
 for every continuously differentiable function $$\eta(x)$$ such that $$\eta(a) = 0$$ and $$\eta(b) = 0$$, then $$g(x) = 0$$ for all $$x \in [a, b]$$.
 </blockquote>
 
@@ -294,18 +308,22 @@ Therefore, our assumption that $$g(x_0) \neq 0$$ must be false. Thus, $$g(x) = 0
 **More on Bump Functions**
 </summary>
 A common example of a smooth bump function that is non-zero only on a finite interval, say $$(-1, 1)$$, is:
+
 $$
 B(t) = \begin{cases} \exp\left(-\frac{1}{1-t^2}\right) & \text{if } \vert t \vert < 1 \\ 0 & \text{if } \vert t \vert \ge 1 \end{cases}
 $$
+
 This function is infinitely differentiable everywhere, including at $$t=\pm 1$$ where all derivatives are zero. By scaling and translating $$t$$, we can create such a bump function $$\eta(x)$$ over any desired subinterval $$[c, d]$$ within $$[a, b]$$. This rigorous construction underpins the Fundamental Lemma.
 </details>
 
 ## 5. The Euler-Lagrange Equation
 
 Applying the Fundamental Lemma of Variational Calculus to our equation:
+
 $$
 \int_a^b \left( \frac{\partial F}{\partial y} - \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) \right) \eta(x) \, dx = 0
 $$
+
 The term in the parenthesis plays the role of $$g(x)$$. If this integral is zero for all admissible $$\eta(x)$$, then the term itself must be identically zero:
 
 <blockquote class="box-theorem" markdown="1">
@@ -325,6 +343,7 @@ This is known as the **Euler-Lagrange equation**.
 -   $$\frac{\partial F}{\partial y}$$: The partial derivative of $$F(x, y, y')$$ with respect to its second argument $$y$$, treating $$x$$ and $$y'$$ as constants.
 -   $$\frac{\partial F}{\partial y'}$$: The partial derivative of $$F(x, y, y')$$ with respect to its third argument $$y'$$, treating $$x$$ and $$y$$ as constants.
 -   $$\frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right)$$: The total derivative with respect to $$x$$ of the expression $$\frac{\partial F}{\partial y'}$$. Since $$y$$ and $$y'$$ are functions of $$x$$, this derivative will generally involve $$y'(x)$$ and $$y''(x)$$ via the chain rule:
+
     $$
     \frac{d}{dx} \left( \frac{\partial F}{\partial y'}(x, y(x), y'(x)) \right) = \frac{\partial^2 F}{\partial x \partial y'} + \frac{\partial^2 F}{\partial y \partial y'} y' + \frac{\partial^2 F}{\partial y'^2} y''
     $$

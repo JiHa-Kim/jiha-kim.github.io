@@ -14,7 +14,7 @@ while (( "$#" )); do
       ;;
     -*)
       echo "Unknown option: $1"
-      echo "Usage: $0 [-b|--backup] file1.md [file2.md …]"
+      echo "Usage: $0 [-b|--backup] file-or-dir [file-or-dir …]"
       exit 1
       ;;
     *)
@@ -23,15 +23,29 @@ while (( "$#" )); do
   esac
 done
 
-# print usage if no files
+# print usage if no targets
 if [ "$#" -eq 0 ]; then
-  echo "Usage: $0 [-b|--backup] file1.md [file2.md …]"
+  echo "Usage: $0 [-b|--backup] file-or-dir [file-or-dir …]"
   exit 1
 fi
 
-for md in "$@"; do
+# build a flat list of all .md files under each argument
+declare -a MD_FILES=()
+for target in "$@"; do
+  if [ -d "$target" ]; then
+    # recurse into directory
+    while IFS= read -r -d $'\0' mdfile; do
+      MD_FILES+=("$mdfile")
+    done < <(find "$target" -type f -name '*.md' -print0)
+  else
+    MD_FILES+=("$target")
+  fi
+done
+
+# now process each markdown file
+for md in "${MD_FILES[@]}"; do
   if [ ! -f "$md" ]; then
-    echo "Skipping: $md is not a file"
+    echo "Skipping: $md (not a file)"
     continue
   fi
 

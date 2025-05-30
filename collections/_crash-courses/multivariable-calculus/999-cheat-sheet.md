@@ -363,25 +363,33 @@ where $$((\mathbf{x}-\mathbf{a}) \cdot \nabla)^k$$ is interpreted as applying th
 **Theorem.** Implicit Function Theorem
 </div>
 Consider a system of $$m$$ equations in $$n+m$$ variables:
+
 $$
 \mathbf{F}(\mathbf{x}, \mathbf{y}) = \mathbf{0}
 $$
+
 where $$\mathbf{F}: \mathbb{R}^n \times \mathbb{R}^m \to \mathbb{R}^m$$ (so $$\mathbf{x} \in \mathbb{R}^n, \mathbf{y} \in \mathbb{R}^m$$), and $$\mathbf{0}$$ is the zero vector in $$\mathbb{R}^m$$.
 Suppose $$(\mathbf{x}_0, \mathbf{y}_0)$$ is a point such that $$\mathbf{F}(\mathbf{x}_0, \mathbf{y}_0) = \mathbf{0}$$.
 If $$\mathbf{F}$$ is continuously differentiable in a neighborhood of $$(\mathbf{x}_0, \mathbf{y}_0)$$, and the Jacobian matrix of $$\mathbf{F}$$ with respect to $$\mathbf{y}$$, denoted $$J_{\mathbf{F},\mathbf{y}}$$, is invertible at $$(\mathbf{x}_0, \mathbf{y}_0)$$:
+
 $$
 \det \left( \frac{\partial \mathbf{F}}{\partial \mathbf{y}}(\mathbf{x}_0, \mathbf{y}_0) \right) \ne 0
 $$
+
 (where $$\frac{\partial \mathbf{F}}{\partial \mathbf{y}}$$ is the $$m \times m$$ matrix of partial derivatives of components of $$\mathbf{F}$$ with respect to components of $$\mathbf{y}$$),
 then there exists a neighborhood $$U$$ of $$\mathbf{x}_0$$ in $$\mathbb{R}^n$$ and a unique continuously differentiable function $$\mathbf{g}: U \to \mathbb{R}^m$$ such that $$\mathbf{y}_0 = \mathbf{g}(\mathbf{x}_0)$$ and
+
 $$
 \mathbf{F}(\mathbf{x}, \mathbf{g}(\mathbf{x})) = \mathbf{0} \quad \text{for all } \mathbf{x} \in U
 $$
+
 In other words, the system implicitly defines $$\mathbf{y}$$ as a function of $$\mathbf{x}$$ near $$(\mathbf{x}_0, \mathbf{y}_0)$$.
 Furthermore, the Jacobian of $$\mathbf{g}$$ at $$\mathbf{x}_0$$ is given by:
+
 $$
 J_{\mathbf{g}}(\mathbf{x}_0) = - \left[ J_{\mathbf{F},\mathbf{y}}(\mathbf{x}_0, \mathbf{y}_0) \right]^{-1} J_{\mathbf{F},\mathbf{x}}(\mathbf{x}_0, \mathbf{y}_0)
 $$
+
 where $$J_{\mathbf{F},\mathbf{x}}$$ is the Jacobian of $$\mathbf{F}$$ with respect to $$\mathbf{x}$$.
 </blockquote>
 This theorem is fundamental in analyzing sensitivities, constrained optimization (e.g., deriving properties of Lagrange multipliers), and when variables are implicitly defined.

@@ -160,18 +160,23 @@ So far, we've focused on functionals of the form $$J[y] = \int_a^b F(x, y, y') \
 
 Sometimes, the quantity we want to optimize depends not only on $$y(x)$$ and its first derivative $$y'(x)$$ but also on higher-order derivatives like $$y''(x)$$, $$y'''(x)$$, and so on, up to $$y^{(n)}(x)$$.
 Consider a functional of the form:
+
 $$
 J[y] = \int_a^b F(x, y, y', y'', \dots, y^{(n)}) \, dx
 $$
+
 To find the necessary condition for an extremum, we again set the first variation $$\delta J[y; \eta]$$ to zero. This involves repeated integration by parts. For each derivative $$y^{(k)}$$ in $$F$$, we will get a term involving $$\eta^{(k)}(x)$$. Each such term must be integrated by parts $$k$$ times to isolate $$\eta(x)$$.
 
 The boundary conditions for $$\eta(x)$$ also become more extensive. If the values of $$y, y', \dots, y^{(n-1)}$$ are fixed at the endpoints $$x=a$$ and $$x=b$$, then the admissible variations $$\eta(x)$$ must satisfy:
+
 $$
 \eta(a) = \eta'(a) = \dots = \eta^{(n-1)}(a) = 0
 $$
+
 $$
 \eta(b) = \eta'(b) = \dots = \eta^{(n-1)}(b) = 0
 $$
+
 These conditions ensure that all boundary terms arising from the integrations by parts vanish.
 
 The resulting generalized Euler-Lagrange equation, often called the **Euler-Poisson equation**, is:
@@ -184,6 +189,7 @@ For a functional $$J[y] = \int_a^b F(x, y, y', \dots, y^{(n)}) \, dx$$, the extr
 $$
 \frac{\partial F}{\partial y} - \frac{d}{dx}\left(\frac{\partial F}{\partial y'}\right) + \frac{d^2}{dx^2}\left(\frac{\partial F}{\partial y''}\right) - \dots + (-1)^n \frac{d^n}{dx^n}\left(\frac{\partial F}{\partial y^{(n)}}\right) = 0
 $$
+
 This is a differential equation of order $$2n$$.
 </blockquote>
 
@@ -192,35 +198,45 @@ This is a differential equation of order $$2n$$.
 **Example.** Elastic Beam Theory
 </div>
 In the theory of elasticity, the potential energy of a thin elastic beam undergoing small deflections $$y(x)$$ is related to its bending stiffness $$EI$$ (where $$E$$ is Young's modulus and $$I$$ is the area moment of inertia) and its curvature, which is approximately $$y''(x)$$. A simple model for the energy might involve a functional like:
+
 $$
 J[y] = \int_0^L \left( \frac{1}{2} EI (y''(x))^2 - w(x)y(x) \right) \, dx
 $$
+
 where $$w(x)$$ is an external distributed load. Here, $$F(x, y, y'') = \frac{1}{2} EI (y'')^2 - w y$$. (Note: $$F$$ does not depend on $$y'$$ in this simplified model).
 The Euler-Poisson equation for $$n=2$$ is:
+
 $$
 \frac{\partial F}{\partial y} - \frac{d}{dx}\left(\frac{\partial F}{\partial y'}\right) + \frac{d^2}{dx^2}\left(\frac{\partial F}{\partial y''}\right) = 0
 $$
+
 Calculating the terms:
 -   $$\frac{\partial F}{\partial y} = -w(x)$$
 -   $$\frac{\partial F}{\partial y'} = 0$$
 -   $$\frac{\partial F}{\partial y''} = EI y''(x)$$
 So, the Euler-Poisson equation becomes:
+
 $$
 -w(x) - 0 + \frac{d^2}{dx^2}(EI y''(x)) = 0
 $$
+
 If $$EI$$ is constant:
+
 $$
 EI \frac{d^4y}{dx^4} = w(x)
 $$
+
 This is the classic fourth-order differential equation governing the deflection of an elastic beam.
 </blockquote>
 
 ## 2. Functionals with Multiple Dependent Variables
 
 Often, a system is described by multiple functions $$y_1(x), y_2(x), \dots, y_m(x)$$. The functional will then depend on all these functions and their derivatives:
+
 $$
 J[y_1, \dots, y_m] = \int_a^b F(x, y_1, \dots, y_m, y_1', \dots, y_m') \, dx
 $$
+
 To find the extremum, we consider variations $$\eta_1(x), \dots, \eta_m(x)$$ for each function $$y_i(x)$$. We perturb one function at a time, say $$y_k \to y_k + \epsilon \eta_k$$, while keeping other $$y_j$$ ($$j \neq k$$) fixed. The first variation $$\delta J$$ must be zero for variations in each $$y_k$$ independently.
 This leads to a system of $$m$$ Euler-Lagrange equations, one for each dependent variable $$y_k(x)$$:
 
@@ -233,6 +249,7 @@ For a functional $$J[y_1, \dots, y_m] = \int_a^b F(x, y_1, \dots, y_m, y_1', \do
 $$
 \frac{\partial F}{\partial y_k} - \frac{d}{dx} \left( \frac{\partial F}{\partial y_k'} \right) = 0 \quad \text{for each } k = 1, \dots, m
 $$
+
 </blockquote>
 This is precisely what happens in Lagrangian mechanics for systems with multiple generalized coordinates $$q_k(t)$$.
 
@@ -240,9 +257,11 @@ This is precisely what happens in Lagrangian mechanics for systems with multiple
 
 Variational principles are not limited to functions of a single independent variable. We can also consider functionals of functions of multiple independent variables. For example, finding a surface $$u(x,y)$$ that minimizes some quantity over a domain $$\Omega \subset \mathbb{R}^2$$.
 The functional might look like:
+
 $$
 J[u] = \iint_\Omega F(x, y, u, u_x, u_y) \, dx dy
 $$
+
 where $$u_x = \frac{\partial u}{\partial x}$$ and $$u_y = \frac{\partial u}{\partial y}$$.
 
 The derivation of the Euler-Lagrange equation is analogous. We consider a variation $$\eta(x,y)$$ such that $$u \to u + \epsilon \eta$$. The variation $$\eta(x,y)$$ must vanish on the boundary $$\partial\Omega$$ of the domain $$\Omega$$.
@@ -257,6 +276,7 @@ For a functional $$J[u] = \iint_\Omega F(x, y, u, u_x, u_y) \, dx dy$$, the extr
 $$
 \frac{\partial F}{\partial u} - \frac{\partial}{\partial x} \left( \frac{\partial F}{\partial u_x} \right) - \frac{\partial}{\partial y} \left( \frac{\partial F}{\partial u_y} \right) = 0
 $$
+
 </blockquote>
 This can be generalized to more independent variables ($$x_1, x_2, \dots, x_n$$) and higher-order partial derivatives. Such equations form the basis of many field theories in physics (e.g., electromagnetism, general relativity) and are crucial in areas like image processing (e.g., minimizing energy functionals for image denoising or segmentation).
 
@@ -265,40 +285,51 @@ This can be generalized to more independent variables ($$x_1, x_2, \dots, x_n$$)
 **Example.** Minimal Surface (Plateau's Problem)
 </div>
 Find the surface $$u(x,y)$$ spanning a given closed curve in 3D that has the minimum possible surface area. The area functional is:
+
 $$
 A[u] = \iint_\Omega \sqrt{1 + u_x^2 + u_y^2} \, dx dy
 $$
+
 Here, $$F(x,y,u,u_x,u_y) = \sqrt{1 + u_x^2 + u_y^2}$$.
 -   $$\frac{\partial F}{\partial u} = 0$$
 -   $$\frac{\partial F}{\partial u_x} = \frac{u_x}{\sqrt{1 + u_x^2 + u_y^2}}$$
 -   $$\frac{\partial F}{\partial u_y} = \frac{u_y}{\sqrt{1 + u_x^2 + u_y^2}}$$
 The Euler-Lagrange PDE is:
+
 $$
 0 - \frac{\partial}{\partial x} \left( \frac{u_x}{\sqrt{1 + u_x^2 + u_y^2}} \right) - \frac{\partial}{\partial y} \left( \frac{u_y}{\sqrt{1 + u_x^2 + u_y^2}} \right) = 0
 $$
+
 This is the **minimal surface equation**. Solutions (like soap films) have zero mean curvature.
 </blockquote>
 
 ## 4. Constrained Variational Problems
 
 Often, we want to extremize a functional $$J[y]$$ subject to one or more constraints. A common type is an **isoperimetric constraint**, where another functional $$K[y]$$ must take a fixed value:
+
 $$
 K[y] = \int_a^b G(x, y, y') \, dx = L_0 \quad (\text{constant})
 $$
+
 An example is Dido's problem: find the curve of a given fixed length $$L_0$$ that encloses the maximum area. Or the catenary problem: find the shape of a hanging chain of fixed length $$L_0$$ that minimizes potential energy.
 
 Analogous to constrained optimization in multivariable calculus, we use the method of **Lagrange multipliers**. We form an auxiliary functional:
+
 $$
 J^*[y] = J[y] + \lambda K[y] = \int_a^b (F(x, y, y') + \lambda G(x, y, y')) \, dx
 $$
+
 $$
 J^*[y] = \int_a^b H(x, y, y', \lambda) \, dx
 $$
+
 where $$H = F + \lambda G$$ and $$\lambda$$ is a Lagrange multiplier (a constant to be determined).
 We then apply the Euler-Lagrange equation to this new functional $$J^*[y]$$ with respect to $$y(x)$$, treating $$\lambda$$ as a constant during this step:
+
 $$
 \frac{\partial H}{\partial y} - \frac{d}{dx} \left( \frac{\partial H}{\partial y'} \right) = 0
 $$
+
 This gives a differential equation that involves $$\lambda$$. The solution $$y(x, \lambda)$$ will depend on $$\lambda$$. Finally, $$\lambda$$ is determined by substituting this solution back into the constraint equation $$K[y(x, \lambda)] = L_0$$.
 
 <blockquote class="box-example" markdown="1">

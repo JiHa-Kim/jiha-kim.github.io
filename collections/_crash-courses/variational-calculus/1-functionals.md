@@ -263,9 +263,11 @@ Let's break this down:
 **Boundary Conditions for Variations:**
 If the problem requires $$y(x)$$ to satisfy fixed boundary conditions, say $$y(a) = y_a$$ and $$y(b) = y_b$$, then any admissible perturbed function $$\tilde{y}(x; \epsilon)$$ must also satisfy these same boundary conditions for all $$\epsilon$$.
 Since $$y(x) + \epsilon \eta(x)$$ must equal $$y_a$$ at $$x=a$$, and $$y(a)=y_a$$, this implies $$\epsilon \eta(a) = 0$$. Similarly, $$\epsilon \eta(b) = 0$$. For these to hold for any small non-zero $$\epsilon$$, the variation function $$\eta(x)$$ must itself vanish at the boundaries:
+
 $$
 \eta(a) = 0 \quad \text{and} \quad \eta(b) = 0
 $$
+
 Such an $$\eta(x)$$ is called an **admissible variation** for problems with fixed endpoints.
 
 <details class="details-block" markdown="1">
@@ -287,7 +289,7 @@ $$
 \Phi(\epsilon) = J[y + \epsilon \eta]
 $$
 
-If $$y(x)$$ is indeed an extremizing function for $$J[y]$$, then for any choice of admissible variation $$\eta(x)$$, the function $$\Phi(\epsilon)$$ must have a stationary point at $$\epsilon = 0$$. From ordinary calculus, this means its derivative with respect to $$\epsilon$$ must be zero at $$\epsilon = 0$:
+If $$y(x)$$ is indeed an extremizing function for $$J[y]$$, then for any choice of admissible variation $$\eta(x)$$, the function $$\Phi(\epsilon)$$ must have a stationary point at $$\epsilon = 0$$. From ordinary calculus, this means its derivative with respect to $$\epsilon$$ must be zero at $$\epsilon = 0$$:
 
 $$
 \left. \frac{d\Phi(\epsilon)}{d\epsilon} \right|_{\epsilon=0} = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right|_{\epsilon=0} = 0
@@ -306,9 +308,11 @@ $$
 $$
 
 A necessary condition for $$y(x)$$ to be an extremizer of $$J[y]$$ (among functions satisfying the given boundary conditions) is that its first variation must be zero for **all** admissible variation functions $$\eta(x)$$:
+
 $$
 \delta J[y; \eta] = 0 \quad \text{for all admissible } \eta(x)
 $$
+
 </blockquote>
 
 <blockquote class="prompt-info" markdown="1">

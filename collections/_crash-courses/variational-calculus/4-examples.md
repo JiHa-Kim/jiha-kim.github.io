@@ -154,10 +154,12 @@ llm-instructions: |
   without an explicit request.
 ---
 
-In the previous parts, we introduced functionals, derived the necessary condition for an extremum ($\$\delta J = 0$$), and arrived at the Euler-Lagrange equation for functionals of the form $$J[y] = \int_a^b F(x, y(x), y'(x)) \, dx$$:
+In the previous parts, we introduced functionals, derived the necessary condition for an extremum ($$\$$\delta J = 0$$), and arrived at the Euler-Lagrange equation for functionals of the form $$J[y] = \int_a^b F(x, y(x), y'(x)) \, dx$$:
+
 $$
 \frac{\partial F}{\partial y} - \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) = 0
 $$
+
 We also saw its profound connection to classical mechanics. Now, it's time to put this powerful equation to work by solving some classic variational problems. We'll also explore some special cases of the Euler-Lagrange equation that can simplify problem-solving.
 
 ## 1. Classic Example: The Shortest Path Between Two Points
@@ -165,58 +167,75 @@ We also saw its profound connection to classical mechanics. Now, it's time to pu
 This is perhaps the simplest, yet most illustrative, variational problem. We want to find the curve $$y(x)$$ connecting two points $$(x_1, y_1)$$ and $$(x_2, y_2)$$ that has the minimum possible length.
 
 The functional to minimize is the arc length:
+
 $$
 L[y] = \int_{x_1}^{x_2} \sqrt{1 + (y'(x))^2} \, dx
 $$
+
 Here, the integrand is $$F(x, y, y') = \sqrt{1 + (y')^2}$$.
 
 Let's apply the Euler-Lagrange equation.
 1.  **Calculate $$\frac{\partial F}{\partial y}$$**:
     Since $$F$$ does not explicitly depend on $$y$$ (only on $$y'$$),
+
     $$
     \frac{\partial F}{\partial y} = 0
     $$
 
 2.  **Calculate $$\frac{\partial F}{\partial y'}$$**:
+
     $$
     \frac{\partial F}{\partial y'} = \frac{\partial}{\partial y'} \left( (1 + (y')^2)^{1/2} \right) = \frac{1}{2} (1 + (y')^2)^{-1/2} \cdot (2y') = \frac{y'}{\sqrt{1 + (y')^2}}
     $$
 
 3.  **Substitute into the Euler-Lagrange equation**:
+
     $$
     0 - \frac{d}{dx} \left( \frac{y'}{\sqrt{1 + (y')^2}} \right) = 0
     $$
+
     This implies:
+
     $$
     \frac{d}{dx} \left( \frac{y'}{\sqrt{1 + (y')^2}} \right) = 0
     $$
 
 If the derivative of a quantity with respect to $$x$$ is zero, then that quantity must be a constant. Let's call this constant $$C_1$$:
+
 $$
 \frac{y'}{\sqrt{1 + (y')^2}} = C_1
 $$
 
 Now we solve for $$y'$$:
+
 $$
 (y')^2 = C_1^2 (1 + (y')^2)
 $$
+
 $$
 (y')^2 = C_1^2 + C_1^2 (y')^2
 $$
+
 $$
 (y')^2 (1 - C_1^2) = C_1^2
 $$
+
 $$
 (y')^2 = \frac{C_1^2}{1 - C_1^2}
 $$
+
 Since the right-hand side is a constant (let $$m^2 = \frac{C_1^2}{1 - C_1^2}$$), we have:
+
 $$
 y' = \pm m = \text{constant}
 $$
+
 Integrating $$y' = m$$ (we can absorb the $$\pm$$ into the constant $$m$$) with respect to $$x$$ gives:
+
 $$
 y(x) = mx + C_2
 $$
+
 This is the equation of a straight line, as expected! The constants $$m$$ and $$C_2$$ are determined by the boundary conditions that the line must pass through $$(x_1, y_1)$$ and $$(x_2, y_2)$$.
 
 This example, though simple, demonstrates the systematic approach provided by the Euler-Lagrange equation.
@@ -227,15 +246,19 @@ This is a historically famous problem posed by Johann Bernoulli in 1696: find th
 
 Let's set up the coordinate system. Let A be at the origin $$(0,0)$$. Let the y-axis point downwards (direction of gravity). The point B is at $$(x_B, y_B)$$ with $$x_B > 0$$ and $$y_B > 0$$.
 A bead starts from rest at A. By conservation of energy, if the bead is at a depth $$y$$, its potential energy lost is $$mgy$$ (where $$m$$ is mass, $$g$$ is acceleration due to gravity). This is converted into kinetic energy $$\frac{1}{2}mv^2$$.
+
 $$
 mgy = \frac{1}{2}mv^2 \implies v = \sqrt{2gy}
 $$
+
 The time $$dt$$ to travel an infinitesimal arc length $$ds$$ is $$dt = ds/v$$.
 The arc length is $$ds = \sqrt{dx^2 + dy^2} = \sqrt{1 + (y'(x))^2} \, dx$$, where $$y'(x) = dy/dx$$.
 So, the total time $$T$$ to travel along a path $$y(x)$$ from $$x=0$$ to $$x=x_B$$ is:
+
 $$
 T[y] = \int_0^{x_B} \frac{ds}{v} = \int_0^{x_B} \frac{\sqrt{1 + (y'(x))^2}}{\sqrt{2gy(x)}} \, dx
 $$
+
 The integrand is $$F(x, y, y') = \frac{\sqrt{1 + (y')^2}}{\sqrt{2gy}}$$. We want to minimize $$T[y]$$.
 Notice that $$F$$ does not explicitly depend on $$x$$. This is a special case!
 
@@ -252,6 +275,7 @@ If the integrand $$F(x, y, y')$$ does not explicitly depend on $$x$$ (i.e., $$F=
 $$
 F - y' \frac{\partial F}{\partial y'} = C
 $$
+
 where $$C$$ is a constant.
 </blockquote>
 
@@ -260,81 +284,112 @@ where $$C$$ is a constant.
 **Derivation of Beltrami Identity**
 </summary>
 Consider the total derivative of $$F$$ with respect to $$x$$ (assuming $$F=F(y,y')$$, so $$\frac{\partial F}{\partial x}=0$$ when $$F$$ is treated as a function of three variables):
+
 $$
 \frac{dF}{dx} = \frac{\partial F}{\partial y} y' + \frac{\partial F}{\partial y'} y''
 $$
+
 From the Euler-Lagrange equation, $$\frac{\partial F}{\partial y} = \frac{d}{dx}\left(\frac{\partial F}{\partial y'}\right)$$. Substitute this:
+
 $$
 \frac{dF}{dx} = \left(\frac{d}{dx}\frac{\partial F}{\partial y'}\right) y' + \frac{\partial F}{\partial y'} y''
 $$
+
 Notice that the right-hand side is the derivative of a product: $$\frac{d}{dx} \left( y' \frac{\partial F}{\partial y'} \right) = y'' \frac{\partial F}{\partial y'} + y' \frac{d}{dx}\left(\frac{\partial F}{\partial y'}\right)$$.
 So,
+
 $$
 \frac{dF}{dx} = \frac{d}{dx} \left( y' \frac{\partial F}{\partial y'} \right)
 $$
+
 Rearranging:
+
 $$
 \frac{d}{dx} \left( F - y' \frac{\partial F}{\partial y'} \right) = 0
 $$
+
 Integrating with respect to $$x$$ gives $$F - y' \frac{\partial F}{\partial y'} = C$$, where $$C$$ is a constant.
 </details>
 
 Now, let's apply the Beltrami identity to the brachistochrone problem.
 $$F = \frac{\sqrt{1 + (y')^2}}{\sqrt{2gy}}$$.
 We need $$\frac{\partial F}{\partial y'}$$:
+
 $$
 \frac{\partial F}{\partial y'} = \frac{1}{\sqrt{2gy}} \cdot \frac{y'}{\sqrt{1 + (y')^2}}
 $$
+
 Substitute into the Beltrami identity $$F - y' \frac{\partial F}{\partial y'} = C_1$$:
+
 $$
 \frac{\sqrt{1 + (y')^2}}{\sqrt{2gy}} - y' \left( \frac{y'}{\sqrt{2gy}\sqrt{1 + (y')^2}} \right) = C_1
 $$
+
 $$
 \frac{1 + (y')^2 - (y')^2}{\sqrt{2gy}\sqrt{1 + (y')^2}} = C_1
 $$
+
 $$
 \frac{1}{\sqrt{2gy}\sqrt{1 + (y')^2}} = C_1
 $$
+
 Squaring both sides:
+
 $$
 \frac{1}{2gy(1 + (y')^2)} = C_1^2
 $$
+
 Let $$k = \frac{1}{2gC_1^2}$$ (another constant). Then:
+
 $$
 y(1 + (y')^2) = k
 $$
+
 This is a first-order differential equation. We can solve for $$y'$$:
+
 $$
 1 + (y')^2 = \frac{k}{y} \implies (y')^2 = \frac{k}{y} - 1 = \frac{k-y}{y}
 $$
+
 $$
 y' = \frac{dy}{dx} = \sqrt{\frac{k-y}{y}}
 $$
+
 Separating variables:
+
 $$
 dx = \sqrt{\frac{y}{k-y}} \, dy
 $$
+
 To integrate this, use the substitution $$y = k \sin^2(\theta/2) = \frac{k}{2}(1 - \cos\theta)$$.
 Then $$dy = k \sin(\theta/2) \cos(\theta/2) \, d\theta = \frac{k}{2} \sin\theta \, d\theta$$.
 And $$\sqrt{\frac{y}{k-y}} = \sqrt{\frac{k \sin^2(\theta/2)}{k - k \sin^2(\theta/2)}} = \sqrt{\frac{\sin^2(\theta/2)}{\cos^2(\theta/2)}} = \tan(\theta/2)$$.
 So,
+
 $$
 dx = \tan(\theta/2) \cdot \frac{k}{2} \sin\theta \, d\theta = \frac{\sin(\theta/2)}{\cos(\theta/2)} \cdot \frac{k}{2} (2 \sin(\theta/2)\cos(\theta/2)) \, d\theta
 $$
+
 $$
 dx = k \sin^2(\theta/2) \, d\theta = \frac{k}{2}(1 - \cos\theta) \, d\theta
 $$
+
 Integrating both sides:
+
 $$
 x = \int \frac{k}{2}(1 - \cos\theta) \, d\theta = \frac{k}{2}(\theta - \sin\theta) + C_2
 $$
+
 We have the parametric equations for the curve (let $$R = k/2$$ and adjust $$C_2$$ by choice of $$\theta$$ at $$x=0, y=0$$):
+
 $$
 x(\theta) = R(\theta - \sin\theta)
 $$
+
 $$
 y(\theta) = R(1 - \cos\theta)
 $$
+
 These are the parametric equations of a **cycloid** – the curve traced by a point on the rim of a circle rolling along a straight line. The constants $$R$$ and the range of $$\theta$$ are determined by the start and end points A and B.
 
 This famous result shows that the fastest path under gravity is not a straight line, but a segment of a cycloid.
@@ -345,20 +400,26 @@ There are other situations where the Euler-Lagrange equation simplifies:
 
 ### Special Case 2: $$F$$ does not depend on $$y$$ (i.e., $$\frac{\partial F}{\partial y} = 0$$)
 If $$F = F(x, y')$$, the Euler-Lagrange equation becomes:
+
 $$
 0 - \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) = 0 \implies \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) = 0
 $$
+
 This means:
+
 $$
 \frac{\partial F}{\partial y'} = C \quad (\text{constant})
 $$
+
 This is a first-order ODE for $$y(x)$$. We saw this in the shortest path example where $$F = \sqrt{1+(y')^2}$$, leading to $$\frac{y'}{\sqrt{1+(y')^2}} = \text{constant}$$.
 
 ### Special Case 3: $$F$$ does not depend on $$y'$$ (i.e., $$\frac{\partial F}{\partial y'} = 0$$)
 If $$F = F(x, y)$$, the Euler-Lagrange equation becomes:
+
 $$
 \frac{\partial F}{\partial y} - \frac{d}{dx}(0) = 0 \implies \frac{\partial F}{\partial y}(x, y) = 0
 $$
+
 This is not a differential equation, but an algebraic equation that determines $$y$$ as a function of $$x$$. This makes sense: if the value of the integral only depends on $$y(x)$$ point-wise and not its slope, then to extremize the integral, we must extremize $$F(x,y)$$ at each $$x$$. Such problems are less common in standard variational calculus settings aimed at finding optimal *paths* that depend on derivatives.
 
 ### Special Case 4: $$F$$ depends only on $$y'$$ (i.e., $$F = F(y')$$)
@@ -370,53 +431,74 @@ From Special Case 2, $$\frac{\partial F}{\partial y'} = \text{constant}$$. Since
 Consider a flexible, heavy chain of uniform density suspended between two points. What shape $$y(x)$$ does it take to minimize its potential energy?
 The potential energy of an element of arc length $$ds$$ at height $$y$$ is $$dPE = \rho g y \, ds$$, where $$\rho$$ is the linear mass density and $$g$$ is gravity.
 So, $$ds = \sqrt{1+(y')^2}dx$$. The total potential energy is:
+
 $$
 PE[y] = \int_{x_1}^{x_2} \rho g y \sqrt{1+(y')^2} \, dx
 $$
+
 This problem typically comes with a constraint: the length of the chain $$L_0 = \int_{x_1}^{x_2} \sqrt{1+(y')^2} \, dx$$ is fixed. This is an **isoperimetric problem**, which we'll touch upon later (it requires Lagrange multipliers for functionals).
 
 However, if we consider a slightly different framing, or if the problem is solved without explicitly stating the constraint at first using physical arguments about force balance, one arrives at an integrand relevant to the shape. For the basic catenary problem where we seek the shape that minimizes potential energy subject to a fixed length, the function to minimize is $$F = y \sqrt{1+(y')^2}$$ (absorbing constants $$\rho g$$ into the analysis, or using a Lagrange multiplier that leads to this effective $$F$$).
 Let's analyze $$F(y, y') = y \sqrt{1+(y')^2}$$. This integrand does not depend explicitly on $$x$$. So we can use the Beltrami identity:
+
 $$
 F - y' \frac{\partial F}{\partial y'} = C_1
 $$
+
 We need $$\frac{\partial F}{\partial y'}$$:
+
 $$
 \frac{\partial F}{\partial y'} = y \cdot \frac{y'}{\sqrt{1+(y')^2}}
 $$
+
 Substitute into Beltrami:
+
 $$
 y \sqrt{1+(y')^2} - y' \left( \frac{y y'}{\sqrt{1+(y')^2}} \right) = C_1
 $$
+
 $$
 \frac{y(1+(y')^2) - y(y')^2}{\sqrt{1+(y')^2}} = C_1
 $$
+
 $$
 \frac{y}{\sqrt{1+(y')^2}} = C_1
 $$
+
 Squaring: $$y^2 = C_1^2 (1+(y')^2)$$.
+
 $$
 (y')^2 = \frac{y^2}{C_1^2} - 1 = \frac{y^2 - C_1^2}{C_1^2}
 $$
+
 $$
 y' = \frac{dy}{dx} = \frac{\sqrt{y^2 - C_1^2}}{C_1}
 $$
+
 Separating variables:
+
 $$
 \frac{C_1 \, dy}{\sqrt{y^2 - C_1^2}} = dx
 $$
+
 Integrating both sides (the left integral is $$\text{arccosh}(y/C_1)$$$ or $$C_1 \ln(y/C_1 + \sqrt{(y/C_1)^2-1})$$):
+
 $$
 C_1 \text{arccosh}\left(\frac{y}{C_1}\right) = x + C_2
 $$
+
 $$
 \text{arccosh}\left(\frac{y}{C_1}\right) = \frac{x+C_2}{C_1}
 $$
+
 So,
+
 $$
 y = C_1 \cosh\left(\frac{x+C_2}{C_1}\right)
 $$
+
 This is the equation of a **catenary**. By choosing the coordinate system appropriately (origin at the lowest point of the chain, $$x=0 \implies y'=0$$), we can set $$C_2=0$$ and $$C_1$$ becomes the y-value at the minimum, often denoted $$a$$.
+
 $$
 y(x) = a \cosh\left(\frac{x}{a}\right)
 $$

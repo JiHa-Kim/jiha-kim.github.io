@@ -225,7 +225,7 @@ For large-scale systems, especially if $$A$$ is sparse (many zero entries), iter
 </div>
 The **Conjugate Gradient (CG)** method is a powerful iterative algorithm for solving $$Ax=b$$ when $$A$$ is Symmetric Positive Definite (SPD).
 <br>
-**Core Idea:** CG generates a sequence of search directions $$p_k$$ that are $$A$%-conjugate (i.e., $$p_i^T A p_j = 0$$ for $$i \neq j$$) and iteratively minimizes the quadratic $$ \phi(x) = \frac{1}{2}x^T A x - b^T x $$ along these directions.
+**Core Idea:** CG generates a sequence of search directions $$p_k$$ that are $$A$$%-conjugate (i.e., $$p_i^T A p_j = 0$$ for $$i \neq j$$) and iteratively minimizes the quadratic $$ \phi(x) = \frac{1}{2}x^T A x - b^T x $$ along these directions.
 <br>
 **Properties:**
 <ul>

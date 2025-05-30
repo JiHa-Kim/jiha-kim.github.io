@@ -158,9 +158,11 @@ llm-instructions: |
 ---
 
 In the previous part, we derived the **Euler-Lagrange equation**:
+
 $$
 \frac{\partial F}{\partial y} - \frac{d}{dx} \left( \frac{\partial F}{\partial y'} \right) = 0
 $$
+
 This equation is a necessary condition for a function $$y(x)$$ to extremize a functional of the form $$J[y] = \int_a^b F(x, y(x), y'(x)) \, dx$$.
 
 One of the most celebrated and historically significant applications of variational principles is in **classical mechanics**. This not only showcases the power of variational calculus but also introduces concepts and mathematical structures, like the Legendre transform, that are fundamental to understanding duality in optimization, including convex conjugation.
@@ -219,6 +221,7 @@ For a system with kinetic energy $$T(q, \dot{q})$$ and potential energy $$V(q, t
 $$
 L(t, q, \dot{q}) = T(q, \dot{q}) - V(q, t)
 $$
+
 </blockquote>
 
 <details class="details-block" markdown="1">
@@ -226,23 +229,29 @@ $$
 **Deriving $$L=T-V$$ from Newton's Laws (1D Example)**
 </summary>
 Consider a particle of mass $$m$$ in one dimension $$q$$, subject to a conservative force $$F(q) = -\frac{dV}{dq}$$. Newton's second law is $$m\ddot{q} = F(q)$$, or $$m\ddot{q} = -\frac{dV}{dq}$$. We can write this as:
+
 $$
 -\frac{dV}{dq} - \frac{d}{dt}(m\dot{q}) = 0
 $$
+
 We want to find an $$L(q, \dot{q})$$ such that the Euler-Lagrange equation $$\frac{\partial L}{\partial q} - \frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}}\right) = 0$$ matches this.
 Comparing terms:
 1.  $$\frac{\partial L}{\partial q} = -\frac{dV}{dq}$$
 2.  $$\frac{\partial L}{\partial \dot{q}} = m\dot{q}$$
 
 Integrating condition (2) with respect to $$\dot{q}$$ (treating $$q$$ as constant) gives:
+
 $$
 L = \int m\dot{q} \, d\dot{q} = \frac{1}{2}m\dot{q}^2 + f(q)
 $$
+
 where $$f(q)$$ is an integration "constant" with respect to $$\dot{q}$$. We recognize $$\frac{1}{2}m\dot{q}^2$$ as the kinetic energy $$T(\dot{q})$$. So, $$L = T(\dot{q}) + f(q)$$.
 Now use condition (1):
+
 $$
 \frac{\partial L}{\partial q} = \frac{\partial}{\partial q}(T(\dot{q}) + f(q)) = \frac{df}{dq}
 $$
+
 So, $$\frac{df}{dq} = -\frac{dV}{dq}$$. Integrating with respect to $$q$$ gives $$f(q) = -V(q) + C$$.
 Thus, $$L = T(\dot{q}) - V(q) + C$$. The constant $$C$$ doesn't affect the equations of motion, so we can set $$C=0$$, yielding $$L = T - V$$.
 </details>
@@ -263,6 +272,7 @@ In the Lagrangian framework, the generalized momentum $$p_i$$ conjugate to the c
 $$
 p_i = \frac{\partial L}{\partial \dot{q}_i}
 $$
+
 For a simple particle with $$L = \frac{1}{2}m\dot{x}^2 - V(x)$$, the momentum conjugate to $$x$$ is $$p_x = \frac{\partial L}{\partial \dot{x}} = m\dot{x}$$, which is the familiar linear momentum.
 
 ### The Legendre Transform
@@ -301,6 +311,7 @@ Using the properties of the Legendre transform and the Euler-Lagrange equations,
 $$
 \dot{q}_i = \frac{\partial H}{\partial p_i}
 $$
+
 $$
 \dot{p}_i = -\frac{\partial H}{\partial q_i}
 $$
@@ -309,9 +320,11 @@ These are a set of first-order differential equations, contrasted with the secon
 
 **What is the Hamiltonian $$H$$?**
 For many common systems where the kinetic energy $$T$$ is a quadratic function of velocities and the potential energy $$V$$ does not depend on velocities, the Hamiltonian simplifies to the total energy of the system:
+
 $$
 H = T + V
 $$
+
 This happens because if $$T = \sum_{j,k} \frac{1}{2} M_{jk}(q) \dot{q}_j \dot{q}_k$$ (a quadratic form in $$\dot{q}$$), then Euler's homogeneous function theorem implies $$\sum_i p_i \dot{q}_i = \sum_i \frac{\partial L}{\partial \dot{q}_i} \dot{q}_i = \sum_i \frac{\partial T}{\partial \dot{q}_i} \dot{q}_i = 2T$$.
 Then $$H = 2T - L = 2T - (T-V) = T+V$$.
 

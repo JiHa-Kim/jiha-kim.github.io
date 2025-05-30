@@ -395,7 +395,7 @@ $$
 </blockquote>
 
 ### Orthogonal Complements
-- Two subspaces $$V$$ and $$W$$ of $$\mathbb{R}^k$$ are orthogonal complements if every vector in $$V$$ is orthogonal to every vector in $$W$$, and $$V \oplus W = \mathbb{R}^k$$ (their direct sum spans $$\mathbb{R}^k$$ and their intersection is $$\{\mathbf{0}\}$). Denoted $$W = V^\perp$$.
+- Two subspaces $$V$$ and $$W$$ of $$\mathbb{R}^k$$ are orthogonal complements if every vector in $$V$$ is orthogonal to every vector in $$W$$, and $$V \oplus W = \mathbb{R}^k$$ (their direct sum spans $$\mathbb{R}^k$$ and their intersection is $$\{\mathbf{0}\}$$). Denoted $$W = V^\perp$$.
 - The table above shows the orthogonal complement relationships for the fundamental subspaces. For example, $$\text{Col}(A)^\perp = \text{Null}(A^T)$$ in $$\mathbb{R}^m$$, and $$\text{Row}(A)^\perp = \text{Null}(A)$$ in $$\mathbb{R}^n$$. This implies $$\mathbb{R}^m = \text{Col}(A) \oplus \text{Null}(A^T)$$ and $$\mathbb{R}^n = \text{Row}(A) \oplus \text{Null}(A)$$.
 
 ## 4. Determinants
