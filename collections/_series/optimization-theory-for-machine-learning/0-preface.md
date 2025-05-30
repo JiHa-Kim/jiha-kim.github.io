@@ -38,7 +38,7 @@ llm-instructions: |
     text...
   Use LaTeX commands for symbols as much as possible (e.g. $$\vert$$ for
   absolute value, $$\ast$$ for asterisk). Avoid using the literal vertical bar
-  symbol; use \vert and \Vert instead.
+  symbol; use \vert and \Vert.
 
   The syntax for lists is:
 
@@ -221,14 +221,14 @@ flowchart TD
 
 If the mermaid flowchart does not render:
 1. `Linear Algebra`
-2. `Multivariable Calculus`
-3. Parallel branches from `Linear Algebra`:
-    1. `Elementary Functional Analysis`
+2. `Multivariable Calculus` (connected from Linear Algebra)
+3. From `Multivariable Calculus`, two parallel branches:
+    1. `Functional Analysis & Matrix Spectral Theory`
     2. `Numerical Analysis`
 4. From `Functional Analysis & Matrix Spectral Theory`, two branches:
     1. `Tensor Calculus`, which leads to:
-        1. `Differential Geometry`
-        2. `Statistics and Information Theory` (which then leads to `Information Geometry`)
+        1. `Differential Geometry` (which then, along with Statistics and Information Theory, leads to `Information Geometry`)
+        2. `Statistics and Information Theory` (which then, along with Differential Geometry, leads to `Information Geometry`)
     2. `Variational Calculus`, which leads to:
         1. `Convex Analysis` (which then leads to `Online Learning`)
 

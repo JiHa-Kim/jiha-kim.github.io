@@ -201,6 +201,13 @@ This quick reference guide covers essential theorems, identities, and facts from
   $$
 
 - **Orthogonal Vectors:** $$ \mathbf{u} \cdot \mathbf{v} = 0 $$ (implies $$ \theta = \pi/2 $$ or $$90^\circ$$ if vectors are non-zero).
+- **Vector Projection:** The projection of vector $$\mathbf{a}$$ onto non-zero vector $$\mathbf{b}$$ is:
+
+  $$
+  \text{proj}_{\mathbf{b}} \mathbf{a} = \frac{\mathbf{a} \cdot \mathbf{b}}{\Vert \mathbf{b} \Vert_2^2} \mathbf{b}
+  $$
+
+  The scalar component of $$\mathbf{a}$$ along $$\mathbf{b}$$ is $$ \frac{\mathbf{a} \cdot \mathbf{b}}{\Vert \mathbf{b} \Vert_2} $$.
 
 ### Vector Norms
 - **Definition:** A function $$\Vert \cdot \Vert : V \to \mathbb{R}$$ such that for all $$c \in \mathbb{R}$$, $$\mathbf{u}, \mathbf{v} \in V$$:
@@ -225,25 +232,18 @@ This quick reference guide covers essential theorems, identities, and facts from
 
 ### Definitions & Special Matrices
 - **Matrix:** A rectangular array of numbers, $$ A \in \mathbb{R}^{m \times n} $$.
-- **Identity Matrix ($$I_n$$ or $$I$$):** Square matrix ($$n \times n$$) with ones on the main diagonal and zeros elsewhere. $$ AI = IA = A $$.
-- **Zero Matrix ($$0$$):** Matrix with all entries as zero.
-- **Diagonal Matrix:** Non-diagonal entries are zero.
-- **Symmetric Matrix:** $$ A = A^T $$ (i.e., $$a_{ij} = a_{ji}$$). Must be square.
-- **Skew-Symmetric (or Anti-symmetric) Matrix:** $$ A = -A^T $$ (i.e., $$a_{ij} = -a_{ji}$$). Diagonal elements must be zero.
-- **Upper/Lower Triangular Matrix:** All entries below/above the main diagonal are zero.
-- **Orthogonal Matrix ($$Q$$):** A square matrix whose columns (and rows) form an orthonormal set of vectors.
-  - Properties:
 
-    $$
-    Q^T Q = Q Q^T = I
-    $$
-
-    $$
-    Q^{-1} = Q^T
-    $$
-
-    - Preserves dot products and lengths: $$ (Q\mathbf{x}) \cdot (Q\mathbf{y}) = \mathbf{x} \cdot \mathbf{y} $$, $$ \Vert Q\mathbf{x} \Vert_2 = \Vert \mathbf{x} \Vert_2 $$.
-    - $$ \det(Q) = \pm 1 $$.
+| Type                        | Definition / Condition                                               | Key Notes                                                                                                         |
+| --------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Identity ($$I_n$$ or $$I$$) | Square matrix; $$A_{ii}=1$$, $$A_{ij}=0$$ for $$i \ne j$$            | $$AI=IA=A$$                                                                                                       |
+| Zero ($$0$$)                | All entries $$A_{ij}=0$$                                             |                                                                                                                   |
+| Diagonal                    | $$A_{ij}=0$$ for $$i \ne j$$                                         |                                                                                                                   |
+| Symmetric                   | $$A = A^T$$ (square matrix)                                          | Real eigenvalues, orthogonally diagonalizable                                                                     |
+| Skew-Symmetric              | $$A = -A^T$$ (square matrix)                                         | Diagonal elements $$A_{ii}=0$$. Eigenvalues are 0 or purely imaginary.                                            |
+| Upper Triangular            | $$A_{ij}=0$$ for $$i > j$$ (square matrix)                           | Eigenvalues are the diagonal entries                                                                              |
+| Lower Triangular            | $$A_{ij}=0$$ for $$i < j$$ (square matrix)                           | Eigenvalues are the diagonal entries                                                                              |
+| Orthogonal ($$Q$$)          | Square matrix; $$Q^T Q = Q Q^T = I$$                                 | $$Q^{-1}=Q^T$$, columns/rows form an orthonormal basis, $$\det(Q)=\pm 1$$, preserves dot products & $$L_2$$ norms |
+| Normal                      | Square matrix; $$AA^T = A^T A$$ (real) or $$AA^H = A^H A$$ (complex) | Unitarily diagonalizable. Includes symmetric, skew-symmetric, orthogonal matrices.                                |
 
 ### Matrix Operations
 - **Matrix Addition/Subtraction:** Element-wise. Matrices must have the same dimensions.
@@ -283,6 +283,15 @@ This quick reference guide covers essential theorems, identities, and facts from
     4. $$ \text{tr}(A) = \text{tr}(A^T) $$
     5. $$ \text{tr}(ABC) = \text{tr}(BCA) = \text{tr}(CAB) $$
 - **Hadamard Product (Element-wise product, $$A \odot B$$):** $$ (A \odot B)_{ij} = A_{ij} B_{ij} $$. Matrices must have the same dimensions.
+- **Moore-Penrose Pseudoinverse ($$A^+$$):** For any matrix $$A \in \mathbb{R}^{m \times n}$$, the pseudoinverse $$A^+ \in \mathbb{R}^{n \times m}$$ is the unique matrix satisfying:
+  1. $$AA^+A = A$$
+  2. $$A^+AA^+ = A^+$$
+  3. $$(AA^+)^T = AA^+$$ (so $$AA^+$$ is symmetric)
+  4. $$(A^+A)^T = A^+A$$ (so $$A^+A$$ is symmetric)
+  - If $$A$$ has full column rank ($$n \le m$$, $$\text{rank}(A)=n$$), then $$A^+ = (A^T A)^{-1}A^T$$. In this case, $$A^+A = I_n$$.
+  - If $$A$$ has full row rank ($$m \le n$$, $$\text{rank}(A)=m$$), then $$A^+ = A^T(AA^T)^{-1}$$. In this case, $$AA^+ = I_m$$.
+  - Computation via SVD: If $$A = U\Sigma V^T$$ is the SVD of $$A$$, then $$A^+ = V\Sigma^+U^T$$, where $$\Sigma^+$$ is formed by taking the reciprocal of the non-zero singular values in $$\Sigma$$ and transposing the resulting matrix.
+  - Use: The vector $$\mathbf{x}^+ = A^+\mathbf{b}$$ is the minimum norm ($$\Vert \mathbf{x} \Vert_2$$) least-squares solution to $$A\mathbf{x} = \mathbf{b}$$.
 
 ### Matrix Norms
 - **Operator Norm (Induced Norm):**
@@ -298,6 +307,7 @@ This quick reference guide covers essential theorems, identities, and facts from
     $$
 
     where $$\lambda_{\max}(M)$$ is the largest eigenvalue of $$M$$.
+  - General property: $$ \Vert AB \Vert_p \le \Vert A \Vert_p \Vert B \Vert_p $$ (submultiplicativity for induced norms).
 - **Frobenius Norm:**
 
   $$
@@ -306,10 +316,22 @@ This quick reference guide covers essential theorems, identities, and facts from
 
   - Properties:
     1. $$ \Vert A \Vert_F^2 = \sum_{i=1}^{\min(m,n)} \sigma_i^2(A) $$ (sum of squares of singular values of $$A$$)
-    2. Submultiplicative: $$ \Vert AB \Vert_F \le \Vert A \Vert_F \Vert B \Vert_F $$ (but not always for operator norms other than $$p=2$$)
+    2. Submultiplicative: $$ \Vert AB \Vert_F \le \Vert A \Vert_F \Vert B \Vert_F $$
     3. $$ \Vert A \Vert_2 \le \Vert A \Vert_F \le \sqrt{\text{rank}(A)} \Vert A \Vert_2 $$
 
 ## 3. Linear Systems, Vector Spaces & Subspaces
+
+### Linear Transformations
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition.** Linear Transformation
+</div>
+A transformation (or mapping) $$T: V \to W$$ from a vector space $$V$$ to a vector space $$W$$ is linear if for all vectors $$\mathbf{u}, \mathbf{v} \in V$$ and all scalars $$c$$:
+1.  $$T(\mathbf{u} + \mathbf{v}) = T(\mathbf{u}) + T(\mathbf{v})$$ (Additivity)
+2.  $$T(c\mathbf{u}) = cT(\mathbf{u})$$ (Homogeneity)
+
+Any linear transformation $$T: \mathbb{R}^n \to \mathbb{R}^m$$ can be represented by matrix multiplication $$T(\mathbf{x}) = A\mathbf{x}$$ for a unique matrix $$A \in \mathbb{R}^{m \times n}$$. The columns of $$A$$ are the images of the standard basis vectors of $$\mathbb{R}^n$$ under $$T$$.
+</blockquote>
 
 ### Systems of Linear Equations
 - A system of linear equations can be written as $$A\mathbf{x} = \mathbf{b}$$, where $$A \in \mathbb{R}^{m \times n}$$ is the coefficient matrix, $$\mathbf{x} \in \mathbb{R}^n$$ is the vector of unknowns, and $$\mathbf{b} \in \mathbb{R}^m$$ is the constant vector.
@@ -317,7 +339,7 @@ This quick reference guide covers essential theorems, identities, and facts from
 - If a solution exists:
   - It is unique if and only if $$\text{Null}(A) = \{\mathbf{0}\}$$ (i.e., columns of $$A$$ are linearly independent). This implies $$n \le m$$ and $$\text{rank}(A) = n$$.
   - If $$A$$ is square ($$m=n$$) and invertible ($$\det(A) \ne 0$$), there is a unique solution $$\mathbf{x} = A^{-1}\mathbf{b}$$.
-  - If there are free variables (i.e., $$\text{nullity}(A) > 0$$), there are infinitely many solutions.
+  - If there are free variables (i.e., $$\text{nullity}(A) > 0$$), there are infinitely many solutions. The general solution is $$\mathbf{x}_p + \mathbf{x}_h$$, where $$\mathbf{x}_p$$ is a particular solution and $$\mathbf{x}_h$$ is any solution to the homogeneous equation $$A\mathbf{x}=\mathbf{0}$$.
 
 ### Vector Space Axioms
 <details class="details-block" markdown="1">
@@ -346,14 +368,19 @@ A set $$V$$ equipped with two operations, vector addition ($$+$$) and scalar mul
 - **Subspace:** A subset of a vector space that is itself a vector space under the same operations (i.e., it is closed under vector addition and scalar multiplication, and contains the zero vector).
 
 ### Fundamental Subspaces of a Matrix $$A \in \mathbb{R}^{m \times n}$$
-- **Column Space (Image or Range):** $$\text{Col}(A) = \text{Im}(A) = \text{Range}(A) = \{ A\mathbf{x} \mid \mathbf{x} \in \mathbb{R}^n \} \subseteq \mathbb{R}^m$$.
-  - The dimension of $$\text{Col}(A)$$ is the **rank** of $$A$$, denoted $$\text{rank}(A)$$.
-- **Null Space (Kernel):** $$\text{Null}(A) = \text{Ker}(A) = \{ \mathbf{x} \in \mathbb{R}^n \mid A\mathbf{x} = \mathbf{0} \} \subseteq \mathbb{R}^n$$.
-  - The dimension of $$\text{Null}(A)$$ is the **nullity** of $$A$$, denoted $$\text{nullity}(A)$$.
-- **Row Space:** $$\text{Row}(A) = \text{Col}(A^T) = \{ A^T\mathbf{y} \mid \mathbf{y} \in \mathbb{R}^m \} \subseteq \mathbb{R}^n$$.
-  - The dimension of $$\text{Row}(A)$$ is also $$\text{rank}(A)$$.
-- **Left Null Space:** $$\text{Null}(A^T) = \{ \mathbf{y} \in \mathbb{R}^m \mid A^T\mathbf{y} = \mathbf{0} \} \subseteq \mathbb{R}^m$$.
-  - The dimension of $$\text{Null}(A^T)$$ is $$m - \text{rank}(A)$$.
+
+| Subspace Name                          | Definition                                                                               | Space            | Dimension                                  | Orthogonal Complement                  |
+| -------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------ | -------------------------------------- |
+| Column Space (Image, Range)            | $$\text{Col}(A) = \{ A\mathbf{x} \mid \mathbf{x} \in \mathbb{R}^n \}$$                   | $$\mathbb{R}^m$$ | $$\text{rank}(A)$$                         | Left Null Space ($$\text{Null}(A^T)$$) |
+| Null Space (Kernel)                    | $$\text{Null}(A) = \{ \mathbf{x} \in \mathbb{R}^n \mid A\mathbf{x} = \mathbf{0} \}$$     | $$\mathbb{R}^n$$ | $$\text{nullity}(A) = n - \text{rank}(A)$$ | Row Space ($$\text{Row}(A)$$)          |
+| Row Space ($$\text{Col}(A^T)$$)        | $$\text{Row}(A) = \{ A^T\mathbf{y} \mid \mathbf{y} \in \mathbb{R}^m \}$$                 | $$\mathbb{R}^n$$ | $$\text{rank}(A)$$                         | Null Space ($$\text{Null}(A)$$)        |
+| Left Null Space ($$\text{Null}(A^T)$$) | $$\text{Null}(A^T) = \{ \mathbf{y} \in \mathbb{R}^m \mid A^T\mathbf{y} = \mathbf{0} \}$$ | $$\mathbb{R}^m$$ | $$m - \text{rank}(A)$$                     | Column Space ($$\text{Col}(A)$$)       |
+
+- **Properties of Rank:** For matrices $$A$$ and $$B$$ (dimensions allowing products/sums):
+  1. $$ 0 \le \text{rank}(A) \le \min(m, n) $$
+  2. $$ \text{rank}(AB) \le \min(\text{rank}(A), \text{rank}(B)) $$
+  3. $$ \text{rank}(A+B) \le \text{rank}(A) + \text{rank}(B) $$
+  4. $$ \text{rank}(A) = \text{rank}(A^T) = \text{rank}(A^T A) = \text{rank}(AA^T) $$
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
@@ -365,25 +392,21 @@ $$
 \text{rank}(A) + \text{nullity}(A) = n \quad (\text{number of columns of } A)
 $$
 
-An important consequence is that $$\text{rank}(A) = \text{rank}(A^T)$$.
 </blockquote>
 
 ### Orthogonal Complements
-- Two subspaces $$V$$ and $$W$$ of $$\mathbb{R}^k$$ are orthogonal complements if every vector in $$V$$ is orthogonal to every vector in $$W$$, and $$V+W = \mathbb{R}^k$$ (their direct sum spans $$\mathbb{R}^k$$). Denoted $$W = V^\perp$$.
-- For a matrix $$A \in \mathbb{R}^{m \times n}$$:
-  - $$\text{Col}(A)$$ is the orthogonal complement of $$\text{Null}(A^T)$$ in $$\mathbb{R}^m$$. ($$\text{Col}(A)^\perp = \text{Null}(A^T)$$)
-  - $$\text{Row}(A)$$ is the orthogonal complement of $$\text{Null}(A)$$ in $$\mathbb{R}^n$$. ($$\text{Row}(A)^\perp = \text{Null}(A)$$)
-  This implies $$\mathbb{R}^m = \text{Col}(A) \oplus \text{Null}(A^T)$$ and $$\mathbb{R}^n = \text{Row}(A) \oplus \text{Null}(A)$$.
+- Two subspaces $$V$$ and $$W$$ of $$\mathbb{R}^k$$ are orthogonal complements if every vector in $$V$$ is orthogonal to every vector in $$W$$, and $$V \oplus W = \mathbb{R}^k$$ (their direct sum spans $$\mathbb{R}^k$$ and their intersection is $$\{\mathbf{0}\}$). Denoted $$W = V^\perp$$.
+- The table above shows the orthogonal complement relationships for the fundamental subspaces. For example, $$\text{Col}(A)^\perp = \text{Null}(A^T)$$ in $$\mathbb{R}^m$$, and $$\text{Row}(A)^\perp = \text{Null}(A)$$ in $$\mathbb{R}^n$$. This implies $$\mathbb{R}^m = \text{Col}(A) \oplus \text{Null}(A^T)$$ and $$\mathbb{R}^n = \text{Row}(A) \oplus \text{Null}(A)$$.
 
 ## 4. Determinants
 
 - **Definition:** A scalar value associated with a square matrix $$A \in \mathbb{R}^{n \times n}$$, denoted $$\det(A)$$ or $$\vert A \vert$$.
   - For $$n=1$$, $$A = [a_{11}]$$, $$\det(A) = a_{11}$$.
   - For $$n=2$$, $$A = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$$, $$\det(A) = ad - bc$$.
-  - For $$n > 2$$, often defined recursively using cofactor expansion along any row or column. For example, along row $$i$$:
+  - For $$n > 2$$, often defined recursively using cofactor expansion along any row $$i$$ (or column $$j$$):
 
     $$
-    \det(A) = \sum_{j=1}^n (-1)^{i+j} A_{ij} M_{ij}
+    \det(A) = \sum_{j=1}^n (-1)^{i+j} A_{ij} M_{ij} \quad (\text{expansion along row } i)
     $$
 
     where $$M_{ij}$$ is the determinant of the submatrix obtained by deleting row $$i$$ and column $$j$$ (the $$(i,j)$$-minor).
@@ -402,12 +425,28 @@ An important consequence is that $$\text{rank}(A) = \text{rank}(A^T)$$.
   12. For a triangular matrix (upper or lower), $$\det(A)$$ is the product of its diagonal entries.
 - **Geometric Interpretation:** For a matrix $$A \in \mathbb{R}^{n \times n}$$, $$\vert \det(A) \vert$$ is the factor by which the linear transformation represented by $$A$$ scales $$n$$-dimensional volume. The sign of $$\det(A)$$ indicates whether the transformation preserves or reverses orientation.
 
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Adjoint Matrix and Cramer's Rule**
+</summary>
+- **Adjoint (or Adjugate) Matrix:** The adjoint of $$A$$, denoted $$\text{adj}(A)$$ or $$\text{Adj}(A)$$, is the transpose of the cofactor matrix of $$A$$. That is, $$(\text{adj}(A))_{ij} = C_{ji} = (-1)^{j+i} M_{ji}$$.
+  - Property: $$ A \cdot \text{adj}(A) = \text{adj}(A) \cdot A = \det(A)I $$.
+  - If $$\det(A) \ne 0$$, then $$ A^{-1} = \frac{1}{\det(A)} \text{adj}(A) $$.
+- **Cramer's Rule:** For an invertible matrix $$A$$, the unique solution to $$A\mathbf{x} = \mathbf{b}$$ is given by:
+
+  $$
+  x_i = \frac{\det(A_i)}{\det(A)}
+  $$
+
+  where $$A_i$$ is the matrix formed by replacing the $$i$$-th column of $$A$$ with the vector $$\mathbf{b}$$. Cramer's rule is computationally inefficient for large systems but is theoretically important.
+</details>
+
 ## 5. Eigenvalues and Eigenvectors
 
 - **Definition:** For a square matrix $$A \in \mathbb{R}^{n \times n}$$, a non-zero vector $$\mathbf{v} \in \mathbb{C}^n$$ is an **eigenvector** of $$A$$ if $$A\mathbf{v} = \lambda\mathbf{v}$$ for some scalar $$\lambda \in \mathbb{C}$$. The scalar $$\lambda$$ is the corresponding **eigenvalue**.
 - **Characteristic Equation:** Eigenvalues are the roots of the characteristic polynomial $$p(\lambda) = \det(A - \lambda I) = 0$$. This is a polynomial in $$\lambda$$ of degree $$n$$.
 - **Properties:**
-  1. An $$n \times n$$ matrix $$A$$ has $$n$$ eigenvalues, counting multiplicities (they may be complex).
+  1. An $$n \times n$$ matrix $$A$$ has $$n$$ eigenvalues in $$\mathbb{C}$$, counting multiplicities.
   2. Sum of eigenvalues: $$ \sum_{i=1}^n \lambda_i = \text{tr}(A) $$
   3. Product of eigenvalues: $$ \prod_{i=1}^n \lambda_i = \det(A) $$
   4. Eigenvectors corresponding to distinct eigenvalues are linearly independent.
@@ -416,6 +455,7 @@ An important consequence is that $$\text{rank}(A) = \text{rank}(A^T)$$.
   7. If $$\lambda$$ is an eigenvalue of an invertible matrix $$A$$, then $$1/\lambda$$ is an eigenvalue of $$A^{-1}$$. The corresponding eigenvector is the same.
   8. If $$\lambda$$ is an eigenvalue of $$A$$, then $$\lambda^k$$ is an eigenvalue of $$A^k$$ for any integer $$k \ge 0$$. The corresponding eigenvector is the same.
   9. The set of all eigenvectors corresponding to an eigenvalue $$\lambda$$, along with the zero vector, forms a subspace called the **eigenspace** $$E_\lambda = \text{Null}(A - \lambda I)$$.
+  10. **Cayley-Hamilton Theorem:** Every square matrix satisfies its own characteristic equation. If $$p(\lambda) = c_n \lambda^n + \dots + c_1 \lambda + c_0$$ is the characteristic polynomial of $$A$$, then $$p(A) = c_n A^n + \dots + c_1 A + c_0 I = 0$$.
 
 ### For Symmetric Matrices ($$A = A^T$$, $$A \in \mathbb{R}^{n \times n}$$)
 1.  All eigenvalues are real numbers.
@@ -476,8 +516,10 @@ where $$\mathbf{u}_i$$ is the $$i$$-th column of $$U$$ and $$\mathbf{v}_i$$ is t
 - **QR Decomposition:** For any $$A \in \mathbb{R}^{m \times n}$$, it can be factored as $$A = QR$$, where $$Q \in \mathbb{R}^{m \times m}$$ is an orthogonal matrix and $$R \in \mathbb{R}^{m \times n}$$ is an upper triangular matrix.
   - If $$m \ge n$$ (tall or square matrix), a "thin" or "reduced" QR decomposition is often used: $$A = Q_1 R_1$$, where $$Q_1 \in \mathbb{R}^{m \times n}$$ has orthonormal columns and $$R_1 \in \mathbb{R}^{n \times n}$$ is upper triangular. The columns of $$Q_1$$ form an orthonormal basis for $$\text{Col}(A)$$ if $$A$$ has full column rank. This decomposition can be found using Gram-Schmidt process on columns of $$A$$.
 - **Cholesky Decomposition:** For a real, symmetric, positive definite matrix $$A$$, there exists a unique lower triangular matrix $$L$$ with strictly positive diagonal entries such that $$A = LL^T$$. (Alternatively, $$A=R^T R$$ where $$R$$ is upper triangular, $$R=L^T$$). This is often used for solving linear systems with symmetric positive definite coefficient matrices and in statistics (e.g., sampling from multivariate normal distributions).
-- **Diagonalization ($$A = PDP^{-1}$$):** An $$n \times n$$ matrix $$A$$ is diagonalizable if and only if it has $$n$$ linearly independent eigenvectors. In this case, $$A = PDP^{-1}$$, where $$P$$ is an invertible matrix whose columns are the eigenvectors of $$A$$, and $$D$$ is a diagonal matrix whose diagonal entries are the corresponding eigenvalues. Symmetric matrices are a special case where $$P$$ can be chosen to be orthogonal ($$Q$$).
-
+- **Diagonalization ($$A = PDP^{-1}$$):** An $$n \times n$$ matrix $$A$$ is **diagonalizable** if and only if it has $$n$$ linearly independent eigenvectors. In this case, $$A = PDP^{-1}$$, where $$P$$ is an invertible matrix whose columns are the eigenvectors of $$A$$, and $$D$$ is a diagonal matrix whose diagonal entries are the corresponding eigenvalues.
+  - A matrix is diagonalizable if and only if for every eigenvalue $$\lambda$$, its **geometric multiplicity** (dimension of the eigenspace $$E_\lambda$$) equals its **algebraic multiplicity** (multiplicity as a root of the characteristic polynomial).
+  - If an $$n \times n$$ matrix has $$n$$ distinct eigenvalues, it is diagonalizable.
+  - Symmetric matrices are a special case where $$P$$ can be chosen to be orthogonal ($$Q$$), so $$A=Q\Lambda Q^T$$.
 </details>
 
 ## 7. Positive Definite and Semi-definite Matrices
@@ -506,6 +548,7 @@ These definitions apply to **symmetric** matrices $$A \in \mathbb{R}^{n \times n
 - **Negative Definite ($$A \prec 0$$):** $$\mathbf{x}^T A \mathbf{x} < 0$$ for all non-zero $$\mathbf{x}$$. (Equivalent to $$-A \succ 0$$, all eigenvalues $$<0$$).
 - **Negative Semi-definite ($$A \preceq 0$$):** $$\mathbf{x}^T A \mathbf{x} \le 0$$ for all $$\mathbf{x}$$. (Equivalent to $$-A \succeq 0$$, all eigenvalues $$\le 0$$).
 - **Indefinite:** The matrix $$A$$ is neither positive semi-definite nor negative semi-definite. This means the quadratic form $$\mathbf{x}^T A \mathbf{x}$$ can take both positive and negative values. (Equivalent to $$A$$ having at least one positive eigenvalue and at least one negative eigenvalue).
+- **Connection to Convexity:** For a twice-differentiable function $$f: \mathbb{R}^n \to \mathbb{R}$$, its Hessian matrix $$\nabla^2 f(\mathbf{x})$$ being positive semi-definite (positive definite) over a convex domain implies $$f$$ is convex (strictly convex) over that domain. This is fundamental in optimization.
 
 ## 8. Inner Product Spaces
 
@@ -523,7 +566,7 @@ An inner product on a real vector space $$V$$ is a function $$\langle \cdot, \cd
 
     (Linearity in the second argument follows from symmetry: $$ \langle \mathbf{u}, c\mathbf{v} + \mathbf{w} \rangle = c\langle \mathbf{u}, \mathbf{v} \rangle + \langle \mathbf{u}, \mathbf{w} \rangle $$).
 3.  **Positive-definiteness:** $$ \langle \mathbf{v}, \mathbf{v} \rangle \ge 0 $$, and $$ \langle \mathbf{v}, \mathbf{v} \rangle = 0 \iff \mathbf{v} = \mathbf{0} $$
-The standard dot product in $$\mathbb{R}^n$$ ($$\langle \mathbf{u}, \mathbf{v} \rangle = \mathbf{u}^T \mathbf{v}$$) is an example of an inner product.
+The standard dot product in $$\mathbb{R}^n$$ ($$\langle \mathbf{u}, \mathbf{v} \rangle = \mathbf{u}^T \mathbf{v}$$) is an example of an inner product. Another example is a weighted inner product $$ \langle \mathbf{u}, \mathbf{v} \rangle_W = \mathbf{u}^T W \mathbf{v} $$ where $$W$$ is a symmetric positive definite matrix.
 An inner product induces a norm defined by $$ \Vert \mathbf{v} \Vert = \sqrt{\langle \mathbf{v}, \mathbf{v} \rangle} $$.
 </blockquote>
 
@@ -537,8 +580,30 @@ An inner product induces a norm defined by $$ \Vert \mathbf{v} \Vert = \sqrt{\la
 - **Orthogonality:** Two vectors $$\mathbf{u}$$ and $$\mathbf{v}$$ are orthogonal with respect to the inner product if $$ \langle \mathbf{u}, \mathbf{v} \rangle = 0 $$.
 - **Orthonormal Basis:** A basis $$\{\mathbf{q}_1, \dots, \mathbf{q}_n\}$$ for an $$n$$-dimensional inner product space is orthonormal if $$ \langle \mathbf{q}_i, \mathbf{q}_j \rangle = \delta_{ij} $$ (Kronecker delta: 1 if $$i=j$$, 0 if $$i \ne j$$).
 - **Gram-Schmidt Process:** An algorithm that takes any basis for an inner product space and constructs an orthonormal basis for that space.
+- **Parseval's Identity:** If $$\{\mathbf{q}_1, \dots, \mathbf{q}_n\}$$ is an orthonormal basis for an inner product space $$V$$, then for any vector $$\mathbf{v} \in V$$:
 
-## 9. Miscellaneous Identities and Facts
+  $$
+  \mathbf{v} = \sum_{i=1}^n \langle \mathbf{v}, \mathbf{q}_i \rangle \mathbf{q}_i \quad \text{and} \quad \Vert \mathbf{v} \Vert^2 = \sum_{i=1}^n \vert \langle \mathbf{v}, \mathbf{q}_i \rangle \vert^2
+  $$
+
+## 9. Matrix Calculus
+
+Common derivatives using numerator layout convention. Result dimensions match the variable being differentiated with respect to (e.g., if differentiating w.r.t a column vector $$\mathbf{x}$$, result is a column vector).
+
+| Function $$f$$                                               | Derivative                                                                  | Notes                                                                                                                                       |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| $$\mathbf{a}^T \mathbf{x}$$ (or $$\mathbf{x}^T \mathbf{a}$$) | $$\frac{\partial f}{\partial \mathbf{x}} = \mathbf{a}$$                     | $$\mathbf{x}, \mathbf{a} \in \mathbb{R}^n$$. Result is $$n \times 1$$.                                                                      |
+| $$\mathbf{x}^T A \mathbf{x}$$                                | $$\frac{\partial f}{\partial \mathbf{x}} = (A + A^T)\mathbf{x}$$            | $$A \in \mathbb{R}^{n \times n}$$. If $$A$$ symmetric, $$2A\mathbf{x}$$. Result is $$n \times 1$$.                                          |
+| $$\Vert A\mathbf{x} - \mathbf{b} \Vert_2^2$$                 | $$\frac{\partial f}{\partial \mathbf{x}} = 2A^T(A\mathbf{x} - \mathbf{b})$$ | $$A \in \mathbb{R}^{m \times n}, \mathbf{x} \in \mathbb{R}^n, \mathbf{b} \in \mathbb{R}^m$$. Result is $$n \times 1$$.                      |
+| $$\text{tr}(AX)$$                                            | $$\frac{\partial f}{\partial X} = A^T$$                                     | $$X \in \mathbb{R}^{k \times l}, A \in \mathbb{R}^{p \times k}$$. Result is $$k \times l$$ (shape of $$X$$).                                |
+| $$\text{tr}(XA)$$                                            | $$\frac{\partial f}{\partial X} = A^T$$                                     | $$X \in \mathbb{R}^{k \times l}, A \in \mathbb{R}^{l \times p}$$. Result is $$k \times l$$ (shape of $$X$$).                                |
+| $$\text{tr}(AXB)$$                                           | $$\frac{\partial f}{\partial X} = A^T B^T$$                                 | $$X \in \mathbb{R}^{k \times l}, A \in \mathbb{R}^{p \times k}, B \in \mathbb{R}^{l \times q}$$. Result is $$k \times l$$ (shape of $$X$$). |
+| $$\text{tr}(X^T A X)$$                                       | $$\frac{\partial f}{\partial X} = (A+A^T)X$$                                | $$X \in \mathbb{R}^{k \times l}, A \in \mathbb{R}^{k \times k}$$. If $$A$$ symmetric, $$2AX$$. Result is $$k \times l$$ (shape of $$X$$).   |
+| $$\log \det(X)$$                                             | $$\frac{\partial f}{\partial X} = (X^{-1})^T = X^{-T}$$                     | $$X \in \mathbb{R}^{n \times n}$$ positive definite. If $$X$$ symmetric, $$X^{-1}$$. Result is $$n \times n$$.                              |
+| $$\det(X)$$ (Jacobi's Formula)                               | $$\frac{\partial f}{\partial X} = \det(X) (X^{-1})^T = \text{adj}(X)^T$$    | $$X \in \mathbb{R}^{n \times n}$$ invertible. If $$X$$ symmetric, $$\det(X)X^{-1}$$. Result is $$n \times n$$.                              |
+
+
+## 10. Miscellaneous Identities and Facts
 
 - **Woodbury Matrix Identity (Matrix Inversion Lemma):**
   Allows efficient computation of the inverse of a rank-$$k$$ corrected matrix:
@@ -571,39 +636,6 @@ An inner product induces a norm defined by $$ \Vert \mathbf{v} \Vert = \sqrt{\la
   - $$\text{rank}(A) = \text{rank}(A^TA) = \text{rank}(AA^T)$$.
   - If $$A$$ has full column rank ($$\text{rank}(A)=n \le m$$), then $$A^TA$$ is positive definite (and thus invertible).
   - If $$A$$ has full row rank ($$\text{rank}(A)=m \le n$$), then $$AA^T$$ is positive definite (and thus invertible).
-- **Common Matrix Calculus Derivatives (Numerator Layout convention):**
-  Let $$\mathbf{x} \in \mathbb{R}^n$$, $$\mathbf{a} \in \mathbb{R}^n$$, $$A \in \mathbb{R}^{m \times n}$$.
-  - Derivative of a linear form:
-
-    $$
-    \frac{\partial (\mathbf{a}^T \mathbf{x})}{\partial \mathbf{x}} = \frac{\partial (\mathbf{x}^T \mathbf{a})}{\partial \mathbf{x}} = \mathbf{a} \quad (\text{an } n \times 1 \text{ column vector})
-    $$
-
-  - Derivative of a quadratic form:
-
-    $$
-    \frac{\partial (\mathbf{x}^T A \mathbf{x})}{\partial \mathbf{x}} = (A + A^T)\mathbf{x} \quad (\text{an } n \times 1 \text{ column vector, for general } A \in \mathbb{R}^{n \times n})
-    $$
-
-    If $$A$$ is symmetric ($$A=A^T$$), this simplifies to $$2A\mathbf{x}$$.
-  - Derivative of squared Euclidean norm of an affine transformation:
-
-    $$
-    \frac{\partial \Vert A\mathbf{x} - \mathbf{b} \Vert_2^2}{\partial \mathbf{x}} = 2A^T(A\mathbf{x} - \mathbf{b})
-    $$
-
-  - Derivative of trace (useful in matrix optimization):
-    - $$ \frac{\partial \text{tr}(AX)}{\partial X} = A^T $$
-    - $$ \frac{\partial \text{tr}(XA)}{\partial X} = A^T $$
-    - $$ \frac{\partial \text{tr}(AXB)}{\partial X} = A^T B^T $$
-    - $$ \frac{\partial \text{tr}(X^T A X)}{\partial X} = (A+A^T)X $$ (If $$A$$ is symmetric, $$2AX$$)
-  - Derivative of log-determinant: For a positive definite matrix $$X$$,
-
-    $$
-    \frac{\partial \log \det(X)}{\partial X} = (X^{-1})^T = X^{-T}
-    $$
-
-    If $$X$$ is symmetric, this is $$X^{-1}$$. (Note: for non-symmetric $$X$$, some define this as $$X^{-T}$$, others as $$X^{-1}$$ if not careful about layout conventions for matrix derivatives. Assuming $$X$$ is symmetric PD, it's $$X^{-1}$$$ minus off-diagonal factors of 2 based on some definitions, or $$2X^{-1} - \text{diag}(X^{-1})$$. Often $$ (X^{-1})^T $$ is the safest if $$X$$ is not assumed symmetric.) For symmetric $$X$$, it's usually stated as $$X^{-1}$$ in contexts where a symmetric perturbation is implied. For general $$X$$, $$(X^{-1})^T$$ is common.
 
 ---
-This list is intended as a compact reference. For deeper understanding, proofs, and further topics, consult standard linear algebra textbooks.
+This list is intended as a compact reference. For deeper understanding, proofs, and further topics, consult standard linear algebra textbooks or Wikipedia.
