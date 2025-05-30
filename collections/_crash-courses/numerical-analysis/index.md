@@ -1,6 +1,7 @@
 ---
 layout: collection-landing
 title: "Numerical Analysis for Optimization"
+slug: numerical-analysis
 description: "A two-part crash course covering numerical methods for ODEs (relevant to gradient flow and momentum) and numerical linear algebra (for conditioning, iterative solvers, and preconditioning) essential for modern optimization."
 cover: # Optional: path to a cover image for the course
 level: "Intermediate to Advanced" # Reflects both parts

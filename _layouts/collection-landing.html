@@ -64,6 +64,14 @@ refactor: true
   <p class="lead ps-2 mb-4">{{ page.description }}</p>
 {% endif %}
 
+{%- comment -%}
+  This will output any Markdown you write in the page body,
+  so you can write a preface directly in index.md
+{%- endcomment -%}
+<div class="ps-2 mb-4">
+  {{ content }}
+</div>
+
 <div id="post-list" class="flex-grow-1 px-xl-1">
   {% for lesson in lessons %}
     <article class="card-wrapper card mb-4">
