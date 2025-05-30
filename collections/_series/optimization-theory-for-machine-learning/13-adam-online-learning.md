@@ -166,25 +166,35 @@ Adam (Adaptive Moment Estimation) has become a de facto standard optimizer in de
 Given parameters $$x_t$$ at iteration $$t$$, gradient $$g_t = \nabla f_t(x_t)$$, learning rate $$\alpha$$, exponential decay rates $$\beta_1, \beta_2 \in [0, 1)$$, and a small constant $$\epsilon > 0$$:
 
 1.  Update biased first moment estimate:
+
     $$
     m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t
     $$
+
 2.  Update biased second moment estimate (element-wise square):
+
     $$
     v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2
     $$
+
 3.  Compute bias-corrected first moment estimate:
+
     $$
     \hat{m}_t = \frac{m_t}{1-\beta_1^t}
     $$
+
 4.  Compute bias-corrected second moment estimate:
+
     $$
     \hat{v}_t = \frac{v_t}{1-\beta_2^t}
     $$
+
 5.  Update parameters:
+
     $$
     x_{t+1} = x_t - \alpha \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
     $$
+
 (Note: Operations involving $$g_t^2$$, $$\sqrt{\hat{v}_t}$$, and the division are typically element-wise.)
 </div>
 
@@ -234,14 +244,18 @@ Consider the Adam update rule: $$u_t = -\alpha \frac{\hat{m}_t}{\sqrt{\hat{v}_t}
 
 Let's sketch the FTRL objective that Adam (approximately) solves for the update $$p_t = x_t - x_{t-1}$$ (the paper uses $$p_t$$ for the update, slightly different from my $$u_t$$ notation but let's stick to the paper's convention for this part for fidelity).
 The FTRL update for the *update vector* $$p_{t+1}$$ is given by:
+
 $$
 p_{t+1} = \arg\min_p \left\{ \eta \sum_{i=1}^t \langle \tilde{g}_i, p \rangle + \frac{1}{2} \sum_{j=1}^d \sum_{i=1}^t (1-\beta_2) \beta_2^{t-i} \frac{(p^{(j)})^2}{(\tilde{g}_i^{(j)})^2 / s_i^{(j)} + \delta} \right\}
 $$
+
 This is a conceptual representation from the paper's line of reasoning. More directly, the paper shows Adam's update rule can be derived from an FTRL variant where the regularizer is a time-varying proximal term.
 Specifically, if we define the update as $$p_{t+1} = x_{t+1} - x_t$$, then Adam's update is equivalent to:
+
 $$
 p_{t+1} = \arg\min_p \left\{ \langle \hat{m}_t, p \rangle + \frac{1}{2\alpha} \langle (\sqrt{\hat{V}_t} + \epsilon \mathbf{I}) p, p \rangle \right\}
 $$
+
 where $$\hat{V}_t$$ is a diagonal matrix with $$\hat{v}_t$$ on its diagonal. (Here I'm slightly simplifying notation to be consistent with standard Adam. The paper has a slightly more general form involving $$s_t$$ and other terms for full generality.)
 The first term $$\langle \hat{m}_t, p \rangle$$ encourages the update $$p$$ to align with the (bias-corrected) accumulated gradients $$\hat{m}_t$$. The second term is a quadratic regularizer, $$\frac{1}{2\alpha} p^\top \text{diag}(\sqrt{\hat{v}_t}+\epsilon) p$$, which penalizes large updates, with coordinate-wise penalties scaled by $$\sqrt{(\hat{v}_t)_j}+\epsilon$$.
 Solving this minimization for $$p$$ yields $$p_{t+1} = -\alpha (\text{diag}(\sqrt{\hat{v}_t}+\epsilon))^{-1} \hat{m}_t$$, which is precisely the Adam update step (if $$p$$ is the update, $$x_{t+1} = x_t + p_{t+1}$$).
