@@ -1,6 +1,6 @@
 ---
 title: "Variational Calculus Part 5: Generalizations and Constraints"
-date: 2025-06-20 10:00 -0400
+date: 2025-05-20 10:00 -0400
 course_index: 5 # Fifth post in the Variational Calculus crash course
 mermaid: true
 description: "Exploring generalizations of the Euler-Lagrange equation for higher-order derivatives, multiple functions, multiple independent variables, and an introduction to constrained variational problems using Lagrange multipliers."

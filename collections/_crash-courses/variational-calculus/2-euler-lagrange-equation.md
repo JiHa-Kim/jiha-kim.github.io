@@ -1,6 +1,6 @@
 ---
 title: "Variational Calculus Part 2: The Euler-Lagrange Equation"
-date: 2025-06-17 10:00 -0400
+date: 2025-05-17 10:00 -0400
 course_index: 2 # Second post in the Variational Calculus crash course
 mermaid: true
 description: "Deriving the Euler-Lagrange equation, the fundamental differential equation that extremizing functions must satisfy in variational problems, using the first variation and the fundamental lemma."

@@ -1,6 +1,6 @@
 ---
 title: "Variational Calculus Part 1: Functionals and the Quest for Optimal Functions"
-date: 2025-06-16 10:00 -0400
+date: 2025-05-16 10:00 -0400
 course_index: 1 # First post in the Variational Calculus crash course
 mermaid: true
 description: "An introduction to variational calculus: exploring functionals, the challenge of optimizing entire functions, and developing the concept of the first variation as a 'derivative' for functionals."
