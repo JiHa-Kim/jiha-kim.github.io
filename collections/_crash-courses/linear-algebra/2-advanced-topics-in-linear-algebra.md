@@ -577,31 +577,6 @@ Certain types of matrices correspond to transformations with distinct geometric 
 *   **Symmetric Matrices ($$A = A^T$$):**
     *   Symmetric matrices $$A=A^T$$ are the representation of **self-adjoint operators** ($$T=T^*$$ with respect to the standard dot product) in an orthonormal basis. The **Spectral Theorem** is a profound, coordinate-free statement about self-adjoint operators.
 
-    <blockquote class="box-theorem" markdown="1">
-    <div class="title" markdown="1">
-    **Theorem.** The Spectral Theorem (for Real Symmetric Matrices)
-    </div>
-
-    *   **Geometric Interpretation:**
-        A linear transformation represented by a real symmetric matrix $$A$$ acts by stretching or compressing space along a set of mutually orthogonal directions. These directions are given by the eigenvectors of $$A$$.
-        More concretely, if $$A$$ is also positive definite, the set of points $$\vec{x}$$ satisfying the quadratic form $$\vec{x}^T A \vec{x} = c$$ (for a positive constant $$c$$) forms an ellipsoid in $$\mathbb{R}^n$$. The **principal axes** of this ellipsoid are precisely the orthogonal eigenvectors of $$A$$. The lengths of the semi-axes along these principal directions are inversely proportional to the square roots of the corresponding eigenvalues ($$1/\sqrt{\lambda_i}$$).
-        Thus, a key geometric insight from the Spectral Theorem is: **"Ellipsoids defined by symmetric positive definite matrices have orthogonal principal axes, which are the eigenvectors of the matrix."**
-
-    *   **Algebraic Formulation:**
-        If $$A$$ is a real $$n \times n$$ symmetric matrix ($$A = A^T$$), then it can be factored as:
-
-        $$
-        A = Q D Q^T
-        $$
-
-        where:
-        *   $$Q$$ is an $$n \times n$$ orthogonal matrix ($$Q^T Q = I$$) whose columns are an orthonormal basis of eigenvectors of $$A$$.
-        *   $$D$$ is an $$n \times n$$ diagonal matrix whose diagonal entries are the real eigenvalues of $$A$$, corresponding to the eigenvectors in $$Q$$.
-
-    This theorem guarantees that for any symmetric transformation, there's an orthogonal basis (the eigenbasis) in which the transformation is a simple scaling along the axes. The eigenvalues are real, and eigenvectors corresponding to distinct eigenvalues are orthogonal.
-    </blockquote>
-    *   **Example:** $$A = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$$ from Section 9.1 is symmetric. Its eigenvectors $$\begin{pmatrix} 1 \\ 1 \end{pmatrix}$$ and $$\begin{pmatrix} 1 \\ -1 \end{pmatrix}$$ are orthogonal. The columns of $$Q$$ would be the normalized versions of these eigenvectors. The eigenvalues are $$4$$ and $$2$$, forming the diagonal of $$D$$. The equation $$\vec{x}^T A \vec{x} = 1$$ describes an ellipse whose principal axes are aligned with these eigenvectors.
-
 *   **Positive Definite Matrices (Symmetric $$A$$ with $$\vec{x}^T A \vec{x} > 0$$ for all $$\vec{x} \neq \vec{0}$$):**
     *   **Geometry:** Symmetric matrices with all *positive* eigenvalues. Represents a transformation that purely stretches along orthogonal axes (no reflections or collapses to lower dimensions). The quadratic form $$\vec{x}^T A \vec{x}$$ defines an "elliptical bowl" shape (level sets are ellipsoids, as discussed in the Spectral Theorem's geometric interpretation). The property of an operator being positive definite (if it's self-adjoint and $$\langle T\vec{x}, \vec{x} \rangle > 0$$ for $$\vec{x} \neq \vec{0}$$) is also coordinate-invariant. Its matrix representation in an orthonormal basis will be a positive definite matrix.
     *   Arise in optimization (Hessians at minima), defining metrics, covariance matrices (positive semi-definite).
@@ -617,6 +592,38 @@ Certain types of matrices correspond to transformations with distinct geometric 
 ## 12. Decomposing Transformations: Matrix Factorizations
 
 Matrix factorizations break down a matrix (and thus a linear transformation) into a product of simpler, more structured matrices. This reveals geometric insights and aids computation. Eigendecomposition ($$A=PDP^{-1}$$), discussed in Section 9 for diagonalizable matrices, and the Spectral Theorem ($$A=QDQ^T$$) for symmetric matrices (Section 11), are powerful factorizations. Another universally applicable one is the Singular Value Decomposition.
+
+Here is a crucial theorem that will motivate our discussion of the Singular Value Decomposition (SVD). In particular, it is important to note that ellipsoids have orthogonal principle axes. In addition, since each linear transformation turns the unit Euclidean ball into an ellipsoid, then the SVD tells us that we can decompose any matrix into an orthogonal matrix, a scaling matrix, and another orthogonal matrix. This decomposition is unique up to the order of the scaling factors.
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem.** Spectral Theorem (Algebraic Form)
+</div>
+* **Algebraic Formulation:**  
+  Every real symmetric matrix $$A$$ decomposes as:  
+
+  $$
+  A = Q D Q^T
+  $$
+
+  where:
+  - $$Q$$ orthogonal (columns are orthonormal eigenvectors)
+  - $$D$$ diagonal (real eigenvalues)
+* **Key Implications:**
+  - Eigenvalues real, eigenvectors orthogonal
+  - Matrix is diagonalizable in orthogonal basis
+</blockquote>
+
+<blockquote class="box-proposition" markdown="1">
+<div class="title" markdown="1">
+**Geometric Foundation:** Orthogonal Axes of Ellipsoids
+</div>
+1. **Symmetric case (Spectral Theorem):**  
+   Quadratic forms $$\vec{x}^TA\vec{x} = c$$ define ellipsoids whose principal axes are orthogonal (along eigenvectors of $$A$$)
+
+2. **General case (SVD Corollary):**  
+   Any linear map transforms the unit sphere to an ellipsoid with orthogonal principal axes
+</blockquote>
 
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
@@ -637,45 +644,45 @@ Thus, SVD identifies an orthonormal basis $$\{\vec{v}_i\}$$ in the domain such t
 
 **Singular Value Decomposition (SVD): The Master Decomposition**
 
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem.** SVD (Complete Form)
+</div>
+* **Geometric Interpretation:**  
+  Every linear transformation decomposes into:  
+  $$\text{(Orthogonal input rotation)} \to \text{(Axis scaling)} \to \text{(Orthogonal output rotation)}$$
+
+* **Algebraic Formulation:**  
+  Any real $$m \times n$$ matrix $$A$$ factors as:  
+
+  $$
+  A = U \Sigma V^T
+  $$
+
+  where:
+  - $$U$$: $$m \times m$$ orthogonal (output axes)
+  - $$V$$: $$n \times n$$ orthogonal (input axes)
+  - $$\Sigma$$: $$m \times n$$ diagonal with $$\sigma_1 \geq \cdots \geq \sigma_r > 0$$
+</blockquote>
+
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
-**Corollary.** Singular Value Decomposition (SVD)
+**Corollary.** Reduced SVD (Practical Form)
 </div>
+For rank $$r$$ matrices $$A$$:
 
-The SVD generalizes the idea of finding special orthogonal bases to *any* real linear transformation, not just symmetric ones, by leveraging the Spectral Theorem on related symmetric matrices ($$A^T A$$ and $$AA^T$$).
+$$
+A = U_r \Sigma_r V_r^T
+$$
 
-*   **Geometric Interpretation (Recap):**
-    Any linear transformation $$A: \mathbb{R}^n \to \mathbb{R}^m$$ maps the unit sphere in $$\mathbb{R}^n$$ to a (hyper)ellipsoid in $$\mathbb{R}^m$$.
-    The SVD finds:
-    1.  An orthonormal basis of **right singular vectors** $$\{\vec{v}_i\}$$ in $$\mathbb{R}^n$$ (columns of $$V$$). These are orthogonal directions in the input sphere.
-    2.  An orthonormal basis of **left singular vectors** $$\{\vec{u}_i\}$$ in $$\mathbb{R}^m$$ (columns of $$U$$). These are the orthogonal principal axes of the output ellipsoid.
-    3.  The **singular values** $$\sigma_i \ge 0$$ (diagonal of $$\Sigma$$) are the scaling factors, i.e., the lengths of the semi-axes of the output ellipsoid. The transformation maps $$A\vec{v}_i = \sigma_i \vec{u}_i$$.
-    The action of $$A$$ on $$\vec{x}$$ is thus: rotate/reflect $$\vec{x}$$ by $$V^T$$, scale the components by $$\Sigma$$, then rotate/reflect the result by $$U$$.
-
-*   **Algebraic Formulation:**
-    For any real $$m \times n$$ matrix $$A$$, it can be factored as:
-
-    $$
-    A = U \Sigma V^T
-    $$
-
-    where:
-    *   $$U$$ is an $$m \times m$$ **orthogonal matrix**. Its columns $$\{\vec{u}_i\}$$ are orthonormal eigenvectors of $$AA^T$$ (left singular vectors).
-    *   $$\Sigma$$ (Sigma) is an $$m \times n$$ matrix (same dimensions as $$A$$) that is rectangular diagonal: its only non-zero entries are $$\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$$ on the main diagonal ($$\Sigma_{ii}$$), where $$r$$ is the rank of $$A$$. These are the **singular values**. They are the square roots of the non-zero eigenvalues of $$A^T A$$ (which are the same as the non-zero eigenvalues of $$AA^T$$).
-    *   $$V$$ is an $$n \times n$$ **orthogonal matrix**. Its columns $$\{\vec{v}_i\}$$ are orthonormal eigenvectors of $$A^T A$$ (right singular vectors). ($$V^T$$ has rows which are these right singular vectors).
-
-*   **Reduced SVD:**
-    Practically, we often work with the **reduced SVD**, where we only consider the non-zero singular values and the corresponding singular vectors, as the zero values don't contribute anything to the transformation. This is equivalent to removing the zero rows and columns from $$\Sigma$$ and the corresponding columns from $$U$$ and $$V$$, respectively.
-
-    $$
-    A = U_r \Sigma_r V_r^T
-    $$
-
-    where $$r$$ is the rank of $$A$$, and $$U_r\in \mathbb{R}^{m \times r}$$, $$\Sigma_r\in \mathbb{R}^{r \times r}$$, and $$V_r\in \mathbb{R}^{n \times r}$$ are the reduced matrices. The columns of $$U_r$$ and $$V_r$$ are the left and right singular orthonormal vectors corresponding to the non-zero singular values in $$\Sigma_r$$.
+- $$U_r$$: $$m \times r$$ orthonormal columns
+- $$V_r$$: $$n \times r$$ orthonormal columns
+- $$\Sigma_r$$: $$r \times r$$ diagonal  
+*Preserves all information while removing zero singular values*
+</blockquote>
 
 While $$U, \Sigma, V$$ are matrices, they give us insight into the coordinate-invariant geometry of the transformation: identifying principal input/output directions and the scaling factors along them. The singular values $$\sigma_i$$ are intrinsic to the operator $$T$$ and do not depend on the initial choice of basis used to represent $$A$$.
 SVD reveals that any linear transformation can be decomposed into a rotation/reflection, a scaling along orthogonal axes (possibly with change of dimension), and another rotation/reflection. The singular values quantify the "strength" or "magnification" of the transformation along its principal directions. SVD can be seen as a generalization of the spectral decomposition to arbitrary rectangular matrices and will also be revisited in the context of compact operators in Functional Analysis.
-</blockquote>
 
 SVD has vast applications, including Principal Component Analysis (PCA), image compression, recommendation systems, and calculating pseudo-inverses.
 
@@ -690,6 +697,7 @@ Other important factorizations include:
 3.  The rank of a matrix is the number of non-zero singular values. What is the rank of $$\Sigma = \begin{pmatrix} 2 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{pmatrix}$$?
 4.  What are the singular values of an orthogonal matrix $$Q$$? (Hint: $$Q^TQ=I$$).
 5.  Describe the geometric effect of $$A = \begin{pmatrix} 2 & 0 \\ 0 & -3 \end{pmatrix}$$ using the SVD idea (it's already nearly diagonal). How would $$U, \Sigma, V$$ look? (Hint: the negative sign can be absorbed into $$U$$ or $$V$$ since singular values must be non-negative).
+6.  Prove that the singular values of $$A$$ are the square roots of the non-zero eigenvalues of $$A^T A$$. Hint: Use the Spectral Theorem on $$A^T A$$ and relate it to the SVD.
 
 ## 14. The Complex Perspective: Rotations and Beyond
 
