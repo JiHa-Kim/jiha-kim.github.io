@@ -232,7 +232,7 @@ We discretize the system of ODEs as follows:
     \implies v_{phys,k+1} = v_{phys,k} - \frac{h\gamma}{m} v_{phys,k} - \frac{h}{m} \nabla f(x_k) = \left(1 - \frac{h\gamma}{m}\right)v_{phys,k} - \frac{h}{m} \nabla f(x_k)
     $$
 
-This specific choice of discretization (updating velocity first using $$x_k$$, then updating position using the new velocity) is a form of symplectic Euler method, often used for Hamiltonian systems, though here applied to a dissipative system.
+    (continued) This specific choice of discretization (updating velocity first using $$x_k$$, then updating position using the new velocity) is a form of symplectic Euler method, often used for Hamiltonian systems, though here applied to a dissipative system.
 
 Now, let's define the "momentum" term $$v_k$$ as it appears in the standard algorithm. This term is typically a scaled version of the physical velocity, representing the accumulated change. Let $$v_k := h v_{phys,k}$$. Then $$v_{k+1} = h v_{phys,k+1}$$.
 Substituting these into our discretized equations:
@@ -333,11 +333,10 @@ The update rule for Polyak's Heavy Ball method is often expressed in two equival
 1.  **Two-variable (velocity) form:**
 
     $$
-    v_{k+1} = \beta v_k - \eta \nabla f(x_k)
-    $$
-
-    $$
-    x_{k+1} = x_k + v_{k+1}
+    \begin{align*}
+    v_{k+1} &= \beta v_k - \eta \nabla f(x_k) \\
+    x_{k+1} &= x_k + v_{k+1}
+    \end{align*}
     $$
 
     Here, $$v_k$$ is the momentum term. Initializing $$v_0 = 0$$ is common.
@@ -348,7 +347,7 @@ The update rule for Polyak's Heavy Ball method is often expressed in two equival
     x_{k+1} = x_k - \eta \nabla f(x_k) + \beta (x_k - x_{k-1})
     $$
 
-    This form requires $$x_0$$ and $$x_{-1}$$ (or $$x_1$$ to be computed differently, e.g., $$x_1 = x_0 - \eta \nabla f(x_0)$$ which corresponds to $$v_0=0$$ giving $$v_1 = -\eta \nabla f(x_0)$$, so $$x_1 = x_0 - \eta \nabla f(x_0)$$; and thus for $$k=0$$, $$x_0-x_{-1}$$ would be zero).
+    (continued) This form requires $$x_0$$ and $$x_{-1}$$ (or $$x_1$$ to be computed differently, e.g., $$x_1 = x_0 - \eta \nabla f(x_0)$$ which corresponds to $$v_0=0$$ giving $$v_1 = -\eta \nabla f(x_0)$$, so $$x_1 = x_0 - \eta \nabla f(x_0)$$; and thus for $$k=0$$, $$x_0-x_{-1}$$ would be zero).
 
 The parameters are the learning rate $$\eta > 0$$ and the momentum coefficient $$\beta \in [0, 1)$$.
 The two forms are equivalent if $$v_k = x_k - x_{k-1}$$ (for $$k \ge 1$$), or more generally, if $$v_0$$ is initialized, then $$v_k$$ represents the accumulated momentum, and $$x_{k+1}-x_k = v_{k+1}$$.
@@ -482,11 +481,10 @@ Nesterov's Accelerated Gradient (NAG) is another highly successful momentum-base
 Using an explicit velocity term $$v_k$$:
 
 $$
-v_{k+1} = \beta v_k - \eta \nabla f(x_k + \beta v_k)
-$$
-
-$$
-x_{k+1} = x_k + v_{k+1}
+\begin{align*}
+v_{k+1} &= \beta v_k - \eta \nabla f(x_k + \beta v_k) \\
+x_{k+1} &= x_k + v_{k+1}
+\end{align*}
 $$
 
 The key difference from PHB is that the gradient is evaluated at a "look-ahead" point $$x_k + \beta v_k$$, rather than at $$x_k$$. (Note: there are multiple formulations of NAG; this is a common one. Sometimes the lookahead is on $$x_k - \beta v_k$$ if $$v_k$$ is defined as $$x_k-x_{k-1}$$, or the update $$x_{k+1} = (x_k + \beta v_k) + v_{k+1} - \beta v_k$$, i.e. $$x_{k+1} = x_k + v_{k+1} + \beta(v_{k+1}-v_k)$$.)
@@ -523,7 +521,65 @@ The discrete update rules for RMSProp (simplified, without $$\epsilon$$ and assu
     x_{k+1} = x_k - \frac{\eta}{\sqrt{s_{k+1}}} \nabla f(x_k)
     $$
 
-    Here, $$\beta_2$$ is the decay rate for the moving average of squared gradients (typically close to 1, e.g., 0.999), and $$\eta$$ is the learning rate. If any component of $$\sqrt{s_{k+1}}$$ is zero, the update for that component of $$x_k$$ would be undefined or handled by a safeguard (like adding $$\epsilon$$ or skipping the update for that component). If $$\nabla f(x_k)=0$$, then $$x_{k+1}=x_k$$, and $$s_{k+1} = \beta_2 s_k$$ (the accumulator decays).
+    (continued) Here, $$\beta_2$$ is the decay rate for the moving average of squared gradients (typically close to 1, e.g., 0.999), and $$\eta$$ is the learning rate. If any component of $$\sqrt{s_{k+1}}$$ is zero, the update for that component of $$x_k$$ would be undefined or handled by a safeguard (like adding $$\epsilon$$ or skipping the update for that component). If $$\nabla f(x_k)=0$$, then $$x_{k+1}=x_k$$, and $$s_{k+1} = \beta_2 s_k$$ (the accumulator decays).
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Special Case: RMSProp with Uniform Averaging vs. Adagrad**
+</summary>
+RMSProp typically uses an exponential moving average for the squared gradients with a constant decay rate $$\beta_2$$. However, a specific time-dependent choice for the weighting factor $$1-\beta_2$$ can make RMSProp perform uniform averaging of all past squared gradients. Let $$g_i = \nabla f(x_i)$$. If we set the weight for the current squared gradient $$g_k^2$$ to be $$1/(k+1)$$ (where $$k$$ is the iteration index, starting from $$k=0$$; so $$t=k+1$$ is the count of gradients observed including the current one), this means $$1-\beta_2 = 1/(k+1)$$, and thus $$\beta_2 = k/(k+1)$$.
+
+The RMSProp accumulator update then becomes:
+
+$$
+s_{k+1} = \beta_2 s_k + (1-\beta_2) g_k^2 = \frac{k}{k+1} s_k + \frac{1}{k+1} g_k^2
+$$
+
+Assuming $$s_0 = 0$$, this recurrence leads to (verifiable by induction):
+- For $$k=0$$ (first iteration, $$t=1$$): $$s_1 = \frac{0}{1}s_0 + \frac{1}{1}g_0^2 = g_0^2$$
+- For $$k=1$$ (second iteration, $$t=2$$): $$s_2 = \frac{1}{2}s_1 + \frac{1}{2}g_1^2 = \frac{1}{2}g_0^2 + \frac{1}{2}g_1^2 = \frac{1}{2}(g_0^2+g_1^2)$$
+In general, this choice yields:
+
+$$
+s_{k+1} = \frac{1}{k+1} \sum_{i=0}^k g_i^2
+$$
+
+This expression shows that $$s_{k+1}$$ is the arithmetic mean (a uniform average) of all squared gradients from $$g_0^2$$ to $$g_k^2$$.
+
+The Adagrad algorithm, on the other hand, accumulates the sum of all past squared gradients (element-wise):
+
+$$
+G_k = \sum_{i=0}^k g_i^2
+$$
+
+Thus, for this specific RMSProp variant, the accumulator $$s_{k+1}$$ is related to Adagrad's accumulator $$G_k$$ by $$s_{k+1} = G_k / (k+1)$$.
+
+Now, let's compare their parameter update rules, including a small constant $$\epsilon > 0$$ typically added for numerical stability:
+-   RMSProp (with uniform averaging as described):
+
+    $$
+    x_{k+1} = x_k - \frac{\eta_{RMSProp}}{\sqrt{s_{k+1}} + \epsilon_{RMSProp}} g_k = x_k - \frac{\eta_{RMSProp}}{\sqrt{G_k/(k+1)} + \epsilon_{RMSProp}} g_k
+    $$
+
+    This can be rewritten as:
+
+    $$
+    x_{k+1} = x_k - \frac{\eta_{RMSProp} \sqrt{k+1}}{\sqrt{G_k} + \epsilon_{RMSProp}\sqrt{k+1}} g_k
+    $$
+
+-   Adagrad:
+
+    $$
+    x_{k+1} = x_k - \frac{\eta_{Adagrad}}{\sqrt{G_k} + \epsilon_{Adagrad}} g_k
+    $$
+
+Comparing these two forms, this special variant of RMSProp is equivalent to Adagrad if Adagrad's global learning rate $$\eta_{Adagrad}$$ and stability constant $$\epsilon_{Adagrad}$$ were set as $$\eta_{Adagrad}(k) = \eta_{RMSProp} \sqrt{k+1}$$ and $$\epsilon_{Adagrad}(k) = \epsilon_{RMSProp}\sqrt{k+1}$$.
+If both methods used the same base learning rate $$\eta$$ and the same $$\epsilon$$ strategy (e.g., $$\epsilon_{RMSProp} = \epsilon_{Adagrad}/\sqrt{k+1}$$ or both $$\epsilon$$ are negligible), the effective learning rate for each parameter in this RMSProp variant is scaled by an additional factor of $$\sqrt{k+1}$$ compared to Adagrad. This factor accounts for the "dimension scaling factor" difference mentioned in the prompt, as it affects the per-dimension scaling of the gradient.
+
+Adagrad's learning rates are known to diminish, sometimes too aggressively, because $$\sqrt{G_k}$$ typically grows with $$k$$. If $$\sqrt{G_k}$$ grows roughly as $$\sqrt{k+1}$$ (e.g., if gradients have, on average, constant magnitudes), Adagrad's effective learning rate decays as $$O(1/\sqrt{k+1})$$. In contrast, this RMSProp variant's effective learning rate would remain approximately constant ($$\eta \sqrt{k+1} / \sqrt{k+1} \approx \eta$$). This behavior—preventing aggressive decay of learning rates—is a primary motivation for RMSProp. Standard RMSProp, which uses a constant $$\beta_2$$ (e.g., 0.9 or 0.999), "forgets" old gradients more strongly by giving exponentially less weight to older gradients, which further helps in stabilizing the effective learning rate over long training periods compared to Adagrad.
+
+In terms of the ODE perspective, if $$1-\beta_2(t) = 1/t$$, the ODE for $$s(t)$$ becomes $$\dot{s}(t) = \frac{1}{t}((\nabla f(x(t)))^2 - s(t))$$. This is a linear first-order ODE whose solution (with $$t_0 s(t_0) \to 0$$ as $$t_0 \to 0$$) is $$s(t) = \frac{1}{t}\int_{t_0}^t (\nabla f(x(\tau)))^2 d\tau$$. The parameter update ODE $$\dot{x}(t) = -\eta_0 \frac{1}{\sqrt{s(t)}} \nabla f(x(t))$$ then becomes $$\dot{x}(t) = -\eta_0 \frac{\sqrt{t}}{\sqrt{\int (\nabla f(x(\tau)))^2 d\tau}} \nabla f(x(t))$$, explicitly showing the $$\sqrt{t}$$ scaling factor in the continuous-time analog.
+</details>
 
 The continuous-time behavior of RMSProp can be described by a system of ODEs. We derive this by interpreting the discrete updates as approximations of continuous dynamics.
 
@@ -649,7 +705,15 @@ The simplified discrete update rules (omitting bias correction and $$\epsilon$$)
     x_{k+1} = x_k - \eta \frac{m_{k+1}}{\sqrt{s_{k+1}}}
     $$
 
-Here, $$\beta_1$$ is the decay rate for the momentum term (e.g., 0.9), and $$\beta_2$$ for the squared gradient accumulator (e.g., 0.999). If $$\nabla f(x_k)=0$$, then $$m_{k+1} = \beta_1 m_k$$ and $$s_{k+1} = \beta_2 s_k$$. The parameter $$x_k$$ will still update due to $$m_{k+1}$$ unless $$m_k$$ was zero. This is typical momentum behavior.
+    (continued) Here, $$\beta_1$$ is the decay rate for the momentum term (e.g., 0.9), and $$\beta_2$$ for the squared gradient accumulator (e.g., 0.999). If $$\nabla f(x_k)=0$$, then $$m_{k+1} = \beta_1 m_k$$ and $$s_{k+1} = \beta_2 s_k$$. The parameter $$x_k$$ will still update due to $$m_{k+1}$$ unless $$m_k$$ was zero. This is typical momentum behavior.
+
+<blockquote class="box-info" markdown="1">
+<div class="title" markdown="1">
+Summary of Adam Optimizer
+</div>
+
+In short, Adam is simply Adagrad with exponential moving average (EMA) on both the gradient and the normalizing factor. Equivalently, it's a blend of momentum gradient descent and RMSProp.
+</blockquote>
 
 Similar to RMSProp, we can derive a system of ODEs that describes the continuous-time behavior of Adam.
 

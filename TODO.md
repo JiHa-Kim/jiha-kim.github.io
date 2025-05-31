@@ -1,3 +1,9 @@
+- [ ] momentum: compare uniform RMS-Prop to Adagrad up to dimension scaling factor
+- [ ] soft inductive biases: example of unit disk opposite sides "shortcut"
+- [ ] 
+
+
+
 ## Legend 
 x=done
 *=revise
