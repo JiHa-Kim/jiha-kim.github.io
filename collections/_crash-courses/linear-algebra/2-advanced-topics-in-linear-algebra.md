@@ -259,6 +259,13 @@ $$\hat{\vec{u}}_2 = \frac{5}{2\sqrt{10}}\begin{pmatrix} -2/5 \\ 6/5 \end{pmatrix
 Orthonormal basis: $$\left\{ \frac{1}{\sqrt{10}}\begin{pmatrix} 3 \\ 1 \end{pmatrix}, \frac{1}{\sqrt{10}}\begin{pmatrix} -1 \\ 3 \end{pmatrix} \right\}$$.
 </blockquote>
 
+<blockquote class="box-warning" markdown="1">
+<div class="title" markdown="1">
+Practical concerns
+</div>
+The Gram-Schmidt process can be slow and numerically unstable, especially when dealing with vectors that are nearly linearly dependent. This can lead to loss of precision in the resulting orthogonal vectors. In practice, one should use a more robust method, such as the QR algorithm, to find an orthogonal basis.
+</blockquote>
+
 **Orthogonality Exercises:**
 1.  Are the vectors $$\vec{u} = \begin{pmatrix} 1 \\ -1 \\ 0 \end{pmatrix}$$, $$\vec{v} = \begin{pmatrix} 1 \\ 1 \\ 1 \end{pmatrix}$$, $$\vec{w} = \begin{pmatrix} 1 \\ 1 \\ -2 \end{pmatrix}$$ mutually orthogonal? Do they form an orthogonal basis for $$\mathbb{R}^3$$?
 2.  Let $$W$$ be the line in $$\mathbb{R}^2$$ spanned by $$\vec{u} = \begin{pmatrix} 4 \\ 3 \end{pmatrix}$$. Find the orthogonal projection of $$\vec{x} = \begin{pmatrix} 1 \\ 7 \end{pmatrix}$$ onto $$W$$.
