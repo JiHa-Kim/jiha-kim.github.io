@@ -396,11 +396,11 @@ Let $$\theta_k = x_{1,k}$$ be the parameter at iteration $$k$$, and let $$v_k = 
 The updates become:
 
 $$
-\theta_{k+1} = \theta_k + h v_k \quad (*)
+\theta_{k+1} = \theta_k + h v_k \quad (\ast)
 $$
 
 $$
-v_{k+1} = v_k - \frac{h\gamma}{m} v_k - \frac{h}{m} \nabla L(\theta_k) = (1 - \frac{h\gamma}{m}) v_k - \frac{h}{m} \nabla L(\theta_k) \quad (**)
+v_{k+1} = v_k - \frac{h\gamma}{m} v_k - \frac{h}{m} \nabla L(\theta_k) = (1 - \frac{h\gamma}{m}) v_k - \frac{h}{m} \nabla L(\theta_k) \quad (\ast\ast)
 $$
 
 If we identify $$v_{k+1}$$ from $$(**)$$ with the step in $$(*)$$, i.e., define a slightly different velocity term for Polyak's momentum:

@@ -292,7 +292,7 @@ $$
 If $$y(x)$$ is indeed an extremizing function for $$J[y]$$, then for any choice of admissible variation $$\eta(x)$$, the function $$\Phi(\epsilon)$$ must have a stationary point at $$\epsilon = 0$$. From ordinary calculus, this means its derivative with respect to $$\epsilon$$ must be zero at $$\epsilon = 0$$:
 
 $$
-\left. \frac{d\Phi(\epsilon)}{d\epsilon} \right|_{\epsilon=0} = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right|_{\epsilon=0} = 0
+\left. \frac{d\Phi(\epsilon)}{d\epsilon} \right\vert_{\epsilon=0} = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right\vert_{\epsilon=0} = 0
 $$
 
 This derivative is precisely what we call the **first variation** of the functional $$J$$ at $$y$$ in the "direction" $$\eta$$.
@@ -304,7 +304,7 @@ This derivative is precisely what we call the **first variation** of the functio
 The **first variation** of a functional $$J[y]$$ at the function $$y$$ with respect to a variation function $$\eta(x)$$ (often denoted $$\delta y = \epsilon \eta$$ for infinitesimal $$\epsilon$$) is given by:
 
 $$
-\delta J[y; \eta] = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right|_{\epsilon=0}
+\delta J[y; \eta] = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right\vert_{\epsilon=0}
 $$
 
 A necessary condition for $$y(x)$$ to be an extremizer of $$J[y]$$ (among functions satisfying the given boundary conditions) is that its first variation must be zero for **all** admissible variation functions $$\eta(x)$$:

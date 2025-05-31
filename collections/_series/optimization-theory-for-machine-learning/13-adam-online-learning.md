@@ -225,7 +225,7 @@ Adam emerges naturally as the solution to a **discounted FTRL** problem with ada
 The Adam update solves:
 
 $$
-\Delta_t = \underset{\Delta \in \mathbb{R}^d}{\text{argmin}} \left( \eta_t \sum_{s=1}^t \beta_1^{t-s} \langle \mathbf{v}_s, \Delta \rangle + \frac{1}{2} \|\Delta\|_2^2 \right)
+\Delta_t = \underset{\Delta \in \mathbb{R}^d}{\text{argmin}} \left( \eta_t \sum_{s=1}^t \beta_1^{t-s} \langle \mathbf{v}_s, \Delta \rangle + \frac{1}{2} \Vert \Delta\Vert _2^2 \right)
 $$
 
 with learning rate schedule:
@@ -243,7 +243,7 @@ $$
 1. Take the gradient of the FTRL objective and set to zero:
 
    $$
-   \nabla_{\Delta} \left[ \eta_t \beta_1^t \sum_{s=1}^t \beta_1^{-s} \langle \mathbf{g}_s, \Delta \rangle + \frac{1}{2} \|\Delta\|_2^2 \right] = 0
+   \nabla_{\Delta} \left[ \eta_t \beta_1^t \sum_{s=1}^t \beta_1^{-s} \langle \mathbf{g}_s, \Delta \rangle + \frac{1}{2} \Vert \Delta\Vert _2^2 \right] = 0
    $$
 
 2. Substitute $$\mathbf{v}_s = \beta_1^{-s}\mathbf{g}_s$$:
@@ -300,10 +300,10 @@ where $$\mathbf{u}_t$$ is a comparator sequence. Adam achieves strong regret bou
 <div class="title" markdown="1">
 **Proposition.** Dynamic Regret of β-FTRL
 </div>
-For any comparator sequence $$\{\mathbf{u}_t\}$$ with $$\|\mathbf{u}_t - \mathbf{u}_{t-1}\| \leq D$$:
+For any comparator sequence $$\{\mathbf{u}_t\}$$ with $$\Vert \mathbf{u}_t - \mathbf{u}_{t-1}\Vert  \leq D$$:
 
 $$
-\mathcal{R}_T \leq \frac{\alpha}{\sqrt{1-\beta_1}} \sum_{i=1}^d \sqrt{\sum_{t=1}^T g_{t,i}^2} + \frac{D^2}{2\alpha} \sqrt{\sum_{t=1}^T \|\mathbf{u}_t - \mathbf{u}_{t-1}\|^2}
+\mathcal{R}_T \leq \frac{\alpha}{\sqrt{1-\beta_1}} \sum_{i=1}^d \sqrt{\sum_{t=1}^T g_{t,i}^2} + \frac{D^2}{2\alpha} \sqrt{\sum_{t=1}^T \Vert \mathbf{u}_t - \mathbf{u}_{t-1}\Vert ^2}
 $$
 
 </blockquote>
@@ -321,19 +321,19 @@ $$
 2. Bound static regret via scale-free FTRL analysis:
 
    $$
-   \sum_{t=1}^T \langle \mathbf{v}_t, \Delta_t - \mathbf{u} \rangle \leq \frac{\alpha}{\sqrt{1-\beta_1}} \sum_{i=1}^d \|\mathbf{g}_{1:T,i}\|_2
+   \sum_{t=1}^T \langle \mathbf{v}_t, \Delta_t - \mathbf{u} \rangle \leq \frac{\alpha}{\sqrt{1-\beta_1}} \sum_{i=1}^d \Vert \mathbf{g}_{1:T,i}\Vert _2
    $$
 
 3. Control stability term with path length:
 
    $$
-   \sum_t \langle \mathbf{v}_t, \mathbf{u}_t - \mathbf{u}_{t-1} \rangle \leq \frac{D^2}{2\alpha} \sqrt{\sum_{t=1}^T \|\mathbf{u}_t - \mathbf{u}_{t-1}\|^2}
+   \sum_t \langle \mathbf{v}_t, \mathbf{u}_t - \mathbf{u}_{t-1} \rangle \leq \frac{D^2}{2\alpha} \sqrt{\sum_{t=1}^T \Vert \mathbf{u}_t - \mathbf{u}_{t-1}\Vert ^2}
    $$
 
 4. Combine using Cauchy-Schwarz:
 
    $$
-   \mathcal{R}_T \leq \frac{\alpha}{\sqrt{1-\beta_1}} \sum_{i=1}^d \sqrt{\sum_{t=1}^T g_{t,i}^2} + \frac{D^2}{2\alpha} \sqrt{\sum_{t=1}^T \|\mathbf{u}_t - \mathbf{u}_{t-1}\|^2}
+   \mathcal{R}_T \leq \frac{\alpha}{\sqrt{1-\beta_1}} \sum_{i=1}^d \sqrt{\sum_{t=1}^T g_{t,i}^2} + \frac{D^2}{2\alpha} \sqrt{\sum_{t=1}^T \Vert \mathbf{u}_t - \mathbf{u}_{t-1}\Vert ^2}
    $$
 
 </details>
@@ -346,10 +346,10 @@ While Adam excels in online settings, nonconvex optimization requires additional
 <div class="title" markdown="1">
 **Theorem.** Convergence of Adam+EMA
 </div>
-For $$L$$-smooth nonconvex $$F$$ with stochastic gradients satisfying $$\mathbb{E}[\|\mathbf{g}_t - \nabla F(\mathbf{x}_t)\|^2] \leq \sigma^2$$, clipped Adam with EMA attains:
+For $$L$$-smooth nonconvex $$F$$ with stochastic gradients satisfying $$\mathbb{E}[\Vert \mathbf{g}_t - \nabla F(\mathbf{x}_t)\Vert ^2] \leq \sigma^2$$, clipped Adam with EMA attains:
 
 $$
-\mathbb{E}\left[ \|\nabla F(\bar{\mathbf{x}}_T)\|^2 \right] \leq \mathcal{O}\left( \frac{\sigma}{\sqrt{T}} + \frac{\sigma^2}{T} \right)
+\mathbb{E}\left[ \Vert \nabla F(\bar{\mathbf{x}}_T)\Vert ^2 \right] \leq \mathcal{O}\left( \frac{\sigma}{\sqrt{T}} + \frac{\sigma^2}{T} \right)
 $$
 
 which matches the lower bound for nonsmooth nonconvex optimization.
@@ -379,7 +379,7 @@ Compared to uniform averaging $$\bar{\mathbf{x}}_T = \frac{1}{T} \sum_{t=1}^T \m
 The optimal weighting scheme balances:
 
 $$
-\gamma_t \propto \mathbb{E}[\|\nabla F(\mathbf{x}_t)\|^{-1}]
+\gamma_t \propto \mathbb{E}[\Vert \nabla F(\mathbf{x}_t)\Vert ^{-1}]
 $$
 
 which EMA approximates through exponential discounting.
@@ -389,10 +389,10 @@ which EMA approximates through exponential discounting.
 
 Adam's per-coordinate scaling provides provable acceleration under **gradient scale heterogeneity**:
 
-| **Condition**  | **Isotropic Methods**                              | **Adam (β-FTRL)**                                     |
-| -------------- | -------------------------------------------------- | ----------------------------------------------------- |
-| Uniform scales | $$\mathcal{O}(\sqrt{dT})$$                         | $$\mathcal{O}(\sqrt{dT})$$                            |
-| High variance  | $$\mathcal{O}(\sqrt{d\sum_t \|\mathbf{g}_t\|^2})$$ | $$\mathcal{O}(\sum_{i=1}^d \sqrt{\sum_t g_{t,i}^2})$$ |
+| **Condition**  | **Isotropic Methods**                                      | **Adam (β-FTRL)**                                     |
+| -------------- | ---------------------------------------------------------- | ----------------------------------------------------- |
+| Uniform scales | $$\mathcal{O}(\sqrt{dT})$$                                 | $$\mathcal{O}(\sqrt{dT})$$                            |
+| High variance  | $$\mathcal{O}(\sqrt{d\sum_t \Vert \mathbf{g}_t\Vert ^2})$$ | $$\mathcal{O}(\sum_{i=1}^d \sqrt{\sum_t g_{t,i}^2})$$ |
 
 The coordinate-adaptive regret bound:
 

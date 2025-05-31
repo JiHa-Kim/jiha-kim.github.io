@@ -485,7 +485,7 @@ The **transpose** of a matrix $$A$$, denoted $$A^T$$, is obtained by swapping it
 The concept of a transpose is intimately linked to the inner product. For a linear operator $$T: V \to W$$ between inner product spaces, its **adjoint operator** $$T^*: W \to V$$ is defined by the coordinate-free relation:
 
 $$
-\langle T\vec{x}, \vec{y} \rangle_W = \langle \vec{x}, T^*\vec{y} \rangle_V
+\langle T\vec{x}, \vec{y} \rangle_W = \langle \vec{x}, T^\ast\vec{y} \rangle_V
 $$
 
 for all $$\vec{x} \in V, \vec{y} \in W$$.

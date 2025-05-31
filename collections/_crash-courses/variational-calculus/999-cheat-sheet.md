@@ -201,7 +201,7 @@ A mathematical tool for changing variables, crucial for moving from Lagrangian t
 -   **Definition:** Given $$f(x)$$ and defining $$p = \frac{df}{dx}(x)$$, the Legendre transform is:
 
     $$
-    f^*(p) = px - f(x)
+    f^\ast(p) = px - f(x)
     $$
 
     where $$x$$ on the right-hand side must be expressed as a function of $$p$$ by inverting $$p = f'(x)$$.
@@ -210,14 +210,14 @@ A mathematical tool for changing variables, crucial for moving from Lagrangian t
 -   **Relationship between Hessians:** The Hessian of $$f^*(p)$$ with respect to $$p$$ is the inverse of the Hessian of $$f(x)$$ with respect to $$x$$:
 
     $$
-    \left( \frac{\partial^2 f^*}{\partial p^2} \right) = \left( \frac{\partial^2 f}{\partial x^2} \right)^{-1}
+    \left( \frac{\partial^2 f^\ast}{\partial p^2} \right) = \left( \frac{\partial^2 f}{\partial x^2} \right)^{-1}
     $$
 
     This implies that convexity is preserved under the Legendre transform.
 -   **Connection to Convex Conjugate (Legendre-Fenchel Transform):**
 
     $$
-    f^*(p) = \sup_x (px - f(x))
+    f^\ast(p) = \sup_x (px - f(x))
     $$
 
 ## 5. Constrained Variational Problems (Isoperimetric Problems)
@@ -228,7 +228,7 @@ Problems where we extremize a functional $$J[y]$$ subject to an integral constra
     1.  Form an auxiliary functional $$J^*[y]$$ using a Lagrange multiplier $$\lambda$$:
 
         $$
-        J^*[y] = J[y] + \lambda K[y] = \int_a^b (F(x, y, y') + \lambda G(x, y, y')) \, dx = \int_a^b H_\lambda(x, y, y', \lambda) \, dx
+        J^\ast[y] = J[y] + \lambda K[y] = \int_a^b (F(x, y, y') + \lambda G(x, y, y')) \, dx = \int_a^b H_\lambda(x, y, y', \lambda) \, dx
         $$
 
         where $$F$$ is the integrand of $$J$$, $$G$$ is the integrand of $$K$$, and $$H_\lambda = F + \lambda G$$.

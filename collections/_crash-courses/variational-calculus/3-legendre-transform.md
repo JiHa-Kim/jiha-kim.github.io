@@ -286,7 +286,7 @@ The Legendre transform is a general mathematical procedure for changing the inde
 Given a function $$f(x)$$, its Legendre transform $$f^*(p)$$ with respect to $$x$$ is:
 
 $$
-f^*(p) = px - f(x)
+f^\ast(p) = px - f(x)
 $$
 
 where $$x$$ on the right-hand side is implicitly expressed as a function of $$p$$ by inverting the relationship $$p = \frac{df}{dx}(x)$$. For this inversion to be unique (at least locally), we require $$\frac{d^2f}{dx^2} \neq 0$$. Typically, $$f(x)$$ is assumed to be **strictly convex**, meaning $$\frac{d^2f}{dx^2} > 0$$, which ensures $$p = f'(x)$$ is strictly increasing and thus invertible.

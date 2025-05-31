@@ -262,5 +262,6 @@ I have inserted an example reading order between the series and the `crash cours
    - `Convex Analysis`
    - `Online Learning`
 13. Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
+   - `Matrix Spectral Theory` (part of `Functional Analysis`)
 14. Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
 15. Parameter-free optimization

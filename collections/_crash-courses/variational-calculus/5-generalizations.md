@@ -316,11 +316,11 @@ An example is Dido's problem: find the curve of a given fixed length $$L_0$$ tha
 Analogous to constrained optimization in multivariable calculus, we use the method of **Lagrange multipliers**. We form an auxiliary functional:
 
 $$
-J^*[y] = J[y] + \lambda K[y] = \int_a^b (F(x, y, y') + \lambda G(x, y, y')) \, dx
+J^\ast[y] = J[y] + \lambda K[y] = \int_a^b (F(x, y, y') + \lambda G(x, y, y')) \, dx
 $$
 
 $$
-J^*[y] = \int_a^b H(x, y, y', \lambda) \, dx
+J^\ast[y] = \int_a^b H(x, y, y', \lambda) \, dx
 $$
 
 where $$H = F + \lambda G$$ and $$\lambda$$ is a Lagrange multiplier (a constant to be determined).

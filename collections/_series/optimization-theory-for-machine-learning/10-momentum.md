@@ -1,5 +1,5 @@
 ---
-title: "Momentum: A Tale of Two ODEs and a Multi-Step Method"
+title: "Momentum: Second-Order Gradient Flow ODE and a Multi-Step Method"
 date: 2025-05-18 02:57 -0400
 series_index: 10
 mermaid: true
@@ -201,10 +201,10 @@ $$ \dot{v}_{phys}(t) = -\frac{\gamma}{m} v_{phys}(t) - \frac{1}{m} \nabla f(x(t)
 Thus, the second-order ODE is equivalent to the following system of first-order ODEs:
 
 $$
-\begin{align*}
+\begin{align\ast}
 \dot{x}(t) &= v_{phys}(t) \\
 \dot{v}_{phys}(t) &= -\frac{\gamma}{m} v_{phys}(t) - \frac{1}{m} \nabla f(x(t))
-\end{align*}
+\end{align\ast}
 $$
 
 We now discretize this system to obtain an iterative optimization algorithm. The specific way we approximate the derivatives and evaluate terms will determine the resulting algorithm. This derivation leads directly to the Polyak's Heavy Ball method.
@@ -258,10 +258,10 @@ Substituting these into our discretized equations:
 If we define the learning rate $$\eta = \frac{h^2}{m}$$ and the momentum parameter $$\beta = 1 - \frac{h\gamma}{m}$$, the update rules are:
 
 $$
-\begin{align*}
+\begin{align\ast}
 v_{k+1} &= \beta v_k - \eta \nabla f(x_k) \\
 x_{k+1} &= x_k + v_{k+1}
-\end{align*}
+\end{align\ast}
 $$
 
 This is precisely the two-variable form of the Polyak's Heavy Ball (PHB) method.
@@ -333,10 +333,10 @@ The update rule for Polyak's Heavy Ball method is often expressed in two equival
 1.  **Two-variable (velocity) form:**
 
     $$
-    \begin{align*}
+    \begin{align\ast}
     v_{k+1} &= \beta v_k - \eta \nabla f(x_k) \\
     x_{k+1} &= x_k + v_{k+1}
-    \end{align*}
+    \end{align\ast}
     $$
 
     Here, $$v_k$$ is the momentum term. Initializing $$v_0 = 0$$ is common.
@@ -481,10 +481,10 @@ Nesterov's Accelerated Gradient (NAG) is another highly successful momentum-base
 Using an explicit velocity term $$v_k$$:
 
 $$
-\begin{align*}
+\begin{align\ast}
 v_{k+1} &= \beta v_k - \eta \nabla f(x_k + \beta v_k) \\
 x_{k+1} &= x_k + v_{k+1}
-\end{align*}
+\end{align\ast}
 $$
 
 The key difference from PHB is that the gradient is evaluated at a "look-ahead" point $$x_k + \beta v_k$$, rather than at $$x_k$$. (Note: there are multiple formulations of NAG; this is a common one. Sometimes the lookahead is on $$x_k - \beta v_k$$ if $$v_k$$ is defined as $$x_k-x_{k-1}$$, or the update $$x_{k+1} = (x_k + \beta v_k) + v_{k+1} - \beta v_k$$, i.e. $$x_{k+1} = x_k + v_{k+1} + \beta(v_{k+1}-v_k)$$.)
@@ -637,10 +637,10 @@ Let $$s_k \approx s(t)$$ and $$x_k \approx x(t)$$, where $$t$$ is the continuous
 The continuous-time system for RMSProp is thus:
 
 $$
-\begin{align*}
+\begin{align\ast}
 \dot{x}(t) &= -\frac{\eta_0}{\sqrt{s(t)}} \nabla f(x(t)) \\
 \dot{s}(t) &= (1-\beta_2) ((\nabla f(x(t)))^2 - s(t))
-\end{align*}
+\end{align\ast}
 $$
 
 (Operations involving $$s(t)$$ and $$(\nabla f(x(t)))^2$$ are element-wise.)
@@ -792,11 +792,11 @@ Let $$m_k \approx m(t)$$, $$s_k \approx s(t)$$, and $$x_k \approx x(t)$$, where 
 The continuous-time behavior of Adam can be described by the following system of three coupled ODEs:
 
 $$
-\begin{align*}
+\begin{align\ast}
 \dot{x}(t) &= -\eta_0 \frac{m(t)}{\sqrt{s(t)}} \\
 \dot{m}(t) &= (1-\beta_1) (\nabla f(x(t)) - m(t)) \\
 \dot{s}(t) &= (1-\beta_2) ((\nabla f(x(t)))^2 - s(t))
-\end{align*}
+\end{align\ast}
 $$
 
 (Element-wise operations for $$m(t), s(t)$$, and terms in their updates, and in $$\dot{x}(t)$$ involving division and square root.)

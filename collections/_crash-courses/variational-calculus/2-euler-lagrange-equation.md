@@ -157,7 +157,7 @@ llm-instructions: |
 In Part 1, we introduced **functionals** $$J[y]$$ – functions of functions – and established that a necessary condition for a function $$y(x)$$ to extremize $$J[y]$$ is that its **first variation** must vanish for all admissible variations $$\eta(x)$$:
 
 $$
-\delta J[y; \eta] = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right|_{\epsilon=0} = 0
+\delta J[y; \eta] = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right\vert_{\epsilon=0} = 0
 $$
 
 This is the variational calculus equivalent of setting $$f'(x)=0$$ in ordinary calculus. Now, our goal is to transform this abstract condition into a concrete, usable tool. We will focus on a very common type of functional and derive the celebrated **Euler-Lagrange equation**, a differential equation that the extremizing function $$y(x)$$ must satisfy.
@@ -193,11 +193,11 @@ $$
 To find the first variation, we differentiate this expression with respect to $$\epsilon$$ and then set $$\epsilon = 0$$. Assuming we can differentiate under the integral sign (Leibniz integral rule, valid here due to our smoothness assumptions):
 
 $$
-\delta J[y; \eta] = \left. \frac{d}{d\epsilon} \int_a^b F(x, y + \epsilon \eta, y' + \epsilon \eta') \, dx \right|_{\epsilon=0}
+\delta J[y; \eta] = \left. \frac{d}{d\epsilon} \int_a^b F(x, y + \epsilon \eta, y' + \epsilon \eta') \, dx \right\vert_{\epsilon=0}
 $$
 
 $$
-\delta J[y; \eta] = \int_a^b \left. \frac{d}{d\epsilon} F(x, y + \epsilon \eta, y' + \epsilon \eta') \right|_{\epsilon=0} \, dx
+\delta J[y; \eta] = \int_a^b \left. \frac{d}{d\epsilon} F(x, y + \epsilon \eta, y' + \epsilon \eta') \right\vert_{\epsilon=0} \, dx
 $$
 
 Now, we apply the chain rule to the integrand $$F$$. Let $$Y = y + \epsilon \eta$$ and $$Y' = y' + \epsilon \eta'$$. Then $$F = F(x, Y, Y')$$.
@@ -215,7 +215,7 @@ $$
 Setting $$\epsilon = 0$$, we get:
 
 $$
-\left. \frac{d}{d\epsilon} F(x, y + \epsilon \eta, y' + \epsilon \eta') \right|_{\epsilon=0} = \frac{\partial F}{\partial y}(x, y, y') \eta(x) + \frac{\partial F}{\partial y'}(x, y, y') \eta'(x)
+\left. \frac{d}{d\epsilon} F(x, y + \epsilon \eta, y' + \epsilon \eta') \right\vert_{\epsilon=0} = \frac{\partial F}{\partial y}(x, y, y') \eta(x) + \frac{\partial F}{\partial y'}(x, y, y') \eta'(x)
 $$
 
 For brevity, we'll write $$\frac{\partial F}{\partial y}$$ and $$\frac{\partial F}{\partial y'}$$}, understanding they are evaluated at $$(x, y(x), y'(x))$$.
