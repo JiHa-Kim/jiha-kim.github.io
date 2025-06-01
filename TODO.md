@@ -24,8 +24,8 @@ x 3. Desirable properties of optimizers
 x 4. Speedrun of common gradient-based ML optimizers
 5. Problem formalization
 6. Gradient descent and gradient flow
-7. Challenges of high-dimensional non-convex optimization in deep learning
-8. Stochastic Gradient Descent and effects of randomness
+x 7. Challenges of high-dimensional non-convex optimization in deep learning
+x 8. Stochastic Gradient Descent and effects of randomness
 9. Adaptive methods and preconditioning
 x 10. Momentum
 11. Soft inductive biases (regularization)
