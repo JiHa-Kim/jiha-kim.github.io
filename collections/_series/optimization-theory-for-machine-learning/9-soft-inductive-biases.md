@@ -228,6 +228,7 @@ L2 regularization, also known as Ridge Regression in linear models or weight dec
     $$
     J(w) = R_{emp}(w) + \frac{\lambda}{2} \Vert w \Vert_2^2
     $$
+
     (where $$R_{emp}(w)$$ is usually the average loss over $$N$$ samples).
 
 *   **Effect:** Encourages smaller, diffuse weight values. It doesn't typically drive weights to be exactly zero (unless the unregularized solution was already zero for that weight). This leads to "simpler" models by preventing weights from growing excessively large, which can improve numerical stability and reduce overfitting.
@@ -364,6 +365,7 @@ L2 regularization, also known as Ridge Regression in linear models or weight dec
     $$
 
     Often parameterized with a mixing parameter $$\alpha \in [0,1]$$ and an overall penalty $$\lambda' > 0$$:
+
     $$
     J(w) = R_{emp}(w) + \lambda'\left(\alpha\Vert w\Vert_1 + \frac{1-\alpha}{2}\Vert w\Vert_2^2\right)
     $$
@@ -372,10 +374,12 @@ L2 regularization, also known as Ridge Regression in linear models or weight dec
 
 ### 3.6. Label Smoothing
 Label smoothing is a regularization technique that prevents the model from becoming too confident about its predictions.
-*   **Mechanism:** Instead of using one-hot encoded target labels ($$y_{true} = [0, ..., 1, ..., 0]$$), it uses "softened" labels. For a class $$k$$ and smoothing factor $$\epsilon > 0$$:
+*   **Mechanism:** Instead of using one-hot encoded target labels ($$y_{true} = [0, \dots , 1, \dots , 0]$$), it uses "softened" labels. For a class $$k$$ and smoothing factor $$\epsilon > 0$$:
+
     $$
     y_{smooth, k} = y_{true, k}(1-\epsilon) + \epsilon/K
     $$
+
     where $$K$$ is the number of classes. This means a small amount of probability mass $$\epsilon$$ is distributed uniformly over all classes.
 *   **As a Soft Bias:**
     *   Behaves like a prior on the target distribution, discouraging extreme logits.
@@ -473,10 +477,12 @@ Another way to analyze generalization is through **algorithmic stability**. An a
 **Theorem (Uniform Stability).** (Bousquet & Elisseeff 2002)
 </div>
 If an algorithm $$\mathcal{A}$$ has uniform stability $$\beta_n$$ on $$n$$ samples with respect to the loss function $$L$$ (meaning that changing one example in a training set $$S$$ of size $$n$$ changes the loss of the learned hypothesis $$h_S$$ on any example by at most $$\beta_n$$), then with probability at least $$1-\delta$$,
+
 $$
 R(h_S) \le R_{emp}(h_S) + O(\beta_n + \sqrt{\tfrac{\ln(1/\delta)}{n}})
 $$
-(The exact form of the bound can vary, often $R(h_S) \le R_{emp}(h_S) + 2\beta_n + \sqrt{\frac{C\ln(1/\delta)}{2n}}$ for bounded losses).
+
+(The exact form of the bound can vary, often $$R(h_S) \le R_{emp}(h_S) + 2\beta_n + \sqrt{\frac{C\ln(1/\delta)}{2n}}$$ for bounded losses).
 Uniform stability, which is a strong notion of stability, can be directly linked to L2-style control over the hypothesis space.
 </blockquote>
 

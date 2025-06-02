@@ -224,7 +224,7 @@ The term $$\sqrt{\hat{v}_t} + \varepsilon$$ in the denominator acts as a per-par
 
 ### 3.2. Interpreting $$v_t$$ as a Diagonal Empirical Fisher
 
-The Fisher Information Matrix (FIM) plays a crucial role in information geometry and statistics. For a model $$p(x|\theta)$$, the FIM is:
+The Fisher Information Matrix (FIM) plays a crucial role in information geometry and statistics. For a model $$p(x\vert \theta)$$, the FIM is:
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
@@ -233,22 +233,25 @@ The Fisher Information Matrix (FIM) plays a crucial role in information geometry
 The Fisher Information Matrix $$F(\theta)$$ is defined as the expectation of the outer product of the score function (gradient of the log-likelihood):
 
 $$
-F(\theta) = E_{p(x|\theta)} \left[ \left( \nabla_\theta \log p(x|\theta) \right) \left( \nabla_\theta \log p(x|\theta) \right)^T \right]
+F(\theta) = E_{p(x\vert \theta)} \left[ \left( \nabla_\theta \log p(x\vert \theta) \right) \left( \nabla_\theta \log p(x\vert \theta) \right)^T \right]
 $$
+
 Under certain regularity conditions, it can also be expressed as the negative expectation of the Hessian of the log-likelihood:
+
 $$
-F(\theta) = -E_{p(x|\theta)} \left[ \nabla_\theta^2 \log p(x|\theta) \right]
+F(\theta) = -E_{p(x\vert \theta)} \left[ \nabla_\theta^2 \log p(x\vert \theta) \right]
 $$
+
 </blockquote>
 
 Computing the true FIM is often intractable. The **empirical FIM** approximates this expectation using a mini-batch $$\mathcal{B}$$ of data:
 
 $$
-\hat{F}(\theta) = \frac{1}{\vert\mathcal{B}\vert} \sum_{(x,y) \in \mathcal{B}} \left( \nabla_\theta \log p(y|x;\theta) \right) \left( \nabla_\theta \log p(y|x;\theta) \right)^T
+\hat{F}(\theta) = \frac{1}{\vert\mathcal{B}\vert} \sum_{(x,y) \in \mathcal{B}} \left( \nabla_\theta \log p(y\vert x;\theta) \right) \left( \nabla_\theta \log p(y\vert x;\theta) \right)^T
 $$
 
-If the loss function $$L(\theta)$$ is the negative log-likelihood (NLL), i.e., $$L(\theta) = -\log p(y|x;\theta)$$ for a single sample (or an average for a mini-batch), then the gradient $$g_t = \nabla_\theta L(\theta_t) = -\nabla_\theta \log p(y_t|x_t;\theta_t)$$.
-The squared gradient $$g_{t,i}^2 = (\nabla_{\theta_i} \log p(y_t|x_t;\theta_t))^2$$ then corresponds to the $$i$$-th diagonal element of the empirical FIM computed on that single sample.
+If the loss function $$L(\theta)$$ is the negative log-likelihood (NLL), i.e., $$L(\theta) = -\log p(y\vert x;\theta)$$ for a single sample (or an average for a mini-batch), then the gradient $$g_t = \nabla_\theta L(\theta_t) = -\nabla_\theta \log p(y_t\vert x_t;\theta_t)$$.
+The squared gradient $$g_{t,i}^2 = (\nabla_{\theta_i} \log p(y_t\vert x_t;\theta_t))^2$$ then corresponds to the $$i$$-th diagonal element of the empirical FIM computed on that single sample.
 Adam's second moment estimate $$\hat{v}_t$$ is an EWMA of these squared gradients. Thus, $$\mathrm{diag}(\hat{v}_t)$$ can be interpreted as a diagonal approximation of the (time-averaged) empirical FIM.
 
 ### 3.3. Adam $$\approx$$ Natural Gradient with Diagonal FIM
@@ -260,9 +263,11 @@ Adam's second moment estimate $$\hat{v}_t$$ is an EWMA of these squared gradient
 **Definition.** Natural Gradient Descent
 </div>
 The update rule for natural gradient descent is:
+
 $$
 \theta_{t+1} = \theta_t - \eta F(\theta_t)^{-1} \nabla L(\theta_t)
 $$
+
 This update follows the steepest descent direction in the Riemannian manifold defined by the FIM.
 </blockquote>
 
@@ -279,6 +284,7 @@ This is very close to Adam's update rule: $$\theta_{t+1} = \theta_t - \eta \frac
 $$
 \theta_{t+1} = \theta_t - \eta \left[\mathrm{diag}(\hat{v}_t)\right]^{-1/2} \hat{m}_t
 $$
+
 This interpretation connects Adam to a natural gradient step where the Riemannian metric itself is taken as $$\mathrm{diag}(\sqrt{\hat{v}_t})$$, or equivalently, where the preconditioner is $$P_t = \mathrm{diag}(\hat{v}_t)^{1/2}$$. This means the preconditioning matrix is the square root of the diagonal empirical FIM.
 
 <details class="details-block" markdown="1">
@@ -349,15 +355,19 @@ Hwang (2024) argues that if weight decay is considered as an $$\ell_2$$ regulari
 $$
 \theta_{t+1} = \theta_t - \eta F(\theta_t)^{-1} (\nabla L(\theta_t) + \lambda \theta_t)
 $$
+
 However, a more common interpretation from optimization theory (e.g., proximal methods) suggests that for $$\ell_2$$ regularization, the term added to the gradient should be $$\lambda F(\theta_t) \theta_t$$ when using the Fisher metric as part of a Bregman divergence. Hwang's FAdam proposes a weight decay mechanism that is consistent with the Fisher metric:
 
 $$
 \theta_{t+1} = \theta_t - \eta \left( F(\theta_t)^{-1} \nabla L(\theta_t) + \lambda \theta_t \right)
 $$
+
 When $$F(\theta_t)$$ is approximated by $$\mathrm{diag}(\hat{v}_t)$$, this leads to a modified AdamW rule where the weight decay term might interact differently with the preconditioning. The paper [arXiv][2] clarifies this to be:
+
 $$
 \theta_{t+1} = \theta_t - \eta \left( \mathrm{diag}(\hat{v}_t)^{-1/2} \hat{m}_t + \lambda \theta_t \right)
 $$
+
 This is similar to AdamW, but the derivation and justification come from the natural gradient perspective.
 
 ## 5. Empirical Evidence & Discussion (FAdam)

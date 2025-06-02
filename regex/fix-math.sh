@@ -3,6 +3,10 @@
 #               add blank lines around block math
 #               and replace common math glyphs with LaTeX command equivalents
 #               (always terminating each command with a space)
+#
+# This variant will NOT touch lines between \begin{…}…\end{…} for common display‐math
+# environments (e.g. align, equation, gather, multline, matrix, etc.), even if they appear
+# inside a $$…$$ block.
 
 set -euo pipefail
 
@@ -25,7 +29,9 @@ fi
 declare -a MD_FILES=()
 for target in "$@"; do
   if [ -d "$target" ]; then
-    while IFS= read -r -d '' md; do MD_FILES+=("$md"); done < <(find "$target" -type f -name '*.md' -print0)
+    while IFS= read -r -d '' md; do
+      MD_FILES+=("$md")
+    done < <(find "$target" -type f -name '*.md' -print0)
   else
     MD_FILES+=("$target")
   fi
@@ -42,7 +48,7 @@ for md in "${MD_FILES[@]}"; do
 
   perl -0777 -i -pe '
     ####################################################################
-    # 1. Promote every solitary $ to $$ so Kramdown treats it as math.  #
+    # 1. Promote every solitary $ to $$ so Kramdown treats it as math. #
     ####################################################################
     s/(?<!\$)\$(?!\$)/\$\$/g;
 
@@ -67,49 +73,82 @@ for md in "${MD_FILES[@]}"; do
     # 3. Rewrite math in two situations                                #
     #    a) block math:   $$ … $$ on its own line(s)                   #
     #    b) inline math:  text $$ … $$ text                            #
+    #                                                                   
+    # We also want to skip any lines between \begin{…}…\end{…} for      #
+    # common display‐math environments (align, equation, gather, etc.)   #
+    # when inside a $$…$$ block.                                        #
     ####################################################################
 
-    # a) process block math line-by-line while preserving blank lines
     my @out;
-    my $yaml = 0;          # still inside YAML front matter?
-    my $code = 0;          # inside ``` fenced code?
-    my $inblock = 0;       # between stand-alone $$ lines?
-    my $need_post = 0;     # need blank line after closing block?
+    my $yaml        = 0;   # still inside YAML front matter?
+    my $code        = 0;   # inside ``` fenced code?
+    my $inblock     = 0;   # between stand-alone $$ lines?
+    my $need_post   = 0;   # need blank line after closing block?
+    my $ignore_env  = 0;   # inside a \begin{…}…\end{…} block to skip
 
     for my $line (split /\n/) {
 
       # YAML front matter passes through unchanged
-      if ( $yaml < 2 && $line =~ /^---\s*$/ ) { $yaml++; push @out,$line; next }
-      if ( $yaml < 2 )                         { push @out,$line; next }
+      if ( $yaml < 2 && $line =~ /^---\s*$/ ) { $yaml++; push @out, $line; next }
+      if ( $yaml < 2 )                         { push @out, $line; next }
 
       # fenced code passes through unchanged
-      if ( $line =~ /^```/ ) { $code ^= 1; push @out,$line; next }
-      if ( $code )           { push @out,$line; next }
+      if ( $line =~ /^```/ ) { $code ^= 1; push @out, $line; next }
+      if ( $code )           { push @out, $line; next }
 
       # insert blank line *after* closing $$ if needed
-      if ( $need_post ) { push @out,"" unless $line =~ /^\s*$/; $need_post=0 }
+      if ( $need_post ) { push @out, "" unless $line =~ /^\s*$/; $need_post = 0 }
 
       # detect stand-alone $$ delimiters
       if ( $line =~ /^\s*\$\$\s*$/ ) {
         if ( !$inblock ) {
-          push @out,"" if @out && $out[-1] !~ /^\s*$/;   # blank line above
-          push @out,$line; $inblock=1;
+          push @out, "" if @out && $out[-1] !~ /^\s*$/;   # blank line above
+          push @out, $line;
+          $inblock = 1;
         } else {
-          push @out,$line; $inblock=0; $need_post=1;
+          push @out, $line;
+          $inblock     = 0;
+          $need_post   = 1;
+          $ignore_env  = 0;   # safely reset any skip‐flag when block closes
         }
         next;
       }
 
-      if ( $inblock ) { $line = fixmath($line) }         # mutate block line
+      # If we’re inside a $$…$$ block and we see \begin{…} for a display env, start skipping
+      if ( $inblock && !$ignore_env
+           && $line =~ /^\s*\\begin\{(?:align\*?|equation\*?|gather\*?|multline\*?|split|cases|dcases|array|matrix|pmatrix|bmatrix|Bmatrix|vmatrix|Vmatrix|aligned|alignedat|gathered|subequations|flalign\*?|eqnarray)\}/ 
+      ) {
+        $ignore_env = 1;
+        push @out, $line;
+        next;
+      }
+
+      # If skipping is on and we see the corresponding \end{…}, stop skipping
+      if ( $inblock && $ignore_env
+           && $line =~ /^\s*\\end\{(?:align\*?|equation\*?|gather\*?|multline\*?|split|cases|dcases|array|matrix|pmatrix|bmatrix|Bmatrix|vmatrix|Vmatrix|aligned|alignedat|gathered|subequations|flalign\*?|eqnarray)\}/
+      ) {
+        $ignore_env = 0;
+        push @out, $line;
+        next;
+      }
+
+      if ( $inblock ) {
+        # We are inside a $$…$$ block.
+        # Only mutate if we are NOT currently skipping a \begin{…}…\end{…} block.
+        if ( !$ignore_env ) {
+          $line = fixmath($line);
+        }
+      }
       else {
         # b) inline segments: $$ … $$ inside an ordinary line
+        #    fixmath is only run on the contents between $$…$$
         $line =~ s/\$\$(.*?)\$\$/"\$\$".fixmath($1)."\$\$"/ge;
       }
 
-      push @out,$line;
+      push @out, $line;
     }
 
-    $_ = join("\n",@out)."\n";
+    $_ = join("\n", @out) . "\n";
   ' "$md"
 
   echo "Processed: $md"
