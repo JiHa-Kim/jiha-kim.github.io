@@ -429,9 +429,11 @@ The goal is to minimize true risk $$R_{\text{exp}}(\theta)$$, but we optimize an
 **Error Component.** Approximation Error (Bias)
 </div>
 Arises from limitations of the model family $$\mathcal{H}_\Theta$$. Even the best model in $$\mathcal{H}_\Theta$$ might not capture the true function.
+
 $$
 \mathcal{E}_{\text{approx}} = \left( \min_{\theta \in \Theta} R_{\text{exp}}(\theta) \right) - \left( \min_{h \in \text{AllFunctions}} R_{\text{exp}}(h) \right)
 $$
+
 </blockquote>
 
 <blockquote class="box-definition" markdown="1">
@@ -439,9 +441,11 @@ $$
 **Error Component.** Estimation Error (Variance)
 </div>
 Results from using a finite sample $$S$$ to approximate $$\mathcal{D}$$. It's the difference between the expected risk of the ERM solution $$\hat{\theta}_{\text{ERM}}$$ and the best possible expected risk within $$\mathcal{H}_\Theta$$.
+
 $$
 \mathcal{E}_{\text{est}} = R_{\text{exp}}(\hat{\theta}_{\text{ERM}}) - \left( \min_{\theta \in \Theta} R_{\text{exp}}(\theta) \right)
 $$
+
 This error is directly related to the "ComplexityTerm" in generalization bounds. Larger datasets and "simpler" (in some theoretical sense) models/algorithms tend to reduce it.
 </blockquote>
 
@@ -450,9 +454,11 @@ This error is directly related to the "ComplexityTerm" in generalization bounds.
 **Error Component.** Optimization Error
 </div>
 Occurs because algorithms may not find the true minimizer of $$R_{\text{emp}}(\theta)$$, especially for non-convex problems or finite computation.
+
 $$
 \mathcal{E}_{\text{opt_emp}} = R_{\text{emp}}(\hat{\theta}_{\text{algo}}) - R_{\text{emp}}(\hat{\theta}_{\text{ERM}})
 $$
+
 The true concern is how this translates to $$R_{\text{exp}}(\hat{\theta}_{\text{algo}}) - R_{\text{exp}}(\hat{\theta}_{\text{ERM}})$$.
 </blockquote>
 
@@ -512,7 +518,7 @@ $$
 We solve the formulation above. The underlying hope is that by carefully choosing the loss $$\ell$$, the regularizer $$\Omega$$, its strength $$\lambda$$, and crucially, *the optimization algorithm itself*, we are implicitly encouraging solutions that not only minimize empirical risk but also possess properties conducive to good generalization.
 
 Modern generalization theories (like PAC-Bayes or information-theoretic approaches) reinforce this by showing that:
-*   The complexity term in generalization bounds (e.g., $$KL(Q||P)$$ in PAC-Bayes, or $$I(W;S)$$) often depends on the relationship between the learned parameters and some prior, or on the stability/information content of the learning algorithm.
+*   The complexity term in generalization bounds (e.g., $$KL(Q\Vert P)$$ in PAC-Bayes, or $$I(W;S)$$) often depends on the relationship between the learned parameters and some prior, or on the stability/information content of the learning algorithm.
 *   Thus, optimization algorithms that lead to "simpler" solutions in this theoretical sense (e.g., solutions in flatter regions of the loss landscape, or solutions less sensitive to individual data points) are often preferred.
 
 The choice of optimizer and its hyperparameters (learning rate, momentum, adaptivity) is therefore not just about reaching *a* minimum quickly, but about reaching a minimum that likely generalizes well.

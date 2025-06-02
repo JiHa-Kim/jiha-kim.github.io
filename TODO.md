@@ -1,5 +1,6 @@
 - [ ] soft inductive biases: example of unit disk opposite sides "shortcut"
-- [ ] 
+- [ ] matrix spectral theory
+- [ ] motivate Hilbert/Banach spaces
 
 
 

@@ -241,9 +241,9 @@ I have inserted an example reading order between the series and the `crash cours
    - `Tensor Calculus`
    - `Differential Geometry`
 8. Stochastic Gradient Descent and effects of randomness
-9. Adaptive methods and preconditioning
-10. Momentum
-11. Soft inductive biases (regularization)
+9.  Soft inductive biases (regularization)
+10. Adaptive methods and preconditioning
+11. Momentum
    - `Statistics and Information Theory`
    - `Information Geometry`
 12. Adam optimizer, info geo view: diagonal Fisher information approximation
