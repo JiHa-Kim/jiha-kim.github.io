@@ -1,21 +1,20 @@
 ---
-title: "Adam: Information Geometry Perspective and Diagonal Fisher Approximation"
-date: 2025-06-02 00:00 -0400 # Placeholder date
-series_index: 12
+title: "Adam Through the Lens of Information Geometry: A Diagonal Fisher Approximation"
+date: 2025-05-22 10:00 -0400 # Adjusted date
+series_index: 12 # As per your series outline
 mermaid: true
-description: A deep dive into the Adam optimizer, interpreting it as a natural gradient method using a diagonal empirical Fisher Information Matrix, and exploring the FAdam enhancements.
+description: "Exploring Adam as an approximation to natural gradient descent using the diagonal empirical Fisher Information Matrix, and improvements proposed by FAdam."
 image: # placeholder
 categories:
 - Mathematical Optimization
 - Machine Learning
 tags:
-- Adam Optimizer
+- Adam
+- Optimization
 - Information Geometry
-- Natural Gradient
-- Preconditioning
 - Fisher Information Matrix
+- Natural Gradient Descent
 - FAdam
-- Deep Learning
 llm-instructions: |
   I am using the Chirpy theme in Jekyll.
 
@@ -144,375 +143,292 @@ llm-instructions: |
   without an explicit request.
 ---
 
-The Adam optimizer has become a de facto standard in training deep neural networks. While its empirical success is undeniable, a deeper understanding of *why* it works so well, and how it relates to more principled optimization theories, has been an active area of research. This post delves into the connection between Adam, adaptive preconditioning, and the concept of natural gradient descent, particularly through the lens of the Fisher Information Matrix. We will explore how Adam can be interpreted as an approximation to natural gradient descent using a diagonal empirical Fisher matrix, and discuss recent work like FAdam that refines this interpretation.
+The Adam optimizer has become a staple in training deep neural networks, prized for its empirical success and efficiency. However, its theoretical underpinnings, particularly its relationship to more principled optimization methods, have been a subject of ongoing research. This post delves into the interpretation of Adam as an approximation to **Natural Gradient Descent (NGD)**, focusing on how its second-moment estimate can be viewed as a diagonal **Empirical Fisher Information Matrix (FIM)**. We'll primarily draw upon the insights from Hwang (2024), "FAdam: Adam is a natural gradient optimizer using diagonal empirical Fisher information," to understand this connection and explore proposed improvements.
 
-## 1. Introduction and Motivation
+Why is this perspective important? Understanding Adam as an NGD variant not only provides theoretical clarity but also helps identify its potential shortcomings and guides the development of more robust and theoretically sound optimizers like FAdam.
 
-In large-scale optimization problems, particularly in deep learning, the loss landscape is often characterized by high dimensionality and complex curvature. Some directions might be extremely steep, while others are very flat. This anisotropy makes simple gradient descent inefficient, as a single learning rate might be too large for steep directions (causing oscillations) and too small for flat directions (causing slow progress).
+## 1. Natural Gradient Descent and the Fisher Information Matrix
 
-A **preconditioner** aims to "reshape" this loss geometry, making the problem appear more isotropic or "well-conditioned" to the optimizer. The goal is that gradient steps make more consistent progress across all dimensions. Standard gradient descent updates parameters $$\theta$$ as:
+To appreciate Adam's connection to NGD, we first need to understand NGD and the FIM.
 
-$$
-\theta_{t+1} = \theta_t - \eta \nabla f(\theta_t)
-$$
+### 1.1. Statistical Manifold & Riemannian Metric
 
-With a preconditioner $$P_t$$ (typically a positive definite matrix), the update becomes:
-
-$$
-\theta_{t+1} = \theta_t - \eta P_t^{-1} \nabla f(\theta_t)
-$$
-
-The preconditioner $$P_t$$ is chosen (or approximated) to "whiten" the curvature. An ideal choice for $$P_t$$ is the Hessian matrix $$\nabla^2 f(\theta_t)$$, which leads to Newton's method. However, computing and inverting the full Hessian is often impractical ($$\mathcal{O}(d^3)$$ for $$d$$ parameters). Adaptive methods like Adam aim to approximate this preconditioning effect efficiently, typically using diagonal matrices that cost only $$\mathcal{O}(d)$$ per step.
-
-This post will explore:
-- The mathematical underpinnings of preconditioning.
-- How adaptive methods like Adagrad, RMSProp, and Adam implement diagonal preconditioning.
-- The interpretation of Adam as a natural gradient method using a diagonal empirical Fisher Information Matrix (FIM).
-- Refinements proposed by FAdam (Hwang, 2024) based on this information geometry perspective.
-
-## 2. Mathematical Primer on Preconditioning
-
-### 2.1. Affine-Invariance & Scale-Free Requirements
-
-One of the most desirable properties of an optimization algorithm is **affine-invariance**. Newton's method, which uses $$P_t = \nabla^2 f(\theta_t)$$, is affine-invariant. This means if we reparameterize $$\theta = A\phi$$ for an invertible matrix $$A$$, applying Newton's method in the $$\phi$$-space yields iterates that map directly back to the iterates in $$\theta$$-space. It is independent of the choice of basis for the parameter space.
-
-Another related property is being **scale-free**.
-- The gradient $$\nabla f$$ is homogeneous of degree 1 with respect to the loss $$f$$ (i.e., $$\nabla(\alpha f) = \alpha \nabla f$$).
-- Ideally, the update step $$\eta P_t^{-1} \nabla f(\theta_t)$$ should be homogeneous of degree 0 in $$f$$. This means scaling the loss function ($$f \mapsto \alpha f$$) should not change the optimization trajectory, only potentially its speed if $$\eta$$ is not also scaled. Newton's method satisfies this because if $$f \mapsto \alpha f$$, then $$\nabla f \mapsto \alpha \nabla f$$ and $$\nabla^2 f \mapsto \alpha \nabla^2 f$$, so $$(\alpha \nabla^2 f)^{-1} (\alpha \nabla f) = (\nabla^2 f)^{-1} \nabla f$$.
-
-Diagonal preconditioners used in methods like Adam lose full affine-invariance but attempt to capture some scale-free properties by adapting to the magnitude of gradients along each coordinate.
-
-### 2.2. ODE View of Adagrad/RMSProp
-
-The behavior of some adaptive algorithms can be understood by looking at their continuous-time ordinary differential equation (ODE) limit. For Adagrad, the update for coordinate $$i$$ is:
-
-$$
-g_{t,i} = \nabla_i f(\theta_t), \quad s_{t,i} = s_{t-1,i} + g_{t,i}^2, \quad \theta_{t+1,i} = \theta_{t,i} - \frac{\eta}{\sqrt{s_{t,i} + \varepsilon}} g_{t,i}
-$$
-
-This can be seen as a discretization of the ODE system:
-
-$$
-\frac{d\theta_i}{dt} = - \frac{1}{\sqrt{G_i(t) + \varepsilon}} \frac{\partial f}{\partial \theta_i}, \quad \text{where} \quad \frac{dG_i}{dt} = \left(\frac{\partial f}{\partial \theta_i}\right)^2
-$$
-
-Here, $$G_i(t) = \int_0^t (\partial_i f(\theta(s)))^2 ds$$ accumulates the squared gradients. The effective learning rate for coordinate $$i$$ decays proportionally to $$1/\sqrt{G_i(t)}$$. This provides coordinate-wise preconditioning using the diagonal preconditioning matrix $$P(t) = \mathrm{diag}(\sqrt{G_1(t)}, \dots, \sqrt{G_d(t)})$$ (ignoring $$\varepsilon$$ for simplicity).
-
-RMSProp modifies this by using an exponentially weighted moving average (EWMA) for the squared gradients:
-
-$$
-v_{t,i} = \beta v_{t-1,i} + (1-\beta) g_{t,i}^2
-$$
-
-This corresponds to an ODE where $$G_i(t)$$ is an exponentially weighted integral, allowing the preconditioner to adapt to more recent gradient statistics rather than accumulating them indefinitely.
-
-## 3. Adam and the Diagonal Empirical Fisher
-
-Adam (Adaptive Moment Estimation) builds upon RMSProp by incorporating an EWMA of the gradients themselves (first moment) in addition to the squared gradients (second moment).
-
-### 3.1. Standard Adam Algorithm and Notation
-
-The core updates for Adam are:
-1. Compute gradient: $$g_t = \nabla f(\theta_t)$$
-2. Update biased first moment estimate: $$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$$
-3. Update biased second moment estimate: $$v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2$$ (element-wise square)
-4. Compute bias-corrected first moment estimate: $$\hat{m}_t = m_t / (1-\beta_1^t)$$
-5. Compute bias-corrected second moment estimate: $$\hat{v}_t = v_t / (1-\beta_2^t)$$
-6. Update parameters: $$\theta_{t+1} = \theta_t - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \varepsilon}$$
-
-The term $$\sqrt{\hat{v}_t} + \varepsilon$$ in the denominator acts as a per-parameter learning rate scaling, effectively a diagonal preconditioner $$P_t = \mathrm{diag}(\sqrt{\hat{v}_t} + \varepsilon)$$.
-
-### 3.2. Interpreting $$v_t$$ as a Diagonal Empirical Fisher
-
-The Fisher Information Matrix (FIM) plays a crucial role in information geometry and statistics. For a model $$p(x|\theta)$$, the FIM is:
+In information geometry, a family of probability distributions parameterized by $$\theta \in \mathbb{R}^d$$, denoted as $$p(x;\theta)$$, forms a **statistical manifold**. Each point $$\theta$$ on this manifold corresponds to a specific probability distribution.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition.** Fisher Information Matrix (FIM)
 </div>
-The Fisher Information Matrix $$F(\theta)$$ is defined as the expectation of the outer product of the score function (gradient of the log-likelihood):
+The **Fisher Information Matrix** $$F(\theta)$$ at a point $$\theta$$ on the statistical manifold is defined as the expectation of the outer product of the score function (gradient of the log-likelihood with respect to parameters):
 
 $$
-F(\theta) = E_{p(x|\theta)} \left[ \left( \nabla_\theta \log p(x|\theta) \right) \left( \nabla_\theta \log p(x|\theta) \right)^T \right]
+F(\theta) \;=\; \mathbb{E}_{x\sim p(\cdot;\theta)}\Big[\,\nabla_\theta \log p(x;\theta)\,\nabla_\theta \log p(x;\theta)^\top\Big]
 $$
-Under certain regularity conditions, it can also be expressed as the negative expectation of the Hessian of the log-likelihood:
+
+Under mild regularity conditions, $$F(\theta)$$ is a positive semi-definite matrix. It can also be expressed as the negative expectation of the Hessian of the log-likelihood:
+
 $$
-F(\theta) = -E_{p(x|\theta)} \left[ \nabla_\theta^2 \log p(x|\theta) \right]
+F(\theta) \;=\; -\mathbb{E}_{x\sim p(\cdot;\theta)}\left[ \frac{\partial^2}{\partial \theta_i \partial \theta_j} \log p(x;\theta) \right]
 $$
 </blockquote>
 
-Computing the true FIM is often intractable. The **empirical FIM** approximates this expectation using a mini-batch $$\mathcal{B}$$ of data:
+The FIM plays a crucial role as it defines a **Riemannian metric** on the parameter space. This metric measures the "distance" between distributions in terms of their distinguishability based on observed data.
 
-$$
-\hat{F}(\theta) = \frac{1}{\vert\mathcal{B}\vert} \sum_{(x,y) \in \mathcal{B}} \left( \nabla_\theta \log p(y|x;\theta) \right) \left( \nabla_\theta \log p(y|x;\theta) \right)^T
-$$
+### 1.2. Natural Gradient Descent
 
-If the loss function $$L(\theta)$$ is the negative log-likelihood (NLL), i.e., $$L(\theta) = -\log p(y|x;\theta)$$ for a single sample (or an average for a mini-batch), then the gradient $$g_t = \nabla_\theta L(\theta_t) = -\nabla_\theta \log p(y_t|x_t;\theta_t)$$.
-The squared gradient $$g_{t,i}^2 = (\nabla_{\theta_i} \log p(y_t|x_t;\theta_t))^2$$ then corresponds to the $$i$$-th diagonal element of the empirical FIM computed on that single sample.
-Adam's second moment estimate $$\hat{v}_t$$ is an EWMA of these squared gradients. Thus, $$\mathrm{diag}(\hat{v}_t)$$ can be interpreted as a diagonal approximation of the (time-averaged) empirical FIM.
-
-### 3.3. Adam $$\approx$$ Natural Gradient with Diagonal FIM
-
-**Natural Gradient Descent** modifies the standard gradient descent update by preconditioning with the inverse of the FIM:
+Standard gradient descent operates in the Euclidean space of parameters. However, this space may not reflect the true geometry of the probability distributions. Natural Gradient Descent (NGD) addresses this by descending along the steepest direction in the Riemannian manifold defined by the FIM.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-**Definition.** Natural Gradient Descent
+**Definition.** Natural Gradient
 </div>
-The update rule for natural gradient descent is:
+The **natural gradient** of a loss function $$L(\theta)$$ is given by:
 
 $$
-\theta_{t+1} = \theta_t - \eta F(\theta_t)^{-1} \nabla L(\theta_t)
+\nabla^{\text{(nat)}} L(\theta) \;=\; F(\theta)^{-1} \,\nabla L(\theta)
 $$
-
-This update follows the steepest descent direction in the Riemannian manifold defined by the FIM.
 </blockquote>
 
-The FIM defines a Riemannian metric on the parameter manifold of the statistical model. The natural gradient $$\tilde{\nabla} L = F(\theta)^{-1} \nabla L(\theta)$$ is the steepest descent direction under this Fisher metric, rather than the Euclidean metric.
-
-If we approximate the full FIM $$F(\theta_t)$$ with its diagonal empirical version, i.e., $$F(\theta_t) \approx \mathrm{diag}(\hat{v}_t)$$, and use the momentum-based gradient $$\hat{m}_t$$ in place of $$\nabla L(\theta_t)$$, the natural gradient update becomes:
+The NGD update rule, with a learning rate $$\eta$$, is:
 
 $$
-\theta_{t+1} = \theta_t - \eta \left[\mathrm{diag}(\hat{v}_t)\right]^{-1} \hat{m}_t
+\theta_{t+1} \;=\; \theta_t \;-\;\eta\,F(\theta_t)^{-1}\,\nabla L(\theta_t)
 $$
 
-This is very close to Adam's update rule: $$\theta_{t+1} = \theta_t - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \varepsilon}$$. The key difference is that Adam uses the square root of $$\hat{v}_t$$. This distinction is crucial and is addressed by Hwang (2024) ([arXiv][2]), who argues that Adam's update can be interpreted as:
+By preconditioning the standard gradient $$\nabla L(\theta)$$ with the inverse FIM $$F(\theta)^{-1}$$, NGD adapts the step size for each parameter direction according to the local curvature of the probability manifold. This often leads to faster and more stable convergence, especially in complex, high-dimensional landscapes.
+
+### 1.3. The Computational Bottleneck
+
+Despite its theoretical advantages, NGD faces a significant practical challenge: computing, storing, and inverting the full FIM $$F(\theta) \in \mathbb{R}^{d \times d}$$ is computationally prohibitive for large models where $$d$$ (the number of parameters) can be in the millions or billions. This necessitates approximations.
+
+## 2. Approximating the Fisher Information Matrix
+
+To make NGD feasible, two common approximations are employed: using the diagonal of the FIM and using an empirical estimate based on minibatches.
+
+### 2.1. From Full Fisher to Diagonal Fisher
+
+A simplification is to assume that the parameter updates are largely independent or that the off-diagonal elements of the FIM (covariances between score components) are negligible. This leads to the **diagonal Fisher Information Matrix**.
+
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition.** Diagonal Fisher Information Matrix
+</div>
+The diagonal FIM retains only the variances of each coordinate's score:
 
 $$
-\theta_{t+1} = \theta_t - \eta \left[\mathrm{diag}(\hat{v}_t)\right]^{-1/2} \hat{m}_t
-$$
-This interpretation connects Adam to a natural gradient step where the Riemannian metric itself is taken as $$\mathrm{diag}(\sqrt{\hat{v}_t})$$, or equivalently, where the preconditioner is $$P_t = \mathrm{diag}(\hat{v}_t)^{1/2}$$. This means the preconditioning matrix is the square root of the diagonal empirical FIM.
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Mathematical Detail.** From Adam to Natural Gradient (Hwang, 2024)
-</summary>
-Suppose we have a probabilistic model $$p_{\theta}(y \mid x)$$ and use the negative log-likelihood loss for a mini-batch $$\mathcal{B}$$:
-
-$$
-L(\theta) = -\frac{1}{\vert\mathcal{B}\vert}\sum_{(x,y)\in\mathcal{B}} \log p_{\theta}(y \mid x)
+F_\text{diag}(\theta) 
+\;=\; \diag\bigl(F(\theta)\bigr)
+\;=\; \mathbb{E}_{x\sim p(\cdot;\theta)}
+\bigl[\nabla_\theta \log p(x;\theta)\odot\nabla_\theta \log p(x;\theta)\bigr]
 $$
 
-The *true* Fisher information is:
+where $$\odot$$ denotes the element-wise (Hadamard) product, and $$\diag(A)$$ extracts the diagonal of matrix $$A$$ as a vector (or forms a diagonal matrix from a vector).
+</blockquote>
+
+Using $$F_\text{diag}(\theta)$$ significantly reduces computational cost as its inverse is simply the element-wise reciprocal of its diagonal entries.
+
+### 2.2. Empirical Approximation via Minibatches
+
+The true FIM involves an expectation over the entire data distribution $$p(x;\theta)$$. In practice, this expectation is approximated using a minibatch of data. The **empirical Fisher** for a minibatch $$\{x_i\}_{i=1}^B$$ is:
 
 $$
-F(\theta) = \mathbb{E}_{(x,y)\sim\mathcal{D}}\Bigl[\nabla_\theta \log p_{\theta}(y \mid x)\,\nabla_\theta \log p_{\theta}(y \mid x)^\top\Bigr]
+\widehat{F}_\text{emp}(\theta)
+\;=\; \frac{1}{B}\sum_{i=1}^B \bigl(\nabla_\theta \log p(x_i;\theta)\bigr)\,\bigl(\nabla_\theta \log p(x_i;\theta)\bigr)^\top
 $$
 
-In each iteration $$t$$, Adam computes the gradient $$g_{t} = \nabla_\theta L(\theta_t)$$.
-The second moment estimate is $$v_{t} = \beta_2\,v_{t-1} + (1-\beta_2)\,g_t^2$$, and its bias-corrected version is $$\hat{v}_t = \frac{v_t}{1-\beta_2^t}$$.
-Each component $$\hat{v}_{t,i}$$ approximates $$\mathbb{E}[\,(g_k)_i^2\,]$$ over recent steps $$k \le t$$. If $$g_k$$ are gradients of the NLL, then $$\hat{v}_{t,i}$$ approximates the $$i$$-th diagonal element of the empirical Fisher.
-The Adam update:
+Combining these two approximations gives the **diagonal empirical Fisher**:
 
 $$
-\theta_{t+1,i} = \theta_{t,i} - \eta \,\frac{\hat{m}_{t,i}}{\sqrt{\hat{v}_{t,i}} + \varepsilon}
+\widehat{F}_\text{diag‐emp}(\theta) \;=\; \frac{1}{B}\sum_{i=1}^B \bigl(\nabla_\theta \log p(x_i;\theta)\odot\nabla_\theta \log p(x_i;\theta)\bigr)
 $$
 
-can be viewed as:
+This is a vector representing the diagonal of the FIM, estimated from a minibatch.
+Hwang (2024) notes that this "empirical Fisher" accurately reflects the true Fisher's curvature only under specific conditions, particularly when the loss function $$L(\theta)$$ is the negative log-likelihood of a *discrete* probability distribution (e.g., categorical cross-entropy). For other losses, like Mean Squared Error (MSE), this approximation can be misleading (Hwang, 2024; Kunstner et al., 2019).
 
+## 3. Adam’s Second Moment as Diagonal Empirical Fisher
+
+Now, let's connect these concepts to the Adam optimizer.
+
+### 3.1. Recall the Adam Update Rules
+
+Adam (Kingma & Ba, 2015) maintains exponential moving averages (EMAs) of the first moment (mean) and second moment (uncentered variance) of the gradients $$g_t = \nabla L(\theta_t)$$:
+
+*   First moment (biased estimate of mean):
+    $$
+    m_t \;=\; \beta_1\,m_{t-1} \;+\;(1-\beta_1)\,g_t
+    $$
+    Bias-corrected estimate:
+    $$
+    \hat m_t \;=\; \frac{m_t}{1-\beta_1^t}
+    $$
+
+*   Second moment (biased estimate of squared gradients):
+    $$
+    v_t \;=\; \beta_2\,v_{t-1} \;+\;(1-\beta_2)\,(g_t \odot g_t)
+    $$
+    Bias-corrected estimate:
+    $$
+    \hat v_t \;=\; \frac{v_t}{1-\beta_2^t}
+    $$
+
+The parameter update is then:
 $$
-\theta_{t+1} = \theta_t - \eta\,\underbrace{\bigl[\mathrm{diag}(\sqrt{\hat{v}_t} + \varepsilon \mathbf{1})\bigr]^{-1}}_{\text{Diagonal Preconditioner}} \hat{m}_t
+\theta_{t+1}
+\;=\;\theta_t \;-\;\alpha \,\frac{\hat m_t}{\sqrt{\hat v_t} + \varepsilon}
 $$
+where $$\alpha$$ is the learning rate and $$\varepsilon > 0$$ is a small constant for numerical stability. The original Adam paper already noted that $$v_t$$ acts as a diagonal preconditioner.
 
-Hwang (2024) argues that this preconditioner, $$P_t = \mathrm{diag}(\sqrt{\hat{v}_t})$$, acts as an approximation to $$F(\theta_t)^{1/2}$$ if $$F(\theta_t)$$ is diagonal. This leads to the interpretation of Adam as using a specific form of diagonal Fisher information.
-</details>
+### 3.2. Interpreting $$v_t$$ as a Diagonal Empirical Fisher
 
-### 3.4. When Does Empirical Fisher ≈ True Fisher?
+The core insight is that the term $$g_t \odot g_t$$ in the $$v_t$$ update is an estimate of the diagonal of the empirical Fisher information.
+Specifically, if the loss function $$L(\theta)$$ is the negative log-likelihood for a single sample $$x_t$$ (or an average over a minibatch), i.e., $$L(\theta_t) = -\log p(x_t;\theta_t)$$, then the gradient $$g_t$$ is:
+$$
+g_t \;=\;\nabla_\theta L(\theta_t)\;=\;-\nabla_\theta\log p(x_t;\theta_t)
+$$
+In this case, the element-wise square of the gradient becomes:
+$$
+g_t \odot g_t \;=\;\bigl(-\nabla_\theta\log p(x_t;\theta_t)\bigr)\odot\bigl(-\nabla_\theta\log p(x_t;\theta_t)\bigr) \;=\; \bigl[\nabla_\theta\log p(x_t;\theta_t)\bigr]\odot\bigl[\nabla_\theta\log p(x_t;\theta_t)\bigr]
+$$
+This term $$g_t \odot g_t$$ is precisely the (unbatched) diagonal empirical Fisher for the sample $$x_t$$. The $$v_t$$ term in Adam, being an EMA of $$g_t \odot g_t$$, can thus be interpreted as a running estimate of the diagonal of the FIM:
+$$
+\mathbb{E}[g_t \odot g_t] = F_\text{diag}(\theta_t)
+$$
+And so,
+$$
+\hat{v}_t \approx F_\text{diag}(\theta_t)
+$$
+Therefore, **Adam’s update step $$\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$ closely resembles a natural gradient update using a diagonal empirical FIM approximation:**
+$$
+\theta_{t+1} \approx \theta_t - \alpha \left[ F_\text{diag}(\theta_t) \right]^{-1/2} \hat{m}_t
+$$
+This is because if $$F_\text{diag}(\theta_t)$$ is a diagonal matrix with entries $$\hat{v}_t$$, then $$[F_\text{diag}(\theta_t)]^{-1/2}$$ would be a diagonal matrix with entries $$1/\sqrt{\hat{v}_t}$$. The term $$\hat{m}_t$$ serves as the estimate of the (Euclidean) gradient.
+
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
-**When Does Empirical Fisher ≈ True Fisher?**
+**Key Connection**
 </div>
-The approximation holds when:
-1. Model is well-specified (true distribution in model family)
-2. Using negative log-likelihood loss
-3. At optimal parameters (where score expectation is zero)
-
-For mispecified models or non-log losses (e.g., MSE), the empirical Fisher may not capture true curvature (Kunstner et al., 2019).
+Adam's adaptive learning rates, derived from $$\sqrt{\hat{v}_t}$$, effectively implement a form of natural gradient descent where the Fisher Information Matrix is approximated by its diagonal, estimated empirically from squared gradients. This connection hinges on the loss function being a negative log-likelihood.
 </blockquote>
 
-### 3.5. Why diagonal approximation works
-In high dimensions, off-diagonal Fisher elements scale as $$\mathcal{O}(1/\sqrt{d})$$ relative to diagonal terms (Hwang, 2024). For models with millions of parameters, diagonal dominance emerges naturally, justifying Adam's approximation.
+## 4. Limitations of the Empirical Fisher and Adam's Approximations
 
-## 4. FAdam: Enhancements and Refinements (Hwang, 2024)
+While the connection is insightful, it's important to acknowledge its limitations:
 
-Building on the interpretation of Adam as a natural gradient method with a diagonal empirical FIM, Dongseong Hwang (2024) proposed **Fisher Adam (FAdam)** ([arXiv][2], [arXiv][3]). This work identifies potential "mismatches" in the original Adam formulation when viewed strictly from an information geometry perspective and suggests corrections.
+1.  **Loss Function Dependence**: As emphasized by Hwang (2024) and Kunstner et al. (2019), the interpretation of $$g_t \odot g_t$$ as an estimate of the FIM's diagonal is most accurate when $$L(\theta)$$ is the negative log-likelihood of a discrete distribution (e.g., categorical cross-entropy). For other losses (like MSE in regression), $$g_t \odot g_t$$ (the squared gradient of the loss) can deviate significantly from the true FIM's diagonal, potentially leading to suboptimal preconditioning.
+    *   Hwang (2024) recommends: "Always adopt *log‐probability* (e.g. softmax‐cross‐entropy for classification) when using Adam from an InfoGeo lens."
 
-### 4.1. Natural Gradient Momentum
-FAdam's key innovation is using natural gradients in momentum accumulation:
+2.  **Bias Correction and Momentum**: The bias correction for $$\hat{v}_t$$ in Adam is $$1/(1-\beta_2^t)$$. While it corrects for the initialization at zero, Hwang (2024) points out that this method of EMA for squared gradients might not optimally track the true diagonal Fisher, especially in early iterations, and its interaction with the momentum term $$\hat{m}_t$$ can lead to imbalances in curvature scaling.
 
+3.  **The Role of $$\varepsilon$$**: The small constant $$\varepsilon$$ is added for numerical stability. However, it also implicitly modifies the preconditioning. Adding $$\varepsilon$$ inside the square root is akin to adding $$\varepsilon^2$$ to $$v_t$$, which can be seen as adding a small multiple of the identity matrix to the estimated diagonal FIM. This slightly flattens the perceived geometry, especially where gradient components are small.
+
+## 5. FAdam: Refining Adam with Information Geometry Principles
+
+Based on the information geometry perspective, Hwang (2024) identifies these issues in Adam and proposes **FAdam (Fisher Adam)**, an optimizer that incorporates several corrections to align more closely with NGD principles.
+
+The main corrections in FAdam are:
+
+1.  **Enhanced Bias Corrections & Momentum Averaging**:
+    *   FAdam revisits how the EMAs $$m_t$$ and $$v_t$$ (denoted $$s_t$$ for squared gradients in FAdam) are computed and bias-corrected to ensure that the preconditioning term $$\sqrt{\hat{s}_t}$$ more faithfully represents the scale of the diagonal Fisher. The paper details specific adjustments to how $$\beta_1$$ and $$\beta_2$$ are handled, aiming for a more accurate natural gradient accumulation.
+
+2.  **Adaptive $$\varepsilon_t$$**:
+    *   Instead of a fixed small $$\varepsilon$$, FAdam proposes an adaptive $$\varepsilon_t$$. This can be a schedule (e.g., decaying over time) so that the update more closely resembles a pure natural gradient step in later iterations when $$s_t$$ might be more stable. A suggested schedule is $$\varepsilon_t = \varepsilon_0 / (1 + \lambda_{\varepsilon} t)$$.
+
+3.  **Riemannian Weight Decay**:
+    *   Standard L2 weight decay (or AdamW's decoupled weight decay) adds a term $$-\alpha \lambda \theta_t$$ to the update. From an InfoGeo perspective, true weight decay (penalizing $$(\lambda/2) ||\theta||^2$$) should occur along the Riemannian manifold. This means the decay term should also be preconditioned by the FIM. FAdam implements this as:
+        $$
+        -\alpha \lambda \diag(\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t
+        $$
+        (Note: The paper's exact formulation for Riemannian weight decay is effectively preconditioning the gradient of the L2 penalty, $$ \lambda \theta_t $$, by the inverse of the (diagonal) FIM, which means dividing by $$ \hat{s}_t + \varepsilon_t^2 $$, or multiplying by $$ (\sqrt{\hat{s}_t} + \varepsilon_t)^{-1} $$ if the weight decay is applied to the preconditioned gradient.) The pseudocode in Hwang (2024) suggests a term like $$-\alpha\lambda \text{diag}(\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t$$ for the update part scaled by $$\alpha$$, effectively making the weight decay term itself adaptive. More precisely, if the penalty is $$\frac{\lambda}{2} \Vert \theta \Vert^2_2$$, its natural gradient is $$\lambda F^{-1} \theta$$. For diagonal FIM approximated by $$\hat{s}_t$$, this would be $$\lambda \frac{\theta_t}{\hat{s}_t}$$. The FAdam paper's pseudocode presents a specific form. Let's use the one from the sketch:
+        $$
+        -\alpha \lambda (\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t
+        $$
+        This suggests a decay proportional to the parameter magnitude and its adaptive scale.
+        *Correction based on common NGD weight decay*: A more standard Riemannian weight decay for $$L_2$$ norm would be to scale $$\theta_t$$ by the inverse of the diagonal Fisher elements. The FAdam paper's formulation is nuanced, so referring to its precise equation is key. The provided sketch implies a scaling. The final term in FAdam's update is shown as $$-\alpha\lambda \text{diag}(\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t$$. Let's adhere to the provided pseudocode structure.
+
+4.  **Natural Gradient Clipping**:
+    *   Instead of clipping the raw gradient $$g_t$$, FAdam advocates for clipping the *natural gradient* itself, i.e., the preconditioned update:
+        $$
+        \Delta_t = \frac{\hat{m}_t}{\sqrt{\hat{s}_t} + \varepsilon_t}
+        $$
+        This ensures that the step size along the manifold, measured by the Riemannian metric, is bounded. The clipping is done if $$||\Delta_t|| > \kappa$$ for some threshold $$\kappa$$.
+
+### FAdam Pseudocode (Schematic)
+
+The FAdam algorithm, incorporating these changes, can be summarized as (based on Hwang, 2024 and the provided sketch):
+
+Let $$s_t$$ be the EMA of squared gradients (equivalent to $$v_t$$ in Adam).
 $$
-m_t = \beta_1 m_{t-1} + (1 - \beta_1) \frac{g_t}{\sqrt{v_t} + \varepsilon_t}
+g_t = \nabla_\theta L(\theta_t)
 $$
-
-This directly incorporates manifold geometry into momentum, unlike Adam's raw gradient accumulation.
-(Note: The $$v_t$$ in the denominator is typically the bias-corrected $$\hat{v}_t$$, or an uncorrected version if bias correction is applied to $$m_t$$ later. The pseudocode will clarify usage.)
-
-### 4.2. Riemannian Weight Decay
-FAdam applies weight decay in the Riemannian manifold by preconditioning with the inverse diagonal Fisher:
-
 $$
-\text{Weight decay term} = -\alpha \lambda \cdot \frac{\theta_t}{\sqrt{\hat{s}_t} + \varepsilon_t}
+m_t = \beta_1\,m_{t-1} + (1-\beta_1)\,g_t, \quad \hat m_t = \frac{m_t}{\text{enhanced_bias_correction}_1(t)}
 $$
-
-This geometrically aligns with the natural gradient direction since the L2 penalty's natural gradient is $$\lambda F^{-1}\theta_t$$. For diagonal approximation, this becomes $$\lambda \cdot \theta_t / \hat{s}_t^{1/2}$$.
-(Note: $$\hat{s}_t$$ here refers to the second moment estimate, equivalent to $$\hat{v}_t$$ in Adam's notation.)
-
-### 4.3. Adaptive $$\varepsilon$$
-The small constant $$\varepsilon$$ in Adam's update ($$\sqrt{\hat{v}_t} + \varepsilon$$) prevents division by zero. FAdam proposes an adaptive $$\varepsilon_t$$ to better maintain the intended scaling, especially when magnitudes of $$\hat{v}_t$$ vary significantly. As described by Hwang (2024) and reflected in some implementations, $$\varepsilon_t$$ can be defined based on the root mean square (RMS) of gradients:
 $$
-\varepsilon_t = \alpha_{\varepsilon} \cdot \text{RMS}(g_k \text{ for } k \le t)
+s_t = \beta_2\,s_{t-1} + (1-\beta_2)\,(g_t \odot g_t), \quad \hat s_t = \frac{s_t}{\text{enhanced_bias_correction}_2(t)}
 $$
-where $$\alpha_{\varepsilon}$$ is a small hyperparameter (distinct from the learning rate $$\alpha$$). Alternatively, an exponential moving average can be used to compute $$\varepsilon_t^2$$. This adaptive $$\varepsilon_t$$ replaces the fixed $$\varepsilon$$ in the denominators for natural gradient and Riemannian weight decay computations.
+$$
+\varepsilon_t = \text{adaptive_schedule}(\varepsilon_0, \lambda_\varepsilon, t)
+$$
+$$
+\Delta_t = \frac{\hat m_t}{\sqrt{\hat s_t} + \varepsilon_t}
+$$
+If $$||\Delta_t||_2 > \kappa$$ (or another suitable norm):
+$$
+\Delta_t \leftarrow \kappa \frac{\Delta_t}{||\Delta_t||_2} \quad \text{(Clip in Riemannian-approximated norm)}
+$$
+$$
+\theta_{t+1} = \theta_t - \alpha\,\Delta_t - \alpha\,\lambda_{\text{WD}} \text{diag}(\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t \quad \text{(Riemannian weight decay)}
+$$
+*(Note: The exact enhanced bias corrections and the precise form of Riemannian weight decay should be referred to directly from Hwang (2024) for implementation.)*
 
-### 4.4. FAdam Algorithm Pseudocode
-```python
-# FAdam (Hwang, 2024)
-# Hyperparameters: α (learning rate), β1, β2 (momentum decay rates), 
-#                  λ (weight decay), ε (small constant for stability, or ε_t is adaptive)
-#                  α_ε (if ε_t is adaptive, for scaling RMS of gradients)
-
-# Initialize: θ_0 (parameters), m_0=0 (1st moment), v_0=0 (2nd moment)
-# Optionally, if ε_t is an EWMA: ε_sq_0 = initial_epsilon_sq_value
-
-for t in range(steps):
-    g_t = ∇L(θ_t)
-    
-    # Update biased second moment estimate (diagonal Fisher approximation)
-    v_t = β2*v_{t-1} + (1-β2)*(g_t ⊙ g_t)
-    v̂_t = v_t / (1 - β2**t)  # Bias correction for v_t
-    
-    # Compute adaptive ε_t (example, consult paper for precise formulation like EWMA)
-    # Concept: ε_t = α_ε * RMS(g_k for k ≤ t).
-    # For simplicity, using a fixed ε or a pre-calculated ε_t here.
-    # Let's assume ε_t is available for the formula. In practice, it's often a small fixed value.
-    current_epsilon = ε # Or calculated ε_t
-    
-    # Natural gradient computation
-    ng_t = g_t / (√v̂_t + current_epsilon)
-    
-    # Update biased first moment estimate with natural gradients
-    m_t = β1*m_{t-1} + (1-β1)*ng_t
-    m̂_t = m_t / (1 - β1**t) # Bias correction for m_t
-    
-    # Riemannian weight decay term
-    # Note: The FAdam paper suggests decay on θ_t / (√ŝ_t + ε_t).
-    # Here ŝ_t is equivalent to v̂_t.
-    wd_t = λ * θ_t / (√v̂_t + current_epsilon)
-    
-    # Parameter update
-    θ_{t+1} = θ_t - α*(m̂_t + wd_t)
-```
-(Note: The pseudocode uses `current_epsilon`. In FAdam, this `ε_t` is ideally adaptive as described in 4.3 and the Mermaid diagram. Some implementations might simplify this to a fixed `ε` for practical reasons.)
-
-### 4.5. FAdam Workflow Diagram
+The key components of the FAdam workflow can be visualized as:
 ```mermaid
-graph TD
-    A[Compute Gradient g_t] --> B[Update Diagonal Fisher v_t (becomes v̂_t after bias correction)]
-    B --> E[Compute adaptive ε_t = α_ε·RMS(g_{1:t})]
-    subgraph Precomputation
-        direction LR
-        B
-        E
-    end
-    E --> C[Compute Natural Gradient: ng_t = g_t / (√v̂_t + ε_t)]
-    C --> D[Update Momentum: m_t = β₁m_{t-1} + (1-β₁)ng_t (becomes m̂_t after bias correction)]
-    D --> F[Compute Riemannian Weight Decay: wd_t = λ·θ_t / (√v̂_t + ε_t)]
-    subgraph UpdateTerms
-        direction LR
-        D
-        F
-    end
-    F --> G[Update Parameters: θ_{t+1} = θ_t - α(m̂_t + wd_t)]
+graph LR
+    A[Gradient $$g_t$$] --> B{Compute EMA of $$g_t$$ ($$m_t$$) and $$g_t \odot g_t$$ ($$s_t$$)}
+    B -- Enhanced Bias Correction --> C{Corrected $$\hat{m}_t, \hat{s}_t$$}
+    C --> D{Compute Adaptive $$\varepsilon_t$$}
+    D --> E{Calculate Preconditioned Update $$\Delta_t = \frac{\hat{m}_t}{\sqrt{\hat{s}_t} + \varepsilon_t}$$}
+    E --> F{Clip $$\Delta_t$$ if $$||\Delta_t|| > \kappa$$}
+    F --> G{Apply Update: $$\theta_{t+1} = \theta_t - \alpha \Delta_t$$}
+    G --> H{Apply Riemannian Weight Decay}
+    H --> I[New Parameters $$\theta_{t+1}$$]
 ```
 
-## 5. Empirical Evidence & Discussion (FAdam)
+## 6. Empirical Performance of FAdam
 
-Hwang (2024) provides empirical results for FAdam across various tasks, including training Large Language Models (LLMs), Automatic Speech Recognition (ASR), and Vector-Quantized Variational Autoencoders (VQ-VAEs).
-The claims include:
-- **8.2% relative WER reduction** vs AdamW in LibriSpeech ASR
-- **18% faster convergence** in GPT-2 pretraining (perplexity)
-- **FID improvement from 15.3 → 13.7** in VQ-VAE image generation
-- Achieving state-of-the-art word-error rates on certain ASR benchmarks.
-- Faster convergence for LLM fine-tuning.
-- More stable training of VQ-VAEs, particularly in avoiding issues like codebook collapse.
+Hwang (2024) provides empirical evidence showing that FAdam outperforms Adam and AdamW on various challenging tasks, including:
+*   **Large Language Models (LLMs):** Achieving better perplexity and faster convergence.
+*   **Automatic Speech Recognition (ASR):** Yielding state-of-the-art results with significant reductions in Word Error Rate.
+*   **VQ-VAE (Vector Quantized Variational AutoEncoders):** Improving reconstruction quality.
 
-Ablation studies in the paper typically compare FAdam's components (e.g., natural gradient momentum, adaptive $$\varepsilon_t$$, Riemannian weight decay) against their counterparts in standard Adam or AdamW, demonstrating the benefits of the proposed modifications.
+Ablation studies in the paper demonstrate that each of the proposed corrections (enhanced bias handling, adaptive $$\varepsilon_t$$, Riemannian weight decay, and natural gradient clipping) contributes positively to the overall performance improvement.
 
-**Key Takeaways from FAdam:**
-- Viewing Adam through the lens of information geometry provides a principled way to understand its components and suggest improvements.
-- The diagonal empirical FIM approximation, while computationally efficient, has inherent limitations. FAdam aims to make this approximation more robust by incorporating geometric insights into momentum and weight decay.
-- Corrections derived from information-geometric principles, such as using natural gradients for momentum and applying Riemannian weight decay, can lead to tangible performance gains.
+## 7. Summary & Takeaways
 
-### 5.1. When to Use FAdam
-<blockquote class="box-tip" markdown="1">
-<div class="title" markdown="1">
-**When to Use FAdam**
-</div>
-Consider FAdam when:
-- Training classifiers/autoencoders with log-loss
-- Using large transformers or CNNs
-- Seeing instability with Adam/AdamW
-- Needing faster convergence
+Viewing Adam through the lens of information geometry reveals it as an approximation to natural gradient descent using a diagonal empirical Fisher Information Matrix. This perspective highlights:
 
-Stick with SGD or AdamW for:
-- Regression with MSE loss
-- Small datasets/models
-- Tasks sensitive to hyperparameter changes
-</blockquote>
+*   **Adam's Strength**: Its adaptive per-parameter learning rates derived from $$v_t$$ (approximating $$F_\text{diag}$$) can be seen as a computationally cheap way to harness some benefits of NGD.
+*   **Adam's "Kludges"**: The specific ways Adam implements its EMAs, bias correction, and handles $$\varepsilon$$ are heuristics that can deviate from a pure InfoGeo approach. The validity of the FIM approximation is also conditional on the loss function.
 
-### 5.2. Optimizer Comparison: Adam vs FAdam vs NGD
+**FAdam** attempts to "clean up these kludges" by:
+*   Using more theoretically grounded bias corrections.
+*   Employing an adaptive $$\varepsilon_t$$.
+*   Implementing weight decay and gradient clipping in a way that is consistent with the Riemannian geometry.
 
-| **Component**          | **Adam**                        | **FAdam**                                                              | **NGD (Idealized)**                               |
-| ---------------------- | ------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------- |
-| **Curvature Estimate** | Diagonal empirical Fisher       | Diagonal empirical Fisher                                              | Full Fisher                                       |
-| **Momentum**           | Raw gradients                   | Natural gradients                                                      | Natural gradients                                 |
-| **Weight Decay**       | Euclidean ($$\lambda\theta_t$$) | Riemannian ($$\lambda (\sqrt{\hat{s}_t}+\varepsilon_t)^{-1}\theta_t$$) | Riemannian ($$\lambda F^{-1}\theta_t$$)           |
-| **Stabilization**      | Constant $$\varepsilon$$        | Adaptive $$\varepsilon_t = \alpha_{\varepsilon} \cdot \text{RMS}(g)$$  | Typically None (assumes $$F$$ PD)                 |
-| **Compute Cost**       | $$\mathcal{O}(d)$$              | $$\mathcal{O}(d)$$                                                     | $$\mathcal{O}(d^3)$$ (or $$d^2$$ for $$F^{-1}g$$) |
+**Practical Guidance:**
+*   When using Adam (or FAdam) and aiming for an InfoGeo interpretation, prefer loss functions that are negative log-likelihoods of discrete distributions (e.g., categorical cross-entropy for classification).
+*   Consider FAdam's corrections if a more principled and potentially higher-performing adaptive optimizer is desired, especially for models where the InfoGeo perspective is relevant.
 
-(Note: $$\hat{s}_t$$ in the table for FAdam weight decay refers to the same second moment estimate as $$\hat{v}_t$$)
+This exploration underscores that the development of optimization algorithms benefits immensely from a deep understanding of underlying mathematical principles, connecting heuristic successes to more rigorous theoretical frameworks.
 
-## 6. Key Limitations of (Diagonal) Fisher-based Approaches
+## 8. Further Reading and References
 
-While interpreting Adam and FAdam through the lens of Fisher information is insightful, this perspective also highlights inherent limitations:
-
-1.  **Loss Sensitivity**: The interpretation of $$g_t^2$$ as diagonal elements of the empirical Fisher is most direct for negative log-likelihood losses (e.g., cross-entropy). For other losses like MSE, this connection weakens, and $$v_t$$ may not accurately reflect true model curvature in the information-geometric sense.
-2.  **Diagonal Bias**: Using only the diagonal of the empirical Fisher ignores all parameter covariances (off-diagonal elements). This can be a poor approximation if parameter updates strongly interact, leading to suboptimal optimization paths in such correlated spaces.
-3.  **EMA Dynamics**: The exponential moving averages ($$m_t, v_t$$) used in Adam and FAdam inherently lag behind the true, instantaneous gradient and curvature statistics, especially in non-stationary parts of the optimization (e.g., early training or during learning rate schedule changes).
-4.  **Non-Convexity and Fisher Properties**: Far from an optimal solution in non-convex landscapes, the true Fisher matrix may not be positive definite. While the empirical Fisher ($$g g^T$$) is always positive semi-definite, its diagonal $$g_t^2$$ (and thus $$\hat{v}_t$$) is always non-negative, avoiding some issues but not necessarily guaranteeing that it's a good preconditioner globally.
-
-## 7. Connections to Other Preconditioning Schemes
-
-Adam and FAdam represent one family of adaptive methods relying on diagonal preconditioning. Other advanced methods attempt to capture more of the true curvature:
-
-- **K-FAC (Kronecker-Factored Approximate Curvature):** (Martens & Grosse, 2015). Approximates the full FIM (or generalized Gauss-Newton matrix) with block-diagonal structures, where each block corresponds to a layer and is further approximated by Kronecker products of smaller matrices. This captures some off-diagonal information related to activations and pre-activations.
-- **Shampoo / M-FAC:** (Gupta et al., 2018; Anil et al., 2020). These methods use block-diagonal or low-rank preconditioners, often applied to tensor representations of parameters (e.g., weight matrices). They aim to approximate the Hessian or Fisher matrix more closely than a simple diagonal, often by preconditioning along different modes of the parameter tensors.
-- **Muon:** (Milzarek et al., 2024). An adaptive method that uses second-moment estimates across groups of parameters (e.g., rows or columns of weight matrices) to form quasi-Newton updates, offering a trade-off between diagonal and full-matrix preconditioning.
-- **iEF (Improved Empirical Fisher):** (Wu et al., 2024) ([arXiv][4]). This work proposes corrections to the empirical Fisher approximation itself, particularly addressing how the diagonal entries should be scaled or modified to better reflect the true Fisher matrix's properties, especially under loss-reduction scenarios.
-
-FAdam can be seen as an "EFIM-plus" approach that refines the diagonal approximation. Future work might involve integrating ideas from iEF or block-diagonal methods into the FAdam framework to capture more off-diagonal curvature information tractably.
-
-## 8. Concluding Remarks
-
-The interpretation of Adam as an approximate natural gradient method using a diagonal empirical Fisher Information Matrix provides valuable insights into its success and its limitations.
-1. The heuristic of dividing by $$\sqrt{\hat{v}_t}$$ in Adam, which provides per-parameter adaptive learning rates, is directly linked to preconditioning with an approximation of the (square root of the) diagonal FIM.
-2. The FAdam work by Hwang (2024) demonstrates that by rigorously adhering to information-geometric principles, one can derive corrections to Adam's components (momentum accumulation, $$\varepsilon_t$$ term, weight decay) that potentially lead to improved performance and stability.
-3. While diagonal approximations are computationally cheap and effective, they inherently miss off-diagonal curvature information. This motivates ongoing research into more sophisticated (but still tractable) preconditioners like block-diagonal or low-rank approximations (K-FAC, Shampoo, iEF, Muon).
-
-Understanding the geometric underpinnings of optimizers like Adam not only helps in using them more effectively but also paves the way for developing next-generation optimization algorithms that are both powerful and theoretically sound.
+*   Hwang, D. (2024). *FAdam: Adam is a Natural Gradient Optimizer Using Diagonal Empirical Fisher Information*. arXiv:2405.12807. ([arXiv](https://arxiv.org/abs/2405.12807), [OpenReview](https://openreview.net/pdf?id=4ihkxIeTFH))
+*   Kingma, D. P., & Ba, J. (2015). *Adam: A Method for Stochastic Optimization.* arXiv:1412.6980. ([arXiv](https://arxiv.org/abs/1412.6980))
+*   Kunstner, F., Balles, L., & Hennig, P. (2019). *Limitations of the Empirical Fisher Approximation for Natural Gradient Descent.* arXiv:1905.12558. ([arXiv](https://arxiv.org/abs/1905.12558))
+*   Martens, J. (2020). *New insights and perspectives on the natural gradient method.* Journal of Machine Learning Research, 21(146), 1-76.
+*   Amari, S. (1998). *Natural Gradient Works Efficiently in Learning.* Neural Computation, 10(2), 251-276.
 
 ---
 
-### References
-
-*   Hwang, D. (2024). *FAdam: Adam is a natural gradient optimizer using diagonal empirical Fisher information*. [arXiv:2405.12807][2]. ([Link also as arXiv:2405.12807v1][3])
-*   Kunstner, F., Balles, L., & Hennig, P. (2019). *Limitations of the Empirical Fisher Approximation for Natural Gradient Descent*. [arXiv:1905.12558][1].
-*   Wu, X., Yu, W., Zhang, C., & Woodland, P. (2024). *An Improved Empirical Fisher Approximation for Natural Gradient Descent*. [arXiv:2406.06420][4].
-*   Kingma, D. P., & Ba, J. (2014). *Adam: A Method for Stochastic Optimization*. arXiv preprint arXiv:1412.6980.
-*   Martens, J., & Grosse, R. (2015). *Optimizing neural networks with Kronecker-factored approximate curvature*. Proceedings of the 32nd International Conference on Machine Learning (ICML).
-*   Anil, R., Gupta, V., Koren, T., Regan, K., & Singer, Y. (2020). *Second Order Optimization Made Practical*. arXiv preprint arXiv:2002.09018. (Introduced M-FAC)
-
-[1]: https://arxiv.org/abs/1905.12558
-[2]: https://arxiv.org/abs/2405.12807
-[3]: https://arxiv.org/abs/2405.12807v1
-[4]: https://arxiv.org/abs/2406.06420
+*This post aimed to elucidate the connection between Adam and natural gradient descent through the diagonal empirical Fisher approximation, drawing heavily on the recent work on FAdam. By understanding these connections, we can better appreciate the behavior of existing optimizers and contribute to the design of new, more effective methods.*
