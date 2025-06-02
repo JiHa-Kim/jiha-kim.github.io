@@ -349,30 +349,38 @@ The main corrections in FAdam are:
 
 1.  **Enhanced Bias Corrections & Momentum Averaging**:
     *   FAdam uses distinct bias correction strategies for the first and second moments:
+
         $$
         \hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad \text{and} \quad \hat{s}_t = \frac{s_t}{1 - \beta_2^t}
         $$
+
         The key difference is that FAdam applies momentum averaging **after** preconditioning rather than before, which better preserves the natural gradient direction.
 
 2.  **Adaptive $$\varepsilon_t$$**:
     *   Instead of a fixed small $$\varepsilon$$, FAdam proposes an adaptive $$\varepsilon_t$$ with the schedule:
+
         $$
         \varepsilon_t = \frac{\varepsilon_0}{1 + \lambda_{\varepsilon} t}
         $$
+
         This allows the update to more closely resemble a pure natural gradient step in later iterations.
 
 3.  **Riemannian Weight Decay**:
     *   FAdam implements weight decay consistent with the Riemannian geometry by preconditioning the decay term:
+
         $$
         -\alpha \lambda \frac{\theta_t}{\sqrt{\hat{s}_t} + \varepsilon_t}
         $$
+
         This corresponds to the natural gradient of the L2 penalty $$\frac{\lambda}{2}\Vert\theta\Vert^2$$.
 
 4.  **Natural Gradient Clipping**:
     *   FAdam clips the preconditioned update vector:
+
         $$
         \Delta_t = \frac{\hat{m}_t}{\sqrt{\hat{s}_t} + \varepsilon_t}
         $$
+
         This ensures the Riemannian norm $$\Vert\Delta_t\Vert$$ remains bounded.
 
 ### FAdam Pseudocode (Exact Formulation)
