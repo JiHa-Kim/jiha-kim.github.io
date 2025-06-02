@@ -107,30 +107,6 @@ The noise inherent in SGD is a double-edged sword: it introduces challenges for 
 *   **B. Escape Dynamics from Poor Optima:**
     *   Deterministic methods like full Gradient Descent can get easily trapped in suboptimal local minima or slow down drastically at saddle points, especially in high-dimensional non-convex landscapes.
     *   The noise in SGD acts like a "kick," providing the necessary perturbation to escape these regions.
-    ```mermaid
-    graph TD
-        subgraph Loss Landscape
-            LM1[Local Minimum 1 (Poor)]
-            SP[Saddle Point]
-            LM2[Local Minimum 2 (Better)]
-        end
-
-        Start --> GD_Path
-        GD_Path -- Stuck --> LM1
-        GD_Path_SP -- Stalled --> SP
-
-        Start --> SGD_Path_Noise
-        SGD_Path_Noise -- Noise Kick --> Escapes_LM1(Escapes LM1)
-        Escapes_LM1 -- Exploration --> Traverses_SP(Traverses SP)
-        Traverses_SP -- Finds Better Basin --> LM2
-
-        style GD_Path fill:#f9d,stroke:#333,stroke-width:2px
-        style GD_Path_SP fill:#f9d,stroke:#333,stroke-width:2px
-        style SGD_Path_Noise fill:#9cf,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5
-    ```
-    <div style="text-align: center; font-size: 0.9em; margin-top: -10px; margin-bottom: 15px;">
-    Fig 1: Conceptual illustration of SGD (blue, dashed) escaping a local minimum and saddle point where GD (red, solid) might get stuck or stall.
-    </div>
 
 *   **C. Implicit Regularization and Finding Flatter Minima:**
     *   One of the most fascinating aspects of SGD is its tendency to converge to "flatter" (wider) minima in the loss landscape, as opposed to "sharper" (narrower) ones.
@@ -259,8 +235,6 @@ The effects of randomness in SGD touch upon many important concepts:
 | **Sensitivity to Hyperparams**   | (Indirect) Forces careful tuning of $$\eta, b$$                             | Requires careful tuning for optimal performance                                                          |
 
 ## Reflection
-
-> "Randomness in optimization is not mere computational compromise; it's an active agent, shaping the solution landscape. The 'hum' of stochasticity transforms a simple descent into an intricate dance of exploration and exploitation."
 
 The shift from deterministic to stochastic optimization, spearheaded by SGD, has been pivotal in the success of modern machine learning. What began as a necessity for scaling has revealed itself to be a source of unexpected power. The noise, far from being just an error term to be minimized, actively helps in navigating the treacherous terrains of high-dimensional, non-convex optimization problems that characterize deep learning. It steers algorithms towards solutions that are not only low in training error but also often more robust and generalizable.
 

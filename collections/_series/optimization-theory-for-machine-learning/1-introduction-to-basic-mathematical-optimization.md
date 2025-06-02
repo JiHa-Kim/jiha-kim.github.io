@@ -238,7 +238,7 @@ For linear regression, the parameters are $$m$$ and $$b$$. They can be grouped i
 
 ### The Goal: Typically Minimization
 
-In most supervised machine learning contexts, the primary goal is to **minimize** the objective function (usually a loss function). This corresponds to minimizing the discrepancy between the model's predictions and the actual target values. While some optimization problems involve **maximization** (e.g., maximizing the likelihood of data under a model, or maximizing a reward in reinforcement learning), any maximization problem can be directly converted into a minimization problem: maximizing $$f(x)$$ is equivalent to minimizing $$-f(x)$$. Consequently, the concepts and algorithms developed for minimization have broad applicability. The specific set of parameter values (e.g., $$m^*$$ and $$b^*$$ in our example) that yields the minimum possible value of the objective function is the **solution** to the optimization problem.
+In most supervised machine learning contexts, the primary goal is to **minimize** the objective function (usually a loss function). This corresponds to minimizing the discrepancy between the model's predictions and the actual target values. While some optimization problems involve **maximization** (e.g., maximizing the likelihood of data under a model, or maximizing a reward in reinforcement learning), any maximization problem can be directly converted into a minimization problem: maximizing $$f(x)$$ is equivalent to minimizing $$-f(x)$$. Consequently, the concepts and algorithms developed for minimization have broad applicability. The specific set of parameter values (e.g., $$m^\ast $$ and $$b^\ast $$ in our example) that yields the minimum possible value of the objective function is the **solution** to the optimization problem.
 
 ## Formalizing the Optimization Problem: A General Statement
 
@@ -299,7 +299,7 @@ Here, $$g_i(x) \le 0$$ represents $$k$$ inequality constraints, and $$h_j(x) = 0
 
 ## How Do We Actually Find the Minimum? (A Look Ahead)
 
-We've now defined an optimization problem: identify an objective function $$L(\theta)$$ and the parameters $$\theta$$ we can adjust, then find the specific parameter values $$\theta^*$$ that minimize $$L(\theta)$$. The natural and crucial next question is: *how* do we find these optimal values?
+We've now defined an optimization problem: identify an objective function $$L(\theta)$$ and the parameters $$\theta$$ we can adjust, then find the specific parameter values $$\theta^\ast $$ that minimize $$L(\theta)$$. The natural and crucial next question is: *how* do we find these optimal values?
 
 For certain problems with well-behaved objective functions, such as the SSE in our simple linear regression, calculus provides a direct method. A minimum of a differentiable function often occurs where its derivative is zero. For a function of multiple variables like $$L(m,b)$$, this means finding points where all partial derivatives are simultaneously zero:
 
