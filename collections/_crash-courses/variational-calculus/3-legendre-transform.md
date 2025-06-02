@@ -277,13 +277,13 @@ For a simple particle with $$L = \frac{1}{2}m\dot{x}^2 - V(x)$$, the momentum co
 
 ### The Legendre Transform
 
-The Legendre transform is a general mathematical procedure for changing the independent variable of a function. If we have a function $$f(x)$$, and we define a new variable $$p = \frac{df}{dx}$$, the Legendre transform $$f^*(p)$$ of $$f(x)$$ is defined as:
+The Legendre transform is a general mathematical procedure for changing the independent variable of a function. If we have a function $$f(x)$$, and we define a new variable $$p = \frac{df}{dx}$$, the Legendre transform $$f^\ast (p)$$ of $$f(x)$$ is defined as:
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition.** Legendre Transform
 </div>
-Given a function $$f(x)$$, its Legendre transform $$f^*(p)$$ with respect to $$x$$ is:
+Given a function $$f(x)$$, its Legendre transform $$f^\ast (p)$$ with respect to $$x$$ is:
 
 $$
 f^\ast(p) = px - f(x)
@@ -293,7 +293,7 @@ where $$x$$ on the right-hand side is implicitly expressed as a function of $$p$
 </blockquote>
 
 An important property of the Legendre transform is its involutivity (it's its own inverse, up to a sign if conventions differ) and the symmetric derivative relationship:
-If $$p = \frac{df}{dx}$$, then $$x = \frac{df^*}{dp}$$.
+If $$p = \frac{df}{dx}$$, then $$x = \frac{df^\ast }{dp}$$.
 
 ### The Hamiltonian
 
@@ -338,7 +338,7 @@ This connection is not accidental. The Legendre transform is a fundamental examp
 
 <blockquote class="prompt-tip" markdown="1">
 **Preview: Convex Conjugation**
-The Legendre transform $$f^*(p) = \sup_x (px - f(x))$$ (using supremum for generality) is known as the convex conjugate or Legendre-Fenchel transform. If $$f$$ is convex and closed, then $$f^{**}=f$$. This concept is pivotal in convex analysis and optimization theory, allowing us to switch between "primal" and "dual" representations of problems. We will explore this in much more detail in the crash course on Convex Analysis.
+The Legendre transform $$f^\ast (p) = \sup_x (px - f(x))$$ (using supremum for generality) is known as the convex conjugate or Legendre-Fenchel transform. If $$f$$ is convex and closed, then $$f^{\ast \ast }=f$$. This concept is pivotal in convex analysis and optimization theory, allowing us to switch between "primal" and "dual" representations of problems. We will explore this in much more detail in the crash course on Convex Analysis.
 </blockquote>
 
 ## 3. Symmetries and Conservation Laws (Noether's Theorem)

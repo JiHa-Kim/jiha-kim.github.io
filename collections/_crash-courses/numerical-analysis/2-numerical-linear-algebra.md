@@ -197,7 +197,7 @@ Ill-conditioning of matrices involved in optimization problems (often Hessians o
 </div>
 Consider minimizing a quadratic objective $$L(\theta) = \frac{1}{2}\theta^T H \theta - g^T \theta$$, where $$H$$ is the SPD Hessian matrix.
 <ul>
-    <li markdown="1">The gradient is $$\nabla L(\theta) = H\theta - g$$. The minimum is at $$\theta^* = H^{-1}g$$.</li>
+    <li markdown="1">The gradient is $$\nabla L(\theta) = H\theta - g$$. The minimum is at $$\theta^\ast  = H^{-1}g$$.</li>
     <li markdown="1">If $$H$$ is ill-conditioned ($$\kappa(H)$$ is large), the loss landscape exhibits long, narrow valleys or ravines.</li>
     <li markdown="1">**Gradient Descent (GD):** The update is $$\theta_{k+1} = \theta_k - \alpha \nabla L(\theta_k)$$. The error reduction per step is approximately governed by the factor $$ \left( \frac{\kappa(H)-1}{\kappa(H)+1} \right)^2 $$. If $$\kappa(H)$$ is large, this factor is very close to 1, leading to extremely slow convergence. GD will tend to oscillate across the narrow valley while making slow progress along its bottom.</li>
 </ul>
@@ -217,7 +217,7 @@ For small to moderately sized, dense systems, direct methods compute the exact s
 Computational cost is typically $$O(n^3)$$ for dense $$n \times n$$ matrices, which becomes prohibitive for large $$n$$ (e.g., millions of parameters in a neural network).
 
 ### 3.2. Iterative Methods
-For large-scale systems, especially if $$A$$ is sparse (many zero entries), iterative methods are preferred. They start with an initial guess $$x_0$$ and generate a sequence $$x_1, x_2, \dots$$ that converges to the true solution $$x^*$$.
+For large-scale systems, especially if $$A$$ is sparse (many zero entries), iterative methods are preferred. They start with an initial guess $$x_0$$ and generate a sequence $$x_1, x_2, \dots$$ that converges to the true solution $$x^\ast $$.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">

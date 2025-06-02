@@ -571,6 +571,7 @@ The unique ket $$\vert \nabla J(\vert x \rangle) \rangle \in H$$ identified via 
 $$
 \underbrace{\langle DJ(\vert x \rangle) \vert h \rangle}_{\text{Action of functional}} = \underbrace{\langle \nabla J(\vert x \rangle) \vert h \rangle}_{\text{Inner product in } H} \quad \text{for all } \vert h \rangle \in H
 $$
+
 </blockquote>
 
 <blockquote class="prompt-info" markdown="1">

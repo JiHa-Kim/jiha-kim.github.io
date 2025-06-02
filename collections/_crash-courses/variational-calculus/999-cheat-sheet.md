@@ -164,7 +164,7 @@ This post serves as a concise cheat sheet for the "Variational Calculus for Opti
 | :---------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------- |
 | **Functional**                                  | A mapping from a set of functions to the real numbers.                                                                          | $$J[y]$$ or $$J[y(x)]$$                                                      |
 | **Variation**                                   | A small, arbitrary perturbation to a function, $$\epsilon \eta(x)$$.                                                            | $$y(x) + \epsilon \eta(x)$$                                                  |
-| **First Variation**                             | The principal linear part of the change in a functional due to a variation. Necessary condition for extremum: $$\delta J = 0$$. | $$\delta J[y; \eta] = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right | _{\epsilon=0}$$ |
+| **First Variation**                             | The principal linear part of the change in a functional due to a variation. Necessary condition for extremum: $$\delta J = 0$$. | $$\delta J[y; \eta] = \left. \frac{d}{d\epsilon} J[y + \epsilon \eta] \right \vert  _{\epsilon=0}$$ |
 | **Admissible Variation**                        | A variation $$\eta(x)$$ that respects the boundary conditions of the problem (e.g., $$\eta(a)=\eta(b)=0$$ for fixed endpoints). |                                                                              |
 | **Fundamental Lemma of Calculus of Variations** | If $$\int_a^b g(x)\eta(x)dx = 0$$ for all admissible $$\eta(x)$$, then $$g(x)=0$$ for all $$x \in [a,b]$$.                      |                                                                              |
 
@@ -197,7 +197,7 @@ A prime application of variational calculus in physics.
 
 A mathematical tool for changing variables, crucial for moving from Lagrangian to Hamiltonian mechanics and foundational for convex duality.
 
--   **Purpose:** Transforms a function $$f(x)$$ into a new function $$f^*(p)$$ where the new variable $$p$$ is related to the derivative of $$f$$.
+-   **Purpose:** Transforms a function $$f(x)$$ into a new function $$f^\ast (p)$$ where the new variable $$p$$ is related to the derivative of $$f$$.
 -   **Definition:** Given $$f(x)$$ and defining $$p = \frac{df}{dx}(x)$$, the Legendre transform is:
 
     $$
@@ -206,8 +206,8 @@ A mathematical tool for changing variables, crucial for moving from Lagrangian t
 
     where $$x$$ on the right-hand side must be expressed as a function of $$p$$ by inverting $$p = f'(x)$$.
 -   **Invertibility Requirement:** For the inversion $$x(p)$$ to be well-defined, $$f'(x)$$ must be monotonic, which is guaranteed if $$f(x)$$ is strictly convex ($$f''(x) > 0$$) or strictly concave ($$f''(x) < 0$$). Standardly, strict convexity is assumed.
--   **Symmetric Derivative Property:** If $$p = f'(x)$$, then the original variable is recovered by $$x = (f^*)'(p)$$.
--   **Relationship between Hessians:** The Hessian of $$f^*(p)$$ with respect to $$p$$ is the inverse of the Hessian of $$f(x)$$ with respect to $$x$$:
+-   **Symmetric Derivative Property:** If $$p = f'(x)$$, then the original variable is recovered by $$x = (f^\ast )'(p)$$.
+-   **Relationship between Hessians:** The Hessian of $$f^\ast (p)$$ with respect to $$p$$ is the inverse of the Hessian of $$f(x)$$ with respect to $$x$$:
 
     $$
     \left( \frac{\partial^2 f^\ast}{\partial p^2} \right) = \left( \frac{\partial^2 f}{\partial x^2} \right)^{-1}
@@ -225,7 +225,7 @@ A mathematical tool for changing variables, crucial for moving from Lagrangian t
 Problems where we extremize a functional $$J[y]$$ subject to an integral constraint $$K[y] = L_0$$ (a constant).
 
 -   **Method of Lagrange Multipliers:**
-    1.  Form an auxiliary functional $$J^*[y]$$ using a Lagrange multiplier $$\lambda$$:
+    1.  Form an auxiliary functional $$J^\ast [y]$$ using a Lagrange multiplier $$\lambda$$:
 
         $$
         J^\ast[y] = J[y] + \lambda K[y] = \int_a^b (F(x, y, y') + \lambda G(x, y, y')) \, dx = \int_a^b H_\lambda(x, y, y', \lambda) \, dx

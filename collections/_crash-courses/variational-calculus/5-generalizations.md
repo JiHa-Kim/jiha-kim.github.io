@@ -324,7 +324,7 @@ J^\ast[y] = \int_a^b H(x, y, y', \lambda) \, dx
 $$
 
 where $$H = F + \lambda G$$ and $$\lambda$$ is a Lagrange multiplier (a constant to be determined).
-We then apply the Euler-Lagrange equation to this new functional $$J^*[y]$$ with respect to $$y(x)$$, treating $$\lambda$$ as a constant during this step:
+We then apply the Euler-Lagrange equation to this new functional $$J^\ast [y]$$ with respect to $$y(x)$$, treating $$\lambda$$ as a constant during this step:
 
 $$
 \frac{\partial H}{\partial y} - \frac{d}{dx} \left( \frac{\partial H}{\partial y'} \right) = 0

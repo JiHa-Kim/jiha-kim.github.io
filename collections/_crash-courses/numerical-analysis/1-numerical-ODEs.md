@@ -403,7 +403,7 @@ $$
 v_{k+1} = v_k - \frac{h\gamma}{m} v_k - \frac{h}{m} \nabla L(\theta_k) = (1 - \frac{h\gamma}{m}) v_k - \frac{h}{m} \nabla L(\theta_k) \quad (\ast\ast)
 $$
 
-If we identify $$v_{k+1}$$ from $$(**)$$ with the step in $$(*)$$, i.e., define a slightly different velocity term for Polyak's momentum:
+If we identify $$v_{k+1}$$ from $$(\ast \ast )$$ with the step in $$(\ast )$$, i.e., define a slightly different velocity term for Polyak's momentum:
 Let $$v_{k+1}^{\text{Polyak}} = \theta_{k+1} - \theta_k$$. Then Polyak's momentum update is often written as:
 
 $$

@@ -489,14 +489,14 @@ Eigenvalues and eigenvectors are crucial for understanding the dynamics of linea
 
 The **transpose** of a matrix $$A$$, denoted $$A^T$$, is obtained by swapping its rows and columns. While algebraically simple, its geometric meaning is subtle and deep, especially concerning the inner product.
 
-The concept of a transpose is intimately linked to the inner product. For a linear operator $$T: V \to W$$ between inner product spaces, its **adjoint operator** $$T^*: W \to V$$ is defined by the coordinate-free relation:
+The concept of a transpose is intimately linked to the inner product. For a linear operator $$T: V \to W$$ between inner product spaces, its **adjoint operator** $$T^\ast : W \to V$$ is defined by the coordinate-free relation:
 
 $$
 \langle T\vec{x}, \vec{y} \rangle_W = \langle \vec{x}, T^\ast\vec{y} \rangle_V
 $$
 
 for all $$\vec{x} \in V, \vec{y} \in W$$.
-The matrix transpose $$A^T$$ arises as the matrix representation of the adjoint operator $$T^*$$ *if the bases chosen for $$V$$ and $$W$$ are orthonormal*. This distinction is crucial: the adjoint is an abstract operator, while the transpose is its matrix in a specific (orthonormal) coordinate system.
+The matrix transpose $$A^T$$ arises as the matrix representation of the adjoint operator $$T^\ast $$ *if the bases chosen for $$V$$ and $$W$$ are orthonormal*. This distinction is crucial: the adjoint is an abstract operator, while the transpose is its matrix in a specific (orthonormal) coordinate system.
 
 For the standard dot product in $$\mathbb{R}^n$$ and $$\mathbb{R}^m$$ (which assumes the standard orthonormal basis), this relationship is embodied by the matrix transpose:
 <blockquote class="box-theorem" markdown="1">
@@ -524,7 +524,7 @@ The transpose is crucial for understanding the **Four Fundamental Subspaces** as
 3.  **Row Space (Row(A)):** Span of rows of $$A$$ (which is Col($$A^T$$)). Lives in $$\mathbb{R}^n$$.
 4.  **Left Null Space (Nul($$A^T$$)):** Set of $$\vec{y}$$ such that $$A^T\vec{y}=\vec{0}$$. Lives in $$\mathbb{R}^m$$.
 
-These four subspaces are intrinsic properties of the linear operator $$T$$ (and its adjoint $$T^*$$), not just its matrix representation $$A$$. For instance, Col(A) is the image of $$T$$, Nul(A) is the kernel of $$T$$, Row(A) is the image of $$T^*$$ (when identifying Row(A) with Col($$A^T$$)), and Nul($$A^T$$) is the kernel of $$T^*$$. The orthogonal complement relationships and the Rank-Nullity theorem are fundamental truths about linear operators.
+These four subspaces are intrinsic properties of the linear operator $$T$$ (and its adjoint $$T^\ast $$), not just its matrix representation $$A$$. For instance, Col(A) is the image of $$T$$, Nul(A) is the kernel of $$T$$, Row(A) is the image of $$T^\ast $$ (when identifying Row(A) with Col($$A^T$$)), and Nul($$A^T$$) is the kernel of $$T^\ast $$. The orthogonal complement relationships and the Rank-Nullity theorem are fundamental truths about linear operators.
 
 **Orthogonal Complements & Rank-Nullity Theorem:**
 *   Row(A) is the orthogonal complement of Nul(A) in $$\mathbb{R}^n$$. ($$\text{Row}(A) \perp \text{Nul}(A)$$)
@@ -575,7 +575,7 @@ Certain types of matrices correspond to transformations with distinct geometric 
     *   **Example:** Rotation matrix $$\begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}$$.
 
 *   **Symmetric Matrices ($$A = A^T$$):**
-    *   Symmetric matrices $$A=A^T$$ are the representation of **self-adjoint operators** ($$T=T^*$$ with respect to the standard dot product) in an orthonormal basis. The **Spectral Theorem** is a profound, coordinate-free statement about self-adjoint operators.
+    *   Symmetric matrices $$A=A^T$$ are the representation of **self-adjoint operators** ($$T=T^\ast $$ with respect to the standard dot product) in an orthonormal basis. The **Spectral Theorem** is a profound, coordinate-free statement about self-adjoint operators.
 
 *   **Positive Definite Matrices (Symmetric $$A$$ with $$\vec{x}^T A \vec{x} > 0$$ for all $$\vec{x} \neq \vec{0}$$):**
     *   **Geometry:** Symmetric matrices with all *positive* eigenvalues. Represents a transformation that purely stretches along orthogonal axes (no reflections or collapses to lower dimensions). The quadratic form $$\vec{x}^T A \vec{x}$$ defines an "elliptical bowl" shape (level sets are ellipsoids, as discussed in the Spectral Theorem's geometric interpretation). The property of an operator being positive definite (if it's self-adjoint and $$\langle T\vec{x}, \vec{x} \rangle > 0$$ for $$\vec{x} \neq \vec{0}$$) is also coordinate-invariant. Its matrix representation in an orthonormal basis will be a positive definite matrix.
@@ -842,10 +842,10 @@ Linear algebra can be generalized to **complex vector spaces** where vectors hav
     \langle \vec{z}, \vec{w} \rangle = \vec{z}^T \overline{\vec{w}} = \sum_{k=1}^n z_k \overline{w_k}
     $$
 
-    (Note: $$\overline{w_k}$$ is the complex conjugate of $$w_k$$. Another convention is $$\vec{z}^* \vec{w} = \sum \overline{z_k} w_k$$, where $$\vec{z}^*$$ is the conjugate transpose. The key is one vector is conjugated.)
+    (Note: $$\overline{w_k}$$ is the complex conjugate of $$w_k$$. Another convention is $$\vec{z}^\ast  \vec{w} = \sum \overline{z_k} w_k$$, where $$\vec{z}^\ast $$ is the conjugate transpose. The key is one vector is conjugated.)
     Then, squared norm is $$ \Vert \vec{z} \Vert ^2 = \langle \vec{z}, \vec{z} \rangle = \sum z_k \overline{z_k} = \sum \vert z_k \vert^2 \ge 0$$.
 *   **Orthogonality:** $$\vec{z}$$ and $$\vec{w}$$ are orthogonal if $$\langle \vec{z}, \vec{w} \rangle = 0$$.
-*   **Unitary Matrices:** A complex square matrix $$U$$ is unitary if $$U^*U = I$$, where $$U^* = \overline{U}^T$$ (conjugate transpose or Hermitian transpose). Unitary matrices preserve the Hermitian inner product and norms, acting as generalized rotations in $$\mathbb{C}^n$$. Orthogonal matrices are real unitary matrices.
+*   **Unitary Matrices:** A complex square matrix $$U$$ is unitary if $$U^\ast U = I$$, where $$U^\ast  = \overline{U}^T$$ (conjugate transpose or Hermitian transpose). Unitary matrices preserve the Hermitian inner product and norms, acting as generalized rotations in $$\mathbb{C}^n$$. Orthogonal matrices are real unitary matrices.
 
 While direct visualization of $$\mathbb{C}^n$$ for $$n>1$$ is challenging (as it would require $$2n$$ real dimensions), the algebraic structures and many geometric intuitions carry over or have analogous interpretations.
 

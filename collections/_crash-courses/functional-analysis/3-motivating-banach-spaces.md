@@ -1,5 +1,5 @@
 ---
-title: "Functional Analysis Crash Course Pt. 3: Beyond Angles – Motivating Banach Spaces"
+title: "Motivating Banach Spaces: Norms Measure Size"
 date: 2025-06-02 09:00 -0400 # Adjusted date
 course_index: 3
 mermaid: false
@@ -194,13 +194,17 @@ $$
 <summary markdown="1">**Geometric Intuition of the Parallelogram Law**</summary>
 Imagine a parallelogram with sides represented by kets $$\vert x \rangle$$ and $$\vert y \rangle$$. Then $$\vert x+y \rangle$$ and $$\vert x-y \rangle$$ represent the diagonals of this parallelogram. The parallelogram law states that the sum of the squares of the lengths of the diagonals is equal to the sum of the squares of the lengths of the four sides. This property is fundamental to Euclidean geometry, which is built upon the dot product (an inner product). If this geometric relationship doesn't hold for a given norm, that norm cannot be capturing the "Euclidean-like" geometry of an inner product.
 If a norm satisfies the parallelogram law, one can explicitly define the inner product that generates it via the **polarization identity**. For real spaces:
+
 $$
 \langle x \vert y \rangle = \frac{1}{4} (\Vert x+y \Vert^2 - \Vert x-y \Vert^2)
 $$
+
 For complex spaces:
+
 $$
 \langle x \vert y \rangle = \frac{1}{4} (\Vert x+y \Vert^2 - \Vert x-y \Vert^2 + i \Vert x+iy \Vert^2 - i \Vert x-iy \Vert^2)
 $$
+
 One then needs to verify that this definition indeed satisfies all inner product axioms.
 </details>
 
@@ -221,10 +225,10 @@ $$
 
 Consider the space $$\mathbb{R}^2$$ (a simple setting to check the law) with the $$L_1$$-norm (Manhattan or taxicab norm): $$\Vert \mathbf{x} \Vert_1 = \vert x_1 \vert + \vert x_2 \vert$$.
 Let $$\vert x \rangle = (1,0)$$ and $$\vert y \rangle = (0,1)$$.
-*   $$\Vert x \Vert_1 = |1| + |0| = 1$$
-*   $$\Vert y \Vert_1 = |0| + |1| = 1$$
-*   $$\vert x+y \rangle = (1,1) \implies \Vert x+y \Vert_1 = |1| + |1| = 2$$
-*   $$\vert x-y \rangle = (1,-1) \implies \Vert x-y \Vert_1 = |1| + |-1| = 2$$
+*   $$\Vert x \Vert_1 = \vert 1\vert  + \vert 0\vert  = 1$$
+*   $$\Vert y \Vert_1 = \vert 0\vert  + \vert 1\vert  = 1$$
+*   $$\vert x+y \rangle = (1,1) \implies \Vert x+y \Vert_1 = \vert 1\vert  + \vert 1\vert  = 2$$
+*   $$\vert x-y \rangle = (1,-1) \implies \Vert x-y \Vert_1 = \vert 1\vert  + \vert -1\vert  = 2$$
 
 Now, check the parallelogram law:
 *   LHS: $$\Vert x+y \Vert_1^2 + \Vert x-y \Vert_1^2 = 2^2 + 2^2 = 4 + 4 = 8$$
@@ -243,6 +247,7 @@ For a continuous function $$f$$ on a compact set $$K$$ (e.g., $$K=[a,b]$$), the 
 $$
 \Vert f \Vert_\infty = \max_{x \in K} \vert f(x) \vert
 $$
+
 (More generally, for measurable functions, it's the **essential supremum**, $$\text{ess sup}_x \vert f(x) \vert$$, which is the smallest $$M$$ such that $$\vert f(x) \vert \le M$$ almost everywhere).
 For sequences $$\mathbf{x} \in \ell_\infty$$: $$\Vert \mathbf{x} \Vert_\infty = \sup_i \vert x_i \vert$$.
 
@@ -304,9 +309,11 @@ All Hilbert spaces are automatically Banach spaces (since the norm induced by an
 Despite lacking the specific geometric tools of inner products (like a universal Riesz Representation Theorem identifying $$X$$ with $$X^\ast$$), Banach spaces possess a rich analytical structure that supports many powerful theorems.
 
 *   **Bounded Linear Operators:** The space $$\mathcal{B}(X,Y)$$ of all bounded (equivalently, continuous) linear operators from a Banach space $$X$$ to another Banach space $$Y$$ is itself a Banach space when equipped with the operator norm:
+
     $$
     \Vert T \Vert_{\mathcal{B}(X,Y)} = \sup_{\Vert x \Vert_X=1, x \in X} \Vert Tx \Vert_Y = \sup_{x \neq 0} \frac{\Vert Tx \Vert_Y}{\Vert x \Vert_X}
     $$
+
     This completeness is vital for studying families of operators, spectral theory, and solving operator equations.
 
 *   **Duality and the Hahn-Banach Theorem:**
@@ -328,13 +335,17 @@ Despite lacking the specific geometric tools of inner products (like a universal
         <blockquote class="box-example" markdown="1">
         <div class="title" markdown="1">**Application: Existence and Uniqueness of Solutions to ODEs**</div>
         Consider the initial value problem $$y'(t) = F(t, y(t))$$, $$y(t_0)=y_0$$. This can be rewritten as an integral equation:
+
         $$
         y(t) = y_0 + \int_{t_0}^t F(s, y(s)) ds
         $$
+
         Let $$X = C(I)$$ be the Banach space of continuous functions on some interval $$I$$ containing $$t_0$$, equipped with the supremum norm. Define an operator $$\mathcal{T}$$ on $$X$$ by:
+
         $$
         (\mathcal{T}y)(t) = y_0 + \int_{t_0}^t F(s, y(s)) ds
         $$
+
         A solution to the ODE is a fixed point of $$\mathcal{T}$$. If $$F$$ satisfies a Lipschitz condition with respect to $$y$$ (i.e., $$\vert F(s,y_1) - F(s,y_2) \vert \le L \vert y_1 - y_2 \vert$$), then for a sufficiently small interval $$I$$, $$\mathcal{T}$$ can be shown to be a contraction mapping on $$X$$. The Banach Fixed Point Theorem then guarantees the existence and uniqueness of a local solution. This is the core idea behind Picard's existence and uniqueness theorem.
         </blockquote>
     *   **Schauder Fixed Point Theorem:** This theorem generalizes the Brouwer fixed point theorem to infinite-dimensional Banach spaces. It states that if $$K$$ is a non-empty, closed, bounded, convex subset of a Banach space $$X$$, and $$T: K \to K$$ is a compact (completely continuous) operator, then $$T$$ has a fixed point. This is very powerful for proving the existence of solutions to non-linear differential and integral equations where the operator might not be a contraction.

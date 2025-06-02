@@ -1,5 +1,5 @@
 ---
-title: "Functional Analysis Crash Course Pt. 2: Adding Geometry – Motivating Hilbert Spaces"
+title: "Motivating Hilbert Spaces: Encoding Geometry"
 date: 2025-05-29 09:00 -0400 # Adjusted date
 course_index: 2
 mermaid: false # Can be set to true if diagrams are added later
@@ -259,6 +259,7 @@ Consider real-valued functions on the interval $$[-\pi, \pi]$$ with the inner pr
 Let $$\vert f_m \rangle$$ represent the function $$f_m(x) = \sin(mx)$$ and $$\vert f_n \rangle$$ represent $$f_n(x) = \sin(nx)$$, for positive integers $$m, n$$.
 
 Their inner product is:
+
 $$
 \langle f_m \vert f_n \rangle = \int_{-\pi}^{\pi} \sin(mx)\sin(nx)dx
 $$
@@ -312,9 +313,11 @@ $$
 $$
 
 **Proof Sketch:** Let $$\vert Q \rangle = \sum_{i=0}^n \langle \Lambda_i \vert P \rangle \vert \phi_i \rangle$$. Apply any functional $$\langle \Lambda_j \vert$$ to $$\vert Q \rangle$$:
+
 $$
 \langle \Lambda_j \vert Q \rangle = \sum_{i=0}^n \langle \Lambda_i \vert P \rangle \langle \Lambda_j \vert \phi_i \rangle = \sum_{i=0}^n \langle \Lambda_i \vert P \rangle \delta_{ji} = \langle \Lambda_j \vert P \rangle
 $$
+
 Since $$\langle \Lambda_j \vert (P-Q) \rangle = 0$$ for all $$j$$, and the $$\langle \Lambda_j \vert$$ form a basis for the dual space (or are sufficient to uniquely determine a polynomial of degree $$n$$), it implies $$\vert P \rangle - \vert Q \rangle = \vert \mathbf{0} \rangle$$, so $$\vert P \rangle = \vert Q \rangle$$.
 
 **Application to Interpolation:**
@@ -333,14 +336,18 @@ Let's see some examples:
    *   **Target Conditions:** We want $$\langle \Lambda_j \vert P \rangle = y_j$$, i.e., $$P(x_j) = y_j$$.
    *   **Biorthogonal Basis Functions (Lagrange Polynomials):** We need to find polynomials $$\vert L_i \rangle \equiv L_i(x)$$ in $$\mathcal{P}_n$$ such that $$\langle \Lambda_j \vert L_i \rangle = L_i(x_j) = \delta_{ji}$$.
        The Lagrange basis polynomial $$L_i(x)$$ is explicitly constructed as:
+
        $$
        L_i(x) = \prod_{k=0, k \neq i}^n \frac{x-x_k}{x_i-x_k}
        $$
+
        You can easily verify that $$L_i(x_i)=1$$ and $$L_i(x_j)=0$$ for $$j \neq i$$.
    *   **Interpolation Formula:** Using the general result with $$y_j$$ as the target values for $$\langle \Lambda_j \vert P \rangle$$, and $$\vert \phi_j \rangle = \vert L_j \rangle$$:
+
        $$
        P(x) = \sum_{j=0}^n y_j L_j(x)
        $$
+
        This is the familiar Lagrange interpolation formula, derived by finding the basis dual to point evaluation.
 
 **2. Taylor Series (Polynomial Approximation):**
@@ -348,11 +355,13 @@ Let's see some examples:
    *   **Target Conditions:** We want $$P^{(j)}(x_0) = f^{(j)}(x_0)$$ for some target function $$f$$. So, $$y_j = f^{(j)}(x_0)$$.
    *   **Biorthogonal Basis Functions:** We need polynomials $$\vert \phi_i \rangle \equiv \phi_i(x)$$ such that $$\langle \Lambda_j \vert \phi_i \rangle = \phi_i^{(j)}(x_0) = \delta_{ji}$$.
        The functions $$\phi_i(x) = \frac{(x-x_0)^i}{i!}$$ satisfy this:
-       $$ \phi_i^{(j)}(x_0) = \frac{d^j}{dx^j} \left( \frac{(x-x_0)^i}{i!} \right) \bigg|_{x=x_0} = \delta_{ji} $$
+       $$ \phi_i^{(j)}(x_0) = \frac{d^j}{dx^j} \left( \frac{(x-x_0)^i}{i!} \right) \bigg\vert _{x=x_0} = \delta_{ji} $$
    *   **Interpolation Formula (Taylor Polynomial):**
+
        $$
        P(x) = \sum_{j=0}^n f^{(j)}(x_0) \frac{(x-x_0)^j}{j!}
        $$
+
        This is the Taylor polynomial of degree $$n$$ for $$f$$ around $$x_0$$.
 
 **3. Newton's Divided Difference Formula:**
@@ -361,23 +370,31 @@ Let's see some examples:
 
 **4. Discrete Fourier Transform (Trigonometric Interpolation):**
    Suppose we have $$N$$ data points $$(t_k, y_k)$$ where $$t_k = k \frac{2\pi}{N}$$ for $$k=0, \dots, N-1$$ (equally spaced points on $$[0, 2\pi)$$). We want to interpolate these points with a trigonometric polynomial:
+
    $$
    P(t) = \sum_{m=0}^{N-1} C_m e^{imt}
    $$
+
    (Adjusting frequency scaling for simplicity here). The basis functions are $$\vert \phi_m \rangle \equiv \phi_m(t) = e^{imt}$$.
    The interpolation conditions are $$P(t_k) = y_k$$, so:
+
    $$
    \sum_{m=0}^{N-1} C_m e^{im t_k} = \sum_{m=0}^{N-1} C_m e^{imk \frac{2\pi}{N}} = y_k
    $$
+
    Let $$W_N = e^{i 2\pi/N}$$. Then $$\sum_{m=0}^{N-1} C_m (W_N^{mk}) = y_k$$. This is an inverse DFT form.
    The vectors $$(\mathbf{v}_m)_k = W_N^{mk}$$ (columns of the DFT matrix) are orthogonal in $$\mathbb{C}^N$$:
+
    $$
    \sum_{k=0}^{N-1} \overline{(W_N^{m_1 k})} (W_N^{m_2 k}) = \sum_{k=0}^{N-1} W_N^{(m_2-m_1)k} = N \delta_{m_1 m_2}
    $$
+
    This orthogonality of the *basis functions evaluated at the sample points* allows us to find the coefficients $$C_m$$ easily using the forward DFT:
+
    $$
    C_m = \frac{1}{N} \sum_{k=0}^{N-1} y_k e^{-im t_k} = \frac{1}{N} \sum_{k=0}^{N-1} y_k W_N^{-mk}
    $$
+
    Here, the "duality" arises from the orthogonality of the columns of the DFT matrix. The rows of the inverse DFT matrix (which is proportional to the conjugate transpose of the DFT matrix) act as the dual basis vectors in the data space $$\mathbb{C}^N$$.
 
 **Important Note on Convergence:**
@@ -416,9 +433,11 @@ Let's define a sequence of functions $$\vert f_n \rangle$$ by $$f_n(x) = \tanh(n
 *   One can show that this sequence $$(\vert f_n \rangle)$$ is a Cauchy sequence with respect to the $$L_2$$-norm. Intuitively, the functions are "settling down."
 
 However, as $$n \to \infty$$, $$f_n(x)$$ converges pointwise to the sign function:
+
 $$
 f(x) = \lim_{n\to\infty} \tanh(nx) = \begin{cases} -1 & \text{if } x < 0 \\ 0 & \text{if } x = 0 \\ 1 & \text{if } x > 0 \end{cases}
 $$
+
 This limit function $$f(x)$$ is indeed in $$L_2([-1,1])$$ (it's square-integrable). However, $$f(x)$$ is *not continuous* at $$x=0$$. Therefore, the limit of this Cauchy sequence of continuous functions is not itself a continuous function; it doesn't belong to our original space $$C([-1,1])$$.
 
 This means $$C([-1,1])$$ with the $$L_2$$-norm is *not complete*. It has "holes" where Cauchy sequences might converge to.
@@ -454,14 +473,19 @@ The theory of Fourier series and Fourier transforms finds its natural home in Hi
         $$
         \vert f \rangle = \sum_{k=-\infty}^{\infty} c_k \vert \phi_k \rangle \quad \text{or} \quad f(x) = \sum_{k=-\infty}^{\infty} c_k \frac{e^{ikx}}{\sqrt{2\pi}}
         $$
+
         where the Fourier coefficients $$c_k$$ are found by projection:
+
         $$
         c_k = \langle \phi_k \vert f \rangle = \frac{1}{\sqrt{2\pi}}\int_{-\pi}^{\pi} e^{-ikx} f(x) dx
         $$
+
 *   **Parseval's Identity:** A direct consequence is Parseval's identity, which is an infinite-dimensional version of the Pythagorean theorem:
+
     $$
     \Vert f \Vert^2 = \sum_{k=-\infty}^{\infty} \vert c_k \vert^2
     $$
+
     This means the "total energy" of the function is the sum of the energies in its orthogonal frequency components.
 *   **Fourier Transform:** Similarly, the **Fourier Transform** acts as a unitary operator on the Hilbert space $$L_2(\mathbb{R})$$ (the space of square-integrable functions on the entire real line). This means it preserves inner products and, therefore, norms (lengths/energies). Functions like Gaussians $$e^{-ax^2}$$ are special because they are eigenfunctions of the Fourier transform (up to scaling and argument change).
 
@@ -505,3 +529,7 @@ In this post, we've journeyed from the basic idea of functions as vectors to the
 However, the world of infinite dimensions brings challenges. The notion of **completeness** became paramount, ensuring that our analytical tools, particularly those involving limits and convergence, are well-behaved. A space might have all the nice geometric properties of an inner product but still be "leaky" if Cauchy sequences don't find their limits within it.
 
 Hilbert spaces elegantly resolve this by mandating completeness. They provide a stable and robust environment where geometric intuition and powerful analytical machinery can work hand-in-hand. Understanding Hilbert spaces is not just an academic exercise; it opens the door to comprehending Fourier analysis, quantum mechanics, advanced signal processing, and the theoretical foundations of many optimization algorithms and machine learning models, especially those operating in function spaces or dealing with infinite-dimensional parameter vectors. The journey emphasizes that the right mathematical abstraction can turn complex problems into more manageable, and often more beautiful, ones.
+
+## References
+
+Kowalski, E. (2013). Spectral theory in Hilbert spaces (ETH Z¨urich, FS 09). https://people.math.ethz.ch/~kowalski/spectral-theory.pdf
