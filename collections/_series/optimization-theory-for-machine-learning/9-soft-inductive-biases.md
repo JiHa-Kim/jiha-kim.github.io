@@ -503,7 +503,7 @@ Soft inductive biases, whether explicitly introduced via regularization or impli
 | Regularizer        | Mathematical Form                                                     | Primary Effect            | Optimization Note                      | Probabilistic Prior                   |
 | ------------------ | --------------------------------------------------------------------- | ------------------------- | -------------------------------------- | ------------------------------------- |
 | **L2 (Ridge)**     | $$\frac{\lambda}{2} \Vert w \Vert_2^2$$                               | Small, non-sparse weights | Gradient: $$\lambda w$$ (Weight Decay) | Gaussian $$\mathcal{N}(0, \tau^2 I)$$ |
-| **L1 (LASSO)**     | $$\lambda \Vert w \Vert_1$$                                           | Sparse weights            | Subgradient; Proximal (Soft-thresh.)   | Laplace$$(0, b)$$                       |
+| **L1 (LASSO)**     | $$\lambda \Vert w \Vert_1$$                                           | Sparse weights            | Subgradient; Proximal (Soft-thresh.)   | Laplace$$(0, b)$$                     |
 | **Elastic Net**    | $$\lambda_1 \Vert w \Vert_1 + \frac{\lambda_2}{2} \Vert w \Vert_2^2$$ | Sparse & grouped          | Combines L1/L2 techniques              | Mix of Laplace/Gaussian               |
 | **Dropout**        | Randomly set activations to 0 (prob $$p$$)                            | Robust features           | Scale at train/test                    | Implicit/Ensemble                     |
 | **Early Stopping** | Stop training when val. loss worsens                                  | Simpler model             | Monitor validation set                 | Implicit (like L2)                    |
@@ -511,3 +511,7 @@ Soft inductive biases, whether explicitly introduced via regularization or impli
 ## Reflection
 
 The study of soft inductive biases moves machine learning from pure function fitting towards a more nuanced process of guided discovery. These biases are not merely "tricks" to improve performance but reflect fundamental assumptions about the nature of the problems we are trying to solve and the characteristics of desirable solutions. As models like large language models and complex vision systems become even more overparameterized, understanding and intelligently designing both explicit and implicit biases will be paramount for continued progress, ensuring that our powerful algorithms learn not just to memorize, but to truly generalize and reason. The path forward involves not only leveraging existing biases but potentially learning new, problem-specific biases dynamically.
+
+## Further Reading
+
+Andrew Gordon Wilson. (2025). Deep Learning is Not So Mysterious or Different. [arXiv](https://arxiv.org/abs/2503.02113)
