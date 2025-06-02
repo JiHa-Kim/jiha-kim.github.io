@@ -198,7 +198,7 @@ Understanding where and how to use these methods is key.
 *   **Mermaid Diagram (A Taxonomy of Preconditioners):**
     ```mermaid
     flowchart TD
-        A[Preconditioners] --> B["Diagonal / Element-wise<br>(e.g., Adagrad, Adam, RMSProp, FAdam)"]
+        A["Preconditioners"] --> B["Diagonal / Element-wise<br>(e.g., Adagrad, Adam, RMSProp, FAdam)"]
         A --> C["Full-Matrix (Exact or Approx.)<br>(e.g., Newton, BFGS, L-BFGS, Online Newton Step)"]
         A --> D["Matrix-Free (Implicit Full/Structured)<br>(e.g., Cutkosky-Sarlos '19, Conjugate Gradient based)"]
         A --> E["Structured / Tensor-Factored<br>(e.g., Shampoo, K-FAC)"]

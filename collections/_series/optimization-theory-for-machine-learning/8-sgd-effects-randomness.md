@@ -203,15 +203,16 @@ Randomness in training isn't monolithic; it arises from various sources, each po
 ```mermaid
 graph LR
     A[Sources of Stochasticity] --> B[Mini-batch Sampling]
-    A --> C[Intrinsic Data/Label Noise]
-    A --> D[Explicit Data Augmentation]
-    A --> E[Model Stochasticity (e.g., Dropout)]
+    A --> C["Intrinsic Data/Label Noise"]
+    A --> D["Explicit Data Augmentation"]
+    A --> E["Model Stochasticity (e.g., Dropout)"]
 
-    B --> F[Primary SGD Noise: Implicit Regularization, Escape Dynamics]
-    C --> G[Robustness to Data Imperfections]
-    D --> H[Learned Invariances]
-    E --> I[Ensemble Effect, Feature Decorrelation]
+    B --> F["Primary SGD Noise: Implicit Regularization, Escape Dynamics"]
+    C --> G["Robustness to Data Imperfections"]
+    D --> H["Learned Invariances"]
+    E --> I["Ensemble Effect, Feature Decorrelation"]
 ```
+
 While all these contribute, this post primarily focuses on the effects of mini-batch sampling noise inherent to SGD.
 
 ---
@@ -227,12 +228,12 @@ The mini-batch size $$b$$ is a primary lever for controlling the noise level and
 graph LR
     subgraph Noise Level Control via Minibatch Size
         direction LR
-        b[Batch Size $$b$$] -->|Small (e.g., 32, 64)| HighNoise[High Noise / High $$T_{eff}$$]
-        b -->|Large (e.g., 512, 1024+)| LowNoise[Low Noise / Low $$T_{eff}$$]
+        b["Batch Size $$b$$"] -->|"Small (e.g., 32, 64)"| HighNoise["High Noise / High $$T_{eff}$$"]
+        b -->|"Large (e.g., 512, 1024+)"| LowNoise["Low Noise / Low $$T_{eff}$$"]
     end
 
-    HighNoise --> FlatMinima[Favors Exploration, Flatter Minima, Potential for better Generalization]
-    LowNoise --> SharpMinima[Favors Exploitation, Can converge to Sharper Minima, Faster local convergence]
+    HighNoise --> FlatMinima["Favors Exploration, Flatter Minima, Potential for better Generalization"]
+    LowNoise --> SharpMinima["Favors Exploitation, Can converge to Sharper Minima, Faster local convergence"]
 ```
 
 *   **Practical Trade-offs with Minibatch Size $$b$$:**

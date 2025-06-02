@@ -162,14 +162,15 @@ In information geometry, a family of probability distributions parameterized by 
 The **Fisher Information Matrix** $$F(\theta)$$ at a point $$\theta$$ on the statistical manifold is defined as the expectation of the outer product of the score function (gradient of the log-likelihood with respect to parameters):
 
 $$
-F(\theta) \;=\; \mathbb{E}_{x\sim p(\cdot;\theta)}\Big[\,\nabla_\theta \log p(x;\theta)\,\nabla_\theta \log p(x;\theta)^\top\Big]
+F(\theta) = \mathbb{E}_{x\sim p(\cdot;\theta)}\Big[\,\nabla_\theta \log p(x;\theta)\,\nabla_\theta \log p(x;\theta)^\top\Big]
 $$
 
 Under mild regularity conditions, $$F(\theta)$$ is a positive semi-definite matrix. It can also be expressed as the negative expectation of the Hessian of the log-likelihood:
 
 $$
-F(\theta) \;=\; -\mathbb{E}_{x\sim p(\cdot;\theta)}\left[ \frac{\partial^2}{\partial \theta_i \partial \theta_j} \log p(x;\theta) \right]
+F(\theta) = -\mathbb{E}_{x\sim p(\cdot;\theta)}\left[ \frac{\partial^2}{\partial \theta_i \partial \theta_j} \log p(x;\theta) \right]
 $$
+
 </blockquote>
 
 The FIM plays a crucial role as it defines a **Riemannian metric** on the parameter space. This metric measures the "distance" between distributions in terms of their distinguishability based on observed data.
@@ -185,14 +186,15 @@ Standard gradient descent operates in the Euclidean space of parameters. However
 The **natural gradient** of a loss function $$L(\theta)$$ is given by:
 
 $$
-\nabla^{\text{(nat)}} L(\theta) \;=\; F(\theta)^{-1} \,\nabla L(\theta)
+\nabla^{\text{(nat)}} L(\theta) = F(\theta)^{-1} \,\nabla L(\theta)
 $$
+
 </blockquote>
 
 The NGD update rule, with a learning rate $$\eta$$, is:
 
 $$
-\theta_{t+1} \;=\; \theta_t \;-\;\eta\,F(\theta_t)^{-1}\,\nabla L(\theta_t)
+\theta_{t+1} = \theta_t -\eta\,F(\theta_t)^{-1}\,\nabla L(\theta_t)
 $$
 
 By preconditioning the standard gradient $$\nabla L(\theta)$$ with the inverse FIM $$F(\theta)^{-1}$$, NGD adapts the step size for each parameter direction according to the local curvature of the probability manifold. This often leads to faster and more stable convergence, especially in complex, high-dimensional landscapes.
@@ -217,12 +219,12 @@ The diagonal FIM retains only the variances of each coordinate's score:
 
 $$
 F_\text{diag}(\theta) 
-\;=\; \diag\bigl(F(\theta)\bigr)
-\;=\; \mathbb{E}_{x\sim p(\cdot;\theta)}
+= \mathrm{diag}\bigl(F(\theta)\bigr)
+= \mathbb{E}_{x\sim p(\cdot;\theta)}
 \bigl[\nabla_\theta \log p(x;\theta)\odot\nabla_\theta \log p(x;\theta)\bigr]
 $$
 
-where $$\odot$$ denotes the element-wise (Hadamard) product, and $$\diag(A)$$ extracts the diagonal of matrix $$A$$ as a vector (or forms a diagonal matrix from a vector).
+where $$\odot$$ denotes the element-wise (Hadamard) product, and $$\mathrm{diag}(A)$$ extracts the diagonal of matrix $$A$$ as a vector (or forms a diagonal matrix from a vector).
 </blockquote>
 
 Using $$F_\text{diag}(\theta)$$ significantly reduces computational cost as its inverse is simply the element-wise reciprocal of its diagonal entries.
@@ -233,13 +235,13 @@ The true FIM involves an expectation over the entire data distribution $$p(x;\th
 
 $$
 \widehat{F}_\text{emp}(\theta)
-\;=\; \frac{1}{B}\sum_{i=1}^B \bigl(\nabla_\theta \log p(x_i;\theta)\bigr)\,\bigl(\nabla_\theta \log p(x_i;\theta)\bigr)^\top
+= \frac{1}{B}\sum_{i=1}^B \bigl(\nabla_\theta \log p(x_i;\theta)\bigr)\,\bigl(\nabla_\theta \log p(x_i;\theta)\bigr)^\top
 $$
 
 Combining these two approximations gives the **diagonal empirical Fisher**:
 
 $$
-\widehat{F}_\text{diag‐emp}(\theta) \;=\; \frac{1}{B}\sum_{i=1}^B \bigl(\nabla_\theta \log p(x_i;\theta)\odot\nabla_\theta \log p(x_i;\theta)\bigr)
+\widehat{F}_\text{diag‐emp}(\theta) = \frac{1}{B}\sum_{i=1}^B \bigl(\nabla_\theta \log p(x_i;\theta)\odot\nabla_\theta \log p(x_i;\theta)\bigr)
 $$
 
 This is a vector representing the diagonal of the FIM, estimated from a minibatch.
@@ -254,53 +256,71 @@ Now, let's connect these concepts to the Adam optimizer.
 Adam (Kingma & Ba, 2015) maintains exponential moving averages (EMAs) of the first moment (mean) and second moment (uncentered variance) of the gradients $$g_t = \nabla L(\theta_t)$$:
 
 *   First moment (biased estimate of mean):
+
     $$
-    m_t \;=\; \beta_1\,m_{t-1} \;+\;(1-\beta_1)\,g_t
+    m_t = \beta_1\,m_{t-1} +(1-\beta_1)\,g_t
     $$
+
     Bias-corrected estimate:
+
     $$
-    \hat m_t \;=\; \frac{m_t}{1-\beta_1^t}
+    \hat m_t = \frac{m_t}{1-\beta_1^t}
     $$
 
 *   Second moment (biased estimate of squared gradients):
+
     $$
-    v_t \;=\; \beta_2\,v_{t-1} \;+\;(1-\beta_2)\,(g_t \odot g_t)
+    v_t = \beta_2\,v_{t-1} +(1-\beta_2)\,(g_t \odot g_t)
     $$
+
     Bias-corrected estimate:
+
     $$
-    \hat v_t \;=\; \frac{v_t}{1-\beta_2^t}
+    \hat v_t = \frac{v_t}{1-\beta_2^t}
     $$
 
 The parameter update is then:
+
 $$
 \theta_{t+1}
-\;=\;\theta_t \;-\;\alpha \,\frac{\hat m_t}{\sqrt{\hat v_t} + \varepsilon}
+=\theta_t -\alpha \,\frac{\hat m_t}{\sqrt{\hat v_t} + \varepsilon}
 $$
+
 where $$\alpha$$ is the learning rate and $$\varepsilon > 0$$ is a small constant for numerical stability. The original Adam paper already noted that $$v_t$$ acts as a diagonal preconditioner.
 
 ### 3.2. Interpreting $$v_t$$ as a Diagonal Empirical Fisher
 
 The core insight is that the term $$g_t \odot g_t$$ in the $$v_t$$ update is an estimate of the diagonal of the empirical Fisher information.
 Specifically, if the loss function $$L(\theta)$$ is the negative log-likelihood for a single sample $$x_t$$ (or an average over a minibatch), i.e., $$L(\theta_t) = -\log p(x_t;\theta_t)$$, then the gradient $$g_t$$ is:
+
 $$
-g_t \;=\;\nabla_\theta L(\theta_t)\;=\;-\nabla_\theta\log p(x_t;\theta_t)
+g_t =\nabla_\theta L(\theta_t)=-\nabla_\theta\log p(x_t;\theta_t)
 $$
+
 In this case, the element-wise square of the gradient becomes:
+
 $$
-g_t \odot g_t \;=\;\bigl(-\nabla_\theta\log p(x_t;\theta_t)\bigr)\odot\bigl(-\nabla_\theta\log p(x_t;\theta_t)\bigr) \;=\; \bigl[\nabla_\theta\log p(x_t;\theta_t)\bigr]\odot\bigl[\nabla_\theta\log p(x_t;\theta_t)\bigr]
+g_t \odot g_t =\bigl(-\nabla_\theta\log p(x_t;\theta_t)\bigr)\odot\bigl(-\nabla_\theta\log p(x_t;\theta_t)\bigr) = \bigl[\nabla_\theta\log p(x_t;\theta_t)\bigr]\odot\bigl[\nabla_\theta\log p(x_t;\theta_t)\bigr]
 $$
+
 This term $$g_t \odot g_t$$ is precisely the (unbatched) diagonal empirical Fisher for the sample $$x_t$$. The $$v_t$$ term in Adam, being an EMA of $$g_t \odot g_t$$, can thus be interpreted as a running estimate of the diagonal of the FIM:
+
 $$
 \mathbb{E}[g_t \odot g_t] = F_\text{diag}(\theta_t)
 $$
+
 And so,
+
 $$
 \hat{v}_t \approx F_\text{diag}(\theta_t)
 $$
+
 Therefore, **Adam’s update step $$\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$ closely resembles a natural gradient update using a diagonal empirical FIM approximation:**
+
 $$
 \theta_{t+1} \approx \theta_t - \alpha \left[ F_\text{diag}(\theta_t) \right]^{-1/2} \hat{m}_t
 $$
+
 This is because if $$F_\text{diag}(\theta_t)$$ is a diagonal matrix with entries $$\hat{v}_t$$, then $$[F_\text{diag}(\theta_t)]^{-1/2}$$ would be a diagonal matrix with entries $$1/\sqrt{\hat{v}_t}$$. The term $$\hat{m}_t$$ serves as the estimate of the (Euclidean) gradient.
 
 <blockquote class="box-info" markdown="1">
@@ -328,70 +348,82 @@ Based on the information geometry perspective, Hwang (2024) identifies these iss
 The main corrections in FAdam are:
 
 1.  **Enhanced Bias Corrections & Momentum Averaging**:
-    *   FAdam revisits how the EMAs $$m_t$$ and $$v_t$$ (denoted $$s_t$$ for squared gradients in FAdam) are computed and bias-corrected to ensure that the preconditioning term $$\sqrt{\hat{s}_t}$$ more faithfully represents the scale of the diagonal Fisher. The paper details specific adjustments to how $$\beta_1$$ and $$\beta_2$$ are handled, aiming for a more accurate natural gradient accumulation.
+    *   FAdam uses distinct bias correction strategies for the first and second moments:
+        $$
+        \hat{m}_t = \frac{m_t}{1 - \beta_1^t} \quad \text{and} \quad \hat{s}_t = \frac{s_t}{1 - \beta_2^t}
+        $$
+        The key difference is that FAdam applies momentum averaging **after** preconditioning rather than before, which better preserves the natural gradient direction.
 
 2.  **Adaptive $$\varepsilon_t$$**:
-    *   Instead of a fixed small $$\varepsilon$$, FAdam proposes an adaptive $$\varepsilon_t$$. This can be a schedule (e.g., decaying over time) so that the update more closely resembles a pure natural gradient step in later iterations when $$s_t$$ might be more stable. A suggested schedule is $$\varepsilon_t = \varepsilon_0 / (1 + \lambda_{\varepsilon} t)$$.
+    *   Instead of a fixed small $$\varepsilon$$, FAdam proposes an adaptive $$\varepsilon_t$$ with the schedule:
+        $$
+        \varepsilon_t = \frac{\varepsilon_0}{1 + \lambda_{\varepsilon} t}
+        $$
+        This allows the update to more closely resemble a pure natural gradient step in later iterations.
 
 3.  **Riemannian Weight Decay**:
-    *   Standard L2 weight decay (or AdamW's decoupled weight decay) adds a term $$-\alpha \lambda \theta_t$$ to the update. From an InfoGeo perspective, true weight decay (penalizing $$(\lambda/2) ||\theta||^2$$) should occur along the Riemannian manifold. This means the decay term should also be preconditioned by the FIM. FAdam implements this as:
+    *   FAdam implements weight decay consistent with the Riemannian geometry by preconditioning the decay term:
         $$
-        -\alpha \lambda \diag(\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t
+        -\alpha \lambda \frac{\theta_t}{\sqrt{\hat{s}_t} + \varepsilon_t}
         $$
-        (Note: The paper's exact formulation for Riemannian weight decay is effectively preconditioning the gradient of the L2 penalty, $$ \lambda \theta_t $$, by the inverse of the (diagonal) FIM, which means dividing by $$ \hat{s}_t + \varepsilon_t^2 $$, or multiplying by $$ (\sqrt{\hat{s}_t} + \varepsilon_t)^{-1} $$ if the weight decay is applied to the preconditioned gradient.) The pseudocode in Hwang (2024) suggests a term like $$-\alpha\lambda \text{diag}(\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t$$ for the update part scaled by $$\alpha$$, effectively making the weight decay term itself adaptive. More precisely, if the penalty is $$\frac{\lambda}{2} \Vert \theta \Vert^2_2$$, its natural gradient is $$\lambda F^{-1} \theta$$. For diagonal FIM approximated by $$\hat{s}_t$$, this would be $$\lambda \frac{\theta_t}{\hat{s}_t}$$. The FAdam paper's pseudocode presents a specific form. Let's use the one from the sketch:
-        $$
-        -\alpha \lambda (\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t
-        $$
-        This suggests a decay proportional to the parameter magnitude and its adaptive scale.
-        *Correction based on common NGD weight decay*: A more standard Riemannian weight decay for $$L_2$$ norm would be to scale $$\theta_t$$ by the inverse of the diagonal Fisher elements. The FAdam paper's formulation is nuanced, so referring to its precise equation is key. The provided sketch implies a scaling. The final term in FAdam's update is shown as $$-\alpha\lambda \text{diag}(\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t$$. Let's adhere to the provided pseudocode structure.
+        This corresponds to the natural gradient of the L2 penalty $$\frac{\lambda}{2}\Vert\theta\Vert^2$$.
 
 4.  **Natural Gradient Clipping**:
-    *   Instead of clipping the raw gradient $$g_t$$, FAdam advocates for clipping the *natural gradient* itself, i.e., the preconditioned update:
+    *   FAdam clips the preconditioned update vector:
         $$
         \Delta_t = \frac{\hat{m}_t}{\sqrt{\hat{s}_t} + \varepsilon_t}
         $$
-        This ensures that the step size along the manifold, measured by the Riemannian metric, is bounded. The clipping is done if $$||\Delta_t|| > \kappa$$ for some threshold $$\kappa$$.
+        This ensures the Riemannian norm $$\Vert\Delta_t\Vert$$ remains bounded.
 
-### FAdam Pseudocode (Schematic)
+### FAdam Pseudocode (Exact Formulation)
 
-The FAdam algorithm, incorporating these changes, can be summarized as (based on Hwang, 2024 and the provided sketch):
+The FAdam algorithm (Hwang, 2024) is:
 
-Let $$s_t$$ be the EMA of squared gradients (equivalent to $$v_t$$ in Adam).
-$$
-g_t = \nabla_\theta L(\theta_t)
-$$
-$$
-m_t = \beta_1\,m_{t-1} + (1-\beta_1)\,g_t, \quad \hat m_t = \frac{m_t}{\text{enhanced_bias_correction}_1(t)}
-$$
-$$
-s_t = \beta_2\,s_{t-1} + (1-\beta_2)\,(g_t \odot g_t), \quad \hat s_t = \frac{s_t}{\text{enhanced_bias_correction}_2(t)}
-$$
-$$
-\varepsilon_t = \text{adaptive_schedule}(\varepsilon_0, \lambda_\varepsilon, t)
-$$
-$$
-\Delta_t = \frac{\hat m_t}{\sqrt{\hat s_t} + \varepsilon_t}
-$$
-If $$||\Delta_t||_2 > \kappa$$ (or another suitable norm):
-$$
-\Delta_t \leftarrow \kappa \frac{\Delta_t}{||\Delta_t||_2} \quad \text{(Clip in Riemannian-approximated norm)}
-$$
-$$
-\theta_{t+1} = \theta_t - \alpha\,\Delta_t - \alpha\,\lambda_{\text{WD}} \text{diag}(\sqrt{\hat{s}_t} + \varepsilon_t) \odot \theta_t \quad \text{(Riemannian weight decay)}
-$$
-*(Note: The exact enhanced bias corrections and the precise form of Riemannian weight decay should be referred to directly from Hwang (2024) for implementation.)*
+**Initialize**: $$\theta_0$$, $$m_0 = 0$$, $$s_0 = 0$$  
+**Set**: $$\alpha$$ (learning rate), $$\beta_1, \beta_2$$ (momentum), $$\lambda_{\text{WD}}$$ (weight decay), $$\varepsilon_0, \lambda_\varepsilon$$, $$\kappa$$ (clipping threshold)
+
+**For** $$t = 1$$ **to** $$T$$:  
+&nbsp;&nbsp; $$g_t = \nabla_\theta L(\theta_t)$$  
+&nbsp;&nbsp; $$m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t$$  
+&nbsp;&nbsp; $$s_t = \beta_2 s_{t-1} + (1 - \beta_2) (g_t \odot g_t)$$  
+&nbsp;&nbsp; $$\hat{m}_t = m_t / (1 - \beta_1^t)$$  
+&nbsp;&nbsp; $$\hat{s}_t = s_t / (1 - \beta_2^t)$$  
+&nbsp;&nbsp; $$\varepsilon_t = \varepsilon_0 / (1 + \lambda_\varepsilon t)$$  
+&nbsp;&nbsp; $$\Delta_t = \hat{m}_t / (\sqrt{\hat{s}_t} + \varepsilon_t)$$  
+&nbsp;&nbsp; **If** $$\Vert \Delta_t \Vert_2 > \kappa$$:  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $$\Delta_t \leftarrow \kappa \Delta_t / \Vert \Delta_t \Vert_2$$  
+&nbsp;&nbsp; $$\theta_{t+1} = \theta_t - \alpha \Delta_t - \alpha \lambda_{\text{WD}} \frac{\theta_t}{\sqrt{\hat{s}_t} + \varepsilon_t}$$  
+
+*(Note: Compared to Adam, FAdam modifies the weight decay application and uses distinct momentum handling)*
 
 The key components of the FAdam workflow can be visualized as:
 ```mermaid
-graph LR
-    A[Gradient $$g_t$$] --> B{Compute EMA of $$g_t$$ ($$m_t$$) and $$g_t \odot g_t$$ ($$s_t$$)}
-    B -- Enhanced Bias Correction --> C{Corrected $$\hat{m}_t, \hat{s}_t$$}
-    C --> D{Compute Adaptive $$\varepsilon_t$$}
-    D --> E{Calculate Preconditioned Update $$\Delta_t = \frac{\hat{m}_t}{\sqrt{\hat{s}_t} + \varepsilon_t}$$}
-    E --> F{Clip $$\Delta_t$$ if $$||\Delta_t|| > \kappa$$}
-    F --> G{Apply Update: $$\theta_{t+1} = \theta_t - \alpha \Delta_t$$}
-    G --> H{Apply Riemannian Weight Decay}
-    H --> I[New Parameters $$\theta_{t+1}$$]
+graph TB
+  subgraph Initial
+    A["Gradient $$g_t$$"]
+  end
+  
+  subgraph EMA
+    B["$$m_t = \beta_1 m_{t-1} + (1-\beta_1)\,g_t$$<br>$$s_t = \beta_2 s_{t-1} + (1-\beta_2)\,(g_t \odot g_t)$$"]
+  end
+  
+  subgraph Correction
+    C["Bias Correct: $$\hat m_t, \hat s_t$$"]
+    D["Adaptive $$\varepsilon_t$$"]
+  end
+  
+  subgraph Update
+    E["$$\Delta_t = \dfrac{\hat m_t}{\sqrt{\hat s_t} + \varepsilon_t}$$"]
+    F["Clip if $$\|\Delta_t\| > \kappa$$"]
+    G["$$\theta_{t+1} = \theta_t - \alpha\,\Delta_t$$"]
+  end
+  
+  subgraph Final
+    H["Riemannian Weight Decay"]
+    I["New $$\theta_{t+1}$$"]
+  end
+  
+  A --> B --> C --> D --> E --> F --> G --> H --> I
 ```
 
 ## 6. Empirical Performance of FAdam
