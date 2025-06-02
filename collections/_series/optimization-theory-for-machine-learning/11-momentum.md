@@ -170,10 +170,10 @@ We will also extend this ODE perspective to understand adaptive optimization alg
 
 ## Recap: Gradient Descent and the Gradient Flow ODE
 
-Before diving into momentum, let's briefly recall Gradient Descent. To minimize a differentiable function $$f(x)$$, GD iteratively updates the parameters $$x$$ in the direction opposite to the gradient $$\nabla f(x)$$:
+Before diving into momentum, let's briefly recall Gradient Descent. To minimize a differentiable function $$f(\mathbf x)$$, GD iteratively updates the parameters $$\mathbf x$$ in the direction opposite to the gradient $$\nabla f(\mathbf x)$$:
 
 $$
-x_{k+1} = x_k - \eta \nabla f(x_k)
+\mathbf x_{k+1} = \mathbf x_k - \eta \nabla f(\mathbf x_k)
 $$
 
 where $$\eta > 0$$ is the learning rate.
@@ -181,30 +181,30 @@ where $$\eta > 0$$ is the learning rate.
 This update can be seen as an **explicit** or **forward Euler discretization** of the **gradient flow ODE**:
 
 $$
-\dot{x}(t) = -\nabla f(x(t))
+\dot{\mathbf x}(t) = -\nabla f(\mathbf x(t))
 $$
 
-where $$\dot{x}(t)$$ denotes the derivative of $$x$$ with respect to time $$t$$. The solutions to this ODE, called gradient flow trajectories, continuously follow the path of steepest descent.
+where $$\dot{\mathbf x}(t)$$ denotes the derivative of $$\mathbf x$$ with respect to time $$t$$. The solutions to this ODE, called gradient flow trajectories, continuously follow the path of steepest descent.
 
 ## Perspective 1: Momentum from a Second-Order ODE (The Heavy Ball)
 
-The physical intuition of a ball rolling down a hill can be formalized using Newton's second law of motion. Consider a particle of mass $$m$$ moving in a potential field defined by $$f(x)$$. The force exerted on the particle by the potential is $$-\nabla f(x)$$. If there's also a friction or viscous drag force proportional to its velocity $$\dot{x}(t)$$ with a damping coefficient $$\gamma \ge 0$$, the equation of motion is:
+The physical intuition of a ball rolling down a hill can be formalized using Newton's second law of motion. Consider a particle of mass $$m$$ moving in a potential field defined by $$f(\mathbf x)$$. The force exerted on the particle by the potential is $$-\nabla f(\mathbf x)$$. If there's also a friction or viscous drag force proportional to its velocity $$\dot{\mathbf x}(t)$$ with a damping coefficient $$\gamma \ge 0$$, the equation of motion is:
 
 $$
-m \ddot{x}(t) + \gamma \dot{x}(t) + \nabla f(x(t)) = 0
+m \ddot{\mathbf x}(t) + \gamma \dot{\mathbf x}(t) + \nabla f(\mathbf x(t)) = 0
 $$
 
-Here, $$\ddot{x}(t)$$ is the acceleration. This is a second-order ODE.
+Here, $$\ddot{\mathbf x}(t)$$ is the acceleration. This is a second-order ODE.
 
-To derive an optimization algorithm, a standard approach is to first convert this second-order ODE into an equivalent system of two first-order ODEs. Let $$v_{phys}(t) = \dot{x}(t)$$ be the physical velocity. Then $$\dot{v}_{phys}(t) = \ddot{x}(t)$$, and substituting this into the equation of motion (after dividing by $$m$$) yields:
-$$ \dot{v}_{phys}(t) = -\frac{\gamma}{m} v_{phys}(t) - \frac{1}{m} \nabla f(x(t)) $$.
+To derive an optimization algorithm, a standard approach is to first convert this second-order ODE into an equivalent system of two first-order ODEs. Let $$\mathbf v_{phys}(t) = \dot{\mathbf x}(t)$$ be the physical velocity. Then $$\dot{\mathbf v}_{phys}(t) = \ddot{\mathbf x}(t)$$, and substituting this into the equation of motion (after dividing by $$m$$) yields:
+$$ \dot{\mathbf v}_{phys}(t) = -\frac{\gamma}{m} \mathbf v_{phys}(t) - \frac{1}{m} \nabla f(\mathbf x(t)) $$.
 Thus, the second-order ODE is equivalent to the following system of first-order ODEs:
 
 $$
-\begin{align\ast}
-\dot{x}(t) &= v_{phys}(t) \\
-\dot{v}_{phys}(t) &= -\frac{\gamma}{m} v_{phys}(t) - \frac{1}{m} \nabla f(x(t))
-\end{align\ast}
+\begin{align*}
+\dot{\mathbf x}(t) &= \mathbf v_{phys}(t) \\
+\dot{\mathbf v}_{phys}(t) &= -\frac{\gamma}{m} \mathbf v_{phys}(t) - \frac{1}{m} \nabla f(\mathbf x(t))
+\end{align*}
 $$
 
 We now discretize this system to obtain an iterative optimization algorithm. The specific way we approximate the derivatives and evaluate terms will determine the resulting algorithm. This derivation leads directly to the Polyak's Heavy Ball method.
@@ -213,71 +213,71 @@ We now discretize this system to obtain an iterative optimization algorithm. The
 <summary markdown="1">
 **Derivation: Polyak's Heavy Ball from the System of First-Order ODEs**
 </summary>
-Let $$h > 0$$ be the time discretization step size. We denote $$x_k \approx x(kh)$$ and $$v_{phys,k} \approx v_{phys}(kh)$$.
+Let $$h > 0$$ be the time discretization step size. We denote $$\mathbf x_k \approx \mathbf x(kh)$$ and $$\mathbf v_{phys,k} \approx \mathbf v_{phys}(kh)$$.
 
 We discretize the system of ODEs as follows:
-1.  For the position update $$\dot{x}(t) = v_{phys}(t)$$, we use the velocity at the *end* of the interval, $$v_{phys,k+1}$$, to determine the change in position:
+1.  For the position update $$\dot{\mathbf x}(t) = \mathbf v_{phys}(t)$$, we use the velocity at the *end* of the interval, $$\mathbf v_{phys,k+1}$$, to determine the change in position:
 
     $$
-    \frac{x_{k+1} - x_k}{h} = v_{phys,k+1} \quad \implies \quad x_{k+1} = x_k + h v_{phys,k+1}
+    \frac{\mathbf x_{k+1} - \mathbf x_k}{h} = \mathbf v_{phys,k+1} \quad \implies \quad \mathbf x_{k+1} = \mathbf x_k + h \mathbf v_{phys,k+1}
     $$
 
-2.  For the velocity update $$\dot{v}_{phys}(t) = -\frac{\gamma}{m} v_{phys}(t) - \frac{1}{m} \nabla f(x(t))$$, we use a forward Euler discretization, evaluating terms at time $$t_k = kh$$:
+2.  For the velocity update $$\dot{\mathbf v}_{phys}(t) = -\frac{\gamma}{m} \mathbf v_{phys}(t) - \frac{1}{m} \nabla f(\mathbf x(t))$$, we use a forward Euler discretization, evaluating terms at time $$t_k = kh$$:
 
     $$
-    \frac{v_{phys,k+1} - v_{phys,k}}{h} = -\frac{\gamma}{m} v_{phys,k} - \frac{1}{m} \nabla f(x_k)
+    \frac{\mathbf v_{phys,k+1} - \mathbf v_{phys,k}}{h} = -\frac{\gamma}{m} \mathbf v_{phys,k} - \frac{1}{m} \nabla f(\mathbf x_k)
     $$
 
     $$
-    \implies v_{phys,k+1} = v_{phys,k} - \frac{h\gamma}{m} v_{phys,k} - \frac{h}{m} \nabla f(x_k) = \left(1 - \frac{h\gamma}{m}\right)v_{phys,k} - \frac{h}{m} \nabla f(x_k)
+    \implies \mathbf v_{phys,k+1} = \mathbf v_{phys,k} - \frac{h\gamma}{m} \mathbf v_{phys,k} - \frac{h}{m} \nabla f(\mathbf x_k) = \left(1 - \frac{h\gamma}{m}\right)\mathbf v_{phys,k} - \frac{h}{m} \nabla f(\mathbf x_k)
     $$
 
-    (continued) This specific choice of discretization (updating velocity first using $$x_k$$, then updating position using the new velocity) is a form of symplectic Euler method, often used for Hamiltonian systems, though here applied to a dissipative system.
+    (continued) This specific choice of discretization (updating velocity first using $$\mathbf x_k$$, then updating position using the new velocity) is a form of symplectic Euler method. More precisely, for dissipative systems like this one with a friction term, it's known as the **dissipative** (or **conformal symplectic**) version of the symplectic-Euler integrator (see, e.g., Zhang et al. 2020, "Conformal Symplectic and Relativistic Optimization," NeurIPS Proceedings). This helps readers familiar with classical mechanics understand how friction fits into such integrators.
 
-Now, let's define the "momentum" term $$v_k$$ as it appears in the standard algorithm. This term is typically a scaled version of the physical velocity, representing the accumulated change. Let $$v_k := h v_{phys,k}$$. Then $$v_{k+1} = h v_{phys,k+1}$$.
+Now, let's define the "momentum" term $$\mathbf v_k$$ as it appears in the standard algorithm. This term is typically a scaled version of the physical velocity, representing the accumulated change. Let $$\mathbf v_k := h \mathbf v_{phys,k}$$. Then $$\mathbf v_{k+1} = h \mathbf v_{phys,k+1}$$.
 Substituting these into our discretized equations:
 
 -   The velocity update becomes:
 
     $$
-    \frac{v_{k+1}}{h} = \left(1 - \frac{h\gamma}{m}\right)\frac{v_k}{h} - \frac{h}{m} \nabla f(x_k)
+    \frac{\mathbf v_{k+1}}{h} = \left(1 - \frac{h\gamma}{m}\right)\frac{\mathbf v_k}{h} - \frac{h}{m} \nabla f(\mathbf x_k)
     $$
 
     Multiplying by $$h$$ gives:
 
     $$
-    v_{k+1} = \left(1 - \frac{h\gamma}{m}\right)v_k - \frac{h^2}{m} \nabla f(x_k)
+    \mathbf v_{k+1} = \left(1 - \frac{h\gamma}{m}\right)\mathbf v_k - \frac{h^2}{m} \nabla f(\mathbf x_k)
     $$
 
 -   The position update becomes:
 
     $$
-    x_{k+1} = x_k + v_{k+1}
+    \mathbf x_{k+1} = \mathbf x_k + \mathbf v_{k+1}
     $$
 
 If we define the learning rate $$\eta = \frac{h^2}{m}$$ and the momentum parameter $$\beta = 1 - \frac{h\gamma}{m}$$, the update rules are:
 
 $$
-\begin{align\ast}
-v_{k+1} &= \beta v_k - \eta \nabla f(x_k) \\
-x_{k+1} &= x_k + v_{k+1}
-\end{align\ast}
+\begin{align*}
+\mathbf v_{k+1} &= \beta \mathbf v_k - \eta \nabla f(\mathbf x_k) \\
+\mathbf x_{k+1} &= \mathbf x_k + \mathbf v_{k+1}
+\end{align*}
 $$
 
 This is precisely the two-variable form of the Polyak's Heavy Ball (PHB) method.
 
 **Equivalence to the single-variable form:**
-This two-variable system can be rewritten as a single second-order difference equation for $$x_k$$. From the position update, we have $$v_{k+1} = x_{k+1} - x_k$$. Consequently, $$v_k = x_k - x_{k-1}$$ (for $$k \ge 1$$, assuming consistent initialization).
+This two-variable system can be rewritten as a single second-order difference equation for $$\mathbf x_k$$. From the position update, we have $$\mathbf v_{k+1} = \mathbf x_{k+1} - \mathbf x_k$$. Consequently, $$\mathbf v_k = \mathbf x_k - \mathbf x_{k-1}$$ (for $$k \ge 1$$, assuming consistent initialization).
 Substituting these into the velocity update equation:
 
 $$
-(x_{k+1} - x_k) = \beta (x_k - x_{k-1}) - \eta \nabla f(x_k)
+(\mathbf x_{k+1} - \mathbf x_k) = \beta (\mathbf x_k - \mathbf x_{k-1}) - \eta \nabla f(\mathbf x_k)
 $$
 
-Rearranging for $$x_{k+1}$$, we get the single-variable form of PHB:
+Rearranging for $$\mathbf x_{k+1}$$, we get the single-variable form of PHB:
 
 $$
-x_{k+1} = x_k - \eta \nabla f(x_k) + \beta (x_k - x_{k-1})
+\mathbf x_{k+1} = \mathbf x_k - \eta \nabla f(\mathbf x_k) + \beta (\mathbf x_k - \mathbf x_{k-1})
 $$
 
 **Connection back to the original second-order ODE:**
@@ -285,38 +285,38 @@ This second-order difference equation can be shown to be a direct finite differe
 Rearranging the single-variable form:
 
 $$
-x_{k+1} - (1+\beta)x_k + \beta x_{k-1} = -\eta \nabla f(x_k)
+\mathbf x_{k+1} - (1+\beta)\mathbf x_k + \beta \mathbf x_{k-1} = -\eta \nabla f(\mathbf x_k)
 $$
 
 Substitute back the definitions of $$\eta = \frac{h^2}{m}$$ and $$\beta = 1 - \frac{h\gamma}{m}$$:
 
 $$
-x_{k+1} - \left(1 + \left(1 - \frac{h\gamma}{m}\right)\right)x_k + \left(1 - \frac{h\gamma}{m}\right)x_{k-1} = -\frac{h^2}{m} \nabla f(x_k)
+\mathbf x_{k+1} - \left(1 + \left(1 - \frac{h\gamma}{m}\right)\right)\mathbf x_k + \left(1 - \frac{h\gamma}{m}\right)\mathbf x_{k-1} = -\frac{h^2}{m} \nabla f(\mathbf x_k)
 $$
 
 $$
-x_{k+1} - \left(2 - \frac{h\gamma}{m}\right)x_k + \left(1 - \frac{h\gamma}{m}\right)x_{k-1} = -\frac{h^2}{m} \nabla f(x_k)
+\mathbf x_{k+1} - \left(2 - \frac{h\gamma}{m}\right)\mathbf x_k + \left(1 - \frac{h\gamma}{m}\right)\mathbf x_{k-1} = -\frac{h^2}{m} \nabla f(\mathbf x_k)
 $$
 
 Multiply by $$m/h^2$$:
 
 $$
-\frac{m}{h^2} \left( x_{k+1} - \left(2 - \frac{h\gamma}{m}\right)x_k + \left(1 - \frac{h\gamma}{m}\right)x_{k-1} \right) + \nabla f(x_k) = 0
+\frac{m}{h^2} \left( \mathbf x_{k+1} - \left(2 - \frac{h\gamma}{m}\right)\mathbf x_k + \left(1 - \frac{h\gamma}{m}\right)\mathbf x_{k-1} \right) + \nabla f(\mathbf x_k) = 0
 $$
 
 Group terms to match standard finite difference formulas:
 
 $$
-\frac{m}{h^2} \left( (x_{k+1} - 2x_k + x_{k-1}) + \frac{h\gamma}{m}(x_k - x_{k-1}) \right) + \nabla f(x_k) = 0
+\frac{m}{h^2} \left( (\mathbf x_{k+1} - 2\mathbf x_k + \mathbf x_{k-1}) + \frac{h\gamma}{m}(\mathbf x_k - \mathbf x_{k-1}) \right) + \nabla f(\mathbf x_k) = 0
 $$
 
 $$
-m \left( \frac{x_{k+1} - 2x_k + x_{k-1}}{h^2} \right) + \gamma \left( \frac{x_k - x_{k-1}}{h} \right) + \nabla f(x_k) = 0
+m \left( \frac{\mathbf x_{k+1} - 2\mathbf x_k + \mathbf x_{k-1}}{h^2} \right) + \gamma \left( \frac{\mathbf x_k - \mathbf x_{k-1}}{h} \right) + \nabla f(\mathbf x_k) = 0
 $$
 
-This equation corresponds to approximating the original ODE $$m \ddot{x}(t) + \gamma \dot{x}(t) + \nabla f(x(t)) = 0$$ at time $$t_k = kh$$ using:
--   Central difference for acceleration: $$\ddot{x}(t_k) \approx \frac{x_{k+1} - 2x_k + x_{k-1}}{h^2}$$
--   Backward difference for velocity (in the damping term): $$\dot{x}(t_k) \approx \frac{x_k - x_{k-1}}{h}$$
+This equation corresponds to approximating the original ODE $$m \ddot{\mathbf x}(t) + \gamma \dot{\mathbf x}(t) + \nabla f(\mathbf x(t)) = 0$$ at time $$t_k = kh$$ using:
+-   Central difference for acceleration: $$\ddot{\mathbf x}(t_k) \approx \frac{\mathbf x_{k+1} - 2\mathbf x_k + \mathbf x_{k-1}}{h^2}$$
+-   Backward difference for velocity (in the damping term): $$\dot{\mathbf x}(t_k) \approx \frac{\mathbf x_k - \mathbf x_{k-1}}{h}$$
 This confirms that the derived PHB algorithm is a consistent discretization of the heavy ball ODE. The system-based derivation makes the choice of these specific finite differences more systematic.
 </details>
 
@@ -333,30 +333,30 @@ The update rule for Polyak's Heavy Ball method is often expressed in two equival
 1.  **Two-variable (velocity) form:**
 
     $$
-    \begin{align\ast}
-    v_{k+1} &= \beta v_k - \eta \nabla f(x_k) \\
-    x_{k+1} &= x_k + v_{k+1}
-    \end{align\ast}
+    \begin{align*}
+    \mathbf v_{k+1} &= \beta \mathbf v_k - \eta \nabla f(\mathbf x_k) \\
+    \mathbf x_{k+1} &= \mathbf x_k + \mathbf v_{k+1}
+    \end{align*}
     $$
 
-    Here, $$v_k$$ is the momentum term. Initializing $$v_0 = 0$$ is common.
+    Here, $$\mathbf v_k$$ is the momentum term. Initializing $$\mathbf v_0 = \mathbf 0$$ is common.
 
 2.  **Single-variable (three-term recurrence) form:**
 
     $$
-    x_{k+1} = x_k - \eta \nabla f(x_k) + \beta (x_k - x_{k-1})
+    \mathbf x_{k+1} = \mathbf x_k - \eta \nabla f(\mathbf x_k) + \beta (\mathbf x_k - \mathbf x_{k-1})
     $$
 
-    (continued) This form requires $$x_0$$ and $$x_{-1}$$ (or $$x_1$$ to be computed differently, e.g., $$x_1 = x_0 - \eta \nabla f(x_0)$$ which corresponds to $$v_0=0$$ giving $$v_1 = -\eta \nabla f(x_0)$$, so $$x_1 = x_0 - \eta \nabla f(x_0)$$; and thus for $$k=0$$, $$x_0-x_{-1}$$ would be zero).
+    (continued) This form requires $$\mathbf x_0$$ and $$\mathbf x_{-1}$$ (or $$\mathbf x_1$$ to be computed differently, e.g., $$\mathbf x_1 = \mathbf x_0 - \eta \nabla f(\mathbf x_0)$$ which corresponds to $$\mathbf v_0=\mathbf 0$$ giving $$\mathbf v_1 = -\eta \nabla f(\mathbf x_0)$$, so $$\mathbf x_1 = \mathbf x_0 - \eta \nabla f(\mathbf x_0)$$; and thus for $$k=0$$, $$\mathbf x_0-\mathbf x_{-1}$$ would be zero).
 
 The parameters are the learning rate $$\eta > 0$$ and the momentum coefficient $$\beta \in [0, 1)$$.
-The two forms are equivalent if $$v_k = x_k - x_{k-1}$$ (for $$k \ge 1$$), or more generally, if $$v_0$$ is initialized, then $$v_k$$ represents the accumulated momentum, and $$x_{k+1}-x_k = v_{k+1}$$.
+The two forms are equivalent if $$\mathbf v_k = \mathbf x_k - \mathbf x_{k-1}$$ (for $$k \ge 1$$), or more generally, if $$\mathbf v_0$$ is initialized, then $$\mathbf v_k$$ represents the accumulated momentum, and $$\mathbf x_{k+1}-\mathbf x_k = \mathbf v_{k+1}$$.
 </blockquote>
 
 This derivation shows that the momentum term arises naturally from the inertia ($$m$$) and damping ($$\gamma$$) of the physical system, as captured by the discretization scheme:
 -   A larger mass $$m$$ (relative to $$h^2$$) implies a smaller effective learning rate $$\eta$$.
 -   A larger friction coefficient $$\gamma$$ (relative to $$m/h$$) implies a smaller momentum parameter $$\beta$$.
--   If $$\gamma h / m = 1$$, then $$\beta=0$$. In this case, $$v_{k+1} = -\eta \nabla f(x_k)$$ and $$x_{k+1} = x_k - \eta \nabla f(x_k)$$, effectively recovering standard Gradient Descent (assuming $$v_k$$ becomes zero if $$\beta=0$$ or it's the first step after initialization with $$v_0=0$$). More generally, if $$\beta=0$$, the single-variable form becomes $$x_{k+1} = x_k - \eta \nabla f(x_k)$$, which is GD. This scenario corresponds to a system where momentum effects from past steps (beyond the current gradient) are not explicitly carried forward.
+-   If $$\gamma h / m = 1$$, then $$\beta=0$$. In this case, $$\mathbf v_{k+1} = -\eta \nabla f(\mathbf x_k)$$ and $$\mathbf x_{k+1} = \mathbf x_k - \eta \nabla f(\mathbf x_k)$$, effectively recovering standard Gradient Descent (assuming $$\mathbf v_k$$ becomes zero if $$\beta=0$$ or it's the first step after initialization with $$\mathbf v_0=\mathbf 0$$). More generally, if $$\beta=0$$, the single-variable form becomes $$\mathbf x_{k+1} = \mathbf x_k - \eta \nabla f(\mathbf x_k)$$, which is GD. This scenario corresponds to a system where momentum effects from past steps (beyond the current gradient) are not explicitly carried forward.
 -   If $$\gamma = 0$$ (no friction), then $$\beta=1$$. This can lead to oscillations or instability if not paired with a small enough step size $$\eta$$.
 
 ## Perspective 2: Momentum as a Linear Multi-step Method
@@ -367,10 +367,10 @@ Another powerful way to understand momentum is by viewing it as a **Linear Multi
 <div class="title" markdown="1">
 **Definition: Linear Multi-step Method (LMM)**
 </div>
-For an initial value problem $$\dot{y}(t) = F(t, y(t))$$ with $$y(t_0) = y_0$$, an $$s$$-step LMM is defined by:
+For an initial value problem $$\dot{\mathbf y}(t) = \mathbf F(t, \mathbf y(t))$$ with $$\mathbf y(t_0) = \mathbf y_0$$, an $$s$$-step LMM is defined by:
 
 $$
-\sum_{j=0}^s \alpha_j y_{n+j} = h_{LMM} \sum_{j=0}^s \beta_j F(t_{n+j}, y_{n+j})
+\sum_{j=0}^s \alpha_j \mathbf y_{n+j} = h_{LMM} \sum_{j=0}^s \beta_j \mathbf F(t_{n+j}, \mathbf y_{n+j})
 $$
 
 where $$h_{LMM}$$ is the step size, $$\alpha_j$$ and $$\beta_j$$ are method-specific coefficients, and by convention $$\alpha_s=1$$.
@@ -378,7 +378,7 @@ where $$h_{LMM}$$ is the step size, $$\alpha_j$$ and $$\beta_j$$ are method-spec
 - If $$\beta_s \neq 0$$, the method is **implicit**.
 </blockquote>
 
-We can show that Polyak's Heavy Ball method can also be interpreted as a specific instance of an LMM applied to the first-order gradient flow ODE $$\dot{x}(t) = -\nabla f(x(t))$$. This provides an alternative perspective on how it uses past information.
+We can show that Polyak's Heavy Ball method can also be interpreted as a specific instance of an LMM applied to the first-order gradient flow ODE $$\dot{\mathbf x}(t) = -\nabla f(\mathbf x(t))$$. This provides an alternative perspective on how it uses past information.
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
@@ -387,47 +387,47 @@ We can show that Polyak's Heavy Ball method can also be interpreted as a specifi
 Consider the first-order gradient flow ODE:
 
 $$
-\dot{x}(t) = -\nabla f(x(t))
+\dot{\mathbf x}(t) = -\nabla f(\mathbf x(t))
 $$
 
-Here, $$y(t) \equiv x(t)$$ and $$F(t, x(t)) \equiv -\nabla f(x(t))$$ in the LMM definition.
+Here, $$\mathbf y(t) \equiv \mathbf x(t)$$ and $$\mathbf F(t, \mathbf x(t)) \equiv -\nabla f(\mathbf x(t))$$ in the LMM definition.
 
 Now, let's look at the Polyak's Heavy Ball update rule in its single-variable form:
 
 $$
-x_{k+1} = x_k - \eta \nabla f(x_k) + \beta (x_k - x_{k-1})
+\mathbf x_{k+1} = \mathbf x_k - \eta \nabla f(\mathbf x_k) + \beta (\mathbf x_k - \mathbf x_{k-1})
 $$
 
 We can rearrange this to:
 
 $$
-x_{k+1} - (1+\beta)x_k + \beta x_{k-1} = -\eta \nabla f(x_k)
+\mathbf x_{k+1} - (1+\beta)\mathbf x_k + \beta \mathbf x_{k-1} = -\eta \nabla f(\mathbf x_k)
 $$
 
 This equation perfectly matches the LMM form. It's a 2-step method ($$s=2$$). Let $$n+j$$ map to our indices such that $$n+s = k+1$$. If we set the current time index $$n=k-1$$, then:
--   $$y_{n+2} = x_{k+1}$$ (value at the new step)
--   $$y_{n+1} = x_k$$ (value at the current step)
--   $$y_{n} = x_{k-1}$$ (value at the previous step)
+-   $$\mathbf y_{n+2} = \mathbf x_{k+1}$$ (value at the new step)
+-   $$\mathbf y_{n+1} = \mathbf x_k$$ (value at the current step)
+-   $$\mathbf y_{n} = \mathbf x_{k-1}$$ (value at the previous step)
 
-The coefficients $$\alpha_j$$ for the left-hand side $$\sum_{j=0}^2 \alpha_j y_{n+j}$$ are:
--   $$\alpha_2 = 1$$ (coefficient of $$x_{k+1}$$, since $$j=s=2$$)
--   $$\alpha_1 = -(1+\beta)$$ (coefficient of $$x_k$$)
--   $$\alpha_0 = \beta$$ (coefficient of $$x_{k-1}$$)
+The coefficients $$\alpha_j$$ for the left-hand side $$\sum_{j=0}^2 \alpha_j \mathbf y_{n+j}$$ are:
+-   $$\alpha_2 = 1$$ (coefficient of $$\mathbf x_{k+1}$$, since $$j=s=2$$)
+-   $$\alpha_1 = -(1+\beta)$$ (coefficient of $$\mathbf x_k$$)
+-   $$\alpha_0 = \beta$$ (coefficient of $$\mathbf x_{k-1}$$)
 
-For the right-hand side $$h_{LMM} \sum_{j=0}^s \beta_j F(t_{n+j}, y_{n+j})$$, we compare it with $$-\eta \nabla f(x_k)$$.
-The gradient term $$-\nabla f(x_k)$$ corresponds to $$F(t_{n+1}, y_{n+1})$$.
--   Since the PHB update for $$x_{k+1}$$ does not depend on $$\nabla f(x_{k+1})$$, the method is explicit. This means $$\beta_s = \beta_2 = 0$$ in the LMM definition.
--   The gradient is evaluated only at $$x_k \equiv y_{n+1}$$. Thus, only $$\beta_1$$ can be non-zero; $$\beta_0$$ must be 0.
--   This leaves the LMM right-hand side as $$h_{LMM} \beta_1 F(t_{n+1}, y_{n+1})$$.
--   Equating this to the PHB right-hand side: $$h_{LMM} \beta_1 F(t_{n+1}, y_{n+1}) = -\eta \nabla f(x_k)$$.
--   Since $$F(t_{n+1}, y_{n+1}) = -\nabla f(x_k)$$, we have $$h_{LMM} \beta_1 (-\nabla f(x_k)) = -\eta \nabla f(x_k)$$.
+For the right-hand side $$h_{LMM} \sum_{j=0}^s \beta_j \mathbf F(t_{n+j}, \mathbf y_{n+j})$$, we compare it with $$-\eta \nabla f(\mathbf x_k)$$.
+The gradient term $$-\nabla f(\mathbf x_k)$$ corresponds to $$\mathbf F(t_{n+1}, \mathbf y_{n+1})$$.
+-   Since the PHB update for $$\mathbf x_{k+1}$$ does not depend on $$\nabla f(\mathbf x_{k+1})$$, the method is explicit. This means $$\beta_s = \beta_2 = 0$$ in the LMM definition.
+-   The gradient is evaluated only at $$\mathbf x_k \equiv \mathbf y_{n+1}$$. Thus, only $$\beta_1$$ can be non-zero; $$\beta_0$$ must be 0.
+-   This leaves the LMM right-hand side as $$h_{LMM} \beta_1 \mathbf F(t_{n+1}, \mathbf y_{n+1})$$.
+-   Equating this to the PHB right-hand side: $$h_{LMM} \beta_1 \mathbf F(t_{n+1}, \mathbf y_{n+1}) = -\eta \nabla f(\mathbf x_k)$$.
+-   Since $$\mathbf F(t_{n+1}, \mathbf y_{n+1}) = -\nabla f(\mathbf x_k)$$, we have $$h_{LMM} \beta_1 (-\nabla f(\mathbf x_k)) = -\eta \nabla f(\mathbf x_k)$$.
 -   This implies $$h_{LMM} \beta_1 = \eta$$.
 
 There are different ways to satisfy this:
 1.  Choose the LMM step size $$h_{LMM} = \eta$$. Then $$\beta_1 = 1$$.
-2.  Choose $$h_{LMM} = 1$$. Then $$\beta_1 = \eta$$. This effectively absorbs the step size into the definition of $$F$$, or considers $$\eta$$ as the combined $$h_{LMM}\beta_1$$.
+2.  Choose $$h_{LMM} = 1$$. Then $$\beta_1 = \eta$$. This effectively absorbs the step size into the definition of $$\mathbf F$$, or considers $$\eta$$ as the combined $$h_{LMM}\beta_1$$.
 
-So, with $$\alpha_2=1, \alpha_1=-(1+\beta), \alpha_0=\beta$$ and $$\beta_2=0, \beta_1=\eta/h_{LMM}, \beta_0=0$$, Polyak's Heavy Ball method *is* an explicit 2-step linear multi-step method applied to the gradient flow ODE $$\dot{x} = -\nabla f(x)$$. The "momentum" term $$(x_k - x_{k-1})$$ is how this LMM incorporates past information ($$x_{k-1}$$) to determine the next step $$x_{k+1}$$.
+So, with $$\alpha_2=1, \alpha_1=-(1+\beta), \alpha_0=\beta$$ and $$\beta_2=0, \beta_1=\eta/h_{LMM}, \beta_0=0$$, Polyak's Heavy Ball method *is* an explicit 2-step linear multi-step method applied to the gradient flow ODE $$\dot{\mathbf x} = -\nabla f(\mathbf x)$$. The "momentum" term $$(\mathbf x_k - \mathbf x_{k-1})$$ is how this LMM incorporates past information ($$\mathbf x_{k-1}$$) to determine the next step $$\mathbf x_{k+1}$$.
 </details>
 
 The LMM structure of PHB allows us to use tools from numerical ODE analysis, such as characteristic polynomials, to study its properties.
@@ -444,19 +444,19 @@ For Polyak's method, using our derived coefficients (and choosing $$h_{LMM}=1$$ 
 - $$\rho(z) = \alpha_2 z^2 + \alpha_1 z + \alpha_0 = z^2 - (1+\beta)z + \beta$$
 - $$\sigma(z) = \beta_2 z^2 + \beta_1 z + \beta_0 = \eta z$$ (since only $$\beta_1=\eta$$ is non-zero among $$\beta_0, \beta_1, \beta_2$$ for $$s=2$$)
 
-An LMM is consistent with the ODE $$\dot{y} = F(t,y)$$ if it has order of accuracy $$p \ge 1$$. This requires two conditions related to the behavior at $$z=1$$:
-1.  **Zero-stability related condition (necessary for convergence):** $$\rho(1) = 0$$. More stringently, the roots of $$\rho(z)$$ must lie within or on the unit circle, and any roots on the unit circle must be simple.
-2.  **Consistency condition (for order $$p \ge 1$$):** $$\rho'(1) = \sigma(1)$$.
+An LMM is **consistent** (meaning it has order of accuracy $$p \ge 1$$) if it satisfies two conditions related to the behavior at $$z=1$$:
+1.  **Root condition (related to zero-stability, necessary for convergence):** $$\rho(1) = 0$$. More stringently for zero-stability, all roots of $$\rho(z)$$ must lie within or on the unit circle, and any roots on the unit circle must be simple.
+2.  **Consistency condition for order $$p \ge 1$$:** $$\rho'(1) = \sigma(1)$$.
 
-Let's check these for PHB as an LMM for $$\dot{x} = -\nabla f(x)$$:
+Let's check these for PHB as an LMM for $$\dot{\mathbf x} = -\nabla f(\mathbf x)$$:
 1.  $$\rho(1) = 1^2 - (1+\beta)(1) + \beta = 1 - 1 - \beta + \beta = 0$$. This condition is satisfied for any $$\beta$$. The roots of $$\rho(z)=0$$ are $$z^2-(1+\beta)z+\beta=0$$, which are $$z=1$$ and $$z=\beta$$. For zero-stability, we need $$\vert\beta\vert \le 1$$. Typically for PHB, $$0 \le \beta < 1$$, so this is met.
 
 2.  For the second condition:
     $$\rho'(z) = 2z - (1+\beta)$$, so $$\rho'(1) = 2 - (1+\beta) = 1-\beta$$.
     $$\sigma(1) = \eta \cdot 1 = \eta$$.
-    So, consistency of order at least 1 requires $$1-\beta = \eta$$.
+    So, the consistency condition $$\rho'(1)=\sigma(1)$$ (which ensures order at least 1) requires $$1-\beta = \eta$$.
 
-This particular relationship, $$1-\beta = \eta$$, is known as the "critically damped" setting for PHB when analyzing its convergence on quadratic functions. It implies a specific tuning between the momentum parameter and the learning rate for the method to be a first-order accurate approximation (in the LMM local truncation error sense) of the gradient flow ODE $$\dot{x} = -\nabla f(x)$$.
+This particular relationship, $$1-\beta = \eta$$, is known as the "critically damped" setting for PHB when analyzing its convergence on quadratic functions. It implies a specific tuning between the momentum parameter and the learning rate for the method to be a first-order accurate approximation (in the LMM local truncation error sense) of the gradient flow ODE $$\dot{\mathbf x} = -\nabla f(\mathbf x)$$.
 However, PHB is an effective optimization algorithm even when $$1-\beta \neq \eta$$. The LMM formulation primarily describes its algebraic structure as a numerical integrator. Its effectiveness as an optimizer is analyzed through other means (e.g., Lyapunov stability for the discrete updates, convergence rates on specific function classes). The fact that it *is* an LMM by its form is significant, regardless of whether this specific LMM consistency condition (which relates to the local truncation error) is met for arbitrary $$\eta, \beta$$.
 </details>
 
@@ -465,8 +465,8 @@ However, PHB is an effective optimization algorithm even when $$1-\beta \neq \et
 The beauty is that these two perspectives are deeply connected.
 1.  We started with a physical system (heavy ball with friction) described by a **second-order ODE**.
 2.  Converting this to a system of first-order ODEs and then discretizing it led directly to the Polyak's Heavy Ball update rule (in its two-variable and equivalent single-variable forms).
-3.  This update rule, particularly in the single-variable form $$x_{k+1} - (1+\beta)x_k + \beta x_{k-1} = -\eta \nabla f(x_k)$$, has the algebraic structure of a **2-step Linear Multi-step Method**.
-4.  This LMM can be seen as a way to solve the simpler **first-order gradient flow ODE** $$\dot{x} = -\nabla f(x)$$, but using information from multiple past steps ($$x_k, x_{k-1}$$) instead of just one ($$x_k$$) as in Euler's method (standard GD).
+3.  This update rule, particularly in the single-variable form $$\mathbf x_{k+1} - (1+\beta)\mathbf x_k + \beta \mathbf x_{k-1} = -\eta \nabla f(\mathbf x_k)$$, has the algebraic structure of a **2-step Linear Multi-step Method**.
+4.  This LMM can be seen as a way to solve the simpler **first-order gradient flow ODE** $$\dot{\mathbf x} = -\nabla f(\mathbf x)$$, but using information from multiple past steps ($$\mathbf x_k, \mathbf x_{k-1}$$) instead of just one ($$\mathbf x_k$$) as in Euler's method (standard GD).
 
 So, the "inertia" from the physical model (which persists velocity) translates into the "memory" of the LMM (which uses previous iterates). The momentum term, crucial for navigating complex optimization landscapes, is essentially how the LMM leverages past states to make a more informed step, aiming to better approximate the trajectory of the underlying gradient flow dynamics or, from the other perspective, to emulate the behavior of a physical system with inertia.
 
@@ -478,27 +478,27 @@ Nesterov's Accelerated Gradient (NAG) is another highly successful momentum-base
 <div class="title" markdown="1">
 **Nesterov's Accelerated Gradient (NAG)**
 </div>
-Using an explicit velocity term $$v_k$$:
+Using an explicit velocity term $$\mathbf v_k$$:
 
 $$
-\begin{align\ast}
-v_{k+1} &= \beta v_k - \eta \nabla f(x_k + \beta v_k) \\
-x_{k+1} &= x_k + v_{k+1}
-\end{align\ast}
+\begin{align*}
+\mathbf v_{k+1} &= \beta \mathbf v_k - \eta \nabla f(\mathbf x_k + \beta \mathbf v_k) \\
+\mathbf x_{k+1} &= \mathbf x_k + \mathbf v_{k+1}
+\end{align*}
 $$
 
-The key difference from PHB is that the gradient is evaluated at a "look-ahead" point $$x_k + \beta v_k$$, rather than at $$x_k$$. (Note: there are multiple formulations of NAG; this is a common one. Sometimes the lookahead is on $$x_k - \beta v_k$$ if $$v_k$$ is defined as $$x_k-x_{k-1}$$, or the update $$x_{k+1} = (x_k + \beta v_k) + v_{k+1} - \beta v_k$$, i.e. $$x_{k+1} = x_k + v_{k+1} + \beta(v_{k+1}-v_k)$$.)
+The key difference from PHB is that the gradient is evaluated at a "look-ahead" point $$\mathbf x_k + \beta \mathbf v_k$$, rather than at $$\mathbf x_k$$. (Note: there are multiple formulations of NAG; this is a common one. Sometimes the lookahead is on $$\mathbf x_k - \beta \mathbf v_k$$ if $$\mathbf v_k$$ is defined as $$\mathbf x_k-\mathbf x_{k-1}$$, or the update $$\mathbf x_{k+1} = (\mathbf x_k + \beta \mathbf v_k) + \mathbf v_{k+1} - \beta \mathbf v_k$$, i.e. $$\mathbf x_{k+1} = \mathbf x_k + \mathbf v_{k+1} + \beta(\mathbf v_{k+1}-\mathbf v_k)$$.)
 </blockquote>
 
-Interestingly, NAG also has a continuous-time ODE interpretation. Su, Boyd, and Candès (2014) showed that a version of NAG can be seen as a discretization of the following second-order ODE:
+Interestingly, NAG also has a continuous-time ODE interpretation. Su, Boyd, and Candès (2016, JMLR; arXiv:1403.4645) showed that a version of NAG can be seen as a discretization of the following second-order ODE:
 
 $$
-\ddot{x}(t) + \frac{k_d}{t} \dot{x}(t) + \nabla f(x(t)) = 0
+\ddot{\mathbf x}(t) + \frac{k_d}{t} \dot{\mathbf x}(t) + \nabla f(\mathbf x(t)) = 0
 $$
 
-For a typical choice for the constant $$k_d \ge 3$$. Notice the time-dependent damping term $$\frac{k_d}{t}$$. As time $$t$$ increases, the damping decreases. This "adaptive" damping is thought to be one reason for NAG's superior performance in some settings. Deriving NAG from this ODE involves a more complex discretization scheme than the one used for PHB.
+For a typical choice for the constant $$k_d \ge 3$$. Notice the time-dependent damping term $$\frac{k_d}{t}$$. As time $$t$$ increases, the damping decreases. This "adaptive" damping is thought to be one reason for NAG's superior performance in some settings. This ODE itself can also be derived from a Bregman-Lagrangian variational perspective, as explored by Wibisono, Wilson, and Jordan (2016, PNAS; arXiv:1603.04245). Deriving NAG from this ODE involves a more complex discretization scheme than the one used for PHB.
 
-While NAG can also be written in a multi-step form, its "look-ahead" gradient evaluation makes its LMM interpretation for the simple gradient flow ODE $$\dot{x} = -\nabla f(x)$$ less direct or natural than for PHB. It's more directly a discretization of its own unique second-order ODE.
+While NAG can also be written in a multi-step form, its "look-ahead" gradient evaluation makes its LMM interpretation for the simple gradient flow ODE $$\dot{\mathbf x} = -\nabla f(\mathbf x)$$ less direct or natural than for PHB. It's more directly a discretization of its own unique second-order ODE.
 
 ## Adaptive Methods: RMSProp and Adam from an ODE Perspective
 
@@ -508,77 +508,77 @@ Adaptive optimization methods like RMSProp and Adam adjust the learning rate for
 
 RMSProp (Root Mean Square Propagation) scales the learning rate for each parameter by an estimate of the root mean square of recent gradients for that parameter.
 
-The discrete update rules for RMSProp (simplified, without $$\epsilon$$ and assuming component-wise operations for vectors like $$(\nabla f(x_k))^2$$ and division/sqrt) are:
-1.  Update the squared gradient accumulator $$s_k$$:
+The discrete update rules for RMSProp (simplified, without $$\epsilon$$ and assuming component-wise operations for vectors like $$(\nabla f(\mathbf x_k))^2$$ and division/sqrt) are:
+1.  Update the squared gradient accumulator $$\mathbf s_k$$:
 
     $$
-    s_{k+1} = \beta_2 s_k + (1-\beta_2) (\nabla f(x_k))^2
+    \mathbf s_{k+1} = \beta_2 \mathbf s_k + (1-\beta_2) (\nabla f(\mathbf x_k))^2
     $$
 
-2.  Update parameters $$x_k$$:
+2.  Update parameters $$\mathbf x_k$$:
 
     $$
-    x_{k+1} = x_k - \frac{\eta}{\sqrt{s_{k+1}}} \nabla f(x_k)
+    \mathbf x_{k+1} = \mathbf x_k - \frac{\eta}{\sqrt{\mathbf s_{k+1}}} \nabla f(\mathbf x_k)
     $$
 
-    (continued) Here, $$\beta_2$$ is the decay rate for the moving average of squared gradients (typically close to 1, e.g., 0.999), and $$\eta$$ is the learning rate. If any component of $$\sqrt{s_{k+1}}$$ is zero, the update for that component of $$x_k$$ would be undefined or handled by a safeguard (like adding $$\epsilon$$ or skipping the update for that component). If $$\nabla f(x_k)=0$$, then $$x_{k+1}=x_k$$, and $$s_{k+1} = \beta_2 s_k$$ (the accumulator decays).
+    (continued) Here, $$\beta_2$$ is the decay rate for the moving average of squared gradients (typically close to 1, e.g., 0.999), and $$\eta$$ is the learning rate. If any component of $$\sqrt{\mathbf s_{k+1}}$$ is zero, the update for that component of $$\mathbf x_k$$ would be undefined or handled by a safeguard (like adding $$\epsilon$$ or skipping the update for that component). If $$\nabla f(\mathbf x_k)=\mathbf 0$$, then $$\mathbf x_{k+1}=\mathbf x_k$$, and $$\mathbf s_{k+1} = \beta_2 \mathbf s_k$$ (the accumulator decays).
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Special Case: RMSProp with Uniform Averaging vs. Adagrad**
 </summary>
-RMSProp typically uses an exponential moving average for the squared gradients with a constant decay rate $$\beta_2$$. However, a specific time-dependent choice for the weighting factor $$1-\beta_2$$ can make RMSProp perform uniform averaging of all past squared gradients. Let $$g_i = \nabla f(x_i)$$. If we set the weight for the current squared gradient $$g_k^2$$ to be $$1/(k+1)$$ (where $$k$$ is the iteration index, starting from $$k=0$$; so $$t=k+1$$ is the count of gradients observed including the current one), this means $$1-\beta_2 = 1/(k+1)$$, and thus $$\beta_2 = k/(k+1)$$.
+RMSProp typically uses an exponential moving average for the squared gradients with a constant decay rate $$\beta_2$$. However, a specific time-dependent choice for the weighting factor $$1-\beta_2$$ can make RMSProp perform uniform averaging of all past squared gradients. Let $$\mathbf g_i = \nabla f(\mathbf x_i)$$. If we set the weight for the current squared gradient $$\mathbf g_k^2$$ to be $$1/(k+1)$$ (where $$k$$ is the iteration index, starting from $$k=0$$; so $$t=k+1$$ is the count of gradients observed including the current one), this means $$1-\beta_2 = 1/(k+1)$$, and thus $$\beta_2 = k/(k+1)$$.
 
 The RMSProp accumulator update then becomes:
 
 $$
-s_{k+1} = \beta_2 s_k + (1-\beta_2) g_k^2 = \frac{k}{k+1} s_k + \frac{1}{k+1} g_k^2
+\mathbf s_{k+1} = \beta_2 \mathbf s_k + (1-\beta_2) \mathbf g_k^2 = \frac{k}{k+1} \mathbf s_k + \frac{1}{k+1} \mathbf g_k^2
 $$
 
-Assuming $$s_0 = 0$$, this recurrence leads to (verifiable by induction):
-- For $$k=0$$ (first iteration, $$t=1$$): $$s_1 = \frac{0}{1}s_0 + \frac{1}{1}g_0^2 = g_0^2$$
-- For $$k=1$$ (second iteration, $$t=2$$): $$s_2 = \frac{1}{2}s_1 + \frac{1}{2}g_1^2 = \frac{1}{2}g_0^2 + \frac{1}{2}g_1^2 = \frac{1}{2}(g_0^2+g_1^2)$$
+Assuming $$\mathbf s_0 = \mathbf 0$$, this recurrence leads to (verifiable by induction):
+- For $$k=0$$ (first iteration, $$t=1$$): $$\mathbf s_1 = \frac{0}{1}\mathbf s_0 + \frac{1}{1}\mathbf g_0^2 = \mathbf g_0^2$$
+- For $$k=1$$ (second iteration, $$t=2$$): $$\mathbf s_2 = \frac{1}{2}\mathbf s_1 + \frac{1}{2}\mathbf g_1^2 = \frac{1}{2}\mathbf g_0^2 + \frac{1}{2}\mathbf g_1^2 = \frac{1}{2}(\mathbf g_0^2+\mathbf g_1^2)$$
 In general, this choice yields:
 
 $$
-s_{k+1} = \frac{1}{k+1} \sum_{i=0}^k g_i^2
+\mathbf s_{k+1} = \frac{1}{k+1} \sum_{i=0}^k \mathbf g_i^2
 $$
 
-This expression shows that $$s_{k+1}$$ is the arithmetic mean (a uniform average) of all squared gradients from $$g_0^2$$ to $$g_k^2$$.
+This expression shows that $$\mathbf s_{k+1}$$ is the arithmetic mean (a uniform average) of all squared gradients from $$\mathbf g_0^2$$ to $$\mathbf g_k^2$$.
 
 The Adagrad algorithm, on the other hand, accumulates the sum of all past squared gradients (element-wise):
 
 $$
-G_k = \sum_{i=0}^k g_i^2
+\mathbf G_k = \sum_{i=0}^k \mathbf g_i^2
 $$
 
-Thus, for this specific RMSProp variant, the accumulator $$s_{k+1}$$ is related to Adagrad's accumulator $$G_k$$ by $$s_{k+1} = G_k / (k+1)$$.
+Thus, for this specific RMSProp variant, the accumulator $$\mathbf s_{k+1}$$ is related to Adagrad's accumulator $$\mathbf G_k$$ by $$\mathbf s_{k+1} = \mathbf G_k / (k+1)$$.
 
 Now, let's compare their parameter update rules, including a small constant $$\epsilon > 0$$ typically added for numerical stability:
 -   RMSProp (with uniform averaging as described):
 
     $$
-    x_{k+1} = x_k - \frac{\eta_{RMSProp}}{\sqrt{s_{k+1}} + \epsilon_{RMSProp}} g_k = x_k - \frac{\eta_{RMSProp}}{\sqrt{G_k/(k+1)} + \epsilon_{RMSProp}} g_k
+    \mathbf x_{k+1} = \mathbf x_k - \frac{\eta_{RMSProp}}{\sqrt{\mathbf s_{k+1}} + \epsilon_{RMSProp}} \mathbf g_k = \mathbf x_k - \frac{\eta_{RMSProp}}{\sqrt{\mathbf G_k/(k+1)} + \epsilon_{RMSProp}} \mathbf g_k
     $$
 
     This can be rewritten as:
 
     $$
-    x_{k+1} = x_k - \frac{\eta_{RMSProp} \sqrt{k+1}}{\sqrt{G_k} + \epsilon_{RMSProp}\sqrt{k+1}} g_k
+    \mathbf x_{k+1} = \mathbf x_k - \frac{\eta_{RMSProp} \sqrt{k+1}}{\sqrt{\mathbf G_k} + \epsilon_{RMSProp}\sqrt{k+1}} \mathbf g_k
     $$
 
 -   Adagrad:
 
     $$
-    x_{k+1} = x_k - \frac{\eta_{Adagrad}}{\sqrt{G_k} + \epsilon_{Adagrad}} g_k
+    \mathbf x_{k+1} = \mathbf x_k - \frac{\eta_{Adagrad}}{\sqrt{\mathbf G_k} + \epsilon_{Adagrad}} \mathbf g_k
     $$
 
 Comparing these two forms, this special variant of RMSProp is equivalent to Adagrad if Adagrad's global learning rate $$\eta_{Adagrad}$$ and stability constant $$\epsilon_{Adagrad}$$ were set as $$\eta_{Adagrad}(k) = \eta_{RMSProp} \sqrt{k+1}$$ and $$\epsilon_{Adagrad}(k) = \epsilon_{RMSProp}\sqrt{k+1}$$.
 If both methods used the same base learning rate $$\eta$$ and the same $$\epsilon$$ strategy (e.g., $$\epsilon_{RMSProp} = \epsilon_{Adagrad}/\sqrt{k+1}$$ or both $$\epsilon$$ are negligible), the effective learning rate for each parameter in this RMSProp variant is scaled by an additional factor of $$\sqrt{k+1}$$ compared to Adagrad. This factor accounts for the "dimension scaling factor" difference mentioned in the prompt, as it affects the per-dimension scaling of the gradient.
 
-Adagrad's learning rates are known to diminish, sometimes too aggressively, because $$\sqrt{G_k}$$ typically grows with $$k$$. If $$\sqrt{G_k}$$ grows roughly as $$\sqrt{k+1}$$ (e.g., if gradients have, on average, constant magnitudes), Adagrad's effective learning rate decays as $$O(1/\sqrt{k+1})$$. In contrast, this RMSProp variant's effective learning rate would remain approximately constant ($$\eta \sqrt{k+1} / \sqrt{k+1} \approx \eta$$). This behavior—preventing aggressive decay of learning rates—is a primary motivation for RMSProp. Standard RMSProp, which uses a constant $$\beta_2$$ (e.g., 0.9 or 0.999), "forgets" old gradients more strongly by giving exponentially less weight to older gradients, which further helps in stabilizing the effective learning rate over long training periods compared to Adagrad.
+Adagrad's learning rates are known to diminish, sometimes too aggressively, because $$\sqrt{\mathbf G_k}$$ typically grows with $$k$$. If $$\sqrt{\mathbf G_k}$$ grows roughly as $$\sqrt{k+1}$$ (e.g., if gradients have, on average, constant magnitudes), Adagrad's effective learning rate decays as $$O(1/\sqrt{k+1})$$. In contrast, this RMSProp variant's effective learning rate would remain approximately constant ($$\eta \sqrt{k+1} / \sqrt{k+1} \approx \eta$$). This behavior—preventing aggressive decay of learning rates—is a primary motivation for RMSProp. Standard RMSProp, which uses a constant $$\beta_2$$ (e.g., 0.9 or 0.999), "forgets" old gradients more strongly by giving exponentially less weight to older gradients, which further helps in stabilizing the effective learning rate over long training periods compared to Adagrad.
 
-In terms of the ODE perspective, if $$1-\beta_2(t) = 1/t$$, the ODE for $$s(t)$$ becomes $$\dot{s}(t) = \frac{1}{t}((\nabla f(x(t)))^2 - s(t))$$. This is a linear first-order ODE whose solution (with $$t_0 s(t_0) \to 0$$ as $$t_0 \to 0$$) is $$s(t) = \frac{1}{t}\int_{t_0}^t (\nabla f(x(\tau)))^2 d\tau$$. The parameter update ODE $$\dot{x}(t) = -\eta_0 \frac{1}{\sqrt{s(t)}} \nabla f(x(t))$$ then becomes $$\dot{x}(t) = -\eta_0 \frac{\sqrt{t}}{\sqrt{\int (\nabla f(x(\tau)))^2 d\tau}} \nabla f(x(t))$$, explicitly showing the $$\sqrt{t}$$ scaling factor in the continuous-time analog.
+In terms of the ODE perspective, if $$1-\beta_2(t) = 1/t$$, the ODE for $$\mathbf s(t)$$ becomes $$\dot{\mathbf s}(t) = \frac{1}{t}((\nabla f(\mathbf x(t)))^2 - \mathbf s(t))$$. This is a linear first-order ODE whose solution (with $$t_0 \mathbf s(t_0) \to \mathbf 0$$ as $$t_0 \to 0$$) is $$\mathbf s(t) = \frac{1}{t}\int_{t_0}^t (\nabla f(\mathbf x(\tau)))^2 d\tau$$. The parameter update ODE $$\dot{\mathbf x}(t) = -\eta_0 \frac{1}{\sqrt{\mathbf s(t)}} \nabla f(\mathbf x(t))$$ then becomes $$\dot{\mathbf x}(t) = -\eta_0 \frac{\sqrt{t}}{\sqrt{\int (\nabla f(\mathbf x(\tau)))^2 d\tau}} \nabla f(\mathbf x(t))$$, explicitly showing the $$\sqrt{t}$$ scaling factor in the continuous-time analog.
 </details>
 
 The continuous-time behavior of RMSProp can be described by a system of ODEs. We derive this by interpreting the discrete updates as approximations of continuous dynamics.
@@ -589,97 +589,97 @@ The continuous-time behavior of RMSProp can be described by a system of ODEs. We
 </summary>
 To derive the continuous-time Ordinary Differential Equation (ODE) system corresponding to RMSProp, we interpret the discrete update rules as a forward Euler discretization with an effective step size of $$h=1$$. This means one iteration of the algorithm corresponds to one unit of time evolution in the ODE.
 
-Let $$s_k \approx s(t)$$ and $$x_k \approx x(t)$$, where $$t$$ is the continuous time variable and $$t_k = k \cdot h = k$$.
+Let $$\mathbf s_k \approx \mathbf s(t)$$ and $$\mathbf x_k \approx \mathbf x(t)$$, where $$t$$ is the continuous time variable and $$t_k = k \cdot h = k$$.
 
-1.  **ODE for the squared gradient accumulator $$s(t)$$$$:**
-    The discrete update for $$s_k$$ is:
-
-    $$
-    s_{k+1} = \beta_2 s_k + (1-\beta_2) (\nabla f(x_k))^2
-    $$
-
-    Rearranging this gives:
+1.  **ODE for the squared gradient accumulator $$\mathbf s(t)$$$$:**
+    The discrete update for $$\mathbf s_k$$ is:
 
     $$
-    s_{k+1} - s_k = (1-\beta_2) ((\nabla f(x_k))^2 - s_k)
-    $$
-
-    If we view $$s_{k+1} - s_k$$ as an approximation to $$\dot{s}(t) \cdot h$$ where the step size $$h=1$$, this directly suggests the ODE:
-
-    $$
-    \dot{s}(t) = (1-\beta_2) ((\nabla f(x(t)))^2 - s(t))
-    $$
-
-    This equation describes $$s(t)$$ as an exponential moving average of the squared gradients $$(\nabla f(x(t)))^2$$, where the term $$(1-\beta_2)$$ acts as the inverse of the averaging time constant (if time is measured in units of iterations).
-
-2.  **ODE for the parameters $$x(t)$$$$:**
-    The discrete update for $$x_k$$ is:
-
-    $$
-    x_{k+1} = x_k - \frac{\eta}{\sqrt{s_{k+1}}} \nabla f(x_k)
+    \mathbf s_{k+1} = \beta_2 \mathbf s_k + (1-\beta_2) (\nabla f(\mathbf x_k))^2
     $$
 
     Rearranging this gives:
 
     $$
-    x_{k+1} - x_k = - \frac{\eta}{\sqrt{s_{k+1}}} \nabla f(x_k)
+    \mathbf s_{k+1} - \mathbf s_k = (1-\beta_2) ((\nabla f(\mathbf x_k))^2 - \mathbf s_k)
     $$
 
-    Viewing $$x_{k+1} - x_k$$ as an approximation to $$\dot{x}(t) \cdot h$$ with $$h=1$$, and assuming $$s_{k+1} \approx s(t)$$ in the continuous limit for the denominator (or more precisely, that the update uses $$s(t_{k+1})$$ which is consistent with an implicit-explicit step if $$s$$ is updated first), we get the ODE:
+    If we view $$\mathbf s_{k+1} - \mathbf s_k$$ as an approximation to $$\dot{\mathbf s}(t) \cdot h$$ where the step size $$h=1$$, this directly suggests the ODE:
 
     $$
-    \dot{x}(t) = -\frac{\eta_0}{\sqrt{s(t)}} \nabla f(x(t))
+    \dot{\mathbf s}(t) = (1-\beta_2) ((\nabla f(\mathbf x(t)))^2 - \mathbf s(t))
     $$
 
-    where $$\eta_0$$ is the learning rate parameter from the algorithm. Note that the term $$\sqrt{s_{k+1}}$$ in the discrete update for $$x_k$$ means that $$s$$ is updated first, and then its new value $$s_{k+1}$$ is used for the $$x$$ update. In the ODE limit, this distinction often blurs to $$s(t)$$.
+    This equation describes $$\mathbf s(t)$$ as an exponential moving average of the squared gradients $$(\nabla f(\mathbf x(t)))^2$$, where the term $$(1-\beta_2)$$ acts as the inverse of the averaging time constant (if time is measured in units of iterations).
+
+2.  **ODE for the parameters $$\mathbf x(t)$$$$:**
+    The discrete update for $$\mathbf x_k$$ is:
+
+    $$
+    \mathbf x_{k+1} = \mathbf x_k - \frac{\eta}{\sqrt{\mathbf s_{k+1}}} \nabla f(\mathbf x_k)
+    $$
+
+    Rearranging this gives:
+
+    $$
+    \mathbf x_{k+1} - \mathbf x_k = - \frac{\eta}{\sqrt{\mathbf s_{k+1}}} \nabla f(\mathbf x_k)
+    $$
+
+    Viewing $$\mathbf x_{k+1} - \mathbf x_k$$ as an approximation to $$\dot{\mathbf x}(t) \cdot h$$ with $$h=1$$, and assuming $$\mathbf s_{k+1} \approx \mathbf s(t)$$ in the continuous limit for the denominator (or more precisely, that the update uses $$\mathbf s(t_{k+1})$$ which is consistent with an implicit-explicit step if $$\mathbf s$$ is updated first), we get the ODE:
+
+    $$
+    \dot{\mathbf x}(t) = -\frac{\eta_0}{\sqrt{\mathbf s(t)}} \nabla f(\mathbf x(t))
+    $$
+
+    where $$\eta_0$$ is the learning rate parameter from the algorithm. Note that the term $$\sqrt{\mathbf s_{k+1}}$$ in the discrete update for $$\mathbf x_k$$ means that $$\mathbf s$$ is updated first, and then its new value $$\mathbf s_{k+1}$$ is used for the $$\mathbf x$$ update. In the ODE limit, this distinction often blurs to $$\mathbf s(t)$$.
 </details>
 
 The continuous-time system for RMSProp is thus:
 
 $$
-\begin{align\ast}
-\dot{x}(t) &= -\frac{\eta_0}{\sqrt{s(t)}} \nabla f(x(t)) \\
-\dot{s}(t) &= (1-\beta_2) ((\nabla f(x(t)))^2 - s(t))
-\end{align\ast}
+\begin{align*}
+\dot{\mathbf x}(t) &= -\frac{\eta_0}{\sqrt{\mathbf s(t)}} \nabla f(\mathbf x(t)) \\
+\dot{\mathbf s}(t) &= (1-\beta_2) ((\nabla f(\mathbf x(t)))^2 - \mathbf s(t))
+\end{align*}
 $$
 
-(Operations involving $$s(t)$$ and $$(\nabla f(x(t)))^2$$ are element-wise.)
+(Operations involving $$\mathbf s(t)$$ and $$(\nabla f(\mathbf x(t)))^2$$ are element-wise.)
 
 **Interpretation of the RMSProp ODE System:**
--   The equation for $$\dot{s}(t)$$ shows that $$s(t)$$ tracks an exponential moving average of the squared gradients. Each component $$s_i(t)$$ estimates the recent typical magnitude (squared) of the gradient component $$\nabla_i f(x(t))$$.
--   The equation for $$\dot{x}(t)$$ describes a preconditioned gradient flow. The term $$\text{diag}(1/\sqrt{s_i(t)})$$ acts as a diagonal preconditioner. It adaptively scales the learning rate for each parameter: parameters with historically large gradient components (large $$s_i(t)$$) receive smaller effective learning rates, while those with small gradient components receive larger ones.
--   This system describes a particle moving in the potential $$f(x)$$, where its "mobility" or "inverse friction" in each coordinate direction is dynamically adjusted based on the history of forces experienced in that direction.
--   **Connection to SignSGD:** If $$s(t)$$ could track $$(\nabla f(x(t)))^2$$ perfectly and instantaneously (i.e., $$\beta_2 \to 0$$ or equivalently, $$1-\beta_2 \to 1$$, and assuming steady state where $$\dot{s}(t)=0$$), then $$s(t) = (\nabla f(x(t)))^2$$. The update would become $$\dot{x}(t) = -\eta_0 \frac{\nabla f(x(t))}{\vert \nabla f(x(t)) \vert}$$ (element-wise absolute value for the denominator if vector). Since $$s(t)$$ is a smoothed average, RMSProp provides a smoothed approximation to this normalization.
+-   The equation for $$\dot{\mathbf s}(t)$$ shows that $$\mathbf s(t)$$ tracks an exponential moving average of the squared gradients. Each component $$s_i(t)$$ estimates the recent typical magnitude (squared) of the gradient component $$\nabla_i f(\mathbf x(t))$$.
+-   The equation for $$\dot{\mathbf x}(t)$$ describes a preconditioned gradient flow. The term $$\text{diag}(1/\sqrt{s_i(t)})$$ acts as a diagonal preconditioner. It adaptively scales the learning rate for each parameter: parameters with historically large gradient components (large $$s_i(t)$$) receive smaller effective learning rates, while those with small gradient components receive larger ones.
+-   This system describes a particle moving in the potential $$f(\mathbf x)$$, where its "mobility" or "inverse friction" in each coordinate direction is dynamically adjusted based on the history of forces experienced in that direction.
+-   **Connection to SignSGD:** If $$\mathbf s(t)$$ could track $$(\nabla f(\mathbf x(t)))^2$$ perfectly and instantaneously (e.g., if $$\beta_2 \to 0$$, implying $$(1-\beta_2) \to 1$$, and assuming a steady state where $$\dot{\mathbf s}(t)=\mathbf 0$$), then $$\mathbf s(t)$$ would effectively be $$(\nabla f(\mathbf x(t)))^2$$. In such a hypothetical scenario, the update would approach that of SignSGD: $$\dot{\mathbf x}(t) \approx -\eta_0 \frac{\nabla f(\mathbf x(t))}{\vert \nabla f(\mathbf x(t)) \vert}$$ (where the division and absolute value are element-wise). Since $$\mathbf s(t)$$ is a smoothed average, RMSProp provides a smoothed approximation to this normalization.
 
-It's natural to ask if this system, like the heavy ball ODE, can be reduced to a single second-order ODE for $$x(t)$$.
+It's natural to ask if this system, like the heavy ball ODE, can be reduced to a single second-order ODE for $$\mathbf x(t)$$.
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Analysis: Can RMSProp be expressed as a single second-order ODE?**
 </summary>
-Unlike the heavy ball method, reducing this system to a single, clean second-order ODE for $$x(t)$$ is not straightforward. We can formally differentiate $$\dot{x}(t)$$ with respect to time:
+Unlike the heavy ball method, reducing this system to a single, clean second-order ODE for $$\mathbf x(t)$$ is not straightforward. We can formally differentiate $$\dot{\mathbf x}(t)$$ with respect to time:
 
 $$
-\ddot{x}(t) = -\eta_0 \frac{d}{dt}\left( \frac{\nabla f(x(t))}{\sqrt{s(t)}} \right)
+\ddot{\mathbf x}(t) = -\eta_0 \frac{d}{dt}\left( \frac{\nabla f(\mathbf x(t))}{\sqrt{\mathbf s(t)}} \right)
 $$
 
-Using the quotient rule (or product rule for $$ \nabla f(x(t)) \cdot s(t)^{-1/2} $$), and assuming element-wise operations:
+Using the quotient rule (or product rule for $$ \nabla f(\mathbf x(t)) \cdot \mathbf s(t)^{-1/2} $$), and assuming element-wise operations:
 
 $$
-\ddot{x}_i(t) = -\eta_0 \left( \frac{\frac{d}{dt}(\nabla_i f(x(t))) \sqrt{s_i(t)} - \nabla_i f(x(t)) \frac{d}{dt}(\sqrt{s_i(t)})}{s_i(t)} \right)
+\ddot{x}_i(t) = -\eta_0 \left( \frac{\frac{d}{dt}(\nabla_i f(\mathbf x(t))) \sqrt{s_i(t)} - \nabla_i f(\mathbf x(t)) \frac{d}{dt}(\sqrt{s_i(t)})}{s_i(t)} \right)
 $$
 
 Let's expand the derivatives:
--   $$\frac{d}{dt}(\nabla_i f(x(t))) = \sum_j \frac{\partial^2 f}{\partial x_i \partial x_j} \dot{x}_j(t)$$. This is the $$i$$-th component of $$\nabla^2 f(x(t)) \dot{x}(t)$$.
--   $$\frac{d}{dt}(\sqrt{s_i(t)}) = \frac{1}{2\sqrt{s_i(t)}} \dot{s}_i(t) = \frac{1}{2\sqrt{s_i(t)}} (1-\beta_2)((\nabla_i f(x(t)))^2 - s_i(t))$$.
+-   $$\frac{d}{dt}(\nabla_i f(\mathbf x(t))) = \sum_j \frac{\partial^2 f}{\partial x_i \partial x_j} \dot{x}_j(t)$$. This is the $$i$$-th component of $$\nabla^2 f(\mathbf x(t)) \dot{\mathbf x}(t)$$.
+-   $$\frac{d}{dt}(\sqrt{s_i(t)}) = \frac{1}{2\sqrt{s_i(t)}} \dot{s}_i(t) = \frac{1}{2\sqrt{s_i(t)}} (1-\beta_2)((\nabla_i f(\mathbf x(t)))^2 - s_i(t))$$.
 
 Substituting these into the expression for $$\ddot{x}_i(t)$$ leads to:
 
 $$
-\ddot{x}_i(t) = -\eta_0 \left( \frac{(\nabla^2 f(x(t)) \dot{x}(t))_i}{\sqrt{s_i(t)}} - \nabla_i f(x(t)) \frac{(1-\beta_2)((\nabla_i f(x(t)))^2 - s_i(t))}{2 s_i(t)^{3/2}} \right)
+\ddot{x}_i(t) = -\eta_0 \left( \frac{(\nabla^2 f(\mathbf x(t)) \dot{\mathbf x}(t))_i}{\sqrt{s_i(t)}} - \nabla_i f(\mathbf x(t)) \frac{(1-\beta_2)((\nabla_i f(\mathbf x(t)))^2 - s_i(t))}{2 s_i(t)^{3/2}} \right)
 $$
 
-This can be rearranged, for instance, by substituting $$\dot{x}(t) = -\eta_0 s(t)^{-1/2} \nabla f(x(t))$$ into the Hessian term. The resulting equation for $$\ddot{x}(t)$$ would involve terms like $$\nabla f(x(t))$$, $$\nabla^2 f(x(t))$$, and highly complex coefficients that depend on $$s(t)$$ (which itself evolves according to its own ODE). It does not simplify to the canonical form $$M\ddot{x} + C\dot{x} + \nabla f(x)=0$$ with constant or simple state-dependent (on just $$x, \dot{x}$$) matrices $$M, C$$. The system of first-order ODEs is a more natural and transparent representation for RMSProp.
+This can be rearranged, for instance, by substituting $$\dot{\mathbf x}(t) = -\eta_0 \mathbf s(t)^{-1/2} \nabla f(\mathbf x(t))$$ into the Hessian term. The resulting equation for $$\ddot{\mathbf x}(t)$$ would involve terms like $$\nabla f(\mathbf x(t))$$, $$\nabla^2 f(\mathbf x(t))$$, and highly complex coefficients that depend on $$\mathbf s(t)$$ (which itself evolves according to its own ODE). It does not simplify to the canonical form $$M\ddot{\mathbf x} + C\dot{\mathbf x} + \nabla f(\mathbf x)=0$$ with constant or simple state-dependent (on just $$\mathbf x, \dot{\mathbf x}$$) matrices $$M, C$$. The system of first-order ODEs is a more natural and transparent representation for RMSProp.
 </details>
 
 ### Adam: Adaptive Moments
@@ -687,25 +687,25 @@ This can be rearranged, for instance, by substituting $$\dot{x}(t) = -\eta_0 s(t
 Adam (Adaptive Moment Estimation) combines the ideas of momentum (first moment of the gradient) and adaptive scaling like RMSProp (second moment of the gradient).
 
 The simplified discrete update rules (omitting bias correction and $$\epsilon$$):
-1.  Update biased first moment estimate $$m_k$$ (momentum):
+1.  Update biased first moment estimate $$\mathbf m_k$$ (momentum):
 
     $$
-    m_{k+1} = \beta_1 m_k + (1-\beta_1) \nabla f(x_k)
+    \mathbf m_{k+1} = \beta_1 \mathbf m_k + (1-\beta_1) \nabla f(\mathbf x_k)
     $$
 
-2.  Update biased second moment estimate $$s_k$$ (scaling):
+2.  Update biased second moment estimate $$\mathbf s_k$$ (scaling):
 
     $$
-    s_{k+1} = \beta_2 s_k + (1-\beta_2) (\nabla f(x_k))^2
+    \mathbf s_{k+1} = \beta_2 \mathbf s_k + (1-\beta_2) (\nabla f(\mathbf x_k))^2
     $$
 
-3.  Update parameters $$x_k$$:
+3.  Update parameters $$\mathbf x_k$$:
 
     $$
-    x_{k+1} = x_k - \eta \frac{m_{k+1}}{\sqrt{s_{k+1}}}
+    \mathbf x_{k+1} = \mathbf x_k - \eta \frac{\mathbf m_{k+1}}{\sqrt{\mathbf s_{k+1}}}
     $$
 
-    (continued) Here, $$\beta_1$$ is the decay rate for the momentum term (e.g., 0.9), and $$\beta_2$$ for the squared gradient accumulator (e.g., 0.999). If $$\nabla f(x_k)=0$$, then $$m_{k+1} = \beta_1 m_k$$ and $$s_{k+1} = \beta_2 s_k$$. The parameter $$x_k$$ will still update due to $$m_{k+1}$$ unless $$m_k$$ was zero. This is typical momentum behavior.
+    (continued) Here, $$\beta_1$$ is the decay rate for the momentum term (e.g., 0.9), and $$\beta_2$$ for the squared gradient accumulator (e.g., 0.999). If $$\nabla f(\mathbf x_k)=\mathbf 0$$, then $$\mathbf m_{k+1} = \beta_1 \mathbf m_k$$ and $$\mathbf s_{k+1} = \beta_2 \mathbf s_k$$. The parameter $$\mathbf x_k$$ will still update due to $$\mathbf m_{k+1}$$ unless $$\mathbf m_k$$ was zero. This is typical momentum behavior.
 
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
@@ -723,112 +723,112 @@ Similar to RMSProp, we can derive a system of ODEs that describes the continuous
 </summary>
 Following a similar procedure as for RMSProp, we interpret the discrete updates of Adam as a forward Euler discretization with an effective step size of $$h=1$$. One iteration of Adam corresponds to one unit of time evolution in its ODE counterpart.
 
-Let $$m_k \approx m(t)$$, $$s_k \approx s(t)$$, and $$x_k \approx x(t)$$, where $$t_k = k$$.
+Let $$\mathbf m_k \approx \mathbf m(t)$$, $$\mathbf s_k \approx \mathbf s(t)$$, and $$\mathbf x_k \approx \mathbf x(t)$$, where $$t_k = k$$.
 
-1.  **ODE for the first moment estimate $$m(t)$$$$:**
-    The discrete update for $$m_k$$ is:
-
-    $$
-    m_{k+1} = \beta_1 m_k + (1-\beta_1) \nabla f(x_k)
-    $$
-
-    Rearranging:
+1.  **ODE for the first moment estimate $$\mathbf m(t)$$$$:**
+    The discrete update for $$\mathbf m_k$$ is:
 
     $$
-    m_{k+1} - m_k = (1-\beta_1) (\nabla f(x_k) - m_k)
-    $$
-
-    Interpreting $$m_{k+1} - m_k$$ as an approximation to $$\dot{m}(t) \cdot h$$ with $$h=1$$, we get:
-
-    $$
-    \dot{m}(t) = (1-\beta_1)(\nabla f(x(t)) - m(t))
-    $$
-
-    This shows $$m(t)$$ as an exponential moving average of past gradients. It acts like a velocity term that tries to follow the current gradient.
-
-2.  **ODE for the second moment estimate $$s(t)$$$$:**
-    The discrete update for $$s_k$$ is:
-
-    $$
-    s_{k+1} = \beta_2 s_k + (1-\beta_2) (\nabla f(x_k))^2
+    \mathbf m_{k+1} = \beta_1 \mathbf m_k + (1-\beta_1) \nabla f(\mathbf x_k)
     $$
 
     Rearranging:
 
     $$
-    s_{k+1} - s_k = (1-\beta_2) ((\nabla f(x_k))^2 - s_k)
+    \mathbf m_{k+1} - \mathbf m_k = (1-\beta_1) (\nabla f(\mathbf x_k) - \mathbf m_k)
+    $$
+
+    Interpreting $$\mathbf m_{k+1} - \mathbf m_k$$ as an approximation to $$\dot{\mathbf m}(t) \cdot h$$ with $$h=1$$, we get:
+
+    $$
+    \dot{\mathbf m}(t) = (1-\beta_1)(\nabla f(\mathbf x(t)) - \mathbf m(t))
+    $$
+
+    This shows $$\mathbf m(t)$$ as an exponential moving average of past gradients. It acts like a velocity term that tries to follow the current gradient.
+
+2.  **ODE for the second moment estimate $$\mathbf s(t)$$$$:**
+    The discrete update for $$\mathbf s_k$$ is:
+
+    $$
+    \mathbf s_{k+1} = \beta_2 \mathbf s_k + (1-\beta_2) (\nabla f(\mathbf x_k))^2
+    $$
+
+    Rearranging:
+
+    $$
+    \mathbf s_{k+1} - \mathbf s_k = (1-\beta_2) ((\nabla f(\mathbf x_k))^2 - \mathbf s_k)
     $$
 
     This yields the ODE:
 
     $$
-    \dot{s}(t) = (1-\beta_2)((\nabla f(x(t)))^2 - s(t))
+    \dot{\mathbf s}(t) = (1-\beta_2)((\nabla f(\mathbf x(t)))^2 - \mathbf s(t))
     $$
 
     This is identical to the RMSProp accumulator ODE.
 
-3.  **ODE for the parameters $$x(t)$$$$:**
-    The discrete update for $$x_k$$ is:
+3.  **ODE for the parameters $$\mathbf x(t)$$$$:**
+    The discrete update for $$\mathbf x_k$$ is:
 
     $$
-    x_{k+1} = x_k - \eta \frac{m_{k+1}}{\sqrt{s_{k+1}}}
+    \mathbf x_{k+1} = \mathbf x_k - \eta \frac{\mathbf m_{k+1}}{\sqrt{\mathbf s_{k+1}}}
     $$
 
     Rearranging:
 
     $$
-    x_{k+1} - x_k = -\eta \frac{m_{k+1}}{\sqrt{s_{k+1}}}
+    \mathbf x_{k+1} - \mathbf x_k = -\eta \frac{\mathbf m_{k+1}}{\sqrt{\mathbf s_{k+1}}}
     $$
 
-    This yields the ODE (assuming $$m_{k+1} \approx m(t)$$ and $$s_{k+1} \approx s(t)$$, or more precisely, that they reflect values at $$t$$ or $$t+h$$ depending on update order, which blurs in the limit):
+    This yields the ODE (assuming $$\mathbf m_{k+1} \approx \mathbf m(t)$$ and $$\mathbf s_{k+1} \approx \mathbf s(t)$$, or more precisely, that they reflect values at $$t$$ or $$t+h$$ depending on update order, which blurs in the limit):
 
     $$
-    \dot{x}(t) = -\eta_0 \frac{m(t)}{\sqrt{s(t)}}
+    \dot{\mathbf x}(t) = -\eta_0 \frac{\mathbf m(t)}{\sqrt{\mathbf s(t)}}
     $$
 
-    where $$\eta_0$$ is the Adam learning rate parameter. The parameters move in the direction of the momentum $$m(t)$$, scaled by $$1/\sqrt{s(t)}$$.
+    where $$\eta_0$$ is the Adam learning rate parameter. The parameters move in the direction of the momentum $$\mathbf m(t)$$, scaled by $$1/\sqrt{\mathbf s(t)}$$.
 </details>
 
 The continuous-time behavior of Adam can be described by the following system of three coupled ODEs:
 
 $$
-\begin{align\ast}
-\dot{x}(t) &= -\eta_0 \frac{m(t)}{\sqrt{s(t)}} \\
-\dot{m}(t) &= (1-\beta_1) (\nabla f(x(t)) - m(t)) \\
-\dot{s}(t) &= (1-\beta_2) ((\nabla f(x(t)))^2 - s(t))
-\end{align\ast}
+\begin{align*}
+\dot{\mathbf x}(t) &= -\eta_0 \frac{\mathbf m(t)}{\sqrt{\mathbf s(t)}} \\
+\dot{\mathbf m}(t) &= (1-\beta_1) (\nabla f(\mathbf x(t)) - \mathbf m(t)) \\
+\dot{\mathbf s}(t) &= (1-\beta_2) ((\nabla f(\mathbf x(t)))^2 - \mathbf s(t))
+\end{align*}
 $$
 
-(Element-wise operations for $$m(t), s(t)$$, and terms in their updates, and in $$\dot{x}(t)$$ involving division and square root.)
+(Element-wise operations for $$\mathbf m(t), \mathbf s(t)$$, and terms in their updates, and in $$\dot{\mathbf x}(t)$$ involving division and square root.)
 
 **Interpretation of the Adam ODE System:**
--   Adam combines a momentum-like update (via $$m(t)$$) with adaptive coordinate-wise scaling (via $$s(t)$$).
--   $$\dot{m}(t)$$ shows $$m(t)$$ as a smoothed version of the gradient, providing inertia.
--   $$\dot{s}(t)$$ provides the adaptive scaling based on recent gradient magnitudes.
--   $$\dot{x}(t)$$ uses the smoothed gradient $$m(t)$$ for direction and scales it adaptively.
--   The system describes a particle whose motion has inertia ($$m(t)$$) and whose "mobility" in each direction is adaptively tuned ($$s(t)$$). This can be thought of as a "heavy ball" moving on a dynamically changing, anisotropic landscape.
--   The bias correction terms ($$1/(1-\beta_1^k)$$ and $$1/(1-\beta_2^k)$$) in practical Adam are important for early iterations to correct the initialization bias of $$m_k$$ and $$s_k$$ (which start at 0). In an ODE context, this could be modeled by time-dependent coefficients $$(1-\beta_1(t))$$ and $$(1-\beta_2(t))$$ or by specific initial conditions or scalings of $$m(t)$$ and $$s(t)$$ for small $$t$$. For large $$t$$ (many iterations), these corrections become negligible.
+-   Adam combines a momentum-like update (via $$\mathbf m(t)$$) with adaptive coordinate-wise scaling (via $$\mathbf s(t)$$).
+-   $$\dot{\mathbf m}(t)$$ shows $$\mathbf m(t)$$ as a smoothed version of the gradient, providing inertia.
+-   $$\dot{\mathbf s}(t)$$ provides the adaptive scaling based on recent gradient magnitudes.
+-   $$\dot{\mathbf x}(t)$$ uses the smoothed gradient $$\mathbf m(t)$$ for direction and scales it adaptively.
+-   The system describes a particle whose motion has inertia ($$\mathbf m(t)$$) and whose "mobility" in each direction is adaptively tuned ($$\mathbf s(t)$$). This can be thought of as a "heavy ball" moving on a dynamically changing, anisotropic landscape.
+-   The bias correction terms ($$1/(1-\beta_1^k)$$ and $$1/(1-\beta_2^k)$$) in practical Adam are important for early iterations to correct the initialization bias of $$\mathbf m_k$$ and $$\mathbf s_k$$ (which start at $$\mathbf 0$$). In an ODE context, this could be modeled by time-dependent coefficients $$(1-\beta_1(t))$$ and $$(1-\beta_2(t))$$ or by specific initial conditions or scalings of $$\mathbf m(t)$$ and $$\mathbf s(t)$$ for small $$t$$. For large $$t$$ (many iterations), these corrections become negligible.
 
-Again, we can investigate if this system can be reduced to a single second-order ODE for $$x(t)$$.
+Again, we can investigate if this system can be reduced to a single second-order ODE for $$\mathbf x(t)$$.
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Analysis: Can Adam be expressed as a single second-order ODE?**
 </summary>
-This is even more complex than for RMSProp due to the additional ODE for $$m(t)$$.
-From the first ODE, $$\dot{x}(t) = -\eta_0 \frac{m(t)}{\sqrt{s(t)}}$$, we can express $$m(t)$$ in terms of $$\dot{x}(t)$$ and $$s(t)$$ (assuming element-wise invertibility of $$1/\sqrt{s(t)}$$):
+This is even more complex than for RMSProp due to the additional ODE for $$\mathbf m(t)$$.
+From the first ODE, $$\dot{\mathbf x}(t) = -\eta_0 \frac{\mathbf m(t)}{\sqrt{\mathbf s(t)}}$$, we can express $$\mathbf m(t)$$ in terms of $$\dot{\mathbf x}(t)$$ and $$\mathbf s(t)$$ (assuming element-wise invertibility of $$1/\sqrt{\mathbf s(t)}$$):
 
 $$
-m(t) = -\frac{\sqrt{s(t)}}{\eta_0} \dot{x}(t)
+\mathbf m(t) = -\frac{\sqrt{\mathbf s(t)}}{\eta_0} \dot{\mathbf x}(t)
 $$
 
-Now, differentiate this expression for $$m(t)$$ with respect to time to get $$\dot{m}(t)$$:
+Now, differentiate this expression for $$\mathbf m(t)$$ with respect to time to get $$\dot{\mathbf m}(t)$$:
 
 $$
-\dot{m}(t) = -\frac{1}{\eta_0} \frac{d}{dt} \left( \sqrt{s(t)} \dot{x}(t) \right)
+\dot{\mathbf m}(t) = -\frac{1}{\eta_0} \frac{d}{dt} \left( \sqrt{\mathbf s(t)} \dot{\mathbf x}(t) \right)
 $$
 
-Using the product rule (for each component, assuming diagonal $$s(t)$$$$):
+Using the product rule (for each component, assuming diagonal $$\mathbf s(t)$$$$):
 
 $$
 \dot{m}_i(t) = -\frac{1}{\eta_0} \left( \frac{d\sqrt{s_i(t)}}{dt} \dot{x}_i(t) + \sqrt{s_i(t)} \ddot{x}_i(t) \right)
@@ -841,23 +841,23 @@ $$
 \dot{m}_i(t) = -\frac{1}{\eta_0} \left( \frac{\dot{s}_i(t)}{2\sqrt{s_i(t)}} \dot{x}_i(t) + \sqrt{s_i(t)} \ddot{x}_i(t) \right)
 $$
 
-Substitute this $$\dot{m}(t)$$ and the expression for $$m(t)$$ into Adam's second ODE, $$\dot{m}(t) = (1-\beta_1) (\nabla f(x(t)) - m(t))$$:
+Substitute this $$\dot{\mathbf m}(t)$$ and the expression for $$\mathbf m(t)$$ into Adam's second ODE, $$\dot{\mathbf m}(t) = (1-\beta_1) (\nabla f(\mathbf x(t)) - \mathbf m(t))$$:
 
 $$
--\frac{1}{\eta_0} \left( \frac{\dot{s}(t)}{2\sqrt{s(t)}} \odot \dot{x}(t) + \sqrt{s(t)} \odot \ddot{x}(t) \right) = (1-\beta_1)\left(\nabla f(x(t)) - \left(-\frac{\sqrt{s(t)}}{\eta_0}\dot{x}(t)\right)\right)
+-\frac{1}{\eta_0} \left( \frac{\dot{\mathbf s}(t)}{2\sqrt{\mathbf s(t)}} \odot \dot{\mathbf x}(t) + \sqrt{\mathbf s(t)} \odot \ddot{\mathbf x}(t) \right) = (1-\beta_1)\left(\nabla f(\mathbf x(t)) - \left(-\frac{\sqrt{\mathbf s(t)}}{\eta_0}\dot{\mathbf x}(t)\right)\right)
 $$
 
 (where $$\odot$$ denotes element-wise product).
-Rearranging to look like a second-order ODE for $$x(t)$$:
+Rearranging to look like a second-order ODE for $$\mathbf x(t)$$:
 
 $$
-\frac{\sqrt{s(t)}}{\eta_0} \odot \ddot{x}(t) + \left[ \frac{\dot{s}(t)}{2\eta_0\sqrt{s(t)}} + (1-\beta_1)\frac{\sqrt{s(t)}}{\eta_0} \right] \odot \dot{x}(t) + (1-\beta_1)\nabla f(x(t)) = 0
+\frac{\sqrt{\mathbf s(t)}}{\eta_0} \odot \ddot{\mathbf x}(t) + \left[ \frac{\dot{\mathbf s}(t)}{2\eta_0\sqrt{\mathbf s(t)}} + (1-\beta_1)\frac{\sqrt{\mathbf s(t)}}{\eta_0} \right] \odot \dot{\mathbf x}(t) + (1-\beta_1)\nabla f(\mathbf x(t)) = \mathbf 0
 $$
 
-This formally looks like $$M(s)\ddot{x}(t) + C(s,\dot{s})\dot{x}(t) + K \nabla f(x(t)) = 0$$, where the "mass" $$M(s)$$ and "damping" $$C(s,\dot{s})$$ are diagonal matrices whose entries depend on $$s(t)$$ and $$\dot{s}(t)$$.
-However, $$s(t)$$ is governed by its own ODE $$\dot{s}(t) = (1-\beta_2)((\nabla f(x(t)))^2 - s(t)) $$. Substituting $$\dot{s}(t)$$ into the expression for $$C(s,\dot{s})$$ will make the "damping" term highly complex, depending on $$s(t)$$ and $$(\nabla f(x(t)))^2$$.
-The coefficients of this "single" second-order ODE for $$x(t)$$ are not simple constants nor simple functions of just $$x$$ and $$\dot{x}$$. They depend on an auxiliary variable $$s(t)$$ that has its own dynamics driven by the history of gradients encountered along the path $$x(t)$$.
-While one can formally write it this way, its coefficients are so intricately coupled with the state and history via $$s(t)$$ that the system form is generally more transparent for analysis and interpretation.
+This formally looks like $$M(\mathbf s)\ddot{\mathbf x}(t) + C(\mathbf s,\dot{\mathbf s})\dot{\mathbf x}(t) + K \nabla f(\mathbf x(t)) = \mathbf 0$$, where the "mass" $$M(\mathbf s)$$ and "damping" $$C(\mathbf s,\dot{\mathbf s})$$ are diagonal matrices whose entries depend on $$\mathbf s(t)$$ and $$\dot{\mathbf s}(t)$$.
+However, $$\mathbf s(t)$$ is governed by its own ODE $$\dot{\mathbf s}(t) = (1-\beta_2)((\nabla f(\mathbf x(t)))^2 - \mathbf s(t)) $$. Substituting $$\dot{\mathbf s}(t)$$ into the expression for $$C(\mathbf s,\dot{\mathbf s})$$ will make the "damping" term highly complex, depending on $$\mathbf s(t)$$ and $$(\nabla f(\mathbf x(t)))^2$$.
+The coefficients of this "single" second-order ODE for $$\mathbf x(t)$$ are not simple constants nor simple functions of just $$\mathbf x$$ and $$\dot{\mathbf x}$$. They depend on an auxiliary variable $$\mathbf s(t)$$ that has its own dynamics driven by the history of gradients encountered along the path $$\mathbf x(t)$$.
+While one can formally write it this way, its coefficients are so intricately coupled with the state and history via $$\mathbf s(t)$$ that the system form is generally more transparent for analysis and interpretation.
 </details>
 
 The ODE perspective for adaptive methods like RMSProp and Adam reveals them as sophisticated dynamical systems that implement preconditioned, momentum-driven descent, where the preconditioning and momentum effects are themselves evolving based on the optimization trajectory. This provides intuition for their ability to navigate complex loss landscapes effectively.
@@ -880,15 +880,25 @@ Furthermore, this ODE perspective extends to adaptive methods like RMSProp and A
 
 ## Summary of Key Methods and ODEs
 
-| Method                        | Update Rule (one common form, simplified)                                                                                                                                                             | Underlying ODE (Conceptual or Direct, simplified)                                                                                                              | Key Idea                                    |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| **Gradient Descent (GD)**     | $$x_{k+1} = x_k - \eta \nabla f(x_k)$$                                                                                                                                                                | $$\dot{x}(t) = -\nabla f(x(t))$$ (Gradient Flow)                                                                                                               | Step along negative gradient                |
-| **Polyak's Heavy Ball (PHB)** | $$x_{k+1} = x_k - \eta \nabla f(x_k) + \beta (x_k - x_{k-1})$$                                                                                                                                        | $$m \ddot{x} + \gamma \dot{x} + \nabla f(x) = 0$$                                                                                                              | Inertia + friction, LMM for Gradient Flow   |
-| **Nesterov's Accel. (NAG)**   | $$v_{k+1} = \beta v_k - \eta \nabla f(x_k + \beta v_k)$$ <br> $$x_{k+1} = x_k + v_{k+1}$$                                                                                                             | $$\ddot{x}(t) + \frac{k_d}{t} \dot{x}(t) + \nabla f(x(t)) = 0$$ (Su, Boyd, Candès)                                                                             | "Look-ahead" gradient, time-varying damping |
-| **RMSProp**                   | $$s_{k+1} = \beta_2 s_k + (1-\beta_2) (\nabla f_k)^2$$ <br> $$x_{k+1} = x_k - \frac{\eta}{\sqrt{s_{k+1}}} \nabla f_k$$                                                                                | $$\dot{x} = -\frac{\eta_0}{\sqrt{s}} \nabla f(x)$$ <br> $$\dot{s} = (1-\beta_2) ((\nabla f(x))^2 - s)$$                                                        | Adaptive per-parameter learning rates       |
-| **Adam**                      | $$m_{k+1}\!=\!\beta_1 m_k \!+\! (1\!-\!\beta_1) \nabla f_k$$ <br> $$s_{k+1}\!=\!\beta_2 s_k \!+\! (1\!-\!\beta_2) (\nabla f_k)^2$$ <br> $$x_{k+1}\!=\!x_k \!-\! \eta \frac{m_{k+1}}{\sqrt{s_{k+1}}}$$ | $$\dot{x}\!=\!-\eta_0 \frac{m}{\sqrt{s}}$$ <br> $$\dot{m}\!=\!(1\!-\!\beta_1)(\nabla f(x)\!-\!m)$$ <br> $$\dot{s}\!=\!(1\!-\!\beta_2)((\nabla f(x))^2\!-\!s)$$ | Momentum + adaptive learning rates          |
+| Method                        | Update Rule (one common form, simplified)                                                                                                                                                                                                                             | Underlying ODE (Conceptual or Direct, simplified)                                                                                                                                                                                      | Key Idea                                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| **Gradient Descent (GD)**     | $$\mathbf x_{k+1} = \mathbf x_k - \eta \nabla f(\mathbf x_k)$$                                                                                                                                                                                                        | $$\dot{\mathbf x}(t) = -\nabla f(\mathbf x(t))$$ (Gradient Flow)                                                                                                                                                                       | Step along negative gradient                |
+| **Polyak's Heavy Ball (PHB)** | $$\mathbf x_{k+1} = \mathbf x_k - \eta \nabla f(\mathbf x_k) + \beta (\mathbf x_k - \mathbf x_{k-1})$$                                                                                                                                                                | $$m \ddot{\mathbf x} + \gamma \dot{\mathbf x} + \nabla f(\mathbf x) = \mathbf 0$$                                                                                                                                                      | Inertia + friction, LMM for Gradient Flow   |
+| **Nesterov's Accel. (NAG)**   | $$\mathbf v_{k+1} = \beta \mathbf v_k - \eta \nabla f(\mathbf x_k + \beta \mathbf v_k)$$ <br> $$\mathbf x_{k+1} = \mathbf x_k + \mathbf v_{k+1}$$                                                                                                                     | $$\ddot{\mathbf x}(t) + \frac{k_d}{t} \dot{\mathbf x}(t) + \nabla f(\mathbf x(t)) = \mathbf 0$$ (Su, Boyd, Candès)                                                                                                                     | "Look-ahead" gradient, time-varying damping |
+| **RMSProp**                   | $$\mathbf s_{k+1} = \beta_2 \mathbf s_k + (1-\beta_2) (\nabla f_k)^2$$ <br> $$\mathbf x_{k+1} = \mathbf x_k - \frac{\eta}{\sqrt{\mathbf s_{k+1}}} \nabla f_k$$                                                                                                        | $$\dot{\mathbf x} = -\frac{\eta_0}{\sqrt{\mathbf s}} \nabla f(\mathbf x)$$ <br> $$\dot{\mathbf s} = (1-\beta_2) ((\nabla f(\mathbf x))^2 - \mathbf s)$$                                                                                | Adaptive per-parameter learning rates       |
+| **Adam**                      | $$\mathbf m_{k+1}\!=\!\beta_1 \mathbf m_k \!+\! (1\!-\!\beta_1) \nabla f_k$$ <br> $$\mathbf s_{k+1}\!=\!\beta_2 \mathbf s_k \!+\! (1\!-\!\beta_2) (\nabla f_k)^2$$ <br> $$\mathbf x_{k+1}\!=\!\mathbf x_k \!-\! \eta \frac{\mathbf m_{k+1}}{\sqrt{\mathbf s_{k+1}}}$$ | $$\dot{\mathbf x}\!=\!-\eta_0 \frac{\mathbf m}{\sqrt{\mathbf s}}$$ <br> $$\dot{\mathbf m}\!=\!(1\!-\!\beta_1)(\nabla f(\mathbf x)\!-\!\mathbf m)$$ <br> $$\dot{\mathbf s}\!=\!(1\!-\!\beta_2)((\nabla f(\mathbf x))^2\!-\!\mathbf s)$$ | Momentum + adaptive learning rates          |
 
-_Note: $$\nabla f_k = \nabla f(x_k)$$. Vector operations like square, square root, and division are typically element-wise in the adaptive methods._
+_Note: $$\nabla f_k = \nabla f(\mathbf x_k)$$. Vector operations like square, square root, and division are typically element-wise in the adaptive methods._
+
+## Further Perspectives
+
+Beyond the direct ODE derivations discussed, these optimization methods can be understood through several other rich mathematical lenses. For example:
+-   The **variational or Lagrangian perspective**, particularly using Bregman Lagrangians (as in Wibisono et al., 2016), provides a unified framework for deriving momentum methods like PHB and NAG via time-rescaling and symplectic discretization of underlying mechanical systems.
+-   A **control-theoretic view** (e.g., Lessard et al., 2016) treats the optimization process as designing a controller (the algorithm) to steer the system (the parameters) to an optimum, often by analyzing stability and performance using tools from robust control.
+-   The role of **conformal symplectic integrators** (Zhang et al., 2020) explains how methods like PHB preserve certain geometric structures even in the presence of dissipation (friction), leading to favorable stability properties.
+-   Recent analyses of **continuous-time Adam-style methods** (e.g., Gould & Tanaka, 2024) continue to refine our understanding of stability regions and dynamics for adaptive optimizers by studying their ODE limits.
+
+These alternative viewpoints often provide complementary insights and can inspire new algorithmic designs.
 
 ## Reflection
 
