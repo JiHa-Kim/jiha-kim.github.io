@@ -193,7 +193,7 @@ flowchart TD
 
     LA --> CAL["Calculus"]
 
-    CAL --> EFA["Functional Analysis & Matrix Spectral Theory"]
+    CAL --> EFA["Functional Analysis & Matrix Norms"]
     CAL --> NA["Numerical Analysis"]
 
     EFA --> TC["Tensor Calculus"]
@@ -211,15 +211,17 @@ flowchart TD
 If the mermaid flowchart does not render:
 1. `Linear Algebra`
 2. `Multivariable Calculus` (connected from Linear Algebra)
-3. From `Multivariable Calculus`, two parallel branches:
-    1. `Functional Analysis & Matrix Spectral Theory`
-    2. `Numerical Analysis`
-4. From `Functional Analysis & Matrix Spectral Theory`, two branches:
-    1. `Tensor Calculus`, which leads to:
-        1. `Differential Geometry` (which then, along with Statistics and Information Theory, leads to `Information Geometry`)
-        2. `Statistics and Information Theory` (which then, along with Differential Geometry, leads to `Information Geometry`)
-    2. `Variational Calculus`, which leads to:
-        1. `Convex Analysis` (which then leads to `Online Learning`)
+
+From `Multivariable Calculus`, two parallel branches:
+    - `Functional Analysis & Matrix Norms`
+    - `Numerical Analysis`
+
+From `Functional Analysis & Matrix Norms`, two branches:
+    - `Tensor Calculus`, which leads to:
+        - `Differential Geometry` (which then, along with Statistics and Information Theory, leads to `Information Geometry`)
+        - `Statistics and Information Theory` (which then, along with Differential Geometry, leads to `Information Geometry`)
+    - `Variational Calculus`, which leads to:
+        - `Convex Analysis` (which then leads to `Online Learning`)
 
 The series is mostly intended to be self-contained beyond these items.
 

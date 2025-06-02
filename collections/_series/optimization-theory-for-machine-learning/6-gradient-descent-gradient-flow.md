@@ -563,3 +563,7 @@ These connections will be explored in future posts.
 -   *Numerical Optimization* by Nocedal & Wright.
 -   *Convex Optimization* by Boyd & Vandenberghe.
 -   Su, W., Boyd, S., & Candès, E. (2016). A differential equation for modeling Nesterov’s accelerated gradient method: Theory and insights. *Journal of Machine Learning Research, 17*(153), 1-43. (For connections to accelerated methods).
+
+## Appendix
+
+Fun fact: the Fokker-Planck equation, which describes the evolution of the probability density of a system, can be derived from gradient flow in the 2-Wasserstein space. This is a fascinating area of research in the context of *optimal transport*, i.e. finding the best way to transport goods from one place and arrangement to another, also called the "earth-mover's problem". Mathematically, we find the minimum cost of transporting one probability distribution to another. See e.g. these [lecture notes](https://personal.math.ubc.ca/~geoff/courses/W2019T1/Lecture16.pdf) for a short statement, or [Jordan et al. (1996)](https://francahoffmann.wordpress.com/wp-content/uploads/2018/07/302ca7465ae824f3d2d629bfeaacfb56b4b8.pdf) for a more in-depth treatment.

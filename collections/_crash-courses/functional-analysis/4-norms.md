@@ -1,0 +1,4 @@
+- [ ] matrix norms
+  - [ ] vector-norm induced matrix norms
+  - [ ] Schatten p-norms
+  - [ ] optional: energy/quadratic norms
