@@ -41,7 +41,7 @@ llm-instructions: |
     text...
   Use LaTeX commands for symbols as much as possible (e.g. $$\vert$$ for
   absolute value, $$\ast$$ for asterisk). Avoid using the literal vertical bar
-  symbol; use \vert and \Vert instead.
+  symbol; use \vert and \Vert.
   The syntax for lists is:
   1. $$inline$$ item
   2. item $$inline$$
@@ -127,6 +127,8 @@ Welcome to the first part of our crash course on Tensor Calculus! Our goal here 
 ## 1. Introduction: Why Tensors? The ML Motivation
 
 You've likely encountered "tensors" in machine learning libraries like TensorFlow or PyTorch, often referring to multi-dimensional arrays. While this is a practical starting point, the mathematical concept of a tensor is richer and more fundamental. Tensors are geometric objects whose components transform in very specific ways when you change your coordinate system. This transformation property is key – it ensures that physical laws and geometric relationships described by tensors remain consistent, regardless of the chosen observational frame.
+
+I mentioned in the linear algebra course that you can indeed multiply vectors, but at the cost of leaving the realm of linearity. Tensors fundamentally rely on this fact through the *tensor product*. As we will see, just like real vectors can be thought of as physical geometric objects that live independently of our coordinate system, thus "grid of numbers", tensors are a product of vectors and covectors and thus similarly invariant under coordinate transformations; however, how their components in that coordinate system will be of interest to study.
 
 Why is this important for Machine Learning?
 
@@ -219,6 +221,15 @@ Let's look at some examples:
 Writing out sums like $$\sum_{i=1}^n \omega_i v^i$$ can become cumbersome with multiple indices. The Einstein summation convention simplifies this notation significantly.
 
 **Rule:** If an index variable appears twice in a single term, once as an upper (contravariant) index and once as a lower (covariant) index, summation over all possible values of that index (typically from 1 to $$n$$, the dimension of the space) is implied.
+
+<blockquote class="box-warning" markdown="1">
+<div class="title" markdown="1">
+**Warning.** Einstein Notation: Components vs. Abstract Tensors
+</div>
+Einstein summation notation primarily deals with the *components* of tensors (e.g., $$v^i$$, $$A^i_j$$). This means that equations written using this notation are relationships between these numerical components and are therefore implicitly dependent on the chosen basis.
+
+The "true formula" or abstract representation of a tensor equation (e.g., $$\mathbf{y} = \mathbf{A}(\mathbf{x})$$) or an explicit basis representation (e.g., $$\mathbf{v} = v^i \mathbf{e}_i$$) is inherently basis-independent or makes the basis dependence explicit. In contrast, component equations like $$y^i = A^i_j x^j$$ are compact but "hide" the basis vectors. This distinction is crucial: the components $$v^i$$ will change if the basis $$\{\mathbf{e}_i\}$$ changes, even if the vector $$\mathbf{v}$$ itself does not. We will explore how components transform in Part 2.
+</blockquote>
 
 *   Such a repeated index is called a **dummy index** or **summation index**.
 *   An index that appears only once in a term is called a **free index**. Free indices must match on both sides of an equation.
