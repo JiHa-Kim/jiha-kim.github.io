@@ -141,7 +141,7 @@ llm-instructions: |
   without an explicit request.
 ---
 
-Welcome to the concluding part of our Information Geometry (IG) crash course! In [Part 1](link_to_ig_part1_placeholder), we introduced statistical manifolds and the Fisher Information Metric (FIM). In [Part 2](link_to_ig_part2_placeholder), we explored dual connections, dually flat spaces, Bregman divergences, and the crucial concept of the Natural Gradient.
+Welcome to the concluding part of our Information Geometry (IG) crash course! In Part 1, we introduced statistical manifolds and the Fisher Information Metric (FIM). In link_to_ig_part2_placeholder, we explored dual connections, dually flat spaces, Bregman divergences, and the crucial concept of the Natural Gradient.
 
 This final part aims to bridge these theoretical concepts more directly to their applications in machine learning and briefly outline some further horizons. The goal is to see how the geometric insights from IG can inform the design and understanding of learning algorithms.
 

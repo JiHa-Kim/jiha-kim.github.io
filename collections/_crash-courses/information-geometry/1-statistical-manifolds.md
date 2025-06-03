@@ -143,7 +143,7 @@ llm-instructions: |
 
 Welcome to this crash course on Information Geometry (IG)! This field beautifully merges concepts from differential geometry with statistics and information theory, providing a powerful geometric framework for understanding statistical models, inference, and even machine learning optimization algorithms. This first part lays the groundwork by introducing statistical manifolds and the cornerstone of IG: the Fisher Information Metric.
 
-This course assumes familiarity with concepts from our [Differential Geometry](link_to_dg_course_placeholder) and [Statistics & Information Theory](link_to_sit_course_placeholder) crash courses.
+This course assumes familiarity with concepts from our Differential Geometry and Statistics and Information Theory courses.
 
 ## Introduction: Why Geometry for Statistics?
 

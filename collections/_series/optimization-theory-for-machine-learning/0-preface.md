@@ -16,7 +16,7 @@ llm-instructions: |
     - Mathematical Optimization
   For both tags and categories, please employ capitalization for distinction.
 
-  Never introduce any non-existant path, like an image.
+  NEVER introduce any non-existant URL or path, like an image.
   This causes build errors. For example, simply put image: # placeholder
 
   For writing the posts, please use the Kramdown MathJax syntax.

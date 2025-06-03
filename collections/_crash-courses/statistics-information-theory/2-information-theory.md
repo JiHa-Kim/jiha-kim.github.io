@@ -146,7 +146,7 @@ llm-instructions: |
 
 ## Introduction
 
-Welcome to Part 2 of our crash course on Statistics and Information Theory! In [Part 1: Statistical Foundations for ML](link-to-part-1), we laid the statistical groundwork, covering probability, random variables, common distributions, and estimation. Now, we venture into Information Theory, a field pioneered by Claude Shannon that provides a mathematical framework for quantifying information, uncertainty, and the relationships between data sources.
+Welcome to Part 2 of our crash course on Statistics and Information Theory! In Part 1: Statistical Foundations for ML, we laid the statistical groundwork, covering probability, random variables, common distributions, and estimation. Now, we venture into Information Theory, a field pioneered by Claude Shannon that provides a mathematical framework for quantifying information, uncertainty, and the relationships between data sources.
 
 These concepts are not just abstract; they are fundamental to understanding many aspects of machine learning, including:
 -   Measuring the "surprise" or inherent uncertainty of random variables (Entropy).

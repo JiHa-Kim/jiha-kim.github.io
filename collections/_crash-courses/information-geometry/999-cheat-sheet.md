@@ -142,7 +142,7 @@ llm-instructions: |
   without an explicit request.
 ---
 
-This cheat sheet provides a quick summary of the key concepts, definitions, and formulas covered in our Information Geometry (IG) crash course. Refer back to [Part 1](link_to_ig_part1_placeholder), [Part 2](link_to_ig_part2_placeholder), and [Part 3](link_to_ig_part3_placeholder) for detailed explanations.
+This cheat sheet provides a quick summary of the key concepts, definitions, and formulas covered in our Information Geometry (IG) crash course. Refer back to the main course materials for more detailed explanations and examples.
 
 ## Core Concepts
 

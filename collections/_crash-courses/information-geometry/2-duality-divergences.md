@@ -142,9 +142,9 @@ llm-instructions: |
   without an explicit request.
 ---
 
-Welcome back to our crash course on Information Geometry! In [Part 1](link_to_ig_part1_placeholder), we established that statistical models can be viewed as statistical manifolds equipped with the Fisher Information Metric (FIM), which provides a natural way to measure distances based on statistical distinguishability.
+Welcome back to our crash course on Information Geometry! In Part 1, we established that statistical models can be viewed as statistical manifolds equipped with the Fisher Information Metric (FIM), which provides a natural way to measure distances based on statistical distinguishability.
 
-Now, we'll build upon this foundation to explore more advanced geometric structures: affine connections, the crucial concept of duality, dually flat spaces, and Bregman divergences. These concepts will culminate in the introduction of the **Natural Gradient**, a powerful optimization algorithm that directly leverages the geometry of the statistical manifold. This part will draw upon concepts from our [Differential Geometry](link_to_dg_course_placeholder) crash course, particularly regarding connections and covariant derivatives.
+Now, we'll build upon this foundation to explore more advanced geometric structures: affine connections, the crucial concept of duality, dually flat spaces, and Bregman divergences. These concepts will culminate in the introduction of the **Natural Gradient**, a powerful optimization algorithm that directly leverages the geometry of the statistical manifold. This part will draw upon concepts from our Differential Geometry crash course, particularly regarding connections and covariant derivatives.
 
 ## Recap from Part 1
 
@@ -155,7 +155,7 @@ Quick reminder:
 
 ## Affine Connections on Statistical Manifolds
 
-A Riemannian metric $$g$$ alone defines lengths and angles. To define concepts like "straight lines" (geodesics) and parallel transport of vectors, we need an **affine connection** $$\nabla$$. An affine connection specifies how to differentiate vector fields along curves on the manifold. (See the [Differential Geometry](link_to_dg_course_placeholder) course for details on connections and Christoffel symbols $$\Gamma_{ijk}$$).
+A Riemannian metric $$g$$ alone defines lengths and angles. To define concepts like "straight lines" (geodesics) and parallel transport of vectors, we need an **affine connection** $$\nabla$$. An affine connection specifies how to differentiate vector fields along curves on the manifold. (See the Differential Geometry course for details on connections and Christoffel symbols $$\Gamma_{ijk}$$).
 
 On a general Riemannian manifold, there's a unique metric-compatible and torsion-free connection called the **Levi-Civita connection** ($$\nabla^{(0)}$$). While fundamental, it turns out that in Information Geometry, a *pair* of dual connections often provides a richer structure.
 

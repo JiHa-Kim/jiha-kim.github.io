@@ -146,7 +146,7 @@ llm-instructions: |
 
 ## Introduction
 
-This cheat sheet provides a quick reference to the key definitions, formulas, and concepts covered in the [Statistics & Info Theory Part 1: Statistical Foundations for ML](link-to-part-1-if-available) and [Statistics & Info Theory Part 2: Information Theory Essentials for ML](link-to-part-2-if-available) crash course posts. Use it as a quick reminder or for reviewing core ideas.
+This cheat sheet provides a quick reference to the key definitions, formulas, and concepts covered in the Statistics & Info Theory Part 1: Statistical Foundations for ML and Statistics & Info Theory Part 2: Information Theory Essentials for ML crash course posts. Use it as a quick reminder or for reviewing core ideas.
 
 ## Part 1: Statistical Foundations Recap
 
@@ -161,10 +161,10 @@ This cheat sheet provides a quick reference to the key definitions, formulas, an
 
 ### Random Variables (RVs)
 
-| Concept                      | Discrete RV                                 | Continuous RV                                               |
-| :--------------------------- | :------------------------------------------ | :---------------------------------------------------------- |
-| **Description**              | Probability Mass Function (PMF): $$p_X(x)$$ | Probability Density Function (PDF): $$f_X(x)$$              |
-| **PMF/PDF Properties**       | $$\sum_x p_X(x) = 1$$, $$p_X(x) \ge 0$$     | $$\int_{-\infty}^{\infty} f_X(x) dx = 1$$, $$f_X(x) \ge 0$$ |
+| Concept                       | Discrete RV                                 | Continuous RV                                               |
+| :---------------------------- | :------------------------------------------ | :---------------------------------------------------------- |
+| **Description**               | Probability Mass Function (PMF): $$p_X(x)$$ | Probability Density Function (PDF): $$f_X(x)$$              |
+| **PMF/PDF Properties**        | $$\sum_x p_X(x) = 1$$, $$p_X(x) \ge 0$$     | $$\int_{-\infty}^{\infty} f_X(x) dx = 1$$, $$f_X(x) \ge 0$$ |
 | **CDF $$F_X(x)=P(X \le x)$$** | $$F_X(x) = \sum_{k \le x} p_X(k)$$          | $$F_X(x) = \int_{-\infty}^x f_X(t) dt$$                     |
 
 ### Expectation, Variance, Covariance
