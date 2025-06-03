@@ -512,6 +512,24 @@ The theory of Fourier series and Fourier transforms finds its natural home in Hi
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
+**Is the Normal PDF the Only Eigenfunction of the Fourier Transform?**
+</summary>
+There's a common assertion that "the normal PDF is the only (up to affine transformation due to linearity of Fourier Transform) eigenfunction of the Fourier Transform." This statement, while pointing to an important property of Gaussian functions, requires some clarification:
+
+*   **Gaussian Eigenfunctions:** Gaussian functions, such as $$e^{-ax^2}$$ (which are proportional to a centered normal PDF), are indeed eigenfunctions of the Fourier Transform. For specific choices of $$a$$ and the FT definition, the eigenvalue can be 1. For example, $$e^{-\pi x^2}$$ is an eigenfunction of $$\mathcal{F}[f](\xi) = \int_{-\infty}^{\infty} f(x)e^{-2\pi i x\xi}dx$$ with eigenvalue 1.
+
+*   **The Hermite Functions:** The complete set of orthogonal eigenfunctions of the Fourier Transform in $$L_2(\mathbb{R})$$ is given by the Hermite functions: $$\psi_n(x) = C_n H_n(x) e^{-x^2/2}$$, where $$H_n(x)$$ are Hermite polynomials and $$n=0, 1, 2, \dots$$. The corresponding eigenvalues are $$(-i)^n$$.
+    The $$n=0$$ Hermite function is $$\psi_0(x) = C_0 e^{-x^2/2}$$, which is a Gaussian. Other Hermite functions (for $$n>0$$) involve polynomial factors (e.g., $$x e^{-x^2/2}$$, $$(4x^2-2)e^{-x^2/2}$$) and are thus not simple Gaussians/normal PDFs.
+
+*   **"Only" and "Affine Transformation":** The claim often means that the Gaussian (the $$n=0$$ case) is the only eigenfunction in this Hermite series that is purely Gaussian in shape, without polynomial multipliers.
+    An "affine transformation" of a function $$f(x)$$ like $$g(x) = K \cdot f(Ax+B)$$ does not always preserve the eigenfunction property in a simple way for arbitrary $$A, B$$. For instance, the Fourier Transform of $$f(x+B)$$ is $$e^{2\pi i B\xi} \hat{f}(\xi)$$. If $$\hat{f}(\xi) = \lambda f(\xi)$$, then $$\mathcal{F}\{f(x+B)\}(\xi) = \lambda e^{2\pi i B\xi} f(\xi)$$, which is not generally of the form $$\lambda' f(\xi+B)$$ unless $$B=0$$ (i.e., the function is centered).
+    The "linearity of the Fourier Transform" part correctly notes that if $$f(x)$$ is an eigenfunction with eigenvalue $$\lambda$$, then $$K f(x)$$ is also an eigenfunction with the same eigenvalue $$\lambda$$.
+
+In summary, the Gaussian (or normal PDF shape) is unique as the foundational ($$n=0$$) eigenfunction among the complete set of Hermite eigenfunctions, being the only one without polynomial factors.
+</details>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
 **Deep Dive: The Fourier Transform as an "Imaginary Unit" in Function Space**
 </summary>
 It's a fascinating and profound fact that the Fourier Transform ($$\mathcal{F}$$), in certain settings, behaves remarkably like the imaginary unit $$i = \sqrt{-1}$$. This connection opens up a rich theoretical landscape with many parallels to familiar concepts from linear algebra and complex numbers.
