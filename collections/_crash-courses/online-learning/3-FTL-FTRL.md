@@ -149,17 +149,17 @@ In Module 2, we examined Online Gradient Descent (OGD), a powerful algorithm for
 We are currently at **Module 3: Regularization: FTL & FTRL**.
 
 ```mermaid
-flowchart LR
-    C0("0. Setting & Motivation") --> C1["1. Regret & Benchmarks"]
-    C1 --> C2["2. Gradient-based Algorithms (OGD)"]
-    C2 --> C3["3. Regularization: FTRL"]
-    C3 --> C4["4. Mirror Descent & Geometry"]
-    C4 --> C5["5. Adaptivity (AdaGrad et al.)"]
-    C5 --> C6["6. Online-to-Batch Conversions"]
-    C6 --> C7["7. Beyond Convexity (Teaser)"]
-    C7 --> C8["8. Summary & Practical Guidance"]
+flowchart TD
+    C0("Setting & Motivation") --> C1["Regret & Benchmarks"]
+    C1 --> C2["Gradient-based Algorithms (OGD)"]
+    C2 --> C3["Regularization: FTRL"]
+    C3 --> C4["Mirror Descent & Geometry"]
+    C4 --> C5["Adaptivity (AdaGrad et al.)"]
+    C5 --> C6["Online-to-Batch Conversions"]
+    C6 --> C7["Beyond Convexity (Teaser)"]
+    C7 --> C8["Summary & Practical Guidance"]
 
-    style C3 fill:#E0BBE4,stroke:#333,stroke-width:2px % Highlight current module
+    style C3 fill:#E0BBE4,color:#000,stroke:#333,stroke-width:2px % Highlight current module
 ```
 
 <details class="details-block" markdown="1">

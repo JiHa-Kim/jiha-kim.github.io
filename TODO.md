@@ -10,7 +10,7 @@ x=done
 - x Linear Algebra  
   └─ x Multivariable Calculus  
       ├─ x Functional Analysis & Matrix Norms  
-      │   ├─ Tensor Calculus  
+      │   ├─ * Tensor Calculus  
       │   │   ├─ Differential Geometry  
       │   │   └─ Statistics and Information Theory  
       │   │       └─ Information Geometry (requires both above)  
