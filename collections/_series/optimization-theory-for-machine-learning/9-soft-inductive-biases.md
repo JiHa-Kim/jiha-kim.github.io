@@ -420,7 +420,7 @@ Beyond explicit regularization terms, the choice of optimization algorithm and i
 The optimization landscape for deep neural networks is complex, often with many global minima (that achieve zero training error) and numerous suboptimal local minima and saddle points (Choromanska et al. 2015). The optimizer's path through this landscape determines which solution is found.
 
 ### 4.2. Stochastic Gradient Descent (SGD) and its Noise
-*   **Recap from [Post 8 on SGD](link-to-your-sgd-post):** The noise in SGD (from mini-batch sampling) plays a crucial role.
+*   **Recap from Post 8 on SGD:** The noise in SGD (from mini-batch sampling) plays a crucial role.
     *   It helps escape sharp local minima and saddle points.
     *   It tends to guide the optimization towards "flatter" minima, which are often associated with better generalization (Keskar et al. 2017; Bach 2022). For instance, in training deep models on datasets like CIFAR-10, SGD often finds wider minima compared to large-batch methods, and these wider minima tend to show better test performance.
 *   **Langevin Dynamics Analogy:** Briefly, SGD can be seen as a particle exploring a potential energy landscape $$F(w)$$ subject to thermal kicks. The stationary distribution $$p(w) \propto \exp(-F(w)/T_{eff})$$ (where effective temperature $$T_{eff}$$ relates to learning rate and noise variance) favors wider, lower-energy regions (Mandt et al. 2017). However, for this analogy to hold strictly and for SGD to truly match Langevin dynamics, an *annealed learning rate* (decreasing appropriately over time) is typically required; otherwise, the stationary distribution analogy is only approximate.

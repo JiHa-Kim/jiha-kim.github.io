@@ -147,15 +147,9 @@ llm-instructions: |
   without an explicit request.
 ---
 
-Welcome to the third installment of our Functional Analysis crash course! In [Part 1](link_to_post_1), we introduced kets, bras, and the idea of functions as vectors. In [Part 2](link_to_post_2), we explored **Hilbert spaces**, which are complete inner product spaces. These spaces provide a rich geometric structure (lengths, angles, orthogonality) crucial for areas like Fourier analysis and quantum mechanics.
+Welcome to the third installment of our Functional Analysis crash course! In Part 1, we introduced kets, bras, and the idea of functions as vectors. In Part 2, we explored **Hilbert spaces**, which are complete inner product spaces. These spaces provide a rich geometric structure (lengths, angles, orthogonality) crucial for areas like Fourier analysis and quantum mechanics.
 
 But what if the most "natural" way to measure the size or distance between functions doesn't come from an inner product? This is where **Banach spaces** enter the picture.
-
-<blockquote class="prompt-info" markdown="1">
-<p markdown="1">
-**Prerequisites:** This post builds upon [Functional Analysis Pt. 1: Kets, Bras, and Duality](link_to_post_1) and [Functional Analysis Pt. 2: Motivating Hilbert Spaces](link_to_post_2). Understanding of norms, inner products, and completeness is assumed.
-</p>
-</blockquote>
 
 ## 1. Introduction: Do We Always Need Inner Products?
 
