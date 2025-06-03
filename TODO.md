@@ -15,7 +15,7 @@ x=done
       │   │   └─ Statistics and Information Theory  
       │   │       └─ Information Geometry (requires both above)  
       │   └─ x Variational Calculus  
-      │       └─ Convex Analysis  
+      │       └─ x Convex Analysis  
       │           └─ Online Learning  
       └─ x Numerical Analysis  
 

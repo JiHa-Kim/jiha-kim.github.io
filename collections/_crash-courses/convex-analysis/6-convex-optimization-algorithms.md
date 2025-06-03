@@ -387,7 +387,58 @@ This algorithm is conceptually fundamental for minimizing a single (possibly non
     $$
 
 *   **Intuition:** Implicit method; find new point making progress on $$h$$ without moving too far.
-*   **Convergence:** If $$h$$ is $$\mu$$-strongly convex, PPA with a constant step size $$t_k=t>0$$ converges linearly. For general convex $$h$$, $$f(x^{(k)})-f^\ast = O(1/k)$$ with appropriate $$t_k$$.
+    <details class="details-block" markdown="1">
+    <summary markdown="1">
+    **Interpretations: Backward Euler and Moreau Envelope**
+    </summary>
+    The Proximal Point Algorithm has deep connections to continuous-time dynamics and related optimization concepts.
+
+    1.  **Connection to Gradient Flow (Backward Euler Discretization):**
+        The PPA update rule can be seen as an implicit discretization of a gradient flow. Recall the definition of the proximal operator:
+        $$
+        x^{(k+1)} = \mathbf{prox}_{t_k h}(x^{(k)}) = \arg\min_x \left( h(x) + \frac{1}{2t_k} \Vert x - x^{(k)} \Vert_2^2 \right)
+        $$
+        The first-order optimality condition for this minimization is (using the subdifferential $$\partial h$$ since $$h$$ may be non-smooth):
+        $$
+        0 \in \partial h(x^{(k+1)}) + \frac{1}{t_k} (x^{(k+1)} - x^{(k)})
+        $$
+        Rearranging this gives:
+        $$
+        \frac{x^{(k+1)} - x^{(k)}}{t_k} \in -\partial h(x^{(k+1)})
+        $$
+        This is precisely the **Backward Euler** (or implicit Euler) discretization of the (sub)gradient flow differential inclusion:
+        $$
+        \dot{x}(t) \in -\partial h(x(t))
+        $$
+        In contrast, if $$h$$ were smooth, the standard Gradient Descent update $$x^{(k+1)} = x^{(k)} - t_k \nabla h(x^{(k)})$$ can be rewritten as $$\frac{x^{(k+1)} - x^{(k)}}{t_k} = -\nabla h(x^{(k)})$$, which is a **Forward Euler** (or explicit Euler) discretization of $$\dot{x}(t) = -\nabla h(x(t))$$. Implicit schemes like backward Euler are often more stable, especially for stiff problems, which aligns with the known stability and robustness of the PPA.
+
+    2.  **Connection to Moreau Envelope (Gradient Descent):**
+        The **Moreau envelope** (or Moreau-Yosida regularization) of $$h$$ with parameter $$t > 0$$ is defined as:
+        $$
+        M_{th}(v) = \min_x \left( h(x) + \frac{1}{2t} \Vert x - v \Vert_2^2 \right)
+        $$
+        Notice that the minimizer in this definition is precisely $$\mathbf{prox}_{th}(v)$$, so $$M_{th}(v) = h(\mathbf{prox}_{th}(v)) + \frac{1}{2t} \Vert \mathbf{prox}_{th}(v) - v \Vert_2^2$$.
+        The Moreau envelope $$M_{th}(v)$$ is a smoothed version of $$h(x)$$; it is always convex if $$h$$ is, and it is continuously differentiable (for convex, proper, l.s.c. $$h$$) with gradient:
+        $$
+        \nabla M_{th}(v) = \frac{1}{t} (v - \mathbf{prox}_{th}(v))
+        $$
+        Now, consider applying a gradient descent step to minimize $$M_{t_k h}(v)$$ starting from $$v=x^{(k)}$$, using a step size equal to $$t_k$$:
+        $$
+        v' = x^{(k)} - t_k \nabla M_{t_k h}(x^{(k)})
+        $$
+        Substituting the gradient of the Moreau envelope:
+        $$
+        v' = x^{(k)} - t_k \left( \frac{1}{t_k} (x^{(k)} - \mathbf{prox}_{t_k h}(x^{(k)})) \right)
+        $$
+        $$
+        v' = x^{(k)} - (x^{(k)} - \mathbf{prox}_{t_k h}(x^{(k)}))
+        $$
+        $$
+        v' = \mathbf{prox}_{t_k h}(x^{(k)})
+        $$
+        Thus, the PPA update $$x^{(k+1)} = \mathbf{prox}_{t_k h}(x^{(k)})$$ is equivalent to performing a single gradient descent step on the Moreau envelope $$M_{t_k h}$$ at $$x^{(k)}$$ with step size $$t_k$$. This provides another perspective: PPA implicitly smooths the function via its Moreau envelope and then takes a gradient step on this smoothed version.
+    </details>
+*   **Convergence:** If $$h$$ is $$\mu$$-strongly convex, PPA with a constant step size $$t_k=t>0$$ converges linearly. For general convex $$h$$, $$h(x^{(k)})-h^\ast = O(1/k)$$ (using $$h$$ instead of $$f$$ as per the objective) with appropriate $$t_k$$.
 
 **Proximal Gradient Method (PGM) / Forward-Backward Splitting (FBS) / ISTA**
 
