@@ -133,4 +133,4 @@ llm-instructions: |
   without an explicit request.
 ---
 
-{% bibliography --file crash-courses\convex-analysis\references.bib %}
+{% bibliography --file crash-courses/convex-analysis/references.bib %}
