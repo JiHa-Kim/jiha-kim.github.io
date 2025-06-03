@@ -1,3 +1,7 @@
+Welcome to my personal blog site
+
+# Original README
+
 # Chirpy Starter
 
 [![Gem Version](https://img.shields.io/gem/v/jekyll-theme-chirpy)][gem]&nbsp;

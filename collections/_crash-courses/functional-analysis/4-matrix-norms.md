@@ -146,7 +146,7 @@ llm-instructions: |
 
 Welcome to this installment of our "Crash Course in Mathematical Foundations" series! As we gear up to explore the fascinating world of **metrized deep learning**, a solid understanding of matrix norms is indispensable. Matrix norms are fundamental tools in linear algebra, numerical analysis, and optimization. They allow us to measure the "size" or "magnitude" of matrices, analyze the behavior of linear transformations (like layers in a neural network), and define geometric structures on spaces of parameters.
 
-In this post, we'll review vector norms, introduce matrix norms, discuss common families like induced (operator) norms and Schatten norms, and delve into the crucial concept of norm duality. We will also touch upon the practical computational costs associated with these norms, particularly in the context of optimization algorithms like Muon. These concepts will pave the way for understanding how different choices of metrics can profoundly impact deep learning optimization and generalization.
+In this post, we'll review vector norms, introduce matrix norms, discuss common families like induced (operator) norms and Schatten norms, and delve into the crucial concept of norm duality. We will also touch upon the practical computational costs associated with these norms, particularly in the context of optimization algorithms like **Muon**. These concepts will pave the way for understanding how different choices of metrics can profoundly impact deep learning optimization and generalization.
 
 ## 1. A Quick Refresher: Vector Norms
 
@@ -190,6 +190,36 @@ $$
 \Vert x \Vert_p = \left( \sum_{i=1}^n \vert x_i \vert^p \right)^{1/p}
 $$
 
+### Root-Mean-Square (RMS) Norm for Vectors
+
+While the norms above are ubiquitous, deep‑learning practice often benefits from a **dimension‑invariant** scale for vectors. The **RMS norm** provides exactly that by normalizing the Euclidean norm by the square‑root of the dimension.
+
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition.** RMS Norm (for Vectors)
+</div>
+For $$x \in \mathbb{R}^n$$ the **root‑mean‑square norm** is
+
+$$
+\Vert x \Vert_{\mathrm{RMS}} \;=\; \frac{\Vert x \Vert_2}{\Vert \vec{1} \Vert_2} \;=\; \frac{\Vert x \Vert_2}{\sqrt{n}} \;=\; \sqrt{\frac{1}{n}\sum_{i=1}^n x_i^2}
+$$
+
+where $$\vec{1}$$ is the vector of all ones in $$\mathbb{R}^n$$.
+</blockquote>
+
+#### Properties and Rationale for Vector RMS Norm
+
+1.  **Dimension neutrality.** If the coordinates of $$x$$ are i.i.d. with variance $$1$$—for instance $$x_i \sim \mathcal{N}(0,1)$$—then $$\mathbb{E}\Vert x \Vert_{\mathrm{RMS}} = 1$$ *no matter how large* $$n$$ is. This property makes the notion of “unit‑size’’ consistent for vectors of varying dimensions, such as activations from layers of different widths.
+2.  **Rotational invariance.** Because the vector RMS norm is a scaled version of the $$\ell_2$$‑norm, it inherits the property of rotational invariance, treating every direction in $$\mathbb{R}^n$$ identically.
+
+<blockquote class="box-tip" markdown="1">
+<div class="title" markdown="1">
+**Tip.** When to reach for the vector RMS norm
+</div>
+Use the vector $$\Vert \cdot \Vert_{\mathrm{RMS}}$$ whenever you need a scale for vectors that is *simultaneously* rotationally symmetric and independent of vector length—e.g.
+when comparing activations from layers of different widths or designing width‑robust regularizers for activations.
+</blockquote>
+
 ## 2. Stepping Up: Matrix Norms
 
 Similar to vector norms, matrix norms measure the "size" of matrices.
@@ -219,9 +249,9 @@ $$
 \Vert A \Vert_{\text{dom} \to \text{codom}} = \sup_{x \ne \mathbf{0}} \frac{\Vert Ax \Vert_{\text{codom}}}{\Vert x \Vert_{\text{dom}}} = \sup_{\Vert x \Vert_{\text{dom}}=1} \Vert Ax \Vert_{\text{codom}}
 $$
 
-All induced norms are sub-multiplicative. Here are some common induced norms arising from vector $$\ell_p$$-norms:
+All induced norms are sub-multiplicative. Here are some common induced norms:
 
-*   **Maximum Column Sum Norm ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$):** Induced by the vector $$\ell_1$$-norm in both domain and codomain.
+*   **Maximum Column Sum Norm ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$):** Induced by the vector $$\ell_1$$-norm in both domain and codomain. For $$A \in \mathbb{R}^{m \times n}$$:
 
     $$
     \Vert A \Vert_{\ell_1 \to \ell_1} = \max_{1 \le j \le n} \sum_{i=1}^m \vert a_{ij} \vert
@@ -229,7 +259,7 @@ All induced norms are sub-multiplicative. Here are some common induced norms ari
 
     This measures the maximum possible output $$\ell_1$$-norm for an input vector with $$\ell_1$$-norm 1. Often denoted simply as $$\Vert A \Vert_1$$.
 
-*   **Spectral Norm ($$\Vert \cdot \Vert_{\ell_2 \to \ell_2}$$):** Induced by the vector $$\ell_2$$-norm in both domain and codomain.
+*   **Spectral Norm ($$\Vert \cdot \Vert_{\ell_2 \to \ell_2}$$):** Induced by the vector $$\ell_2$$-norm in both domain and codomain. For $$A \in \mathbb{R}^{m \times n}$$:
 
     $$
     \Vert A \Vert_{\ell_2 \to \ell_2} = \sigma_{\max}(A)
@@ -237,13 +267,30 @@ All induced norms are sub-multiplicative. Here are some common induced norms ari
 
     where $$\sigma_{\max}(A)$$ is the largest singular value of $$A$$. This norm measures the maximum stretching in terms of Euclidean length. Often denoted simply as $$\Vert A \Vert_2$$.
 
-*   **Maximum Row Sum Norm ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$):** Induced by the vector $$\ell_\infty$$-norm in both domain and codomain.
+*   **Maximum Row Sum Norm ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$):** Induced by the vector $$\ell_\infty$$-norm in both domain and codomain. For $$A \in \mathbb{R}^{m \times n}$$:
 
     $$
     \Vert A \Vert_{\ell_\infty \to \ell_\infty} = \max_{1 \le i \le m} \sum_{j=1}^n \vert a_{ij} \vert
     $$
 
     This measures the maximum possible output $$\ell_\infty$$-norm for an input vector with $$\ell_\infty$$-norm 1. Often denoted simply as $$\Vert A \Vert_\infty$$.
+
+*   **RMS-Induced Operator Norm ($$\Vert \cdot \Vert_{\mathrm{RMS} \to \mathrm{RMS}}$$):**
+    This norm is induced when both the domain and codomain vector spaces are equipped with the vector RMS norm. For a matrix $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$ (mapping from $$\mathbb{R}^{n_{in}}$$ to $$\mathbb{R}^{n_{out}}$$), the RMS-induced operator norm is:
+
+    $$
+    \Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} = \sup_{\Vert x \Vert_{\mathrm{RMS},n_{in}} = 1} \Vert Ax \Vert_{\mathrm{RMS},n_{out}}
+    $$
+
+    where $$\Vert x \Vert_{\mathrm{RMS},n_{in}} = \frac{\Vert x \Vert_2}{\sqrt{n_{in}}}$$ and $$\Vert Ax \Vert_{\mathrm{RMS},n_{out}} = \frac{\Vert Ax \Vert_2}{\sqrt{n_{out}}}$$. This simplifies to:
+
+    $$
+    \Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} = \sqrt{\frac{n_{in}}{n_{out}}}\,\sigma_{\max}(A)
+    $$
+
+    where $$\sigma_{\max}(A)$$ is the largest singular value of $$A$$. This norm has several advantages in deep learning contexts:
+    *   **Layer‑wise stability:** The identity matrix (or any orthogonal matrix, assuming $$n_{out}=n_{in}$$) has an $$\Vert \cdot \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$ norm of $$1$$, irrespective of the layer width. Coupled with initialization schemes like Xavier/He (where, for instance, $$\operatorname{Var} A_{ij} = 1/n_{in}$$), newly initialized linear layers tend to have $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} \approx 1$$. This helps in preventing exploding or vanishing activations during the initial phases of training.
+    *   **Optimizer friendliness:** Optimization algorithms designed for metrized deep learning, such as **Muon**, can leverage this norm to control changes in layer weights (e.g., $$\Vert \Delta A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$). Because the norm definition inherently accounts for input and output dimensions, the same optimization hyper‑parameters (like step sizes or trust region radii defined in terms of this norm) can be more robustly applied to layers of varying widths.
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
@@ -264,7 +311,7 @@ This identity is different from norm duality (discussed later), but it's a usefu
 Not all matrix norms are induced by vector norms. Some are defined directly based on the matrix entries or its singular values.
 
 ### Frobenius Norm
-The **Frobenius norm** ($$\Vert \cdot \Vert_F$$) is analogous to the vector $$\ell_2$$-norm, treating the matrix as a long vector of its elements:
+The **Frobenius norm** ($$\Vert \cdot \Vert_F$$) is analogous to the vector $$\ell_2$$-norm, treating the matrix as a long vector of its elements: For $$A \in \mathbb{R}^{m \times n}$$,
 
 $$
 \Vert A \Vert_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n \vert a_{ij} \vert^2} = \sqrt{\mathrm{tr}(A^\top A)}
@@ -286,26 +333,21 @@ $$
 $$
 
 #### Alternative Formulation via Trace
-The singular values $$\sigma_k(A)$$ are also the non-negative square roots of the eigenvalues of $$A^\top A$$ (or $$AA^\top$$). If $$\lambda_k(A^\top A)$$ are the eigenvalues of $$A^\top A$$, then $$\sigma_k(A) = \sqrt{\lambda_k(A^\top A)}$$. This allows us to write:
+The singular values $$\sigma_k(A)$$ are the non-negative square roots of the eigenvalues of $$A^\top A$$ (or $$AA^\top$$). If $$\lambda_k(A^\top A)$$ are the (non-negative) eigenvalues of the positive semi-definite matrix $$A^\top A$$, then $$\sigma_k(A) = \sqrt{\lambda_k(A^\top A)}$$.
+The Schatten $$p$$-norm can then be written in terms of these eigenvalues:
 
 $$
 \Vert A \Vert_{S_p} = \left( \sum_{k=1}^{\min(m,n)} (\lambda_k(A^\top A))^{p/2} \right)^{1/p}
 $$
 
-This sum of powered eigenvalues is precisely the trace of the matrix $$(A^\top A)^{p/2}$$, where the matrix power $$(A^\top A)^{p/2}$$ is defined via functional calculus (typically involving the eigendecomposition of $$A^\top A$$).
+This sum corresponds to the trace of the matrix $$(A^\top A)^{p/2}$$. The matrix power $$(A^\top A)^{p/2}$$ is defined via functional calculus using the eigendecomposition of $$A^\top A$$. If $$A^\top A = V \Lambda V^\top$$ where $$\Lambda$$ is the diagonal matrix of eigenvalues $$\lambda_k(A^\top A)$$, then $$(A^\top A)^{p/2} = V \Lambda^{p/2} V^\top$$. The trace is then $$\mathrm{Tr}((A^\top A)^{p/2}) = \sum_{k=1}^n (\lambda_k(A^\top A))^{p/2}$$, where the sum runs over all $$n$$ eigenvalues (if $$A \in \mathbb{R}^{m \times n}$$, $$A^\top A$$ is $$n \times n$$).
 Thus, an alternative expression for the Schatten $$p$$-norm is:
 
 $$
 \Vert A \Vert_{S_p} = \left( \mathrm{Tr}\left( (A^\top A)^{p/2} \right) \right)^{1/p}
 $$
 
-Explicitly, if $$\left[ (A^\top A)^{p/2} \right]_{ii}$$ denotes the $$i$$-th diagonal element of the matrix $$(A^\top A)^{p/2}$$, then:
-
-$$
-\Vert A \Vert_{S_p} = \left( \sum_{i=1}^{n} \left[ (A^\top A)^{p/2} \right]_{ii} \right)^{1/p}
-$$
-
-While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/2}$$ generally involves an eigendecomposition of $$A^\top A$$, which is computationally similar to performing an SVD on $$A$$. The practical computation often relies directly on the singular values or, for special cases, more direct methods.
+While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/2}$$ generally involves an eigendecomposition of $$A^\top A$$, which is computationally similar to performing an SVD on $$A$$ to get the singular values directly. The practical computation, especially for general $$p$$, often relies on the singular values. For specific cases like $$p=2$$ (Frobenius norm), more direct methods are used as highlighted below.
 
 #### Key Examples and Their Practical Computation:
 
@@ -390,20 +432,26 @@ The element $$A$$ that achieves the supremum (or one such element if not unique)
 
 *   **Schatten Norms:** The dual of the Schatten $$p$$-norm ($$\Vert \cdot \Vert_{S_p}$$) is the Schatten $$q$$-norm ($$\Vert \cdot \Vert_{S_q}$$), where $$1/p + 1/q = 1$$.
     *   This means the **Nuclear Norm ($$\Vert \cdot \Vert_{S_1}$$)** and the **Spectral Norm ($$\Vert \cdot \Vert_{S_\infty}$$)** are dual to each other:
+
         $$
         (\Vert \cdot \Vert_{S_1})^\ast  = \Vert \cdot \Vert_{S_\infty} \quad \text{and} \quad (\Vert \cdot \Vert_{S_\infty})^\ast  = \Vert \cdot \Vert_{S_1}
         $$
+
     *   The **Frobenius Norm ($$\Vert \cdot \Vert_{S_2}$$)** is self-dual:
+
         $$
         (\Vert \cdot \Vert_{S_2})^\ast  = \Vert \cdot \Vert_{S_2}
         $$
 
 *   **Induced $$\ell_1 \to \ell_1$$ and $$\ell_\infty \to \ell_\infty$$ Norms:**
     *   The dual of the **Maximum Column Sum Norm ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)** is the **Maximum Row Sum Norm ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$)**:
+
         $$
         (\Vert \cdot \Vert_{\ell_1 \to \ell_1})^\ast  = \Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}
         $$
+
     *   Conversely, the dual of the **Maximum Row Sum Norm ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$)** is the **Maximum Column Sum Norm ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)**:
+
         $$
         (\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty})^\ast  = \Vert \cdot \Vert_{\ell_1 \to \ell_1}
         $$
@@ -421,14 +469,14 @@ Understanding matrix norms and their duals is more than just a mathematical exer
 
 1.  **Defining Geometry:** Norms induce metrics ($$d(W_1, W_2) = \Vert W_1 - W_2 \Vert$$). The choice of norm for the weights and activations of a neural network defines the geometry of the parameter space and representation spaces.
 
-2.  **Informing Optimizer Design:** Many advanced optimization algorithms, like mirror descent or adaptive methods (e.g., Adam, Shampoo, Muon), implicitly or explicitly leverage geometric information. Dual norms are key to understanding and deriving these methods, especially for gradient transformation.
+2.  **Informing Optimizer Design:** Many advanced optimization algorithms, like mirror descent or adaptive methods (e.g., Adam, Shampoo, **Muon**), implicitly or explicitly leverage geometric information. Dual norms are key to understanding and deriving these methods, especially for gradient transformation.
 
 3.  **Regularization:** Norms are extensively used in regularization techniques (e.g., spectral/nuclear norm regularization for matrices) to encourage desirable properties like low rank or sparsity.
 
 4.  **Analyzing Network Properties:** Matrix norms help analyze stability, expressivity, and robustness. For instance, the spectral norm of weight matrices controls the Lipschitz constant of network layers.
 
 5.  **Computational Costs in Optimization:** The choice of norm is not "free."
-    *   **Norm Computation:** Calculating some norms (e.g., Frobenius) is cheap, while others (e.g., spectral, nuclear) require SVDs or iterative methods, adding computational overhead per optimization step if used directly for regularization or monitoring.
+    *   **Norm Computation:** Calculating some norms (e.g., Frobenius) is cheap, while others (e.g., spectral, nuclear, RMS-induced) require SVDs or iterative methods, adding computational overhead per optimization step if used directly for regularization or monitoring.
     *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert  \Vert B \Vert_\ast$$. More practically, they often need to compute the dual of the gradient, or transform the gradient using a mapping related to the dual norm. For example, if a layer's parameters $$W$$ are equipped with a norm $$\Vert \cdot \Vert$$, the optimizer might need to compute the dual of the gradient $$G$$ with respect to this norm, or a preconditioning matrix derived from it.
     *   For common layers like Linear or Conv2D, computing these dual elements or related preconditioners can be expensive. For instance, if the norm involves matrix inversion (as in Mahalanobis norms or when the dualizer requires $$M^{-1}G$$), this is costly. The **Muon** optimizer and related methods often employ approximations, like Newton-Schulz iterations for matrix inverses or low-rank approximations, to make these computations feasible for large deep learning models.
 
@@ -436,15 +484,16 @@ Understanding matrix norms and their duals is more than just a mathematical exer
 
 ## Summary
 
-Here's a quick cheat sheet of common matrix norms and their duals (with respect to the Frobenius inner product):
+Here's a quick cheat sheet of common matrix norms and their duals (with respect to the Frobenius inner product). For a matrix $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$:
 
-| Norm Name      | Notation(s)                                                                                  | Definition                                                               | Dual Norm (w.r.t. Frobenius Inner Product)                        | Computational Cost (Approx.) |
-| -------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------- | ---------------------------- |
-| Max Column Sum | $$\Vert A \Vert_{\ell_1 \to \ell_1}$$ (or $$\Vert A \Vert_1$$)                               | $$\max_j \sum_i \vert a_{ij} \vert$$                                     | Max Row Sum ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$) | Cheap ($$O(mn)$$)            |
-| Spectral       | $$\Vert A \Vert_{\ell_2 \to \ell_2}$$ (or $$\Vert A \Vert_2$$), $$\Vert A \Vert_{S_\infty}$$ | $$\sigma_{\max}(A)$$                                                     | Nuclear ($$\Vert \cdot \Vert_{S_1}$$)                             | Expensive (SVD/Iterative)    |
-| Max Row Sum    | $$\Vert A \Vert_{\ell_\infty \to \ell_\infty}$$ (or $$\Vert A \Vert_\infty$$)                | $$\max_i \sum_j \vert a_{ij} \vert$$                                     | Max Col Sum ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)           | Cheap ($$O(mn)$$)            |
-| Frobenius      | $$\Vert A \Vert_F$$, $$\Vert A \Vert_{S_2}$$                                                 | $$\sqrt{\sum_{i,j} \vert a_{ij} \vert^2} = \sqrt{\sum_k \sigma_k(A)^2}$$ | Frobenius ($$\Vert \cdot \Vert_F$$)                               | Cheap ($$O(mn)$$)            |
-| Nuclear        | $$\Vert A \Vert_\ast$$, $$\Vert A \Vert_{S_1}$$                                              | $$\sum_k \sigma_k(A)$$                                                   | Spectral ($$\Vert \cdot \Vert_{S_\infty}$$)                       | Expensive (SVD)              |
+| Norm Name                 | Notation(s)                                                                                  | Definition                                                               | Dual Norm (w.r.t. Frobenius Inner Product)                           | Computational Cost (Approx.) |
+| ------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------- |
+| Max Column Sum            | $$\Vert A \Vert_{\ell_1 \to \ell_1}$$ (or $$\Vert A \Vert_1$$)                               | $$\max_j \sum_i \vert a_{ij} \vert$$                                     | Max Row Sum ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$)    | Cheap ($$O(n_{out}n_{in})$$) |
+| Spectral                  | $$\Vert A \Vert_{\ell_2 \to \ell_2}$$ (or $$\Vert A \Vert_2$$), $$\Vert A \Vert_{S_\infty}$$ | $$\sigma_{\max}(A)$$                                                     | Nuclear ($$\Vert \cdot \Vert_{S_1}$$)                                | Expensive (SVD/Iterative)    |
+| Max Row Sum               | $$\Vert A \Vert_{\ell_\infty \to \ell_\infty}$$ (or $$\Vert A \Vert_\infty$$)                | $$\max_i \sum_j \vert a_{ij} \vert$$                                     | Max Col Sum ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)              | Cheap ($$O(n_{out}n_{in})$$) |
+| Frobenius                 | $$\Vert A \Vert_F$$, $$\Vert A \Vert_{S_2}$$                                                 | $$\sqrt{\sum_{i,j} \vert a_{ij} \vert^2} = \sqrt{\sum_k \sigma_k(A)^2}$$ | Frobenius ($$\Vert \cdot \Vert_F$$)                                  | Cheap ($$O(n_{out}n_{in})$$) |
+| Nuclear                   | $$\Vert A \Vert_\ast$$, $$\Vert A \Vert_{S_1}$$                                              | $$\sum_k \sigma_k(A)$$                                                   | Spectral ($$\Vert \cdot \Vert_{S_\infty}$$)                          | Expensive (SVD)              |
+| RMS-Induced Operator Norm | $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$                                              | $$\sqrt{n_{in}/n_{out}}\,\sigma_{\max}(A)$$                              | $$\sqrt{n_{out}/n_{in}}\,\Vert A \Vert_{S_1}$$ (Scaled Nuclear Norm) | Expensive (SVD/Iterative)    |
 
 In our upcoming posts on metrized deep learning, we will see how these norms and their associated geometries are not just theoretical curiosities but practical tools for building more efficient and effective deep learning models. Stay tuned!
 

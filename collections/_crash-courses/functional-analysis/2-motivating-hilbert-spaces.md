@@ -173,27 +173,27 @@ This sum pairs corresponding components of the vectors, multiplies them, and sum
 How can we extend this idea to functions, say, real-valued functions $$f(t)$$ and $$g(t)$$ defined on an interval $$[a,b]$$? We can think of a function as a "vector" with infinitely many components, indexed by $$t \in [a,b]$$.
 
 1.  **Discretize and Approximate with Step Functions:**
-    To make the sum-of-products idea tractable, let's first approximate $$f(t)$$ and $$g(t)$$ using simpler functions. Divide the interval $$[a,b]$$ into $$N$$ small subintervals. For simplicity, let each subinterval $$I_k = [t_{k-1}, t_k]$$ have width $$\Delta t_k = t_k - t_{k-1}$$. We can pick a sample point $$t_k^* \in I_k$$ (e.g., the midpoint or left endpoint).
+    To make the sum-of-products idea tractable, let's first approximate $$f(t)$$ and $$g(t)$$ using simpler functions. Divide the interval $$[a,b]$$ into $$N$$ small subintervals. For simplicity, let each subinterval $$I_k = [t_{k-1}, t_k]$$ have width $$\Delta t_k = t_k - t_{k-1}$$. We can pick a sample point $$t_k^\ast  \in I_k$$ (e.g., the midpoint or left endpoint).
     Now, define two **step functions**, $$f_N(t)$$ and $$g_N(t)$$, that approximate $$f(t)$$ and $$g(t)$$:
-    *   $$f_N(t) = f(t_k^*)$$ for all $$t \in I_k$$
-    *   $$g_N(t) = g(t_k^*)$$ for all $$t \in I_k$$
+    *   $$f_N(t) = f(t_k^\ast )$$ for all $$t \in I_k$$
+    *   $$g_N(t) = g(t_k^\ast )$$ for all $$t \in I_k$$
     Each step function is constant on each subinterval.
 
 2.  **An "Inner Product" for Step Functions:**
-    What would be a natural inner product for these step functions $$f_N$$ and $$g_N$$? If we were to simply take the values $$(f(t_1^*), \dots, f(t_N^*))$$ and $$(g(t_1^*), \dots, g(t_N^*))$$ as vectors in $$\mathbb{R}^N$$, their dot product would be $$\sum_{k=1}^N f(t_k^*) g(t_k^*)$$. However, this doesn't account for the fact that these values represent the function's behavior over intervals of potentially varying lengths $$\Delta t_k$$.
-    A more appropriate generalization of the sum $$ \sum x_i y_i $$ would be to "sum" the products $$f_N(t)g_N(t)$$ across the entire interval $$[a,b]$$, where each product $$f(t_k^*)g(t_k^*)$$ is weighted by the length of the subinterval $$\Delta t_k$$ over which it applies. This leads to the sum:
+    What would be a natural inner product for these step functions $$f_N$$ and $$g_N$$? If we were to simply take the values $$(f(t_1^\ast ), \dots, f(t_N^\ast ))$$ and $$(g(t_1^\ast ), \dots, g(t_N^\ast ))$$ as vectors in $$\mathbb{R}^N$$, their dot product would be $$\sum_{k=1}^N f(t_k^\ast ) g(t_k^\ast )$$. However, this doesn't account for the fact that these values represent the function's behavior over intervals of potentially varying lengths $$\Delta t_k$$.
+    A more appropriate generalization of the sum $$ \sum x_i y_i $$ would be to "sum" the products $$f_N(t)g_N(t)$$ across the entire interval $$[a,b]$$, where each product $$f(t_k^\ast )g(t_k^\ast )$$ is weighted by the length of the subinterval $$\Delta t_k$$ over which it applies. This leads to the sum:
 
     $$
-    \sum_{k=1}^N f(t_k^*)g(t_k^*) \Delta t_k
+    \sum_{k=1}^N f(t_k^\ast )g(t_k^\ast ) \Delta t_k
     $$
 
-    This sum can also be seen as the integral of the product of our step function approximations: $$\int_a^b f_N(t)g_N(t)dt = \sum_{k=1}^N f(t_k^*)g(t_k^*) \Delta t_k$$. This is precisely a **Riemann sum** for the integral of $$f(t)g(t)$$ (assuming $$f$$ and $$g$$ are Riemann integrable).
+    This sum can also be seen as the integral of the product of our step function approximations: $$\int_a^b f_N(t)g_N(t)dt = \sum_{k=1}^N f(t_k^\ast )g(t_k^\ast ) \Delta t_k$$. This is precisely a **Riemann sum** for the integral of $$f(t)g(t)$$ (assuming $$f$$ and $$g$$ are Riemann integrable).
 
 3.  **Taking the Limit:**
     As we make our approximation finer by increasing the number of subintervals $$N \to \infty$$ (and ensuring the maximum $$\Delta t_k \to 0$$), our step functions $$f_N(t)$$ and $$g_N(t)$$ should (under suitable conditions on $$f$$ and $$g$$, like continuity or Riemann integrability) converge to $$f(t)$$ and $$g(t)$$, respectively. Correspondingly, the Riemann sum converges to the definite integral:
 
     $$
-    \lim_{N \to \infty} \sum_{k=1}^N f(t_k^*)g(t_k^*) \Delta t_k = \int_a^b f(t)g(t)dt
+    \lim_{N \to \infty} \sum_{k=1}^N f(t_k^\ast )g(t_k^\ast ) \Delta t_k = \int_a^b f(t)g(t)dt
     $$
 
 This integral, $$\int_a^b f(t)g(t)dt$$, emerges as the natural extension of the Euclidean dot product to real-valued functions.
@@ -225,6 +225,7 @@ As derived from our Riemann sum analogy, one of the most common inner products f
 $$
 \langle f \vert g \rangle = \int_a^b \overline{f(x)} g(x) dx
 $$
+
 (Or $$\int_\Omega \overline{f(x)} g(x) d\mu(x)$$ for a general measure space with measure $$\mu$$).
 
 As noted, the complex conjugate $$\overline{f(x)}$$ on the first function ensures that $$\langle f \vert f \rangle = \int_a^b \overline{f(x)}f(x)dx = \int_a^b \vert f(x) \vert^2 dx \ge 0$$, satisfying the positive-definiteness axiom. For real-valued functions, this simplifies to the already familiar $$\int_a^b f(x)g(x)dx$$. The space of functions for which this integral of the squared magnitude, $$\int_a^b \vert f(x) \vert^2 dx$$, is finite is called the **$$L_2$$ space**, denoted $$L_2([a,b])$$ (or $$L_2(\Omega, \mu)$$). Technically, $$L_2$$ spaces consist of equivalence classes of functions that differ only on sets of measure zero.

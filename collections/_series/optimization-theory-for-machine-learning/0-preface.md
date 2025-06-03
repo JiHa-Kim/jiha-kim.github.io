@@ -209,19 +209,20 @@ flowchart TD
 ```
 
 If the mermaid flowchart does not render:
-1. `Linear Algebra`
-2. `Multivariable Calculus` (connected from Linear Algebra)
 
-From `Multivariable Calculus`, two parallel branches:
-    - `Functional Analysis & Matrix Norms`
-    - `Numerical Analysis`
-
-From `Functional Analysis & Matrix Norms`, two branches:
-    - `Tensor Calculus`, which leads to:
-        - `Differential Geometry` (which then, along with Statistics and Information Theory, leads to `Information Geometry`)
-        - `Statistics and Information Theory` (which then, along with Differential Geometry, leads to `Information Geometry`)
-    - `Variational Calculus`, which leads to:
-        - `Convex Analysis` (which then leads to `Online Learning`)
+```markdown
+- Linear Algebra  
+  └─ Multivariable Calculus  
+      ├─ Functional Analysis & Matrix Norms  
+      │   ├─ Tensor Calculus  
+      │   │   ├─ Differential Geometry  
+      │   │   └─ Statistics and Information Theory  
+      │   │       └─ Information Geometry (requires both above)  
+      │   └─ Variational Calculus  
+      │       └─ Convex Analysis  
+      │           └─ Online Learning  
+      └─ Numerical Analysis  
+```
 
 The series is mostly intended to be self-contained beyond these items.
 

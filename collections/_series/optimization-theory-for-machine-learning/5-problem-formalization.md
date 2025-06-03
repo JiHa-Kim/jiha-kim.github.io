@@ -212,7 +212,7 @@ The learning process is framed as a search for the "best" parameters $$\theta$$ 
 
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
-**Frequentist Perspective.** Goal: Minimize Expected Loss
+**Frequentist Perspective.** Goal: Minimize (True) Expected Loss
 </div>
 We seek parameters $$\theta^\ast$$ that minimize the **expected loss** (or risk) over the true, unknown data distribution $$\mathcal{D}$$. The objective is strong generalization to new, unseen data from $$\mathcal{D}$$.
 

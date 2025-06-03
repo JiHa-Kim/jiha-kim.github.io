@@ -1,6 +1,3 @@
-- [ ] matrix spectral theory
-- [ ] motivate Hilbert/Banach spaces
-
 
 
 ## Legend 
@@ -9,12 +6,18 @@ x=done
 1. (no prefix)=not started
 
 ## Crash courses
-    * 1. `Numerical Analysis`
-    2. `Tensor Calculus`, which leads to:
-        1. `Differential Geometry` (which then, along with Statistics and Information Theory, leads to `Information Geometry`)
-        2. `Statistics and Information Theory` (which then, along with Differential Geometry, leads to `Information Geometry`)
 
-        3. `Convex Analysis` (which then leads to `Online Learning`)
+- x Linear Algebra  
+  └─ x Multivariable Calculus  
+      ├─ x Functional Analysis & Matrix Norms  
+      │   ├─ Tensor Calculus  
+      │   │   ├─ Differential Geometry  
+      │   │   └─ Statistics and Information Theory  
+      │   │       └─ Information Geometry (requires both above)  
+      │   └─ x Variational Calculus  
+      │       └─ Convex Analysis  
+      │           └─ Online Learning  
+      └─ x Numerical Analysis  
 
 ## Series
 
