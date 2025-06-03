@@ -192,7 +192,7 @@ $$
 
 The term $$ \Vert y - \hat{y}\Vert _2^2 = \sum_{i=1}^N (y_i - \bar{y})^2 $$ is exactly the sum of squared errors (or residuals) that we minimized. This quantity is related to the sample variance ($$ s^2 = \frac{1}{N-1} \Vert y - \hat{y}\Vert _2^2 $$).
 
-![2D Mean as Projection onto Diagonal Subspace](2d_mean_diagonal_projection.svg)
+![2D Mean as Projection onto Diagonal Subspace](./2d_mean_diagonal_projection.svg)
 _Figure: 2D Mean as Projection onto Diagonal Subspace_
 
 This shows that squared loss has deep geometric roots: minimizing it is equivalent to orthogonally projecting $$ y $$ onto a subspace, and the mean arises as the optimal point in that subspace. This perspective will resurface again when we look at linear regression more generally.
@@ -220,7 +220,7 @@ Let $$X$$ and $$Y$$ be random variables representing our inputs and targets, dra
 
 Intuitively, we take the slice $$X=x$$ of the joint distribution, and average the values of $$Y$$ in that slice. So within that slice, it's the best constant predictor we can have.
 
-![Conditional Expectation as Mean of Slice](conditional_expectation_slice.png)
+![Conditional Expectation as Mean of Slice](./conditional_expectation_slice.png)
 _Figure: Conditional Expectation as Mean of Slice_
 
 That means that the conditional expectation is a function of the slice $$X$$, so it's a random variable.
@@ -273,7 +273,7 @@ So, the conditional expectation function is $$f(x) = x/2$$ for $$x \in [0, 1]$$.
 
 Let's visualize some examples.
 
-![Example: Discrete Conditional Mean](conditional_mean_ex2_discrete.png)
+![Example: Discrete Conditional Mean](./conditional_mean_ex2_discrete.png)
 _Figure: Example: Discrete Conditional Mean_
 
 **Explanation of Diagram 1:**
@@ -287,7 +287,7 @@ _Figure: Example: Discrete Conditional Mean_
 
 This diagram illustrates finding $$E[Y \vert X=x]$$ where $$Y$$ is uniformly distributed on $$[0, x]$$, given $$X=x$$. We pick a specific value, say $$x=0.8$$. Given $$X=0.8$$, $$Y$$ is uniform on $$[0, 0.8]$$. The conditional expectation $$E[Y \vert X=0.8]$$ is the midpoint of this interval, which is $$0.8 / 2 = 0.4$$.
 
-![Example: Continuous Conditional Mean](conditional_mean_ex3_continuous.png)
+![Example: Continuous Conditional Mean](./conditional_mean_ex3_continuous.png)
 _Figure: Example: Continuous Conditional Mean_
 
 **Explanation of Diagram 2:**
@@ -483,13 +483,13 @@ Let's carefully understand each term:
 2.  **Bias ($$\text{Bias}[\hat{f}(x_0)] = E_{\mathcal{D}}[\hat{f}(x_0)] - f(x_0)$$):** This is the difference between the *average prediction* of our model at $$x_0$$ (if we were to train it on many different datasets $$\mathcal{D}$$ and average the predictions) and the *true* value $$f(x_0)$$. Squared bias measures how much our model's average prediction deviates from the truth. High bias suggests the model is systematically wrong, perhaps because it's too simple to capture the underlying structure (e.g., fitting a line to a curve). This leads to **underfitting**.
 3.  **Variance ($$\text{Variance}[\hat{f}(x_0)] = E_{\mathcal{D}} [(\hat{f}(x_0) - E_{\mathcal{D}}[\hat{f}(x_0)])^2]$$):** This measures how much the model's prediction $$\hat{f}(x_0)$$ tends to vary *around its own average prediction* as we train it on different datasets $$\mathcal{D}$$. High variance indicates that the model is very sensitive to the specific training data; small changes in the data lead to large changes in the model's predictions. This often happens with overly complex models that fit the noise in the training data. This leads to **overfitting**.
 
-![Target Practice Analogy](target_practice.png)
+![Target Practice Analogy](./target_practice.png)
 _Figure: Target Practice Analogy. Imagine you're trying to hit a target. The irreducible error is the size of the target itself (the inherent noise). The bias is how far your average shot lands from the target. The variance is how much your shots vary from the average._
 
-![Bias-Variance Plot](bias_variance_plot.png)
+![Bias-Variance Plot](./bias_variance_plot.png)
 _Figure: Bias-Variance Plot_
 
-![Underfitting vs Overfitting](underfitting_vs_overfitting.png)
+![Underfitting vs Overfitting](./underfitting_vs_overfitting.png)
 _Figure: Underfitting vs Overfitting example with polynomials_
 
 <blockquote class="prompt-warning">
@@ -893,7 +893,7 @@ $$
 TBD(y,x) = (0, D_\phi (y, x)) \cdot \hat n = \frac{D_\phi (y, x)}{\sqrt{1+\Vert \nabla \phi(y) \Vert^2}}.
 $$
 
-![Total Bregman Divergence as Orthogonal Error](total_bregman_divergence.svg)
+![Total Bregman Divergence as Orthogonal Error](./total_bregman_divergence.svg)
 _Figure: Total Bregman Divergence as Orthogonal Error_
 
 ---

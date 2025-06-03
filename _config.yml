@@ -191,7 +191,6 @@ defaults:
       path: "" # applies to every content document
     values:
       layout: post
-      media_subpath: ../
       toc: true
       math: true
       panel_includes:

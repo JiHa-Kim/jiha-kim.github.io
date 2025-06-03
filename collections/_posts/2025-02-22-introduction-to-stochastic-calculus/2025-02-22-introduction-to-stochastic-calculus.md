@@ -56,7 +56,7 @@ $$
 
 Using 0-indexing, the number of ways to reach the $$k$$-th spot in the $$n$$-th row is $$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$. For example, in row 3, there are $$\binom{3}{2} = 3$$ ways to hit position 2.
 
-![Pascal's Triangle Paths for 3 choose 2](binom_3_2_paths_pascal.svg)
+![Pascal's Triangle Paths for 3 choose 2](./binom_3_2_paths_pascal.svg)
 _[Code](#b5-latex-code-for-tikz-diagram-of-paths-in-pascals-triangle) 2D image: All 3 paths for the 2nd position in the 3rd row of Pascal's triangle_
 
 Why care? This setup powers the binomial distribution, which models repeated trials with two outcomes—win or lose, heads or tails. Think of:
@@ -105,7 +105,7 @@ We'll set the probabability of winning as $$p = 0.5$$ as a first example since i
 
 The number of ways to get $$k$$ wins (and $$n - k$$ losses) is $$\binom{n}{k}$$. Let's try to plot this for a different values $$n$$ over $$k$$. (The code can be found in the [Appendix](#b1-python-code-for-binomial-plots).)
 
-![Plots for n=5,10,25,50,100](random_walk_combined.png)
+![Plots for n=5,10,25,50,100](./random_walk_combined.png)
 _[Code](#b1-python-code-for-binomial-plots) 2D image: Binomial distribution plots for n=5,10,25,50,100_
 
 That looks awfully familiar, doesn't it? It's a bell curve, so naturally, we might guess that the limit is a **normal distribution** (aka Gaussian distribution).
@@ -151,13 +151,13 @@ which is our desired limit. We have shown that a "continuous binomial distributi
 
 Here are some very nice 3D animations of sample paths with the distribution evolving over the number of steps:
 
-![Discrete Random Walk, 15 steps](discrete_binomial.gif)
+![Discrete Random Walk, 15 steps](./discrete_binomial.gif)
 _[Code](#c1-3d-plot-of-discrete-random-walks) 3D animation: Discrete Random Walk, 15 steps_
 
-![Discrete Random Walk, 100 steps](discrete_binomial_normalizing.gif)
+![Discrete Random Walk, 100 steps](./discrete_binomial_normalizing.gif)
 _[Code](#c1-3d-plot-of-discrete-random-walks) 3D Animation: Discrete Random Walk, 100 steps over 5 seconds_
 
-![Normal Distribution Approximation by Random Walks](discrete_random_walk.gif)
+![Normal Distribution Approximation by Random Walks](./discrete_random_walk.gif)
 _[Code](#c4-python-code-for-normal-distribution-approximation-by-random-walks) 2D animation: Normal distribution approximation by discrete random walks_
 
 ### **3. Defining Brownian motion (Wiener process)**
@@ -206,10 +206,10 @@ But it also turns out that these conditions are sufficient to prove continuity, 
 So, $$W(t)$$ is our mathematical model for Brownian motion: a continuous, random, zero-mean process with variance proportional to time. It’s wild—it’s globally somewhat predictable yet locally completely unpredictable. A plot of 
 W(t) looks like a jagged mess, but it’s got structure under the hood. (You can generate one yourself with the code in [Appendix](#b2-python-code-for-brownian-motion-plot).)
 
-![Sample Brownian Motion Path](sample_brownian_motion.png)
+![Sample Brownian Motion Path](./sample_brownian_motion.png)
 _[Code](#b2-python-code-for-brownian-motion-plot) 2D image: Sample Brownian motion path_
 
-![3D Animation Continuous Brownian Motion](continuous_brownian_3d_smooth.gif)
+![3D Animation Continuous Brownian Motion](./continuous_brownian_3d_smooth.gif)
 _[Code](#c2-3d-animation-of-brownian-motion) 3D animation: Brownian motion with evolving distribution_
 
 
@@ -375,7 +375,7 @@ $$
 
 Since $$W(t) \sim N(0, t)$$, we have $$X(t) \sim N(\mu t, \sigma^2 t)$$—a process drifting linearly with noise spreading over time. It’s a basic model for things like a stock with steady growth and volatility.
 
-![Sample SDE Path](sample_SDE.png)
+![Sample SDE Path](./sample_SDE.png)
 _[Code](#b3-python-code-for-basic-sde-simulation) 2D image: Sample SDE path with mu=1.0, sigma=0.5_
 
 #### **Geometric Brownian Motion**
@@ -417,10 +417,10 @@ $$
 
 The drift is adjusted by $$-\frac{1}{2} \sigma^2$$ due to the second-order effect of noise, and $$\sigma W(t)$$ adds random fluctuations. This form underlies the Black-Scholes model in finance.
 
-![Sample Geometric Brownian Motion Path](gbm_path.png)
+![Sample Geometric Brownian Motion Path](./gbm_path.png)
 _[Code](#b4-python-code-for-geometric-brownian-motion-simulation) 2D image: A sample path of a geometric Brownian motion with parameters μ = 0.15 and σ = 0.2_
 
-![Geometric Brownian Motion drifting over time](geometric_brownian_drifted_3d.gif)
+![Geometric Brownian Motion drifting over time](./geometric_brownian_drifted_3d.gif)
 _[Code](#c3-3d-animation-of-geometric-brownian-motion) 3D animation: Geometric Brownian Motion drifting over time_
 
 #### **Beyond Analytics**
