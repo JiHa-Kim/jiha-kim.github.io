@@ -171,21 +171,18 @@ collections_dir: collections
 collections:
   tabs:
     output: true
-    sort_by: order
-
   notes:
     output: true
-    permalink: /notes/:path/
-
   series:
     output: true
-    permalink: /series/:path/
-
   crash-courses:
     output: true
-    permalink: /crash-courses/:path/
 
 defaults:
+  - scope:
+      type: collection
+    values:
+      permalink: /:collection/:title
   # 1) Global: everything uses "post" layout with TOC on
   - scope:
       path: "" # applies to every content document
@@ -203,20 +200,12 @@ defaults:
       type: posts
     values:
       comments: true
-      permalink: /posts/:title/
 
   # 3) Drafts turn comments off + custom permalink
   - scope:
       path: _drafts
     values:
       comments: false
-      permalink: /drafts/:title/
-
-  # 4) Notes permalink override (layout: post inherited)
-  - scope:
-      type: notes
-    values:
-      permalink: /notes/:path/
 
   - scope:
       path: "collections/_series/*/index.md"
