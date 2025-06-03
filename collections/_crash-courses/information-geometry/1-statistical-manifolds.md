@@ -1,6 +1,6 @@
 ---
 title: "Information Geometry Part 1: Statistical Manifolds and the Fisher Metric"
-date: 2025-06-15 10:00 -0400
+date: 2025-06-03 10:00 -0400
 course_index: 1
 description: "An introduction to Information Geometry, exploring how statistical models form manifolds and how the Fisher Information Metric provides a natural way to measure distances and curvature."
 image: # placeholder

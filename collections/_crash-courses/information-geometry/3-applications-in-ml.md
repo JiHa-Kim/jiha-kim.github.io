@@ -1,6 +1,6 @@
 ---
 title: "Information Geometry Part 3: Applications in ML and Further Horizons"
-date: 2025-06-29 10:00 -0400
+date: 2025-06-03 10:00 -0400
 course_index: 3
 description: "Connecting Information Geometry to machine learning applications like natural gradient in deep learning, mirror descent, and other advanced topics, highlighting its practical relevance."
 image: # placeholder

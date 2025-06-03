@@ -1,6 +1,6 @@
 ---
 title: "Information Geometry Part 2: Duality, Divergences, and Natural Gradient"
-date: 2025-06-22 10:00 -0400
+date: 2025-06-03 10:00 -0400
 course_index: 2
 description: "Exploring dual connections, Bregman divergences, dually flat spaces, and the powerful natural gradient algorithm within the framework of Information Geometry."
 image: # placeholder

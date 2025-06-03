@@ -1,6 +1,6 @@
 ---
 title: "Information Geometry: Cheat Sheet"
-date: 2025-07-01 10:00 -0400
+date: 2025-06-03 10:00 -0400
 course_index: 999
 description: "A quick reference guide and cheat sheet for key concepts, definitions, and formulas from the Information Geometry crash course."
 image: # placeholder
