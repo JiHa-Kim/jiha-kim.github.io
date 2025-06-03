@@ -17,7 +17,7 @@ tags:
 - Scale-Free Optimization
 - Matrix-Free Methods
 - Newton's Method
-- Adagrad
+- AdaGrad
 - Adam
 - FAdam
 - Cutkosky-Sarlos

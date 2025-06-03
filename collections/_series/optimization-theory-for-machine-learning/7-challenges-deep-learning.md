@@ -9,7 +9,7 @@ categories:
 - Mathematical Optimization
 - Machine Learning
 tags:
-- Non-Convex Optimization
+- Non-convex Optimization
 - Deep Learning
 - Hessian Spectrum
 - Saddle Points
