@@ -11,8 +11,8 @@ x=done
   └─ x Multivariable Calculus  
       ├─ x Functional Analysis & Matrix Norms  
       │   ├─ * Tensor Calculus  
-      │   │   ├─ Differential Geometry  
-      │   │   └─ Statistics and Information Theory  
+      │   │   ├─ x Differential Geometry  
+      │   │   └─ x Statistics and Information Theory  
       │   │       └─ Information Geometry (requires both above)  
       │   └─ x Variational Calculus  
       │       └─ x Convex Analysis  
