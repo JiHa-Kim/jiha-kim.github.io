@@ -171,18 +171,21 @@ collections_dir: collections
 collections:
   tabs:
     output: true
+    sort_by: order
+
   notes:
     output: true
+    permalink: /notes/:title/
+
   series:
     output: true
+    permalink: /series/:title/
+
   crash-courses:
     output: true
+    permalink: /crash-courses/:title/
 
 defaults:
-  - scope:
-      type: collection
-    values:
-      permalink: /:collection/:title
   # 1) Global: everything uses "post" layout with TOC on
   - scope:
       path: "" # applies to every content document
@@ -200,12 +203,14 @@ defaults:
       type: posts
     values:
       comments: true
+      permalink: /posts/:title/
 
   # 3) Drafts turn comments off + custom permalink
   - scope:
       path: _drafts
     values:
       comments: false
+      permalink: /drafts/:title/
 
   - scope:
       path: "collections/_series/*/index.md"
