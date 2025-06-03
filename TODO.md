@@ -3,7 +3,7 @@
 ## Legend 
 x=done
 *=revise
-1. (no prefix)=not started
+(no prefix)=not started
 
 ## Crash courses
 
@@ -16,7 +16,7 @@ x=done
       │   │       └─ Information Geometry (requires both above)  
       │   └─ x Variational Calculus  
       │       └─ x Convex Analysis  
-      │           └─ Online Learning  
+      │           └─ x Online Learning  
       └─ x Numerical Analysis  
 
 ## Series

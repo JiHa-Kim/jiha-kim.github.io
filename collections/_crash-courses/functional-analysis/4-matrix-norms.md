@@ -463,13 +463,237 @@ The element $$A$$ that achieves the supremum (or one such element if not unique)
 The Spectral Norm ($$\Vert A \Vert_2$$ or $$\Vert A \Vert_{\ell_2 \to \ell_2}$$) is identical to the Schatten-$$\infty$$ norm ($$\Vert A \Vert_{S_\infty}$$). Therefore, its dual with respect to the Frobenius inner product is consistently the Nuclear Norm ($$\Vert A \Vert_{S_1}$$). Any alternative derivations suggesting the spectral norm is self-dual under this specific inner product are typically referencing a different context or a specialized result not general for Frobenius duality.
 </blockquote>
 
+### 5.1 Duality Mappings: Explicit Formulas
+
+A **duality mapping** $$J$$ for a norm $$\Vert \cdot \Vert$$ (on a space of matrices $$\mathbb{R}^{m \times n}$$) maps a matrix $$A$$ to a matrix $$J(A)$$ such that two conditions are met:
+1.  $$\langle A, J(A) \rangle_F = \Vert A \Vert$$
+2.  $$\Vert J(A) \Vert_\ast = 1$$, where $$\Vert \cdot \Vert_\ast$$ is the dual norm of $$\Vert \cdot \Vert$$ with respect to the Frobenius inner product $$\langle X, Y \rangle_F = \mathrm{tr}(X^\top Y)$$.
+
+If $$A=\mathbf{0}$$, then $$J(\mathbf{0})=\mathbf{0}$$. For $$A \ne \mathbf{0}$$, $$J(A)$$ is non-zero.
+The duality mapping $$J(A)$$ essentially identifies a matrix in the dual unit ball that is "aligned" with $$A$$ and saturates Hölder's inequality. The existence of such a mapping is guaranteed by the Hahn-Banach theorem. If the norm is smooth (e.g., for $$\ell_p$$-norms when $$1 < p < \infty$$), the duality mapping is unique. Otherwise, it can be set-valued (a subgradient).
+
+All formulas below are derived by finding the conditions for equality in Hölder’s inequality for the relevant pair of norms.
+
+#### 1. Vector-induced $$\ell_p \to \ell_q$$ Operator Norms
+
+**Norm:** $$\displaystyle\Vert A \Vert_{p\to q}:=\max_{\Vert x \Vert_p=1}\Vert Ax \Vert_q$$ on $$A\in\mathbb R^{m\times n}$$.
+
+**Dual Norm:** The dual norm $$\Vert \cdot \Vert_{p\to q}^\ast $$ depends on $$p,q$$. For example:
+*   If $$p=q=2$$ (Spectral norm), dual is Nuclear norm ($$\Vert \cdot \Vert_{S_1}$$).
+*   If $$p=q=1$$ (Max Column Sum), dual is Max Row Sum norm ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$).
+
+**Duality Mapping:**
+1.  Pick any *extremizing* vector $$x_{\ast}$$ such that $$\Vert x_{\ast} \Vert_p = 1$$ and $$\Vert Ax_{\ast} \Vert_q = \Vert A \Vert_{p\to q}$$. Let $$v_{\ast} := Ax_{\ast}$$.
+2.  Form the Hölder-tight dual vector $$y_{\ast}$$ to $$v_{\ast}$$:
+
+    $$
+    y_{\ast} := \frac{\operatorname{sign}(v_{\ast})\circ\vert v_{\ast}\vert^{\,q-1}}{\Vert v_{\ast}\Vert_{q}^{\,q-1}}
+    $$
+
+    (If $$v_{\ast}=\mathbf{0}$$, then $$A=\mathbf{0}$$ and $$J(A)=\mathbf{0}$$. If $$v_{\ast} \ne \mathbf{0}$$ but some components are zero, their signs can be taken as zero. If $$q=1$$, then $$\vert v_{\ast}\vert^{q-1}=1$$ for non-zero components, and the denominator becomes $$\Vert v_{\ast}\Vert_1^0=1$$ assuming $$v_{\ast} \ne \mathbf{0}$$. This ensures $$\Vert y_{\ast} \Vert_{q^{\ast}}=1$$ and $$\langle y_{\ast}, v_{\ast} \rangle_v = \sum_i (y_\ast )_i (v_\ast )_i = \Vert v_{\ast} \Vert_q = \Vert A \Vert_{p\to q}$$, where $$1/q+1/q^\ast=1$$.)
+3.  **Mapping:**
+
+    $$
+    \boxed{\,J_{p\to q}(A) = y_{\ast}\,x_{\ast}^{\!\top}\,}
+    $$
+
+***Check:***
+*   $$\langle A, J_{p\to q}(A) \rangle_F = \mathrm{tr}(A^\top (y_{\ast}x_{\ast}^{\!\top})) = \mathrm{tr}(x_{\ast}^{\!\top}A^\top y_{\ast}) = (Ax_{\ast})^\top y_{\ast} = v_{\ast}^\top y_{\ast} = \Vert v_{\ast} \Vert_q = \Vert A \Vert_{p\to q}$$.
+*   The dual norm condition $$\Vert J_{p\to q}(A) \Vert_{\ast}=1$$ must hold. For the rank-one matrix $$y_{\ast}x_{\ast}^{\!\top}$$, its specific dual norm (e.g., $$S_1$$ norm if $$p=q=2$$; or $$\ell_\infty \to \ell_\infty$$ norm if $$p=q=1$$) evaluates to $$1$$. This is often because the structure of $$x_\ast, y_\ast$$ (extremal and dual vectors) means that $$\Vert y_{\ast}x_{\ast}^{\!\top} \Vert_\ast = \Vert y_{\ast} \Vert_{q^\ast} \Vert x_{\ast} \Vert_p = 1 \cdot 1 = 1$$. (This identity is specific to these types of norms and constructions.)
+
+***Uniqueness:*** The mapping is unique if $$x_{\ast}$$ and (for $$q>1$$) $$y_{\ast}$$ are unique. This typically occurs when the unit balls for $$\Vert \cdot \Vert_p$$ and $$\Vert \cdot \Vert_q$$ are strictly convex, i.e., $$1 < p, q < \infty$$. For boundary exponents ($$1$$ or $$\infty$$), the mapping can be set-valued.
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Derivation for $$J_{p\to q}(A)$$**
+</summary>
+The operator norm $$\Vert A \Vert_{p\to q}$$ is defined as $$\sup_{\Vert x \Vert_p=1} \Vert Ax \Vert_q$$.
+Let $$x_\ast$$ be a vector such that $$\Vert x_\ast \Vert_p=1$$ and $$\Vert Ax_\ast \Vert_q = \Vert A \Vert_{p\to q}$$. Let $$v_\ast = Ax_\ast$$.
+The duality mapping $$J(A)$$ must satisfy $$\langle A, J(A) \rangle_F = \Vert A \Vert_{p\to q}$$ and $$\Vert J(A) \Vert_\ast = 1$$.
+Consider the candidate $$J(A) = y_\ast x_\ast^\top$$.
+The first condition is $$\langle A, y_\ast x_\ast^\top \rangle_F = (Ax_\ast)^\top y_\ast = v_\ast^\top y_\ast$$.
+To make this equal to $$\Vert A \Vert_{p\to q} = \Vert v_\ast \Vert_q$$, we need $$v_\ast^\top y_\ast = \Vert v_\ast \Vert_q$$.
+This is achieved by choosing $$y_\ast$$ to be the vector that saturates Hölder's inequality for $$v_\ast$$ with respect to the $$\ell_q$$ and $$\ell_{q^\ast}$$ norms.
+Specifically, if $$v_\ast \ne \mathbf{0}$$, take
+
+$$
+y_i = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\left(\sum_j \vert (v_\ast)_j \vert^{(q-1)q^\ast}\right)^{1/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\left(\sum_j \vert (v_\ast)_j \vert^q\right)^{1/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\Vert v_\ast \Vert_q^{q/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\Vert v_\ast \Vert_q^{q-1}}
+$$
+
+This ensures $$\Vert y_\ast \Vert_{q^\ast}=1$$ and $$v_\ast^\top y_\ast = \sum_i (v_\ast)_i \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\Vert v_\ast \Vert_q^{q-1}} = \frac{\sum_i \vert (v_\ast)_i \vert^q}{\Vert v_\ast \Vert_q^{q-1}} = \frac{\Vert v_\ast \Vert_q^q}{\Vert v_\ast \Vert_q^{q-1}} = \Vert v_\ast \Vert_q$$.
+The second condition, $$\Vert y_\ast x_\ast^\top \Vert_\ast = 1$$, then needs to be verified for the specific dual norm corresponding to $$\Vert \cdot \Vert_{p\to q}$$. This generally holds due to the properties of subdifferentials of operator norms; the rank-one matrix $$y_\ast x_\ast^\top$$ is a subgradient of $$\Vert \cdot \Vert_{p\to q}$$ at $$A$$.
+For example, if $$p=q=2$$ (Spectral Norm $$\Vert A \Vert_{S_\infty}$$), then $$x_\ast$$ is a top right singular vector $$v_1$$, and $$Ax_\ast = \sigma_1 u_1$$, so $$v_\ast = \sigma_1 u_1$$. Then $$y_\ast = u_1$$ (since $$q=2, q-1=1, \Vert v_\ast \Vert_2 = \sigma_1$$). So $$J_{S_\infty}(A) = u_1 v_1^\top$$. The dual norm is the Nuclear Norm ($$S_1$$). $$\Vert u_1 v_1^\top \Vert_{S_1} = \Vert u_1 \Vert_2 \Vert v_1 \Vert_2 = 1 \cdot 1 = 1$$.
+</details>
+
+#### 2. Schatten $$S_p$$ Norms
+
+**Norm:** For $$A\in\mathbb R^{m\times n}$$ with singular values $$\sigma_{1}\ge\dots\ge 0$$, and SVD $$A=U\Sigma V^{\top}$$ where $$\Sigma=\operatorname{diag}(\sigma_{1},\dots)$$.
+$$\Vert A \Vert_{S_p}:=\left(\textstyle\sum_{i}\sigma_i^{\,p}\right)^{1/p}$$.
+
+**Dual Norm:** $$\Vert \cdot \Vert_{S_q}$$, where $$1/p+1/q=1$$.
+
+**Duality Mapping (for $$1 < p < \infty$$):**
+
+$$
+\boxed{\,J_{S_p}(A)=\frac{U\,\operatorname{diag}(\sigma_i^{\,p-1})\,V^{\top}}
+                          {\Vert A \Vert_{S_p}^{\,p-1}}\,}
+$$
+
+(If $$A=\mathbf{0}$$, $$J_{S_p}(A)=\mathbf{0}$$. The formula assumes $$A \ne \mathbf{0}$$. If some $$\sigma_i=0$$, then $$\sigma_i^{p-1}=0$$ as $$p>1$$).
+
+***Check:***
+*   $$\langle A, J_{S_p}(A) \rangle_F = \mathrm{tr}( (U\Sigma V^\top)^\top \frac{U\operatorname{diag}(\sigma_i^{p-1})V^\top}{\Vert A \Vert_{S_p}^{p-1}} ) = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \mathrm{tr}(\Sigma \operatorname{diag}(\sigma_i^{p-1})) = \frac{\sum_i \sigma_i \cdot \sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\sum_i \sigma_i^p}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\Vert A \Vert_{S_p}^p}{\Vert A \Vert_{S_p}^{p-1}} = \Vert A \Vert_{S_p}$$.
+*   The singular values of $$J_{S_p}(A)$$ are $$\hat{\sigma}_i = \frac{\sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}$$.
+    $$\Vert J_{S_p}(A) \Vert_{S_q} = \left( \sum_i \hat{\sigma}_i^q \right)^{1/q} = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \left( \sum_i (\sigma_i^{p-1})^q \right)^{1/q}$$.
+    Since $$(p-1)q = p$$ (from $$1/p+1/q=1$$), this becomes $$\frac{1}{\Vert A \Vert_{S_p}^{p-1}} \left( \sum_i \sigma_i^p \right)^{1/q} = \frac{(\Vert A \Vert_{S_p}^p)^{1/q}}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\Vert A \Vert_{S_p}^{p/q}}{\Vert A \Vert_{S_p}^{p-1}}$$.
+    Since $$p/q = p-1$$, this is $$\frac{\Vert A \Vert_{S_p}^{p-1}}{\Vert A \Vert_{S_p}^{p-1}} = 1$$.
+
+***Uniqueness:*** The mapping is single-valued and smooth for $$1<p<\infty$$ (assuming distinct non-zero singular values for strictness, otherwise subgradient).
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Derivation for $$J_{S_p}(A)$$**
+</summary>
+We use von Neumann's trace inequality: $$\vert\mathrm{tr}(X^\top Y)\vert \le \sum_i \sigma_i(X)\sigma_i(Y)$$. Equality holds if $$X=U\Sigma_X V^\top$$ and $$Y=U\Sigma_Y V^\top$$ (shared singular vectors).
+So, $$\langle A, J(A) \rangle_F = \sum_i \sigma_i(A)\sigma_i(J(A)) $$.
+We want this to be $$\Vert A \Vert_{S_p} = (\sum_i \sigma_i(A)^p)^{1/p}$$, and $$\Vert J(A) \Vert_{S_q} = (\sum_i \sigma_i(J(A))^q)^{1/q} = 1$$.
+This is an instance of Hölder's inequality for vectors $$\vec{s} = (\sigma_i(A))$$ and $$\vec{t} = (\sigma_i(J(A)))$$:
+$$\sum s_i t_i \le \Vert \vec{s} \Vert_p \Vert \vec{t} \Vert_q$$.
+Equality holds if $$t_i^q$$ is proportional to $$s_i^p$$, or $$t_i \propto s_i^{p/q} = s_i^{p-1}$$.
+So, let $$\sigma_i(J(A)) = c \cdot \sigma_i(A)^{p-1}$$ for some constant $$c > 0$$.
+The condition $$\Vert J(A) \Vert_{S_q}=1$$ means
+
+$$
+\left( \sum_i (c \cdot \sigma_i(A)^{p-1})^q \right)^{1/q} = c \left( \sum_i \sigma_i(A)^{(p-1)q} \right)^{1/q} = c \left( \sum_i \sigma_i(A)^p \right)^{1/q} = 1
+$$
+
+So $$c = \frac{1}{(\sum_i \sigma_i(A)^p)^{1/q}} = \frac{1}{(\Vert A \Vert_{S_p}^p)^{1/q}} = \frac{1}{\Vert A \Vert_{S_p}^{p/q}} = \frac{1}{\Vert A \Vert_{S_p}^{p-1}}$$.
+Thus, $$\sigma_i(J(A)) = \frac{\sigma_i(A)^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}$$.
+The matrix $$J_{S_p}(A)$$ is then constructed using the same singular vectors as $$A$$: $$J_{S_p}(A) = U \operatorname{diag}(\sigma_i(J(A))) V^\top$$.
+</details>
+
+**Special Cases for Schatten Norms:**
+
+*   **$$p=2$$ (Frobenius Norm $$\Vert \cdot \Vert_F = \Vert \cdot \Vert_{S_2}$$):** The norm is self-dual ($$q=2$$).
+    $$p-1=1$$. The formula becomes:
+
+    $$
+    \boxed{\,J_F(A) = J_{S_2}(A) = \frac{U \Sigma V^\top}{\Vert A \Vert_{S_2}} = \frac{A}{\Vert A \Vert_F}\,}
+    $$
+
+    This mapping is unique (if $$A \ne \mathbf{0}$$).
+
+*   **$$p=1$$ (Nuclear Norm $$\Vert \cdot \Vert_{S_1}$$):** Dual is Spectral Norm ($$\Vert \cdot \Vert_{S_\infty}$$, $$q=\infty$$).
+    The general formula for $$1<p<\infty$$ is not directly applicable as $$p-1=0$$. If $$A=U_r \Sigma_r V_r^\top$$ is the compact SVD (with $$r$$ positive singular values), a common choice for the duality mapping (subgradient) is:
+
+    $$
+    \boxed{\,J_{S_1}(A) = U_r V_r^\top\,}
+    $$
+
+    More generally, any $$M = U_r V_r^\top + W$$ where $$U_r^\top W V_r = \mathbf{0}$$ and $$\Vert W \Vert_{S_\infty} \le 1$$ and $$W$$ has support on the zero singular space of $$A$$ will work. The choice $$J_{S_1}(A) = U_rV_r^\top$$ is the unique minimum Frobenius norm subgradient.
+    *Check:* $$\langle A, U_rV_r^\top \rangle_F = \mathrm{tr}((V_r\Sigma_r U_r^\top) U_rV_r^\top) = \mathrm{tr}(\Sigma_r) = \Vert A \Vert_{S_1}$$.
+    And $$\Vert U_rV_r^\top \Vert_{S_\infty} = \sigma_{\max}(U_rV_r^\top) = 1$$ (since its singular values are all 1, assuming $$r \ge 1$$).
+
+*   **$$p=\infty$$ (Spectral Norm $$\Vert \cdot \Vert_{S_\infty}$$):** Dual is Nuclear Norm ($$\Vert \cdot \Vert_{S_1}$$, $$q=1$$).
+    This is also the $$\ell_2 \to \ell_2$$ operator norm. If $$\sigma_1 > \sigma_2$$ (largest singular value is simple), let $$u_1, v_1$$ be the corresponding top left and right singular vectors.
+
+    $$
+    \boxed{\,J_{S_\infty}(A) = u_1 v_1^\top\,}
+    $$
+
+    If $$\sigma_1$$ is not simple, $$J_{S_\infty}(A)$$ is any convex combination of $$u_i v_i^\top$$ for all $$i$$ such that $$\sigma_i = \sigma_1$$.
+    *Check:* $$\langle A, u_1v_1^\top \rangle_F = u_1^\top A v_1 = u_1^\top (\sigma_1 u_1) = \sigma_1 = \Vert A \Vert_{S_\infty}$$.
+    And $$\Vert u_1v_1^\top \Vert_{S_1} = \Vert u_1 \Vert_2 \Vert v_1 \Vert_2 = 1 \cdot 1 = 1$$.
+
+#### 3. Mahalanobis-Induced Operator Norm
+
+Let $$M \succ 0$$ be an $$n \times n$$ SPD matrix. The norm on $$\mathbb{R}^n$$ is $$\Vert x \Vert_M = (x^\top M x)^{1/2}$$.
+**Norm:** For $$A \in \mathbb{R}^{n \times n}$$ (can be generalized to $$m \times n$$ with two matrices $$M_{out}, M_{in}$$):
+
+$$
+\Vert A \Vert_M := \max_{x^\top M x = 1} \sqrt{(Ax)^\top M (Ax)} = \Vert M^{1/2} A M^{-1/2} \Vert_{S_\infty}
+$$
+
+Let $$C := M^{1/2} A M^{-1/2}$$. Then $$\Vert A \Vert_M = \sigma_{\max}(C) = \sigma_1(C)$$.
+
+**Dual Norm:** $$\Vert \cdot \Vert_{M^{-1}}$$. So, $$\Vert B \Vert_{M^{-1}} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_\infty}$$.
+
+**Duality Mapping:** Let $$u_1, v_1$$ be the top singular pair of $$C$$ ($$C v_1 = \sigma_1(C) u_1, C^\top u_1 = \sigma_1(C) v_1$$).
+
+$$
+\boxed{\, J_M(A) = M^{1/2} u_1 v_1^\top M^{-1/2} \,}
+$$
+
+***Check:***
+*   $$\langle A, J_M(A) \rangle_F = \mathrm{tr}(A^\top (M^{1/2} u_1 v_1^\top M^{-1/2})) = \mathrm{tr}(v_1^\top M^{-1/2} A^\top M^{1/2} u_1)$$.
+    Since $$C^\top = (M^{1/2} A M^{-1/2})^\top = M^{-1/2} A^\top M^{1/2}$$, this is
+    $$\mathrm{tr}(v_1^\top C^\top u_1) = u_1^\top C v_1 = u_1^\top (\sigma_1(C) u_1) = \sigma_1(C) \Vert u_1 \Vert_2^2 = \sigma_1(C) = \Vert A \Vert_M$$.
+*   $$\Vert J_M(A) \Vert_{M^{-1}} = \Vert M^{-1/2} (M^{1/2} u_1 v_1^\top M^{-1/2}) M^{1/2} \Vert_{S_\infty} = \Vert I (u_1 v_1^\top) I \Vert_{S_\infty} = \Vert u_1 v_1^\top \Vert_{S_\infty} = 1$$.
+
+***Uniqueness:*** Unique if $$\sigma_1(C)$$ is simple (up to the usual SVD sign flips).
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Derivation for $$J_M(A)$$**
+</summary>
+Let the norm be $$\mathcal{N}(A) = \Vert A \Vert_M = \Vert M^{1/2}A M^{-1/2} \Vert_{S_\infty}$$.
+This can be written as $$\mathcal{N}(A) = \Vert \mathcal{T}(A) \Vert_{S_\infty}$$, where $$\mathcal{T}(X) = M^{1/2}X M^{-1/2}$$ is an invertible linear transformation.
+The duality mapping for $$\Vert \cdot \Vert_{S_\infty}$$ applied to $$C = \mathcal{T}(A)$$ is $$J_{S_\infty}(C) = u_1 v_1^\top$$.
+The general formula for transforming duality mappings is $$J_{\mathcal{N}}(A) = \mathcal{T}^\ast(J_{S_\infty}(\mathcal{T}(A)))$$, where $$\mathcal{T}^\ast$$ is the adjoint of $$\mathcal{T}$$ with respect to the Frobenius inner product.
+We find $$\mathcal{T}^\ast$$:
+$$\langle \mathcal{T}(X), Y \rangle_F = \mathrm{tr}((M^{1/2}X M^{-1/2})^\top Y) = \mathrm{tr}(M^{-1/2}X^\top M^{1/2} Y)$$.
+$$\langle X, \mathcal{T}^\ast(Y) \rangle_F = \mathrm{tr}(X^\top \mathcal{T}^\ast(Y))$$.
+For these to be equal for all $$X,Y$$, we must have $$\mathcal{T}^\ast(Y) = M^{1/2}Y M^{-1/2}$$ (using cyclic property of trace and symmetry of $$M^{1/2}$$).
+So, $$J_M(A) = \mathcal{T}^\ast(u_1 v_1^\top) = M^{1/2} (u_1 v_1^\top) M^{-1/2}$$.
+</details>
+
+#### 4. RMS-Induced Operator Norm
+
+**Norm:** For $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$:
+
+$$
+\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} = \sqrt{\frac{n_{in}}{n_{out}}}\,\sigma_{\max}(A) = \sqrt{\frac{n_{in}}{n_{out}}}\,\Vert A \Vert_{S_\infty}
+$$
+
+Let $$k = \sqrt{n_{in}/n_{out}}$$. So $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$.
+
+**Dual Norm:** $$\Vert B \Vert_R^\ast = \frac{1}{k} \Vert B \Vert_{S_1} = \sqrt{\frac{n_{out}}{n_{in}}}\,\Vert B \Vert_{S_1}$$.
+
+**Duality Mapping:** Let $$u_1, v_1$$ be the top singular pair of $$A$$ ($$A v_1 = \sigma_1(A) u_1$$).
+
+$$
+\boxed{\, J_R(A) = k \, u_1 v_1^\top = \sqrt{\frac{n_{in}}{n_{out}}} \, u_1 v_1^\top \,}
+$$
+
+***Check:***
+*   $$\langle A, J_R(A) \rangle_F = \left\langle A, k u_1 v_1^\top \right\rangle_F = k \langle A, u_1 v_1^\top \rangle_F = k \, \sigma_{\max}(A) = \Vert A \Vert_R$$.
+*   $$\Vert J_R(A) \Vert_R^\ast = \left\Vert k u_1 v_1^\top \right\Vert_R^\ast = \frac{1}{k} \left\Vert k u_1 v_1^\top \right\Vert_{S_1} = \frac{1}{k} \cdot k \Vert u_1 v_1^\top \Vert_{S_1} = \Vert u_1 v_1^\top \Vert_{S_1} = 1$$.
+
+***Uniqueness:*** Unique if $$\sigma_{\max}(A)$$ is simple (up to sign flips).
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Derivation for $$J_R(A)$$**
+</summary>
+Let $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$. We seek $$J_R(A)$$ such that $$\langle A, J_R(A) \rangle_F = k \Vert A \Vert_{S_\infty}$$ and $$\Vert J_R(A) \Vert_R^\ast = \frac{1}{k} \Vert J_R(A) \Vert_{S_1} = 1$$.
+The duality mapping for $$\Vert A \Vert_{S_\infty}$$ is $$J_{S_\infty}(A) = u_1 v_1^\top$$.
+We have $$\langle A, u_1 v_1^\top \rangle_F = \Vert A \Vert_{S_\infty}$$.
+Let's try $$J_R(A) = c \cdot u_1 v_1^\top$$ for some scalar $$c$$.
+Then $$\langle A, c \, u_1 v_1^\top \rangle_F = c \Vert A \Vert_{S_\infty}$$. For this to be $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$, we need $$c=k$$.
+So candidate is $$J_R(A) = k \, u_1 v_1^\top$$.
+Now check the dual norm condition:
+$$\Vert k \, u_1 v_1^\top \Vert_R^\ast = \frac{1}{k} \Vert k \, u_1 v_1^\top \Vert_{S_1} = \frac{k}{k} \Vert u_1 v_1^\top \Vert_{S_1} = 1 \cdot 1 = 1$$.
+Both conditions are satisfied.
+</details>
+
+
 ## 6. Why Matrix Norms Matter for Metrized Deep Learning
 
 Understanding matrix norms and their duals is more than just a mathematical exercise. These concepts are foundational for "metrized deep learning" for several reasons:
 
 1.  **Defining Geometry:** Norms induce metrics ($$d(W_1, W_2) = \Vert W_1 - W_2 \Vert$$). The choice of norm for the weights and activations of a neural network defines the geometry of the parameter space and representation spaces.
 
-2.  **Informing Optimizer Design:** Many advanced optimization algorithms, like mirror descent or adaptive methods (e.g., Adam, Shampoo, **Muon**), implicitly or explicitly leverage geometric information. Dual norms are key to understanding and deriving these methods, especially for gradient transformation.
+2.  **Informing Optimizer Design:** Many advanced optimization algorithms, like mirror descent or adaptive methods (e.g., Adam, Shampoo, **Muon**), implicitly or explicitly leverage geometric information. Dual norms and duality mappings are key to understanding and deriving these methods, especially for gradient transformation.
 
 3.  **Regularization:** Norms are extensively used in regularization techniques (e.g., spectral/nuclear norm regularization for matrices) to encourage desirable properties like low rank or sparsity.
 
@@ -477,8 +701,8 @@ Understanding matrix norms and their duals is more than just a mathematical exer
 
 5.  **Computational Costs in Optimization:** The choice of norm is not "free."
     *   **Norm Computation:** Calculating some norms (e.g., Frobenius) is cheap, while others (e.g., spectral, nuclear, RMS-induced) require SVDs or iterative methods, adding computational overhead per optimization step if used directly for regularization or monitoring.
-    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert  \Vert B \Vert_\ast$$. More practically, they often need to compute the dual of the gradient, or transform the gradient using a mapping related to the dual norm. For example, if a layer's parameters $$W$$ are equipped with a norm $$\Vert \cdot \Vert$$, the optimizer might need to compute the dual of the gradient $$G$$ with respect to this norm, or a preconditioning matrix derived from it.
-    *   For common layers like Linear or Conv2D, computing these dual elements or related preconditioners can be expensive. For instance, if the norm involves matrix inversion (as in Mahalanobis norms or when the dualizer requires $$M^{-1}G$$), this is costly. The **Muon** optimizer and related methods often employ approximations, like Newton-Schulz iterations for matrix inverses or low-rank approximations, to make these computations feasible for large deep learning models.
+    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert  \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in Section 5.1 are crucial for implementing such optimizers.
+    *   For common layers like Linear or Conv2D, computing these duality mappings can be expensive. For instance, if the norm involves SVD (like for Spectral, Nuclear, RMS-induced norms) or matrix square roots/inverses (Mahalanobis), this is costly. The **Muon** optimizer and related methods often employ approximations, like Newton-Schulz iterations for matrix inverses or low-rank approximations for SVD, to make these computations feasible for large deep learning models.
 
 6.  **Modular Duality:** As seen in recent research, concepts of duality can be applied modularly to layers (Linear, Conv2D, Embedding) and composed throughout a network. This allows for a "dual" perspective on the entire weight space, enabling optimizers that adapt to the specific geometry of each layer. Efficient GPU kernels for these layer-wise dualizations are an active area of development.
 
