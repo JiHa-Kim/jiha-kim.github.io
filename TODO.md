@@ -5,15 +5,15 @@ x=done
 *=revise
 (no prefix)=not started
 
-## Crash courses
+## x Crash courses
 
 - x Linear Algebra  
   └─ x Multivariable Calculus  
       ├─ x Functional Analysis & Matrix Norms  
-      │   ├─ * Tensor Calculus  
+      │   ├─ x Tensor Calculus  
       │   │   ├─ x Differential Geometry  
       │   │   └─ x Statistics and Information Theory  
-      │   │       └─ Information Geometry (requires both above)  
+      │   │       └─ x Information Geometry (requires both above)  
       │   └─ x Variational Calculus  
       │       └─ x Convex Analysis  
       │           └─ x Online Learning  
