@@ -3,7 +3,7 @@ layout: post
 title: Reducing Probability to Arithmetic
 date: 2025-04-28 01:47 -0400
 description: Uncovering the hidden algebra within probability, using indicators and expectation to convert sets and probabilities into arithmetic.
-image: /assets/2025-04-28-reducing-probability-to-arithmetic/venn_3set_pie.png 
+image: venn_3set_pie.png 
 categories:
 - Probability and Statistics
 - Algebra

@@ -3,7 +3,7 @@ layout: post
 title: The Mean-ing of Loss Functions
 date: 2025-03-25 20:32 -0400
 description: Introduction to Bregman projections in information geometry, exploration connections between basic loss functions and the mean as a predictor.
-image: /assets/2025-03-25-the-mean-ing-of-loss-functions/The_Mean_ing_of_Loss_Functions.svg 
+image: The_Mean_ing_of_Loss_Functions.svg 
 category: 
 - Information Geometry
 tags: 

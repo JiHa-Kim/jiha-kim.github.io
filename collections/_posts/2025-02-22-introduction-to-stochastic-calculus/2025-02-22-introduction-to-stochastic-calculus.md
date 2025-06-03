@@ -12,7 +12,7 @@ tags:
 - Stratonovich Calculus
 date: 2025-02-22 22:50 +0000
 image:
-  path: /assets/2025-02-22-introduction-to-stochastic-calculus/continuous_brownian_3d_smooth.gif
+  path: continuous_brownian_3d_smooth.gif
   alt: 3D plot of 2D Continous Brownian Motion Distributions
 math: true
 ---

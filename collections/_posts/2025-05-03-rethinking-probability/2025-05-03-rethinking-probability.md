@@ -3,7 +3,7 @@ layout: post
 title: Rethinking Probability - Mass, Averages, and Granularity
 date: 2025-04-29 05:19 +0000
 description: Developing an intuition for probability using analogies from physics (mass distributions, centers of mass, resolution/granularity), exploring both the standard measure-theoretic and the expectation-first foundations.
-image: /assets/2025-05-03-rethinking-probability/center_of_mass_density_tikz.svg
+image: center_of_mass_density_tikz.svg
 categories:
 - Mathematics
 - Probability and Statistics

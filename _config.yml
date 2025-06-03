@@ -175,42 +175,41 @@ collections:
 
   notes:
     output: true
-    permalink: /notes/:title/
+    permalink: /notes/:path/
 
   series:
     output: true
-    permalink: /series/:title/
+    permalink: /series/:path/
 
   crash-courses:
     output: true
-    permalink: /crash-courses/:title/
+    permalink: /crash-courses/:path/
 
 defaults:
-  # 1) Global: everything uses "post" layout with TOC on
   - scope:
-      path: "" # applies to every content document
+      type: collection
+    values:
+      permalink: /:collection/:path/
+
+  - scope:
+      type: posts
     values:
       layout: post
-      media_subpath: ./
+      permalink: /posts/:title/
       toc: true
       math: true
       panel_includes:
         - toc
 
-  # 2) Posts still get comments + custom permalink
+  # 1) Global: everything uses "post" layout with TOC on
   - scope:
-      path: ""
-      type: posts
+      path: "" # applies to every content document
     values:
-      comments: true
-      permalink: /posts/:title/
-
-  # 3) Drafts turn comments off + custom permalink
-  - scope:
-      path: _drafts
-    values:
-      comments: false
-      permalink: /drafts/:title/
+      layout: post
+      toc: true
+      math: true
+      panel_includes:
+        - toc
 
   - scope:
       path: "collections/_series/*/index.md"
