@@ -191,15 +191,19 @@ With vectors and covectors in mind, we can now define tensors more generally.
 **Definition.** Tensor of Type $$(p,q)$$
 </div>
 A **tensor $$T$$ of type (or rank) $$(p,q)$$** over a vector space $$V$$ is a multilinear map that takes $$q$$ covectors from the dual space $$V^\ast$$ and $$p$$ vectors from the vector space $$V$$ as arguments, and returns a scalar from $$\mathbb{R}$$.
+
 $$
 T: \underbrace{V^\ast \times \dots \times V^\ast}_{q \text{ times}} \times \underbrace{V \times \dots \times V}_{p \text{ times}} \to \mathbb{R}
 $$
+
 The integer $$p$$ is called the **contravariant rank** and $$q$$ is called the **covariant rank**. The total rank is $$p+q$$.
 
 In a chosen basis $$\{\mathbf{e}_i\}$$ for $$V$$ and its dual basis $$\{\boldsymbol{\epsilon}^j\}$$ for $$V^\ast$$, the tensor $$T$$ can be represented by a set of $$n^{p+q}$$ components, typically written as:
+
 $$
 T^{i_1 i_2 \dots i_p}_{j_1 j_2 \dots j_q}
 $$
+
 where each index $$i_k$$ ranges from $$1$$ to $$n$$, and each index $$j_l$$ ranges from $$1$$ to $$n$$. The upper indices correspond to the contravariant part (related to vectors) and the lower indices to the covariant part (related to covectors).
 </blockquote>
 
@@ -263,21 +267,25 @@ Tensors of the same type can be combined using algebraic operations similar to t
 
 *   **Addition and Subtraction:**
     Two tensors $$A$$ and $$B$$ can be added or subtracted if and only if they have the same type $$(p,q)$$. The resulting tensor $$C = A \pm B$$ also has type $$(p,q)$$, and its components are the sum or difference of the corresponding components:
+
     $$
     (C)^{i_1 \dots i_p}_{j_1 \dots j_q} = (A)^{i_1 \dots i_p}_{j_1 \dots j_q} \pm (B)^{i_1 \dots i_p}_{j_1 \dots j_q}
     $$
 
 *   **Scalar Multiplication:**
     Multiplying a tensor $$T$$ by a scalar $$\alpha \in \mathbb{R}$$ results in a tensor $$\alpha T$$ of the same type, whose components are:
+
     $$
     (\alpha T)^{i_1 \dots i_p}_{j_1 \dots j_q} = \alpha (T^{i_1 \dots i_p}_{j_1 \dots j_q})
     $$
 
 *   **Outer Product (Tensor Product):**
     The outer product of a tensor $$A$$ of type $$(p,q)$$ with components $$A^{i_1 \dots i_p}_{j_1 \dots j_q}$$ and a tensor $$B$$ of type $$(r,s)$$ with components $$B^{k_1 \dots k_r}_{l_1 \dots l_s}$$ is a new tensor $$C = A \otimes B$$ of type $$(p+r, q+s)$$. Its components are formed by simply multiplying the components of $$A$$ and $$B$$:
+
     $$
     (C)^{i_1 \dots i_p k_1 \dots k_r}_{j_1 \dots j_q l_1 \dots l_s} = A^{i_1 \dots i_p}_{j_1 \dots j_q} B^{k_1 \dots k_r}_{l_1 \dots l_s}
     $$
+
     No indices are summed in the outer product.
     Example: Outer product of two vectors $$u^i$$ (type (1,0)) and $$v^j$$ (type (1,0)) yields a (2,0)-tensor $$T^{ij} = u^i v^j$$.
     Example: Outer product of a vector $$u^i$$ (type (1,0)) and a covector $$w_k$$ (type (0,1)) yields a (1,1)-tensor $$M^i_k = u^i w_k$$.
@@ -292,9 +300,11 @@ Tensors of the same type can be combined using algebraic operations similar to t
     **Example.** Trace as a contraction
     </summary>
     Consider a (1,1)-tensor $$A^i_j$$ (like a matrix). If we contract its upper index with its lower index, we set $$i=j=k$$ (dummy index) and sum:
+
     $$
     S = A^k_k = \sum_k A^k_k
     $$
+
     The result $$S$$ is a (0,0)-tensor, which is a scalar. This is precisely the definition of the trace of a matrix.
     </details>
 
