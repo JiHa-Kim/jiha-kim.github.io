@@ -1,7 +1,6 @@
-- [ ] modify workflow to avoid pushing invalid builds
-- [ ] fix path issues
 - [ ] replace `series_index` and `course_index` by `sort_index`
 - [ ] dual norm visualization
+- [ ] notes on operator theory
 
 ## Legend 
 x=done

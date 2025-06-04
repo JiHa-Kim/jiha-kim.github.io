@@ -43,6 +43,16 @@ Imagine trying to navigate a steep, narrow valley. If you can only take steps in
         Here, $$P_t$$ is a positive definite **preconditioner matrix**. The matrix $$P_t^{-1}$$ (or $$P_t$$ itself, depending on convention) reshapes the gradient.
     *   The goal is effectively to make simple gradient steps more direct and efficient in finding the minimum.
 
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Mathematical Aside:** Preconditioning as a Change of Coordinates
+</summary>
+The preconditioned update $$W_{t+1} = W_t - \eta M_t^{-1} g_t$$ can be thought of as performing gradient descent in a transformed coordinate system. Let $$W = S \tilde{W}$$ where $$S^T S = M_t$$. Then, in the $$\tilde{W}$$ coordinates, the gradient $$\tilde{g}_t = S^T g_t$$. The update becomes $$S \tilde{W}_{t+1} = S \tilde{W}_t - \eta (S S^T)^{-1} g_t = S \tilde{W}_t - \eta (S^T)^{-1} S^{-1} g_t$$. If $$M_t$$ is symmetric positive definite, we can choose $$S$$ such that $$M_t = S S^T$$. Then the update is $$S \tilde{W}_{t+1} = S \tilde{W}_t - \eta (S^T)^{-1} S^{-1} g_t$$. Multiplying by $$S^{-1}$$ gives $$\tilde{W}_{t+1} = \tilde{W}_t - \eta (S^{-1} M_t^{-1} S) (S^{-1}g_t)$$.
+
+A more direct view: if we consider the local quadratic approximation of the loss $$\mathcal{L}(W + \delta) \approx \mathcal{L}(W) + g_t^T \delta + \frac{1}{2} \delta^T M_t \delta$$, minimizing this with respect to $$\delta$$ gives $$\delta = -M_t^{-1} g_t$$. The preconditioner $$M_t$$ defines the local geometry (metric) of the loss surface.
+</details>
+
 The name "preconditioning" refers to improving the **condition number** of the problem. Similarly, **whitening** refers to making the covariance matrix of the data isotropic (i.e., having equal variances along all dimensions), similar to how white noise has equal components across all frequencies.
 
 We'll explore how various methods, from classical Newton-based approaches to modern matrix-free techniques, implement this idea of preconditioning.

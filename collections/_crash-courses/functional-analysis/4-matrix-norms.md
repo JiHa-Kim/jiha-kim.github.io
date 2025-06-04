@@ -239,6 +239,63 @@ Additionally, many (but not all) matrix norms satisfy **sub-multiplicativity**. 
 This property is particularly important when analyzing compositions of linear transformations, such as sequential layers in a neural network.
 </blockquote>
 
+### 2.1. Some Standard Matrix Norm Inequalities
+
+Beyond the defining properties, matrix norms relate to each other through various useful inequalities. These relationships are particularly handy when converting bounds from one norm to another, or when choosing a norm for computational convenience versus theoretical sharpness.
+
+All norms on the finite-dimensional space $$\mathbb{R}^{m \times n}$$ are **equivalent**. This means that for any two norms $$\Vert \cdot \Vert_a$$ and $$\Vert \cdot \Vert_b$$, there exist positive constants $$c_1, c_2$$ such that $$c_1 \Vert A \Vert_a \le \Vert A \Vert_b \le c_2 \Vert A \Vert_a$$ for all matrices $$A \in \mathbb{R}^{m \times n}$$.
+
+Here are some specific well-known inequalities relating common matrix norms. For a matrix $$A \in \mathbb{R}^{m \times n}$$:
+(The norms $$\Vert A \Vert_1$$, $$\Vert A \Vert_2$$, and $$\Vert A \Vert_\infty$$ refer to the operator norms: max column sum, spectral norm, and max row sum, respectively. The Frobenius norm is $$\Vert A \Vert_F$$. These are formally defined in the subsequent sections.)
+
+1.  **Relating spectral norm ($$\Vert A \Vert_2$$) and Frobenius norm ($$\Vert A \Vert_F$$):**
+
+    $$
+    \Vert A \Vert_2 \le \Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2
+    $$
+
+    Since $$\mathrm{rank}(A) \le \min(m,n)$$, the looser but more common bound $$\Vert A \Vert_F \le \sqrt{\min(m,n)} \Vert A \Vert_2$$ also holds.
+
+2.  **Relating spectral norm ($$\Vert A \Vert_2$$) to max column sum norm ($$\Vert A \Vert_1$$) and max row sum norm ($$\Vert A \Vert_\infty$$):**
+
+    $$
+    \frac{1}{\sqrt{m}} \Vert A \Vert_\infty \le \Vert A \Vert_2 \le \sqrt{n} \Vert A \Vert_\infty
+    $$
+
+    $$
+    \frac{1}{\sqrt{n}} \Vert A \Vert_1 \le \Vert A \Vert_2 \le \sqrt{m} \Vert A \Vert_1
+    $$
+
+3.  **An interpolation-like inequality for the spectral norm:**
+
+    $$
+    \Vert A \Vert_2 \le \sqrt{\Vert A \Vert_1 \Vert A \Vert_\infty}
+    $$
+
+4.  **Relating various norms to the maximum absolute entry, $$\Vert A \Vert_{\max} = \max_{i,j} \vert a_{ij} \vert$$:**
+
+    $$
+    \Vert A \Vert_{\max} \le \Vert A \Vert_2
+    $$
+
+    $$
+    \Vert A \Vert_2 \le \sqrt{mn} \Vert A \Vert_{\max}
+    $$
+
+    $$
+    \Vert A \Vert_F \le \sqrt{mn} \Vert A \Vert_{\max}
+    $$
+
+    $$
+    \Vert A \Vert_1 \le m \Vert A \Vert_{\max}
+    $$
+    
+    $$
+    \Vert A \Vert_\infty \le n \Vert A \Vert_{\max}
+    $$
+
+These inequalities are fundamental in many areas of numerical analysis and matrix theory.
+
 There are several ways to define matrix norms. We'll focus on two major categories: induced norms and entry-wise norms (specifically Schatten norms).
 
 ## 3. Induced (Operator) Norms
@@ -718,6 +775,26 @@ Here's a quick cheat sheet of common matrix norms and their duals (with respect 
 | Frobenius                 | $$\Vert A \Vert_F$$, $$\Vert A \Vert_{S_2}$$                                                 | $$\sqrt{\sum_{i,j} \vert a_{ij} \vert^2} = \sqrt{\sum_k \sigma_k(A)^2}$$ | Frobenius ($$\Vert \cdot \Vert_F$$)                                  | Cheap ($$O(n_{out}n_{in})$$) |
 | Nuclear                   | $$\Vert A \Vert_\ast$$, $$\Vert A \Vert_{S_1}$$                                              | $$\sum_k \sigma_k(A)$$                                                   | Spectral ($$\Vert \cdot \Vert_{S_\infty}$$)                          | Expensive (SVD)              |
 | RMS-Induced Operator Norm | $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$                                              | $$\sqrt{n_{in}/n_{out}}\,\sigma_{\max}(A)$$                              | $$\sqrt{n_{out}/n_{in}}\,\Vert A \Vert_{S_1}$$ (Scaled Nuclear Norm) | Expensive (SVD/Iterative)    |
+
+## Summary of Matrix Norm Inequalities
+
+This table summarizes key inequalities relating common matrix norms for a matrix $$A \in \mathbb{R}^{m \times n}$$.
+Here, $$\Vert A \Vert_1$$ is the max column sum (operator norm $$\ell_1 \to \ell_1$$), $$\Vert A \Vert_2$$ is the spectral norm (operator norm $$\ell_2 \to \ell_2$$), $$\Vert A \Vert_\infty$$ is the max row sum (operator norm $$\ell_\infty \to \ell_\infty$$), $$\Vert A \Vert_F$$ is the Frobenius norm, and $$\Vert A \Vert_{\max} = \max_{i,j} \vert a_{ij} \vert$$.
+
+| Inequality                                                          | Notes / Context                                                 |
+| :------------------------------------------------------------------ | :-------------------------------------------------------------- |
+| $$\Vert A \Vert_2 \le \Vert A \Vert_F$$                             | Spectral norm is less than or equal to Frobenius norm.          |
+| $$\Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2$$     | Often simplified using $$\mathrm{rank}(A) \le \min(m,n)$$.      |
+| $$\frac{1}{\sqrt{m}} \Vert A \Vert_\infty \le \Vert A \Vert_2$$     | Lower bound for spectral norm by max row sum.                   |
+| $$\Vert A \Vert_2 \le \sqrt{n} \Vert A \Vert_\infty$$               | Upper bound for spectral norm by max row sum.                   |
+| $$\frac{1}{\sqrt{n}} \Vert A \Vert_1 \le \Vert A \Vert_2$$          | Lower bound for spectral norm by max column sum.                |
+| $$\Vert A \Vert_2 \le \sqrt{m} \Vert A \Vert_1$$                    | Upper bound for spectral norm by max column sum.                |
+| $$\Vert A \Vert_2 \le \sqrt{\Vert A \Vert_1 \Vert A \Vert_\infty}$$ | Interpolates between operator 1-norm and $$\infty$$-norm.       |
+| $$\Vert A \Vert_{\max} \le \Vert A \Vert_2$$                        | Max absolute entry is less than or equal to spectral norm.      |
+| $$\Vert A \Vert_2 \le \sqrt{mn} \Vert A \Vert_{\max}$$              | Upper bound for spectral norm by max absolute entry.            |
+| $$\Vert A \Vert_F \le \sqrt{mn} \Vert A \Vert_{\max}$$              | Upper bound for Frobenius norm by max absolute entry.           |
+| $$\Vert A \Vert_1 \le m \Vert A \Vert_{\max}$$                      | Upper bound for operator 1-norm by max absolute entry.          |
+| $$\Vert A \Vert_\infty \le n \Vert A \Vert_{\max}$$                 | Upper bound for operator $$\infty$$-norm by max absolute entry. |
 
 In our upcoming posts on metrized deep learning, we will see how these norms and their associated geometries are not just theoretical curiosities but practical tools for building more efficient and effective deep learning models. Stay tuned!
 
