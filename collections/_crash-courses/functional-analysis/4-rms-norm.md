@@ -160,7 +160,7 @@ where $$\Vert x \Vert_2 = \sqrt{\sum_{i=1}^n x_i^2}$$ is the standard Euclidean 
 <div class="title" markdown="1">
 **Theorem 1.** Rotationally Invariant Functions
 </div>
-A function $$f: \mathbb{R}^n \to \mathbb{R}$$ ($$n \ge 2$$) is **rotationally invariant** (i.e., $$f(Qx) = f(x)$$ for all rotation matrices $$Q \in SO(n)$$ and all $$x \in \mathbb{R}^n$$) if and only if there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that:
+A function $$f: \mathbb{R}^n \to \mathbb{R}$$ ($$n \ge 2$$) is **rotationally invariant** (i.e., $$f(Rx) = f(x)$$ for all rotation matrices $$R \in SO(n)$$ and all $$x \in \mathbb{R}^n$$) if and only if there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that:
 
 $$
 f(x) = g(\Vert x \Vert_2) \quad \forall x \in \mathbb{R}^n
@@ -179,13 +179,13 @@ For $$n=1$$, the space is $$\mathbb{R}$$. The special orthogonal group $$SO(1)$$
 **Proof of Theorem 1.**
 </summary>
 ($$\Leftarrow$$) **Sufficiency (for all $$n \ge 1$$):**
-Assume $$f(x) = g(\Vert x \Vert_2)$$ for some function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$. For any rotation matrix $$Q \in SO(n)$$, rotations preserve the Euclidean norm: $$\Vert Qx \Vert_2 = \Vert x \Vert_2$$.
-Then, $$f(Qx) = g(\Vert Qx \Vert_2) = g(\Vert x \Vert_2) = f(x)$$. Thus, $$f$$ is rotationally invariant.
+Assume $$f(x) = g(\Vert x \Vert_2)$$ for some function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$. For any rotation matrix $$R \in SO(n)$$, rotations preserve the Euclidean norm: $$\Vert Rx \Vert_2 = \Vert x \Vert_2$$.
+Then, $$f(Rx) = g(\Vert Rx \Vert_2) = g(\Vert x \Vert_2) = f(x)$$. Thus, $$f$$ is rotationally invariant.
 
 ($$\Rightarrow$$) **Necessity:**
 *   **Case $$n \ge 2$$:** Assume $$f: \mathbb{R}^n \to \mathbb{R}$$ is rotationally invariant.
     *   If $$x = \mathbf{0}$$, define $$g(0) = f(\mathbf{0})$$. Then $$f(\mathbf{0}) = g(\Vert \mathbf{0} \Vert_2)$$.
-    *   If $$x \ne \mathbf{0}$$, let $$r = \Vert x \Vert_2 > 0$$. For any $$y \in \mathbb{R}^n$$ with $$\Vert y \Vert_2 = r$$, there exists $$Q \in SO(n)$$ such that $$y = Qx$$ (since $$SO(n)$$ acts transitively on spheres for $$n \ge 2$$). By rotational invariance, $$f(y) = f(Qx) = f(x)$$. Thus, $$f(x)$$ depends only on $$\Vert x \Vert_2$$. Define $$g(r) = f(x_0)$$ for any fixed $$x_0$$ with $$\Vert x_0 \Vert_2 = r$$ (e.g., $$x_0 = (r, 0, \ldots, 0)^\top$$). Then $$f(x) = g(\Vert x \Vert_2)$$.
+    *   If $$x \ne \mathbf{0}$$, let $$r_0 = \Vert x \Vert_2 > 0$$. For any $$y \in \mathbb{R}^n$$ with $$\Vert y \Vert_2 = r_0$$, there exists $$R \in SO(n)$$ such that $$y = Rx$$ (since $$SO(n)$$ acts transitively on spheres for $$n \ge 2$$). By rotational invariance, $$f(y) = f(Rx) = f(x)$$. Thus, $$f(x)$$ depends only on $$\Vert x \Vert_2$$. Define $$g(r_0) = f(x_0)$$ for any fixed $$x_0$$ with $$\Vert x_0 \Vert_2 = r_0$$ (e.g., $$x_0 = (r_0, 0, \ldots, 0)^\top$$). Then $$f(x) = g(\Vert x \Vert_2)$$. (Using $$r_0$$ to avoid confusion with function $$g(r)$$).
 
 *   **Case $$n=1$$:** (Covered in the note within the theorem statement.) For completeness, if $$f(x_1) = g(\vert x_1 \vert)$$, then $$f(-x_1) = g(\vert -x_1 \vert) = g(\vert x_1 \vert) = f(x_1)$$, so $$f$$ must be an even function. Conversely, if $$f$$ is an even function, define $$g(r) = f(r)$$ for $$r \ge 0$$. Then for any $$x_1 \in \mathbb{R}$$, $$g(\vert x_1 \vert) = f(\vert x_1 \vert)$$. Since $$f$$ is even, $$f(\vert x_1 \vert) = f(x_1)$$ if $$x_1 \ge 0$$ and $$f(\vert x_1 \vert) = f(-x_1) = f(x_1)$$ if $$x_1 < 0$$. So $$f(x_1) = g(\vert x_1 \vert)$$.
 </details>
@@ -426,7 +426,7 @@ All axioms hold.
 A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it satisfies:
 1.  **Norm properties:** $$f$$ is a norm on $$\mathbb{R}^n$$.
 2.  **Permutation & sign-flip symmetry:** As in Theorem 6, Axiom 3.
-3.  **Structural property linked to Euclidean norm:** $$f$$ satisfies the parallelogram identity ($$f(x+y)^2+f(x-y)^2 = 2f(x)^2+2f(y)^2$$) OR $$f$$ is rotationally invariant ($$f(Qx)=f(x)$$ for $$Q \in SO(n)$$).
+3.  **Structural property linked to Euclidean norm:** $$f$$ satisfies the parallelogram identity ($$f(x+y)^2+f(x-y)^2 = 2f(x)^2+2f(y)^2$$) OR $$f$$ is rotationally invariant ($$f(Rx)=f(x)$$ for $$R \in SO(n)$$).
 4.  **Normalization on the all-ones vector:** $$f(\vec{1}) = f(1,1,\dots,1) = 1$$.
 </blockquote>
 
@@ -542,7 +542,7 @@ Each set of properties below uniquely defines the RMS norm $$f(x) = \Vert x \Ver
 5.  **Enhanced Symmetry Version (Theorem 7)**
     *   $$f$$ is a norm.
     *   Permutation & sign-flip symmetry for coordinates.
-    *   Parallelogram identity OR Rotational invariance.
+    *   Parallelogram identity OR Rotational invariance ($$f(Rx)=f(x)$$ for $$R \in SO(n)$$).
     *   Normalization: $$f(1,1,\dots,1)=1$$.
 
 6.  **Averaged Sum-of-Functions Structure (Theorem 8)**
