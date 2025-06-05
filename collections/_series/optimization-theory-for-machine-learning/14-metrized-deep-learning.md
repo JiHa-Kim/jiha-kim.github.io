@@ -3,7 +3,7 @@ title: "Metrized Deep Learning: Finding the Right \"Measure\" for Neural Network
 date: 2025-05-18 00:45 -0400
 series_index: 14
 mermaid: true
-description: Exploring how choosing the right norm for parameter spaces can revolutionize deep learning optimization, with a focus on modular duality and the Muon optimizer.
+description: Exploring how choosing the right norm for parameter spaces (like dimension-agnostic operator norms) can revolutionize deep learning optimization, with a focus on modular duality and the Muon optimizer.
 image: # placeholder
 categories:
 - Machine Learning
@@ -150,7 +150,7 @@ In our journey through the landscape of machine learning optimization, we've enc
 
 Recent results show lots of promise in this direction. Notably, the **Muon Optimizer**, which stands for **Momentum Orthogonalized by Newton-Schulz**, has demonstrated impressive performance that continues to outperform previous state-of-the-art optimizers even at large scale. For instance, [Keller Jordan](https://kellerjordan.github.io/posts/muon/), with the work of others, has achieved record training times in optimization speedrun categories such as [NanoGPT](https://x.com/Yuchenj_UW/status/1846964136204173318) and CIFAR-10. Kimi AI's ["Moonlight" 16B MoE LLM](https://arxiv.org/abs/2502.16982) demonstrates that Muon is suitable for real-world scale.
 
-This post delves into **Metrized Deep Learning**, an approach that moves beyond scalar learning rates to embrace *metrics* that capture the intrinsic geometry of the parameter space. We'll explore how this principled perspective, particularly through concepts like **modular duality** and the **spectral norm**, leads to more effective and insightful optimization strategies, with a special focus on the **Muon optimizer** and its theoretical underpinnings.
+This post delves into **Metrized Deep Learning**, an approach that moves beyond scalar learning rates to embrace *metrics* that capture the intrinsic geometry of the parameter space. We'll explore how this principled perspective, particularly through concepts like **modular duality** and appropriately scaled operator norms (like **dimension-agnostic spectral norms**), leads to more effective and insightful optimization strategies, with a special focus on the **Muon optimizer** and its theoretical underpinnings.
 
 ## Part 1: Setting the Stage – Why Metrics in Deep Learning?
 
@@ -186,7 +186,7 @@ Neural networks, especially deep ones, can be viewed as compositions of function
 <div class="title" markdown="1">
 **Key Insight:** The behavior of a layer as an operator is often better captured by its **operator norm** rather than, say, the Frobenius norm of its flattened weights.
 </div>
-The operator norm measures the maximum amplification an operator can apply to an input vector.
+The operator norm measures the maximum amplification an operator can apply to an input vector, relative to chosen norms on the input and output spaces.
 </blockquote>
 
 <blockquote class="box-definition" markdown="1">
@@ -199,15 +199,31 @@ $$
 \Vert W \Vert_2 = \max_{\Vert x \Vert_2 = 1, x \in \mathbb{R}^n} \Vert Wx \Vert_2 = \sigma_{\max}(W) = \sqrt{\lambda_{\max}(W^T W)}
 $$
 
-The spectral norm is the operator norm induced by the Euclidean ($$\ell_2$$) vector norm on its input and output spaces.
+The spectral norm is the operator norm induced by the Euclidean ($$\ell_2$$) vector norm on its input and output spaces. It is also known as the Schatten-$$\infty$$ norm.
 </blockquote>
 
-Why do operator norms matter?
-*   **Lipschitz Constants:** The operator norm of a layer often bounds its Lipschitz constant. The Lipschitz constant of the entire network (a composition of layers) is related to the product of these individual operator norms. A controlled Lipschitz constant is crucial for:
+<blockquote class="box-info" markdown="1">
+<div class="title" markdown="1">
+**From Spectral Norm to Dimension-Agnostic Operator Norms for Network Layers**
+</div>
+While the spectral norm $$\Vert W \Vert_2$$ is fundamental, for neural network layers $$y=Wx$$ (where $$W \in \mathbb{R}^{d_{out} \times d_{in}}$$), it's often beneficial to use a norm that is invariant to the dimensions $$d_{in}$$ and $$d_{out}$$. One such norm is the operator norm from an RMS-normalized input space to an RMS-normalized output space.
+
+The RMS (Root Mean Square) norm of a vector $$v \in \mathbb{R}^D$$ is $$\Vert v \Vert_{RMS} = \Vert v \Vert_2 / \sqrt{D}$$.
+The induced operator norm, which we'll call the **Dimension-Agnostic Spectral Norm** and denote $$\Vert W \Vert_{\text{DA}}$$, is:
+
+$$
+\Vert W \Vert_{\text{DA}} = \max_{\Vert x \Vert_{RMS, d_{in}}=1} \Vert Wx \Vert_{RMS, d_{out}} = \sqrt{\frac{d_{in}}{d_{out}}} \Vert W \Vert_2 = \sqrt{\frac{d_{in}}{d_{out}}} \sigma_{\max}(W)
+$$
+
+This normalization ensures that, for instance, an identity matrix $$I_D$$ (where $$d_{in}=d_{out}=D$$) has $$\Vert I_D \Vert_{\text{DA}} = 1$$ regardless of $$D$$. Similarly, certain compositions like $$\text{concat}(I_D, I_D)$$ (mapping $$D$$ to $$2D$$ inputs to $$D$$ to $$2D$$ outputs, or analogous structures) can preserve this norm. This dimension-agnostic characteristic is crucial for stable optimization across layers of varying sizes. This is the type of norm often used by Muon for linear layers, as discussed in Bernstein's work (where it might be denoted $$\Vert W \Vert_\infty$$ in that specific context, distinct from the Schatten-$$\infty$$ norm meaning of $$\sigma_{\max}(W)$$).
+</blockquote>
+
+Why do appropriately chosen operator norms matter?
+*   **Lipschitz Constants:** The operator norm of a layer often bounds its Lipschitz constant (with respect to Euclidean norms, this is $$\Vert W \Vert_2$$). The Lipschitz constant of the entire network (a composition of layers) is related to the product of these individual operator norms. A controlled Lipschitz constant is crucial for:
     *   **Generalization:** Networks with smaller Lipschitz constants tend to generalize better.
     *   **Robustness:** They are less sensitive to small input perturbations.
     *   **Stability:** Preventing issues like exploding or vanishing gradients, and "logit explosion" where output values become excessively large (Bernstein, Statistics Colloquium 2024-2025).
-*   **Intrinsic Properties:** Operator norms reflect how a layer transforms information, which is more fundamental to its role than the sum of squares of its individual weights.
+*   **Intrinsic Properties:** Operator norms, especially dimension-agnostic ones, reflect how a layer transforms information in a scale-invariant way, which is more fundamental to its role than the sum of squares of its individual weights.
 
 ### 1.3. The Duality Mismatch: Gradients Live in the Dual Space
 
@@ -259,8 +275,8 @@ This construction allows us to tailor the geometry to the specific architecture 
 
 The choice of $$\Vert W_l \Vert_{(l)}$$ for each layer is critical and should reflect its function:
 
-*   **Linear / Embedding Layers:** The **spectral norm** ($$\Vert W \Vert_2 = \sigma_{\max}(W)$$) is the natural choice, directly measuring the maximum amplification factor of the linear transformation.
-*   **Conv2D Layers:** Convolutional layers can also be analyzed via operator norms. While more complex due to their structure, concepts related to the spectral norm of their unfolded kernel tensors or specialized "rectangular" spectral norms are used (Bernstein & Newhouse, 2024, arXiv:2410.21265).
+*   **Linear / Embedding Layers:** The **Dimension-Agnostic Spectral Norm** ($$\Vert W_l \Vert_{\text{DA}} = \sqrt{d_{in,l}/d_{out,l}} \sigma_{\max}(W_l)$$) is the natural choice, as it measures the operator gain in a way that is invariant to layer dimensions.
+*   **Conv2D Layers:** Convolutional layers can also be analyzed via operator norms. While more complex due to their structure, concepts related to the spectral norm of their unfolded kernel tensors or specialized "rectangular" spectral norms (potentially also made dimension-agnostic) are used (Bernstein & Newhouse, 2024, arXiv:2410.21265).
 *   **LayerNorm / Bias Parameters:** For parameters like biases or scales/shifts in normalization layers, simpler scalar norms (e.g., their Euclidean norm) might suffice, or they might be treated as passthroughs if their operator nature is less dominant or handled by the normalization itself.
 
 ### 2.3. Key Property: Automatic Lipschitz Certificate
@@ -271,7 +287,7 @@ A significant advantage of a thoughtfully constructed modular norm, particularly
 <div class="title" markdown="1">
 **Lipschitz Bound:** The modular norm can often provide an explicit upper bound on the global Lipschitz constant of the neural network function $$f_W(x)$$.
 </div>
-If $$L(f_W)$$ is the Lipschitz constant of the network $$f_W$$ with respect to its input $$x$$, and $$L(W_l)$$ is the Lipschitz constant of layer $$l$$ (related to $$\Vert W_l \Vert_{(l)}$$), then under certain composition rules (e.g., for sequential compositions, $$L(f_W) \le \prod_l L(W_l)$$), $$\Vert W \Vert_{\text{mod}}$$ can be related to bounds on $$L(f_W)$$.
+If $$L(f_W)$$ is the Lipschitz constant of the network $$f_W$$ with respect to its input $$x$$, and $$L(W_l)$$ is the Lipschitz constant of layer $$l$$ (related to $$\Vert W_l \Vert_{(l)}$$), then under certain composition rules (e.g., for sequential compositions, $$L(f_W) \le \prod_l L(W_l)$$), $$\Vert W \Vert_{\text{mod}}$$ can be related to bounds on $$L(f_W)$$. (Note: $$L(W_l)$$ for a linear layer is its standard spectral norm $$\Vert W_l \Vert_2$$, which is $$\Vert W_l \Vert_{\text{DA}} / \sqrt{d_{in,l}/d_{out,l}}$$).
 This is invaluable for:
 *   **Safety-critical applications:** Providing guarantees on output stability.
 *   **Robustness analysis:** Understanding how input perturbations propagate.
@@ -306,7 +322,12 @@ $$
 
 The solution $$d_k$$ is the "dualized" gradient. For example, if $$\Vert d \Vert^2 = d^T M d$$, then $$d_k = -\eta_k M^{-1} \nabla \mathcal{L}(W_k)$$.
 
-The term $$\mathcal{D}_{\text{mod}}(g_t)$$ represents this primal space direction. For the spectral norm $$\Vert \cdot \Vert_2$$, the dual norm is the nuclear norm $$\Vert \cdot \Vert_\ast $$ (or trace norm $$\Vert \cdot \Vert_{\text{tr}}$$). The element in the primal space corresponding to a gradient $$G$$ (in the dual space) that gives the steepest descent direction with respect to $$\Vert \cdot \Vert_2$$ is proportional to $$\operatorname{sign}(G)$$. Specifically, if $$G=U\Sigma V^T$$, then $$\operatorname{sign}(G) = UV^T$$. The actual preconditioned gradient step is then $$-\eta \cdot \operatorname{sign}(G)$$.
+The term $$\mathcal{D}_{\text{mod}}(g_t)$$ represents this primal space direction.
+For the standard spectral norm $$\Vert W \Vert_2$$ (i.e., Schatten-$$\infty$$ norm), its dual norm is the nuclear norm $$\Vert G \Vert_{tr}$$ (Schatten-1 norm). The steepest descent direction with respect to $$\Vert W \Vert_2$$ is proportional to $$-\operatorname{sign}(G)$$.
+If we use the Dimension-Agnostic Spectral Norm for a layer $$l$$, $$\Vert W_l \Vert_{\text{DA}} = s_l \Vert W_l \Vert_2$$, where $$s_l = \sqrt{d_{in,l}/d_{out,l}}$$.
+The dual norm to $$\Vert \cdot \Vert_{\text{DA}}$$ is $$\Vert G \Vert_{\text{DA}\ast} = (1/s_l) \Vert G \Vert_{tr}$$.
+The preconditioned gradient (steepest descent direction in the primal space) for layer $$l$$ is then proportional to $$-s_l \operatorname{sign}(G_l)$$. If $$G_l=U\Sigma V^T$$, then $$\operatorname{sign}(G_l) = UV^T$$.
+The update step for layer $$l$$ with gradient $$g_l$$ is $$W_{l, t+1} = W_{l, t} - \eta \cdot s_l \operatorname{sign}(g_l)$$.
 </details>
 
 The update rule then becomes:
@@ -315,21 +336,21 @@ $$
 W_{t+1} = W_t - \eta \, \mathcal{D}_{\text{mod}}(g_t)
 $$
 
-where $$\mathcal{D}_{\text{mod}}(g_t)$$ for layer $$l$$ with gradient $$g_l$$ and spectral norm is $$\operatorname{sign}(g_l)$$.
+where $$\mathcal{D}_{\text{mod}}(g_t)_l$$ for layer $$l$$ with gradient $$g_l$$ and using the Dimension-Agnostic Spectral Norm is $$s_l \operatorname{sign}(g_l)$$, with $$s_l = \sqrt{d_{in,l}/d_{out,l}}$$.
 
 ### 3.2. Intuition with Simple Examples
 
 Let's build some intuition:
 
 *   **Single Linear Layer ($$y=Wx$$):**
-    Suppose we choose the spectral norm $$\Vert W \Vert_2$$ for this layer. The gradient component is $$\nabla_W \mathcal{L}$$. As detailed above, the dual map for the spectral norm yields $$\mathcal{D}_{\text{spectral}}(\nabla_W \mathcal{L}) = \operatorname{sign}(\nabla_W \mathcal{L})$$. This means the update modifies $$W$$ along directions defined by its singular vectors, but with unit "energy" along these directions, effectively re-shaping the update to prioritize changes in "orientation" rather than magnitude scaled by singular values of the gradient.
+    Suppose we choose the Dimension-Agnostic Spectral Norm $$\Vert W \Vert_{\text{DA}} = s \Vert W \Vert_2$$ for this layer, where $$s = \sqrt{d_{in}/d_{out}}$$. The gradient component is $$\nabla_W \mathcal{L}$$. As detailed above, the dual map for this norm yields $$\mathcal{D}_{\text{DA}}(\nabla_W \mathcal{L}) = s \cdot \operatorname{sign}(\nabla_W \mathcal{L})$$. This means the update modifies $$W$$ along directions defined by its singular vectors. The magnitude of this update along these "principal components" is scaled by $$s$$, effectively re-shaping the update to prioritize changes in "orientation" (via $$\operatorname{sign}(\nabla_W \mathcal{L})$$) while also accounting for the layer's dimensions through the factor $$s$$.
 
 *   **Residual Block ($$x_{out} = x_{in} + F(x_{in}, W)$$):**
-    The gradient will have components flowing through the identity path and the residual function $$F$$. The modular duality map must respect this structure. If gradients are $$g_{skip}$$ and $$g_{residual}$$ (for parameters $$W$$ within $$F$$), the dualization applies to $$g_{residual}$$ based on the norm for $$W$$ (e.g., yielding $$\operatorname{sign}(g_{residual})$$), and the overall update structure is preserved by applying these transformed gradients.
+    The gradient will have components flowing through the identity path and the residual function $$F$$. The modular duality map must respect this structure. If gradients are $$g_{skip}$$ and $$g_{residual}$$ (for parameters $$W$$ within $$F$$), the dualization applies to $$g_{residual}$$ based on the norm for $$W$$ (e.g., yielding $$s \cdot \operatorname{sign}(g_{residual})$$ if $$W$$ is a linear layer and $$s$$ is its corresponding scale factor), and the overall update structure is preserved by applying these transformed gradients.
 
 ### 3.3. Computational Aspect: The Matrix Sign Operation
 
-For spectral norms, a key computational primitive in the dual map is the **matrix sign function**, $$\operatorname{sign}(G)$$.
+For spectral-based norms, a key computational primitive in the dual map is the **matrix sign function**, $$\operatorname{sign}(G)$$.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
@@ -368,18 +389,18 @@ This specific iteration can be seen as finding a fixed point of $$X = \frac{1}{2
 
 Different choices of the metric $$M$$ (or equivalently, the norm whose duality map is used) lead to different optimizers. Let's look at a few examples:
 
-| Optimizer   | Metric $$M$$ (Conceptual)                                              | Update Sketch                                                                                   | Key Geometric Idea / Notes                                                                                                                                                                             |
-| :---------- | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Adam**    | Diagonal, adaptive (from squared grads)                                | $$m_t \sim g_t, v_t \sim g_t^2; W \leftarrow W - \eta \frac{m_t}{\sqrt{v_t}+\epsilon}$$         | Adapts per-parameter learning rates based on gradient statistics. Can be seen as approximating a diagonal Fisher metric. (Post #12, #13)                                                               |
-| **IsoAdam** | $$M_l = \sigma_l^2 I$$ (per-tensor scalar isotropy)                    | $$m_t \leftarrow \beta m_{t-1} + (1-\beta)g_t; W_l \leftarrow W_l - \eta \frac{m_t}{\sigma_l}$$ | Aims for update norm invariance to linear input/output transforms of $$W_l$$; scales equally in all directions for parameters of tensor $$W_l$$. (Jackson et al.)                                      |
-| **Shampoo** | Approx. Hessian via Kronecker factors ($$A_l \otimes B_l$$)            | Precondition with roots: $$(A_l \otimes B_l)^{-1/2} g_l$$                                       | Captures some parameter correlations more richly than diagonal methods; can be expensive for high-dimensional factors. (Gupta et al., 2018; Anil et al., 2020)                                         |
-| **Muon**    | Modular Norm ($$\Vert \cdot \Vert_{\text{mod}}$$) (Spectral per layer) | $$W \leftarrow W - \eta\,\mathcal{D}_{\text{mod}}(g)$$                                          | Explicitly performs steepest descent in the chosen modular (often spectral) metric. Does not require hand-tuned gradient clipping norms. (Bernstein & Newhouse, 2024; Bernstein, "Deriving Muon" blog) |
+| Optimizer   | Metric $$M$$ (Conceptual)                                                                                  | Update Sketch                                                                                                           | Key Geometric Idea / Notes                                                                                                                                                                                                |
+| :---------- | :--------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Adam**    | Diagonal, adaptive (from squared grads)                                                                    | $$m_t \sim g_t, v_t \sim g_t^2; W \leftarrow W - \eta \frac{m_t}{\sqrt{v_t}+\epsilon}$$                                 | Adapts per-parameter learning rates based on gradient statistics. Can be seen as approximating a diagonal Fisher metric. (Post #12, #13)                                                                                  |
+| **IsoAdam** | $$M_l = \sigma_l^2 I$$ (per-tensor scalar isotropy)                                                        | $$m_t \leftarrow \beta m_{t-1} + (1-\beta)g_t; W_l \leftarrow W_l - \eta \frac{m_t}{\sigma_l}$$                         | Aims for update norm invariance to linear input/output transforms of $$W_l$$; scales equally in all directions for parameters of tensor $$W_l$$. (Jackson et al.)                                                         |
+| **Shampoo** | Approx. Hessian via Kronecker factors ($$A_l \otimes B_l$$)                                                | Precondition with roots: $$(A_l \otimes B_l)^{-1/2} g_l$$                                                               | Captures some parameter correlations more richly than diagonal methods; can be expensive for high-dimensional factors. (Gupta et al., 2018; Anil et al., 2020)                                                            |
+| **Muon**    | Modular Norm ($$\Vert \cdot \Vert_{\text{mod}}$$) (e.g., $$\Vert W_l \Vert_{\text{DA}}$$ per linear layer) | $$W_{l} \leftarrow W_{l} - \eta\,s_l \operatorname{sign}(g_l)$$ for linear layers ($$s_l = \sqrt{d_{in,l}/d_{out,l}}$$) | Explicitly performs steepest descent in the chosen modular (often dimension-agnostic spectral) metric. Does not require hand-tuned gradient clipping norms. (Bernstein & Newhouse, 2024; Bernstein, "Deriving Muon" blog) |
 
-The focus of the rest of this post will be primarily on Muon, as it directly instantiates many of the "modular duality" and "spectral norm" ideas.
+The focus of the rest of this post will be primarily on Muon, as it directly instantiates many of the "modular duality" and dimension-agnostic operator norm ideas.
 
 ## Part 5: Deep Dive – Muon: Spectral Descent, Implicit Bias, and Computational Optimality
 
-The Muon optimizer, developed by Jeremy Bernstein and collaborators, is a prime example of metrized deep learning. It uses the principles of modular duality with a strong emphasis on spectral norms for matrix-like parameters.
+The Muon optimizer, developed by Jeremy Bernstein and collaborators, is a prime example of metrized deep learning. It uses the principles of modular duality with a strong emphasis on dimension-agnostic spectral norms for matrix-like parameters.
 
 ### 5.1. Theoretical Grounding: Implicit Bias of Spectral Descent (Fan et al., 2025, arXiv:2502.04664)
 
@@ -392,52 +413,56 @@ Recent theoretical work has shed light on *why* optimizers like Muon, which perf
 **Setting:** Consider a multiclass linear classifier $$f_W(x)=\operatorname{softmax}(Wx)$$ trained with cross-entropy loss on *separable* data (i.e., there exists a $$W$$ that correctly classifies all training points).
 
 **Norms and Descent:**
-Let $$\Vert W \Vert_p = \left(\sum_{j}\sigma_j(W)^p\right)^{1/p}$$ be the Schatten-$$p$$ norm of matrix $$W$$ (where $$\sigma_j(W)$$ are its singular values).
+Let $$N(W)$$ be the norm chosen for the parameters $$W$$. Let $$N^\ast(G)$$ be its dual norm.
 **Normalized Steepest Descent (NSD)** performs the update:
 
 $$
-W_{t+1} = W_t - \eta \frac{\nabla\mathcal{L}(W_t)}{\Vert\nabla\mathcal{L}(W_t)\Vert_{p^\ast}}
+W_{t+1} = W_t - \eta \frac{\nabla\mathcal{L}(W_t)}{N^\ast(\nabla\mathcal{L}(W_t))}
 $$
 
-where $$\frac{1}{p} + \frac{1}{p^\ast} = 1$$ ($$\Vert \cdot \Vert_{p^\ast}$$ is the dual norm to $$\Vert \cdot \Vert_p$$).
-
-**Muon Connection:** The Muon optimizer, particularly its core update logic for a single matrix layer, can be seen as a form of **Normalized Momentum Descent (NMD)**. For the **spectral norm** ($$\Vert W \Vert_{\infty} = \sigma_{\max}(W)$$, which is Schatten-$$\infty$$), the dual norm is the **trace norm (or nuclear norm)** ($$\Vert G \Vert_1 = \sum \sigma_j(G)$$, which is Schatten-1, so $$p=\infty, p^\ast=1$$). The update direction $$\frac{\nabla\mathcal{L}(W_t)}{\Vert\nabla\mathcal{L}(W_t)\Vert_{1}}$$ is proportional to $$\operatorname{sign}(\nabla\mathcal{L}(W_t))$$, the matrix sign of the gradient.
+**Muon Connection:** The Muon optimizer uses the **Dimension-Agnostic Spectral Norm** for matrix layers, which we denote as $$N(W) = \Vert W \Vert_{\text{DA}} = s \Vert W \Vert_2 = s \cdot \sigma_{\max}(W)$$, where $$s = \sqrt{d_{in}/d_{out}}$$ and $$\sigma_{\max}(W)$$ is the standard spectral norm (Schatten-$$\infty$$ norm).
+The dual norm to this is $$N^\ast(G) = (1/s) \Vert G \Vert_{tr}$$, where $$\Vert G \Vert_{tr}$$ is the trace norm (Schatten-1 norm).
+The NSD update for such a layer is:
+$$
+W_{t+1} = W_t - \eta \frac{g_t}{N^\ast(g_t)} = W_t - \eta \frac{g_t}{(1/s)\Vert g_t \Vert_{tr}} = W_t - \eta s \frac{g_t}{\Vert g_t \Vert_{tr}}
+$$
+Since $$g_t / \Vert g_t \Vert_{tr} = \operatorname{sign}(g_t)$$ (the matrix sign of the gradient), the update direction is proportional to $$s \cdot \operatorname{sign}(g_t)$$. This aligns with Muon's update for linear layers (potentially with momentum).
 
 **Main Result (Fan et al.):**
-For NSD (and this extends to NMD under suitable conditions):
-1.  **Margin Maximization:** The direction of the weights, $$\hat W_t = W_t/\Vert W_t \Vert_p$$, converges to $$W^{\star}$$, where $$W^{\star}$$ is the classifier that **maximizes the margin with respect to the chosen $$p$$-norm**:
+For NSD (and this extends to NMD - Normalized Momentum Descent - under suitable conditions):
+1.  **Margin Maximization:** The direction of the weights, $$\hat W_t = W_t/N(W_t)$$, converges to $$W^{\star}$$, where $$W^{\star}$$ is the classifier that **maximizes the margin with respect to the norm used for NSD updates, $N(\cdot)$**:
 
     $$
-    W^{\star} = \arg\max_{\Vert W \Vert_p=1} \gamma_p(W) \quad \text{where} \quad \gamma_p(W) = \min_i y_i^{\top}Wx_i
+    W^{\star} = \arg\max_{N(W)=1} \gamma(W) \quad \text{where} \quad \gamma(W) = \min_i y_i^{\top}Wx_i
     $$
 
     (assuming $$y_i$$ are one-hot and inputs $$x_i$$ are normalized for simplicity of margin definition here).
-2.  **Muon's Implicit Bias:** Specifically for the spectral norm ($$p=\infty$$) used by Muon for matrix layers, the optimizer has an implicit bias towards finding the **max-spectral-norm-margin separator**. This is a powerful generalization property, analogous to how SVMs maximize margin.
+2.  **Muon's Implicit Bias:** For matrix layers, Muon uses the Dimension-Agnostic Spectral Norm $$N(W) = \sqrt{d_{in}/d_{out}} \sigma_{\max}(W)$$. Thus, it has an implicit bias towards finding the separator that **maximizes the margin with respect to this specific $N(W)$ norm**. This is a powerful generalization property.
 3.  **Convergence Rate:** The convergence of the angle to the max-margin solution is characterized by:
 
     $$
-    1-\frac{\langle\hat W_t,W^{\star}\rangle}{\Vert W^{\star}\Vert_{p}} = \mathcal{O}((\log t)^{-1})
+    1-\frac{\langle\hat W_t,W^{\star}\rangle}{N(W^{\star})} = \mathcal{O}((\log t)^{-1})
     $$
-
+    (where the denominator term ensures proper normalization if $$N(W^\star) \ne 1$$).
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**Intuition:** Max-Spectral-Norm Margin
+**Intuition:** Max-$$N(W)$$-Margin
 </summary>
-Imagine a binary classification task where data points $$x_i$$ have labels $$y_i \in \{-1, 1\}$$. A linear classifier is $$f(x) = w^T x$$. The margin for a data point $$(x_i, y_i)$$ with respect to $$w$$ is $$y_i w^T x_i$$. The geometric margin is $$\frac{y_i w^T x_i}{\Vert w \Vert_2}$$. Maximizing this margin (as in SVMs) leads to robust classifiers.
+Imagine a binary classification task where data points $$x_i$$ have labels $$y_i \in \{-1, 1\}$$. A linear classifier is $$f(x) = w^T x$$. The margin for a data point $$(x_i, y_i)$$ with respect to $$w$$ is $$y_i w^T x_i$$. The geometric margin (for Euclidean norm) is $$\frac{y_i w^T x_i}{\Vert w \Vert_2}$$. Maximizing this margin (as in SVMs) leads to robust classifiers.
 
-For matrices $$W$$ in multiclass settings, the "margin" $$\min_i y_i^{\top}Wx_i$$ measures how confidently the least confidently correct prediction is made. Normalizing by $$\Vert W \Vert_p$$ gives the p-norm margin.
+For matrices $$W$$ in multiclass settings, the "margin" $$\min_i y_i^{\top}Wx_i$$ measures how confidently the least confidently correct prediction is made. Normalizing by a chosen norm $$N(W)$$ gives the N-norm margin.
 
-*   **Frobenius Norm Margin ($$p=2$$):** Maximizing this tends to find solutions where the sum of squares of all weights is constrained. It might spread out the "importance" across all weight elements.
-*   **Spectral Norm Margin ($$p=\infty$$):** Maximizing this constrains the largest singular value $$\sigma_{\max}(W)$$. This means the classifier should be robust to the "worst-case" input direction (the one aligned with the top singular vector of $$W$$). It encourages solutions where the matrix $$W$$ doesn't excessively amplify signals in any one particular direction, leading to a form of operator-level robustness. This is often desirable for stability and generalization in deep networks where layers compose.
+*   **Frobenius Norm Margin ($N(W) = \Vert W \Vert_F$):** Maximizing this tends to find solutions where the sum of squares of all weights is constrained. It might spread out the "importance" across all weight elements.
+*   **Dimension-Agnostic Spectral Norm Margin ($N(W) = \Vert W \Vert_{\text{DA}} = \sqrt{d_{in}/d_{out}}\sigma_{\max}(W)$):** Maximizing this constrains this scaled version of the largest singular value. This encourages solutions where the matrix $$W$$, when its operator gain is measured from RMS-input to RMS-output (i.e., in a dimension-agnostic way), is controlled. This leads to a form of dimension-aware, operator-level robustness, promoting stability and good generalization, especially in deep networks where layers compose and dimensions can vary widely.
 </details>
 
-This theorem provides a strong theoretical motivation for using spectral norm descent: it naturally searches for solutions that are robust in a specific, operator-theoretic sense.
+This theorem provides a strong theoretical motivation for using dimension-agnostic spectral norm descent: it naturally searches for solutions that are robust in a specific, operator-theoretic, and dimensionally-aware sense.
 
 ### 5.2. Computational Engine: The Matrix Sign Bottleneck & Polar Express (Amsel et al., 2025, arXiv:2505.16932)
 
-The practical implementation of Muon (and other spectral norm methods) hinges on efficiently computing the matrix sign $$\operatorname{sign}(G)$$ or the orthogonal factor $$U$$ in its polar decomposition $$G=US$$ (where $$U=\operatorname{sign}(G)$$).
+The practical implementation of Muon (and other methods relying on similar operator norms) hinges on efficiently computing the matrix sign $$\operatorname{sign}(G)$$ or the orthogonal factor $$U$$ in its polar decomposition $$G=US$$ (where $$U=\operatorname{sign}(G)$$).
 
 **The Challenge:**
 *   Direct SVD is too slow for large matrices encountered in deep learning.
@@ -480,7 +505,7 @@ $$
 ### 5.3. Synthesis: The Power of Muon
 
 The combination of theoretical insight and computational advancement makes Muon a compelling optimizer:
-*   **Principled Theory:** It is grounded in modular duality and possesses a desirable implicit bias towards max-spectral-norm-margin solutions, which is linked to good generalization.
+*   **Principled Theory:** It is grounded in modular duality and possesses a desirable implicit bias towards max-dimension-agnostic-spectral-norm-margin solutions, which is linked to good generalization.
 *   **Efficient Practice:** Thanks to algorithms like Polar Express, the core spectral operations are computationally feasible and efficient on modern hardware, making Muon competitive with (and often superior to) standard optimizers like AdamW, especially in large-scale transformer training.
 
 ## Part 6: Broader Geometric & Theoretical Perspectives
@@ -489,7 +514,7 @@ The ideas underpinning Muon and modular duality connect to broader concepts in o
 
 ### 6.1. Mirror Descent Interpretation
 
-The update rule $$W \leftarrow W - \eta \, \mathcal{D}_{\text{mod}}(g)$$ can be elegantly framed within the **Mirror Descent** paradigm.
+The update rule $$W_l \leftarrow W_l - \eta s_l \operatorname{sign}(g_l)$$ (for a linear layer $$l$$) can be elegantly framed within the **Mirror Descent** paradigm.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
@@ -511,8 +536,9 @@ $$
 The modular duality update is equivalent to mirror descent with the potential function:
 
 $$
-\psi(W) = \frac{1}{2} \Vert W \Vert_{\text{mod}}^2
+\psi(W) = \frac{1}{2} \Vert W \Vert_{\text{mod}}^2 = \frac{1}{2} \sum_l \alpha_l \Vert W_l \Vert_{(l)}^2
 $$
+(assuming $$p=2$$ in the modular norm definition). If $$\Vert W_l \Vert_{(l)} = \Vert W_l \Vert_{\text{DA}}$$ (the dimension-agnostic spectral norm), then this potential is defined using these specific layer norms. The resulting updates, when worked out, align with the $$s_l \operatorname{sign}(g_l)$$ form for linear layers.
 
 This connection links metrized optimizers to the rich theory of online learning and regret minimization, where mirror descent is a foundational algorithm (related to Follow-The-Regularized-Leader, see Post #13).
 </blockquote>
@@ -520,14 +546,14 @@ This connection links metrized optimizers to the rich theory of online learning 
 ### 6.2. Riemannian Manifold View
 
 We can also think of the parameter spaces of layers in a more geometric way.
-*   If a layer's parameters $$W_l$$ are constrained by $$\Vert W_l \Vert_{(l)} \le c$$ (e.g., its spectral norm is bounded), then the feasible set of parameters forms a region on a **Riemannian manifold**. For instance, matrices with bounded spectral norm can be related to Stiefel manifolds (matrices with orthonormal columns) or their cones.
+*   If a layer's parameters $$W_l$$ are constrained by $$\Vert W_l \Vert_{(l)} \le c$$ (e.g., its dimension-agnostic spectral norm is bounded), then the feasible set of parameters forms a region on a **Riemannian manifold**.
 *   Muon, by respecting these per-layer norms, can be loosely interpreted as performing a trust-region-like step on the *product manifold* formed by these individual layer manifolds. It seeks the best update within a "trust region" defined by the modular norm.
 
 ### 6.3. Implicit Bias and Generalization (Revisited)
 
 The Fan et al. (2025) result for linear models is a specific instance of a broader principle:
 *The choice of optimizer, and particularly the norm it implicitly or explicitly uses to measure gradient "size" or parameter "magnitude," steers the learning trajectory towards solutions with specific characteristics.*
-Optimizers employing a modular norm built from, say, spectral norms, are biased towards solutions that are "simple" or "robust" in the sense of those spectral norms. This tailored implicit bias is a key mechanism through which metrized optimizers can achieve better generalization than optimizers that are agnostic to this underlying operator structure.
+Optimizers employing a modular norm built from, say, dimension-agnostic spectral norms, are biased towards solutions that are "simple" or "robust" in the sense of those norms. This tailored implicit bias is a key mechanism through which metrized optimizers can achieve better generalization than optimizers that are agnostic to this underlying operator structure.
 
 ## Part 7: "Show, Don't Tell" – Practical Evidence and Usage
 
@@ -538,10 +564,10 @@ Visual evidence, such as graphs plotting training loss against wall-clock time, 
 *(Imagine a plot here showing Muon's training curve below AdamW's for a task like NanoGPT training).*
 
 ### 7.2. Visualizing Parameter Geometry: Singular Value Heatmaps
-A powerful way to visualize the effect of spectral norm control is to plot heatmaps of the singular value distributions for each layer of a trained network.
-*   **Networks trained with AdamW:** Might show "spiky" or uneven singular value distributions across layers, with some layers having very large singular values and others very small.
-*   **Networks trained with Muon:** Often exhibit "flatter" or more uniform singular value spectra. This suggests that Muon successfully controls the operator norm of each layer, preventing any single layer from becoming an amplification bottleneck or having its transformation "collapse."
-*(Imagine two side-by-side heatmaps here, one for AdamW (spiky singular values) and one for Muon (flatter singular values)).*
+A powerful way to visualize the effect of dimension-agnostic spectral norm control is to plot heatmaps of the singular value distributions (or $$\Vert W_l \Vert_{\text{DA}}$$ values) for each layer of a trained network.
+*   **Networks trained with AdamW:** Might show "spiky" or uneven singular value distributions across layers, with some layers having very large singular values and others very small (when appropriately scaled for comparison, e.g., by looking at $$\sqrt{d_{in}/d_{out}}\sigma_{max}$$ or just raw $$\sigma_{max}$$).
+*   **Networks trained with Muon:** Often exhibit "flatter" or more uniform distributions of $$\Vert W_l \Vert_{\text{DA}}$$. This suggests that Muon successfully controls the dimension-agnostic operator norm of each layer, preventing any single layer from becoming an amplification bottleneck or having its transformation "collapse" in this scaled sense.
+*(Imagine two side-by-side heatmaps here, one for AdamW (spiky scaled singular values) and one for Muon (flatter scaled singular values)).*
 
 ### 7.3. Accessibility and Future Implementations
 While we've omitted a specific code snippet for brevity and to focus on theory, it's important to note that the practical application of these ideas is an active area of development. Libraries and optimizer implementations that abstract away the mathematical machinery (like the `modula.systems` initiative or built-in versions of Muon in popular frameworks) are key to broader adoption. The goal is to allow practitioners to leverage the benefits of metrized learning without needing to implement the complex dual maps or matrix sign algorithms from scratch. The theoretical insights discussed here motivate the engineering efforts to make these advanced optimizers robust, efficient, and user-friendly.
@@ -552,27 +578,27 @@ Metrized deep learning is an active research area with many exciting avenues.
 
 ### 8.1. Detailed Comparisons: Kronecker vs. Spectral
 *   **Shampoo (Kronecker-factored preconditioning):** Approximates the Hessian (or Fisher) using Kronecker products. This can capture some correlations between input and output dimensions of a weight matrix.
-*   **Muon (Spectral/Modular norm):** Focuses on the operator norm.
-*   **When does Kronecker ≈ Spectral?**
+*   **Muon (Modular norm with e.g. $$\Vert \cdot \Vert_{\text{DA}}$$):** Focuses on dimension-agnostic operator norms for linear layers.
+*   **When does Kronecker ≈ Spectral-like behavior?**
     *   For low-rank matrices, their behavior might align more closely.
-    *   The structure of convolutions (stride, padding) can affect how well Kronecker factors approximate the true underlying geometry that spectral norms aim to capture.
+    *   The structure of convolutions (stride, padding) can affect how well Kronecker factors approximate the true underlying geometry that dimension-agnostic spectral norms aim to capture.
     *   Shampoo can be more expensive for very high-dimensional layers if the factors themselves are large, while spectral methods (with efficient sign computation) scale with matrix multiplication costs.
-    *   Note that Muon is Shampoo without accumulation.
+    *   Note that Muon is Shampoo without accumulation (of preconditioning statistics).
 
 ### 8.2. Hybrid Approaches and Optimizer Composition
-*   **Mixing Metrics:** Is it possible to combine the strengths of different geometric approaches? For instance, using modular duality with spectral norms for dense linear/convolutional layers, but employing a Fisher-diagonal approximation (like Adam's $$v_t$$ term) for embedding layers or biases where spectral properties are less clearly defined or critical.
+*   **Mixing Metrics:** Is it possible to combine the strengths of different geometric approaches? For instance, using modular duality with dimension-agnostic spectral norms for dense linear/convolutional layers, but employing a Fisher-diagonal approximation (like Adam's $$v_t$$ term) for embedding layers or biases where spectral properties are less clearly defined or critical.
 *   **Optimizer Composition (Bernstein's Vision):** The idea of having a "local optimizer per module, glued by duality" is powerful. How would learning rates be scheduled across such modules? Could different modules even use fundamentally different update rules, coordinated by a global understanding of network geometry? (Bernstein, "Deriving Muon" blog).
 
 ### 8.3. Robustness and Further Challenges
-*   **Stability under Quantization:** Neural network quantization (e.g., to 8-bit integers) is crucial for deployment. Do the benefits of modular-norm control, such as bounded Lipschitz constants or improved generalization, persist robustly after quantization? Or could these methods even *aid* in quantization-aware training?
+*   **Stability under Quantization:** Neural network quantization (e.g., to 8-bit integers) is crucial for deployment. Do the benefits of modular-norm control, such as bounded Lipschitz constants (related to bounded $$\Vert W_l \Vert_{\text{DA}}$$) or improved generalization, persist robustly after quantization? Or could these methods even *aid* in quantization-aware training?
 *   **Extending Theory:** The strong implicit bias results (Fan et al., 2025) are currently for linear models on separable data. Extending these guarantees to deep, non-linear models and non-separable data is a major research direction.
 *   **Adaptive Modular Norms:** Could the $$\alpha_l$$ weights or even the type of norm $$\Vert W_l \Vert_{(l)}$$ in the modular norm definition be adapted during training?
 
 ## Conclusion
 
-Metrized deep learning, with its focus on understanding and leveraging the geometric structure of neural network parameter spaces, represents a significant step beyond heuristic optimizer design. By moving from simple scalar learning rates to sophisticated metrics like the modular norm (often built from spectral norms), we gain a more principled way to guide the optimization process.
+Metrized deep learning, with its focus on understanding and leveraging the geometric structure of neural network parameter spaces, represents a significant step beyond heuristic optimizer design. By moving from simple scalar learning rates to sophisticated metrics like the modular norm (often built from dimension-agnostic spectral norms for linear components), we gain a more principled way to guide the optimization process.
 
-Optimizers like Muon, grounded in theories of modular duality and benefiting from strong implicit bias guarantees (such as convergence to max-spectral-norm-margin solutions) and cutting-edge computational subroutines (like Polar Express), exemplify this progress. They demonstrate that by carefully considering "how to measure" in parameter space, we can achieve faster training, better generalization, and a deeper understanding of why our models succeed.
+Optimizers like Muon, grounded in theories of modular duality and benefiting from strong implicit bias guarantees (such as convergence to max-dimension-agnostic-spectral-norm-margin solutions) and cutting-edge computational subroutines (like Polar Express), exemplify this progress. They demonstrate that by carefully considering "how to measure" in parameter space, we can achieve faster training, better generalization, and a deeper understanding of why our models succeed.
 
 The journey into the geometry of deep learning is far from over. As our models grow in complexity, so too must our understanding of the landscapes they inhabit and the tools we use to navigate them. The principles of metrized learning offer a promising compass for this exploration.
 
