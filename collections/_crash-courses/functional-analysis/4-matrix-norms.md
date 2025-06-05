@@ -225,6 +225,43 @@ $$
 
 </blockquote>
 
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Proof of Theorem 1.**
+</summary>
+Let $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ be a norm that is rotationally invariant. This means $$\Vert Qx \Vert = \Vert x \Vert$$ for all orthogonal matrices $$Q \in O(n)$$ and all vectors $$x \in \mathbb{R}^n$$.
+
+1.  If $$x = \mathbf{0}$$, then $$\Vert x \Vert = 0$$. The theorem statement $$\Vert x \Vert = c \Vert x \Vert_2$$ holds for any $$c$$ since $$\Vert x \Vert_2 = 0$$.
+
+2.  Consider any non-zero vector $$x \in \mathbb{R}^n$$. Let $$e_1 = (1, 0, \ldots, 0)^\top$$ be the first standard basis vector. Since $$x \ne \mathbf{0}$$, $$\Vert x \Vert_2 > 0$$.
+    We can always find an orthogonal matrix $$Q_x$$ such that $$x = Q_x (\Vert x \Vert_2 e_1)$$. (For example, $$Q_x$$ could be a rotation that aligns $$e_1$$ with the direction of $$x$$. If $$x = \Vert x \Vert_2 u$$ where $$u$$ is a unit vector, then $$Q_x e_1 = u$$.)
+
+3.  Using the rotational invariance of the norm:
+
+    $$
+    \Vert x \Vert = \Vert Q_x (\Vert x \Vert_2 e_1) \Vert = \Vert \Vert x \Vert_2 e_1 \Vert
+    $$
+
+4.  By the absolute homogeneity property of norms:
+
+    $$
+    \Vert \Vert x \Vert_2 e_1 \Vert = \vert \Vert x \Vert_2 \vert \Vert e_1 \Vert = \Vert x \Vert_2 \Vert e_1 \Vert
+    $$
+
+    (Since $$\Vert x \Vert_2 \ge 0$$, $$\vert \Vert x \Vert_2 \vert = \Vert x \Vert_2$$).
+
+5.  Let $$c = \Vert e_1 \Vert$$. Since $$e_1 \ne \mathbf{0}$$ and $$\Vert \cdot \Vert$$ is a norm, $$c > 0$$.
+    This constant $$c$$ depends only on the norm applied to a fixed vector $$e_1$$, not on $$x$$.
+
+6.  Combining these steps, we get:
+
+    $$
+    \Vert x \Vert = c \Vert x \Vert_2
+    $$
+
+    This holds for all $$x \in \mathbb{R}^n$$ (including $$x=\mathbf{0}$$). Thus, any rotationally invariant norm on $$\mathbb{R}^n$$ must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm.
+</details>
+
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
 **Corollary 1.1.** Any rotationally and dimensionally invariant norm is the RMS-norm.
@@ -242,6 +279,60 @@ $$
 
 If, by convention or normalization, this constant $$K'$$ is 1 (e.g., if the dimensional invariance is specifically $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$, as is the case for the RMS-norm itself), then the norm family is precisely the RMS-norm family.
 </blockquote>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Proof of Corollary 1.1.**
+</summary>
+Let $$\mathcal{N}$$ be a function defining a family of norms $$\mathcal{N}_n(\cdot)$$ on each $$\mathbb{R}^n$$ ($$n \ge 1$$).
+
+1.  **Rotational Invariance:** By Theorem 1, since each $$\mathcal{N}_n(\cdot)$$ is rotationally invariant, there exists a constant $$c_n > 0$$ for each dimension $$n$$ such that:
+
+    $$
+    \mathcal{N}_n(x) = c_n \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n
+    $$
+
+2.  **Dimensional Invariance:** The family is dimensionally invariant. This means for vectors $$X^{(n)} \in \mathbb{R}^n$$ with i.i.d. components $$X_i$$ (zero mean, unit variance), the expected value $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ is a constant $$K$$ independent of $$n$$.
+
+    Substituting the form from (1):
+
+    $$
+    \mathbb{E}[c_n \Vert X^{(n)} \Vert_2] = K
+    $$
+
+    So, $$c_n \mathbb{E}[\Vert X^{(n)} \Vert_2] = K$$.
+
+3.  The definition of the RMS norm for vectors includes the property (Property 1 under "Properties and Rationale for Vector RMS Norm") that for such vectors $$X^{(n)}$$, $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}] = 1$$.
+    Recalling $$\Vert X^{(n)} \Vert_{\mathrm{RMS}} = \frac{\Vert X^{(n)} \Vert_2}{\sqrt{n}}$$, this means:
+
+    $$
+    \mathbb{E}\left[\frac{\Vert X^{(n)} \Vert_2}{\sqrt{n}}\right] = 1 \implies \mathbb{E}[\Vert X^{(n)} \Vert_2] = \sqrt{n}
+    $$
+
+    (Note: This property might be an idealization or hold for specific choices of i.i.d. variables. For common distributions like Gaussians, $$\mathbb{E}[\Vert X^{(n)} \Vert_2/\sqrt{n}]$$ is approximately 1 for large $$n$$ but may not be exactly 1 for all $$n$$. We proceed assuming this property holds as stated in the article for the relevant random variables.)
+
+4.  Substitute $$\mathbb{E}[\Vert X^{(n)} \Vert_2] = \sqrt{n}$$ into the equation from (2):
+
+    $$
+    c_n \sqrt{n} = K
+    $$
+
+    This implies $$c_n = K/\sqrt{n}$$. Let $$K' = K$$. Then $$K' > 0$$ is a constant independent of $$n$$.
+
+5.  Therefore, the norm $$\mathcal{N}_n(x)$$ must be of the form:
+
+    $$
+    \mathcal{N}_n(x) = c_n \Vert x \Vert_2 = \frac{K'}{\sqrt{n}} \Vert x \Vert_2 = K' \left( \frac{\Vert x \Vert_2}{\sqrt{n}} \right) = K' \Vert x \Vert_{\mathrm{RMS}}
+    $$
+
+6.  If, by convention, $$K'=1$$ (e.g., if the dimensional invariance condition is specifically $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$, meaning $$K=1$$), then:
+
+    $$
+    \mathcal{N}_n(x) = \Vert x \Vert_{\mathrm{RMS}}
+    $$
+
+    This shows that any family of norms satisfying rotational invariance and this specific type of dimensional invariance (where $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}] = 1$$ for the test vectors) must be a positive scalar multiple of the RMS-norm family, and if normalized such that $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$, it is precisely the RMS-norm family.
+</details>
 
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
@@ -275,6 +366,49 @@ This property is particularly important when analyzing compositions of linear tr
 Beyond the defining properties, matrix norms relate to each other through various useful inequalities. These relationships are particularly handy when converting bounds from one norm to another, or when choosing a norm for computational convenience versus theoretical sharpness.
 
 All norms on the finite-dimensional space $$\mathbb{R}^{m \times n}$$ are **equivalent**. This means that for any two norms $$\Vert \cdot \Vert_a$$ and $$\Vert \cdot \Vert_b$$, there exist positive constants $$c_1, c_2$$ such that $$c_1 \Vert A \Vert_a \le \Vert A \Vert_b \le c_2 \Vert A \Vert_a$$ for all matrices $$A \in \mathbb{R}^{m \times n}$$.
+
+These inequalities are fundamental in many areas of numerical analysis and matrix theory. We provide proofs for some of them below.
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Proofs of Selected Inequalities**
+</summary>
+
+**1. $$\Vert A \Vert_2 \le \Vert A \Vert_F$$**
+
+The spectral norm $$\Vert A \Vert_2$$ is the largest singular value, $$\sigma_{\max}(A)$$. The Frobenius norm is $$\Vert A \Vert_F = \sqrt{\sum_{k=1}^{\min(m,n)} \sigma_k(A)^2}$$.
+Let $$\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$$ be the non-zero singular values of $$A$$, where $$r = \mathrm{rank}(A)$$.
+Then $$\Vert A \Vert_2 = \sigma_1$$.
+And $$\Vert A \Vert_F^2 = \sum_{k=1}^r \sigma_k(A)^2$$.
+Since $$\sigma_1^2$$ is one of the terms in the sum (or the only term if $$r=1$$), and all $$\sigma_k(A)^2 \ge 0$$:
+
+$$
+\Vert A \Vert_2^2 = \sigma_1^2 \le \sum_{k=1}^r \sigma_k(A)^2 = \Vert A \Vert_F^2
+$$
+
+Taking the square root of both sides (since norms are non-negative) yields $$\Vert A \Vert_2 \le \Vert A \Vert_F$$.
+
+**2. $$\Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2$$**
+
+Using the same notation as above ($$\sigma_1 = \Vert A \Vert_2$$ being the largest singular value and $$r = \mathrm{rank}(A)$$-many non-zero singular values):
+We know that for each $$k \in \{1, \ldots, r\}$$, $$\sigma_k(A) \le \sigma_1(A) = \Vert A \Vert_2$$.
+Therefore, $$\sigma_k(A)^2 \le \Vert A \Vert_2^2$$.
+Now consider the square of the Frobenius norm:
+
+$$
+\Vert A \Vert_F^2 = \sum_{k=1}^r \sigma_k(A)^2 \le \sum_{k=1}^r \Vert A \Vert_2^2
+$$
+
+The sum on the right has $$r$$ identical terms:
+
+$$
+\sum_{k=1}^r \Vert A \Vert_2^2 = r \Vert A \Vert_2^2 = \mathrm{rank}(A) \Vert A \Vert_2^2
+$$
+
+So, $$\Vert A \Vert_F^2 \le \mathrm{rank}(A) \Vert A \Vert_2^2$$.
+Taking the square root of both sides gives $$\Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2$$.
+
+</details>
 
 Here are some specific well-known inequalities relating common matrix norms. For a matrix $$A \in \mathbb{R}^{m \times n}$$:
 (The norms $$\Vert A \Vert_1$$, $$\Vert A \Vert_2$$, and $$\Vert A \Vert_\infty$$ refer to the operator norms: max column sum, spectral norm, and max row sum, respectively. The Frobenius norm is $$\Vert A \Vert_F$$. These are formally defined in the subsequent sections.)
@@ -392,6 +526,42 @@ $$
 
 For example, $$\Vert A \Vert_{\ell_1 \to \ell_1} = \Vert A^\top \Vert_{\ell_\infty \to \ell_\infty}$$.
 This identity is different from norm duality (discussed later), but it's a useful property relating the norm of a matrix to the norm of its transpose with different inducing vector norms.
+
+**Proof of the Identity:**
+Recall the definition of an induced norm:
+
+$$
+\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert x \Vert_p=1} \Vert Ax \Vert_q
+$$
+
+Also, recall the definition of a dual vector norm: $$\Vert v \Vert_q = \sup_{\Vert y \Vert_{q^\ast}=1} \vert y^\top v \vert$$.
+Substituting this into the definition of the induced norm:
+
+$$
+\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert x \Vert_p=1} \left( \sup_{\Vert y \Vert_{q^\ast}=1} \vert y^\top (Ax) \vert \right)
+$$
+
+Since $$y^\top (Ax) = (A^\top y)^\top x$$, we have:
+
+$$
+\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert x \Vert_p=1} \sup_{\Vert y \Vert_{q^\ast}=1} \vert (A^\top y)^\top x \vert
+$$
+
+We can swap the suprema (this is permissible as the domain is compact for $$x$$ and $$y$$ if we consider unit balls, or more generally by properties of sup):
+
+$$
+\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert y \Vert_{q^\ast}=1} \left( \sup_{\Vert x \Vert_p=1} \vert (A^\top y)^\top x \vert \right)
+$$
+
+The inner supremum, $$\sup_{\Vert x \Vert_p=1} \vert (A^\top y)^\top x \vert$$, is the definition of the vector norm $$\Vert A^\top y \Vert_{p^\ast}$$ (since $$(\ell_p)^\ast = \ell_{p^\ast}$$).
+So,
+
+$$
+\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert y \Vert_{q^\ast}=1} \Vert A^\top y \Vert_{p^\ast}
+$$
+
+This last expression is precisely the definition of the induced norm $$\Vert A^\top \Vert_{\ell_{q^\ast} \to \ell_{p^\ast}}$$.
+Thus, the identity is proven.
 </details>
 
 ## 4. Entry-wise and Schatten Norms
