@@ -1,9 +1,9 @@
 ---
-title: "Metrized Deep Learning: Finding the Right \"Measure\" for Neural Network Optimization"
+title: "Metrized Deep Learning: From Geometric Intuition to Principled Preconditioning with Muon and PolarGrad"
 date: 2025-05-18 00:45 -0400
 series_index: 14
 mermaid: true
-description: Exploring how choosing the right norm for parameter spaces (like dimension-agnostic operator norms) can revolutionize deep learning optimization, with a focus on modular duality and the Muon optimizer.
+description: Exploring how choosing the right norm for parameter spaces (like dimension-agnostic operator norms) and principled preconditioning (like PolarGrad) can revolutionize deep learning optimization.
 image: # placeholder
 categories:
 - Machine Learning
@@ -14,7 +14,12 @@ tags:
 - Metrized Learning
 - Modular Duality
 - Muon Optimizer
+- PolarGrad
 - Spectral Norm
+- Matrix Sign Function
+- Nuclear Norm
+- Preconditioning
+- Condition Number
 - Implicit Bias
 llm-instructions: |
   I am using the Chirpy theme in Jekyll.
@@ -144,480 +149,355 @@ llm-instructions: |
   without an explicit request.
 ---
 
-This post relates strongly to the crash course on [matrix norms](https://jiha-kim.github.io/crash-courses/functional-analysis/4-matrix-norms/).
+In our ongoing exploration of deep learning optimization, a central theme has been the search for methods that are not only fast but also lead to "good" generalizing solutions. We've seen how standard optimizers often fall short when faced with the complex, high-dimensional landscapes of neural networks. This post dives deeper into **Metrized Deep Learning**, examining how a principled choice of "measure" or geometry for parameter spaces can lead to breakthroughs.
 
-In our journey through the landscape of machine learning optimization, we've encountered various challenges, from navigating high-dimensional non-convex terrains (Post #7) to understanding the subtleties of adaptive methods and preconditioning (Post #10) and momentum (Post #11). A recurring theme is the quest for optimizers that not only converge quickly but also find "good" solutions—solutions that generalize well to unseen data. Standard optimizers often treat all parameters uniformly, applying updates based on gradient magnitudes scaled by a simple learning rate. But what if the very notion of "distance" or "steepness" in the parameter space could be tailored to the structure of our neural networks?
+We'll particularly focus on matrix-structured parameters (like weights in linear and convolutional layers), where the notion of anisotropy plays a crucial role. We will explore two powerful, interlinked perspectives:
+1.  **Metrized Learning & Modular Duality:** This geometric viewpoint, exemplified by optimizers like **Muon**, emphasizes choosing appropriate operator norms (e.g., dimension-agnostic spectral norms) and correctly handling the duality between parameters and gradients.
+2.  **Principled Preconditioning & PolarGrad:** This framework, introduced by Lau, Long, and Su (2025), uses the polar decomposition of gradient matrices to systematically address different types of anisotropies, offering a unifying perspective and potential improvements over existing methods.
 
-Recent results show lots of promise in this direction. Notably, the **Muon Optimizer**, which stands for **Momentum Orthogonalized by Newton-Schulz**, has demonstrated impressive performance that continues to outperform previous state-of-the-art optimizers even at large scale. For instance, [Keller Jordan](https://kellerjordan.github.io/posts/muon/), with the work of others, has achieved record training times in optimization speedrun categories such as [NanoGPT](https://x.com/Yuchenj_UW/status/1846964136204173318) and CIFAR-10. Kimi AI's ["Moonlight" 16B MoE LLM](https://arxiv.org/abs/2502.16982) demonstrates that Muon is suitable for real-world scale.
+The **Muon Optimizer** has demonstrated significant empirical success, and recent work like **PolarGrad** provides a robust theoretical underpinning and extensions. Together, these ideas push the boundaries of how we understand and design optimizers for deep learning. Foundational concepts like matrix norms and duality, which are crucial for this discussion, are covered in our [matrix norms tutorial](https://jiha-kim.github.io/crash-courses/functional-analysis/4-matrix-norms/).
 
-This post delves into **Metrized Deep Learning**, an approach that moves beyond scalar learning rates to embrace *metrics* that capture the intrinsic geometry of the parameter space. We'll explore how this principled perspective, particularly through concepts like **modular duality** and appropriately scaled operator norms (like **dimension-agnostic spectral norms**), leads to more effective and insightful optimization strategies, with a special focus on the **Muon optimizer** and its theoretical underpinnings.
+## Part 1: The Challenge of Anisotropy in Deep Learning Optimization
 
-## Part 1: Setting the Stage – Why Metrics in Deep Learning?
+The core idea of gradient-based optimization is to move parameters "downhill." However, the "shape" of this downhill path can be highly complex and vary dramatically in different directions—a phenomenon known as anisotropy.
 
-The core idea of gradient-based optimization is to move parameters "downhill" along the loss surface. But how do we measure "downhill," and how large a step should we take?
+### 1.1. Beyond Scalar Learning Rates: The Need for Preconditioning
 
-### 1.1. From Scalar Learning Rates to Preconditioning
-
-The simplest form of gradient descent updates parameters $$W$$ using a learning rate $$\eta$$ and the gradient $$g = \nabla \mathcal{L}(W)$$:
-
-$$
-W_{t+1} = W_t - \eta g_t
-$$
-
-This update implicitly assumes that all directions in the parameter space are equally important or scaled, which is rarely true for complex loss landscapes. A single scalar $$\eta$$ struggles to adapt to varying curvatures across different parameter dimensions.
-
-A more general approach involves a **preconditioner** or **metric tensor** $$M$$, a positive-definite matrix that "reshapes" the gradient:
+The simplest gradient descent update, $$W_{t+1} = W_t - \eta g_t$$, implicitly assumes a uniform geometry. A more general and powerful approach involves a **preconditioner** $$M_t$$, a positive-definite matrix that reshapes the gradient:
 
 $$
 W_{t+1} = W_t - \eta M_t^{-1} g_t
 $$
 
-Here, $$M_t^{-1}$$ transforms the gradient to better align with the local geometry of the loss surface. This isn't a new idea; it has deep roots:
-*   **Newton's Method:** Uses $$M_t = H_t$$, the Hessian matrix (matrix of second derivatives), aiming for quadratic convergence. However, computing and inverting the Hessian is often intractable for large neural networks.
-*   **Natural Gradient:** Uses $$M_t = F_t$$, the Fisher Information Matrix, which measures the sensitivity of the model's output distribution to changes in parameters. This provides a notion of distance in the space of probability distributions learned by the model (see Post #12 on Information Geometry).
+Classic examples include Newton's method ($$M_t$$ is the Hessian) and Natural Gradient Descent ($$M_t$$ is the Fisher Information Matrix). Metrized deep learning explores choices for $$M_t$$ specifically tailored to neural network structures.
 
-Metrized deep learning generalizes this by considering various choices for $$M$$ tailored to the structure and properties of neural networks.
+### 1.2. Two Types of Anisotropy (Lau et al., 2025)
 
-### 1.2. Deep Networks as Operator Algebras: The Importance of Operator Norms
-
-Neural networks, especially deep ones, can be viewed as compositions of functions or, more formally, as *operator algebras*. Each layer takes an input and transforms it. For linear layers ($$y = Wx + b$$) or convolutional layers, the weight matrix $$W$$ acts as a linear operator.
-
-<blockquote class="box-info" markdown="1">
-<div class="title" markdown="1">
-**Key Insight:** The behavior of a layer as an operator is often better captured by its **operator norm** rather than, say, the Frobenius norm of its flattened weights.
-</div>
-The operator norm measures the maximum amplification an operator can apply to an input vector, relative to chosen norms on the input and output spaces.
-</blockquote>
+Lau, Long, and Su (2025) highlight a crucial distinction between two types of anisotropy that preconditioners can address:
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-**Definition:** Spectral Norm
+**Definition.** Curvature vs. Gradient Anisotropy
 </div>
-For a matrix $$W \in \mathbb{R}^{m \times n}$$, its **spectral norm**, denoted $$\Vert W \Vert_2$$, is defined as the largest singular value of $$W$$, $$\sigma_{\max}(W)$$. Equivalently, it is the square root of the largest eigenvalue of $$W^T W$$ (or $$W W^T$$):
 
-$$
-\Vert W \Vert_2 = \max_{\Vert x \Vert_2 = 1, x \in \mathbb{R}^n} \Vert Wx \Vert_2 = \sigma_{\max}(W) = \sqrt{\lambda_{\max}(W^T W)}
-$$
+1.  **Curvature Anisotropy:** Refers to the varying curvature of the loss surface along different parameter axes (if parameters are viewed as a flat vector). It's often characterized by the **Hessian condition number**:
 
-The spectral norm is the operator norm induced by the Euclidean ($$\ell_2$$) vector norm on its input and output spaces. It is also known as the Schatten-$$\infty$$ norm.
+    $$
+    \kappa_H = \kappa_2(\nabla^2 f) = \frac{\lambda_{\max}(\nabla^2 f)}{\lambda_{\min}(\nabla^2 f)}
+    $$
+
+    Adaptive methods like Adam attempt to mitigate this by adapting per-parameter learning rates, effectively using a diagonal preconditioner to approximate the Hessian's inverse square root.
+
+2.  **Gradient Anisotropy:** Pertains to the non-uniformity within the *gradient matrix itself* when viewed as an operator. For a matrix parameter $$X$$ and its gradient $$\nabla f(X)$$, this is captured by the **gradient condition number**:
+
+    $$
+    \kappa_G(X) = \kappa_2(\nabla f(X)) = \frac{\sigma_{\max}(\nabla f(X))}{\sigma_{\min_+(}(\nabla f(X))}
+    $$
+    where $$\sigma_{\min_+}$$ is the smallest non-zero singular value. A high $$\kappa_G(X)$$ means the gradient operator stretches space non-uniformly along its principal directions. Matrix-aware methods, particularly those involving orthogonalization, aim to drive $$\kappa_G(X) \to 1$$.
 </blockquote>
 
-<blockquote class="box-info" markdown="1">
-<div class="title" markdown="1">
-**From Spectral Norm to Dimension-Agnostic Operator Norms for Network Layers**
-</div>
-While the spectral norm $$\Vert W \Vert_2$$ is fundamental, for neural network layers $$y=Wx$$ (where $$W \in \mathbb{R}^{d_{out} \times d_{in}}$$), it's often beneficial to use a norm that is invariant to the dimensions $$d_{in}$$ and $$d_{out}$$. One such norm is the operator norm from an RMS-normalized input space to an RMS-normalized output space.
+### 1.3. Illustrative Example: Matrix Quadratic Regression (Lau et al., 2025)
 
-The RMS (Root Mean Square) norm of a vector $$v \in \mathbb{R}^D$$ is $$\Vert v \Vert_{RMS} = \Vert v \Vert_2 / \sqrt{D}$$.
-The induced operator norm, which we'll call the **Dimension-Agnostic Spectral Norm** and denote $$\Vert W \Vert_{\text{DA}}$$, is:
+Consider the matrix quadratic regression problem:
+Find $$X \in \mathbb{R}^{m \times n}$$ that minimizes $$f(X) = \frac{1}{2} \Vert AXB - C \Vert_F^2$$, where $$A \in \mathbb{R}^{p \times m}$$, $$B \in \mathbb{R}^{n \times q}$$, and $$C \in \mathbb{R}^{p \times q}$$.
+
+*   The gradient is:
+    $$
+    \nabla f(X) = A^\top (AXB - C) B^\top
+    $$
+*   The Hessian (viewing $$X$$ as a vector in $$\mathbb{R}^{mn}$$) can be written using the Kronecker product $$\otimes$$:
+    $$
+    \nabla^2 f(X) = (BB^\top) \otimes (A^\top A)
+    $$
+    Its condition number is $$\kappa_H = \kappa_2(BB^\top) \kappa_2(A^\top A) = \kappa_2(A)^2 \kappa_2(B)^2$$.
+*   **Inverse-Hessian Preconditioning:** An ideal update direction (like in Newton's method for this quadratic) would be:
+    $$
+    G_{\text{pre}}(X) = (\nabla^2 f(X))^{-1} \mathrm{vec}(\nabla f(X))
+    $$
+    Which, for matrices, corresponds to pre- and post-multiplying the gradient matrix:
+    $$
+    G_{\text{pre}}(X) = (A^\top A)^{-1} \nabla f(X) (BB^\top)^{-1}
+    $$
+    This directly addresses curvature anisotropy.
+*   **Gradient Orthogonalization:** If we instead replace $$\nabla f(X)$$ with its matrix sign, $$\mathrm{sign}(\nabla f(X))$$ (which is an orthogonal matrix if $$\nabla f(X)$$ is full rank and square, or an isometry otherwise), the condition number of this update direction becomes 1 (ideal gradient anisotropy). However, this discards all magnitude information from the singular values of $$\nabla f(X)$$, potentially ignoring crucial curvature information.
+
+This example highlights that different preconditioning strategies target different types of anisotropy, with distinct effects on the optimization process.
+
+## Part 2: Metrized Learning – A Geometric Approach via Operator Norms
+
+The core idea of metrized learning is to choose a "natural" geometry for the parameter space, often defined by specific matrix norms, and perform steepest descent in that geometry.
+
+### 2.1. Deep Networks as Operator Algebras & Importance of Operator Norms
+
+Neural network layers (especially linear and convolutional ones) are linear operators. Their behavior is often best captured by operator norms, such as the spectral norm ($$\Vert W \Vert_2 = \sigma_{\max}(W)$$), rather than entry-wise norms like the Frobenius norm. For details on various matrix norms, please refer to our [matrix norms tutorial](https://jiha-kim.github.io/crash-courses/functional-analysis/4-matrix-norms/).
+
+A particularly relevant norm for deep learning layers ($$y=Wx$$, $$W \in \mathbb{R}^{d_{out} \times d_{in}}$$) is the **Dimension-Agnostic Spectral Norm**:
 
 $$
-\Vert W \Vert_{\text{DA}} = \max_{\Vert x \Vert_{RMS, d_{in}}=1} \Vert Wx \Vert_{RMS, d_{out}} = \sqrt{\frac{d_{in}}{d_{out}}} \Vert W \Vert_2 = \sqrt{\frac{d_{in}}{d_{out}}} \sigma_{\max}(W)
+\Vert W \Vert_{\text{DA}} = \sqrt{\frac{d_{in}}{d_{out}}} \Vert W \Vert_2 = \sqrt{\frac{d_{in}}{d_{out}}} \sigma_{\max}(W)
 $$
 
-This normalization ensures that, for instance, an identity matrix $$I_D$$ (where $$d_{in}=d_{out}=D$$) has $$\Vert I_D \Vert_{\text{DA}} = 1$$ regardless of $$D$$. Similarly, certain compositions like $$\text{concat}(I_D, I_D)$$ (mapping $$D$$ to $$2D$$ inputs to $$D$$ to $$2D$$ outputs, or analogous structures) can preserve this norm. This dimension-agnostic characteristic is crucial for stable optimization across layers of varying sizes. This is the type of norm often used by Muon for linear layers, as discussed in Bernstein's work (where it might be denoted $$\Vert W \Vert_\infty$$ in that specific context, distinct from the Schatten-$$\infty$$ norm meaning of $$\sigma_{\max}(W)$$).
-</blockquote>
+This norm is invariant to layer dimensions (e.g., $$\Vert I_D \Vert_{\text{DA}} = 1$$ for any $$D$$), making it suitable for defining consistent geometric properties across layers of varying sizes.
 
-Why do appropriately chosen operator norms matter?
-*   **Lipschitz Constants:** The operator norm of a layer often bounds its Lipschitz constant (with respect to Euclidean norms, this is $$\Vert W \Vert_2$$). The Lipschitz constant of the entire network (a composition of layers) is related to the product of these individual operator norms. A controlled Lipschitz constant is crucial for:
-    *   **Generalization:** Networks with smaller Lipschitz constants tend to generalize better.
-    *   **Robustness:** They are less sensitive to small input perturbations.
-    *   **Stability:** Preventing issues like exploding or vanishing gradients, and "logit explosion" where output values become excessively large (Bernstein, Statistics Colloquium 2024-2025).
-*   **Intrinsic Properties:** Operator norms, especially dimension-agnostic ones, reflect how a layer transforms information in a scale-invariant way, which is more fundamental to its role than the sum of squares of its individual weights.
+### 2.2. The Duality Mismatch & Modular Norms
 
-### 1.3. The Duality Mismatch: Gradients Live in the Dual Space
+As emphasized by Bernstein & Newhouse (2024), parameters $$W$$ live in a primal space $$V$$, while gradients $$\nabla \mathcal{L}(W)$$ live in the dual space $$V^\ast$$. Directly subtracting gradients from parameters ($$W - \eta g$$) is ill-posed unless an appropriate mapping (metric) from $$V^\ast$$ to $$V$$ is chosen. This is the **duality mismatch**.
 
-A crucial insight, emphasized by Jeremy Bernstein (Bernstein & Newhouse, 2024, arXiv:2410.21265), is the concept of **duality**.
-
-<blockquote class="box-proposition" markdown="1">
-<div class="title" markdown="1">
-**Bernstein's Mantra:** "A gradient lives in the dual space; subtracting it directly [from parameters in the primal space] is ill-posed unless you first dualise."
-</div>
-Parameters (weights $$W$$) live in a primal vector space $$V$$. The gradient $$\nabla \mathcal{L}(W)$$, however, naturally lives in the *dual space* $$V^\ast $$ of linear functionals that act on $$V$$. A direct subtraction $$W - \eta g$$ implicitly assumes an identification between $$V$$ and $$V^\ast $$, often via the Euclidean dot product (which corresponds to a Frobenius norm metric for matrices).
-
-If the "natural" geometry of our parameters isn't Euclidean, this implicit identification is a **duality mismatch**. This mismatch can manifest as an ill-conditioned optimization problem, slowing convergence as the optimizer struggles against a geometry it doesn't "understand."
-</blockquote>
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Mathematical Aside:** Primal and Dual Spaces
-</summary>
-Let $$V$$ be a finite-dimensional real vector space (our parameter space). The **dual space** $$V^\ast $$ is the space of all linear functions (functionals) $$\phi: V \to \mathbb{R}$$.
-If $$V = \mathbb{R}^n$$, then $$V^\ast $$ is also isomorphic to $$\mathbb{R}^n$$. For any linear functional $$\phi \in V^\ast $$, there exists a unique vector $$u \in V$$ such that $$\phi(x) = u^T x$$ for all $$x \in V$$ (this is related to the Riesz Representation Theorem for Hilbert spaces, simplified here for $$\mathbb{R}^n$$ with the standard dot product).
-
-The gradient $$\nabla \mathcal{L}(W)$$ is an element of $$V^\ast $$ because for any direction $$d \in V$$, the directional derivative $$\langle \nabla \mathcal{L}(W), d \rangle$$ (which is $$\lim_{h \to 0} \frac{\mathcal{L}(W+hd) - \mathcal{L}(W)}{h}$$) is a scalar. This defines $$\nabla \mathcal{L}(W)$$ as a linear map from directions $$d$$ to scalars.
-
-When we choose a norm $$\Vert \cdot \Vert$$ on $$V$$, this induces a metric. To perform steepest descent, we are looking for a direction $$d$$ that minimizes $$\langle \nabla \mathcal{L}(W), d \rangle$$ subject to $$\Vert d \Vert$$ being small. The solution to this involves the **dual norm** $$\Vert \cdot \Vert_\ast $$ on $$V^\ast $$, defined as $$\Vert \phi \Vert_\ast  = \sup_{\Vert x \Vert \le 1, x \in V} \vert \phi(x) \vert$$. The direction of steepest descent is related to mapping the gradient (an element of $$V^\ast $$) back to $$V$$ using the structures induced by these norms.
-</details>
-
-Metrized learning aims to resolve this by explicitly choosing a norm (and thus a metric) for the parameter space and then correctly mapping the gradient from the dual space back to the primal space before updating.
-
-## Part 2: The Modular Norm ($$\Vert\cdot\Vert_{\text{mod}}$$) – A Constructive Approach to Network Geometry
-
-If different parts of a neural network (e.g., different layers or types of parameters) have different geometric properties, a single, global metric might be suboptimal. The concept of a **modular norm** addresses this by building a network-wide norm from individual norms applied to its components (modules).
-
-### 2.1. Definition: Stitching Per-Layer Operator Norms
-
-We can define a modular norm $$\Vert (W_1, \dots, W_L) \Vert_{\text{mod}}$$ for a network with $$L$$ layers (or parameter groups $$W_l$$) by combining their individual norms $$\Vert W_l \Vert_{(l)}$$:
-
+Metrized learning addresses this by defining a **modular norm** for the entire network:
 $$
 \Vert (W_1,\dots,W_L) \Vert_{\text{mod}} = \left(\sum_{l=1}^L \alpha_l\,\Vert W_l\Vert_{(l)}^p\right)^{1/p}
 $$
+Here, $$\Vert W_l \Vert_{(l)}$$ is a chosen norm for layer $$l$$ (e.g., $$\Vert W_l \Vert_{\text{DA}}$$), allowing tailored geometries.
 
-Here:
-*   $$\Vert W_l \Vert_{(l)}$$ is the chosen norm for the $$l$$-th layer's parameters.
-*   $$\alpha_l$$ are weighting factors (often uniform, e.g., $$\alpha_l=1$$).
-*   $$p$$ is a parameter, commonly $$p=2$$, leading to a sum-of-squares combination reminiscent of an $$\ell_2$$-norm in the space of layer norms.
+### 2.3. The Modular Duality Map ($$\mathcal{D}_{\text{mod}}$$) and Steepest Descent
 
-This construction allows us to tailor the geometry to the specific architecture and semantics of the network.
-
-### 2.2. Layer Semantics Dictate Local Norm Choice ($$\Vert W_l\Vert_{(l)}$$)
-
-The choice of $$\Vert W_l \Vert_{(l)}$$ for each layer is critical and should reflect its function:
-
-*   **Linear / Embedding Layers:** The **Dimension-Agnostic Spectral Norm** ($$\Vert W_l \Vert_{\text{DA}} = \sqrt{d_{in,l}/d_{out,l}} \sigma_{\max}(W_l)$$) is the natural choice, as it measures the operator gain in a way that is invariant to layer dimensions.
-*   **Conv2D Layers:** Convolutional layers can also be analyzed via operator norms. While more complex due to their structure, concepts related to the spectral norm of their unfolded kernel tensors or specialized "rectangular" spectral norms (potentially also made dimension-agnostic) are used (Bernstein & Newhouse, 2024, arXiv:2410.21265).
-*   **LayerNorm / Bias Parameters:** For parameters like biases or scales/shifts in normalization layers, simpler scalar norms (e.g., their Euclidean norm) might suffice, or they might be treated as passthroughs if their operator nature is less dominant or handled by the normalization itself.
-
-### 2.3. Key Property: Automatic Lipschitz Certificate
-
-A significant advantage of a thoughtfully constructed modular norm, particularly one using operator norms for its constituent layers, is its connection to the network's overall Lipschitz constant.
-
-<blockquote class="box-lemma" markdown="1">
-<div class="title" markdown="1">
-**Lipschitz Bound:** The modular norm can often provide an explicit upper bound on the global Lipschitz constant of the neural network function $$f_W(x)$$.
-</div>
-If $$L(f_W)$$ is the Lipschitz constant of the network $$f_W$$ with respect to its input $$x$$, and $$L(W_l)$$ is the Lipschitz constant of layer $$l$$ (related to $$\Vert W_l \Vert_{(l)}$$), then under certain composition rules (e.g., for sequential compositions, $$L(f_W) \le \prod_l L(W_l)$$), $$\Vert W \Vert_{\text{mod}}$$ can be related to bounds on $$L(f_W)$$. (Note: $$L(W_l)$$ for a linear layer is its standard spectral norm $$\Vert W_l \Vert_2$$, which is $$\Vert W_l \Vert_{\text{DA}} / \sqrt{d_{in,l}/d_{out,l}}$$).
-This is invaluable for:
-*   **Safety-critical applications:** Providing guarantees on output stability.
-*   **Robustness analysis:** Understanding how input perturbations propagate.
-*   **Generalization theory:** Connecting parameter norms to generalization bounds.
-</blockquote>
-
-## Part 3: The Modular Duality Map ($$\mathcal{D}_{\text{mod}}$$) – From Gradient to "Corrected" Update
-
-Once we've defined a modular norm $$\Vert \cdot \Vert_{\text{mod}}$$, how do we use it to guide optimization? This is where the **modular duality map** $$\mathcal{D}_{\text{mod}}$$ comes in. It provides the "corrected" gradient direction that represents steepest descent with respect to our chosen modular norm.
-
-### 3.1. The Recipe: Dualizing the Gradient Through the Modular Norm
-
-The modular duality map takes the raw gradient $$g = (\nabla_{W_1}\mathcal{L}, \dots, \nabla_{W_L}\mathcal{L})$$ and transforms it into $$\tilde g = \mathcal{D}_{\text{mod}}(g)$$. This $$\tilde g$$ is the direction in the primal parameter space that corresponds to $$g$$ in the dual space, under the geometry defined by $$\Vert \cdot \Vert_{\text{mod}}$$.
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Understanding Duality Maps for Steepest Descent**
-</summary>
-The direction of steepest descent $$d_k$$ for a function $$\mathcal{L}$$ at $$W_k$$ with respect to a norm $$\Vert \cdot \Vert$$ is the solution to:
-
-$$
-d_k = \arg\min_{d} \left\{ \langle \nabla \mathcal{L}(W_k), d \rangle \quad \text{s.t.} \quad \Vert d \Vert \le \epsilon \right\}
-$$
-
-For small $$\epsilon$$, this direction is proportional to $$-J^{-1}(\nabla \mathcal{L}(W_k))$$ if such an inverse mapping $$J^{-1}$$ from the dual space (where $$\nabla \mathcal{L}(W_k)$$ lives) to the primal space (where $$d_k$$ lives) is well-defined by the norm.
-
-More generally, the steepest descent update can be derived from minimizing a local model:
-
-$$
-d_k = \arg\min_{d} \left\{ \langle \nabla \mathcal{L}(W_k), d \rangle + \frac{1}{2\eta_k} \Vert d \Vert^2 \right\}
-$$
-
-The solution $$d_k$$ is the "dualized" gradient. For example, if $$\Vert d \Vert^2 = d^T M d$$, then $$d_k = -\eta_k M^{-1} \nabla \mathcal{L}(W_k)$$.
-
-The term $$\mathcal{D}_{\text{mod}}(g_t)$$ represents this primal space direction.
-For the standard spectral norm $$\Vert W \Vert_2$$ (i.e., Schatten-$$\infty$$ norm), its dual norm is the nuclear norm $$\Vert G \Vert_{tr}$$ (Schatten-1 norm). The steepest descent direction with respect to $$\Vert W \Vert_2$$ is proportional to $$-\operatorname{sign}(G)$$.
-If we use the Dimension-Agnostic Spectral Norm for a layer $$l$$, $$\Vert W_l \Vert_{\text{DA}} = s_l \Vert W_l \Vert_2$$, where $$s_l = \sqrt{d_{in,l}/d_{out,l}}$$.
-The dual norm to $$\Vert \cdot \Vert_{\text{DA}}$$ is $$\Vert G \Vert_{\text{DA}\ast} = (1/s_l) \Vert G \Vert_{tr}$$.
-The preconditioned gradient (steepest descent direction in the primal space) for layer $$l$$ is then proportional to $$-s_l \operatorname{sign}(G_l)$$. If $$G_l=U\Sigma V^T$$, then $$\operatorname{sign}(G_l) = UV^T$$.
-The update step for layer $$l$$ with gradient $$g_l$$ is $$W_{l, t+1} = W_{l, t} - \eta \cdot s_l \operatorname{sign}(g_l)$$.
-</details>
-
-The update rule then becomes:
-
+The chosen modular norm defines how to map the gradient from the dual space to a "corrected" update direction in the primal space. This is done via the **modular duality map** $$\mathcal{D}_{\text{mod}}$$. The update becomes:
 $$
 W_{t+1} = W_t - \eta \, \mathcal{D}_{\text{mod}}(g_t)
 $$
+For a layer $$l$$ with gradient $$G_l$$, if the chosen norm is $$\Vert W_l \Vert_{\text{DA}}$$, the corresponding component of the duality map (the steepest descent direction in the primal space) is:
+$$
+(\mathcal{D}_{\text{mod}}(g_t))_l = s_l \cdot \mathrm{sign}(G_l)
+$$
+where $$s_l = \sqrt{d_{in,l}/d_{out,l}}$$ and $$\mathrm{sign}(G_l)$$ is the matrix sign of the gradient for layer $$l$$. This choice implicitly preconditions the gradient by aligning it with the geometry defined by $$\Vert \cdot \Vert_{\text{DA}}$$.
 
-where $$\mathcal{D}_{\text{mod}}(g_t)_l$$ for layer $$l$$ with gradient $$g_l$$ and using the Dimension-Agnostic Spectral Norm is $$s_l \operatorname{sign}(g_l)$$, with $$s_l = \sqrt{d_{in,l}/d_{out,l}}$$.
+## Part 3: Muon Optimizer – Spectral Descent in Action
 
-### 3.2. Intuition with Simple Examples
+The Muon optimizer (Bernstein & Newhouse, 2024) directly implements these ideas.
 
-Let's build some intuition:
+### 3.1. Muon's Update Rule as Scaled Matrix Sign Descent
 
-*   **Single Linear Layer ($$y=Wx$$):**
-    Suppose we choose the Dimension-Agnostic Spectral Norm $$\Vert W \Vert_{\text{DA}} = s \Vert W \Vert_2$$ for this layer, where $$s = \sqrt{d_{in}/d_{out}}$$. The gradient component is $$\nabla_W \mathcal{L}$$. As detailed above, the dual map for this norm yields $$\mathcal{D}_{\text{DA}}(\nabla_W \mathcal{L}) = s \cdot \operatorname{sign}(\nabla_W \mathcal{L})$$. This means the update modifies $$W$$ along directions defined by its singular vectors. The magnitude of this update along these "principal components" is scaled by $$s$$, effectively re-shaping the update to prioritize changes in "orientation" (via $$\operatorname{sign}(\nabla_W \mathcal{L})$$) while also accounting for the layer's dimensions through the factor $$s$$.
+For a linear layer $$l$$, Muon's update (without momentum for simplicity) is:
+$$
+W_{l, t+1} = W_{l, t} - \eta_t s_l \mathrm{sign}(G_{l,t})
+$$
+The term $$\mathrm{sign}(G_{l,t})$$ represents an update direction whose condition number $$\kappa_G(\mathrm{sign}(G_{l,t}))$$ is 1 (perfectly isotropic in the gradient's own operator space). The scaling factor $$s_l$$ makes this update dimension-aware. This update directly addresses gradient anisotropy by focusing on the "direction" of the gradient matrix.
 
-*   **Residual Block ($$x_{out} = x_{in} + F(x_{in}, W)$$):**
-    The gradient will have components flowing through the identity path and the residual function $$F$$. The modular duality map must respect this structure. If gradients are $$g_{skip}$$ and $$g_{residual}$$ (for parameters $$W$$ within $$F$$), the dualization applies to $$g_{residual}$$ based on the norm for $$W$$ (e.g., yielding $$s \cdot \operatorname{sign}(g_{residual})$$ if $$W$$ is a linear layer and $$s$$ is its corresponding scale factor), and the overall update structure is preserved by applying these transformed gradients.
+### 3.2. Implicit Bias of Spectral Descent (Fan et al., 2025 for multiclass, separable)
 
-### 3.3. Computational Aspect: The Matrix Sign Operation
+The choice of update direction has profound implications for generalization. Fan, Schmidt, & Thrampoulidis (2025) showed that Normalized Steepest Descent (NSD) using a norm $$N(W)$$ implicitly biases the learning towards solutions that maximize the margin with respect to that norm $$N(W)$$.
+The update $$W_{t+1} = W_t - \eta \frac{g_t}{N^\ast(g_t)}$$ (where $$N^\ast$$ is the dual norm) converges (in direction) to the max-$N(W)$-margin classifier.
+Muon's update direction $$s_l \mathrm{sign}(g_l)$$ can be seen as NSD with respect to the Dimension-Agnostic Spectral Norm $$\Vert W_l \Vert_{\text{DA}}$$. Its dual norm is $$N^\ast(G_l) = (1/s_l)\Vert G_l \Vert_{S_1}$$ (scaled nuclear norm). Thus,
+$$
+s_l \frac{g_l}{\Vert g_l \Vert_{S_1}} = \frac{g_l}{(1/s_l)\Vert g_l \Vert_{S_1}} = \frac{g_l}{N^\ast(g_l)}
+$$
+Since $$g_l/\Vert g_l \Vert_{S_1} = \mathrm{sign}(g_l)$$ (if $g_l$ is full rank or by SVD components), Muon's core update aligns with the direction of NSD w.r.t $$\Vert \cdot \Vert_{\text{DA}}$$. This implies Muon searches for solutions robust in this specific, dimension-aware operator sense.
 
-For spectral-based norms, a key computational primitive in the dual map is the **matrix sign function**, $$\operatorname{sign}(G)$$.
+### 3.3. The Matrix Sign Function: Core of the Update
 
+The **matrix sign function** is central to these ideas.
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-**Definition:** Matrix Sign Function and Polar Decomposition
+**Definition.** Matrix Sign Function
 </div>
-For a real square matrix $$G$$ with SVD $$G=U\Sigma V^T$$ (where $$U,V$$ are orthogonal and $$\Sigma$$ is diagonal with non-negative entries), the **matrix sign function** is defined as:
-
-$$
-\operatorname{sign}(G) = UV^T
-$$
-
-If $$G$$ is non-singular, $$\operatorname{sign}(G) = G(G^2)^{-1/2}$$. It has the same singular vectors as $$G$$, but all its non-zero singular values are 1. It essentially extracts the "orientation" or "direction" of the transformation represented by $$G$$.
-
-The **polar decomposition** of a matrix $$G$$ is $$G=UP$$, where $$U$$ is orthogonal ($$U^T U = I$$) and $$P$$ is a positive semi-definite Hermitian matrix ($$P = \sqrt{G^T G}$$). If $$G$$ is invertible, $$U = G P^{-1} = G (G^T G)^{-1/2}$$. In this case, $$U = \operatorname{sign}(G)$$.
+For a real matrix $$G$$ with SVD $$G=U\Sigma V^T$$, its matrix sign is $$\mathrm{sign}(G) = UV^T$$. It has the same singular vectors as $$G$$, but all its non-zero singular values are 1.
+The matrix sign is also the orthogonal polar factor in the **polar decomposition** $$G = U_p H$$, where $$U_p = \mathrm{sign}(G)$$ is orthogonal (or an isometry) and $$H = (G^T G)^{1/2}$$ is positive semi-definite.
 </blockquote>
+Numerically, $$\mathrm{sign}(G)$$ can be computed via iterative methods like Newton-Schulz, which we'll revisit.
 
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Derivation Sketch:** Newton-Schulz for Matrix Sign
-</summary>
-The Newton-Schulz iteration is derived from applying Newton's method to find the root of the matrix equation $$X^2 - I = 0$$, with $$X = \operatorname{sign}(G)$$.
-Let $$f(X) = X^2 - I$$. Newton's iteration for a root is $$X_{k+1} = X_k - [f'(X_k)]^{-1} f(X_k)$$.
-The Fréchet derivative $$f'(X_k)(H)$$ for $$f(X)=X^2-I$$ is $$X_k H + H X_k$$. Inverting this linear operator $$L_{X_k}(H) = X_k H + H X_k$$ is complicated.
+## Part 4: PolarGrad – A Unifying Preconditioning Perspective (Lau et al., 2025)
 
-A different path is to note that if $$X_0$$ is chosen carefully (e.g., $$X_0 = G / c$$ where $$c$$ scales $$G$$ appropriately), the iteration
+The PolarGrad framework (Lau, Long, & Su, 2025) provides a powerful preconditioning lens to understand and improve upon optimizers like Muon.
 
-$$
-X_{k+1} = \frac{1}{2} (X_k + X_k^{-T}) \quad \text{or related forms like} \quad X_{k+1} = \frac{1}{2} X_k (3I - X_k^T X_k)
-$$
+### 4.1. Polar Decomposition as the Foundation
 
-converges to the orthogonal polar factor $$U = \operatorname{sign}(G)$$. The second form, $$X_{k+1} = \frac{1}{2} X_k (3I - X_k^T X_k)$$, is more common for computing the matrix sign when starting with $$X_0=G$$ (properly scaled), as it avoids matrix inverses if $$X_k$$ is not orthogonal. It converges quadratically if $$\Vert I - X_0^T X_0 \Vert_2 < 1$$.
-This specific iteration can be seen as finding a fixed point of $$X = \frac{1}{2}X(3I - X^TX)$$, which, if $$X^TX=I$$ (i.e., $$X$$ is orthogonal), becomes $$X = \frac{1}{2}X(3I-I) = X$$.
-</details>
+The polar decomposition $$G = U_p H$$ is key.
+*   $$U_p = \mathrm{sign}(G) \in \mathcal{O}_{m \times n}$$ (if $$m \ge n$$, $$U_p^\top U_p = I_n$$) is the orthogonal polar factor. It captures the "direction" of $$G$$.
+*   $$H = (G^\top G)^{1/2} \in \mathcal{S}_{n \times n}^+$$ is the Hermitian polar factor (symmetric PSD). It captures the "magnitude" of $$G$$ along its principal directions. If $$G=U\Sigma V^\top$$, then $$H = V\Sigma V^\top$$. Note that $$\mathrm{tr}(H) = \mathrm{tr}(V\Sigma V^\top) = \mathrm{tr}(\Sigma) = \sum \sigma_i(G) = \Vert G \Vert_{S_1}$$ (the nuclear norm).
 
-## Part 4: Metrized Optimizers – Algorithms That Embrace Geometry
-
-Different choices of the metric $$M$$ (or equivalently, the norm whose duality map is used) lead to different optimizers. Let's look at a few examples:
-
-| Optimizer   | Metric $$M$$ (Conceptual)                                                                                  | Update Sketch                                                                                                           | Key Geometric Idea / Notes                                                                                                                                                                                                |
-| :---------- | :--------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Adam**    | Diagonal, adaptive (from squared grads)                                                                    | $$m_t \sim g_t, v_t \sim g_t^2; W \leftarrow W - \eta \frac{m_t}{\sqrt{v_t}+\epsilon}$$                                 | Adapts per-parameter learning rates based on gradient statistics. Can be seen as approximating a diagonal Fisher metric. (Post #12, #13)                                                                                  |
-| **IsoAdam** | $$M_l = \sigma_l^2 I$$ (per-tensor scalar isotropy)                                                        | $$m_t \leftarrow \beta m_{t-1} + (1-\beta)g_t; W_l \leftarrow W_l - \eta \frac{m_t}{\sigma_l}$$                         | Aims for update norm invariance to linear input/output transforms of $$W_l$$; scales equally in all directions for parameters of tensor $$W_l$$. (Jackson et al.)                                                         |
-| **Shampoo** | Approx. Hessian via Kronecker factors ($$A_l \otimes B_l$$)                                                | Precondition with roots: $$(A_l \otimes B_l)^{-1/2} g_l$$                                                               | Captures some parameter correlations more richly than diagonal methods; can be expensive for high-dimensional factors. (Gupta et al., 2018; Anil et al., 2020)                                                            |
-| **Muon**    | Modular Norm ($$\Vert \cdot \Vert_{\text{mod}}$$) (e.g., $$\Vert W_l \Vert_{\text{DA}}$$ per linear layer) | $$W_{l} \leftarrow W_{l} - \eta\,s_l \operatorname{sign}(g_l)$$ for linear layers ($$s_l = \sqrt{d_{in,l}/d_{out,l}}$$) | Explicitly performs steepest descent in the chosen modular (often dimension-agnostic spectral) metric. Does not require hand-tuned gradient clipping norms. (Bernstein & Newhouse, 2024; Bernstein, "Deriving Muon" blog) |
-
-The focus of the rest of this post will be primarily on Muon, as it directly instantiates many of the "modular duality" and dimension-agnostic operator norm ideas.
-
-## Part 5: Deep Dive – Muon: Spectral Descent, Implicit Bias, and Computational Optimality
-
-The Muon optimizer, developed by Jeremy Bernstein and collaborators, is a prime example of metrized deep learning. It uses the principles of modular duality with a strong emphasis on dimension-agnostic spectral norms for matrix-like parameters.
-
-### 5.1. Theoretical Grounding: Implicit Bias of Spectral Descent (Fan et al., 2025, arXiv:2502.04664)
-
-Recent theoretical work has shed light on *why* optimizers like Muon, which perform descent in specific norms, can achieve superior generalization. This is related to their **implicit bias**.
-
-<blockquote class="box-theorem" markdown="1">
-<div class="title" markdown="1">
-**Implicit Bias of Normalized Steepest Descent (Fan, Schmidt, Thrampoulidis '25)**
-</div>
-**Setting:** Consider a multiclass linear classifier $$f_W(x)=\operatorname{softmax}(Wx)$$ trained with cross-entropy loss on *separable* data (i.e., there exists a $$W$$ that correctly classifies all training points).
-
-**Norms and Descent:**
-Let $$N(W)$$ be the norm chosen for the parameters $$W$$. Let $$N^\ast(G)$$ be its dual norm.
-**Normalized Steepest Descent (NSD)** performs the update:
-
-$$
-W_{t+1} = W_t - \eta \frac{\nabla\mathcal{L}(W_t)}{N^\ast(\nabla\mathcal{L}(W_t))}
-$$
-
-**Muon Connection:** The Muon optimizer uses the **Dimension-Agnostic Spectral Norm** for matrix layers, which we denote as $$N(W) = \Vert W \Vert_{\text{DA}} = s \Vert W \Vert_2 = s \cdot \sigma_{\max}(W)$$, where $$s = \sqrt{d_{in}/d_{out}}$$ and $$\sigma_{\max}(W)$$ is the standard spectral norm (Schatten-$$\infty$$ norm).
-The dual norm to this is $$N^\ast(G) = (1/s) \Vert G \Vert_{tr}$$, where $$\Vert G \Vert_{tr}$$ is the trace norm (Schatten-1 norm).
-The NSD update for such a layer is:
-
-$$
-W_{t+1} = W_t - \eta \frac{g_t}{N^\ast(g_t)} = W_t - \eta \frac{g_t}{(1/s)\Vert g_t \Vert_{tr}} = W_t - \eta s \frac{g_t}{\Vert g_t \Vert_{tr}}
-$$
-
-Since $$g_t / \Vert g_t \Vert_{tr} = \operatorname{sign}(g_t)$$ (the matrix sign of the gradient), the update direction is proportional to $$s \cdot \operatorname{sign}(g_t)$$. This aligns with Muon's update for linear layers (potentially with momentum).
-
-**Main Result (Fan et al.):**
-For NSD (and this extends to NMD - Normalized Momentum Descent - under suitable conditions):
-1.  **Margin Maximization:** The direction of the weights, $$\hat W_t = W_t/N(W_t)$$, converges to $$W^{\star}$$, where $$W^{\star}$$ is the classifier that **maximizes the margin with respect to the norm used for NSD updates, $$N(\cdot)$$**:
-
-    $$
-    W^{\star} = \arg\max_{N(W)=1} \gamma(W) \quad \text{where} \quad \gamma(W) = \min_i y_i^{\top}Wx_i
-    $$
-
-    (assuming $$y_i$$ are one-hot and inputs $$x_i$$ are normalized for simplicity of margin definition here).
-2.  **Muon's Implicit Bias:** For matrix layers, Muon uses the Dimension-Agnostic Spectral Norm $$N(W) = \sqrt{d_{in}/d_{out}} \sigma_{\max}(W)$$. Thus, it has an implicit bias towards finding the separator that **maximizes the margin with respect to this specific $$N(W)$$ norm**. This is a powerful generalization property.
-3.  **Convergence Rate:** The convergence of the angle to the max-margin solution is characterized by:
-
-    $$
-    1-\frac{\langle\hat W_t,W^{\star}\rangle}{N(W^{\star})} = \mathcal{O}((\log t)^{-1})
-    $$
-
-    (where the denominator term ensures proper normalization if $$N(W^\star) \ne 1$$).
-</blockquote>
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Intuition:** Max-$$N(W)$$-Margin
-</summary>
-Imagine a binary classification task where data points $$x_i$$ have labels $$y_i \in \{-1, 1\}$$. A linear classifier is $$f(x) = w^T x$$. The margin for a data point $$(x_i, y_i)$$ with respect to $$w$$ is $$y_i w^T x_i$$. The geometric margin (for Euclidean norm) is $$\frac{y_i w^T x_i}{\Vert w \Vert_2}$$. Maximizing this margin (as in SVMs) leads to robust classifiers.
-
-For matrices $$W$$ in multiclass settings, the "margin" $$\min_i y_i^{\top}Wx_i$$ measures how confidently the least confidently correct prediction is made. Normalizing by a chosen norm $$N(W)$$ gives the N-norm margin.
-
-*   **Frobenius Norm Margin ($$N(W) = \Vert W \Vert_F$$):** Maximizing this tends to find solutions where the sum of squares of all weights is constrained. It might spread out the "importance" across all weight elements.
-*   **Dimension-Agnostic Spectral Norm Margin ($$N(W) = \Vert W \Vert_{\text{DA}} = \sqrt{d_{in}/d_{out}}\sigma_{\max}(W)$$):** Maximizing this constrains this scaled version of the largest singular value. This encourages solutions where the matrix $$W$$, when its operator gain is measured from RMS-input to RMS-output (i.e., in a dimension-agnostic way), is controlled. This leads to a form of dimension-aware, operator-level robustness, promoting stability and good generalization, especially in deep networks where layers compose and dimensions can vary widely.
-</details>
-
-This theorem provides a strong theoretical motivation for using dimension-agnostic spectral norm descent: it naturally searches for solutions that are robust in a specific, operator-theoretic, and dimensionally-aware sense.
-
-### 5.2. Computational Engine: The Matrix Sign Bottleneck & Polar Express (Amsel et al., 2025, arXiv:2505.16932)
-
-The practical implementation of Muon (and other methods relying on similar operator norms) hinges on efficiently computing the matrix sign $$\operatorname{sign}(G)$$ or the orthogonal factor $$U$$ in its polar decomposition $$G=US$$ (where $$U=\operatorname{sign}(G)$$).
-
-**The Challenge:**
-*   Direct SVD is too slow for large matrices encountered in deep learning.
-*   **Classical Newton-Schulz Iteration:** For $$X_0 = G / \Vert G \Vert_F$$ (or some other scaling), iterate:
-
-    $$
-    X_{k+1} = \frac{1}{2} X_k (3I - X_k^{\top}X_k)
-    $$
-
-    This converges quadratically to $$\operatorname{sign}(G)$$ if $$\Vert G \Vert_2 < \sqrt{3}$$. While effective, its initial convergence can be slow if the condition number $$\kappa(G) = \sigma_{\max}(G)/\sigma_{\min}(G)$$ is large, or if some singular values are very small.
+### 4.2. The PolarGrad Optimizer Family
 
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
-**Polar Express Algorithm (Amsel, Persson, Musco, Gower '25)**
+**Vanilla PolarGrad Update (Lau et al., 2025)**
 </div>
-This algorithm offers a more robust and often faster way to compute the matrix sign, particularly on modern hardware like GPUs.
-**Idea:** Use a dynamically chosen polynomial update. At each iteration $$k$$, find a scalar $$\alpha_k$$ that minimizes the maximum possible error over all singular values. The update is:
+Given the gradient $$G_k = \nabla f(X_k)$$, compute its polar decomposition $$U_k H_k = \mathrm{polar}(G_k)$$. The update is:
 
 $$
-X_{k+1} = X_k\left(I + \alpha_k(I - X_k^{\top}X_k)\right)
+X_{k+1} = X_k - \gamma_k \mathrm{tr}(H_k) U_k = X_k - \gamma_k \Vert G_k \Vert_{S_1} \mathrm{sign}(G_k)
 $$
-
-where $$\alpha_k$$ is chosen to optimally solve the minimax problem:
-
-$$
-\alpha_k = \arg\min_{\alpha} \max_{\lambda_i^2 \in \text{spec}(X_k^T X_k), \lambda_i^2 \neq 1} \frac{\left\vert  \lambda_i^2 (1+\alpha(1-\lambda_i^2))^2 - 1 \right\vert }{\left\vert  \lambda_i^2 - 1 \right\vert }
-$$
-
-(This expression captures the idea of optimal worst-case contraction for singular values not yet at 1. The actual $$\alpha_k$$ often comes from properties of Chebyshev polynomials or similar optimal polynomial approximation theory, aiming to make $$X_{k+1}^T X_{k+1}$$ closer to $$I$$).
-
-**Advantages:**
-*   **GPU-Friendly:** Uses only matrix-matrix multiplications.
-*   **Fast Convergence:** Exhibits rapid initial convergence and fast asymptotic convergence, often outperforming Newton-Schulz.
-*   **Stability:** More stable, e.g., when using lower precision like bfloat16.
-*   **Optimality Theorem (Amsel et al.):** No iteration using only matrix-matrix multiplications and a fixed number of $$m$$ flops per step can achieve a better worst-case spectral-error factor than Polar Express (up to a small constant).
-
-**Practical Impact:** For Muon, Polar Express can significantly reduce the per-step GPU time for the matrix sign computation (e.g., by ≈2x for 4096×4096 matrices) while maintaining or even improving model performance compared to using Newton-Schulz.
 </blockquote>
 
-### 5.3. Synthesis: The Power of Muon
+**Key Idea:**
+1.  Uses the orthogonal direction $$U_k = \mathrm{sign}(G_k)$$. This component drives the condition number of the *directional part* of the update to 1, directly addressing **gradient anisotropy**.
+2.  Scales this direction by the nuclear norm $$\Vert G_k \Vert_{S_1} = \mathrm{tr}(H_k)$. This reintroduces a measure of the gradient's overall magnitude, making the update sensitive to the "strength" of the gradient, which can be related to curvature.
 
-The combination of theoretical insight and computational advancement makes Muon a compelling optimizer:
-*   **Principled Theory:** It is grounded in modular duality and possesses a desirable implicit bias towards max-dimension-agnostic-spectral-norm-margin solutions, which is linked to good generalization.
-*   **Efficient Practice:** Thanks to algorithms like Polar Express, the core spectral operations are computationally feasible and efficient on modern hardware, making Muon competitive with (and often superior to) standard optimizers like AdamW, especially in large-scale transformer training.
+PolarGrad thus blends gradient-anisotropy preconditioning (via $$U_k$$) with a specific magnitude scaling (via $$\Vert G_k \Vert_{S_1}$$).
 
-## Part 6: Broader Geometric & Theoretical Perspectives
+### 4.3. Relationship with Muon and Other Optimizers
 
-The ideas underpinning Muon and modular duality connect to broader concepts in optimization theory.
+*   **Muon vs. PolarGrad:**
+    *   Muon's update for layer $$l$$: $$W_l \leftarrow W_l - \eta s_l \mathrm{sign}(G_l)$$.
+    *   PolarGrad's update for layer $$l$$: $$W_l \leftarrow W_l - \eta \Vert G_l \Vert_{S_1} \mathrm{sign}(G_l)$$.
+    Both use the same core orthogonal direction $$\mathrm{sign}(G_l)$$. The crucial difference lies in the scaling factor: Muon uses the dimension-aware constant $$s_l = \sqrt{d_{in,l}/d_{out,l}}$$, while PolarGrad uses the dynamic, gradient-dependent nuclear norm $$\Vert G_l \Vert_{S_1}$$.
 
-### 6.1. Mirror Descent Interpretation
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Implicit vs. Explicit Preconditioning (Lau et al., 2025)**
+</summary>
 
-The update rule $$W_l \leftarrow W_l - \eta s_l \operatorname{sign}(g_l)$$ (for a linear layer $$l$$) can be elegantly framed within the **Mirror Descent** paradigm.
+*   **Vector Case:**
+    *   **signSGD:** Update $$x_k - \gamma \mathrm{sgn}(g_k)$$. Can be seen as steepest descent w.r.t. $$\Vert \cdot \Vert_\infty$$ (implicit preconditioning). Adam (with $$\beta_1=\beta_2=0$$ and no epsilon) simplifies to $$x_k - \gamma \mathrm{diag}(\vert g_k \vert)^{-1/2} g_k$$ if gradients are normalized by $$1/\sqrt{\vert g_k \vert}$$. If we consider the update $x_k - \gamma \frac{g_k}{\Vert g_k \Vert_1}$, it's like $x_k - \gamma \Vert g_k \Vert_\infty^* \mathrm{sgn}(g_k)$. The paper suggests signSGD can be derived from $x_{k+1} = \arg\min_x \langle g_k, x-x_k \rangle + \frac{1}{2\gamma_k} \Vert x-x_k \Vert_\infty^2 = x_k - \gamma_k \Vert g_k \Vert_1 \mathrm{sgn}(g_k)$. This view suggests an explicit preconditioner $P_k = \mathrm{diag}(\vert g_k \vert)^{-1}$ if we consider the scaling $\Vert g_k \Vert_1$. Adam combines explicit diagonal preconditioning with momentum.
+
+*   **Matrix Case:**
+    *   **Shampoo:** Uses explicit left/right Kronecker preconditioners $$L_k^{-1/4} G_k R_k^{-1/4}$$, targeting curvature anisotropy in a structured way.
+    *   **Muon (matrix sign part):** The use of $$\mathrm{sign}(G_k)$$ implicitly preconditions by orthogonalizing the gradient direction, addressing gradient anisotropy.
+    *   **PolarGrad:** Uses polar factors more explicitly. The $$U_k$$ part directly targets gradient anisotropy. The $$\mathrm{tr}(H_k)$$ scaling reintroduces magnitude information related to curvature.
+</details>
+
+### 4.4. Null-Gradient Consistency: An Advantage of PolarGrad
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-**Mirror Descent Framework**
+**Definition.** Null-Gradient Consistency (Lau et al., 2025)
 </div>
-Mirror Descent generalizes gradient descent to non-Euclidean geometries. It uses a **potential function** (or generating function) $$\psi(W)$$, which must be strictly convex and differentiable. The Bregman divergence associated with $$\psi$$ is $$D_\psi(W, W') = \psi(W) - \psi(W') - \langle \nabla \psi(W'), W - W' \rangle$$.
-
-The Mirror Descent update involves three steps:
-1.  **Map to Dual Space:** $$ \theta_t = \nabla \psi(W_t) $$
-2.  **Gradient Step in Dual Space:** $$ \theta_{t+1} = \theta_t - \eta_t g_t $$ (where $$g_t = \nabla \mathcal{L}(W_t)$$)
-3.  **Map Back to Primal Space:** $$ W_{t+1} = (\nabla \psi)^{-1}(\theta_{t+1}) = \arg\min_W D_\psi(W, (\nabla \psi)^{-1}(\theta_t - \eta_t g_t)) $$
-
-Equivalently, the update can be written as:
-
-$$
-W_{t+1} = \arg\min_W \left\{ \eta_t \langle g_t, W \rangle + D_\psi(W, W_t) \right\}
-$$
-
-The modular duality update is equivalent to mirror descent with the potential function:
-
-$$
-\psi(W) = \frac{1}{2} \Vert W \Vert_{\text{mod}}^2 = \frac{1}{2} \sum_l \alpha_l \Vert W_l \Vert_{(l)}^2
-$$
-
-(assuming $$p=2$$ in the modular norm definition). If $$\Vert W_l \Vert_{(l)} = \Vert W_l \Vert_{\text{DA}}$$ (the dimension-agnostic spectral norm), then this potential is defined using these specific layer norms. The resulting updates, when worked out, align with the $$s_l \operatorname{sign}(g_l)$$ form for linear layers.
-
-This connection links metrized optimizers to the rich theory of online learning and regret minimization, where mirror descent is a foundational algorithm (related to Follow-The-Regularized-Leader, see Post #13).
+An optimizer is *null-gradient consistent* if the magnitude of its update step vanishes as the gradient magnitude approaches zero. Formally, if $$\Vert G_k \Vert \to 0$$, then $$\Vert \text{update}_k \Vert \to 0$$.
 </blockquote>
 
-### 6.2. Riemannian Manifold View
+*   **Muon (original formulation $s_l \mathrm{sign}(G_k)$):** Fails this property. Even if $$\Vert G_k \Vert$$ is tiny, $$\mathrm{sign}(G_k)$$ is an isometry and has a "norm" of 1 (e.g., its spectral norm is 1). So, the update step $$\eta s_l \mathrm{sign}(G_k)$$ does not shrink to zero unless $$\eta \to 0$$. This can cause persistent oscillations near optima.
+*   **PolarGrad ($$\Vert G_k \Vert_{S_1} \mathrm{sign}(G_k)$$)**: Satisfies this. As $$G_k \to \mathbf{0}$$, its singular values go to zero, so $$\Vert G_k \Vert_{S_1} = \sum \sigma_i(G_k) \to 0$$. Thus, the entire update vanishes, promoting stable convergence.
 
-We can also think of the parameter spaces of layers in a more geometric way.
-*   If a layer's parameters $$W_l$$ are constrained by $$\Vert W_l \Vert_{(l)} \le c$$ (e.g., its dimension-agnostic spectral norm is bounded), then the feasible set of parameters forms a region on a **Riemannian manifold**.
-*   Muon, by respecting these per-layer norms, can be loosely interpreted as performing a trust-region-like step on the *product manifold* formed by these individual layer manifolds. It seeks the best update within a "trust region" defined by the modular norm.
+### 4.5. Momentum Variants (Lau et al., 2025)
 
-### 6.3. Implicit Bias and Generalization (Revisited)
+PolarGrad can be combined with momentum in various ways:
+*   **Momentum-First (PolarMuon):** Accumulate momentum on raw gradients, then polar decompose the momentum.
+    $$
+    M_k = \beta M_{k-1} + (1-\beta)G_k
+    $$
+    $$
+    U_k H_k = \mathrm{polar}(M_k)
+    $$
+    $$
+    X_{k+1} = (1-\lambda\gamma_k)X_k - \gamma_k \mathrm{tr}(H_k) U_k \quad \text{(with weight decay } \lambda \text{)}
+    $$
+    This is analogous to standard momentum in Muon but uses PolarGrad's scaling.
+*   **Polar-First:** Polar decompose raw gradients, then accumulate momentum on the orthogonal factors $$U_k$$.
+    $$
+    U_k H_k = \mathrm{polar}(G_k)
+    $$
+    $$
+    M_k = \beta M_{k-1} + (1-\beta)U_k
+    $$
+    $$
+    X_{k+1} = (1-\lambda\gamma_k)X_k - \gamma_k \mathrm{tr}(H_k) M_k
+    $$
+*   **Heavy-Ball (PolarHB):** Similar to Momentum-First but momentum is on raw gradients, and this momentum term is then polar decomposed and scaled.
 
-The Fan et al. (2025) result for linear models is a specific instance of a broader principle:
-*The choice of optimizer, and particularly the norm it implicitly or explicitly uses to measure gradient "size" or parameter "magnitude," steers the learning trajectory towards solutions with specific characteristics.*
-Optimizers employing a modular norm built from, say, dimension-agnostic spectral norms, are biased towards solutions that are "simple" or "robust" in the sense of those norms. This tailored implicit bias is a key mechanism through which metrized optimizers can achieve better generalization than optimizers that are agnostic to this underlying operator structure.
+## Part 5: Theoretical Guarantees and Comparisons
 
-## Part 7: "Show, Don't Tell" – Practical Evidence and Usage
+### 5.1. Convergence Analysis of PolarGrad/PolarSGD (Lau et al., 2025)
 
-While theory is essential, practical results demonstrate the power of these approaches. The accessibility of these methods is also improving through libraries like `modula.systems`, which aim to encapsulate the complexities of modular duality and spectral operations.
+Under standard assumptions ($$f$$ is $$L$$-Lipschitz smooth and $$\mu$$-strongly convex):
+Let $$r_k = \mathrm{rank}(\nabla f(X_k))$$ and $$\kappa_{G_k} = \kappa_2(\nabla f(X_k))$$ be the gradient condition number. Let $$\kappa_H = L/\mu$$ be the global Hessian condition number.
 
-### 7.1. Performance Graphs: The NanoGPT Example
-Visual evidence, such as graphs plotting training loss against wall-clock time, often shows optimizers like Muon outperforming AdamW in training large language models like NanoGPT. These graphs would typically demonstrate Muon achieving lower loss faster or reaching a target loss with less compute.
-*(Imagine a plot here showing Muon's training curve below AdamW's for a task like NanoGPT training).*
+1.  **PolarGrad (deterministic gradients):** $$X_{k+1} = X_k - \gamma_k \Vert \nabla f(X_k) \Vert_{S_1} U_k$$
+    With step size $$\gamma_k = 1/(L r_k)$$, it satisfies:
+    $$
+    f(X_{k+1}) - f^* \le \left(1 - \frac{1}{r_k^2 \kappa_H}\right) (f(X_k)-f^*)
+    $$
+    and also
+    $$
+    f(X_{k+1}) - f^* \le \left(1 - \frac{1}{\kappa_{G_k}^2 \kappa_H}\right) (f(X_k)-f^*)
+    $$
+    If $$\kappa_{G_k} \ll r_k$$ (gradient is ill-conditioned but not necessarily low rank), the gradient-conditioned rate can be much faster. With a constant step $$\gamma = 1/(L r_{\max})$$ (where $$r_{\max} = \max_k r_k$$), PolarGrad achieves a linear convergence rate:
+    $$
+    f(X_k)-f^* = \mathcal{O}\left(\exp\left(-\frac{k}{r_{\max}^2 \kappa_H}\right)\right)
+    $$
 
-### 7.2. Visualizing Parameter Geometry: Singular Value Heatmaps
-A powerful way to visualize the effect of dimension-agnostic spectral norm control is to plot heatmaps of the singular value distributions (or $$\Vert W_l \Vert_{\text{DA}}$$ values) for each layer of a trained network.
-*   **Networks trained with AdamW:** Might show "spiky" or uneven singular value distributions across layers, with some layers having very large singular values and others very small (when appropriately scaled for comparison, e.g., by looking at $$\sqrt{d_{in}/d_{out}}\sigma_{max}$$ or just raw $$\sigma_{max}$$).
-*   **Networks trained with Muon:** Often exhibit "flatter" or more uniform distributions of $$\Vert W_l \Vert_{\text{DA}}$$. This suggests that Muon successfully controls the dimension-agnostic operator norm of each layer, preventing any single layer from becoming an amplification bottleneck or having its transformation "collapse" in this scaled sense.
-*(Imagine two side-by-side heatmaps here, one for AdamW (spiky scaled singular values) and one for Muon (flatter scaled singular values)).*
+2.  **PolarSGD (stochastic gradients):** With unbiased noise and constant step size $$\gamma < 1/(L r_{\max}^2)$$:
+    $$
+    \mathbb{E}[f(X_k)-f^*] = \mathcal{O}(\exp(-C_1 k) + C_2 \sigma^2)
+    $$
+    This shows linear convergence up to a noise floor $$O(\sigma^2)$$.
 
-### 7.3. Accessibility and Future Implementations
-While we've omitted a specific code snippet for brevity and to focus on theory, it's important to note that the practical application of these ideas is an active area of development. Libraries and optimizer implementations that abstract away the mathematical machinery (like the `modula.systems` initiative or built-in versions of Muon in popular frameworks) are key to broader adoption. The goal is to allow practitioners to leverage the benefits of metrized learning without needing to implement the complex dual maps or matrix sign algorithms from scratch. The theoretical insights discussed here motivate the engineering efforts to make these advanced optimizers robust, efficient, and user-friendly.
+### 5.2. Importance of Nuclear Norm Scaling: Matrix Sign Descent Analysis
 
-## Part 8: Comparisons, Open Questions, and Future Horizons
+Consider the update rule using only the matrix sign direction (akin to Muon without its $$s_l$$ scaling or PolarGrad without its nuclear norm scaling):
+$$
+X_{k+1} = X_k - \gamma U_k, \quad \text{where } U_k H_k = \mathrm{polar}(\nabla f(X_k))
+$$
+Even with $$\mu$$-strong convexity, Lau et al. (2025) show this leads to a sublinear recursion with a non-zero plateau for $$f(X_k)-f^*$$ (denoted $$\Delta_k$$):
+$$
+\Delta_{k+1} \le \Delta_k - \gamma \sqrt{2\mu \Delta_k} + \frac{L}{2}\gamma^2 r_{\max}
+$$
+This recursion does not guarantee $$\Delta_k \to 0$$ unless $$\gamma$$ decays appropriately, typically yielding only $$O(1/k)$$ rates in convex/non-convex cases.
+**Conclusion:** The nuclear norm scaling $$\Vert G_k \Vert_{S_1}$$ in PolarGrad is crucial for achieving linear convergence in the strongly convex setting analyzed. Muon's $$s_l$$ scaling offers a different mechanism, potentially leading to different convergence characteristics not covered by this specific analysis.
 
-Metrized deep learning is an active research area with many exciting avenues.
+### 5.3. Juxtaposing with Muon's Implicit Bias
 
-### 8.1. Detailed Comparisons: Kronecker vs. Spectral
-*   **Shampoo (Kronecker-factored preconditioning):** Approximates the Hessian (or Fisher) using Kronecker products. This can capture some correlations between input and output dimensions of a weight matrix.
-*   **Muon (Modular norm with e.g. $$\Vert \cdot \Vert_{\text{DA}}$$):** Focuses on dimension-agnostic operator norms for linear layers.
-*   **When does Kronecker ≈ Spectral-like behavior?**
-    *   For low-rank matrices, their behavior might align more closely.
-    *   The structure of convolutions (stride, padding) can affect how well Kronecker factors approximate the true underlying geometry that dimension-agnostic spectral norms aim to capture.
-    *   Shampoo can be more expensive for very high-dimensional layers if the factors themselves are large, while spectral methods (with efficient sign computation) scale with matrix multiplication costs.
-    *   Note that Muon is Shampoo without accumulation (of preconditioning statistics).
+Recall Fan et al. (2025) showed that Normalized Steepest Descent (NSD) converges in *direction* to the max-$$N(W)$$-margin solution. Muon's update direction $$s_l \mathrm{sign}(G_l)$$ aligns with NSD for the $$\Vert \cdot \Vert_{\text{DA}}$$ norm.
+PolarGrad uses the same core direction $$\mathrm{sign}(G_l)$$ but scales it by $$\Vert G_l \Vert_{S_1}$$.
+*   The *direction* $$\mathrm{sign}(G_l)$$ is still responsible for steering towards a particular type of margin (related to spectral properties).
+*   The nuclear norm scaling $$\Vert G_l \Vert_{S_1}$$ primarily affects the *step size* along this direction. It ensures null-gradient consistency and contributes to the linear convergence rates shown by Lau et al. Whether this specific scaling preserves or modifies the exact max-margin characteristics of the unscaled direction in all scenarios is an interesting point for further thought. It likely helps in navigating the loss landscape more effectively towards such solutions by better controlling step magnitudes.
 
-### 8.2. Hybrid Approaches and Optimizer Composition
-*   **Mixing Metrics:** Is it possible to combine the strengths of different geometric approaches? For instance, using modular duality with dimension-agnostic spectral norms for dense linear/convolutional layers, but employing a Fisher-diagonal approximation (like Adam's $$v_t$$ term) for embedding layers or biases where spectral properties are less clearly defined or critical.
-*   **Optimizer Composition (Bernstein's Vision):** The idea of having a "local optimizer per module, glued by duality" is powerful. How would learning rates be scheduled across such modules? Could different modules even use fundamentally different update rules, coordinated by a global understanding of network geometry? (Bernstein, "Deriving Muon" blog).
+## Part 6: Computational Aspects and Practical Optimizers
 
-### 8.3. Robustness and Further Challenges
-*   **Stability under Quantization:** Neural network quantization (e.g., to 8-bit integers) is crucial for deployment. Do the benefits of modular-norm control, such as bounded Lipschitz constants (related to bounded $$\Vert W_l \Vert_{\text{DA}}$$) or improved generalization, persist robustly after quantization? Or could these methods even *aid* in quantization-aware training?
-*   **Extending Theory:** The strong implicit bias results (Fan et al., 2025) are currently for linear models on separable data. Extending these guarantees to deep, non-linear models and non-separable data is a major research direction.
-*   **Adaptive Modular Norms:** Could the $$\alpha_l$$ weights or even the type of norm $$\Vert W_l \Vert_{(l)}$$ in the modular norm definition be adapted during training?
+### 6.1. Efficiently Computing the Polar Factor / Matrix Sign
+
+A practical bottleneck is computing $$\mathrm{sign}(G)$$ or the full polar decomposition.
+*   **Direct SVD:** Too slow for large matrices in DL.
+*   **Newton-Schulz Iteration:** Used in some motivations for Muon. Iterates $$X_{k+1} = \frac{1}{2} X_k (3I - X_k^\top X_k)$$. Can be ill-conditioned and requires careful scaling/tuning.
+*   **Polar Express (Amsel et al., 2025):** A faster, more robust algorithm for the matrix sign $$\mathrm{sign}(G)$$, using dynamically chosen polynomial updates.
+*   **Robust Solvers for Full Polar Decomposition (advocated by Lau et al., 2025 for PolarGrad):**
+    *   **QDWH (QR-based Dynamically Weighted Halley)**
+    *   **ZOLO-PD (Zolotarev-based Polar Decomposition)**
+    These solvers are reported to converge quickly and stably, often within a few iterations, without needing manual coefficient tuning for the polar decomposition $$G=U_p H$$. This makes PolarGrad potentially more robust and easier to use than methods relying solely on less stable matrix sign iterations.
+
+### 6.2. Summary Table of Metrized/Matrix-Aware Optimizers
+
+| Optimizer     | Key Preconditioning / Metric Idea                                                                     | Update Sketch (Simplified for one layer)                                         | Addresses Anisotropy                                     | Null-Gradient Consistent? |
+| :------------ | :---------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- | :------------------------------------------------------- | :------------------------ |
+| Adam          | Diagonal approx. of Hessian (Curvature)                                                               | $$W \leftarrow W - \eta \frac{m_t}{\sqrt{v_t}+\epsilon}$$                        | $$\kappa_H$$ (partially, diagonal)                       | Yes                       |
+| Shampoo       | Kronecker factors for approx. Hessian (Curvature)                                                     | $$W \leftarrow W - \eta L_k^{-1/4} G_k R_k^{-1/4}$$                              | $$\kappa_H$$ (structured)                                | Yes                       |
+| Muon          | Modular Norm ($$\Vert \cdot \Vert_{\text{DA}}$$) / Implicit precond. via Orthogonalization (Gradient) | $$W \leftarrow W - \eta s \cdot \mathrm{sign}(G)$$ ($$s=\sqrt{d_{in}/d_{out}}$$) | $$\kappa_G$$ (directional part)                          | No (original formulation) |
+| **PolarGrad** | Preconditioning via Polar Decomposition ($$G=U_P H$$)                                                 | $$W \leftarrow W - \eta \Vert G \Vert_{S_1} \cdot \mathrm{sign}(G)$$             | $$\kappa_G$$ (directional) + Magnitude Sensitive Scaling | Yes                       |
+
+## Part 7: Broader Perspectives and Open Questions
+
+### 7.1. Mirror Descent Interpretation (Revisited)
+
+*   Muon's update ($$s_l \mathrm{sign}(G_l)$$) is interpretable as Mirror Descent with a potential function like $$\psi(W) = \frac{1}{2} \Vert W \Vert_{\text{DA}}^2$$.
+*   PolarGrad's update ($$\Vert G_l \Vert_{S_1} \mathrm{sign}(G_l)$$) is more directly derived from a preconditioning viewpoint ($$M_t^{-1} G_t = P_t^{-1} G_t = U_t$$, then scaled). While it uses the same $$U_t$$ as the steepest descent direction for the spectral norm, the $$\Vert G_l \Vert_{S_1}$$ scaling makes a simple Mirror Descent connection less obvious. It's a distinct adaptive step sizing strategy for that direction.
+
+### 7.2. Modular Application
+
+The "local optimizer per module" philosophy applies well here. Both Muon's per-layer norm choice and PolarGrad's per-layer polar decomposition and scaling fit naturally into modern deep learning architectures where different layers (Linear, Conv2D, etc.) can be treated with tailored matrix-aware updates.
+
+### 7.3. Open Questions from PolarGrad & Muon
+
+*   **Optimal Scaling of $$\mathrm{sign}(G_t)$$: ** Is Muon's dimension-aware constant $$s_l$$, PolarGrad's dynamic nuclear norm $$\Vert G_t \Vert_{S_1}$$, or some other scaling strategy (or none, as in pure Matrix Sign Descent for some contexts) universally optimal? The choice likely depends on the specific problem structure, desired implicit biases, and convergence properties.
+*   **Interaction of Momentum with Polar Decomposition:** Lau et al. propose several ways (PolarMuon, Polar-First). Which is most effective empirically and theoretically? How does this interact with the different scaling strategies?
+*   **Extending Theory:** Current strong convergence results (e.g., Lau et al. for PolarGrad, Fan et al. for NSD bias) are often for convex or separable settings. Extending these rigorous analyses to the deep, non-linear, non-convex regime of most DL models is a major challenge.
+*   **Computational Overheads:** While advanced solvers (Polar Express, QDWH, ZOLO-PD) improve efficiency and stability, computing polar decompositions or matrix signs per layer per step still adds overhead compared to simpler methods like Adam. The trade-off between per-step cost and total convergence time/final performance is crucial.
+*   **Robustness:** How do these methods perform under quantization, pruning, or other deployment constraints? Does the inherent geometric control offer advantages?
 
 ## Conclusion
 
-Metrized deep learning, with its focus on understanding and leveraging the geometric structure of neural network parameter spaces, represents a significant step beyond heuristic optimizer design. By moving from simple scalar learning rates to sophisticated metrics like the modular norm (often built from dimension-agnostic spectral norms for linear components), we gain a more principled way to guide the optimization process.
+Metrized deep learning has evolved significantly, moving from intuitive geometric ideas to more formal preconditioning frameworks. We've seen that:
+1.  Addressing **anisotropy** is key. Lau et al. (2025) provide a valuable distinction between **curvature anisotropy** ($$\kappa_H$$) and **gradient anisotropy** ($$\kappa_G$$).
+2.  **Muon**, through its use of the dimension-agnostic spectral norm and modular duality, effectively targets gradient anisotropy by using the $$\mathrm{sign}(G_t)$$ direction, scaled by $$s_l$$. This offers strong implicit bias towards robust solutions.
+3.  **PolarGrad** builds upon this by using the full polar decomposition $$G_t = U_t H_t$$. It leverages the same orthogonal direction $$U_t = \mathrm{sign}(G_t)$$ but scales it by the nuclear norm $$\Vert G_t \Vert_{S_1} = \mathrm{tr}(H_t)$$. This provides:
+    *   A clear preconditioning interpretation.
+    *   Null-gradient consistency, potentially leading to more stable convergence.
+    *   Strong theoretical convergence rates in certain settings.
+    *   A framework for robust computation using advanced polar decomposition solvers.
 
-Optimizers like Muon, grounded in theories of modular duality and benefiting from strong implicit bias guarantees (such as convergence to max-dimension-agnostic-spectral-norm-margin solutions) and cutting-edge computational subroutines (like Polar Express), exemplify this progress. They demonstrate that by carefully considering "how to measure" in parameter space, we can achieve faster training, better generalization, and a deeper understanding of why our models succeed.
-
-The journey into the geometry of deep learning is far from over. As our models grow in complexity, so too must our understanding of the landscapes they inhabit and the tools we use to navigate them. The principles of metrized learning offer a promising compass for this exploration.
+The journey from simple gradient descent to sophisticated matrix-aware optimizers like Muon and PolarGrad highlights a trend towards more principled, geometrically informed, and structurally aware optimization in deep learning. By carefully considering "how to measure" and "how to precondition" in the complex parameter spaces of neural networks, we are unlocking faster training, better generalization, and a deeper understanding of the learning process itself.
 
 ---
 
-## Further Reading & Quick Links
+## References
 
-*   Bernstein, J., & Newhouse, Z. (2024). *Modular Duality in Deep Learning*. arXiv preprint arXiv:2410.21265. (Also presented at ICML 2025).
-*   Bernstein, J. *Deriving Muon*. Blog post available at [jeremybernste.in/writing/deriving-muon](https://jeremybernste.in/writing/deriving-muon).
-*   Fan, Z., Schmidt, M., & Thrampoulidis, C. (2025). *Implicit Bias of SignGD and Adam on Multiclass Separable Data*. arXiv preprint arXiv:2502.04664.
 *   Amsel, N., Persson, K., Musco, C., & Gower, R. M. (2025). *The Polar Express: Optimal Matrix Sign Methods and Their Application to the Muon Algorithm*. arXiv preprint arXiv:2505.16932.
-*   *Modula* library documentation: [docs.modula.systems](https://docs.modula.systems).
-*   Carlson, D., Collins, E., Hsieh, Y.P., Carin, L., & Cevher, V. (2015). Preconditioned Spectral Descent for Deep Learning. In Advances in Neural Information Processing Systems. Curran Associates, Inc..
-*   Gupta, V., Anil, R., et al. (2018). *Shampoo: Preconditioned Stochastic Tensor Optimization*.
-*   Anil, R., Gupta, V., et al. (2020). *Scalable Second Order Optimization for Deep Learning*.
+*   Anil, R., Gupta, V., Koren, T., & Singer, Y. (2020). *Scalable Second Order Optimization for Deep Learning*. arXiv preprint arXiv:2002.09018.
+*   Bernstein, J. (n.d.). *Deriving Muon*. Retrieved from [jeremybernste.in/writing/deriving-muon](https://jeremybernste.in/writing/deriving-muon).
+*   Bernstein, J., & Newhouse, Z. (2024). *Modular Duality in Deep Learning*. arXiv preprint arXiv:2410.21265.
+*   Carlson, D., Collins, E., Hsieh, Y.P., Carin, L., & Cevher, V. (2015). Preconditioned Spectral Descent for Deep Learning. In *Advances in Neural Information Processing Systems 28 (NIPS 2015)*.
+*   Fan, Z., Schmidt, M., & Thrampoulidis, C. (2025). *Implicit Bias of SignGD and Adam on Multiclass Separable Data*. arXiv preprint arXiv:2502.04664.
+*   Gupta, V., Anil, R., Koren, T., & Singer, Y. (2018). *Shampoo: Preconditioned Stochastic Tensor Optimization*. In *Proceedings of the 35th International Conference on Machine Learning (ICML 2018)*.
+*   Gunasekar, S., Lee, J. D., Soudry, D., & Srebro, N. (2018). *Characterising Implicit Bias in Terms of Optimisation Geometry*. In *Proceedings of the 35th International Conference on Machine Learning (ICML 2018)*.
+*   Higham, N. J. (2008). *Functions of Matrices: Theory and Computation*. Society for Industrial and Applied Mathematics (SIAM).
 *   Jackson, J. (2023). *An Isometric Stochastic Optimizer*. arXiv preprint arXiv:2307.12979.
-*   Higham, N. J. (2008). *Functions of Matrices: Theory and Computation*. SIAM.
-*   Gunasekar, S., et al. (2018). *Characterising Implicit Bias in Terms of Optimisation Geometry*. ICML 2018.
+*   Kimi AI. (2025). *Moonlight: A Lightweight and Powerful 16B MoE Large Language Model*. arXiv preprint arXiv:2502.16982.
+*   Lau, C. W., Long, Q., & Su, W. J. (2025). *PolarGrad: A Class of Matrix-Gradient Optimizers from a Unifying Preconditioning Perspective*. arXiv preprint arXiv:2505.21799.
+*   *Modula Systems Documentation*. Retrieved from [docs.modula.systems](https://docs.modula.systems).
