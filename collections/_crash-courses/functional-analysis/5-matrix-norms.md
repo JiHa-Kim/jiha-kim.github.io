@@ -1,7 +1,7 @@
 ---
 title: "Matrix Norms: Foundations for Metrized Deep Learning"
 date: 2025-06-02 00:45 -0400
-course_index: 4
+course_index: 5
 mermaid: true
 description: An introduction to matrix norms, their duals, and computational aspects essential for understanding advanced optimization in machine learning.
 image: # placeholder
@@ -40,10 +40,6 @@ llm-instructions: |
     $$
     block
     $$
-
-    text... or:
-
-    $$block$$
 
     text...
   Use LaTeX commands for symbols as much as possible (e.g. $$\vert$$ for
@@ -115,7 +111,7 @@ llm-instructions: |
   <summary markdown="1">
   **Tip.** A concise title goes here.
   </summary>
-  Here is content thatl can include **Markdown**, inline math $$a + b$$,
+  Here is content that can include **Markdown**, inline math $$a + b$$,
   and block math.
 
   $$
@@ -189,247 +185,6 @@ More generally, for $$p \ge 1$$, the **$$\ell_p$$-norm** is:
 $$
 \Vert x \Vert_p = \left( \sum_{i=1}^n \vert x_i \vert^p \right)^{1/p}
 $$
-
-### Root-Mean-Square (RMS) Norm for Vectors
-
-While the norms above are ubiquitous, deep‑learning practice often benefits from a **dimension‑invariant** scale for vectors. The **RMS norm** provides exactly that by normalizing the Euclidean norm by the square‑root of the dimension.
-
-<blockquote class="box-definition" markdown="1">
-<div class="title" markdown="1">
-**Definition.** RMS Norm (for Vectors)
-</div>
-For $$x \in \mathbb{R}^n$$ the **root‑mean‑square norm** is
-
-$$
-\Vert x \Vert_{\mathrm{RMS}} \;=\; \frac{\Vert x \Vert_2}{\Vert \vec{1} \Vert_2} \;=\; \frac{\Vert x \Vert_2}{\sqrt{n}} \;=\; \sqrt{\frac{1}{n}\sum_{i=1}^n x_i^2}
-$$
-
-where $$\vec{1}$$ is the vector of all ones in $$\mathbb{R}^n$$.
-</blockquote>
-
-#### Properties and Rationale for Vector RMS Norm
-
-1.  **Dimension neutrality.** If the coordinates of $$x$$ are i.i.d. with variance $$1$$—for instance $$x_i \sim \mathcal{N}(0,1)$$—then $$\mathbb{E}\Vert x \Vert_{\mathrm{RMS}} \approx 1$$ for large $$n$$ (and exactly 1 under certain ideal conditions). This property makes the notion of “unit‑size’’ consistent for vectors of varying dimensions, such as activations from layers of different widths.
-2.  **Rotational and Orthogonal Invariance.** The vector RMS norm is a scaled version of the $$\ell_2$$‑norm. The $$\ell_2$$-norm possesses strong geometric symmetries, specifically invariance under rotations and, more broadly, under all orthogonal transformations (which include reflections). The RMS norm inherits these symmetries. This means it treats all orthonormal bases equivalently and does not distinguish between right-handed and left-handed coordinate systems. These geometric properties are fundamental and lead to the following characterizations of norms possessing such invariances.
-
-<blockquote class="box-theorem" markdown="1">
-<div class="title" markdown="1">
-**Theorem 1.** Rotationally Invariant Functions
-</div>
-A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is **rotationally invariant** (i.e., $$f(Qx) = f(x)$$ for all rotation matrices $$Q \in SO(n)$$ and all $$x \in \mathbb{R}^n$$) if and only if it can be expressed as a function of the Euclidean norm of $$x$$. That is, there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that:
-
-$$
-f(x) = g(\Vert x \Vert_2) \quad \forall x \in \mathbb{R}^n
-$$
-
-For the case $$n=1$$, $$SO(1) = \{[1]\}$$ (the identity transformation), so any function $$f(x_1)$$ is trivially $$SO(1)$$-invariant. For the conclusion $$f(x_1) = g(\Vert x_1 \Vert_2) = g(\vert x_1 \vert)$$ to hold, $$f(x_1)$$ must be an even function ($$f(x_1)=f(-x_1)$$).
-</blockquote>
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Proof of Theorem 1.**
-</summary>
-($$\Leftarrow$$) **Sufficiency:** Assume $$f(x) = g(\Vert x \Vert_2)$$ for some function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$.
-For any rotation matrix $$Q \in SO(n)$$, the Euclidean norm is preserved: $$\Vert Qx \Vert_2 = \Vert x \Vert_2$$.
-Then, $$f(Qx) = g(\Vert Qx \Vert_2) = g(\Vert x \Vert_2) = f(x)$$.
-Thus, $$f$$ is rotationally invariant.
-
-($$\Rightarrow$$) **Necessity:** Assume $$f: \mathbb{R}^n \to \mathbb{R}$$ is rotationally invariant, i.e., $$f(Qx) = f(x)$$ for all $$Q \in SO(n)$$ and all $$x \in \mathbb{R}^n$$.
-
-*   If $$x = \mathbf{0}$$, then $$Q\mathbf{0} = \mathbf{0}$$. The condition $$f(Q\mathbf{0}) = f(\mathbf{0})$$ is $$f(\mathbf{0}) = f(\mathbf{0})$$, which is trivially true. We can define $$g(0) = f(\mathbf{0})$$.
-
-*   Consider $$x \ne \mathbf{0}$$. Let $$r = \Vert x \Vert_2 > 0$$.
-    *   **Case $$n \ge 2$$:**
-        Let $$y \in \mathbb{R}^n$$ be any other vector such that $$\Vert y \Vert_2 = r$$. This means $$x$$ and $$y$$ lie on the same sphere of radius $$r$$ centered at the origin. The special orthogonal group $$SO(n)$$ acts transitively on such spheres for $$n \ge 2$$. This means there exists a rotation matrix $$Q \in SO(n)$$ such that $$y = Qx$$.
-        By the assumed rotational invariance of $$f$$:
-        $$f(y) = f(Qx) = f(x)$$
-        This shows that the value of $$f(x)$$ is the same for all vectors $$x$$ having the same Euclidean norm $$r$$. Therefore, $$f(x)$$ depends only on $$\Vert x \Vert_2$$. We can define a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ by setting $$g(r) = f(x_0)$$ for any chosen vector $$x_0$$ such that $$\Vert x_0 \Vert_2 = r$$ (for example, $$x_0 = (r, 0, \ldots, 0)^\top$$). This function $$g$$ is well-defined. Then, for any $$x \in \mathbb{R}^n$$, $$f(x) = g(\Vert x \Vert_2)$$.
-
-    *   **Case $$n=1$$:**
-        The space is $$\mathbb{R}$$. The special orthogonal group $$SO(1)$$ consists only of the identity transformation, $$Q = [1]$$. The condition for rotational invariance, $$f(Qx_1) = f(x_1)$$, becomes $$f(1 \cdot x_1) = f(x_1)$$. This equation is true for *any* function $$f: \mathbb{R} \to \mathbb{R}$$.
-        For the theorem's conclusion, $$f(x_1) = g(\Vert x_1 \Vert_2) = g(\vert x_1 \vert)$$, to hold, it must be that $$f(x_1) = f(-x_1)$$ for all $$x_1 \in \mathbb{R}$$. This is because if $$f(x_1) = g(\vert x_1 \vert)$$, then $$f(-x_1) = g(\vert -x_1 \vert) = g(\vert x_1 \vert) = f(x_1)$$. Thus, for $$n=1$$, an $$SO(1)$$-invariant function is a function of its Euclidean norm if and only if it is an even function. (As noted below, if $$f$$ is a norm, this even property is always satisfied).
-
-Combining these parts, a rotationally invariant function $$f$$ can be written as $$f(x) = g(\Vert x \Vert_2)$$ (with the caveat for $$n=1$$ that $$f$$ must be even, which is implicitly handled if rotational invariance is strengthened or understood in context, e.g. for norms).
-</details>
-
-<blockquote class="box-proposition" markdown="1">
-<div class="title" markdown="1">
-**Corollary 1.1.** Rotationally Invariant Norms
-</div>
-If a function $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is a **norm** and is **rotationally invariant**, then it must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm. That is, there exists a constant $$c > 0$$ such that:
-
-$$
-\Vert x \Vert = c \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n
-$$
-
-</blockquote>
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Proof of Corollary 1.1.**
-</summary>
-Let $$\Vert \cdot \Vert$$ be a norm on $$\mathbb{R}^n$$ that is rotationally invariant (i.e., $$\Vert Qx \Vert = \Vert x \Vert$$ for all $$Q \in SO(n)$$ and $$x \in \mathbb{R}^n$$).
-
-1.  **Apply Theorem 1:**
-    Since $$\Vert \cdot \Vert$$ is a rotationally invariant function, by Theorem 1, there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that $$\Vert x \Vert = g(\Vert x \Vert_2)$$ for all $$x \in \mathbb{R}^n$$.
-    For the case $$n=1$$: A norm $$\Vert \cdot \Vert$$ on $$\mathbb{R}$$ must satisfy absolute homogeneity, so $$\Vert -x_1 \Vert = \vert -1 \vert \Vert x_1 \Vert = \Vert x_1 \Vert$$. This means any norm on $$\mathbb{R}$$ is an even function. Thus, the condition from Theorem 1 for $$n=1$$ is met, and we can write $$\Vert x_1 \Vert = g(\vert x_1 \vert) = g(\Vert x_1 \Vert_2)$$.
-
-2.  **Use Norm Properties:**
-    We now use the absolute homogeneity property of the norm $$\Vert \cdot \Vert$$: For any $$x \in \mathbb{R}^n$$ and any scalar $$\alpha \in \mathbb{R}$$, $$\Vert \alpha x \Vert = \vert \alpha \vert \Vert x \Vert$$.
-    Substituting the form from Theorem 1:
-    $$g(\Vert \alpha x \Vert_2) = \vert \alpha \vert g(\Vert x \Vert_2)$$
-    Since $$\Vert \alpha x \Vert_2 = \vert \alpha \vert \Vert x \Vert_2$$ (a property of the $$\ell_2$$-norm), we have:
-    $$g(\vert \alpha \vert \Vert x \Vert_2) = \vert \alpha \vert g(\Vert x \Vert_2)$$
-    Let $$r = \Vert x \Vert_2 \ge 0$$. Let $$\lambda = \vert \alpha \vert \ge 0$$. The equation becomes:
-    $$g(\lambda r) = \lambda g(r) \quad \text{for all } \lambda \ge 0, r \ge 0$$
-    This is a form of Cauchy's functional equation for non-negative real numbers.
-    If $$r > 0$$, we can set $$r=1$$ (corresponding to any vector on the $$\ell_2$$-unit sphere). Then for any $$\lambda \ge 0$$:
-    $$g(\lambda) = \lambda g(1)$$
-    Let $$c = g(1)$$. Then $$g(\lambda) = c\lambda$$ for all $$\lambda \ge 0$$.
-    So, for any $$x \in \mathbb{R}^n$$, if $$\Vert x \Vert_2 = r \ge 0$$, then
-    $$\Vert x \Vert = g(\Vert x \Vert_2) = g(r) = cr = c \Vert x \Vert_2$$
-
-3.  **Determine the constant $$c$$:**
-    The constant $$c = g(1)$$. Since $$g(1) = \Vert e_1 \Vert$$ (where $$e_1$$ is the first standard basis vector, $$\Vert e_1 \Vert_2 = 1$$), and $$\Vert \cdot \Vert$$ is a norm, we must have $$\Vert e_1 \Vert > 0$$ because $$e_1 \ne \mathbf{0}$$ (by positive definiteness of norms). Thus, $$c > 0$$.
-
-4.  **Verify other norm properties:**
-    The function $$\Vert x \Vert = c \Vert x \Vert_2$$ with $$c > 0$$ satisfies all norm axioms because $$\Vert \cdot \Vert_2$$ is a norm:
-    *   Non-negativity: $$\Vert x \Vert = c \Vert x \Vert_2 \ge 0$$ since $$c>0$$ and $$\Vert x \Vert_2 \ge 0$$.
-    *   Positive definiteness: $$\Vert x \Vert = c \Vert x \Vert_2 = 0$$ iff $$\Vert x \Vert_2 = 0$$ (since $$c>0$$) iff $$x = \mathbf{0}$$.
-    *   Absolute homogeneity: $$\Vert \alpha x \Vert = c \Vert \alpha x \Vert_2 = c \vert \alpha \vert \Vert x \Vert_2 = \vert \alpha \vert (c \Vert x \Vert_2) = \vert \alpha \vert \Vert x \Vert$$.
-    *   Triangle inequality: $$\Vert x+y \Vert = c \Vert x+y \Vert_2 \le c(\Vert x \Vert_2 + \Vert y \Vert_2)$$ (by triangle inequality for $$\ell_2$$-norm) $$= c\Vert x \Vert_2 + c\Vert y \Vert_2 = \Vert x \Vert + \Vert y \Vert$$.
-
-Thus, any rotationally invariant norm on $$\mathbb{R}^n$$ must be of the form $$c \Vert x \Vert_2$$ for some constant $$c > 0$$.
-</details>
-
-<blockquote class="box-theorem" markdown="1">
-<div class="title" markdown="1">
-**Theorem 2.** Orthogonal Invariance of Euclidean-derived Norms
-</div>
-The Euclidean norm ($$\ell_2$$-norm) is **orthogonally invariant**. That is, for any orthogonal matrix $$Q \in O(n)$$ (where $$O(n)$$ is the orthogonal group, whose elements satisfy $$Q^\top Q = QQ^\top = I$$) and any vector $$x \in \mathbb{R}^n$$:
-
-$$
-\Vert Qx \Vert_2 = \Vert x \Vert_2
-$$
-
-Consequently, any norm of the form $$\Vert x \Vert = c \Vert x \Vert_2$$ with $$c > 0$$ (which, by Corollary 1.1, includes all rotationally invariant norms) is also orthogonally invariant.
-</blockquote>
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Proof of Theorem 2.**
-</summary>
-An orthogonal matrix $$Q \in O(n)$$ is defined by the property $$Q^\top Q = I$$ (or equivalently, $$QQ^\top = I$$). Orthogonal transformations preserve the standard dot product:
-$$(Qx)^\top (Qy) = x^\top Q^\top Q y = x^\top I y = x^\top y$$
-The Euclidean norm is defined as $$\Vert x \Vert_2 = \sqrt{x^\top x}$$.
-Therefore, for any $$Q \in O(n)$$ and any $$x \in \mathbb{R}^n$$:
-
-$$
-\Vert Qx \Vert_2 = \sqrt{(Qx)^\top (Qx)}
-$$
-
-Using the dot product preservation property with $$y=x$$:
-$$(Qx)^\top (Qx) = x^\top x$$
-So,
-
-$$
-\Vert Qx \Vert_2 = \sqrt{x^\top x} = \Vert x \Vert_2
-$$
-
-Thus, the Euclidean norm is orthogonally invariant. This means it is invariant under all transformations in $$O(n)$$, which includes rotations ($$Q \in SO(n) \subset O(n)$$) as well as reflections (orthogonal transformations with $$\det(Q) = -1$$).
-
-Now, consider a norm $$\Vert \cdot \Vert$$ on $$\mathbb{R}^n$$ such that $$\Vert x \Vert = c \Vert x \Vert_2$$ for some constant $$c > 0$$.
-For any $$Q \in O(n)$$:
-
-$$
-\Vert Qx \Vert = c \Vert Qx \Vert_2
-$$
-
-Since we just showed $$\Vert Qx \Vert_2 = \Vert x \Vert_2$$ for $$Q \in O(n)$$,
-
-$$
-\Vert Qx \Vert = c \Vert x \Vert_2
-$$
-
-And since $$\Vert x \Vert = c \Vert x \Vert_2$$, we have:
-
-$$
-\Vert Qx \Vert = \Vert x \Vert
-$$
-
-This shows that any norm that is a positive scalar multiple of the Euclidean norm is orthogonally invariant.
-By Corollary 1.1, any rotationally ($$SO(n)$$-) invariant norm must be of the form $$c \Vert x \Vert_2$$ with $$c>0$$. Therefore, any rotationally invariant norm is automatically orthogonally ($$O(n)$$-) invariant.
-</details>
-
-<blockquote class="box-proposition" markdown="1">
-<div class="title" markdown="1">
-**Corollary 2.1.** Uniqueness of RMS-Norm under Rotational, Orthogonal, and Dimensional Invariance
-</div>
-The RMS-norm, defined as $$\Vert x \Vert_{\mathrm{RMS}} = \frac{\Vert x \Vert_2}{\sqrt{n}}$$, is a positive scalar multiple of the Euclidean norm (with scaling factor $$c = 1/\sqrt{n} > 0$$). Therefore:
-1.  By Corollary 1.1, the RMS-norm is rotationally invariant.
-2.  By Theorem 2, the RMS-norm is also orthogonally invariant.
-
-Furthermore, consider a function $$\mathcal{N}$$ that defines a norm $$\mathcal{N}_n(\cdot)$$ on each space $$\mathbb{R}^n$$ (for $$n \ge 1$$). If this family of norms satisfies:
-*   **Rotational Invariance:** Each norm $$\mathcal{N}_n(\cdot)$$ is rotationally invariant on $$\mathbb{R}^n$$ (i.e., $$\mathcal{N}_n(Qx) = \mathcal{N}_n(x)$$ for all $$Q \in SO(n)$$ and all $$x \in \mathbb{R}^n$$).
-*   **Dimensional Invariance:** The family is *dimensionally invariant*. This means that for vectors $$X^{(n)} \in \mathbb{R}^n$$ whose components $$X_i$$ are i.i.d. random variables with zero mean and unit variance (e.g., $$X_i \sim \mathcal{N}(0,1)$$), the expected value $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ is a constant $$K > 0$$ that is independent of the dimension $$n$$.
-
-Then, each $$\mathcal{N}_n(x)$$ must be a positive scalar multiple of the RMS-norm for $$x \in \mathbb{R}^n$$. Specifically, for any $$n$$ and any $$x \in \mathbb{R}^n$$:
-
-$$
-\mathcal{N}_n(x) = K' \cdot \frac{\Vert x \Vert_2}{\sqrt{n}} = K' \cdot \Vert x \Vert_{\mathrm{RMS}}
-$$
-
-for some constant $$K' > 0$$ (related to $$K$$). If, by convention or normalization, this constant $$K'$$ is 1 (e.g., if the dimensional invariance is specifically $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$ for a class of test random vectors where $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}] = 1$$), then the RMS-norm family is the **unique** family of norms satisfying these conditions of rotational (hence orthogonal) and dimensional invariance.
-</blockquote>
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Proof of Corollary 2.1.**
-</summary>
-The first part, stating that the RMS-norm is rotationally and orthogonally invariant, follows directly from its definition. The RMS-norm is $$\Vert x \Vert_{\mathrm{RMS}} = (1/\sqrt{n}) \Vert x \Vert_2$$. Since $$1/\sqrt{n} > 0$$, Corollary 1.1 implies it is rotationally invariant, and Theorem 2 implies it is orthogonally invariant.
-
-For the second part, let $$\mathcal{N}$$ be a function defining a family of norms $$\mathcal{N}_n(\cdot)$$ on each $$\mathbb{R}^n$$ ($$n \ge 1$$).
-
-1.  **Implication of Rotational Invariance:**
-    By **Corollary 1.1**, since each norm $$\mathcal{N}_n(\cdot)$$ in the family is rotationally invariant (invariant under $$SO(n)$$), it must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm. Thus, for each dimension $$n$$, there exists a constant $$c_n > 0$$ such that:
-    $$ \mathcal{N}_n(x) = c_n \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n $$
-    By Theorem 2, this implies that each $$\mathcal{N}_n(\cdot)$$ is also orthogonally invariant.
-
-2.  **Application of Dimensional Invariance:**
-    The family is also dimensionally invariant. This means for vectors $$X^{(n)} \in \mathbb{R}^n$$ with i.i.d. components $$X_i$$ having zero mean and unit variance, the expected value $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ is a constant $$K > 0$$ that is independent of $$n$$.
-    Substituting the form from (1):
-    $$ \mathbb{E}[c_n \Vert X^{(n)} \Vert_2] = K $$
-    Since $$c_n$$ is a constant for a given $$n$$ (but may depend on $$n$$), this implies:
-    $$ c_n \mathbb{E}[\Vert X^{(n)} \Vert_2] = K $$
-
-3.  **Relating to RMS Norm Property:**
-    For the specified random vectors $$X^{(n)}$$, we consider their expected RMS-norm. Let $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}] = \mathbb{E}[\Vert X^{(n)} \Vert_2 / \sqrt{n}] = C_X(n)$$.
-    The factor $$C_X(n)$$ depends on the distribution of $$X_i$$ and $$n$$. For many common distributions (like standard normal), $$C_X(n) \to 1$$ as $$n \to \infty$$. The concept of "dimensional invariance" for RMS-like quantities often assumes conditions where $$C_X(n)$$ is either exactly 1 or treated as 1 for the purpose of defining the invariance.
-    From $$\mathbb{E}[\Vert X^{(n)} \Vert_2 / \sqrt{n}] = C_X(n)$$, we have $$\mathbb{E}[\Vert X^{(n)} \Vert_2] = C_X(n) \sqrt{n}$$.
-    Substituting this into the equation from (2):
-    $$ c_n (C_X(n) \sqrt{n}) = K $$
-    Thus, $$c_n = \frac{K}{C_X(n) \sqrt{n}}$$.
-
-4.  **Final Form of the Norm:**
-    The norm $$\mathcal{N}_n(x)$$ takes the form:
-    $$ \mathcal{N}_n(x) = c_n \Vert x \Vert_2 = \left( \frac{K}{C_X(n) \sqrt{n}} \right) \Vert x \Vert_2 = \frac{K}{C_X(n)} \left( \frac{\Vert x \Vert_2}{\sqrt{n}} \right) = \frac{K}{C_X(n)} \cdot \Vert x \Vert_{\mathrm{RMS}} $$
-    Let $$K' = K/C_X(n)$$. For $$\mathcal{N}_n$$ to be "dimensionally invariant" in a strong sense where the scaling relative to RMS norm is fixed across dimensions, $$K'$$ must be a constant independent of $$n$$. This occurs if $$C_X(n)$$ is itself independent of $$n$$ (or if the definition of dimensional invariance implies $$K$$ absorbs this dependence, e.g., by defining it in a limit or for specific distributions where $$C_X(n)$$ is stable).
-    A common interpretation for RMS-like quantities is that "dimensional invariance" fixes the scaling such that $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ matches the behavior of $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}]$$ up to a single constant. If we assume ideal conditions where $$C_X(n)=1$$ (as suggested by the property $$\mathbb{E}\Vert x \Vert_{\mathrm{RMS}} \approx 1$$ for the RMS norm itself), then $$K' = K$$.
-    Thus, $$\mathcal{N}_n(x) = K' \Vert x \Vert_{\mathrm{RMS}}$$ for a single constant $$K' > 0$$.
-
-5.  **Normalization and Uniqueness:**
-    If, by convention or normalization, the constant $$K'$$ is 1 (e.g., if the dimensional invariance condition is specifically $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$ and this is achieved with random vectors for which $$C_X(n)=1$$), then:
-    $$ \mathcal{N}_n(x) = \Vert x \Vert_{\mathrm{RMS}} $$
-    This shows that a family of norms satisfying rotational invariance (and thus orthogonal invariance) and the specified type of dimensional invariance must be the RMS-norm family, up to a single positive scaling constant $$K'$$ across all dimensions. If this scaling constant is fixed (e.g., to 1 by the normalization inherent in the definition of dimensional invariance), then the family is unique.
-</details>
-
-<blockquote class="box-tip" markdown="1">
-<div class="title" markdown="1">
-**Tip.** When to reach for the vector RMS norm
-</div>
-Use the vector $$\Vert \cdot \Vert_{\mathrm{RMS}}$$ whenever you need a scale for vectors that is *simultaneously* rotationally symmetric (and thus orthogonally symmetric) and independent of vector length—e.g.
-when comparing activations from layers of different widths or designing width‑robust regularizers for activations.
-</blockquote>
 
 ## 2. Stepping Up: Matrix Norms
 

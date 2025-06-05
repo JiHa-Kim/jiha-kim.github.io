@@ -307,10 +307,6 @@ llm-instructions: &llm-instructions
       block
       $$
 
-      text... or:
-
-      $$block$$
-
       text...
     Use LaTeX commands for symbols as much as possible (e.g. $$\vert$$ for
     absolute value, $$\ast$$ for asterisk). Avoid using the literal vertical bar
@@ -381,7 +377,7 @@ llm-instructions: &llm-instructions
     <summary markdown="1">
     **Tip.** A concise title goes here.
     </summary>
-    Here is content thatl can include **Markdown**, inline math $$a + b$$,
+    Here is content that can include **Markdown**, inline math $$a + b$$,
     and block math.
 
     $$
