@@ -490,7 +490,97 @@ While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/
 
 Schatten norms are unitarily invariant, meaning $$\Vert UAV \Vert_{S_p} = \Vert A \Vert_{S_p}$$ for any orthogonal/unitary matrices $$U$$ and $$V$$.
 
-## 5. The Concept of Duality in Norms
+## 5. Orthogonally Invariant Functions
+
+Orthogonally invariant functions play a significant role in various areas of mathematics and its applications, including the study of matrix norms (many of which are, by definition, orthogonally invariant). The characterization of these functions depends on their domain and codomain. Let $$O(n)$$ be the group of $$n \times n$$ orthogonal matrices $$Q$$ (satisfying $$Q^\top Q = Q Q^\top = I$$). We consider the most common cases below:
+
+### 5.1. Functions $$f: \mathbb{R}^n \to \mathbb{R}$$ (Scalar-valued functions of a vector)
+A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is orthogonally invariant if $$f(Qx) = f(x)$$ for all $$x \in \mathbb{R}^n$$ and all $$Q \in O(n)$$.
+
+**Characterization:** Such a function $$f$$ is orthogonally invariant if and only if it can be expressed as a function of the norm (or squared norm) of $$x$$. That is, there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that:
+
+$$
+f(x) = g(\Vert x \Vert)
+$$
+
+(Alternatively, $$f(x) = h(\Vert x \Vert^2)$$ for some $$h: \mathbb{R}_{\ge 0} \to \mathbb{R}$$).
+
+**Proof:**
+*   **If $$f(x) = g(\Vert x \Vert)$$, then $$f$$ is orthogonally invariant:**
+    For any $$Q \in O(n)$$, we have $$\Vert Qx \Vert^2 = (Qx)^\top(Qx) = x^\top Q^\top Q x = x^\top I x = x^\top x = \Vert x \Vert^2$$. So $$\Vert Qx \Vert = \Vert x \Vert$$.
+    Then $$f(Qx) = g(\Vert Qx \Vert) = g(\Vert x \Vert) = f(x)$$. Thus, $$f$$ is orthogonally invariant.
+
+*   **If $$f$$ is orthogonally invariant, then $$f(x) = g(\Vert x \Vert)$$ for some $$g$$:**
+    We need to show that if $$\Vert x \Vert = \Vert y \Vert$$, then $$f(x) = f(y)$$.
+    *   If $$\Vert x \Vert = \Vert y \Vert = 0$$, then $$x = y = 0$$, so $$f(x)=f(y)$$ trivially.
+    *   If $$\Vert x \Vert = \Vert y \Vert = r > 0$$:
+        The vectors $$x/r$$ and $$y/r$$ are unit vectors. It is a known result that for any two unit vectors $$u, v \in \mathbb{R}^n$$, there exists an orthogonal matrix $$Q \in O(n)$$ such that $$Qu = v$$.
+        So, there exists $$Q \in O(n)$$ such that $$Q(x/r) = y/r$$. This implies $$Qx = y$$.
+        Since $$f$$ is orthogonally invariant, $$f(y) = f(Qx) = f(x)$$.
+    Thus, $$f(x)$$ depends only on the norm $$\Vert x \Vert$$. We can define a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ as follows: for any $$r \ge 0$$, choose an arbitrary $$x_0 \in \mathbb{R}^n$$ such that $$\Vert x_0 \Vert = r$$ (e.g., $$x_0 = (r, 0, \dots, 0)^\top$$). Define $$g(r) = f(x_0)$$. This definition is sound because we've shown that $$f$$ takes the same value for all vectors of the same norm.
+    Then, for any $$x \in \mathbb{R}^n$$, $$f(x) = g(\Vert x \Vert)$$.
+
+**Examples:** $$f(x) = \Vert x \Vert$$, $$f(x) = \Vert x \Vert^2$$, $$f(x) = e^{-\Vert x \Vert^2}$$, $$f(x) = \sin(\Vert x \Vert)$$.
+
+### 5.2. Functions $$f: \mathbb{R}^n \to \mathbb{R}^m$$ (Vector-valued functions of a vector)
+A function $$f: \mathbb{R}^n \to \mathbb{R}^m$$ is orthogonally invariant if $$f(Qx) = f(x)$$ for all $$x \in \mathbb{R}^n$$ and all $$Q \in O(n)$$.
+
+**Characterization:** Such a function $$f$$ is orthogonally invariant if and only if it can be expressed as $$f(x) = \vec{g}(\Vert x \Vert)$$ for some function $$\vec{g}: \mathbb{R}_{\ge 0} \to \mathbb{R}^m$$.
+
+**Proof:**
+Let $$f(x) = (f_1(x), f_2(x), \dots, f_m(x))^\top$$, where $$f_i: \mathbb{R}^n \to \mathbb{R}$$ are the component functions.
+The condition $$f(Qx) = f(x)$$ means $$(f_1(Qx), \dots, f_m(Qx))^\top = (f_1(x), \dots, f_m(x))^\top$$.
+This holds if and only if $$f_i(Qx) = f_i(x)$$ for all $$i=1, \dots, m$$.
+By the characterization in Case 1, each $$f_i$$ must be of the form $$f_i(x) = g_i(\Vert x \Vert)$$ for some $$g_i: \mathbb{R}_{\ge 0} \to \mathbb{R}$$.
+So, $$f(x) = (g_1(\Vert x \Vert), \dots, g_m(\Vert x \Vert))^\top$$. We can define $$\vec{g}(r) = (g_1(r), \dots, g_m(r))^\top$$, where $$\vec{g}: \mathbb{R}_{\ge 0} \to \mathbb{R}^m$$.
+Then $$f(x) = \vec{g}(\Vert x \Vert)$$.
+
+**Important Note:** For $$x \neq 0$$, $$f(x)$$ is some vector $$\vec{v}$$. For $$f(0)$$, $$f(0)$$ is some vector $$\vec{v}_0$$. This characterization covers $$f(0)$$ by $$\vec{g}(0)$$. The only vector in $$\mathbb{R}^n$$ that is fixed by all $$Q \in O(n)$$ is the zero vector $$0$$. If we were looking for *equivariant* functions such that $$f(Qx) = Qf(x)$$, the characterization would be $$f(x) = c \frac{x}{\Vert x \Vert}$$ or $$f(x) = h(\Vert x \Vert)x$$. But for *invariant* functions $$f(Qx)=f(x)$$, the value $$f(x)$$ must be $$0$$ if $$f(x)$$ is expected to have the same symmetries as $$x$$ (e.g., if $$f(x)$$ were forced to be a multiple of $$x$$). However, this is not required. The value $$f(x)$$ is simply a point in $$\mathbb{R}^m$$ that is constant on spheres in $$\mathbb{R}^n$$.
+The only special case is $$f(x)=0$$ for all $$x$$. This is $$g(\Vert x \Vert)=0$$.
+
+### 5.3. Functions $$f: (\mathbb{R}^n)^k \to \mathbb{R}$$ (Scalar-valued functions of $$k$$ vectors)
+A function $$f(v_1, v_2, \dots, v_k)$$ where $$v_i \in \mathbb{R}^n$$ is orthogonally invariant if $$f(Qv_1, \dots, Qv_k) = f(v_1, \dots, v_k)$$ for all $$Q \in O(n)$$.
+
+**Characterization:** Such a function $$f$$ is orthogonally invariant if and only if it can be expressed as a function of the inner products $$v_i \cdot v_j$$ for $$1 \le i \le j \le k$$. That is, there exists a function $$G$$ such that:
+
+$$
+f(v_1, \dots, v_k) = G( \{v_i \cdot v_j\}_{1 \le i \le j \le k} )
+$$
+
+Note that norms are included since $$\Vert v_i \Vert^2 = v_i \cdot v_i$$.
+
+**Proof Sketch:**
+*   **If $$f$$ depends only on $$v_i \cdot v_j$$, then $$f$$ is orthogonally invariant:**
+    $$(Qv_i) \cdot (Qv_j) = (Qv_i)^\top (Qv_j) = v_i^\top Q^\top Q v_j = v_i^\top I v_j = v_i \cdot v_j$$.
+    So, all inner products are unchanged by the transformation $$v_l \mapsto Qv_l$$. Thus $$f$$ is invariant.
+
+*   **If $$f$$ is orthogonally invariant, then it depends only on the inner products:**
+    Suppose we have two sets of vectors $$\{v_1, \dots, v_k\}$$ and $$\{w_1, \dots, w_k\}$$ such that $$v_i \cdot v_j = w_i \cdot w_j$$ for all $$1 \le i,j \le k$$. This means their Gramian matrices are equal: $$V^\top V = W^\top W$$, where $$V = [v_1, \dots, v_k]$$ and $$W = [w_1, \dots, w_k]$$ are $$n \times k$$ matrices.
+    It's a known result (related to the Cholesky decomposition or SVD) that if $$V^\top V = W^\top W$$, then there exists an orthogonal matrix $$Q \in O(n)$$ such that $$Q V = W$$, i.e., $$Qv_i = w_i$$ for all $$i=1, \dots, k$$. (This holds if $$n \ge k$$ and $$V$$ has full column rank, or more generally, if the map from $$\text{span}(v_i)$$ to $$\text{span}(w_i)$$ defined by $$v_i \mapsto w_i$$ is an isometry, it can be extended to an isometry on $$\mathbb{R}^n$$).
+    Since $$f$$ is orthogonally invariant, $$f(w_1, \dots, w_k) = f(Qv_1, \dots, Qv_k) = f(v_1, \dots, v_k)$$.
+    Thus, $$f$$ only depends on the collection of inner products.
+
+### 5.4. Functions of Matrices $$F: M_{n,n}(\mathbb{R}) \to \mathbb{R}$$
+The term "orthogonally invariant" can also apply to functions of matrices. There are a few common interpretations:
+*   **Invariance under orthogonal similarity:** $$F(Q^\top A Q) = F(A)$$ for all $$A \in M_{n,n}(\mathbb{R})$$ and $$Q \in O(n)$$.
+    *   **Characterization:** Such functions are precisely the symmetric functions of the eigenvalues of $$A$$ if $$A$$ is restricted to be symmetric. For general $$A$$, they are functions of the coefficients of the characteristic polynomial of $$A$$ (e.g., trace, determinant, sums of principal minors). More fundamentally, they are functions of the (unordered) set of eigenvalues of $$A$$ (counting multiplicities), provided these eigenvalues are considered in $$\mathbb{C}$$. If $$A$$ is not normal, eigenvalues alone might not be sufficient; one might need Jordan form related invariants. However, for normal matrices $$A A^\top = A^\top A$$ (which includes symmetric, skew-symmetric, and orthogonal matrices), $$F(A)$$ is a symmetric function of its eigenvalues.
+    *   **Examples:** $$\text{trace}(A)$$, $$\det(A)$$.
+*   **Invariance under left (and/or right) orthogonal transformations:** $$F(Q_1 A Q_2^\top) = F(A)$$ for all $$Q_1, Q_2 \in O(n)$$. (Or $$F(QA)=F(A)$$ or $$F(AQ)=F(A)$$).
+    *   **Characterization (for $$F(Q_1 A Q_2^\top) = F(A)$$):** Such functions depend only on the singular values of $$A$$. $$F(A) = h(\sigma_1(A), \dots, \sigma_n(A))$$, where $$\sigma_i(A)$$ are the singular values of $$A$$ and $$h$$ is a symmetric function of its arguments.
+    *   **Example:** The Frobenius norm $$\Vert A \Vert_F = \sqrt{\text{trace}(A^\top A)} = \sqrt{\sum \sigma_i(A)^2}$$. The operator norm $$\Vert A \Vert_2 = \sigma_{\max}(A)$$.
+    *   If $$F(QA)=F(A)$$ for all $$Q \in O(n)$$, then $$F(A) = G(A^\top A)$$ for some function $$G$$.
+    *   If $$F(AQ)=F(A)$$ for all $$Q \in O(n)$$, then $$F(A) = G(A A^\top)$$ for some function $$G$$.
+
+The most standard interpretation of "orthogonally invariant functions" without further context usually refers to Case 1 or 2 (functions whose argument is a vector from $$\mathbb{R}^n$$).
+
+In summary:
+*   $$f: \mathbb{R}^n \to \mathbb{R}$$ is orthogonally invariant iff $$f(x) = g(\Vert x \Vert)$$.
+*   $$f: \mathbb{R}^n \to \mathbb{R}^m$$ is orthogonally invariant iff $$f(x) = \vec{g}(\Vert x \Vert)$$.
+*   $$f: (\mathbb{R}^n)^k \to \mathbb{R}$$ is orthogonally invariant iff $$f(v_1, \dots, v_k) = G(\{v_i \cdot v_j\}_{1 \le i \le j \le k})$$.
+*   Functions of matrices $$F(A)$$ invariant under $$Q^\top A Q$$ depend on eigenvalues (or characteristic polynomial coefficients).
+*   Functions of matrices $$F(A)$$ invariant under $$Q_1 A Q_2^\top$$ depend on singular values.
+
+## 6. The Concept of Duality in Norms
 
 Duality is a powerful concept in optimization and functional analysis. Every norm has an associated **dual norm**.
 
@@ -565,7 +655,7 @@ The element $$A$$ that achieves the supremum (or one such element if not unique)
 The Spectral Norm ($$\Vert A \Vert_2$$ or $$\Vert A \Vert_{\ell_2 \to \ell_2}$$) is identical to the Schatten-$$\infty$$ norm ($$\Vert A \Vert_{S_\infty}$$). Therefore, its dual with respect to the Frobenius inner product is consistently the Nuclear Norm ($$\Vert A \Vert_{S_1}$$). Any alternative derivations suggesting the spectral norm is self-dual under this specific inner product are typically referencing a different context or a specialized result not general for Frobenius duality.
 </blockquote>
 
-### 5.1 Duality Mappings: Explicit Formulas
+### 6.1 Duality Mappings: Explicit Formulas
 
 A **duality mapping** $$J$$ for a norm $$\Vert \cdot \Vert$$ (on a space of matrices $$\mathbb{R}^{m \times n}$$) maps a matrix $$A$$ to a matrix $$J(A)$$ such that two conditions are met:
 1.  $$\langle A, J(A) \rangle_F = \Vert A \Vert$$
@@ -789,7 +879,7 @@ Both conditions are satisfied.
 </details>
 
 
-## 6. Why Matrix Norms Matter for Metrized Deep Learning
+## 7. Why Matrix Norms Matter for Metrized Deep Learning
 
 Understanding matrix norms and their duals is more than just a mathematical exercise. These concepts are foundational for "metrized deep learning" for several reasons:
 
@@ -803,12 +893,12 @@ Understanding matrix norms and their duals is more than just a mathematical exer
 
 5.  **Computational Costs in Optimization:** The choice of norm is not "free."
     *   **Norm Computation:** Calculating some norms (e.g., Frobenius) is cheap, while others (e.g., spectral, nuclear, RMS-induced) require SVDs or iterative methods, adding computational overhead per optimization step if used directly for regularization or monitoring.
-    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert  \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in Section 5.1 are crucial for implementing such optimizers.
+    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert  \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in Section 6.1 are crucial for implementing such optimizers.
     *   For common layers like Linear or Conv2D, computing these duality mappings can be expensive. For instance, if the norm involves SVD (like for Spectral, Nuclear, RMS-induced norms) or matrix square roots/inverses (Mahalanobis), this is costly. The **Muon** optimizer and related methods often employ approximations, like Newton-Schulz iterations for matrix inverses or low-rank approximations for SVD, to make these computations feasible for large deep learning models.
 
 6.  **Modular Duality:** As seen in recent research, concepts of duality can be applied modularly to layers (Linear, Conv2D, Embedding) and composed throughout a network. This allows for a "dual" perspective on the entire weight space, enabling optimizers that adapt to the specific geometry of each layer. Efficient GPU kernels for these layer-wise dualizations are an active area of development.
 
-## Summary
+## 8. Summary of Common Matrix Norms
 
 Here's a quick cheat sheet of common matrix norms and their duals (with respect to the Frobenius inner product). For a matrix $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$:
 
@@ -821,7 +911,7 @@ Here's a quick cheat sheet of common matrix norms and their duals (with respect 
 | Nuclear                   | $$\Vert A \Vert_\ast$$, $$\Vert A \Vert_{S_1}$$                                              | $$\sum_k \sigma_k(A)$$                                                   | Spectral ($$\Vert \cdot \Vert_{S_\infty}$$)                          | Expensive (SVD)              |
 | RMS-Induced Operator Norm | $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$                                              | $$\sqrt{n_{in}/n_{out}}\,\sigma_{\max}(A)$$                              | $$\sqrt{n_{out}/n_{in}}\,\Vert A \Vert_{S_1}$$ (Scaled Nuclear Norm) | Expensive (SVD/Iterative)    |
 
-## Summary of Matrix Norm Inequalities
+## 9. Summary of Matrix Norm Inequalities
 
 This table summarizes key inequalities relating common matrix norms for a matrix $$A \in \mathbb{R}^{m \times n}$$.
 Here, $$\Vert A \Vert_1$$ is the max column sum (operator norm $$\ell_1 \to \ell_1$$), $$\Vert A \Vert_2$$ is the spectral norm (operator norm $$\ell_2 \to \ell_2$$), $$\Vert A \Vert_\infty$$ is the max row sum (operator norm $$\ell_\infty \to \ell_\infty$$), $$\Vert A \Vert_F$$ is the Frobenius norm, and $$\Vert A \Vert_{\max} = \max_{i,j} \vert a_{ij} \vert$$.
