@@ -136,318 +136,182 @@ llm-instructions: |
 
 ### Root-Mean-Square (RMS) Norm for Vectors
 
-While the norms above are ubiquitous, deep-learning practice often benefits from a **dimension-invariant** scale for vectors. The **RMS norm** provides exactly that by normalizing the Euclidean norm by the square-root of the dimension.
+While various norms are ubiquitous in mathematics and engineering, deep learning practice often benefits from a **dimension-invariant** scale for vectors. The **RMS norm** provides this by normalizing the Euclidean norm by the square root of the dimension.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition.** RMS Norm (for Vectors)
 </div>
-For $$x \in \mathbb{R}^n$$ the **root-mean-square norm** is
+For $$x \in \mathbb{R}^n$$, the **root-mean-square norm** is
 
 $$
 \Vert x \Vert_{\mathrm{RMS}} \;=\; \frac{\Vert x \Vert_2}{\Vert \vec{1} \Vert_2} \;=\; \frac{\Vert x \Vert_2}{\sqrt{n}} \;=\; \sqrt{\frac{1}{n}\sum_{i=1}^n x_i^2}
 $$
 
-where $$\vec{1}$$ is the vector of all ones in $$\mathbb{R}^n$$.
+where $$\vec{1}$$ is the vector of all ones in $$\mathbb{R}^n$$, and $$\Vert x \Vert_2 = \sqrt{\sum_{i=1}^n x_i^2}$$ is the standard Euclidean norm.
 </blockquote>
 
 #### Properties and Rationale for Vector RMS Norm
 
-1.  **Dimension neutrality.** If the coordinates of $$x$$ are i.i.d. with variance $$1$$—for instance $$x_i \sim \mathcal{N}(0,1)$$—then $$\mathbb{E}\Vert x \Vert_{\mathrm{RMS}} \approx 1$$ for large $$n$$ (and exactly 1 under certain ideal conditions). This property makes the notion of “unit-size” consistent for vectors of varying dimensions, such as activations from layers of different widths.
-2.  **Rotational and Orthogonal Invariance.** The vector RMS norm is a scaled version of the $$\ell_2$$-norm. The $$\ell_2$$-norm possesses strong geometric symmetries, specifically invariance under rotations and, more broadly, under all orthogonal transformations (which include reflections). The RMS norm inherits these symmetries. This means it treats all orthonormal bases equivalently and does not distinguish between right-handed and left-handed coordinate systems. These geometric properties are fundamental and lead to the following characterizations of norms possessing such invariances.
+1.  **Dimension neutrality.** If the coordinates $$x_i$$ of $$x$$ are i.i.d. random variables with zero mean and unit variance (e.g., $$x_i \sim \mathcal{N}(0,1)$$), then $$\mathbb{E}[\Vert x \Vert_{\mathrm{RMS}}] \approx 1$$ for large $$n$$. This property makes the notion of "unit-size" more consistent for vectors of varying dimensions, such as network activations from layers of different widths.
+2.  **Rotational and Orthogonal Invariance.** The RMS norm is a positive scalar multiple of the $$\ell_2$$-norm. The $$\ell_2$$-norm is invariant under rotations ($$SO(n)$$) and, more generally, under all orthogonal transformations ($$O(n)$$), which include reflections. The RMS norm inherits these crucial geometric symmetries. This means it treats all orthonormal bases equivalently. These properties lead to the following characterizations.
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
-**Theorem 1.** Rotationally Invariant Functions with Vector Input
+**Theorem 1.** Rotationally Invariant Functions
 </div>
-A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is **rotationally invariant** (i.e., $$f(Qx) = f(x)$$ for all rotation matrices $$Q \in SO(n)$$ and all $$x \in \mathbb{R}^n$$) if and only if it can be expressed as a function of the Euclidean norm of $$x$$. That is, there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that:
+A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is **rotationally invariant** (i.e., $$f(Qx) = f(x)$$ for all rotation matrices $$Q \in SO(n)$$ and all $$x \in \mathbb{R}^n$$) if and only if there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that:
 
 $$
 f(x) = g(\Vert x \Vert_2) \quad \forall x \in \mathbb{R}^n
 $$
 
-For the case $$n=1$$, $$SO(1) = \{[1]\}$$ (the identity transformation), so any function $$f(x_1)$$ is trivially $$SO(1)$$-invariant. For the conclusion $$f(x_1) = g(\Vert x_1 \Vert_2) = g(\vert x_1 \vert)$$ to hold, $$f(x_1)$$ must be an even function ($$f(x_1)=f(-x_1)$$).
+For $$n=1$$, $$SO(1) = \{[1]\}$$ (the identity matrix). Thus, any function $$f: \mathbb{R} \to \mathbb{R}$$ is trivially $$SO(1)$$-invariant. For the conclusion $$f(x_1) = g(\Vert x_1 \Vert_2) = g(\vert x_1 \vert)$$ to hold, $$f(x_1)$$ must be an even function (i.e., $$f(x_1)=f(-x_1)$$).
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof of Theorem 1.**
 </summary>
-($$\Leftarrow$$) **Sufficiency:** Assume $$f(x) = g(\Vert x \Vert_2)$$ for some function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$.
-For any rotation matrix $$Q \in SO(n)$$, the Euclidean norm is preserved: $$\Vert Qx \Vert_2 = \Vert x \Vert_2$$.
-Then, $$f(Qx) = g(\Vert Qx \Vert_2) = g(\Vert x \Vert_2) = f(x)$$.
-Thus, $$f$$ is rotationally invariant.
+($$\Leftarrow$$) **Sufficiency:** Assume $$f(x) = g(\Vert x \Vert_2)$$. For any $$Q \in SO(n)$$, rotations preserve the Euclidean norm: $$\Vert Qx \Vert_2 = \Vert x \Vert_2$$.
+Then, $$f(Qx) = g(\Vert Qx \Vert_2) = g(\Vert x \Vert_2) = f(x)$$. Thus, $$f$$ is rotationally invariant.
 
-($$\Rightarrow$$) **Necessity:** Assume $$f: \mathbb{R}^n \to \mathbb{R}$$ is rotationally invariant, i.e., $$f(Qx) = f(x)$$ for all $$Q \in SO(n)$$ and all $$x \in \mathbb{R}^n$$.
-
-*   If $$x = \mathbf{0}$$, then $$Q\mathbf{0} = \mathbf{0}$$. The condition $$f(Q\mathbf{0}) = f(\mathbf{0})$$ is $$f(\mathbf{0}) = f(\mathbf{0})$$, which is trivially true. We can define $$g(0) = f(\mathbf{0})$$.
-
+($$\Rightarrow$$) **Necessity:** Assume $$f$$ is rotationally invariant.
+*   If $$x = \mathbf{0}$$, then $$Q\mathbf{0} = \mathbf{0}$$, so $$f(Q\mathbf{0}) = f(\mathbf{0})$$ is trivial. Define $$g(0) = f(\mathbf{0})$$.
 *   Consider $$x \ne \mathbf{0}$$. Let $$r = \Vert x \Vert_2 > 0$$.
-    *   **Case $$n \ge 2$$:**
-        Let $$y \in \mathbb{R}^n$$ be any other vector such that $$\Vert y \Vert_2 = r$$. This means $$x$$ and $$y$$ lie on the same sphere of radius $$r$$ centered at the origin. The special orthogonal group $$SO(n)$$ acts transitively on such spheres for $$n \ge 2$$. This means there exists a rotation matrix $$Q \in SO(n)$$ such that $$y = Qx$$.
-        By the assumed rotational invariance of $$f$$:
-        $$f(y) = f(Qx) = f(x)$$
-        This shows that the value of $$f(x)$$ is the same for all vectors $$x$$ having the same Euclidean norm $$r$$. Therefore, $$f(x)$$ depends only on $$\Vert x \Vert_2$$. We can define a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ by setting $$g(r) = f(x_0)$$ for any chosen vector $$x_0$$ such that $$\Vert x_0 \Vert_2 = r$$ (for example, $$x_0 = (r, 0, \ldots, 0)^\top$$). This function $$g$$ is well-defined. Then, for any $$x \in \mathbb{R}^n$$, $$f(x) = g(\Vert x \Vert_2)$$.
+    *   **Case $$n \ge 2$$:** Let $$y \in \mathbb{R}^n$$ be any vector with $$\Vert y \Vert_2 = r$$. Since $$SO(n)$$ acts transitively on spheres for $$n \ge 2$$, there exists $$Q \in SO(n)$$ such that $$y = Qx$$. By rotational invariance, $$f(y) = f(Qx) = f(x)$$. Thus, $$f(x)$$ depends only on $$\Vert x \Vert_2$$. We can define $$g(r) = f(x_0)$$ for any fixed $$x_0$$ with $$\Vert x_0 \Vert_2 = r$$ (e.g., $$x_0 = (r, 0, \ldots, 0)^\top$$). Then $$f(x) = g(\Vert x \Vert_2)$$.
+    *   **Case $$n=1$$:** $$SO(1)=\{[1]\}$$. Rotational invariance $$f(1 \cdot x_1) = f(x_1)$$ holds for any function $$f:\mathbb{R} \to \mathbb{R}$$. For $$f(x_1) = g(\Vert x_1 \Vert_2) = g(\vert x_1 \vert)$$ to be true, $$f$$ must be an even function, as $$g(\vert -x_1 \vert) = g(\vert x_1 \vert)$$ implies $$f(-x_1)=f(x_1)$$.
 
-    *   **Case $$n=1$$:**
-        The space is $$\mathbb{R}$$. The special orthogonal group $$SO(1)$$ consists only of the identity transformation, $$Q = [1]$$. The condition for rotational invariance, $$f(Qx_1) = f(x_1)$$, becomes $$f(1 \cdot x_1) = f(x_1)$$. This equation is true for *any* function $$f: \mathbb{R} \to \mathbb{R}$$.
-        For the theorem's conclusion, $$f(x_1) = g(\Vert x_1 \Vert_2) = g(\vert x_1 \vert)$$, to hold, it must be that $$f(x_1) = f(-x_1)$$ for all $$x_1 \in \mathbb{R}$$. This is because if $$f(x_1) = g(\vert x_1 \vert)$$, then $$f(-x_1) = g(\vert -x_1 \vert) = g(\vert x_1 \vert) = f(x_1)$$. Thus, for $$n=1$$, an $$SO(1)$$-invariant function is a function of its Euclidean norm if and only if it is an even function. (As noted below, if $$f$$ is a norm, this even property is always satisfied).
-
-Combining these parts, a rotationally invariant function $$f$$ can be written as $$f(x) = g(\Vert x \Vert_2)$$ (with the caveat for $$n=1$$ that $$f$$ must be even, which is implicitly handled if rotational invariance is strengthened or understood in context, e.g. for norms).
+Thus, a rotationally invariant $$f$$ has the form $$f(x) = g(\Vert x \Vert_2)$$, provided $$f$$ is even if $$n=1$$.
 </details>
 
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
 **Corollary 1.1.** Rotationally Invariant Norms
 </div>
-If a function $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is a **norm** and is **rotationally invariant**, then it must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm. That is, there exists a constant $$c > 0$$ such that:
+If a function $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is a **norm** and is **rotationally invariant**, then it must be a positive scalar multiple of the Euclidean norm:
 
 $$
-\Vert x \Vert = c \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n
+\Vert x \Vert = c \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n, \text{ for some constant } c > 0
 $$
-
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof of Corollary 1.1.**
 </summary>
-Let $$\Vert \cdot \Vert$$ be a norm on $$\mathbb{R}^n$$ that is rotationally invariant (i.e., $$\Vert Qx \Vert = \Vert x \Vert$$ for all $$Q \in SO(n)$$ and $$x \in \mathbb{R}^n$$).
-
-1.  **Apply Theorem 1:**
-    Since $$\Vert \cdot \Vert$$ is a rotationally invariant function, by Theorem 1, there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that $$\Vert x \Vert = g(\Vert x \Vert_2)$$ for all $$x \in \mathbb{R}^n$$.
-    For the case $$n=1$$: A norm $$\Vert \cdot \Vert$$ on $$\mathbb{R}$$ must satisfy absolute homogeneity, so $$\Vert -x_1 \Vert = \vert -1 \vert \Vert x_1 \Vert = \Vert x_1 \Vert$$. This means any norm on $$\mathbb{R}$$ is an even function. Thus, the condition from Theorem 1 for $$n=1$$ is met, and we can write $$\Vert x_1 \Vert = g(\vert x_1 \vert) = g(\Vert x_1 \Vert_2)$$.
-
-2.  **Use Norm Properties:**
-    We now use the absolute homogeneity property of the norm $$\Vert \cdot \Vert$$: For any $$x \in \mathbb{R}^n$$ and any scalar $$\alpha \in \mathbb{R}$$, $$\Vert \alpha x \Vert = \vert \alpha \vert \Vert x \Vert$$.
-    Substituting the form from Theorem 1:
-
-    $$
-    g(\Vert \alpha x \Vert_2) = \vert \alpha \vert g(\Vert x \Vert_2)
-    $$
-
-    Since $$\Vert \alpha x \Vert_2 = \vert \alpha \vert \Vert x \Vert_2$$ (a property of the $$\ell_2$$-norm), we have:
-
-    $$
-    g(\vert \alpha \vert \Vert x \Vert_2) = \vert \alpha \vert g(\Vert x \Vert_2)
-    $$
-
-    Let $$r = \Vert x \Vert_2 \ge 0$$. Let $$\lambda = \vert \alpha \vert \ge 0$$. The equation becomes:
-
-    $$
-    g(\lambda r) = \lambda g(r) \quad \text{for all } \lambda \ge 0, r \ge 0
-    $$
-
-    This is a form of Cauchy's functional equation for non-negative real numbers.
-    If $$r > 0$$, we can set $$r=1$$ (corresponding to any vector on the $$\ell_2$$-unit sphere). Then for any $$\lambda \ge 0$$:
-
-    $$
-    g(\lambda) = \lambda g(1)
-    $$
-
-    Let $$c = g(1)$$. Then $$g(\lambda) = c\lambda$$ for all $$\lambda \ge 0$$.
-    So, for any $$x \in \mathbb{R}^n$$, if $$\Vert x \Vert_2 = r \ge 0$$, then
-
-    $$
-    \Vert x \Vert = g(\Vert x \Vert_2) = g(r) = cr = c \Vert x \Vert_2
-    $$
-
-3.  **Determine the constant $$c$$:**
-    The constant $$c = g(1)$$. Since $$g(1) = \Vert e_1 \Vert$$ (where $$e_1$$ is the first standard basis vector, $$\Vert e_1 \Vert_2 = 1$$), and $$\Vert \cdot \Vert$$ is a norm, we must have $$\Vert e_1 \Vert > 0$$ because $$e_1 \ne \mathbf{0}$$ (by positive definiteness of norms). Thus, $$c > 0$$.
-
-4.  **Verify other norm properties:**
-    The function $$\Vert x \Vert = c \Vert x \Vert_2$$ with $$c > 0$$ satisfies all norm axioms because $$\Vert \cdot \Vert_2$$ is a norm:
-    *   Non-negativity: $$\Vert x \Vert = c \Vert x \Vert_2 \ge 0$$ since $$c>0$$ and $$\Vert x \Vert_2 \ge 0$$.
-    *   Positive definiteness: $$\Vert x \Vert = c \Vert x \Vert_2 = 0$$ iff $$\Vert x \Vert_2 = 0$$ (since $$c>0$$) iff $$x = \mathbf{0}$$.
-    *   Absolute homogeneity: $$\Vert \alpha x \Vert = c \Vert \alpha x \Vert_2 = c \vert \alpha \vert \Vert x \Vert_2 = \vert \alpha \vert (c \Vert x \Vert_2) = \vert \alpha \vert \Vert x \Vert$$.
-    *   Triangle inequality: $$\Vert x+y \Vert = c \Vert x+y \Vert_2 \le c(\Vert x \Vert_2 + \Vert y \Vert_2)$$ (by triangle inequality for $$\ell_2$$-norm) $$= c\Vert x \Vert_2 + c\Vert y \Vert_2 = \Vert x \Vert + \Vert y \Vert$$.
-
-Thus, any rotationally invariant norm on $$\mathbb{R}^n$$ must be of the form $$c \Vert x \Vert_2$$ for some constant $$c > 0$$.
+Let $$\Vert \cdot \Vert$$ be a rotationally invariant norm.
+1.  **Apply Theorem 1:** Since $$\Vert \cdot \Vert$$ is a norm, it is an even function for $$n=1$$ (as $$\Vert -x_1 \Vert = \vert -1 \vert \Vert x_1 \Vert = \Vert x_1 \Vert$$). Thus, by Theorem 1, there is a $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that $$\Vert x \Vert = g(\Vert x \Vert_2)$$.
+2.  **Use Absolute Homogeneity:** For $$\alpha \in \mathbb{R}$$, $$\Vert \alpha x \Vert = \vert \alpha \vert \Vert x \Vert$$. So, $$g(\Vert \alpha x \Vert_2) = \vert \alpha \vert g(\Vert x \Vert_2)$$. Since $$\Vert \alpha x \Vert_2 = \vert \alpha \vert \Vert x \Vert_2$$, we get $$g(\vert \alpha \vert \Vert x \Vert_2) = \vert \alpha \vert g(\Vert x \Vert_2)$$. Let $$r = \Vert x \Vert_2 \ge 0$$ and $$\lambda = \vert \alpha \vert \ge 0$$. Then $$g(\lambda r) = \lambda g(r)$$ for all $$\lambda, r \ge 0$$.
+    For $$r > 0$$, set $$r=1$$. Then $$g(\lambda) = \lambda g(1)$$ for $$\lambda \ge 0$$. Let $$c = g(1)$$. So $$g(\lambda) = c\lambda$$.
+    If $$r=0$$, then $$x=\mathbf{0}$$. $$\Vert \mathbf{0} \Vert = 0$$ and $$g(\Vert \mathbf{0} \Vert_2) = g(0)$$. The relation $$g(0 \cdot r) = 0 \cdot g(r)=0$$ implies $$g(0)=0$$. So $$g(\lambda)=c\lambda$$ holds for all $$\lambda \ge 0$$.
+    Thus, $$\Vert x \Vert = g(\Vert x \Vert_2) = c \Vert x \Vert_2$$.
+3.  **Determine $$c$$:** Since $$\Vert \cdot \Vert$$ is a norm, for any $$x \ne \mathbf{0}$$, $$\Vert x \Vert > 0$$. So $$c \Vert x \Vert_2 > 0$$. This implies $$c > 0$. (For example, $$c=g(1)=\Vert e_1 \Vert > 0$$).
+The function $$x \mapsto c \Vert x \Vert_2$$ with $$c>0$$ satisfies all norm axioms as $$\Vert \cdot \Vert_2$$ does.
 </details>
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
-**Theorem 2.** Orthogonal Invariance of Euclidean-derived Norms
+**Theorem 2.** Orthogonal Invariance Implies Rotational Invariance
 </div>
-The Euclidean norm ($$\ell_2$$-norm) is **orthogonally invariant**. That is, for any orthogonal matrix $$Q \in O(n)$$ (where $$O(n)$$ is the orthogonal group, whose elements satisfy $$Q^\top Q = QQ^\top = I$$) and any vector $$x \in \mathbb{R}^n$$:
+The Euclidean norm ($$\ell_2$$-norm) is **orthogonally invariant**: for any orthogonal matrix $$Q \in O(n)$$ (satisfying $$Q^\top Q = I$$) and any $$x \in \mathbb{R}^n$$,
 
 $$
 \Vert Qx \Vert_2 = \Vert x \Vert_2
 $$
 
-Consequently, any norm of the form $$\Vert x \Vert = c \Vert x \Vert_2$$ with $$c > 0$$ (which, by Corollary 1.1, includes all rotationally invariant norms) is also orthogonally invariant.
+Consequently, any norm of the form $$\Vert x \Vert = c \Vert x \Vert_2$$ with $$c > 0$$ is also orthogonally invariant. This implies that any rotationally invariant norm is also orthogonally invariant.
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof of Theorem 2.**
 </summary>
-An orthogonal matrix $$Q \in O(n)$$ is defined by the property $$Q^\top Q = I$$ (or equivalently, $$QQ^\top = I$$). Orthogonal transformations preserve the standard dot product:
-$$(Qx)^\top (Qy) = x^\top Q^\top Q y = x^\top I y = x^\top y$$
-The Euclidean norm is defined as $$\Vert x \Vert_2 = \sqrt{x^\top x}$$.
-Therefore, for any $$Q \in O(n)$$ and any $$x \in \mathbb{R}^n$$:
+The Euclidean norm squared is $$\Vert x \Vert_2^2 = x^\top x$$. For $$Q \in O(n)$$,
+$$\Vert Qx \Vert_2^2 = (Qx)^\top (Qx) = x^\top Q^\top Q x = x^\top I x = x^\top x = \Vert x \Vert_2^2$$.
+Since norms are non-negative, $$\Vert Qx \Vert_2 = \Vert x \Vert_2$$.
 
-$$
-\Vert Qx \Vert_2 = \sqrt{(Qx)^\top (Qx)}
-$$
-
-Using the dot product preservation property with $$y=x$$:
-$$(Qx)^\top (Qx) = x^\top x$$
-So,
-
-$$
-\Vert Qx \Vert_2 = \sqrt{x^\top x} = \Vert x \Vert_2
-$$
-
-Thus, the Euclidean norm is orthogonally invariant. This means it is invariant under all transformations in $$O(n)$$, which includes rotations ($$Q \in SO(n) \subset O(n)$$) as well as reflections (orthogonal transformations with $$\det(Q) = -1$$).
-
-Now, consider a norm $$\Vert \cdot \Vert$$ on $$\mathbb{R}^n$$ such that $$\Vert x \Vert = c \Vert x \Vert_2$$ for some constant $$c > 0$$.
-For any $$Q \in O(n)$$:
-
-$$
-\Vert Qx \Vert = c \Vert Qx \Vert_2
-$$
-
-Since we just showed $$\Vert Qx \Vert_2 = \Vert x \Vert_2$$ for $$Q \in O(n)$$,
-
-$$
-\Vert Qx \Vert = c \Vert x \Vert_2
-$$
-
-And since $$\Vert x \Vert = c \Vert x \Vert_2$$, we have:
-
-$$
-\Vert Qx \Vert = \Vert x \Vert
-$$
-
-This shows that any norm that is a positive scalar multiple of the Euclidean norm is orthogonally invariant.
-By Corollary 1.1, any rotationally ($$SO(n)$$-) invariant norm must be of the form $$c \Vert x \Vert_2$$ with $$c>0$$. Therefore, any rotationally invariant norm is automatically orthogonally ($$O(n)$$-) invariant.
+If a norm is $$\Vert x \Vert = c \Vert x \Vert_2$$ for $$c > 0$$, then
+$$\Vert Qx \Vert = c \Vert Qx \Vert_2 = c \Vert x \Vert_2 = \Vert x \Vert$$.
+So, such norms are orthogonally invariant.
+By Corollary 1.1, any rotationally invariant norm is of the form $$c \Vert x \Vert_2$$ ($$c>0$$). Therefore, any rotationally invariant norm is also orthogonally invariant.
 </details>
 
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
-**Corollary 2.1.** Uniqueness of RMS norm under Rotational, Orthogonal, and Dimensional Invariance
+**Corollary 2.1.** Uniqueness of RMS Norm Family
 </div>
-The RMS norm, defined as $$\Vert x \Vert_{\mathrm{RMS}} = \frac{\Vert x \Vert_2}{\sqrt{n}}$$, is a positive scalar multiple of the Euclidean norm (with scaling factor $$c = 1/\sqrt{n} > 0$$). Therefore:
-1.  By Corollary 1.1, the RMS norm is rotationally invariant.
-2.  By Theorem 2, the RMS norm is also orthogonally invariant.
+The RMS norm, $$\Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$, is a positive scalar multiple of the $$\ell_2$$-norm. Therefore, it is rotationally and orthogonally invariant.
 
-Furthermore, consider a function $$\mathcal{N}$$ that defines a norm $$\mathcal{N}_n(\cdot)$$ on each space $$\mathbb{R}^n$$ (for $$n \ge 1$$). If this family of norms satisfies:
-*   **Rotational Invariance:** Each norm $$\mathcal{N}_n(\cdot)$$ is rotationally invariant on $$\mathbb{R}^n$$ (i.e., $$\mathcal{N}_n(Qx) = \mathcal{N}_n(x)$$ for all $$Q \in SO(n)$$ and all $$x \in \mathbb{R}^n$$).
-*   **Dimensional Invariance:** The family is *dimensionally invariant*. This means that for vectors $$X^{(n)} \in \mathbb{R}^n$$ whose components $$X_i$$ are i.i.d. random variables with zero mean and unit variance (e.g., $$X_i \sim \mathcal{N}(0,1)$$), the expected value $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ is a constant $$K > 0$$ that is independent of the dimension $$n$$.
+Furthermore, consider a family of norms $$\{\mathcal{N}_n(\cdot)\}_{n \ge 1}$$, where each $$\mathcal{N}_n: \mathbb{R}^n \to \mathbb{R}$$ is a norm on $$\mathbb{R}^n$$. If this family satisfies:
+1.  **Rotational Invariance:** Each $$\mathcal{N}_n(\cdot)$$ is rotationally invariant.
+2.  **Dimensional Normalization:** For a specific class of random vectors $$X^{(n)} \in \mathbb{R}^n$$ (e.g., components $$X_i$$ are i.i.d. with zero mean, unit variance, and $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}] = 1$$), the expected value $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ is a constant $$K > 0$$ independent of $$n$.
 
-Then, each $$\mathcal{N}_n(x)$$ must be a positive scalar multiple of the RMS norm for $$x \in \mathbb{R}^n$$. Specifically, for any $$n$$ and any $$x \in \mathbb{R}^n$$:
-
-$$
-\mathcal{N}_n(x) = K' \cdot \frac{\Vert x \Vert_2}{\sqrt{n}} = K' \cdot \Vert x \Vert_{\mathrm{RMS}}
-$$
-
-for some constant $$K' > 0$$ (related to $$K$$). If, by convention or normalization, this constant $$K'$$ is 1 (e.g., if the dimensional invariance is specifically $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$ for a class of test random vectors where $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}] = 1$$), then the RMS norm family is the **unique** family of norms satisfying these conditions of rotational (hence orthogonal) and dimensional invariance.
+Then, each norm $$\mathcal{N}_n(x)$$ must be of the form $$K \cdot \Vert x \Vert_{\mathrm{RMS}}$$. If $$K=1$$, the RMS norm family is the unique family of norms satisfying these conditions.
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof of Corollary 2.1.**
 </summary>
-The first part, stating that the RMS norm is rotationally and orthogonally invariant, follows directly from its definition. The RMS norm is $$\Vert x \Vert_{\mathrm{RMS}} = (1/\sqrt{n}) \Vert x \Vert_2$$. Since $$1/\sqrt{n} > 0$$, Corollary 1.1 implies it is rotationally invariant, and Theorem 2 implies it is orthogonally invariant.
+The RMS norm is $$(1/\sqrt{n})\Vert x \Vert_2$$. Since $$1/\sqrt{n}>0$$, it's rotationally invariant by Corollary 1.1, and orthogonally invariant by Theorem 2.
 
-For the second part, let $$\mathcal{N}$$ be a function defining a family of norms $$\mathcal{N}_n(\cdot)$$ on each $$\mathbb{R}^n$$ ($$n \ge 1$$).
-
-1.  **Implication of Rotational Invariance:**
-    By **Corollary 1.1**, since each norm $$\mathcal{N}_n(\cdot)$$ in the family is rotationally invariant (invariant under $$SO(n)$$), it must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm. Thus, for each dimension $$n$$, there exists a constant $$c_n > 0$$ such that:
-    $$ \mathcal{N}_n(x) = c_n \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n $$
-    By Theorem 2, this implies that each $$\mathcal{N}_n(\cdot)$$ is also orthogonally invariant.
-
-2.  **Application of Dimensional Invariance:**
-    The family is also dimensionally invariant. This means for vectors $$X^{(n)} \in \mathbb{R}^n$$ with i.i.d. components $$X_i$$ having zero mean and unit variance, the expected value $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ is a constant $$K > 0$$ that is independent of $$n$$.
-    Substituting the form from (1):
-    $$ \mathbb{E}[c_n \Vert X^{(n)} \Vert_2] = K $$
-    Since $$c_n$$ is a constant for a given $$n$$ (but may depend on $$n$$), this implies:
-    $$ c_n \mathbb{E}[\Vert X^{(n)} \Vert_2] = K $$
-
-3.  **Relating to RMS Norm Property:**
-    For the specified random vectors $$X^{(n)}$$, we consider their expected RMS norm. Let $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}] = \mathbb{E}[\Vert X^{(n)} \Vert_2 / \sqrt{n}] = C_X(n)$$.
-    The factor $$C_X(n)$$ depends on the distribution of $$X_i$$ and $$n$$. For many common distributions (like standard normal), $$C_X(n) \to 1$$ as $$n \to \infty$$. The concept of "dimensional invariance" for RMS-like quantities often assumes conditions where $$C_X(n)$$ is either exactly 1 or treated as 1 for the purpose of defining the invariance.
-    From $$\mathbb{E}[\Vert X^{(n)} \Vert_2 / \sqrt{n}] = C_X(n)$$, we have $$\mathbb{E}[\Vert X^{(n)} \Vert_2] = C_X(n) \sqrt{n}$$.
-    Substituting this into the equation from (2):
-    $$ c_n (C_X(n) \sqrt{n}) = K $$
-    Thus, $$c_n = \frac{K}{C_X(n) \sqrt{n}}$$.
-
-4.  **Final Form of the Norm:**
-    The norm $$\mathcal{N}_n(x)$$ takes the form:
-    $$ \mathcal{N}_n(x) = c_n \Vert x \Vert_2 = \left( \frac{K}{C_X(n) \sqrt{n}} \right) \Vert x \Vert_2 = \frac{K}{C_X(n)} \left( \frac{\Vert x \Vert_2}{\sqrt{n}} \right) = \frac{K}{C_X(n)} \cdot \Vert x \Vert_{\mathrm{RMS}} $$
-    Let $$K' = K/C_X(n)$$. For $$\mathcal{N}_n$$ to be "dimensionally invariant" in a strong sense where the scaling relative to RMS norm is fixed across dimensions, $$K'$$ must be a constant independent of $$n$$. This occurs if $$C_X(n)$$ is itself independent of $$n$$ (or if the definition of dimensional invariance implies $$K$$ absorbs this dependence, e.g., by defining it in a limit or for specific distributions where $$C_X(n)$$ is stable).
-    A common interpretation for RMS-like quantities is that "dimensional invariance" fixes the scaling such that $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ matches the behavior of $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}]$$ up to a single constant. If we assume ideal conditions where $$C_X(n)=1$$ (as suggested by the property $$\mathbb{E}\Vert x \Vert_{\mathrm{RMS}} \approx 1$$ for the RMS norm itself), then $$K' = K$$.
-    Thus, $$\mathcal{N}_n(x) = K' \Vert x \Vert_{\mathrm{RMS}}$$ for a single constant $$K' > 0$$.
-
-5.  **Normalization and Uniqueness:**
-    If, by convention or normalization, the constant $$K'$$ is 1 (e.g., if the dimensional invariance condition is specifically $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$ and this is achieved with random vectors for which $$C_X(n)=1$$), then:
-    $$ \mathcal{N}_n(x) = \Vert x \Vert_{\mathrm{RMS}} $$
-    This shows that a family of norms satisfying rotational invariance (and thus orthogonal invariance) and the specified type of dimensional invariance must be the RMS norm family, up to a single positive scaling constant $$K'$$ across all dimensions. If this scaling constant is fixed (e.g., to 1 by the normalization inherent in the definition of dimensional invariance), then the family is unique.
+For the second part:
+1.  **Rotational Invariance:** By Corollary 1.1, each $$\mathcal{N}_n(x) = c_n \Vert x \Vert_2$$ for some $$c_n > 0$$.
+2.  **Dimensional Normalization:** We are given $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = K$$ for all $$n$$.
+    Substituting the form from (1): $$ \mathbb{E}[c_n \Vert X^{(n)} \Vert_2] = c_n \mathbb{E}[\Vert X^{(n)} \Vert_2] = K $$.
+    The definition of the RMS norm is $$\Vert X^{(n)} \Vert_{\mathrm{RMS}} = \Vert X^{(n)} \Vert_2 / \sqrt{n}$$.
+    The condition on the random vectors states $$\mathbb{E}[\Vert X^{(n)} \Vert_{\mathrm{RMS}}] = 1$$, so $$\mathbb{E}[\Vert X^{(n)} \Vert_2 / \sqrt{n}] = 1$$, which means $$\mathbb{E}[\Vert X^{(n)} \Vert_2] = \sqrt{n}$$.
+    Plugging this into the equation for $$K$$: $$c_n \sqrt{n} = K$$.
+    So, $$c_n = K / \sqrt{n}$$.
+3.  **Form of the Norm:** Therefore, $$\mathcal{N}_n(x) = (K/\sqrt{n}) \Vert x \Vert_2 = K \cdot (\Vert x \Vert_2 / \sqrt{n}) = K \cdot \Vert x \Vert_{\mathrm{RMS}}$$.
+    If $$K=1$$ (e.g., if the normalization condition is $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$), then $$\mathcal{N}_n(x) = \Vert x \Vert_{\mathrm{RMS}}$$. This establishes uniqueness under these specific conditions.
 </details>
 
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
-**Tip.** When to reach for the vector RMS norm
+**Tip.** When to use the vector RMS norm
 </div>
-Use the vector $$\Vert \cdot \Vert_{\mathrm{RMS}}$$ whenever you need a scale for vectors that is *simultaneously* rotationally symmetric (and thus orthogonally symmetric) and independent of vector length—e.g.
-when comparing activations from layers of different widths or designing width-robust regularizers for activations.
+Employ the vector $$\Vert \cdot \Vert_{\mathrm{RMS}}$$ when a scale for vectors is needed that is simultaneously rotationally symmetric (thus orthogonally symmetric) and normalized for vector dimension. This is useful, for example, when comparing activations from neural network layers of different widths or designing width-robust regularizers.
 </blockquote>
 
 #### Minimal Axiomatic Characterizations of the RMS norm
 
-The RMS norm, being a scaled version of the Euclidean ($$\ell_2$$) norm ($$\Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$), can be uniquely identified by various sets of minimal axioms. Typically, these involve axioms that characterize the Euclidean norm up to a positive scalar constant, plus one additional normalization condition to fix this constant to $$1/\sqrt{n}$$. Below are several such characterizations.
+The RMS norm, as $$\frac{1}{\sqrt{n}}\Vert x \Vert_2$$, can be uniquely identified by various sets of axioms. These typically involve axioms characterizing the Euclidean norm up to a positive scalar, plus a normalization condition to fix this scalar to $$1/\sqrt{n}$$.
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
 **Theorem 3 (Characterization 1: Parallelogram Law and Normalization).**
 </div>
-A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm, $$f(x) = \Vert x \Vert_{\mathrm{RMS}} = \sqrt{\frac{1}{n}\sum_{i=1}^n x_i^2}$$, if and only if it satisfies the following properties:
-1.  **Nondegeneracy:** $$f(x) \ge 0$$ for all $$x \in \mathbb{R}^n$$, and $$f(x)=0 \iff x=\mathbf{0}$$.
-2.  **Absolute homogeneity:** $$f(\lambda x) = \vert\lambda\vert f(x)$$ for all $$\lambda \in \mathbb{R}$$ and $$x \in \mathbb{R}^n$$.
+A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it satisfies:
+1.  **Nondegeneracy:** $$f(x) \ge 0$$, and $$f(x)=0 \iff x=\mathbf{0}$$.
+2.  **Absolute homogeneity:** $$f(\lambda x) = \vert\lambda\vert f(x)$$ for all $$\lambda \in \mathbb{R}, x \in \mathbb{R}^n$$.
 3.  **Parallelogram identity:** $$f(x+y)^2 + f(x-y)^2 = 2f(x)^2 + 2f(y)^2$$ for all $$x,y \in \mathbb{R}^n$$.
-4.  **Normalization on standard basis:** $$f(e_i) = \frac{1}{\sqrt{n}}$$ for each standard basis vector $$e_i=(0,\dots,1,\dots,0)$$.
+4.  **Normalization on standard basis:** $$f(e_i) = \frac{1}{\sqrt{n}}$$ for each standard basis vector $$e_i$$.
+(Implicitly, for $$f$$ to be a norm from (1)-(3), the triangle inequality must also hold, which it does if these conditions ensure it's derived from an inner product).
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof of Theorem 3.**
 </summary>
-($$\Rightarrow$$) **Necessity:** We show that $$\Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$ satisfies the axioms.
-1.  **Nondegeneracy:** $$\Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert x \Vert_2 \ge 0$$ since $$\Vert x \Vert_2 \ge 0$$ and $$\sqrt{n}>0$$. Also, $$\Vert x \Vert_{\mathrm{RMS}} = 0 \iff \Vert x \Vert_2 = 0 \iff x = \mathbf{0}$$. This holds.
-2.  **Absolute homogeneity:** $$\Vert \lambda x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert \lambda x \Vert_2 = \frac{1}{\sqrt{n}}\vert\lambda\vert \Vert x \Vert_2 = \vert\lambda\vert \left(\frac{1}{\sqrt{n}}\Vert x \Vert_2\right) = \vert\lambda\vert \Vert x \Vert_{\mathrm{RMS}}$$. This holds.
-3.  **Parallelogram identity:** The RMS norm is derived from the inner product $$\langle x, y \rangle_{\text{scaled}} = \frac{1}{n} x^\top y$$, since $$\Vert x \Vert_{\mathrm{RMS}}^2 = \frac{1}{n} x^\top x = \langle x,x \rangle_{\text{scaled}}$$. Any norm derived from an inner product satisfies the parallelogram law. Specifically:
-
-    $$
-    \begin{aligned}
-    f(x+y)^2 + f(x-y)^2 &= \frac{1}{n}\Vert x+y \Vert_2^2 + \frac{1}{n}\Vert x-y \Vert_2^2 \\
-    &= \frac{1}{n} (\Vert x+y \Vert_2^2 + \Vert x-y \Vert_2^2) \\
-    &= \frac{1}{n} (2\Vert x \Vert_2^2 + 2\Vert y \Vert_2^2) \quad (\text{by parallelogram law for } \Vert\cdot\Vert_2) \\
-    &= 2\left(\frac{1}{n}\Vert x \Vert_2^2\right) + 2\left(\frac{1}{n}\Vert y \Vert_2^2\right) \\
-    &= 2f(x)^2 + 2f(y)^2.
-    \end{aligned}
-    $$
-
-    This holds.
-4.  **Normalization on standard basis:** For a standard basis vector $$e_i$$, $$\Vert e_i \Vert_2 = 1$$. So, $$\Vert e_i \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert e_i \Vert_2 = \frac{1}{\sqrt{n}} \cdot 1 = \frac{1}{\sqrt{n}}$$. This holds.
-All axioms are satisfied by the RMS norm.
+($$\Rightarrow$$) **Necessity:** The RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$.
+1.  **Nondegeneracy** and (2) **Absolute homogeneity** are standard for norms and hold for $$f(x)$$.
+3.  **Parallelogram identity:** $$\Vert \cdot \Vert_2$$ satisfies this identity. Scaling by $$1/\sqrt{n}$$ preserves it:
+    $$ f(x+y)^2 + f(x-y)^2 = \frac{1}{n}(\Vert x+y \Vert_2^2 + \Vert x-y \Vert_2^2) = \frac{1}{n}(2\Vert x \Vert_2^2 + 2\Vert y \Vert_2^2) = 2f(x)^2 + 2f(y)^2 $$.
+4.  **Normalization:** $$f(e_i) = \frac{1}{\sqrt{n}}\Vert e_i \Vert_2 = \frac{1}{\sqrt{n}} \cdot 1 = \frac{1}{\sqrt{n}}$$.
+All axioms hold for the RMS norm.
 
 ($$\Leftarrow$$) **Sufficiency:** Assume $$f$$ satisfies axioms (1)-(4).
-*   The Jordan-von Neumann theorem states that a norm (a function satisfying (1) Nondegeneracy, (2) Absolute homogeneity, and the triangle inequality) satisfies the parallelogram identity (3) if and only if it arises from an inner product. That is, $$f(x)^2 = \langle x, x \rangle_S$$ for some inner product $$\langle u, v \rangle_S = u^\top S v$$ where $$S$$ is a symmetric positive-definite matrix. Thus, $$f(x) = \sqrt{x^\top S x}$$.
-*   It's a standard result in functional analysis that if a norm arises from an inner product and satisfies certain symmetry conditions (often implied or explicitly stated, like rotational invariance), then this inner product must be a scalar multiple of the standard dot product, i.e., $$S = c^2 I$$ for some $$c>0$$. Thus, $$f(x) = \sqrt{c^2 x^\top I x} = c \Vert x \Vert_2$$. (The properties (1)+(2)+(3) for a function on $$\mathbb{R}^n$$ are sufficient to establish $$f(x) = c\Vert x \Vert_2$$ for some $$c>0$$.)
-*   Given $$f(x) = c \Vert x \Vert_2$$ for some constant $$c > 0$$.
-*   Now, apply axiom (4): $$f(e_i) = \frac{1}{\sqrt{n}}$$ for any standard basis vector $$e_i$$.
-    Substituting $$x=e_i$$ into $$f(x) = c \Vert x \Vert_2$$:
+*   Axioms (1), (2), and (3) (along with the triangle inequality, which makes $$f$$ a norm) imply by the Jordan-von Neumann theorem that $$f(x)^2$$ arises from an inner product, i.e., $$f(x)^2 = \langle x, x \rangle_S$$ for some inner product $$\langle u, v \rangle_S = u^\top S v$$, where $$S$$ is a symmetric positive-definite matrix. So $$f(x) = \sqrt{x^\top S x}$$.
+*   For $$S$$ to be a scalar multiple of the identity matrix (i.e., $$S=kI$$), an additional symmetry assumption (like rotational invariance or specific basis properties) is generally needed. If such symmetry is assumed (e.g., if the standard basis $$e_i$$ are orthogonal with respect to $$\langle \cdot, \cdot \rangle_S$$ and $$\langle e_i, e_i \rangle_S$$ is constant), then $$S=kI$$ for some $$k>0$$. Then $$f(x) = \sqrt{k} \Vert x \Vert_2$$. Let $$c=\sqrt{k}$$.
+*   With $$f(x) = c \Vert x \Vert_2$$ (assuming $$S=c^2I$$ as discussed), apply axiom (4): $$f(e_i) = c \Vert e_i \Vert_2 = c \cdot 1 = c$$.
+*   From axiom (4), $$f(e_i) = \frac{1}{\sqrt{n}}$$. So, $$c = \frac{1}{\sqrt{n}}$$.
+*   Thus, $$f(x) = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$.
 
-    $$
-    f(e_i) = c \Vert e_i \Vert_2
-    $$
-
-    Since $$\Vert e_i \Vert_2 = 1$$, we have $$f(e_i) = c \cdot 1 = c$$.
-    From axiom (4), $$f(e_i) = \frac{1}{\sqrt{n}}$$.
-    Therefore, $$c = \frac{1}{\sqrt{n}}$$.
-*   So, $$f(x) = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \sqrt{\frac{1}{n}\sum_{i=1}^n x_i^2} = \Vert x \Vert_{\mathrm{RMS}}$$.
-This completes the proof.
+<div class="box-info" markdown="1">
+**Note on Theorem 3:** The step from $$f(x)^2 = x^\top S x$$ to $$f(x)=c\Vert x \Vert_2$$ typically requires an assumption like rotational invariance (Theorem 4) or symmetry across coordinates (Theorem 6, implying $$S_{ii}$$ are equal and $$S_{ij}=0$$ for $$i \neq j$$). Theorem 3 as stated relies on this step being inferable, or on an implicit choice of "standard" inner product structure.
+</div>
 </details>
 
 <blockquote class="box-theorem" markdown="1">
@@ -455,10 +319,10 @@ This completes the proof.
 **Theorem 4 (Characterization 2: Orthogonal Invariance and Normalization).**
 </div>
 A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it satisfies:
-1.  **Orthogonal (rotational) invariance:** $$f(Qx) = f(x)$$ for all $$Q \in O(n)$$ and $$x \in \mathbb{R}^n$$.
+1.  **Orthogonal invariance:** $$f(Qx) = f(x)$$ for all $$Q \in O(n)$$ and $$x \in \mathbb{R}^n$$.
 2.  **Absolute homogeneity:** $$f(\lambda x) = \vert\lambda\vert f(x)$$ for all $$\lambda \in \mathbb{R}, x \in \mathbb{R}^n$$.
 3.  **Nondegeneracy:** $$f(x) \ge 0$$, and $$f(x)=0 \iff x=\mathbf{0}$$.
-4.  **Continuity:** $$f$$ is continuous (e.g., at $$x=\mathbf{0}$$).
+4.  **Continuity:** $$f$$ is continuous.
 5.  **Normalization on a basis vector:** $$f(e_1) = \frac{1}{\sqrt{n}}$$.
 </blockquote>
 
@@ -466,22 +330,20 @@ A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it 
 <summary markdown="1">
 **Proof of Theorem 4.**
 </summary>
-($$\Rightarrow$$) **Necessity:** We show that $$\Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$ satisfies the axioms.
-1.  **Orthogonal invariance:** By Theorem 2, $$\Vert x \Vert_2$$ is orthogonally invariant. Thus, $$\Vert Qx \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert Qx \Vert_2 = \frac{1}{\sqrt{n}}\Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$.
-2.  **Absolute homogeneity:** Verified in Theorem 3.
-3.  **Nondegeneracy:** Verified in Theorem 3.
-4.  **Continuity:** All norms on finite-dimensional vector spaces are continuous. The $$\ell_2$$-norm is continuous, and so is $$\frac{1}{\sqrt{n}}\Vert x \Vert_2$$.
-5.  **Normalization:** $$\Vert e_1 \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert e_1 \Vert_2 = \frac{1}{\sqrt{n}} \cdot 1 = \frac{1}{\sqrt{n}}$$.
-All axioms are satisfied.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$.
+1.  **Orthogonal invariance:** Holds by Theorem 2.
+2.  **Absolute homogeneity & (3) Nondegeneracy:** Verified for Thm 3.
+4.  **Continuity:** Norms on finite-dimensional spaces are continuous. $$\Vert \cdot \Vert_2$$ is continuous, so $$f(x)$$ is.
+5.  **Normalization:** $$f(e_1) = \frac{1}{\sqrt{n}}\Vert e_1 \Vert_2 = \frac{1}{\sqrt{n}}$$.
+All axioms hold.
 
 ($$\Leftarrow$$) **Sufficiency:** Assume $$f$$ satisfies axioms (1)-(5).
-*   Axioms (1) (Orthogonal invariance, which implies rotational invariance as $$SO(n) \subset O(n)$$), (2) (Absolute homogeneity), and (3) (Nondegeneracy) are the conditions for Corollary 1.1, provided $$f$$ is a norm. The triangle inequality, required for $$f$$ to be a norm, can be derived from these properties along with continuity (or it's often included as part of "Nondegeneracy" definition for a norm-like function). A known result states that a function satisfying (1), (2), (3), and (4) (continuity) must be a norm and hence, by Corollary 1.1, $$f(x) = c \Vert x \Vert_2$$ for some constant $$c > 0$$.
-*   Given $$f(x) = c \Vert x \Vert_2$$ for some $$c > 0$$.
-*   Apply axiom (5): $$f(e_1) = \frac{1}{\sqrt{n}}$$.
-    Substituting $$x=e_1$$: $$f(e_1) = c \Vert e_1 \Vert_2 = c \cdot 1 = c$$.
-    Thus, $$c = \frac{1}{\sqrt{n}}$$.
-*   Therefore, $$f(x) = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$.
-This completes the proof.
+*   Axiom (1) (Orthogonal invariance) implies rotational invariance ($$SO(n) \subset O(n)$$). Also, $$f(x)=f(-x)$$ by taking $$Q=-I \in O(n)$$ (if $n$ is odd, $\det(-I)=-1$; if $n$ is even, $\det(-I)=1$, so $-I$ may or may not be in $SO(n)$, but it is always in $O(n)$). So $f$ is even.
+*   By Theorem 1, $$f(x) = g(\Vert x \Vert_2)$$ for some $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$.
+*   Using Axiom (2) (Absolute homogeneity), as in Corollary 1.1, we find $$g(r) = cr$$ for some constant $$c$$. So $$f(x) = c \Vert x \Vert_2$$.
+*   Axiom (3) (Nondegeneracy: $$f(x)>0$$ for $$x \ne \mathbf{0}$$) implies $$c > 0$$. (Continuity, Axiom 4, ensures $$g(r)=cr$$ applies to all real $$r \ge 0$$ rather than just rational multiples).
+*   Axiom (5) (Normalization): $$f(e_1) = c \Vert e_1 \Vert_2 = c \cdot 1 = c$$. Since $$f(e_1) = \frac{1}{\sqrt{n}}$$, we have $$c = \frac{1}{\sqrt{n}}$$.
+*   Thus, $$f(x) = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$. This function is a norm.
 </details>
 
 <blockquote class="box-theorem" markdown="1">
@@ -489,43 +351,29 @@ This completes the proof.
 **Theorem 5 (Characterization 3: Pythagorean Additivity and Normalization).**
 </div>
 A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it satisfies:
-1.  **Nonnegativity / nondegeneracy:** $$f(x) \ge 0$$, and $$f(x)=0 \iff x=\mathbf{0}$$.
+1.  **Nondegeneracy:** $$f(x) \ge 0$$, and $$f(x)=0 \iff x=\mathbf{0}$$.
 2.  **Absolute homogeneity:** $$f(\lambda x) = \vert\lambda\vert f(x)$$.
-3.  **Pythagorean (orthogonal) additivity:** If $$x \perp y$$ (i.e., $$x^\top y = 0$$), then $$f(x+y)^2 = f(x)^2 + f(y)^2$$.
-4.  **Continuity** (e.g., at $$0$$ or everywhere).
-5.  **Normalization:** $$f(e_i) = \frac{1}{\sqrt{n}}$$ for all standard basis vectors $$e_i$$, $$i=1,\dots,n$$.
+3.  **Pythagorean additivity:** If $$x^\top y = 0$$ (standard orthogonality), then $$f(x+y)^2 = f(x)^2 + f(y)^2$$.
+4.  **Continuity:** $$f$$ is continuous.
+5.  **Normalization:** $$f(e_i) = \frac{1}{\sqrt{n}}$$ for all standard basis vectors $$e_i$$.
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof of Theorem 5.**
 </summary>
-($$\Rightarrow$$) **Necessity:** We show $$\Vert x \Vert_{\mathrm{RMS}}$$ satisfies the axioms.
-1.  **Nondegeneracy:** Verified in Theorem 3.
-2.  **Absolute homogeneity:** Verified in Theorem 3.
-3.  **Pythagorean additivity:** Let $$f(x) = \Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$. If $$x \perp y$$, then $$\Vert x+y \Vert_2^2 = \Vert x \Vert_2^2 + \Vert y \Vert_2^2$$.
-
-    $$
-    f(x+y)^2 = \left(\frac{1}{\sqrt{n}}\Vert x+y \Vert_2\right)^2 = \frac{1}{n}\Vert x+y \Vert_2^2 = \frac{1}{n}(\Vert x \Vert_2^2 + \Vert y \Vert_2^2)
-    $$
-
-    $$
-    f(x)^2 + f(y)^2 = \left(\frac{1}{\sqrt{n}}\Vert x \Vert_2\right)^2 + \left(\frac{1}{\sqrt{n}}\Vert y \Vert_2\right)^2 = \frac{1}{n}\Vert x \Vert_2^2 + \frac{1}{n}\Vert y \Vert_2^2 = \frac{1}{n}(\Vert x \Vert_2^2 + \Vert y \Vert_2^2)
-    $$
-
-    Thus, $$f(x+y)^2 = f(x)^2 + f(y)^2$$.
-4.  **Continuity:** Verified in Theorem 4.
-5.  **Normalization:** Verified in Theorem 3.
-All axioms are satisfied.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$.
+1.  Nondegeneracy, (2) Absolute homogeneity, (4) Continuity, (5) Normalization: Verified previously.
+3.  **Pythagorean additivity:** If $$x^\top y=0$$, then $$\Vert x+y \Vert_2^2 = \Vert x \Vert_2^2 + \Vert y \Vert_2^2$$.
+    So, $$f(x+y)^2 = \frac{1}{n}\Vert x+y \All_2^2 = \frac{1}{n}(\Vert x \Vert_2^2 + \Vert y \Vert_2^2) = f(x)^2 + f(y)^2$$.
+All axioms hold.
 
 ($$\Leftarrow$$) **Sufficiency:** Assume $$f$$ satisfies axioms (1)-(5).
-*   A known result states that a function satisfying (1) Nondegeneracy, (2) Absolute homogeneity, (3) Pythagorean additivity for orthogonal vectors (with respect to the standard dot product), and (4) Continuity, must be a positive scalar multiple of the Euclidean norm. That is, $$f(x) = c \Vert x \Vert_2$$ for some constant $$c > 0$$. (The Pythagorean property is key to showing it's an inner product norm based on the standard notion of orthogonality).
-*   Given $$f(x) = c \Vert x \Vert_2$$ for some $$c > 0$$.
-*   Apply axiom (5): $$f(e_i) = \frac{1}{\sqrt{n}}$$ for any $$i$$.
-    $$f(e_i) = c \Vert e_i \Vert_2 = c \cdot 1 = c$$.
-    Thus, $$c = \frac{1}{\sqrt{n}}$$.
-*   Therefore, $$f(x) = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$.
-This completes the proof.
+*   It's a known result that a function satisfying (1)-(4) (Nondegeneracy, Abs. homogeneity, Pythagorean additivity w.r.t standard orthogonality, Continuity) must be a positive scalar multiple of the Euclidean norm: $$f(x) = c \Vert x \Vert_2$$ for some $$c > 0$$. This is because these properties ensure $$f(x)^2$$ defines an inner product compatible with the standard one.
+*   Specifically, repeated use of (3) for an orthonormal basis expansion $$x = \sum x_i e_i$$ gives $$f(x)^2 = \sum f(x_i e_i)^2 = \sum x_i^2 f(e_i)^2$$.
+*   Axiom (5) states $$f(e_i) = \frac{1}{\sqrt{n}}$$. So $$f(e_i)^2 = \frac{1}{n}$$.
+*   Then $$f(x)^2 = \sum x_i^2 \left(\frac{1}{n}\right) = \frac{1}{n} \sum x_i^2 = \frac{1}{n} \Vert x \Vert_2^2$$.
+*   Since $$f(x) \ge 0$$, $$f(x) = \sqrt{\frac{1}{n} \Vert x \Vert_2^2} = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$.
 </details>
 
 <blockquote class="box-theorem" markdown="1">
@@ -535,8 +383,8 @@ This completes the proof.
 A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it satisfies:
 1.  **Nondegeneracy:** $$f(x) \ge 0$$, and $$f(x)=0 \iff x=\mathbf{0}$$.
 2.  **Absolute homogeneity:** $$f(\lambda x) = \vert\lambda\vert f(x)$$.
-3.  **Permutation & sign-flip symmetry:** $$f(x_1,\dots,x_n) = f(\pm x_{\sigma(1)},\dots,\pm x_{\sigma(n)})$$ for any permutation $$\sigma \in S_n$$ and any choice of signs.
-4.  **“Pythagoras” on disjoint supports:** If $$x_i \neq 0 \implies y_i=0$$ for all $$i$$ (meaning $$x$$ and $$y$$ have disjoint support: $$\mathrm{supp}(x) \cap \mathrm{supp}(y) = \emptyset$$), then $$f(x+y)^2 = f(x)^2 + f(y)^2$$.
+3.  **Permutation & sign-flip symmetry:** $$f(x_1,\dots,x_n) = f(\pm x_{\sigma(1)},\dots,\pm x_{\sigma(n)})$$ for any permutation $$\sigma$$ and any choice of signs.
+4.  **Pythagorean additivity on disjoint supports:** If $$\mathrm{supp}(x) \cap \mathrm{supp}(y) = \emptyset$$ (i.e., $$x_i \neq 0 \implies y_i=0$$), then $$f(x+y)^2 = f(x)^2 + f(y)^2$$.
 5.  **Normalization:** $$f(e_i) = \frac{1}{\sqrt{n}}$$ for $$i=1,\dots,n$$.
 </blockquote>
 
@@ -544,84 +392,55 @@ A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it 
 <summary markdown="1">
 **Proof of Theorem 6.**
 </summary>
-($$\Rightarrow$$) **Necessity:** We show $$\Vert x \Vert_{\mathrm{RMS}}$$ satisfies the axioms.
-1.  **Nondegeneracy:** Verified.
-2.  **Absolute homogeneity:** Verified.
-3.  **Permutation & sign-flip symmetry:** $$\Vert (\pm x_{\sigma(1)},\dots,\pm x_{\sigma(n)}) \Vert_{\mathrm{RMS}}^2 = \frac{1}{n}\sum_{j=1}^n (\pm x_{\sigma(j)})^2 = \frac{1}{n}\sum_{j=1}^n x_{\sigma(j)}^2$$. Since summing squared permuted values is the same as summing original squared values, this equals $$\frac{1}{n}\sum_{k=1}^n x_k^2 = \Vert x \Vert_{\mathrm{RMS}}^2$$. Taking square roots, symmetry holds.
-4.  **Pythagoras on disjoint supports:** Let $$x = \sum_{k \in K_1} x_k e_k$$ and $$y = \sum_{j \in K_2} y_j e_j$$ with $$K_1 \cap K_2 = \emptyset$$. Then $$x+y = \sum_{i \in K_1 \cup K_2} (x+y)_i e_i$$.
-
-    $$
-    f(x+y)^2 = \frac{1}{n}\sum_{i \in K_1 \cup K_2} ((x+y)_i)^2 = \frac{1}{n}\left( \sum_{k \in K_1} x_k^2 + \sum_{j \in K_2} y_j^2 \right)
-    $$
-
-    $$
-    f(x)^2 + f(y)^2 = \frac{1}{n}\sum_{k \in K_1} x_k^2 + \frac{1}{n}\sum_{j \in K_2} y_j^2 = \frac{1}{n}\left( \sum_{k \in K_1} x_k^2 + \sum_{j \in K_2} y_j^2 \right)
-    $$
-
-    This holds.
-5.  **Normalization:** Verified.
-All axioms are satisfied.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$.
+1.  Nondegeneracy, (2) Absolute homogeneity, (5) Normalization: Verified previously.
+3.  **Permutation & sign-flip symmetry:** $$f(\pm x_{\sigma(1)},\dots,\pm x_{\sigma(n)})^2 = \frac{1}{n}\sum_{j=1}^n (\pm x_{\sigma(j)})^2 = \frac{1}{n}\sum_{j=1}^n x_{\sigma(j)}^2 = \frac{1}{n}\sum_{k=1}^n x_k^2 = f(x)^2$$. Taking square roots, symmetry holds.
+4.  **Pythagorean additivity on disjoint supports:** If $$x_i y_i = 0$$ for all $$i$$, then $$\Vert x+y \Vert_2^2 = \sum (x_i+y_i)^2 = \sum (x_i^2+y_i^2) = \Vert x \Vert_2^2 + \Vert y \Vert_2^2$$. The argument then follows as in Thm 5, axiom 3.
+All axioms hold.
 
 ($$\Leftarrow$$) **Sufficiency:** Assume $$f$$ satisfies axioms (1)-(5).
-*   From (3) Permutation & sign-flip symmetry: $$f(e_i)$$ must be the same value for all $$i$$. Also $$f(e_i) = f(-e_i)$$.
-    Let $$c_0 = f(e_1) = f(e_2) = \dots = f(e_n)$$.
-*   Consider a vector $$x_j e_j = (0, \dots, x_j, \dots, 0)$$. By (2) Absolute homogeneity:
-    $$f(x_j e_j) = \vert x_j \vert f(e_j) = \vert x_j \vert c_0$$.
-*   Let $$x = (x_1, x_2, \dots, x_n)$$. We can write $$x = x_1 e_1 + x_2 e_2 + \dots + x_n e_n$$.
-    The vectors $$x_1 e_1, x_2 e_2, \dots, x_n e_n$$ have disjoint supports.
-    Using (4) Pythagoras on disjoint supports repeatedly:
-
-    $$
-    \begin{aligned}
-    f(x)^2 &= f(x_1 e_1 + (x_2 e_2 + \dots + x_n e_n))^2 \\
-           &= f(x_1 e_1)^2 + f(x_2 e_2 + \dots + x_n e_n)^2 \\
-           &= f(x_1 e_1)^2 + f(x_2 e_2)^2 + \dots + f(x_n e_n)^2 \\
-           &= (\vert x_1 \vert c_0)^2 + (\vert x_2 \vert c_0)^2 + \dots + (\vert x_n \vert c_0)^2 \\
-           &= c_0^2 (x_1^2 + x_2^2 + \dots + x_n^2) = c_0^2 \Vert x \Vert_2^2.
-    \end{aligned}
-    $$
-
-*   Taking the square root (since $$f(x) \ge 0$$ by (1)): $$f(x) = \sqrt{c_0^2 \Vert x \Vert_2^2} = \vert c_0 \vert \Vert x \Vert_2$$.
-    Since $$c_0 = f(e_1) \ge 0$$ (by (1)), we have $$\vert c_0 \vert = c_0$$. So $$f(x) = c_0 \Vert x \Vert_2$$.
-    From (1), if $$x \ne \mathbf{0}$$, $$f(x) > 0$$, so $$c_0 > 0$$.
-*   Now apply axiom (5): $$f(e_i) = \frac{1}{\sqrt{n}}$$.
-    We already established $$f(e_i) = c_0$$. So, $$c_0 = \frac{1}{\sqrt{n}}$$.
-*   Thus, $$f(x) = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$.
-    (We also need to ensure this $$f$$ is a norm, specifically satisfying the triangle inequality. Since it's a positive multiple of $$\Vert x \Vert_2$$, it is indeed a norm.)
-This completes the proof.
+*   Axiom (3) implies $$f(e_i)$$ is the same for all $$i$$. Let this value be $$c_0 = f(e_1)$$. By (1), $$c_0 \ge 0$$.
+*   For $$x_j e_j = (0, \dots, x_j, \dots, 0)$$, by (2): $$f(x_j e_j) = \vert x_j \vert f(e_j) = \vert x_j \vert c_0$$.
+*   Any $$x = \sum x_i e_i$$. The vectors $$x_i e_i$$ have disjoint supports. By repeated use of (4):
+    $$f(x)^2 = f(\sum x_i e_i)^2 = \sum f(x_i e_i)^2 = \sum (\vert x_i \vert c_0)^2 = c_0^2 \sum x_i^2 = c_0^2 \Vert x \Vert_2^2$$.
+*   Since $$f(x) \ge 0$$, $$f(x) = c_0 \Vert x \Vert_2$$. By (1), if $$x \ne \mathbf{0}$$, $$f(x)>0$$, so $$c_0 > 0$$.
+*   Axiom (5): $$f(e_i) = \frac{1}{\sqrt{n}}$$. So $$c_0 = \frac{1}{\sqrt{n}}$$.
+*   Thus, $$f(x) = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$. This function is a norm.
 </details>
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
-**Theorem 7 (Characterization 5: General Norm Properties, Coordinate Symmetry, and All-Ones Normalization).**
+**Theorem 7 (Characterization 5: Norm Properties, Coordinate Symmetry, and All-Ones Normalization).**
 </div>
 A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it satisfies:
-1.  **Norm properties:** $$f$$ is a norm on $$\mathbb{R}^n$$ (i.e., satisfies nondegeneracy, absolute homogeneity, and triangle inequality).
-2.  **Permutation & sign-flip symmetry:** $$f(x_1,\dots,x_n) = f(\pm x_{\sigma(1)},\dots,\pm x_{\sigma(n)})$$ for any permutation $$\sigma \in S_n$$ and any choice of signs.
-3.  **Normalization on the all-ones vector:** $$f(1,1,\dots,1) = 1$$.
+1.  **Norm properties:** $$f$$ is a norm on $$\mathbb{R}^n$$.
+2.  **Permutation & sign-flip symmetry:** As in Theorem 6, Axiom 3.
+3.  **Normalization on the all-ones vector:** $$f(\vec{1}) = f(1,1,\dots,1) = 1$$.
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof of Theorem 7.**
 </summary>
-($$\Rightarrow$$) **Necessity:** We show $$\Vert x \Vert_{\mathrm{RMS}}$$ satisfies the axioms.
-1.  **Norm properties:** $$\Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$. Since $$\Vert \cdot \Vert_2$$ is a norm and $$1/\sqrt{n} > 0$$, $$\Vert \cdot \Vert_{\mathrm{RMS}}$$ is also a norm.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$.
+1.  **Norm properties:** $$f$$ is a positive scalar multiple of $$\Vert \cdot \Vert_2$$, so it's a norm.
 2.  **Permutation & sign-flip symmetry:** Verified in Theorem 6.
-3.  **Normalization on all-ones vector:** Let $$\mathbf{1} = (1,1,\dots,1)$$. Then $$\Vert \mathbf{1} \Vert_2 = \sqrt{\sum_{i=1}^n 1^2} = \sqrt{n}$$.
-    So, $$\Vert \mathbf{1} \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert \mathbf{1} \Vert_2 = \frac{1}{\sqrt{n}} \sqrt{n} = 1$$.
-All axioms are satisfied.
+3.  **Normalization on all-ones vector:** Let $$\vec{1} = (1,\dots,1)$$. Then $$\Vert \vec{1} \Vert_2 = \sqrt{n}$$.
+    So, $$f(\vec{1}) = \frac{1}{\sqrt{n}}\Vert \vec{1} \Vert_2 = \frac{1}{\sqrt{n}} \sqrt{n} = 1$$.
+All axioms hold.
 
 ($$\Leftarrow$$) **Sufficiency:** Assume $$f$$ satisfies axioms (1)-(3).
-*   Axiom (1) states $$f$$ is a norm. Axiom (2) states $$f$$ is invariant under coordinate permutations and sign flips. It is a known result (due to von Neumann, Mazur, Schoenberg) that the only norms on $$\mathbb{R}^n$$ that are invariant under permutations and sign-flips are the scaled $$\ell_p$$-norms, i.e., $$f(x) = k \Vert x \Vert_p$$ for some $$k>0$$ and $$1 \le p \le \infty$$, or limits of these.
-*   Furthermore, if a norm satisfies the parallelogram law (which is implied by certain strong symmetry conditions for norms that are also inner-product derived), it must be an inner product norm, which means $$p=2$$. The strong symmetry of (2) combined with (1) being a norm implies that the unit ball of $$f$$ must be an $$\ell_p$$-ball; for it to also be an inner product norm (which the parallelogram law would ensure), it must be $$p=2$$. Thus, properties (1) and (2) together imply $$f(x)=c\Vert x \Vert_2$$ for some constant $$c>0$$.
-*   Given $$f(x) = c \Vert x \Vert_2$$ for some $$c > 0$$.
-*   Apply axiom (3): $$f(1,1,\dots,1) = 1$$. Let $$\mathbf{1} = (1,1,\dots,1)$$.
-    $$f(\mathbf{1}) = c \Vert \mathbf{1} \Vert_2 = c \sqrt{\sum_{i=1}^n 1^2} = c \sqrt{n}$$.
-    From axiom (3), $$f(\mathbf{1}) = 1$$.
+*   Axiom (1) states $$f$$ is a norm. Axiom (2) means $$f$$ is a symmetric gauge function.
+*   It is a known result in norm theory that a norm on $$\mathbb{R}^n$$ that is invariant under coordinate permutations and sign flips, and additionally satisfies a condition that forces it to be Euclidean (e.g., satisfying the parallelogram law, or being rotationally invariant), must be of the form $$c\Vert x \Vert_2$$ for some $$c>0$$. (Axiom (2) alone only restricts $$f$$ to the class of symmetric gauge functions, which includes all $$\ell_p$$ norms.)
+*   Assuming that such a specific result or an implicit understanding allows the deduction from (1) and (2) that $$f(x)=c\Vert x \Vert_2$$ for some $$c > 0$.
+*   Apply axiom (3): $$f(\vec{1}) = 1$$.
+    $$f(\vec{1}) = c \Vert \vec{1} \Vert_2 = c \sqrt{n}$$.
     So, $$c \sqrt{n} = 1$$, which means $$c = \frac{1}{\sqrt{n}}$$.
 *   Therefore, $$f(x) = \frac{1}{\sqrt{n}} \Vert x \Vert_2 = \Vert x \Vert_{\mathrm{RMS}}$$.
-This completes the proof.
+
+<div class="box-info" markdown="1">
+**Note on Theorem 7:** The inference from "norm properties + permutation/sign-flip symmetry" to $$f(x)=c\Vert x \Vert_2$$ is a strong assertion. Typically, these axioms define a symmetric gauge function (e.g., any $$\ell_p$$ norm is one). To single out the $$\ell_2$$ structure (up to scale), an additional property like the parallelogram identity (making it an inner product norm) or full rotational invariance is required.
+</div>
 </details>
 
 <blockquote class="box-theorem" markdown="1">
@@ -629,158 +448,81 @@ This completes the proof.
 **Theorem 8 (Characterization 6: Averaged Sum-of-Functions Structure).**
 </div>
 A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it satisfies:
-1.  **Nondegeneracy:** $$f(x) \ge 0$$ for all $$x \in \mathbb{R}^n$$, and $$f(x)=0 \iff x=\mathbf{0}$$.
-2.  **Averaged Sum-of-Functions Structure for $$f^2$$:** The squared value of $$f(x)$$ is the average of a function $$\phi$$ applied to each coordinate:
-
-    $$
-      f(x)^2 \;=\; \frac{1}{n}\,\sum_{i=1}^n \phi(x_i)
-    $$
-
-    for some function $$\phi: \mathbb{R} \to \mathbb{R}_{\ge 0}$$.
+1.  **Nondegeneracy:** $$f(x) \ge 0$$, and $$f(x)=0 \iff x=\mathbf{0}$$.
+2.  **Structure for $$f^2$$:** $$f(x)^2 \;=\; \frac{1}{n}\,\sum_{i=1}^n \phi(x_i)$$ for some function $$\phi: \mathbb{R} \to \mathbb{R}_{\ge 0}$$.
 3.  **Absolute homogeneity:** $$f(\lambda x) = \vert\lambda\vert f(x)$$ for all $$\lambda \in \mathbb{R}, x \in \mathbb{R}^n$$.
-4.  **Normalization of $$\phi$$ at $$1$$:** $$\phi(1) = 1$$.
-(Additionally, for $$f$$ to be a norm, it must satisfy the triangle inequality, which is verified post-derivation for the resulting form).
+4.  **Normalization of $$\phi$$:** $$\phi(1) = 1$$.
+(The triangle inequality, for $$f$$ to be a full norm, is verified from the derived form.)
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Proof of Theorem 8.**
 </summary>
-($$\Rightarrow$$) **Necessity:** We show $$\Vert x \Vert_{\mathrm{RMS}}$$ satisfies the axioms. Let $$f(x) = \Vert x \Vert_{\mathrm{RMS}}$$.
-1.  **Nondegeneracy:** Verified.
-2.  **Averaged Sum-of-Functions Structure:** $$f(x)^2 = \Vert x \Vert_{\mathrm{RMS}}^2 = \frac{1}{n}\sum_{i=1}^n x_i^2$$. This fits the structure with $$\phi(u) = u^2$$. Since $$u^2 \ge 0$$, $$\phi: \mathbb{R} \to \mathbb{R}_{\ge 0}$$ holds.
-3.  **Absolute homogeneity:** Verified.
-4.  **Normalization of $$\phi$$:** For $$\phi(u) = u^2$$, we have $$\phi(1) = 1^2 = 1$$.
-All axioms are satisfied.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \sqrt{\frac{1}{n}\sum x_i^2}$.
+1.  Nondegeneracy, (3) Absolute homogeneity: Verified previously.
+2.  **Structure:** $$f(x)^2 = \frac{1}{n}\sum x_i^2$$. This fits the structure with $$\phi(u) = u^2$$. Clearly $$\phi(u) = u^2 \ge 0$$.
+4.  **Normalization of $$\phi$$:** For $$\phi(u) = u^2$$, $$\phi(1) = 1^2 = 1$$.
+All axioms hold.
 
 ($$\Leftarrow$$) **Sufficiency:** Assume $$f$$ satisfies axioms (1)-(4).
-*   From (1), $$f(\mathbf{0})=0$$. Substituting $$x=\mathbf{0}$$ into (2):
-    $$f(\mathbf{0})^2 = 0 = \frac{1}{n}\sum_{i=1}^n \phi(0) = \frac{1}{n} \cdot n \cdot \phi(0) = \phi(0)$$.
-    So, $$\phi(0)=0$$.
-*   From (3), $$f(\lambda x)^2 = (\vert\lambda\vert f(x))^2 = \lambda^2 f(x)^2$$.
-    Using structure (2) for both sides:
-
-    $$
-    \frac{1}{n}\,\sum_{i=1}^n \phi(\lambda x_i) \;=\; \lambda^2 \left(\frac{1}{n}\,\sum_{i=1}^n \phi(x_i)\right)
-    $$
-
-    Multiplying by $$n$$:
-
-    $$
-    \sum_{i=1}^n \phi(\lambda x_i) \;=\; \lambda^2 \sum_{i=1}^n \phi(x_i)
-    $$
-
-*   Let $$x = e_j$$ (the $$j$$-th standard basis vector, so $$x_j=1$$ and $$x_k=0$$ for $$k \neq j$$).
-    The equation becomes:
-
-    $$
-    \phi(\lambda \cdot x_j) + \sum_{k \neq j} \phi(\lambda \cdot x_k) \;=\; \lambda^2 \left(\phi(x_j) + \sum_{k \neq j} \phi(x_k)\right)
-    $$
-
-    Substituting $$x_j=1$$ and $$x_k=0$$ for $$k \neq j$$, and using $$\phi(0)=0$$:
-
-    $$
-    \phi(\lambda \cdot 1) + \sum_{k \neq j} \phi(0) \;=\; \lambda^2 \left(\phi(1) + \sum_{k \neq j} \phi(0)\right)
-    $$
-
-    $$
-    \phi(\lambda) + (n-1)\phi(0) \;=\; \lambda^2 (\phi(1) + (n-1)\phi(0))
-    $$
-
-    Since $$\phi(0)=0$$, this simplifies to:
-
-    $$
-    \phi(\lambda) \;=\; \lambda^2 \phi(1).
-    $$
-
-    This holds for any $$\lambda \in \mathbb{R}$$. Let $$u=\lambda$$. So, $$\phi(u) = u^2 \phi(1)$$ for all $$u \in \mathbb{R}$$.
-*   Using (4), Normalization of $$\phi$$ at $$1$$: $$\phi(1) = 1$$.
-    Therefore, $$\phi(u) = u^2 \cdot 1 = u^2$$.
-*   Substitute $$\phi(u)=u^2$$ back into the structural form (2):
-
-    $$
-    f(x)^2 \;=\; \frac{1}{n}\,\sum_{i=1}^n x_i^2.
-    $$
-
-    Since $$f(x) \ge 0$$ by (1), taking the square root gives:
-
-    $$
-    f(x) \;=\; \sqrt{\frac{1}{n}\,\sum_{i=1}^n x_i^2} \;=\; \Vert x \Vert_{\mathrm{RMS}}.
-    $$
-
-*   Finally, we verify that this derived $$f(x) = \Vert x \Vert_{\mathrm{RMS}}$$ is indeed a norm.
-    Axioms (1) (Nondegeneracy) and (3) (Absolute homogeneity) were given for $$f$$. The triangle inequality must also hold for $$f$$ to be a norm. Since $$\Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$, and $$\Vert \cdot \Vert_2$$ is a norm (satisfying triangle inequality), and $$1/\sqrt{n} > 0$$, then $$\Vert \cdot \Vert_{\mathrm{RMS}}$$ also satisfies the triangle inequality.
-    Thus, $$f(x) = \Vert x \Vert_{\mathrm{RMS}}$$ is the unique function satisfying the axioms.
-This completes the proof.
+*   From (1), $$f(\mathbf{0})=0$$. Substituting $$x=\mathbf{0}$$ into (2): $$0 = \frac{1}{n}\sum \phi(0) = \phi(0)$$. So, $$\phi(0)=0$$.
+*   From (3), $$f(\lambda x)^2 = (\vert\lambda\vert f(x))^2 = \lambda^2 f(x)^2$$. Using (2):
+    $$\frac{1}{n}\,\sum \phi(\lambda x_i) \;=\; \lambda^2 \left(\frac{1}{n}\,\sum \phi(x_i)\right) \implies \sum \phi(\lambda x_i) \;=\; \lambda^2 \sum \phi(x_i)$$.
+*   Let $$x = e_j$$ (j-th standard basis vector). Then $$x_j=1$$, others $$0$$.
+    $$\phi(\lambda \cdot 1) + \sum_{k \neq j} \phi(\lambda \cdot 0) \;=\; \lambda^2 \left(\phi(1) + \sum_{k \neq j} \phi(0)\right)$$.
+    Since $$\phi(0)=0$$: $$\phi(\lambda) = \lambda^2 \phi(1)$$.
+*   Using (4), $$\phi(1) = 1$$. Therefore, $$\phi(u) = u^2$$ for all $$u \in \mathbb{R}$$.
+*   Substitute $$\phi(u)=u^2$$ into (2): $$f(x)^2 \;=\; \frac{1}{n}\,\sum x_i^2$$.
+*   Since $$f(x) \ge 0$$ by (1), $$f(x) \;=\; \sqrt{\frac{1}{n}\,\sum x_i^2} \;=\; \Vert x \Vert_{\mathrm{RMS}}$$.
+*   This function $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$ is a norm (satisfies triangle inequality as $$\Vert \cdot \Vert_2$$ does).
 </details>
 
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
 **In a Nutshell: Characterizing the RMS norm**
 </div>
-Because the RMS norm is defined as
-
-$$
-  \Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\,\Vert x \Vert_2,
-$$
-
-most minimal characterizations of the RMS norm start from axioms known to imply that a function $$f(x)$$ must be a positive scalar multiple of the Euclidean norm ($$f(x) = c\Vert x \Vert_2$$). An additional normalization axiom then uniquely determines the constant $$c=1/\sqrt{n}$$. Typical normalization choices include:
-*   Fixing the value on a standard basis vector: $$f(e_i)=1/\sqrt{n}$$.
-*   Fixing the value on the all-ones vector: $$f(1,1,\dots,1)=1$$.
-*   Structural assumptions (as in Theorem 8) that directly lead to the specific form of the RMS norm.
-
-Once the form $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$ is established, it's confirmed to be the RMS norm.
+The RMS norm, $$\Vert x \Vert_{\mathrm{RMS}} = \frac{1}{\sqrt{n}}\,\Vert x \Vert_2$$, is a scaled Euclidean norm. Most minimal characterizations first establish that a function $$f(x)$$ must be $$c\Vert x \Vert_2$$ for some $$c>0$$, using axioms related to inner product structure or high symmetry. An additional normalization axiom then fixes $$c=1/\sqrt{n}$$. Typical normalizations set $$f(e_i)=1/\sqrt{n}$$ or $$f(\vec{1})=1$$, or assume a structural form like in Theorem 8.
 </blockquote>
 
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
 **Quick Checklist of Axiom Sets for the RMS norm**
 </div>
-Below is a compact summary of some minimal axiom sets. In most cases, a subset of axioms forces $$f(x)=c\Vert x \Vert_2$$, and the final axiom(s) pin down $$c=1/\sqrt n$$.
+Each set of properties below uniquely defines the RMS norm. Most rely on first showing $$f(x)=c\Vert x \Vert_2$$, then finding $$c=1/\sqrt n$$.
 
 1.  **Parallelogram Law Version (Theorem 3)**
-    *   Nondegeneracy
-    *   Absolute homogeneity
-    *   Parallelogram identity
-    *   $$f(e_i)=1/\sqrt n$$ for each $$i$$.
+    *   Nondegeneracy, Absolute homogeneity, Parallelogram identity.
+    *   (Requires additional symmetry assumption for $$f(x)=c\Vert x \Vert_2$$ step).
+    *   Normalization: $$f(e_i)=1/\sqrt n$$.
     *   $$\Rightarrow$$ $$f(x)=\Vert x \Vert_{\mathrm{RMS}}$$
 
 2.  **Orthogonal Invariance Version (Theorem 4)**
-    *   Orthogonal invariance: $$f(Qx)=f(x)$$
-    *   Absolute homogeneity
-    *   Nondegeneracy
-    *   Continuity
-    *   $$f(e_1)=1/\sqrt n$$.
+    *   Orthogonal invariance, Absolute homogeneity, Nondegeneracy, Continuity.
+    *   Normalization: $$f(e_1)=1/\sqrt n$$.
     *   $$\Rightarrow$$ $$f(x)=\Vert x \Vert_{\mathrm{RMS}}$$
 
 3.  **Pythagorean Additivity Version (Theorem 5)**
-    *   Nondegeneracy
-    *   Absolute homogeneity
-    *   If $$x\perp y$$, then $$f(x+y)^2 = f(x)^2 + f(y)^2$$.
-    *   Continuity
-    *   $$f(e_i)=1/\sqrt n$$ for $$i=1,\dots,n$$.
+    *   Nondegeneracy, Absolute homogeneity, Pythagorean additivity (for standard orthogonality), Continuity.
+    *   Normalization: $$f(e_i)=1/\sqrt n$$ for all $$i$$.
     *   $$\Rightarrow$$ $$f(x)=\Vert x \Vert_{\mathrm{RMS}}$$
 
-4.  **Coordinate-Symmetry + Disjoint-Support Version (Theorem 6)**
-    *   Nondegeneracy
-    *   Absolute homogeneity
-    *   Permutation & sign-flip symmetry
-    *   If $$\mathrm{supp}(x) \cap \mathrm{supp}(y) = \emptyset$$, then $$f(x+y)^2 = f(x)^2 + f(y)^2$$.
-    *   $$f(e_i)=1/\sqrt n$$ for $$i=1,\dots,n$$.
+4.  **Coordinate-Symmetry + Disjoint-Support Additivity Version (Theorem 6)**
+    *   Nondegeneracy, Absolute homogeneity, Permutation & sign-flip symmetry.
+    *   Pythagorean additivity on disjoint supports.
+    *   Normalization: $$f(e_i)=1/\sqrt n$$ for all $$i$$.
     *   $$\Rightarrow$$ $$f(x)=\Vert x \Vert_{\mathrm{RMS}}$$
 
 5.  **General Norm + Symmetry + All-Ones Normalization (Theorem 7)**
-    *   $$f$$ is a norm.
-    *   Permutation & sign-flip symmetry.
-    *   $$f(1,1,\dots,1)=1$$.
+    *   $$f$$ is a norm, Permutation & sign-flip symmetry.
+    *   (Requires specific interpretation or stronger theorem for $$f(x)=c\Vert x \Vert_2$$ step).
+    *   Normalization: $$f(1,1,\dots,1)=1$$.
     *   $$\Rightarrow$$ $$f(x)=\Vert x \Vert_{\mathrm{RMS}}$$
 
 6.  **Averaged Sum-of-Functions Structure (Theorem 8)**
-    *   Nondegeneracy
-    *   $$f(x)^2 = \frac{1}{n}\sum_i \phi(x_i)$$
-    *   Absolute homogeneity
-    *   $$\phi(1)=1$$
-    *   $$\Rightarrow$$ $$f(x)=\Vert x \Vert_{\mathrm{RMS}}$$ (and satisfies triangle inequality)
+    *   Nondegeneracy, $$f(x)^2 = \frac{1}{n}\sum \phi(x_i)$$, Absolute homogeneity.
+    *   Normalization: $$\phi(1)=1$$.
+    *   $$\Rightarrow$$ $$f(x)=\Vert x \Vert_{\mathrm{RMS}}$$ (and confirmed to be a norm)
 </blockquote>
 
-Any one of these sets of properties is sufficient to uniquely define the RMS norm.
+Any one of these sets of properties (with caveats as noted for Theorems 3 and 7 regarding the derivation of the Euclidean form) is sufficient to uniquely define the RMS norm.
