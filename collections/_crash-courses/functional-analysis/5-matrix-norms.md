@@ -689,11 +689,16 @@ All formulas below are derived by finding the conditions for equality in Hölder
     \boxed{\,J_{p\to q}(A) = y_{\ast}\,x_{\ast}^{\!\top}\,}
     $$
 
-***Check:***
-*   $$\langle A, J_{p\to q}(A) \rangle_F = \mathrm{tr}(A^\top (y_{\ast}x_{\ast}^{\!\top})) = \mathrm{tr}(x_{\ast}^{\!\top}A^\top y_{\ast}) = (Ax_{\ast})^\top y_{\ast} = v_{\ast}^\top y_{\ast} = \Vert v_{\ast} \Vert_q = \Vert A \Vert_{p\to q}$$.
-*   The dual norm condition $$\Vert J_{p\to q}(A) \Vert_{\ast}=1$$ must hold. For the rank-one matrix $$y_{\ast}x_{\ast}^{\!\top}$$, its specific dual norm (e.g., $$S_1$$ norm if $$p=q=2$$; or $$\ell_\infty \to \ell_\infty$$ norm if $$p=q=1$$) evaluates to $$1$$. This is often because the structure of $$x_\ast, y_\ast$$ (extremal and dual vectors) means that $$\Vert y_{\ast}x_{\ast}^{\!\top} \Vert_\ast = \Vert y_{\ast} \Vert_{q^\ast} \Vert x_{\ast} \Vert_p = 1 \cdot 1 = 1$$. (This identity is specific to these types of norms and constructions.)
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Check and Uniqueness for $$J_{p\to q}(A)$$**
+</summary>
+**Check:**
+*   Condition 1: $$\langle A, J_{p\to q}(A) \rangle_F = \mathrm{tr}(A^\top (y_{\ast}x_{\ast}^{\!\top})) = \mathrm{tr}(x_{\ast}^{\!\top}A^\top y_{\ast}) = (Ax_{\ast})^\top y_{\ast} = v_{\ast}^\top y_{\ast}$$. By construction of $$y_\ast$$ (as the Hölder-tight dual vector to $$v_\ast$$), we have $$v_{\ast}^\top y_{\ast} = \Vert v_{\ast} \Vert_q$$. Since $$v_\ast = Ax_\ast$$ and $$x_\ast$$ is an extremizing vector, $$\Vert v_\ast \Vert_q = \Vert A x_\ast \Vert_q = \Vert A \Vert_{p\to q}$$. So, $$\langle A, J_{p\to q}(A) \rangle_F = \Vert A \Vert_{p\to q}$$.
+*   Condition 2: The dual norm condition $$\Vert J_{p\to q}(A) \Vert_{\ast}=1$$ must hold. For the rank-one matrix $$y_{\ast}x_{\ast}^{\!\top}$$, its specific dual norm corresponding to $$\Vert \cdot \Vert_{p \to q}$$ (which depends on $$p,q$$) generally evaluates to $$1$$. This is often because the structure of $$x_\ast, y_\ast$$ (extremal and dual vectors) means that $$\Vert y_{\ast}x_{\ast}^{\!\top} \Vert_\ast = \Vert y_{\ast} \Vert_{q^\ast} \Vert x_{\ast} \Vert_p = 1 \cdot 1 = 1$$. (This identity $$\Vert zw^\top \Vert_{\text{dual of op norm}} = \Vert z \Vert_{\text{codomain dual}} \Vert w \Vert_{\text{domain}}$$ is specific to these types of norms and constructions and is related to properties of subgradients of operator norms. For instance, for $$p=q=2$$, $$\Vert A \Vert_{S_\infty}$$, the dual norm is $$\Vert \cdot \Vert_{S_1}$$, and $$\Vert y_\ast x_\ast^\top \Vert_{S_1} = \Vert y_\ast \Vert_2 \Vert x_\ast \Vert_2 = 1 \cdot 1 = 1$$).
 
-***Uniqueness:*** The mapping is unique if $$x_{\ast}$$ and (for $$q>1$$) $$y_{\ast}$$ are unique. This typically occurs when the unit balls for $$\Vert \cdot \Vert_p$$ and $$\Vert \cdot \Vert_q$$ are strictly convex, i.e., $$1 < p, q < \infty$$. For boundary exponents ($$1$$ or $$\infty$$), the mapping can be set-valued.
+**Uniqueness:** The mapping is unique if $$x_{\ast}$$ and (for $$q>1$$) $$y_{\ast}$$ are unique. This typically occurs when the unit balls for $$\Vert \cdot \Vert_p$$ and $$\Vert \cdot \Vert_q$$ are strictly convex, i.e., $$1 < p, q < \infty$$. For boundary exponents ($$1$$ or $$\infty$$), the mapping can be set-valued.
+</details>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
@@ -709,7 +714,7 @@ This is achieved by choosing $$y_\ast$$ to be the vector that saturates Hölder'
 Specifically, if $$v_\ast \ne \mathbf{0}$$, take
 
 $$
-y_i = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\left(\sum_j \vert (v_\ast)_j \vert^{(q-1)q^\ast}\right)^{1/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\left(\sum_j \vert (v_\ast)_j \vert^q\right)^{1/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\Vert v_\ast \Vert_q^{q/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\Vert v_\ast \Vert_q^{q-1}}
+(y_\ast)_i = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\left(\sum_j \vert (v_\ast)_j \vert^{(q-1)q^\ast}\right)^{1/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\left(\sum_j \vert (v_\ast)_j \vert^q\right)^{1/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\Vert v_\ast \Vert_q^{q/q^\ast}} = \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\Vert v_\ast \Vert_q^{q-1}}
 $$
 
 This ensures $$\Vert y_\ast \Vert_{q^\ast}=1$$ and $$v_\ast^\top y_\ast = \sum_i (v_\ast)_i \frac{\operatorname{sign}((v_\ast)_i) \vert (v_\ast)_i \vert^{q-1}}{\Vert v_\ast \Vert_q^{q-1}} = \frac{\sum_i \vert (v_\ast)_i \vert^q}{\Vert v_\ast \Vert_q^{q-1}} = \frac{\Vert v_\ast \Vert_q^q}{\Vert v_\ast \Vert_q^{q-1}} = \Vert v_\ast \Vert_q$$.
@@ -733,33 +738,47 @@ $$
 
 (If $$A=\mathbf{0}$$, $$J_{S_p}(A)=\mathbf{0}$$. The formula assumes $$A \ne \mathbf{0}$$. If some $$\sigma_i=0$$, then $$\sigma_i^{p-1}=0$$ as $$p>1$$).
 
-***Check:***
-*   $$\langle A, J_{S_p}(A) \rangle_F = \mathrm{tr}( (U\Sigma V^\top)^\top \frac{U\operatorname{diag}(\sigma_i^{p-1})V^\top}{\Vert A \Vert_{S_p}^{p-1}} ) = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \mathrm{tr}(\Sigma \operatorname{diag}(\sigma_i^{p-1})) = \frac{\sum_i \sigma_i \cdot \sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\sum_i \sigma_i^p}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\Vert A \Vert_{S_p}^p}{\Vert A \Vert_{S_p}^{p-1}} = \Vert A \Vert_{S_p}$$.
-*   The singular values of $$J_{S_p}(A)$$ are $$\hat{\sigma}_i = \frac{\sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}$$.
-    $$\Vert J_{S_p}(A) \Vert_{S_q} = \left( \sum_i \hat{\sigma}_i^q \right)^{1/q} = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \left( \sum_i (\sigma_i^{p-1})^q \right)^{1/q}$$.
-    Since $$(p-1)q = p$$ (from $$1/p+1/q=1$$), this becomes $$\frac{1}{\Vert A \Vert_{S_p}^{p-1}} \left( \sum_i \sigma_i^p \right)^{1/q} = \frac{(\Vert A \Vert_{S_p}^p)^{1/q}}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\Vert A \Vert_{S_p}^{p/q}}{\Vert A \Vert_{S_p}^{p-1}}$$.
-    Since $$p/q = p-1$$, this is $$\frac{\Vert A \Vert_{S_p}^{p-1}}{\Vert A \Vert_{S_p}^{p-1}} = 1$$.
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Check and Uniqueness for $$J_{S_p}(A)$$ ($$1 < p < \infty$$)**
+</summary>
+**Check:**
+*   Condition 1: $$\langle A, J_{S_p}(A) \rangle_F = \mathrm{tr}( (U\Sigma V^\top)^\top \frac{U\operatorname{diag}(\sigma_i^{p-1})V^\top}{\Vert A \Vert_{S_p}^{p-1}} ) = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \mathrm{tr}( V\Sigma U^\top U\operatorname{diag}(\sigma_i^{p-1})V^\top ) = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \mathrm{tr}(\Sigma \operatorname{diag}(\sigma_i^{p-1}))$$ (using $$\mathrm{tr}(XYZ)=\mathrm{tr}(ZXY)$$ and $$U^\top U=I, V^\top V=I$$).
+    This simplifies to $$\frac{\sum_i \sigma_i \cdot \sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\sum_i \sigma_i^p}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\Vert A \Vert_{S_p}^p}{\Vert A \Vert_{S_p}^{p-1}} = \Vert A \Vert_{S_p}$$.
+*   Condition 2: The singular values of $$J_{S_p}(A)$$ are $$\hat{\sigma}_i = \frac{\sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}$$ (since $$U,V$$ are orthogonal).
+    We need to check $$\Vert J_{S_p}(A) \Vert_{S_q} = 1$$.
 
-***Uniqueness:*** The mapping is single-valued and smooth for $$1<p<\infty$$ (assuming distinct non-zero singular values for strictness, otherwise subgradient).
+    $$
+    \Vert J_{S_p}(A) \Vert_{S_q} = \left( \sum_i \hat{\sigma}_i^q \right)^{1/q} = \left( \sum_i \left(\frac{\sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}\right)^q \right)^{1/q} = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \left( \sum_i (\sigma_i^{p-1})^q \right)^{1/q}
+    $$
+
+    Since $$1/p+1/q=1$$, we have $$q(p-1) = qp - q = qp - (p/(p-1)) \cdot (p-1)/p \cdot q = qp - (pq/(p-1))$$
+    No, easier: $$1/q = (p-1)/p$$, so $$p/q = p-1$$. Also, $$(p-1)q = p$$.
+    So, the sum becomes $$\left( \sum_i \sigma_i^p \right)^{1/q} = (\Vert A \Vert_{S_p}^p)^{1/q} = \Vert A \Vert_{S_p}^{p/q}$$.
+    Thus, $$\Vert J_{S_p}(A) \Vert_{S_q} = \frac{\Vert A \Vert_{S_p}^{p/q}}{\Vert A \Vert_{S_p}^{p-1}}$$.
+    Since $$p/q = p-1$$, this expression is $$\frac{\Vert A \Vert_{S_p}^{p-1}}{\Vert A \Vert_{S_p}^{p-1}} = 1$$.
+
+**Uniqueness:** The mapping is single-valued and smooth for $$1<p<\infty$$ if all non-zero singular values $$\sigma_i(A)$$ are distinct. If there are repeated non-zero singular values, the SVD ($$U,V$$) is not unique, but the product $$U \operatorname{diag}(\sigma_i^{p-1}) V^\top$$ remains unique. If $$A=\mathbf{0}$$, $$J(A)=\mathbf{0}$$.
+</details>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Derivation for $$J_{S_p}(A)$$**
 </summary>
 We use von Neumann's trace inequality: $$\vert\mathrm{tr}(X^\top Y)\vert \le \sum_i \sigma_i(X)\sigma_i(Y)$$. Equality holds if $$X=U\Sigma_X V^\top$$ and $$Y=U\Sigma_Y V^\top$$ (shared singular vectors).
-So, $$\langle A, J(A) \rangle_F = \sum_i \sigma_i(A)\sigma_i(J(A)) $$.
-We want this to be $$\Vert A \Vert_{S_p} = (\sum_i \sigma_i(A)^p)^{1/p}$$, and $$\Vert J(A) \Vert_{S_q} = (\sum_i \sigma_i(J(A))^q)^{1/q} = 1$$.
-This is an instance of Hölder's inequality for vectors $$\vec{s} = (\sigma_i(A))$$ and $$\vec{t} = (\sigma_i(J(A)))$$:
-$$\sum s_i t_i \le \Vert \vec{s} \Vert_p \Vert \vec{t} \Vert_q$$.
-Equality holds if $$t_i^q$$ is proportional to $$s_i^p$$, or $$t_i \propto s_i^{p/q} = s_i^{p-1}$$.
-So, let $$\sigma_i(J(A)) = c \cdot \sigma_i(A)^{p-1}$$ for some constant $$c > 0$$.
-The condition $$\Vert J(A) \Vert_{S_q}=1$$ means
+So, if $$J(A)$$ shares singular vectors with $$A$$, $$\langle A, J(A) \rangle_F = \sum_i \sigma_i(A)\sigma_i(J(A)) $$.
+We want this to be $$\Vert A \Vert_{S_p} = (\sum_i \sigma_i(A)^p)^{1/p}$$, and we need $$\Vert J(A) \Vert_{S_q} = (\sum_i \sigma_i(J(A))^q)^{1/q} = 1$$.
+This is an instance of Hölder's inequality for the vectors of singular values $$\vec{s}_A = (\sigma_i(A))$$ and $$\vec{s}_{J(A)} = (\sigma_i(J(A)))$$:
+$$\sum_i (\vec{s}_A)_i (\vec{s}_{J(A)})_i \le \Vert \vec{s}_A \Vert_p \Vert \vec{s}_{J(A)} \Vert_q$$.
+Equality holds if $$(\vec{s}_{J(A)})_i^q$$ is proportional to $$(\vec{s}_A)_i^p$$, or more directly, if $$(\vec{s}_{J(A)})_i$$ is proportional to $$((\vec{s}_A)_i^p)^{1/q \cdot (q-1)} = (\vec{s}_A)_i^{(p-1)}$$.
+Let $$\sigma_i(J(A)) = c \cdot \sigma_i(A)^{p-1}$$ for some constant $$c > 0$$.
+The condition $$\Vert J(A) \Vert_{S_q}=1$$ implies:
 
 $$
 \left( \sum_i (c \cdot \sigma_i(A)^{p-1})^q \right)^{1/q} = c \left( \sum_i \sigma_i(A)^{(p-1)q} \right)^{1/q} = c \left( \sum_i \sigma_i(A)^p \right)^{1/q} = 1
 $$
 
-So $$c = \frac{1}{(\sum_i \sigma_i(A)^p)^{1/q}} = \frac{1}{(\Vert A \Vert_{S_p}^p)^{1/q}} = \frac{1}{\Vert A \Vert_{S_p}^{p/q}} = \frac{1}{\Vert A \Vert_{S_p}^{p-1}}$$.
+So $$c = \frac{1}{(\sum_i \sigma_i(A)^p)^{1/q}} = \frac{1}{(\Vert A \Vert_{S_p}^p)^{1/q}} = \frac{1}{\Vert A \Vert_{S_p}^{p/q}} = \frac{1}{\Vert A \Vert_{S_p}^{p-1}}$$ (since $$p/q = p-1$$).
 Thus, $$\sigma_i(J(A)) = \frac{\sigma_i(A)^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}$$.
 The matrix $$J_{S_p}(A)$$ is then constructed using the same singular vectors as $$A$$: $$J_{S_p}(A) = U \operatorname{diag}(\sigma_i(J(A))) V^\top$$.
 </details>
@@ -767,7 +786,7 @@ The matrix $$J_{S_p}(A)$$ is then constructed using the same singular vectors as
 **Special Cases for Schatten Norms:**
 
 *   **$$p=2$$ (Frobenius Norm $$\Vert \cdot \Vert_F = \Vert \cdot \Vert_{S_2}$$):** The norm is self-dual ($$q=2$$).
-    $$p-1=1$$. The formula becomes:
+    Then $$p-1=1$$. The formula becomes:
 
     $$
     \boxed{\,J_F(A) = J_{S_2}(A) = \frac{U \Sigma V^\top}{\Vert A \Vert_{S_2}} = \frac{A}{\Vert A \Vert_F}\,}
@@ -776,26 +795,38 @@ The matrix $$J_{S_p}(A)$$ is then constructed using the same singular vectors as
     This mapping is unique (if $$A \ne \mathbf{0}$$).
 
 *   **$$p=1$$ (Nuclear Norm $$\Vert \cdot \Vert_{S_1}$$):** Dual is Spectral Norm ($$\Vert \cdot \Vert_{S_\infty}$$, $$q=\infty$$).
-    The general formula for $$1<p<\infty$$ is not directly applicable as $$p-1=0$$. If $$A=U_r \Sigma_r V_r^\top$$ is the compact SVD (with $$r$$ positive singular values), a common choice for the duality mapping (subgradient) is:
+    The general formula for $$1<p<\infty$$ is not directly applicable as $$p-1=0$$. If $$A=U_r \Sigma_r V_r^\top$$ is the compact SVD (with $$r = \mathrm{rank}(A)$$ positive singular values $$\sigma_1, \dots, \sigma_r$$), a common choice for the duality mapping (which is an element of the subgradient $$\partial \Vert A \Vert_{S_1}$$) is:
 
     $$
     \boxed{\,J_{S_1}(A) = U_r V_r^\top\,}
     $$
 
-    More generally, any $$M = U_r V_r^\top + W$$ where $$U_r^\top W V_r = \mathbf{0}$$ and $$\Vert W \Vert_{S_\infty} \le 1$$ and $$W$$ has support on the zero singular space of $$A$$ will work. The choice $$J_{S_1}(A) = U_rV_r^\top$$ is the unique minimum Frobenius norm subgradient.
-    *Check:* $$\langle A, U_rV_r^\top \rangle_F = \mathrm{tr}((V_r\Sigma_r U_r^\top) U_rV_r^\top) = \mathrm{tr}(\Sigma_r) = \Vert A \Vert_{S_1}$$.
-    And $$\Vert U_rV_r^\top \Vert_{S_\infty} = \sigma_{\max}(U_rV_r^\top) = 1$$ (since its singular values are all 1, assuming $$r \ge 1$$).
+    More generally, any $$M = U_r V_r^\top + W$$ where $$U_r^\top W = \mathbf{0}$$, $$W V_r = \mathbf{0}$$, and $$\Vert W \Vert_{S_\infty} \le 1$$ will work (here $$W$$ lives in the space orthogonal to range/corange of $$A$$). The choice $$J_{S_1}(A) = U_rV_r^\top$$ is the unique minimum Frobenius norm subgradient.
+
+    <details class="details-block" markdown="1">
+    <summary markdown="1">
+    **Check for $$J_{S_1}(A)$$**
+    </summary>
+    *   Condition 1: $$\langle A, U_rV_r^\top \rangle_F = \mathrm{tr}((U_r\Sigma_r V_r^\top)^\top U_rV_r^\top) = \mathrm{tr}(V_r\Sigma_r U_r^\top U_rV_r^\top) = \mathrm{tr}(V_r\Sigma_r V_r^\top) = \mathrm{tr}(\Sigma_r V_r^\top V_r) = \mathrm{tr}(\Sigma_r) = \sum_{i=1}^r \sigma_i = \Vert A \Vert_{S_1}$$.
+    *   Condition 2: We need $$\Vert U_rV_r^\top \Vert_{S_\infty} = 1$$. The matrix $$U_rV_r^\top$$ has singular values equal to 1 (since $$U_r$$ and $$V_r$$ have orthonormal columns, and for $$x \in \mathrm{span}(V_r)$$, $$\Vert U_r V_r^\top x \Vert_2 = \Vert x \Vert_2$$). Thus, its largest singular value is 1 (assuming $$r \ge 1$$, i.e., $$A \neq \mathbf{0}$$). So, $$\Vert U_rV_r^\top \Vert_{S_\infty} = 1$$.
+    </details>
 
 *   **$$p=\infty$$ (Spectral Norm $$\Vert \cdot \Vert_{S_\infty}$$):** Dual is Nuclear Norm ($$\Vert \cdot \Vert_{S_1}$$, $$q=1$$).
-    This is also the $$\ell_2 \to \ell_2$$ operator norm. If $$\sigma_1 > \sigma_2$$ (largest singular value is simple), let $$u_1, v_1$$ be the corresponding top left and right singular vectors.
+    This is also the $$\ell_2 \to \ell_2$$ operator norm. If $$\sigma_1 > \sigma_2$$ (largest singular value is simple), let $$u_1, v_1$$ be the corresponding top left and right singular vectors (columns of $$U$$ and $$V$$ respectively).
 
     $$
     \boxed{\,J_{S_\infty}(A) = u_1 v_1^\top\,}
     $$
 
-    If $$\sigma_1$$ is not simple, $$J_{S_\infty}(A)$$ is any convex combination of $$u_i v_i^\top$$ for all $$i$$ such that $$\sigma_i = \sigma_1$$.
-    *Check:* $$\langle A, u_1v_1^\top \rangle_F = u_1^\top A v_1 = u_1^\top (\sigma_1 u_1) = \sigma_1 = \Vert A \Vert_{S_\infty}$$.
-    And $$\Vert u_1v_1^\top \Vert_{S_1} = \Vert u_1 \Vert_2 \Vert v_1 \Vert_2 = 1 \cdot 1 = 1$$.
+    If $$\sigma_1$$ is not simple (i.e., if $$k > 1$$ singular values are equal to $$\sigma_1$$), then $$J_{S_\infty}(A)$$ is any convex combination of $$u_i v_i^\top$$ for all $$i$$ such that $$\sigma_i = \sigma_1$$. The simplest choice is often just one such pair.
+
+    <details class="details-block" markdown="1">
+    <summary markdown="1">
+    **Check for $$J_{S_\infty}(A)$$**
+    </summary>
+    *   Condition 1: $$\langle A, u_1v_1^\top \rangle_F = \mathrm{tr}(A^\top u_1v_1^\top) = v_1^\top A^\top u_1 = (u_1^\top A v_1)^\top$$. Since $$A v_1 = \sigma_1 u_1$$, then $$u_1^\top A v_1 = u_1^\top (\sigma_1 u_1) = \sigma_1 \Vert u_1 \Vert_2^2 = \sigma_1 = \Vert A \Vert_{S_\infty}$$. So $$\langle A, u_1v_1^\top \rangle_F = \sigma_1$$.
+    *   Condition 2: We need $$\Vert u_1v_1^\top \Vert_{S_1} = 1$$. The matrix $$u_1v_1^\top$$ is a rank-one matrix. Its only non-zero singular value is $$\Vert u_1 \Vert_2 \Vert v_1 \Vert_2 = 1 \cdot 1 = 1$$. So, its nuclear norm (sum of singular values) is 1.
+    </details>
 
 #### 3. Mahalanobis-Induced Operator Norm
 
@@ -808,7 +839,7 @@ $$
 
 Let $$C := M^{1/2} A M^{-1/2}$$. Then $$\Vert A \Vert_M = \sigma_{\max}(C) = \sigma_1(C)$$.
 
-**Dual Norm:** $$\Vert \cdot \Vert_{M^{-1}}$$. So, $$\Vert B \Vert_{M^{-1}} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_\infty}$$.
+**Dual Norm:** The dual of $$\Vert \cdot \Vert_M$$ is $$\Vert \cdot \Vert_{M, \ast}$$. It can be shown that $$\Vert B \Vert_{M, \ast} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_1}$$. (Note: The prompt text previously said $$\Vert \cdot \Vert_{M^{-1}}$$ which is a norm but potentially not the direct dual in this context. For operator norms induced by Mahalanobis norms, the dual is more complex. Let's assume the definition $$J_M(A)$$ is chosen to satisfy the conditions with *some* dual norm whose structure is defined by $$J_M(A)$$. For our specific formulation, we are aiming for $$\Vert J_M(A) \Vert_{M,\ast}=1$$.)
 
 **Duality Mapping:** Let $$u_1, v_1$$ be the top singular pair of $$C$$ ($$C v_1 = \sigma_1(C) u_1, C^\top u_1 = \sigma_1(C) v_1$$).
 
@@ -816,27 +847,48 @@ $$
 \boxed{\, J_M(A) = M^{1/2} u_1 v_1^\top M^{-1/2} \,}
 $$
 
-***Check:***
-*   $$\langle A, J_M(A) \rangle_F = \mathrm{tr}(A^\top (M^{1/2} u_1 v_1^\top M^{-1/2})) = \mathrm{tr}(v_1^\top M^{-1/2} A^\top M^{1/2} u_1)$$.
-    Since $$C^\top = (M^{1/2} A M^{-1/2})^\top = M^{-1/2} A^\top M^{1/2}$$, this is
-    $$\mathrm{tr}(v_1^\top C^\top u_1) = u_1^\top C v_1 = u_1^\top (\sigma_1(C) u_1) = \sigma_1(C) \Vert u_1 \Vert_2^2 = \sigma_1(C) = \Vert A \Vert_M$$.
-*   $$\Vert J_M(A) \Vert_{M^{-1}} = \Vert M^{-1/2} (M^{1/2} u_1 v_1^\top M^{-1/2}) M^{1/2} \Vert_{S_\infty} = \Vert I (u_1 v_1^\top) I \Vert_{S_\infty} = \Vert u_1 v_1^\top \Vert_{S_\infty} = 1$$.
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Check and Uniqueness for $$J_M(A)$$**
+</summary>
+**Check:**
+*   Condition 1:
 
-***Uniqueness:*** Unique if $$\sigma_1(C)$$ is simple (up to the usual SVD sign flips).
+    $$
+    \langle A, J_M(A) \rangle_F = \mathrm{tr}(A^\top (M^{1/2} u_1 v_1^\top M^{-1/2})) = \mathrm{tr}(v_1^\top M^{-1/2} A^\top M^{1/2} u_1)
+    $$
+
+    Let $$C = M^{1/2} A M^{-1/2}$$. Then $$C^\top = M^{-1/2} A^\top M^{1/2}$$.
+    So, $$\langle A, J_M(A) \rangle_F = \mathrm{tr}(v_1^\top C^\top u_1) = u_1^\top C v_1$$.
+    Since $$u_1, v_1$$ are the top singular pair of $$C$$, $$C v_1 = \sigma_1(C) u_1$$.
+    Thus, $$u_1^\top C v_1 = u_1^\top (\sigma_1(C) u_1) = \sigma_1(C) \Vert u_1 \Vert_2^2 = \sigma_1(C) = \Vert A \Vert_M$$.
+*   Condition 2: We need to verify $$\Vert J_M(A) \Vert_\ast = 1$$. The dual norm corresponding to $$\Vert \cdot \Vert_M$$ is $$\Vert B \Vert_{M,\ast} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_1}$$.
+    Let's compute this for $$J_M(A)$$:
+
+    $$
+    \Vert M^{-1/2} (M^{1/2} u_1 v_1^\top M^{-1/2}) M^{1/2} \Vert_{S_1} = \Vert I (u_1 v_1^\top) I \Vert_{S_1} = \Vert u_1 v_1^\top \Vert_{S_1}
+    $$
+
+    As shown before, $$\Vert u_1 v_1^\top \Vert_{S_1} = 1$$. So, Condition 2 holds.
+
+**Uniqueness:** Unique if $$\sigma_1(C)$$ is simple (up to the usual SVD sign flips for $$u_1, v_1$$).
+</details>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Derivation for $$J_M(A)$$**
 </summary>
 Let the norm be $$\mathcal{N}(A) = \Vert A \Vert_M = \Vert M^{1/2}A M^{-1/2} \Vert_{S_\infty}$$.
-This can be written as $$\mathcal{N}(A) = \Vert \mathcal{T}(A) \Vert_{S_\infty}$$, where $$\mathcal{T}(X) = M^{1/2}X M^{-1/2}$$ is an invertible linear transformation.
-The duality mapping for $$\Vert \cdot \Vert_{S_\infty}$$ applied to $$C = \mathcal{T}(A)$$ is $$J_{S_\infty}(C) = u_1 v_1^\top$$.
-The general formula for transforming duality mappings is $$J_{\mathcal{N}}(A) = \mathcal{T}^\ast(J_{S_\infty}(\mathcal{T}(A)))$$, where $$\mathcal{T}^\ast$$ is the adjoint of $$\mathcal{T}$$ with respect to the Frobenius inner product.
-We find $$\mathcal{T}^\ast$$:
-$$\langle \mathcal{T}(X), Y \rangle_F = \mathrm{tr}((M^{1/2}X M^{-1/2})^\top Y) = \mathrm{tr}(M^{-1/2}X^\top M^{1/2} Y)$$.
-$$\langle X, \mathcal{T}^\ast(Y) \rangle_F = \mathrm{tr}(X^\top \mathcal{T}^\ast(Y))$$.
-For these to be equal for all $$X,Y$$, we must have $$\mathcal{T}^\ast(Y) = M^{1/2}Y M^{-1/2}$$ (using cyclic property of trace and symmetry of $$M^{1/2}$$).
-So, $$J_M(A) = \mathcal{T}^\ast(u_1 v_1^\top) = M^{1/2} (u_1 v_1^\top) M^{-1/2}$$.
+This can be written as $$\mathcal{N}(A) = \Vert \mathcal{T}_1(A) \Vert_{S_\infty}$$, where $$\mathcal{T}_1(X) = M^{1/2}X M^{-1/2}$$ is an invertible linear transformation.
+The duality mapping for $$\Vert \cdot \Vert_{S_\infty}$$ applied to $$C = \mathcal{T}_1(A)$$ is $$J_{S_\infty}(C) = u_1 v_1^\top$$.
+The dual norm of $$\mathcal{N}(\cdot)$$ is $$\mathcal{N}^\ast(B) = \Vert \mathcal{T}_2(B) \Vert_{S_1}$$, where $$\mathcal{T}_2(Y) = M^{-1/2} Y M^{1/2}$$.
+The duality mapping $$J_{\mathcal{N}}(A)$$ for $$\mathcal{N}(A)$$ is generally given by $$J_{\mathcal{N}}(A) = \mathcal{T}_1^\ast(J_{S_\infty}(\mathcal{T}_1(A)))$$, where $$\mathcal{T}_1^\ast$$ is the adjoint of $$\mathcal{T}_1$$ with respect to the Frobenius inner product.
+We find $$\mathcal{T}_1^\ast$$:
+$$\langle \mathcal{T}_1(X), Y \rangle_F = \mathrm{tr}((M^{1/2}X M^{-1/2})^\top Y) = \mathrm{tr}(M^{-1/2}X^\top M^{1/2} Y)$$.
+$$\langle X, \mathcal{T}_1^\ast(Y) \rangle_F = \mathrm{tr}(X^\top \mathcal{T}_1^\ast(Y)) = \mathrm{tr}(X^\top M^{1/2}Y M^{-1/2})$$ (to make it match the form using cyclic property of trace).
+For these to be equal for all $$X,Y$$, by inspection, we need $$\mathcal{T}_1^\ast(Y) = M^{1/2}Y M^{-1/2}$$.
+So, $$J_M(A) = \mathcal{T}_1^\ast(u_1 v_1^\top) = M^{1/2} (u_1 v_1^\top) M^{-1/2}$$.
+The condition $$\Vert J_M(A) \Vert_{\mathcal{N}^\ast} = 1$$ is then $$\Vert \mathcal{T}_2(J_M(A)) \Vert_{S_1} = \Vert M^{-1/2} (M^{1/2} u_1 v_1^\top M^{-1/2}) M^{1/2} \Vert_{S_1} = \Vert u_1 v_1^\top \Vert_{S_1} = 1$$.
 </details>
 
 #### 4. RMS-Induced Operator Norm
@@ -857,25 +909,47 @@ $$
 \boxed{\, J_R(A) = k \, u_1 v_1^\top = \sqrt{\frac{n_{in}}{n_{out}}} \, u_1 v_1^\top \,}
 $$
 
-***Check:***
-*   $$\langle A, J_R(A) \rangle_F = \left\langle A, k u_1 v_1^\top \right\rangle_F = k \langle A, u_1 v_1^\top \rangle_F = k \, \sigma_{\max}(A) = \Vert A \Vert_R$$.
-*   $$\Vert J_R(A) \Vert_R^\ast = \left\Vert k u_1 v_1^\top \right\Vert_R^\ast = \frac{1}{k} \left\Vert k u_1 v_1^\top \right\Vert_{S_1} = \frac{1}{k} \cdot k \Vert u_1 v_1^\top \Vert_{S_1} = \Vert u_1 v_1^\top \Vert_{S_1} = 1$$.
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Check and Uniqueness for $$J_R(A)$$**
+</summary>
+**Check:**
+*   Condition 1:
 
-***Uniqueness:*** Unique if $$\sigma_{\max}(A)$$ is simple (up to sign flips).
+    $$
+    \langle A, J_R(A) \rangle_F = \left\langle A, k u_1 v_1^\top \right\rangle_F = k \langle A, u_1 v_1^\top \rangle_F
+    $$
+
+    As shown for $$J_{S_\infty}(A)$$, $$\langle A, u_1 v_1^\top \rangle_F = \sigma_{\max}(A)$$.
+    So, $$\langle A, J_R(A) \rangle_F = k \, \sigma_{\max}(A) = \Vert A \Vert_R$$.
+*   Condition 2: We need $$\Vert J_R(A) \Vert_R^\ast = 1$$.
+
+    $$
+    \Vert J_R(A) \Vert_R^\ast = \left\Vert k u_1 v_1^\top \right\Vert_R^\ast = \frac{1}{k} \left\Vert k u_1 v_1^\top \right\Vert_{S_1}
+    $$
+
+    Since $$k$$ is a positive scalar, $$\left\Vert k u_1 v_1^\top \right\Vert_{S_1} = k \left\Vert u_1 v_1^\top \right\Vert_{S_1}$$.
+    We know $$\left\Vert u_1 v_1^\top \right\Vert_{S_1} = 1$$.
+    So, $$\Vert J_R(A) \Vert_R^\ast = \frac{1}{k} \cdot k \cdot 1 = 1$$.
+
+**Uniqueness:** Unique if $$\sigma_{\max}(A)$$ is simple (up to sign flips for $$u_1, v_1$$).
+</details>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Derivation for $$J_R(A)$$**
 </summary>
-Let $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$. We seek $$J_R(A)$$ such that $$\langle A, J_R(A) \rangle_F = k \Vert A \Vert_{S_\infty}$$ and $$\Vert J_R(A) \Vert_R^\ast = \frac{1}{k} \Vert J_R(A) \Vert_{S_1} = 1$$.
-The duality mapping for $$\Vert A \Vert_{S_\infty}$$ is $$J_{S_\infty}(A) = u_1 v_1^\top$$.
-We have $$\langle A, u_1 v_1^\top \rangle_F = \Vert A \Vert_{S_\infty}$$.
-Let's try $$J_R(A) = c \cdot u_1 v_1^\top$$ for some scalar $$c$$.
-Then $$\langle A, c \, u_1 v_1^\top \rangle_F = c \Vert A \Vert_{S_\infty}$$. For this to be $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$, we need $$c=k$$.
-So candidate is $$J_R(A) = k \, u_1 v_1^\top$$.
-Now check the dual norm condition:
-$$\Vert k \, u_1 v_1^\top \Vert_R^\ast = \frac{1}{k} \Vert k \, u_1 v_1^\top \Vert_{S_1} = \frac{k}{k} \Vert u_1 v_1^\top \Vert_{S_1} = 1 \cdot 1 = 1$$.
-Both conditions are satisfied.
+Let $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$. We seek $$J_R(A)$$ such that $$\langle A, J_R(A) \rangle_F = k \Vert A \Vert_{S_\infty}$$ and its dual norm $$\Vert J_R(A) \Vert_R^\ast = 1$$.
+The dual norm is $$\Vert B \Vert_R^\ast = \frac{1}{k} \Vert B \Vert_{S_1}$$.
+The duality mapping for $$\Vert \cdot \Vert_{S_\infty}$$ is $$J_{S_\infty}(A) = u_1 v_1^\top$$, which satisfies $$\langle A, u_1 v_1^\top \rangle_F = \Vert A \Vert_{S_\infty}$$ and $$\Vert u_1 v_1^\top \Vert_{S_1} = 1$$.
+Let's try a scaled version: $$J_R(A) = c \cdot u_1 v_1^\top$$ for some scalar $$c$$.
+For Condition 1:
+$$\langle A, c \, u_1 v_1^\top \rangle_F = c \langle A, u_1 v_1^\top \rangle_F = c \Vert A \Vert_{S_\infty}$$.
+We need this to be equal to $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$. So, $$c = k$$.
+This gives the candidate $$J_R(A) = k \, u_1 v_1^\top$$.
+For Condition 2:
+$$\Vert J_R(A) \Vert_R^\ast = \Vert k \, u_1 v_1^\top \Vert_R^\ast = \frac{1}{k} \Vert k \, u_1 v_1^\top \Vert_{S_1} = \frac{1}{k} \cdot k \Vert u_1 v_1^\top \Vert_{S_1} = 1 \cdot 1 = 1$$.
+Both conditions are satisfied with $$c=k$$.
 </details>
 
 

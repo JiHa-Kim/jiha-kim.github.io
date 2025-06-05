@@ -193,6 +193,7 @@ Lau, Long, and Su (2025) highlight a crucial distinction between two types of an
     $$
     \kappa_G(X) = \kappa_2(\nabla f(X)) = \frac{\sigma_{\max}(\nabla f(X))}{\sigma_{\min_+(}(\nabla f(X))}
     $$
+
     where $$\sigma_{\min_+}$$ is the smallest non-zero singular value. A high $$\kappa_G(X)$$ means the gradient operator stretches space non-uniformly along its principal directions. Matrix-aware methods, particularly those involving orthogonalization, aim to drive $$\kappa_G(X) \to 1$$.
 </blockquote>
 
@@ -202,22 +203,30 @@ Consider the matrix quadratic regression problem:
 Find $$X \in \mathbb{R}^{m \times n}$$ that minimizes $$f(X) = \frac{1}{2} \Vert AXB - C \Vert_F^2$$, where $$A \in \mathbb{R}^{p \times m}$$, $$B \in \mathbb{R}^{n \times q}$$, and $$C \in \mathbb{R}^{p \times q}$$.
 
 *   The gradient is:
+
     $$
     \nabla f(X) = A^\top (AXB - C) B^\top
     $$
+
 *   The Hessian (viewing $$X$$ as a vector in $$\mathbb{R}^{mn}$$) can be written using the Kronecker product $$\otimes$$:
+
     $$
     \nabla^2 f(X) = (BB^\top) \otimes (A^\top A)
     $$
+
     Its condition number is $$\kappa_H = \kappa_2(BB^\top) \kappa_2(A^\top A) = \kappa_2(A)^2 \kappa_2(B)^2$$.
 *   **Inverse-Hessian Preconditioning:** An ideal update direction (like in Newton's method for this quadratic) would be:
+
     $$
     G_{\text{pre}}(X) = (\nabla^2 f(X))^{-1} \mathrm{vec}(\nabla f(X))
     $$
+
     Which, for matrices, corresponds to pre- and post-multiplying the gradient matrix:
+
     $$
     G_{\text{pre}}(X) = (A^\top A)^{-1} \nabla f(X) (BB^\top)^{-1}
     $$
+
     This directly addresses curvature anisotropy.
 *   **Gradient Orthogonalization:** If we instead replace $$\nabla f(X)$$ with its matrix sign, $$\mathrm{sign}(\nabla f(X))$$ (which is an orthogonal matrix if $$\nabla f(X)$$ is full rank and square, or an isometry otherwise), the condition number of this update direction becomes 1 (ideal gradient anisotropy). However, this discards all magnitude information from the singular values of $$\nabla f(X)$$, potentially ignoring crucial curvature information.
 
@@ -244,21 +253,27 @@ This norm is invariant to layer dimensions (e.g., $$\Vert I_D \Vert_{\text{DA}} 
 As emphasized by Bernstein & Newhouse (2024), parameters $$W$$ live in a primal space $$V$$, while gradients $$\nabla \mathcal{L}(W)$$ live in the dual space $$V^\ast$$. Directly subtracting gradients from parameters ($$W - \eta g$$) is ill-posed unless an appropriate mapping (metric) from $$V^\ast$$ to $$V$$ is chosen. This is the **duality mismatch**.
 
 Metrized learning addresses this by defining a **modular norm** for the entire network:
+
 $$
 \Vert (W_1,\dots,W_L) \Vert_{\text{mod}} = \left(\sum_{l=1}^L \alpha_l\,\Vert W_l\Vert_{(l)}^p\right)^{1/p}
 $$
+
 Here, $$\Vert W_l \Vert_{(l)}$$ is a chosen norm for layer $$l$$ (e.g., $$\Vert W_l \Vert_{\text{DA}}$$), allowing tailored geometries.
 
 ### 2.3. The Modular Duality Map ($$\mathcal{D}_{\text{mod}}$$) and Steepest Descent
 
 The chosen modular norm defines how to map the gradient from the dual space to a "corrected" update direction in the primal space. This is done via the **modular duality map** $$\mathcal{D}_{\text{mod}}$$. The update becomes:
+
 $$
 W_{t+1} = W_t - \eta \, \mathcal{D}_{\text{mod}}(g_t)
 $$
+
 For a layer $$l$$ with gradient $$G_l$$, if the chosen norm is $$\Vert W_l \Vert_{\text{DA}}$$, the corresponding component of the duality map (the steepest descent direction in the primal space) is:
+
 $$
 (\mathcal{D}_{\text{mod}}(g_t))_l = s_l \cdot \mathrm{sign}(G_l)
 $$
+
 where $$s_l = \sqrt{d_{in,l}/d_{out,l}}$$ and $$\mathrm{sign}(G_l)$$ is the matrix sign of the gradient for layer $$l$$. This choice implicitly preconditions the gradient by aligning it with the geometry defined by $$\Vert \cdot \Vert_{\text{DA}}$$.
 
 ## Part 3: Muon Optimizer – Spectral Descent in Action
@@ -268,20 +283,24 @@ The Muon optimizer (Bernstein & Newhouse, 2024) directly implements these ideas.
 ### 3.1. Muon's Update Rule as Scaled Matrix Sign Descent
 
 For a linear layer $$l$$, Muon's update (without momentum for simplicity) is:
+
 $$
 W_{l, t+1} = W_{l, t} - \eta_t s_l \mathrm{sign}(G_{l,t})
 $$
+
 The term $$\mathrm{sign}(G_{l,t})$$ represents an update direction whose condition number $$\kappa_G(\mathrm{sign}(G_{l,t}))$$ is 1 (perfectly isotropic in the gradient's own operator space). The scaling factor $$s_l$$ makes this update dimension-aware. This update directly addresses gradient anisotropy by focusing on the "direction" of the gradient matrix.
 
 ### 3.2. Implicit Bias of Spectral Descent (Fan et al., 2025 for multiclass, separable)
 
 The choice of update direction has profound implications for generalization. Fan, Schmidt, & Thrampoulidis (2025) showed that Normalized Steepest Descent (NSD) using a norm $$N(W)$$ implicitly biases the learning towards solutions that maximize the margin with respect to that norm $$N(W)$$.
-The update $$W_{t+1} = W_t - \eta \frac{g_t}{N^\ast(g_t)}$$ (where $$N^\ast$$ is the dual norm) converges (in direction) to the max-$N(W)$-margin classifier.
+The update $$W_{t+1} = W_t - \eta \frac{g_t}{N^\ast(g_t)}$$ (where $$N^\ast$$ is the dual norm) converges (in direction) to the max-$$N(W)$$-margin classifier.
 Muon's update direction $$s_l \mathrm{sign}(g_l)$$ can be seen as NSD with respect to the Dimension-Agnostic Spectral Norm $$\Vert W_l \Vert_{\text{DA}}$$. Its dual norm is $$N^\ast(G_l) = (1/s_l)\Vert G_l \Vert_{S_1}$$ (scaled nuclear norm). Thus,
+
 $$
 s_l \frac{g_l}{\Vert g_l \Vert_{S_1}} = \frac{g_l}{(1/s_l)\Vert g_l \Vert_{S_1}} = \frac{g_l}{N^\ast(g_l)}
 $$
-Since $$g_l/\Vert g_l \Vert_{S_1} = \mathrm{sign}(g_l)$$ (if $g_l$ is full rank or by SVD components), Muon's core update aligns with the direction of NSD w.r.t $$\Vert \cdot \Vert_{\text{DA}}$$. This implies Muon searches for solutions robust in this specific, dimension-aware operator sense.
+
+Since $$g_l/\Vert g_l \Vert_{S_1} = \mathrm{sign}(g_l)$$ (if $$g_l$$ is full rank or by SVD components), Muon's core update aligns with the direction of NSD w.r.t $$\Vert \cdot \Vert_{\text{DA}}$$. This implies Muon searches for solutions robust in this specific, dimension-aware operator sense.
 
 ### 3.3. The Matrix Sign Function: Core of the Update
 
@@ -316,11 +335,12 @@ Given the gradient $$G_k = \nabla f(X_k)$$, compute its polar decomposition $$U_
 $$
 X_{k+1} = X_k - \gamma_k \mathrm{tr}(H_k) U_k = X_k - \gamma_k \Vert G_k \Vert_{S_1} \mathrm{sign}(G_k)
 $$
+
 </blockquote>
 
 **Key Idea:**
 1.  Uses the orthogonal direction $$U_k = \mathrm{sign}(G_k)$$. This component drives the condition number of the *directional part* of the update to 1, directly addressing **gradient anisotropy**.
-2.  Scales this direction by the nuclear norm $$\Vert G_k \Vert_{S_1} = \mathrm{tr}(H_k)$. This reintroduces a measure of the gradient's overall magnitude, making the update sensitive to the "strength" of the gradient, which can be related to curvature.
+2.  Scales this direction by the nuclear norm $$\Vert G_k \Vert_{S_1} = \mathrm{tr}(H_k)$$. This reintroduces a measure of the gradient's overall magnitude, making the update sensitive to the "strength" of the gradient, which can be related to curvature.
 
 PolarGrad thus blends gradient-anisotropy preconditioning (via $$U_k$$) with a specific magnitude scaling (via $$\Vert G_k \Vert_{S_1}$$).
 
@@ -337,7 +357,7 @@ PolarGrad thus blends gradient-anisotropy preconditioning (via $$U_k$$) with a s
 </summary>
 
 *   **Vector Case:**
-    *   **signSGD:** Update $$x_k - \gamma \mathrm{sgn}(g_k)$$. Can be seen as steepest descent w.r.t. $$\Vert \cdot \Vert_\infty$$ (implicit preconditioning). Adam (with $$\beta_1=\beta_2=0$$ and no epsilon) simplifies to $$x_k - \gamma \mathrm{diag}(\vert g_k \vert)^{-1/2} g_k$$ if gradients are normalized by $$1/\sqrt{\vert g_k \vert}$$. If we consider the update $x_k - \gamma \frac{g_k}{\Vert g_k \Vert_1}$, it's like $x_k - \gamma \Vert g_k \Vert_\infty^* \mathrm{sgn}(g_k)$. The paper suggests signSGD can be derived from $x_{k+1} = \arg\min_x \langle g_k, x-x_k \rangle + \frac{1}{2\gamma_k} \Vert x-x_k \Vert_\infty^2 = x_k - \gamma_k \Vert g_k \Vert_1 \mathrm{sgn}(g_k)$. This view suggests an explicit preconditioner $P_k = \mathrm{diag}(\vert g_k \vert)^{-1}$ if we consider the scaling $\Vert g_k \Vert_1$. Adam combines explicit diagonal preconditioning with momentum.
+    *   **signSGD:** Update $$x_k - \gamma \mathrm{sgn}(g_k)$$. Can be seen as steepest descent w.r.t. $$\Vert \cdot \Vert_\infty$$ (implicit preconditioning). Adam (with $$\beta_1=\beta_2=0$$ and no epsilon) simplifies to $$x_k - \gamma \mathrm{diag}(\vert g_k \vert)^{-1/2} g_k$$ if gradients are normalized by $$1/\sqrt{\vert g_k \vert}$$. If we consider the update $$x_k - \gamma \frac{g_k}{\Vert g_k \Vert_1}$$, it's like $$x_k - \gamma \Vert g_k \Vert_\infty^\ast  \mathrm{sgn}(g_k)$$. The paper suggests signSGD can be derived from $$x_{k+1} = \arg\min_x \langle g_k, x-x_k \rangle + \frac{1}{2\gamma_k} \Vert x-x_k \Vert_\infty^2 = x_k - \gamma_k \Vert g_k \Vert_1 \mathrm{sgn}(g_k)$$. This view suggests an explicit preconditioner $$P_k = \mathrm{diag}(\vert g_k \vert)^{-1}$$ if we consider the scaling $$\Vert g_k \Vert_1$$. Adam combines explicit diagonal preconditioning with momentum.
 
 *   **Matrix Case:**
     *   **Shampoo:** Uses explicit left/right Kronecker preconditioners $$L_k^{-1/4} G_k R_k^{-1/4}$$, targeting curvature anisotropy in a structured way.
@@ -354,33 +374,41 @@ PolarGrad thus blends gradient-anisotropy preconditioning (via $$U_k$$) with a s
 An optimizer is *null-gradient consistent* if the magnitude of its update step vanishes as the gradient magnitude approaches zero. Formally, if $$\Vert G_k \Vert \to 0$$, then $$\Vert \text{update}_k \Vert \to 0$$.
 </blockquote>
 
-*   **Muon (original formulation $s_l \mathrm{sign}(G_k)$):** Fails this property. Even if $$\Vert G_k \Vert$$ is tiny, $$\mathrm{sign}(G_k)$$ is an isometry and has a "norm" of 1 (e.g., its spectral norm is 1). So, the update step $$\eta s_l \mathrm{sign}(G_k)$$ does not shrink to zero unless $$\eta \to 0$$. This can cause persistent oscillations near optima.
+*   **Muon (original formulation $$s_l \mathrm{sign}(G_k)$$):** Fails this property. Even if $$\Vert G_k \Vert$$ is tiny, $$\mathrm{sign}(G_k)$$ is an isometry and has a "norm" of 1 (e.g., its spectral norm is 1). So, the update step $$\eta s_l \mathrm{sign}(G_k)$$ does not shrink to zero unless $$\eta \to 0$$. This can cause persistent oscillations near optima.
 *   **PolarGrad ($$\Vert G_k \Vert_{S_1} \mathrm{sign}(G_k)$$)**: Satisfies this. As $$G_k \to \mathbf{0}$$, its singular values go to zero, so $$\Vert G_k \Vert_{S_1} = \sum \sigma_i(G_k) \to 0$$. Thus, the entire update vanishes, promoting stable convergence.
 
 ### 4.5. Momentum Variants (Lau et al., 2025)
 
 PolarGrad can be combined with momentum in various ways:
 *   **Momentum-First (PolarMuon):** Accumulate momentum on raw gradients, then polar decompose the momentum.
+
     $$
     M_k = \beta M_{k-1} + (1-\beta)G_k
     $$
+
     $$
     U_k H_k = \mathrm{polar}(M_k)
     $$
+
     $$
     X_{k+1} = (1-\lambda\gamma_k)X_k - \gamma_k \mathrm{tr}(H_k) U_k \quad \text{(with weight decay } \lambda \text{)}
     $$
+
     This is analogous to standard momentum in Muon but uses PolarGrad's scaling.
 *   **Polar-First:** Polar decompose raw gradients, then accumulate momentum on the orthogonal factors $$U_k$$.
+
     $$
     U_k H_k = \mathrm{polar}(G_k)
     $$
+
     $$
     M_k = \beta M_{k-1} + (1-\beta)U_k
     $$
+
     $$
     X_{k+1} = (1-\lambda\gamma_k)X_k - \gamma_k \mathrm{tr}(H_k) M_k
     $$
+
 *   **Heavy-Ball (PolarHB):** Similar to Momentum-First but momentum is on raw gradients, and this momentum term is then polar decomposed and scaled.
 
 ## Part 5: Theoretical Guarantees and Comparisons
@@ -392,34 +420,45 @@ Let $$r_k = \mathrm{rank}(\nabla f(X_k))$$ and $$\kappa_{G_k} = \kappa_2(\nabla 
 
 1.  **PolarGrad (deterministic gradients):** $$X_{k+1} = X_k - \gamma_k \Vert \nabla f(X_k) \Vert_{S_1} U_k$$
     With step size $$\gamma_k = 1/(L r_k)$$, it satisfies:
+
     $$
-    f(X_{k+1}) - f^* \le \left(1 - \frac{1}{r_k^2 \kappa_H}\right) (f(X_k)-f^*)
+    f(X_{k+1}) - f^\ast  \le \left(1 - \frac{1}{r_k^2 \kappa_H}\right) (f(X_k)-f^\ast )
     $$
+
     and also
+
     $$
-    f(X_{k+1}) - f^* \le \left(1 - \frac{1}{\kappa_{G_k}^2 \kappa_H}\right) (f(X_k)-f^*)
+    f(X_{k+1}) - f^\ast  \le \left(1 - \frac{1}{\kappa_{G_k}^2 \kappa_H}\right) (f(X_k)-f^\ast )
     $$
+
     If $$\kappa_{G_k} \ll r_k$$ (gradient is ill-conditioned but not necessarily low rank), the gradient-conditioned rate can be much faster. With a constant step $$\gamma = 1/(L r_{\max})$$ (where $$r_{\max} = \max_k r_k$$), PolarGrad achieves a linear convergence rate:
+
     $$
-    f(X_k)-f^* = \mathcal{O}\left(\exp\left(-\frac{k}{r_{\max}^2 \kappa_H}\right)\right)
+    f(X_k)-f^\ast  = \mathcal{O}\left(\exp\left(-\frac{k}{r_{\max}^2 \kappa_H}\right)\right)
     $$
 
 2.  **PolarSGD (stochastic gradients):** With unbiased noise and constant step size $$\gamma < 1/(L r_{\max}^2)$$:
+
     $$
-    \mathbb{E}[f(X_k)-f^*] = \mathcal{O}(\exp(-C_1 k) + C_2 \sigma^2)
+    \mathbb{E}[f(X_k)-f^\ast ] = \mathcal{O}(\exp(-C_1 k) + C_2 \sigma^2)
     $$
+
     This shows linear convergence up to a noise floor $$O(\sigma^2)$$.
 
 ### 5.2. Importance of Nuclear Norm Scaling: Matrix Sign Descent Analysis
 
 Consider the update rule using only the matrix sign direction (akin to Muon without its $$s_l$$ scaling or PolarGrad without its nuclear norm scaling):
+
 $$
 X_{k+1} = X_k - \gamma U_k, \quad \text{where } U_k H_k = \mathrm{polar}(\nabla f(X_k))
 $$
-Even with $$\mu$$-strong convexity, Lau et al. (2025) show this leads to a sublinear recursion with a non-zero plateau for $$f(X_k)-f^*$$ (denoted $$\Delta_k$$):
+
+Even with $$\mu$$-strong convexity, Lau et al. (2025) show this leads to a sublinear recursion with a non-zero plateau for $$f(X_k)-f^\ast $$ (denoted $$\Delta_k$$):
+
 $$
 \Delta_{k+1} \le \Delta_k - \gamma \sqrt{2\mu \Delta_k} + \frac{L}{2}\gamma^2 r_{\max}
 $$
+
 This recursion does not guarantee $$\Delta_k \to 0$$ unless $$\gamma$$ decays appropriately, typically yielding only $$O(1/k)$$ rates in convex/non-convex cases.
 **Conclusion:** The nuclear norm scaling $$\Vert G_k \Vert_{S_1}$$ in PolarGrad is crucial for achieving linear convergence in the strongly convex setting analyzed. Muon's $$s_l$$ scaling offers a different mechanism, potentially leading to different convergence characteristics not covered by this specific analysis.
 
