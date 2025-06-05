@@ -204,7 +204,7 @@ So far, our measure $$\mu$$ gives us an *absolute* amount, like kilograms or met
 
 *   **The Problem: Infinite Measure:** But what if the natural underlying measure $$\mu$$ is infinite?
     *   **Example 1: Length on the Real Line.** Consider $$\Omega = \mathbb{R}$$. The natural measure is length (Lebesgue measure), $$\mu$$. But the total length $$\mu(\mathbb{R}) = \infty$$. The normalization formula $$P(E) = \mu(E)/\mu(\Omega)$$ breaks down. Yet, we define probability distributions (like Gaussian) on $$\mathbb{R}$$.
-    *   **Example 2: Counting Measure on Integers.** Let $$\Omega = \mathbb{N} = \{1, 2, 3, ...\}$$. The counting measure gives $$\mu(\mathbb{N}) = \infty$$. Simple normalization fails. How do we define distributions over infinitely many integers?
+    *   **Example 2: Counting Measure on Integers.** Let $$\Omega = \mathbb{N} = \{1, 2, 3, \dots \}$$. The counting measure gives $$\mu(\mathbb{N}) = \infty$$. Simple normalization fails. How do we define distributions over infinitely many integers?
 
 *   **The Problem: Infinite Sequences and Limits:** Probability often deals with infinite sequences of events (e.g., infinite coin flips) requiring robust handling of limits, which simple finite additivity doesn't guarantee.
 
@@ -271,7 +271,7 @@ In summary, thinking in terms of **mass distribution** ($$\mu$$, then normalized
 
 The rigorous definition of measure and probability, especially for continuous spaces like the real line ($$\mathbb{R}$$), yields a result that often feels quite paradoxical at first: the probability of any single, specific outcome is zero.
 
-*   **The "Crazy" Result:** Consider a random variable $$X$$ representing a truly continuous measurement, like the exact height of a person or the exact landing position $$x$$ of a point chosen randomly on a 1-meter line segment $$[0, 1]$$. If the distribution is continuous (described by a PDF $$p(x)$$), what is the probability that $$X$$ takes *exactly* one specific value, say $$X = 175.12345...$$ cm or $$x = 0.5$$? The perhaps startling answer from measure theory is:
+*   **The "Crazy" Result:** Consider a random variable $$X$$ representing a truly continuous measurement, like the exact height of a person or the exact landing position $$x$$ of a point chosen randomly on a 1-meter line segment $$[0, 1]$$. If the distribution is continuous (described by a PDF $$p(x)$$), what is the probability that $$X$$ takes *exactly* one specific value, say $$X = 175.12345\dots $$ cm or $$x = 0.5$$? The perhaps startling answer from measure theory is:
 
     $$
     P(X = x_0) = 0 \quad \text{for any single point } x_0
@@ -303,7 +303,7 @@ Now that we have our object ($$\Omega$$), its measurable structure ($$\mathcal{F
 *   **Motivation:** We roll the die ($$\omega$$ occurs) – what number $$X(\omega)$$ appears? We measure a person's height ($$\omega$$ occurs) – what is their height $$X(\omega)$$ in cm?
 *   **Analogy:** A **random variable $$X$$** corresponds to assigning a **measurable physical property** (like temperature $$T(\omega)$$, position $$x(\omega)$$, or the numerical value itself) to each point $$\omega$$ in our object $$\Omega$$.
 *   **Formal Definition:** A **random variable** is a function $$X: \Omega \to \mathbb{R}$$.
-*   **Running Example (Die Roll):** Let $$X$$ be the face value shown: $$X(\omega) = \omega$$ for $$\omega \in \{1, ..., 6\}$$.
+*   **Running Example (Die Roll):** Let $$X$$ be the face value shown: $$X(\omega) = \omega$$ for $$\omega \in \{1, \dots , 6\}$$.
 
 *   **The Crucial Measurability Requirement:** Can *any* function $$X: \Omega \to \mathbb{R}$$ be a random variable? No. It must be compatible with our defined resolution $$\mathcal{F}$$. We need to be able to determine the probability (mass) of events defined by $$X$$, like "$$X \le x$$".
 *   **Motivation:** To calculate $$P(X \le x)$$, which is $$P(\{\omega \in \Omega \mid X(\omega) \le x\})$$, the set $$\{\omega \in \Omega \mid X(\omega) \le x\}$$ must be one of the regions we know how to measure – it must be in $$\mathcal{F}$$. This must hold for *all* possible thresholds $$x$$.
@@ -311,12 +311,13 @@ Now that we have our object ($$\Omega$$), its measurable structure ($$\mathcal{F
 
 <blockquote class="prompt-warning" markdown="1">
 A function $$X: \Omega \to \mathbb{R}$$ is **measurable** w.r.t. $$\mathcal{F}$$ (and thus a valid random variable for the space $$(\Omega, \mathcal{F}, P)$$) if for every real number $$x$$, the set
+
 $$
 \{\omega \in \Omega \mid X(\omega) \le x\} \in \mathcal{F}
 $$
 
 </blockquote>
-*   **Running Example (Die Roll):** Our $$X(\omega) = \omega$$ is measurable w.r.t. the power set $$\mathcal{F}$$. For any $$x$$, the set $$\{\omega \mid \omega \le x\}$$ is a subset of $$\{1, ..., 6\}$$, and all subsets are in $$\mathcal{F}$$.
+*   **Running Example (Die Roll):** Our $$X(\omega) = \omega$$ is measurable w.r.t. the power set $$\mathcal{F}$$. For any $$x$$, the set $$\{\omega \mid \omega \le x\}$$ is a subset of $$\{1, \dots , 6\}$$, and all subsets are in $$\mathcal{F}$$.
 
 *   **Cumulative Distribution Function (CDF):** For any random variable $$X$$, we can define its **Cumulative Distribution Function (CDF)** as $$F_X(x) = P(X \le x)$$. This function gives the probability that the random variable takes on a value less than or equal to $$x$$.
     *   **Analogy:** The CDF $$F_X(x)$$ corresponds to the **total accumulated normalized mass** associated with the property $$X$$ from the minimum possible value up to the value $$x$$. For the 1D rod analogy where $$X$$ is position, $$F_X(x)$$ is the fraction of the total mass contained in the segment $$(-\infty, x]$$ of the rod. It's like sweeping from the left end and measuring the fraction of mass encountered up to point $$x$$. In the discrete case (like the die roll), the CDF $$F_X(x)$$ is a step function, where the value jumps up by the probability mass $$P(X=x_i)$$ at each possible outcome $$x_i$$. It still represents the total accumulated probability up to value $$x$$. The CDF always increases (or stays level) from 0 to 1 as $$x$$ goes from $$-\infty$$ to $$+\infty$$.

@@ -105,26 +105,26 @@ The online algorithm does *not* know $$u$$ or the future losses when making its 
 
 A natural strategy is to choose the action at time $$t$$ that would have been optimal for the *past* rounds $$1, \dots, t-1$$. This uses all information available (from past rounds).  
 
-*   In the example game: The best action in hindsight after $$T$$ rounds is $$x^*_T = \frac{1}{T} \sum_{t=1}^T y_t$$.
-*   FTL Strategy: $$x_t = x^*_{t-1} = \frac{1}{t-1} \sum_{i=1}^{t-1} y_i$$ (for $$t > 1$$).
+*   In the example game: The best action in hindsight after $$T$$ rounds is $$x^\ast _T = \frac{1}{T} \sum_{t=1}^T y_t$$.
+*   FTL Strategy: $$x_t = x^\ast _{t-1} = \frac{1}{t-1} \sum_{i=1}^{t-1} y_i$$ (for $$t > 1$$).
 
 **Analysis of FTL for the Guessing Game:**
 
-*   **Lemma 1.2 (Hannan's Lemma):** Let $$x^*_t = \arg\min_{x \in V} \sum_{i=1}^t \ell_i(x)$$. Then for any sequence of loss functions $$\ell_t$$:
+*   **Lemma 1.2 (Hannan's Lemma):** Let $$x^\ast _t = \arg\min_{x \in V} \sum_{i=1}^t \ell_i(x)$$. Then for any sequence of loss functions $$\ell_t$$:
 
     $$
-    \sum_{t=1}^T \ell_t(x^*_t) \le \sum_{t=1}^T \ell_t(x^*_T)
+    \sum_{t=1}^T \ell_t(x^\ast _t) \le \sum_{t=1}^T \ell_t(x^\ast _T)
     $$
 
     (Playing adaptively based on past data is no worse than playing the single best action in hindsight).
-*   **Theorem 1.3:** For the number guessing game ($$\ell_t(x)=(x-y_t)^2, y_t \in [0,1]$$), the FTL strategy ($$x_t = x^*_{t-1}$$) achieves:
+*   **Theorem 1.3:** For the number guessing game ($$\ell_t(x)=(x-y_t)^2, y_t \in [0,1]$$), the FTL strategy ($$x_t = x^\ast _{t-1}$$) achieves:
 
     $$
     \text{Regret}_T \le 4 + 4 \ln T
     $$
 
     This is sublinear in $$T$$, so FTL "wins" this specific game.
-*   **Proof Idea:** Use Lemma 1.2 to bound the regret against the *sequence* $$x^*_1, \dots, x^*_T$$. Then bound the difference between consecutive optimal actions $$|x^*_{t-1} - x^*_t|$$. Show this difference decreases quickly enough (like $$O(1/t)$$), and the sum is bounded by $$O(\ln T)$$.
+*   **Proof Idea:** Use Lemma 1.2 to bound the regret against the *sequence* $$x^\ast _1, \dots, x^\ast _T$$. Then bound the difference between consecutive optimal actions $$\vert x^\ast _{t-1} - x^\ast _t\vert $$. Show this difference decreases quickly enough (like $$O(1/t)$$), and the sum is bounded by $$O(\ln T)$$.
 
 **Key Takeaways from FTL Example:**
 

@@ -100,10 +100,10 @@ This leads us to consider methods that learn representations directly from the d
 ## **3.B Mathematical Formalization: From Words to Vectors**  
 
 ### **One-Hot Encoding: A Simple but Inefficient Approach**  
-One of the earliest ideas in representing text numerically is **one-hot encoding**. If we consider a vocabulary $$ V $$ of size $$ |V| $$, we can represent each word as a binary vector of length $$ |V| $$:
+One of the earliest ideas in representing text numerically is **one-hot encoding**. If we consider a vocabulary $$ V $$ of size $$ \vert V\vert  $$, we can represent each word as a binary vector of length $$ \vert V\vert  $$:
 
 $$
-w_i \rightarrow \mathbf{e}_i \in \mathbb{R}^{|V|}
+w_i \rightarrow \mathbf{e}_i \in \mathbb{R}^{\vert V\vert }
 $$
 
 where $$ \mathbf{e}_i $$ is a vector with all zeros except for a 1 at the $$ i $$-th index.  
@@ -118,7 +118,7 @@ $$
 However, this representation has **severe drawbacks**:
 1. **High Dimensionality**: If 
 
-$$ |V| $$ is large (millions of words), these vectors become extremely sparse and computationally inefficient.
+$$ \vert V\vert  $$ is large (millions of words), these vectors become extremely sparse and computationally inefficient.
 1. **No Semantic Information**: The vectors for "dog" and "cat" are as dissimilar as "dog" and "jump", which does not reflect real-world meaning.
 
 Thus, we need a representation that captures **semantic similarities** while being computationally feasible.
@@ -132,14 +132,14 @@ $$
 w_i \rightarrow \mathbf{v}_i \in \mathbb{R}^{d}
 $$
 
-where $$d \ll |V|$$, 
+where $$d \ll \vert V\vert $$, 
 meaning instead of huge sparse vectors, we now have compact, information-rich representations.
 
 Tokenization becomes an optimization problem: find a vocabulary $$V$$ that minimizes both vocabulary size and the average number of tokens per text:
 
-$$\min_{V} \left( |V| + \mathbb{E}_{text}[|\text{Tokenize}(text)|] \right)$$
+$$\min_{V} \left( \vert V\vert  + \mathbb{E}_{text}[\vert \text{Tokenize}(text)\vert ] \right)$$
 
-The embedding maps each token to a vector in $$\mathbb{R}^d$$, creating a sequence $$X = [x_1, x_2, ..., x_n]$$ where $$x_i \in \mathbb{R}^d$$.
+The embedding maps each token to a vector in $$\mathbb{R}^d$$, creating a sequence $$X = [x_1, x_2, \dots , x_n]$$ where $$x_i \in \mathbb{R}^d$$.
 
 These embeddings are **learned from data** rather than being manually assigned. Popular techniques include:
 
@@ -240,27 +240,27 @@ $$
 Based on the cosine law:
 
 $$
-\|\mathbf{x}-\mathbf{y}\|^2 = \|\mathbf{x}\|^2 + \|\mathbf{y}\|^2 - 2 \mathbf{x}^\top \mathbf{y} = \|\mathbf{x}\|^2 + \|\mathbf{y}\|^2 - 2\|\mathbf{x}\| \|\mathbf{y}\| \cos(\theta)
+\Vert \mathbf{x}-\mathbf{y}\Vert ^2 = \Vert \mathbf{x}\Vert ^2 + \Vert \mathbf{y}\Vert ^2 - 2 \mathbf{x}^\top \mathbf{y} = \Vert \mathbf{x}\Vert ^2 + \Vert \mathbf{y}\Vert ^2 - 2\Vert \mathbf{x}\Vert  \Vert \mathbf{y}\Vert  \cos(\theta)
 $$
 
-where $\mathbf{x}$ and $\mathbf{y}$ are vectors of length $n$, the norms are the Euclidean norm and $\theta$ is the angle between them. 
+where $$\mathbf{x}$$ and $$\mathbf{y}$$ are vectors of length $$n$$, the norms are the Euclidean norm and $$\theta$$ is the angle between them. 
 
 Thus:
 
 $$
-\mathbf{x}^\top \mathbf{y} = \|\mathbf{x}\| \|\mathbf{y}\| \cos(\theta)
+\mathbf{x}^\top \mathbf{y} = \Vert \mathbf{x}\Vert  \Vert \mathbf{y}\Vert  \cos(\theta)
 $$
 
 This defines the **cosine similarity**.
 
 $$
-\text{cosine}(\mathbf{x}, \mathbf{y}) = \cos \theta = \frac{\mathbf{x}^\top \mathbf{y}}{\|\mathbf{x}\| \|\mathbf{y}\|}
+\text{cosine}(\mathbf{x}, \mathbf{y}) = \cos \theta = \frac{\mathbf{x}^\top \mathbf{y}}{\Vert \mathbf{x}\Vert  \Vert \mathbf{y}\Vert }
 $$
 
 We can interpret each of $$Q=XW_Q$$ and $$K=XW_K$$ as a concatenation of the weight matrices $$W_Q$$ and $$W_K$$ transforming each row vector in the input $$X$$. Thus, when we compute $$S = QK^\top$$, we are computing the cosine similarity between each row in $$Q$$ and each row in $$K$$, scaled by the magnitude of the vectors:
 
 $$
-S_{ij} = Q_i K_j^\top = \|Q_i\| \|K_j\| \cos(\theta_{ij})
+S_{ij} = Q_i K_j^\top = \Vert Q_i\Vert  \Vert K_j\Vert  \cos(\theta_{ij})
 $$
 
 where indices are taken over the individual rows of $$Q$$ and $$K$$, and $$\theta_{ij}$$ is the angle between the $$Q_i$$ and $$K_j$$ vectors.
@@ -274,16 +274,16 @@ Note that the product is generalized by an "inner product", so-called because in
 Doing a little trigonometry shows that the dot product of a vector with a unit vector is the orthogonal projection of the vector onto the unit vector:
 
 $$
-a \cdot \frac{b}{\|b\|} = \|a\| \cos(\theta) = \text{proj}_b(a)
+a \cdot \frac{b}{\Vert b\Vert } = \Vert a\Vert  \cos(\theta) = \text{proj}_b(a)
 $$
 
-where $$\theta$$ is the angle between the vectors. Thus, for general unnormalized vectors $a$ and $b$, we have the dot product:
+where $$\theta$$ is the angle between the vectors. Thus, for general unnormalized vectors $$a$$ and $$b$$, we have the dot product:
 
 $$
-a\cdot b = \|a\|\|b\| \cos(\theta) = \|a\| \text{proj}_b(a) = \|b\| \text{proj}_a(b).
+a\cdot b = \Vert a\Vert \Vert b\Vert  \cos(\theta) = \Vert a\Vert  \text{proj}_b(a) = \Vert b\Vert  \text{proj}_a(b).
 $$
 
-where $$\text{proj}_a(b)$$ is the orthogonal projection of $b$ onto $a$.
+where $$\text{proj}_a(b)$$ is the orthogonal projection of $$b$$ onto $$a$$.
 
 ---
 
@@ -292,7 +292,7 @@ where $$\text{proj}_a(b)$$ is the orthogonal projection of $b$ onto $a$.
 The **cosine similarity** normalizes out the length of vectors:
 
 $$
-\cos(\theta_{ij}) = \frac{Q_i \cdot K_j^\top}{\|Q_i\| \|K_j\|}
+\cos(\theta_{ij}) = \frac{Q_i \cdot K_j^\top}{\Vert Q_i\Vert  \Vert K_j\Vert }
 $$
 
 In self-attention, **we don’t explicitly compute cosine similarity**, but the dot product implicitly captures it **scaled by vector lengths**.
@@ -375,12 +375,12 @@ Because:
 
 #### **Summary: Dot Product, Cosine, Normalization**
 
-| **Concept**                       | **Formula**                                                  | **Purpose**                                           |
-| --------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------- |
-| Dot Product                       | $$Q_i \cdot K_j^\top$$                                       | Measures alignment + magnitude interaction            |
-| Cosine Similarity                 | $$\frac{Q_i \cdot K_j^\top}{\\|Q_i\\|\\|K_j\\|}$$            | Pure directional similarity                           |
-| Softmax                           | $$\text{softmax} \left( \frac{QK^\top}{\sqrt{d_k}} \right)$$ | Converts raw scores into normalized attention weights |
-| Normalizing Factor $$\sqrt{d_k}$$ | Divides dot product                                          | Prevents large variance; keeps softmax outputs stable |
+| **Concept**                       | **Formula**                                                       | **Purpose**                                           |
+| --------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------- |
+| Dot Product                       | $$Q_i \cdot K_j^\top$$                                            | Measures alignment + magnitude interaction            |
+| Cosine Similarity                 | $$\frac{Q_i \cdot K_j^\top}{\\Vert Q_i\\Vert \\Vert K_j\\Vert }$$ | Pure directional similarity                           |
+| Softmax                           | $$\text{softmax} \left( \frac{QK^\top}{\sqrt{d_k}} \right)$$      | Converts raw scores into normalized attention weights |
+| Normalizing Factor $$\sqrt{d_k}$$ | Divides dot product                                               | Prevents large variance; keeps softmax outputs stable |
 
 ---
 
@@ -468,10 +468,13 @@ $$
 This suggests defining **reduced representations** for each token by projecting \(x\) onto the subspaces spanned by \(U\) and \(V\):
 
 - **Reduced Query:**
+
   $$
   \tilde{q} = x\,U \in \mathbb{R}^{1 \times d_k},
   $$
+
 - **Reduced Key:**
+
   $$
   \tilde{k} = x\,V \in \mathbb{R}^{1 \times d_k}.
   $$
@@ -501,22 +504,31 @@ $$
 **Summary of the Updated Math:**
 
 1. **Traditional Computation:**
+
    $$
    q = x\,W_Q,\quad k = x\,W_K,\quad q\,k^\top = x\,W_Q\,W_K^\top\,x^\top.
    $$
+
 2. **Reduced SVD Factorization:**
+
    $$
    M = W_Q\,W_K^\top = U\,\Sigma\,V^\top.
    $$
+
 3. **Reduced Representations:**
+
    $$
    \tilde{q} = x\,U,\quad \tilde{k} = x\,V.
    $$
+
 4. **Weighted Sum Formulation:**
+
    $$
    q\,k^\top = \sum_{i=1}^{d_k} \sigma_i\, \tilde{q}_i\, \tilde{k}_i.
    $$
+
 5. **Asymmetric Reweighting:**
+
    $$
    \hat{q} = \Sigma\,\tilde{q},\quad q\,k^\top = {\hat{q}}^\top\,\tilde{k}.
    $$
@@ -530,51 +542,53 @@ For our concrete example, we set:
 We explicitly construct \( M \) by choosing:
 - Two random \(3 \times 3\) orthogonal matrices and taking their first two columns to form \( U \) and \( V \), respectively.
 - An asymmetric diagonal matrix:
-  \[
+
+  $$
   \Sigma = \begin{bmatrix} 2.5 & 0 \\ 0 & 0.8 \end{bmatrix}.
-  \]
+  $$
   
 Thus, we define
 
-\[
+$$
 M = U\,\Sigma\,V^\top.
-\]
+$$
 
 In our example, numerical outputs (up to rounding) were:
 
 - **\( \Sigma \):**
 
-  \[
+  $$
   \Sigma = \begin{bmatrix} 2.5 & 0 \\ 0 & 0.8 \end{bmatrix}.
-  \]
+  $$
 
 - **\( U \):** (denoted here as \( U_{\text{orth}} \))
   
-  \[
+  $$
   U = \begin{bmatrix}
   -0.8083 & -0.4115 \\
   -0.5877 &  0.5192 \\
    0.0367 & -0.7491
   \end{bmatrix},
-  \]
+  $$
   
 - **\( V \):** (denoted here as \( V_{\text{orth}} \))
   
-  \[
+  $$
   V = \begin{bmatrix}
   -0.5948 &  0.0413 \\
   -0.7862 & -0.2381 \\
   -0.1676 &  0.9704
   \end{bmatrix}.
-  \]
+  $$
 
 - The SVD of \( M \) confirms the singular values are \( \sigma_1 = 2.5 \) and \( \sigma_2 = 0.8 \) (with the third singular value essentially zero, since the rank is at most 2).
 
 We then choose a token embedding \( x_i \in \mathbb{R}^3 \) as, for example,
 
-\[
+$$
 x_i = \begin{bmatrix} 0.8 \\ 0.3 \\ 0.5 \end{bmatrix},
-\]
+$$
+
 normalized so that \( \|x_i\| = 1 \) for easier viewing.
 
 #### **Summary of the Setup with Numbers**
@@ -582,27 +596,33 @@ normalized so that \( \|x_i\| = 1 \) for easier viewing.
 - **Dimensions:** \( d = 3 \), \( d_k = 2 \)
 - **Matrix Construction:**  
   - \( U \) (from random orthonormal basis):
-    \[
+
+    $$
     U = \begin{bmatrix}
     -0.8083 & -0.4115 \\
     -0.5877 &  0.5192 \\
      0.0367 & -0.7491
     \end{bmatrix}
-    \]
+    $$
+
   - \( V \) (from random orthonormal basis):
-    \[
+
+    $$
     V = \begin{bmatrix}
     -0.5948 &  0.0413 \\
     -0.7862 & -0.2381 \\
     -0.1676 &  0.9704
     \end{bmatrix}
-    \]
+    $$
+
   - \( \Sigma = \begin{bmatrix} 2.5 & 0 \\ 0 & 0.8 \end{bmatrix} \)
   - Constructed \( M = U\,\Sigma\,V^\top \).
 - **Token:**  
-  \[
+
+  $$
   x_i = \begin{bmatrix} 0.8 \\ 0.3 \\ 0.5 \end{bmatrix} \text{ (normalized for viewing)}
-  \]
+  $$
+
 - **Reduced Representations:**
   - \( \tilde{q} = x_i\,U \) (projection onto the \( U \)-subspace).
   - \( \hat{q} = \Sigma\,\tilde{q} \) (after reweighting/scaling).
@@ -774,7 +794,7 @@ axA1.quiver(0,0,0, 0,1,0, color='g', linestyle='dashed')
 axA1.quiver(0,0,0, 0,0,1, color='b', linestyle='dashed')
 axA1.quiver(0,0,0, x_i[0], x_i[1], x_i[2], color='magenta', linewidth=3, arrow_length_ratio=0.1)
 axA1.scatter(x_i[0], x_i[1], x_i[2], color='magenta', s=100)
-axA1.set_title('Original 3D Sphere + $x_i$')
+axA1.set_title('Original 3D Sphere + $$x_i$$')
 axA1.set_xlim([-1.5, 1.5]); axA1.set_ylim([-1.5, 1.5]); axA1.set_zlim([-1.5, 1.5])
 axA1.view_init(elev=elev, azim=azim)
 
@@ -791,7 +811,7 @@ axA2.quiver(0,0,0, u2[0],u2[1],u2[2], color='b', linestyle='dashed')
 axA2.quiver(0,0,0, q_tilde_3D[0], q_tilde_3D[1], q_tilde_3D[2],
             color='magenta', linewidth=3, arrow_length_ratio=0.1)
 axA2.scatter(q_tilde_3D[0], q_tilde_3D[1], q_tilde_3D[2], color='magenta', s=100)
-axA2.set_title('Range(U) + $\\tilde{q}_i$')
+axA2.set_title('Range(U) + $$\\tilde{q}_i$$')
 axA2.set_xlim([-1.5, 1.5]); axA2.set_ylim([-1.5, 1.5]); axA2.set_zlim([-1.5, 1.5])
 axA2.view_init(elev=elev, azim=azim)
 plt.tight_layout()
@@ -819,7 +839,7 @@ axB.quiver(0,0,0, q_hat_3D[0], q_hat_3D[1], q_hat_3D[2],
 axB.scatter(q_hat_3D[0], q_hat_3D[1], q_hat_3D[2], color='green', s=100)
 axB.plot3D(ellipse_points_U[:,0], ellipse_points_U[:,1], ellipse_points_U[:,2], color='green', linewidth=2)
 axB.set_xlim([-3, 3]); axB.set_ylim([-3, 3]); axB.set_zlim([-3, 3])
-axB.set_title('Range(U): Rescaling $\\tilde{q}_i$ via $\\Sigma$')
+axB.set_title('Range(U): Rescaling $$\\tilde{q}_i$$ via $$\\Sigma$$')
 axB.view_init(elev=elev, azim=azim)
 plt.tight_layout()
 plt.show()
@@ -834,7 +854,7 @@ axC1.quiver(0,0,0, 0,0,1, color='b', linestyle='dashed')
 axC1.quiver(0,0,0, x_j[0], x_j[1], x_j[2], color='orange',
             linewidth=3, arrow_length_ratio=0.1)
 axC1.scatter(x_j[0], x_j[1], x_j[2], color='orange', s=100)
-axC1.set_title('Original 3D Sphere + $x_j$')
+axC1.set_title('Original 3D Sphere + $$x_j$$')
 axC1.set_xlim([-1.5, 1.5]); axC1.set_ylim([-1.5, 1.5]); axC1.set_zlim([-1.5, 1.5])
 axC1.view_init(elev=elev, azim=azim)
 
@@ -850,7 +870,7 @@ axC2.quiver(0,0,0, v2[0],v2[1],v2[2], color='b', linestyle='dashed')
 axC2.quiver(0,0,0, k_tilde_3D[0], k_tilde_3D[1], k_tilde_3D[2],
             color='orange', linewidth=3, arrow_length_ratio=0.1)
 axC2.scatter(k_tilde_3D[0], k_tilde_3D[1], k_tilde_3D[2], color='orange', s=100)
-axC2.set_title('Range(V) + $\\tilde{k}_j$')
+axC2.set_title('Range(V) + $$\\tilde{k}_j$$')
 axC2.set_xlim([-1.5, 1.5]); axC2.set_ylim([-1.5, 1.5]); axC2.set_zlim([-1.5, 1.5])
 axC2.view_init(elev=elev, azim=azim)
 plt.tight_layout()
@@ -867,18 +887,18 @@ figD, axD = plt.subplots(figsize=(6,6))
 axD.axhline(0, color='gray', lw=0.5)
 axD.axvline(0, color='gray', lw=0.5)
 axD.quiver(0, 0, q_hat[0], q_hat[1], angles='xy', scale_units='xy', scale=1,
-           color='green', width=0.005, label=r'$\hat{q} = \Sigma\,\tilde{q}$')
+           color='green', width=0.005, label=r'$$\hat{q} = \Sigma\,\tilde{q}$$')
 axD.quiver(0, 0, k_tilde[0], k_tilde[1], angles='xy', scale_units='xy', scale=1,
-           color='orange', width=0.005, label=r'$\tilde{k}$')
+           color='orange', width=0.005, label=r'$$\tilde{k}$$')
 axD.plot([0, proj_vector[0]], [0, proj_vector[1]], color='blue', linestyle='dashed', linewidth=2,
-         label='Projection of $\\tilde{k}$ onto $\\hat{q}$')
+         label='Projection of $$\\tilde{k}$$ onto $$\\hat{q}$$')
 
 axD.plot(q_hat[0], q_hat[1], 'go', markersize=8)
 axD.plot(k_tilde[0], k_tilde[1], 'o', color='orange', markersize=8)
 axD.plot(proj_vector[0], proj_vector[1], 'bo', markersize=8)
 
-textstr = (r'$\hat{q}^\top\,\tilde{k} = ||\hat{q}||\,||\mathrm{proj}_{\hat{q}}(\tilde{k})||$' + '\n' +
-           r'$= %.2f \times %.2f = %.2f$' % (norm_q_hat, abs(proj_length), dot_product))
+textstr = (r'$$\hat{q}^\top\,\tilde{k} = ||\hat{q}||\,||\mathrm{proj}_{\hat{q}}(\tilde{k})||$$' + '\n' +
+           r'$$= %.2f \times %.2f = %.2f$$' % (norm_q_hat, abs(proj_length), dot_product))
 axD.text(0.05, 0.95, textstr, transform=axD.transAxes, fontsize=12,
          verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 

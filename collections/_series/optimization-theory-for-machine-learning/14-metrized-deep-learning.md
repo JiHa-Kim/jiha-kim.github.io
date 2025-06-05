@@ -423,26 +423,29 @@ $$
 **Muon Connection:** The Muon optimizer uses the **Dimension-Agnostic Spectral Norm** for matrix layers, which we denote as $$N(W) = \Vert W \Vert_{\text{DA}} = s \Vert W \Vert_2 = s \cdot \sigma_{\max}(W)$$, where $$s = \sqrt{d_{in}/d_{out}}$$ and $$\sigma_{\max}(W)$$ is the standard spectral norm (Schatten-$$\infty$$ norm).
 The dual norm to this is $$N^\ast(G) = (1/s) \Vert G \Vert_{tr}$$, where $$\Vert G \Vert_{tr}$$ is the trace norm (Schatten-1 norm).
 The NSD update for such a layer is:
+
 $$
 W_{t+1} = W_t - \eta \frac{g_t}{N^\ast(g_t)} = W_t - \eta \frac{g_t}{(1/s)\Vert g_t \Vert_{tr}} = W_t - \eta s \frac{g_t}{\Vert g_t \Vert_{tr}}
 $$
+
 Since $$g_t / \Vert g_t \Vert_{tr} = \operatorname{sign}(g_t)$$ (the matrix sign of the gradient), the update direction is proportional to $$s \cdot \operatorname{sign}(g_t)$$. This aligns with Muon's update for linear layers (potentially with momentum).
 
 **Main Result (Fan et al.):**
 For NSD (and this extends to NMD - Normalized Momentum Descent - under suitable conditions):
-1.  **Margin Maximization:** The direction of the weights, $$\hat W_t = W_t/N(W_t)$$, converges to $$W^{\star}$$, where $$W^{\star}$$ is the classifier that **maximizes the margin with respect to the norm used for NSD updates, $N(\cdot)$**:
+1.  **Margin Maximization:** The direction of the weights, $$\hat W_t = W_t/N(W_t)$$, converges to $$W^{\star}$$, where $$W^{\star}$$ is the classifier that **maximizes the margin with respect to the norm used for NSD updates, $$N(\cdot)$$**:
 
     $$
     W^{\star} = \arg\max_{N(W)=1} \gamma(W) \quad \text{where} \quad \gamma(W) = \min_i y_i^{\top}Wx_i
     $$
 
     (assuming $$y_i$$ are one-hot and inputs $$x_i$$ are normalized for simplicity of margin definition here).
-2.  **Muon's Implicit Bias:** For matrix layers, Muon uses the Dimension-Agnostic Spectral Norm $$N(W) = \sqrt{d_{in}/d_{out}} \sigma_{\max}(W)$$. Thus, it has an implicit bias towards finding the separator that **maximizes the margin with respect to this specific $N(W)$ norm**. This is a powerful generalization property.
+2.  **Muon's Implicit Bias:** For matrix layers, Muon uses the Dimension-Agnostic Spectral Norm $$N(W) = \sqrt{d_{in}/d_{out}} \sigma_{\max}(W)$$. Thus, it has an implicit bias towards finding the separator that **maximizes the margin with respect to this specific $$N(W)$$ norm**. This is a powerful generalization property.
 3.  **Convergence Rate:** The convergence of the angle to the max-margin solution is characterized by:
 
     $$
     1-\frac{\langle\hat W_t,W^{\star}\rangle}{N(W^{\star})} = \mathcal{O}((\log t)^{-1})
     $$
+
     (where the denominator term ensures proper normalization if $$N(W^\star) \ne 1$$).
 </blockquote>
 
@@ -454,8 +457,8 @@ Imagine a binary classification task where data points $$x_i$$ have labels $$y_i
 
 For matrices $$W$$ in multiclass settings, the "margin" $$\min_i y_i^{\top}Wx_i$$ measures how confidently the least confidently correct prediction is made. Normalizing by a chosen norm $$N(W)$$ gives the N-norm margin.
 
-*   **Frobenius Norm Margin ($N(W) = \Vert W \Vert_F$):** Maximizing this tends to find solutions where the sum of squares of all weights is constrained. It might spread out the "importance" across all weight elements.
-*   **Dimension-Agnostic Spectral Norm Margin ($N(W) = \Vert W \Vert_{\text{DA}} = \sqrt{d_{in}/d_{out}}\sigma_{\max}(W)$):** Maximizing this constrains this scaled version of the largest singular value. This encourages solutions where the matrix $$W$$, when its operator gain is measured from RMS-input to RMS-output (i.e., in a dimension-agnostic way), is controlled. This leads to a form of dimension-aware, operator-level robustness, promoting stability and good generalization, especially in deep networks where layers compose and dimensions can vary widely.
+*   **Frobenius Norm Margin ($$N(W) = \Vert W \Vert_F$$):** Maximizing this tends to find solutions where the sum of squares of all weights is constrained. It might spread out the "importance" across all weight elements.
+*   **Dimension-Agnostic Spectral Norm Margin ($$N(W) = \Vert W \Vert_{\text{DA}} = \sqrt{d_{in}/d_{out}}\sigma_{\max}(W)$$):** Maximizing this constrains this scaled version of the largest singular value. This encourages solutions where the matrix $$W$$, when its operator gain is measured from RMS-input to RMS-output (i.e., in a dimension-agnostic way), is controlled. This leads to a form of dimension-aware, operator-level robustness, promoting stability and good generalization, especially in deep networks where layers compose and dimensions can vary widely.
 </details>
 
 This theorem provides a strong theoretical motivation for using dimension-agnostic spectral norm descent: it naturally searches for solutions that are robust in a specific, operator-theoretic, and dimensionally-aware sense.
@@ -538,6 +541,7 @@ The modular duality update is equivalent to mirror descent with the potential fu
 $$
 \psi(W) = \frac{1}{2} \Vert W \Vert_{\text{mod}}^2 = \frac{1}{2} \sum_l \alpha_l \Vert W_l \Vert_{(l)}^2
 $$
+
 (assuming $$p=2$$ in the modular norm definition). If $$\Vert W_l \Vert_{(l)} = \Vert W_l \Vert_{\text{DA}}$$ (the dimension-agnostic spectral norm), then this potential is defined using these specific layer norms. The resulting updates, when worked out, align with the $$s_l \operatorname{sign}(g_l)$$ form for linear layers.
 
 This connection links metrized optimizers to the rich theory of online learning and regret minimization, where mirror descent is a foundational algorithm (related to Follow-The-Regularized-Leader, see Post #13).

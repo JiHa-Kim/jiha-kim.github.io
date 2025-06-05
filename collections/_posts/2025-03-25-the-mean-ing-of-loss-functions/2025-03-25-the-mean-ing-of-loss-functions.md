@@ -241,7 +241,7 @@ That means that the conditional expectation is a function of the slice $$X$$, so
 
 In both scenarios, $$E[Y \vert X=x]$$ gives the "local mean" of $$Y$$ in the context provided by $$X=x$$. It defines a function of $$x$$, often called the **regression function**.
 
-**Example 1 (Discrete):** Let $$X$$ be the result of a fair die roll ($$\{1, ..., 6\}$$) and $$Y = X^2$$.
+**Example 1 (Discrete):** Let $$X$$ be the result of a fair die roll ($$\{1, \dots , 6\}$$) and $$Y = X^2$$.
 If we observe $$X=3$$, then $$Y$$ is deterministically $$3^2=9$$. So, $$E[Y \vert X=3] = 9$$.
 In this case, $$E[Y \vert X=x] = x^2$$.
 
@@ -304,13 +304,13 @@ These diagrams should help clarify how $$E[Y\vert X=x]$$ relates to the distribu
 
 Now, let's formally state why $$E[Y\vert X]$$ is the optimal predictor under expected squared error. We are looking for the function $$f(X)$$ that minimizes $$E[(Y - f(X))^2]$$.
 
-It's a fundamental result in probability theory that the unique function $$f^*(x)$$ achieving this minimum is precisely the conditional expectation function:
+It's a fundamental result in probability theory that the unique function $$f^\ast (x)$$ achieving this minimum is precisely the conditional expectation function:
 
 $$
-f^*(x) = E[Y \vert X=x]
+f^\ast (x) = E[Y \vert X=x]
 $$
 
-This means that the predictor $$f^*(X) = E[Y \vert X]$$ minimizes the expected squared error $$E[(Y - f(X))^2]$$ over all possible functions $$f$$ that depend only on $$X$$.
+This means that the predictor $$f^\ast (X) = E[Y \vert X]$$ minimizes the expected squared error $$E[(Y - f(X))^2]$$ over all possible functions $$f$$ that depend only on $$X$$.
 
 Intuitively, this optimality arises because the conditional expectation acts like an orthogonal projection in a space of random variables (specifically, the Hilbert space $$L^2$$). It finds the function of $$X$$ that is "closest" to $$Y$$ in terms of the average squared difference. *(The rigorous proof involves the Hilbert Projection Theorem and is provided in [Appendix A](#appendix-a-formal-justification-for-conditional-expectation).)*
 
@@ -550,10 +550,12 @@ While L2 loss targets the conditional mean $$E[Y \vert X]$$, alternative loss fu
 #### L1 Loss (Mean Absolute Error - MAE)
 
 The pointwise L1 loss is the absolute difference:
+
 $$
 \ell_{L1}(y, \hat{y}) =  \vert y - \hat{y} \vert 
 $$
-Minimizing the sum of absolute errors $$ \sum_{i=1}^N  \vert y_i - c \vert  $$ for a constant predictor $$c$$ yields the **median** of the data $$\{y_1, \dots, y_N\}$$. More generally, the function $$f(x)$$ that minimizes the expected absolute error $$ E[  \vert Y - f(X) \vert  ] $$ is the **conditional median** function, $$ f^*(x) = \text{Median}(Y  \vert  X=x) $$.
+
+Minimizing the sum of absolute errors $$ \sum_{i=1}^N  \vert y_i - c \vert  $$ for a constant predictor $$c$$ yields the **median** of the data $$\{y_1, \dots, y_N\}$$. More generally, the function $$f(x)$$ that minimizes the expected absolute error $$ E[  \vert Y - f(X) \vert  ] $$ is the **conditional median** function, $$ f^\ast (x) = \text{Median}(Y  \vert  X=x) $$.
 
 **Key Aspects:**
 *   **Target:** Conditional median.
@@ -563,6 +565,7 @@ Minimizing the sum of absolute errors $$ \sum_{i=1}^N  \vert y_i - c \vert  $$ f
 #### Huber Loss
 
 Huber loss provides a compromise between L1 and L2, defined piecewise using a threshold $$\delta$$:
+
 $$
 L_\delta(y, \hat{y}) =
 \begin{cases}
@@ -570,6 +573,7 @@ L_\delta(y, \hat{y}) =
 \delta ( \vert y - \hat{y} \vert  - \frac{1}{2}\delta) & \text{for }  \vert y - \hat{y} \vert  > \delta \quad (\text{L1-like})
 \end{cases}
 $$
+
 It benefits from L2's smoothness near the minimum and L1's robustness for larger errors. The choice between L1, L2, and Huber depends on the data's noise characteristics and the desired robustness.
 
 ---

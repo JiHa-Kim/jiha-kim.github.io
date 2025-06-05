@@ -257,6 +257,7 @@ Let's revisit our goal: understanding the structure of $$\Pr(\cup A_i)$$ using t
 Using our indicator function toolkit:
 *   The indicator for the complement $$A_i^c$$ is $$1_{A_i^c} = 1 - 1_{A_i}$$.
 *   The indicator for the intersection $$\bigcap A_i^c$$ is the product of the individual indicators:
+
     $$
     1_{\bigcap A_i^c} = \prod_{i=1}^n 1_{A_i^c} = \prod_{i=1}^n (1 - 1_{A_i})
     $$

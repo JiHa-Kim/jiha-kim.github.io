@@ -222,6 +222,7 @@ If a norm satisfies this property, then it must be a positive scalar multiple of
 $$
 \Vert x \Vert = c \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n
 $$
+
 </blockquote>
 
 <blockquote class="box-proposition" markdown="1">

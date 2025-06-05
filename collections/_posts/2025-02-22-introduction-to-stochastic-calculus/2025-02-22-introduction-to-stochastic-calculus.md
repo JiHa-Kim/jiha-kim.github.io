@@ -613,6 +613,7 @@ Here is a list of notation used in this document:
 $$
 \lim_{dt \to 0} \frac{E[(dW)^2-dt]^2}{dt}=0
 $$
+
 - $$f_t:=\frac{\partial f}{\partial t}$$ is the partial derivative of $$f$$ with respect to $$t$$
 - $$f_xx:=\frac{\partial^2 f}{\partial x^2}$$ is the second order partial derivative of $$f$$ with respect to $$x$$
 
