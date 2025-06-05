@@ -212,6 +212,36 @@ where $$\vec{1}$$ is the vector of all ones in $$\mathbb{R}^n$$.
 1.  **Dimension neutrality.** If the coordinates of $$x$$ are i.i.d. with variance $$1$$—for instance $$x_i \sim \mathcal{N}(0,1)$$—then $$\mathbb{E}\Vert x \Vert_{\mathrm{RMS}} = 1$$ *no matter how large* $$n$$ is. This property makes the notion of “unit‑size’’ consistent for vectors of varying dimensions, such as activations from layers of different widths.
 2.  **Rotational invariance.** Because the vector RMS norm is a scaled version of the $$\ell_2$$‑norm, it inherits the property of rotational invariance, treating every direction in $$\mathbb{R}^n$$ identically.
 
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem 1.** Any rotationally invariant norm on $$\mathbb{R}^n$$ is a positively scaled $$\ell_2$$-norm.
+</div>
+A norm $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is **rotationally invariant** if $$\Vert Qx \Vert = \Vert x \Vert$$ for all orthogonal matrices $$Q \in O(n)$$ (i.e., $$Q^\top Q = I$$) and all vectors $$x \in \mathbb{R}^n$$.
+If a norm satisfies this property, then it must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm. That is, there exists a constant $$c > 0$$ such that:
+
+$$
+\Vert x \Vert = c \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n
+$$
+</blockquote>
+
+<blockquote class="box-proposition" markdown="1">
+<div class="title" markdown="1">
+**Corollary 1.1.** Any rotationally and dimensionally invariant norm is the RMS-norm.
+</div>
+Consider a function $$\mathcal{N}$$ that defines a norm $$\mathcal{N}_n(\cdot)$$ on each space $$\mathbb{R}^n$$ (for $$n \ge 1$$).
+If this family of norms satisfies:
+1.  **Rotational Invariance:** Each norm $$\mathcal{N}_n(\cdot)$$ is rotationally invariant on $$\mathbb{R}^n$$ (meaning $$\mathcal{N}_n(x) = c_n \Vert x \Vert_2$$ for some $$c_n > 0$$, by Theorem 1).
+2.  **Dimensional Invariance:** The family is *dimensionally invariant*. This means that for vectors $$X^{(n)} \in \mathbb{R}^n$$ whose components are i.i.d. random variables with zero mean and unit variance (e.g., $$X_i \sim \mathcal{N}(0,1)$$), the expected value $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ is a constant $$K$$ that is independent of the dimension $$n$$.
+
+Then, each $$\mathcal{N}_n(x)$$ must be a positive scalar multiple of the RMS-norm for $$x \in \mathbb{R}^n$$. Specifically, the scaling constants $$c_n$$ must be of the form $$K'/\sqrt{n}$$ for some constant $$K' > 0$$ (related to $$K$$). Thus, for any $$n$$ and any $$x \in \mathbb{R}^n$$:
+
+$$
+\mathcal{N}_n(x) = K' \cdot \frac{\Vert x \Vert_2}{\sqrt{n}} = K' \cdot \Vert x \Vert_{\mathrm{RMS}}
+$$
+
+If, by convention or normalization, this constant $$K'$$ is 1 (e.g., if the dimensional invariance is specifically $$\mathbb{E}[\mathcal{N}_n(X^{(n)})] = 1$$, as is the case for the RMS-norm itself), then the norm family is precisely the RMS-norm family.
+</blockquote>
+
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
 **Tip.** When to reach for the vector RMS norm
