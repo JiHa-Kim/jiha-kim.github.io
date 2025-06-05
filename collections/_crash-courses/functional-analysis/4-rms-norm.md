@@ -199,6 +199,7 @@ If a function $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is a **norm** 
 $$
 \Vert x \Vert = c \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n, \text{ for some constant } c > 0
 $$
+
 </blockquote>
 
 <details class="details-block" markdown="1">
@@ -332,7 +333,7 @@ A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it 
 <summary markdown="1">
 **Proof of Theorem 4.**
 </summary>
-($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$.
 1. Norm properties: Verified (it's a positive multiple of the $$\ell_2$$ norm).
 2. Orthogonal invariance: Holds by Theorem 2.
 3. Normalization: $$f(e_1) = \frac{1}{\sqrt{n}}\Vert e_1 \Vert_2 = \frac{1}{\sqrt{n}} \cdot 1 = \frac{1}{\sqrt{n}}$$.
@@ -361,7 +362,7 @@ A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it 
 <summary markdown="1">
 **Proof of Theorem 5.**
 </summary>
-($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$.
 1. Nondegeneracy, (2) Absolute homogeneity, (4) Continuity/Triangle Inequality (it's a norm): Verified.
 3. **Pythagorean additivity:** If $$x^\top y=0$$, then by the Pythagorean theorem for the Euclidean norm, $$\Vert x+y \Vert_2^2 = \Vert x \Vert_2^2 + \Vert y \Vert_2^2$$.
     So, $$f(x+y)^2 = \frac{1}{n}\Vert x+y \Vert_2^2 = \frac{1}{n}(\Vert x \Vert_2^2 + \Vert y \Vert_2^2) = \left(\frac{1}{\sqrt{n}}\Vert x \Vert_2\right)^2 + \left(\frac{1}{\sqrt{n}}\Vert y \Vert_2\right)^2 = f(x)^2 + f(y)^2$$.
@@ -397,7 +398,7 @@ A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it 
 <summary markdown="1">
 **Proof of Theorem 6.**
 </summary>
-($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$.
 1. Nondegeneracy, (2) Absolute homogeneity: Verified.
 3. **Permutation & sign-flip symmetry:** The sum of squares $$\sum x_i^2$$ is invariant under permutation of coordinates and changes of sign $$x_i \to \pm x_i$$. Thus, $$f(x)$$ which involves $$\sqrt{\sum x_i^2}$$ is also invariant.
     $$f(\pm x_{\sigma(1)},\dots,\pm x_{\sigma(n)})^2 = \frac{1}{n}\sum_{j=1}^n (\pm x_{\sigma(j)})^2 = \frac{1}{n}\sum_{j=1}^n x_{\sigma(j)}^2 = \frac{1}{n}\sum_{k=1}^n x_k^2 = f(x)^2$$. Taking square roots (since $$f \ge 0$$) gives the symmetry.
@@ -433,7 +434,7 @@ A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is the RMS norm if and only if it 
 <summary markdown="1">
 **Proof of Theorem 7.**
 </summary>
-($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$.
+($$\Rightarrow$$) **Necessity:** RMS norm is $$f(x) = \frac{1}{\sqrt{n}}\Vert x \Vert_2$$.
 1. Norm properties: Verified.
 2. Permutation & sign-flip symmetry: Verified (as in Theorem 6 proof).
 3. Structural property:
@@ -447,7 +448,7 @@ All axioms hold.
 *   Axiom (1) states $$f$$ is a norm.
 *   Axiom (3):
     *   If $$f$$ (a norm) satisfies the parallelogram identity, it is an inner product norm (by Jordan-von Neumann theorem). If additionally Axiom (2) (permutation & sign-flip symmetry) holds, such a norm must be of the form $$c\Vert x \Vert_2$$ for some $$c>0$$ (a known result, e.g., from theory of symmetric gauge functions).
-    *   Alternatively, if $$f$$ (a norm) is rotationally invariant, then by Corollary 1.1, $$f(x)=c\Vert x \Vert_2$$ for some $$c>0$$. (In this case, Axiom (2) is largely implied by rotational invariance for $$n \ge 2$$; for $$n=1$$, $f(x_1)=f(-x_1)$ is true for any norm).
+    *   Alternatively, if $$f$$ (a norm) is rotationally invariant, then by Corollary 1.1, $$f(x)=c\Vert x \Vert_2$$ for some $$c>0$$. (In this case, Axiom (2) is largely implied by rotational invariance for $$n \ge 2$$; for $$n=1$$, $$f(x_1)=f(-x_1)$$ is true for any norm).
 *   So, from Axioms (1), (2), and (3), we deduce $$f(x) = c \Vert x \Vert_2$$ for some constant $$c > 0$$.
 *   Apply Axiom (4) (Normalization on $$\vec{1}$$): $$f(\vec{1}) = 1$$.
     Substituting the form of $$f$$: $$c \Vert \vec{1} \Vert_2 = 1$$.
