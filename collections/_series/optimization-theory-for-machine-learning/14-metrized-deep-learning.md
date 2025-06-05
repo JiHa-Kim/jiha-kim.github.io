@@ -191,7 +191,7 @@ Lau, Long, and Su (2025) highlight a crucial distinction between two types of an
 2.  **Gradient Anisotropy:** Pertains to the non-uniformity within the *gradient matrix itself* when viewed as an operator. For a matrix parameter $$X$$ and its gradient $$\nabla f(X)$$, this is captured by the **gradient condition number**:
 
     $$
-    \kappa_G(X) = \kappa_2(\nabla f(X)) = \frac{\sigma_{\max}(\nabla f(X))}{\sigma_{\min_+(}(\nabla f(X))}
+    \kappa_G(X) = \kappa_2(\nabla f(X)) = \frac{\sigma_{\max}(\nabla f(X))}{\sigma_{\min_+}(\nabla f(X))}
     $$
 
     where $$\sigma_{\min_+}$$ is the smallest non-zero singular value. A high $$\kappa_G(X)$$ means the gradient operator stretches space non-uniformly along its principal directions. Matrix-aware methods, particularly those involving orthogonalization, aim to drive $$\kappa_G(X) \to 1$$.
@@ -475,8 +475,16 @@ PolarGrad uses the same core direction $$\mathrm{sign}(G_l)$$ but scales it by $
 
 A practical bottleneck is computing $$\mathrm{sign}(G)$$ or the full polar decomposition.
 *   **Direct SVD:** Too slow for large matrices in DL.
-*   **Newton-Schulz Iteration:** Used in some motivations for Muon. Iterates $$X_{k+1} = \frac{1}{2} X_k (3I - X_k^\top X_k)$$. Can be ill-conditioned and requires careful scaling/tuning.
-*   **Polar Express (Amsel et al., 2025):** A faster, more robust algorithm for the matrix sign $$\mathrm{sign}(G)$$, using dynamically chosen polynomial updates.
+*   **Newton-Schulz Iteration:** Used in some motivations for Muon. Iterates $$X_{k+1} = \frac{1}{2} X_k (3I - X_k^\top X_k)$$. While using only matrix-matrix products, it suffers from slow initial convergence (linear order until $$\Vert I-X_k^{\!\top}X_k\Vert_2 \lt 0.2$$) and can be sensitive to the condition number of $$X_k$$.
+*   **Polar Express (Amsel et al., 2025):** A *minimax-optimal* polynomial iteration for the matrix-sign / polar factors. Each step chooses the best composite polynomial for the current spectral interval, guaranteeing the strongest possible contraction factor. The method uses only matrix–matrix multiplies, is GPU-friendly, and remains numerically stable in **bfloat16**. In Muon and PolarGrad loops it trims 1–2 iterations off every forward step, translating into ≈10 % wall-time savings on GPT-2 while improving validation loss. (Amsel et al., 2025)
+
+    <blockquote class="box-example" markdown="1">
+    <div class="title" markdown="1">
+    **Example.** Polar Express vs. Newton–Schulz
+    </div>
+    For a weight-gradient matrix with condition number $$10^3$$, Newton–Schulz needs **7** iterations to hit $$\|I-X^{\!\top}X\|_2 < 10^{-4}$$; Polar Express reaches the same tolerance in **3** iterations on the same GPU batch. (Amsel et al., 2025)
+    </blockquote>
+
 *   **Robust Solvers for Full Polar Decomposition (advocated by Lau et al., 2025 for PolarGrad):**
     *   **QDWH (QR-based Dynamically Weighted Halley)**
     *   **ZOLO-PD (Zolotarev-based Polar Decomposition)**
