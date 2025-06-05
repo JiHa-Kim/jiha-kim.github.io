@@ -214,9 +214,9 @@ where $$\vec{1}$$ is the vector of all ones in $$\mathbb{R}^n$$.
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
-**Theorem 1.** Any rotationally invariant norm on $$\mathbb{R}^n$$ is a positively scaled $$\ell_2$$-norm.
+**Theorem 1.** Any orthogonally invariant norm on $$\mathbb{R}^n$$ is a positively scaled $$\ell_2$$-norm.
 </div>
-A norm $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is **rotationally invariant** if $$\Vert Qx \Vert = \Vert x \Vert$$ for all orthogonal matrices $$Q \in O(n)$$ (i.e., $$Q^\top Q = I$$) and all vectors $$x \in \mathbb{R}^n$$.
+A norm $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is **orthogonally invariant** if $$\Vert Qx \Vert = \Vert x \Vert$$ for all orthogonal matrices $$Q \in O(n)$$ (i.e., $$Q^\top Q = I$$) and all vectors $$x \in \mathbb{R}^n$$.
 If a norm satisfies this property, then it must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm. That is, there exists a constant $$c > 0$$ such that:
 
 $$
@@ -229,7 +229,7 @@ $$
 <summary markdown="1">
 **Proof of Theorem 1.**
 </summary>
-Let $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ be a norm that is rotationally invariant. This means $$\Vert Qx \Vert = \Vert x \Vert$$ for all orthogonal matrices $$Q \in O(n)$$ and all vectors $$x \in \mathbb{R}^n$$.
+Let $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ be a norm that is orthogonally invariant. This means $$\Vert Qx \Vert = \Vert x \Vert$$ for all orthogonal matrices $$Q \in O(n)$$ and all vectors $$x \in \mathbb{R}^n$$.
 
 1.  If $$x = \mathbf{0}$$, then $$\Vert x \Vert = 0$$. The theorem statement $$\Vert x \Vert = c \Vert x \Vert_2$$ holds for any $$c$$ since $$\Vert x \Vert_2 = 0$$.
 
@@ -259,16 +259,16 @@ Let $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ be a norm that is rotati
     \Vert x \Vert = c \Vert x \Vert_2
     $$
 
-    This holds for all $$x \in \mathbb{R}^n$$ (including $$x=\mathbf{0}$$). Thus, any rotationally invariant norm on $$\mathbb{R}^n$$ must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm.
+    This holds for all $$x \in \mathbb{R}^n$$ (including $$x=\mathbf{0}$$). Thus, any orthogonally invariant norm on $$\mathbb{R}^n$$ must be a positive scalar multiple of the Euclidean ($$\ell_2$$) norm.
 </details>
 
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
-**Corollary 1.1.** Any rotationally and dimensionally invariant norm is the RMS-norm.
+**Corollary 1.1.** Any orthogonally and dimensionally invariant norm is the RMS-norm.
 </div>
 Consider a function $$\mathcal{N}$$ that defines a norm $$\mathcal{N}_n(\cdot)$$ on each space $$\mathbb{R}^n$$ (for $$n \ge 1$$).
 If this family of norms satisfies:
-1.  **Rotational Invariance:** Each norm $$\mathcal{N}_n(\cdot)$$ is rotationally invariant on $$\mathbb{R}^n$$ (meaning $$\mathcal{N}_n(x) = c_n \Vert x \Vert_2$$ for some $$c_n > 0$$, by Theorem 1).
+1.  **Rotational Invariance:** Each norm $$\mathcal{N}_n(\cdot)$$ is orthogonally invariant on $$\mathbb{R}^n$$ (meaning $$\mathcal{N}_n(x) = c_n \Vert x \Vert_2$$ for some $$c_n > 0$$, by Theorem 1).
 2.  **Dimensional Invariance:** The family is *dimensionally invariant*. This means that for vectors $$X^{(n)} \in \mathbb{R}^n$$ whose components are i.i.d. random variables with zero mean and unit variance (e.g., $$X_i \sim \mathcal{N}(0,1)$$), the expected value $$\mathbb{E}[\mathcal{N}_n(X^{(n)})]$$ is a constant $$K$$ that is independent of the dimension $$n$$.
 
 Then, each $$\mathcal{N}_n(x)$$ must be a positive scalar multiple of the RMS-norm for $$x \in \mathbb{R}^n$$. Specifically, the scaling constants $$c_n$$ must be of the form $$K'/\sqrt{n}$$ for some constant $$K' > 0$$ (related to $$K$$). Thus, for any $$n$$ and any $$x \in \mathbb{R}^n$$:
@@ -286,7 +286,7 @@ If, by convention or normalization, this constant $$K'$$ is 1 (e.g., if the dime
 </summary>
 Let $$\mathcal{N}$$ be a function defining a family of norms $$\mathcal{N}_n(\cdot)$$ on each $$\mathbb{R}^n$$ ($$n \ge 1$$).
 
-1.  **Rotational Invariance:** By Theorem 1, since each $$\mathcal{N}_n(\cdot)$$ is rotationally invariant, there exists a constant $$c_n > 0$$ for each dimension $$n$$ such that:
+1.  **Rotational Invariance:** By Theorem 1, since each $$\mathcal{N}_n(\cdot)$$ is orthogonally invariant, there exists a constant $$c_n > 0$$ for each dimension $$n$$ such that:
 
     $$
     \mathcal{N}_n(x) = c_n \Vert x \Vert_2 \quad \forall x \in \mathbb{R}^n
@@ -338,7 +338,7 @@ Let $$\mathcal{N}$$ be a function defining a family of norms $$\mathcal{N}_n(\cd
 <div class="title" markdown="1">
 **Tip.** When to reach for the vector RMS norm
 </div>
-Use the vector $$\Vert \cdot \Vert_{\mathrm{RMS}}$$ whenever you need a scale for vectors that is *simultaneously* rotationally symmetric and independent of vector length—e.g.
+Use the vector $$\Vert \cdot \Vert_{\mathrm{RMS}}$$ whenever you need a scale for vectors that is *simultaneously* orthogonally symmetric and independent of vector length—e.g.
 when comparing activations from layers of different widths or designing width‑robust regularizers for activations.
 </blockquote>
 
