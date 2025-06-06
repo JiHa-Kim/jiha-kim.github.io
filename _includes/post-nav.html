@@ -1,14 +1,44 @@
 {% assign previous = site.data.locales[include.lang].post.button.previous %}
 {% assign next = site.data.locales[include.lang].post.button.next %}
 
-{% if page.collection == 'series' %}
-  {% assign sorted = site.series | sort: 'series_index' %}
-{% elsif page.collection == 'crash-courses' %}
-  {% assign sorted = site['crash-courses'] | sort: 'course_index' %}
+{%- comment -%}
+  1. Determine the set of pages to navigate through.
+     - If the page is in a collection (and not 'posts'), we navigate within that specific series/course.
+     - Otherwise, we navigate through the regular blog posts.
+{%- endcomment -%}
+{% if page.collection and page.collection != 'posts' %}
+  {%- comment -%}
+    This is a page within a custom collection (like 'series' or 'crash-courses').
+  {%- endcomment -%}
+  {%- assign collection_data = site[page.collection] -%}
+
+  {%- comment -%}
+    To ensure we only navigate within the *current* series/course,
+    we must filter the collection to items in the same parent directory.
+    - A page.path is like: '_series/my-awesome-series/part-1.md'
+    - We derive the parent prefix: '_series/my-awesome-series/'
+  {%- endcomment -%}
+  {%- assign path_parts = page.path | split: '/' | slice: 0, -1 -%}
+  {%- capture parent_path_prefix -%}{{ path_parts | join: '/' }}/{%- endcapture -%}
+
+  {%- comment -%}
+    Filter the collection by the parent path and then sort by the universal 'sort_index'.
+  {%- endcomment -%}
+  {%- assign sorted = collection_data
+    | where_exp: 'item', 'item.path contains parent_path_prefix'
+    | sort: 'sort_index'
+  -%}
+
 {% else %}
-  {% assign sorted = site.posts %}
+  {%- comment -%}
+    This is a regular blog post. Navigation will be through all posts by date.
+  {%- endcomment -%}
+  {%- assign sorted = site.posts -%}
 {% endif %}
 
+{%- comment -%}
+  2. Find the current page's index within the sorted list.
+{%- endcomment -%}
 {% assign current_index = null %}
 {% for item in sorted %}
   {% if item.url == page.url %}
@@ -16,6 +46,9 @@
   {% endif %}
 {% endfor %}
 
+{%- comment -%}
+  3. Determine the previous and next items.
+{%- endcomment -%}
 {% assign prev_item = null %}
 {% assign next_item = null %}
 {% if current_index %}
@@ -31,6 +64,9 @@
   {% endif %}
 {% endif %}
 
+{%- comment -%}
+  4. Render the navigation buttons.
+{%- endcomment -%}
 <nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation">
   {% if prev_item %}
     <a
