@@ -2,6 +2,7 @@
 layout: post
 title: Properties of Matrix Norms
 date: 2025-06-06 01:50 -0400
+sort_index: 6
 description: Characterizing some properties of matrix norms
 categories:
 - Mathematical Optimization
@@ -134,11 +135,18 @@ llm-instructions: |
   without an explicit request.
 ---
 
-- lemma: (one-sided) rotationally invariant matrix norm is orthogonally invariant iff reflectionally invariant
 - proposition: for matrix norms induced by vector norms
   - left rotationally invariant iff codomain uses Euclidean norm
   - right rotationally invariant iff domain uses Euclidean norm
 - proposition: for matrix norms induced by inner product
   - one-sided rotational invariance (any) implies scalar multiple of Frobenius norm implies unitarily invariant
-- theorem (Von Neumann): matrix norm unitarily invariant iff norm equals some symmetric gauge function of singular values
+- theorem:
+  - left unitarily invariant matrix norm iff depends only on row Gram matrix
+  - right unitarily invariant matrix norm iff depends only on (column) Gram matrix
+- theorem (Von Neumann): matrix norm unitarily invariant on both sides iff norm equals some symmetric gauge function of singular values
+  - symmetric gauge function: norm axioms + invariant under elementwise absolute value and permutation
   - special case: all Schatten p-norms
+
+## References
+
+{% bibliography --file crash-courses/functional-analysis/properties-of-matrix-norms.bib %}

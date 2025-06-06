@@ -385,3 +385,8 @@ Moving from the familiar geometric landscape of Hilbert spaces to the broader re
 While we might "lose" the intuitive comfort of universal orthogonality or the direct identification of a space with its dual (as provided by the Riesz theorem in Hilbert spaces), the analytical machinery built upon Banach spaces is immensely powerful. The Hahn-Banach theorem ensures our dual spaces are rich and meaningful, supporting concepts like subgradients essential for non-smooth optimization. The Banach Fixed Point Theorem provides a cornerstone for proving the existence and uniqueness of solutions to a wide variety of equations that model real-world phenomena, forming the basis for many iterative numerical methods.
 
 Understanding Banach spaces allows us to appreciate the subtleties of convergence, the behavior of linear operators, and the nature of solutions in settings where Euclidean geometry is not the most natural fit. This broader perspective is essential for tackling diverse and complex problems encountered in advanced mathematics, physics, engineering, and the ever-evolving theoretical foundations of machine learning and data science.
+
+## Further Reading
+
+Wikipedia contributors. (2025, April 14). Banach space. Wikipedia. https://en.wikipedia.org/wiki/Banach_space#Linear_operators,_isomorphisms
+Wikipedia contributors. (2024, July 26). List of Banach spaces. Wikipedia. https://en.wikipedia.org/wiki/List_of_Banach_spaces

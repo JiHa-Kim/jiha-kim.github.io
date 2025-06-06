@@ -372,34 +372,7 @@ Parameter-free optimization is a significant step towards more automated and int
 
 The continued dialogue between theoretical understanding, empirical validation, and algorithmic innovation will undoubtedly lead to even more capable and autonomous optimization methods in the years to come.
 
-## 9. A Brief Historical Timeline
-
-The journey towards parameter-free optimization has been a gradual evolution, with key insights building upon each other over several decades.
-
-```mermaid
-gantt
-    title Key Milestones Towards Parameter-Free Optimization
-    dateFormat  YYYY
-    axisFormat %Y
-
-    section Early Foundational Ideas
-    Polyak's Heavy Ball & Step Size :milestone, m0, 1964, 1y
-
-    section Per-Parameter Adaptation
-    AdaGrad (Duchi et al.) :milestone, m2, 2011, 1y
-    RMSprop / Adam :crit, m2a, 2012, 3y
-
-    section Parameter-Free OCO Theory
-    Coin-Betting & Scale-Free OCO :crit, m3, 2016, 2y
-    Parameter-Free OMD (Cutkosky) :crit, m4, 2018, 2y
-
-    section PFO in Deep Learning
-    COCOB-Backprop :milestone, m5, 2017, 1y
-    L4 Optimizer :milestone, m5a, 2018, 1y
-    Continued Research (Schedule-Free, etc.) :active, m6, 2022, 8y
-```
-
-## 10. Further Reading and References
+## Further Reading and References
 
 For those interested in delving deeper into the theory and practice of parameter-free optimization, the following resources are highly recommended:
 

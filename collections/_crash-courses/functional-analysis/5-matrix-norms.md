@@ -44,7 +44,7 @@ llm-instructions: |
     text...
   Use LaTeX commands for symbols as much as possible (e.g. $$\vert$$ for
   absolute value, $$\ast$$ for asterisk). Avoid using the literal vertical bar
-  symbol; use \vert and \Vert instead.
+  symbol; use \vert and \Vert.
 
   The syntax for lists is:
 
@@ -205,108 +205,6 @@ Additionally, many (but not all) matrix norms satisfy **sub-multiplicativity**. 
 This property is particularly important when analyzing compositions of linear transformations, such as sequential layers in a neural network.
 </blockquote>
 
-### 2.1. Some Standard Matrix Norm Inequalities
-
-Beyond the defining properties, matrix norms relate to each other through various useful inequalities. These relationships are particularly handy when converting bounds from one norm to another, or when choosing a norm for computational convenience versus theoretical sharpness.
-
-All norms on the finite-dimensional space $$\mathbb{R}^{m \times n}$$ are **equivalent**. This means that for any two norms $$\Vert \cdot \Vert_a$$ and $$\Vert \cdot \Vert_b$$, there exist positive constants $$c_1, c_2$$ such that $$c_1 \Vert A \Vert_a \le \Vert A \Vert_b \le c_2 \Vert A \Vert_a$$ for all matrices $$A \in \mathbb{R}^{m \times n}$$.
-
-These inequalities are fundamental in many areas of numerical analysis and matrix theory. We provide proofs for some of them below.
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Proofs of Selected Inequalities**
-</summary>
-
-**1. $$\Vert A \Vert_2 \le \Vert A \Vert_F$$**
-
-The spectral norm $$\Vert A \Vert_2$$ is the largest singular value, $$\sigma_{\max}(A)$$. The Frobenius norm is $$\Vert A \Vert_F = \sqrt{\sum_{k=1}^{\min(m,n)} \sigma_k(A)^2}$$.
-Let $$\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$$ be the non-zero singular values of $$A$$, where $$r = \mathrm{rank}(A)$$.
-Then $$\Vert A \Vert_2 = \sigma_1$$.
-And $$\Vert A \Vert_F^2 = \sum_{k=1}^r \sigma_k(A)^2$$.
-Since $$\sigma_1^2$$ is one of the terms in the sum (or the only term if $$r=1$$), and all $$\sigma_k(A)^2 \ge 0$$:
-
-$$
-\Vert A \Vert_2^2 = \sigma_1^2 \le \sum_{k=1}^r \sigma_k(A)^2 = \Vert A \Vert_F^2
-$$
-
-Taking the square root of both sides (since norms are non-negative) yields $$\Vert A \Vert_2 \le \Vert A \Vert_F$$.
-
-**2. $$\Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2$$**
-
-Using the same notation as above ($$\sigma_1 = \Vert A \Vert_2$$ being the largest singular value and $$r = \mathrm{rank}(A)$$-many non-zero singular values):
-We know that for each $$k \in \{1, \ldots, r\}$$, $$\sigma_k(A) \le \sigma_1(A) = \Vert A \Vert_2$$.
-Therefore, $$\sigma_k(A)^2 \le \Vert A \Vert_2^2$$.
-Now consider the square of the Frobenius norm:
-
-$$
-\Vert A \Vert_F^2 = \sum_{k=1}^r \sigma_k(A)^2 \le \sum_{k=1}^r \Vert A \Vert_2^2
-$$
-
-The sum on the right has $$r$$ identical terms:
-
-$$
-\sum_{k=1}^r \Vert A \Vert_2^2 = r \Vert A \Vert_2^2 = \mathrm{rank}(A) \Vert A \Vert_2^2
-$$
-
-So, $$\Vert A \Vert_F^2 \le \mathrm{rank}(A) \Vert A \Vert_2^2$$.
-Taking the square root of both sides gives $$\Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2$$.
-
-</details>
-
-Here are some specific well-known inequalities relating common matrix norms. For a matrix $$A \in \mathbb{R}^{m \times n}$$:
-(The norms $$\Vert A \Vert_1$$, $$\Vert A \Vert_2$$, and $$\Vert A \Vert_\infty$$ refer to the operator norms: max column sum, spectral norm, and max row sum, respectively. The Frobenius norm is $$\Vert A \Vert_F$$. These are formally defined in the subsequent sections.)
-
-1.  **Relating spectral norm ($$\Vert A \Vert_2$$) and Frobenius norm ($$\Vert A \Vert_F$$):**
-
-    $$
-    \Vert A \Vert_2 \le \Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2
-    $$
-
-    Since $$\mathrm{rank}(A) \le \min(m,n)$$, the looser but more common bound $$\Vert A \Vert_F \le \sqrt{\min(m,n)} \Vert A \Vert_2$$ also holds.
-
-2.  **Relating spectral norm ($$\Vert A \Vert_2$$) to max column sum norm ($$\Vert A \Vert_1$$) and max row sum norm ($$\Vert A \Vert_\infty$$):**
-
-    $$
-    \frac{1}{\sqrt{m}} \Vert A \Vert_\infty \le \Vert A \Vert_2 \le \sqrt{n} \Vert A \Vert_\infty
-    $$
-
-    $$
-    \frac{1}{\sqrt{n}} \Vert A \Vert_1 \le \Vert A \Vert_2 \le \sqrt{m} \Vert A \Vert_1
-    $$
-
-3.  **An interpolation-like inequality for the spectral norm:**
-
-    $$
-    \Vert A \Vert_2 \le \sqrt{\Vert A \Vert_1 \Vert A \Vert_\infty}
-    $$
-
-4.  **Relating various norms to the maximum absolute entry, $$\Vert A \Vert_{\max} = \max_{i,j} \vert a_{ij} \vert$$:**
-
-    $$
-    \Vert A \Vert_{\max} \le \Vert A \Vert_2
-    $$
-
-    $$
-    \Vert A \Vert_2 \le \sqrt{mn} \Vert A \Vert_{\max}
-    $$
-
-    $$
-    \Vert A \Vert_F \le \sqrt{mn} \Vert A \Vert_{\max}
-    $$
-
-    $$
-    \Vert A \Vert_1 \le m \Vert A \Vert_{\max}
-    $$
-    
-    $$
-    \Vert A \Vert_\infty \le n \Vert A \Vert_{\max}
-    $$
-
-These inequalities are fundamental in many areas of numerical analysis and matrix theory.
-
-There are several ways to define matrix norms. We'll focus on two major categories: induced norms and entry-wise norms (specifically Schatten norms).
-
 ## 3. Induced (Operator) Norms
 
 Induced norms, also known as operator norms, are defined in terms of how a matrix transforms vectors. Given vector norms $$\Vert \cdot \Vert_{\text{dom}}$$ on $$\mathbb{R}^n$$ (the domain) and $$\Vert \cdot \Vert_{\text{codom}}$$ on $$\mathbb{R}^m$$ (the codomain), the induced matrix norm $$\Vert \cdot \Vert_{\text{dom} \to \text{codom}}$$ for a matrix $$A \in \mathbb{R}^{m \times n}$$ is defined as the maximum "stretching factor" A applies to any non-zero vector:
@@ -408,26 +306,51 @@ This last expression is precisely the definition of the induced norm $$\Vert A^\
 Thus, the identity is proven.
 </details>
 
-## 4. Entry-wise and Schatten Norms
+## 4. Entrywise and Schatten Norms
 
-Not all matrix norms are induced by vector norms. Some are defined directly based on the matrix entries or its singular values.
+Not all matrix norms are induced by vector norms. Some are defined directly on the matrix's components—either its individual entries (entrywise norms) or its singular values (Schatten norms).
 
-### Frobenius Norm
-The **Frobenius norm** ($$\Vert \cdot \Vert_F$$) is analogous to the vector $$\ell_2$$-norm, treating the matrix as a long vector of its elements: For $$A \in \mathbb{R}^{m \times n}$$,
+### 4.1. Entrywise $$L_{p,q}$$ Norms
 
-$$
-\Vert A \Vert_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n \vert a_{ij} \vert^2} = \sqrt{\mathrm{tr}(A^\top A)}
-$$
+Entrywise norms are defined by applying vector $$\ell_p$$-norms to the entries of the matrix, often in a nested fashion. The most general family of these are the **$$L_{p,q}$$ norms**. For a matrix $$A \in \mathbb{R}^{m \times n}$$, the $$L_{p,q}$$ norm is computed by first taking the $$\ell_p$$-norm of each column vector, and then taking the $$\ell_q$$-norm of the resulting vector of column norms.
 
-It can also be expressed in terms of singular values $$\sigma_k(A)$$:
+Let $$a_{\cdot, j}$$ denote the $$j$$-th column of $$A$$. The $$L_{p,q}$$ norm is defined as:
 
 $$
-\Vert A \Vert_F = \sqrt{\sum_{k=1}^{\min(m,n)} \sigma_k(A)^2}
+\Vert A \Vert_{p,q} = \left( \sum_{j=1}^n \Vert a_{\cdot, j} \Vert_p^q \right)^{1/q} = \left( \sum_{j=1}^n \left( \sum_{i=1}^m \vert a_{ij} \vert^p \right)^{q/p} \right)^{1/q}
 $$
 
-The Frobenius norm is sub-multiplicative.
+where $$p, q \ge 1$$.
 
-### Schatten $$p$$-Norms
+<blockquote class="box-info" markdown="1">
+<div class="title" markdown="1">
+**Note on Sub-multiplicativity**
+</div>
+A key feature of entrywise norms is that, in general, they are **not** sub-multiplicative. A notable exception is the Frobenius norm ($$p=q=2$$), which does satisfy $$\Vert AB \Vert_F \le \Vert A \Vert_F \Vert B \Vert_F$$. The lack of this property makes them less suitable for analyzing compositions of linear maps compared to operator norms.
+</blockquote>
+
+Important special cases include:
+*   **Frobenius Norm ($$p=q=2$$):** This is the most famous entrywise norm, which is also a Schatten norm ($$\Vert A \Vert_{S_2}$$). It is equivalent to the vector $$\ell_2$$-norm applied to the matrix's entries reshaped into a single vector.
+    $$
+    \Vert A \Vert_{2,2} = \left( \sum_{j=1}^n \sum_{i=1}^m \vert a_{ij} \vert^2 \right)^{1/2} = \Vert A \Vert_F
+    $$
+*   **Maximum Absolute Value Norm ($$p=q=\infty$$):** This norm finds the largest absolute value among all matrix entries, often denoted $$\Vert A \Vert_{\max}$$.
+    $$
+    \Vert A \Vert_{\infty, \infty} = \max_{j} \left( \max_{i} \vert a_{ij} \vert \right) = \max_{i,j} \vert a_{ij} \vert
+    $$
+*   **$$L_{2,1}$$-Norm ($$p=2, q=1$$):** This norm is the sum of the Euclidean norms of the columns.
+    $$
+    \Vert A \Vert_{2,1} = \sum_{j=1}^n \Vert a_{\cdot,j} \Vert_2 = \sum_{j=1}^n \sqrt{\sum_{i=1}^m \vert a_{ij} \vert^2}
+    $$
+    The $$L_{2,1}$$ norm is particularly useful in machine learning for inducing **group sparsity** by encouraging entire columns of a weight matrix to become zero, which is useful for feature selection in multi-task or multi-class learning settings.
+*   **$$L_{1}$$-Norm ($$p=q=1$$):** This is the sum of the absolute values of all entries.
+    $$
+    \Vert A \Vert_{1,1} = \sum_{j=1}^n \sum_{i=1}^m \vert a_{ij} \vert
+    $$
+
+**Duality:** With respect to the Frobenius inner product, the dual of the $$L_{p,q}$$ norm is the $$L_{p^\ast, q^\ast}$$ norm, where $$1/p + 1/p^\ast = 1$$ and $$1/q + 1/q^\ast = 1$$. For instance, the Frobenius norm ($$\Vert \cdot \Vert_{2,2}$$) is self-dual, while the dual of the max absolute value norm ($$\Vert \cdot \Vert_{\infty,\infty}$$) is the sum of absolute values norm ($$\Vert \cdot \Vert_{1,1}$$).
+
+### 4.2. Schatten $$p$$-Norms
 Schatten norms are a family of norms defined using the singular values of a matrix $$A \in \mathbb{R}^{m \times n}$$. The singular values, denoted $$\sigma_k(A)$$, are typically obtained via Singular Value Decomposition (SVD). For $$p \ge 1$$, the Schatten $$p$$-norm is:
 
 $$
@@ -490,7 +413,7 @@ While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/
 
 Schatten norms are unitarily invariant, meaning $$\Vert UAV \Vert_{S_p} = \Vert A \Vert_{S_p}$$ for any orthogonal/unitary matrices $$U$$ and $$V$$.
 
-### 4.1. Uniqueness of the Spectral Norm
+### 4.3. Uniqueness of the Spectral Norm
 
 The spectral norm (Schatten $$\infty$$-norm, or operator norm $$\Vert \cdot \Vert_{\ell_2 \to \ell_2}$$) possesses a remarkable uniqueness property. It is the only matrix norm on $$\mathbb{R}^{n \times n}$$ that satisfies a specific set of conditions related to orthogonal transformations and submultiplicativity.
 
