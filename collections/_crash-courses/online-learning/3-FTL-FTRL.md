@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 3: FTL & FTRL"
 date: 2025-06-01 09:00 -0400
-course_index: 3
+sort_index: 3
 mermaid: true
 description: Exploring Follow-The-Leader (FTL), its limitations, and the Follow-The-Regularized-Leader (FTRL) framework for stable and effective online learning.
 image: # placeholder

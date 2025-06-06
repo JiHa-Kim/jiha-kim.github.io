@@ -1,7 +1,7 @@
 ---
 title: "Challenges of High-Dimensional Non-Convex Optimization in Deep Learning"
 date: 2025-05-31 09:00 -0400
-series_index: 7
+sort_index: 7
 mermaid: true
 description: "Analyzing why non-convex, high-dimensional loss landscapes in deep learning defy classical optimization intuition yet remain optimizable."
 image: # assets/img/path-to-relevant-image.png

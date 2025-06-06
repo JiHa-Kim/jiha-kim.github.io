@@ -1,8 +1,8 @@
 ---
 title: "Statistics & Info Theory Part 1: Statistical Foundations for ML"
 date: 2025-06-02 10:00 -0400
-course_index: 7 # Adjust if needed based on other crash courses
-series_index: 0 # Indicates it's part of a crash course collection, not main series
+sort_index: 7 # Adjust if needed based on other crash courses
+sort_index: 0 # Indicates it's part of a crash course collection, not main series
 mermaid: true
 description: "Laying the groundwork with probability theory, random variables, essential distributions, limit theorems, and statistical estimation techniques like MLE, crucial for machine learning."
 image: # placeholder

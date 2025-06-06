@@ -1,7 +1,7 @@
 ---
 title: "Desirable Properties of Optimizers"
 date: 2025-05-25 09:00 -0400
-series_index: 3
+sort_index: 3
 mermaid: true
 description: A discussion of the key desirable properties for optimization algorithms in machine learning, covering effectiveness, efficiency, robustness, invariance, practicality, and impact on model generalization.
 image:

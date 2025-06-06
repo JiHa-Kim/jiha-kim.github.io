@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Cheat Sheet"
 date: 2025-06-01 09:00 -0400
-course_index: 999 # This will be the last post in the crash course series
+sort_index: 999 # This will be the last post in the crash course series
 mermaid: false # Likely not needed for a cheat sheet, but can be true if you add a diagram
 description: A consolidated cheat sheet of key concepts, algorithms, and formulas from the Online Learning Crash Course for quick reference.
 image: # placeholder

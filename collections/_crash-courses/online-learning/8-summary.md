@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 8: Summary & Guidance"
 date: 2025-06-01 09:00 -0400
-course_index: 8
+sort_index: 8
 mermaid: true
 description: Summarizing the online learning crash course, offering practical guidance, reflection points, and connecting to further topics in optimization.
 image: # placeholder

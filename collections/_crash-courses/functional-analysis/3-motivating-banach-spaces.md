@@ -1,7 +1,7 @@
 ---
 title: "Motivating Banach Spaces: Norms Measure Size"
 date: 2025-06-02 09:00 -0400 # Adjusted date
-course_index: 3
+sort_index: 3
 mermaid: false
 description: Exploring why complete normed spaces without inner products (Banach spaces) are essential, with examples like L_p and C(K) spaces, and their impact on analysis and optimization.
 image: # placeholder

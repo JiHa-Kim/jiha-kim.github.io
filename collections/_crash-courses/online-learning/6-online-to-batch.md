@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 6: Online-to-Batch Conversions"
 date: 2025-06-01 09:00 -0400
-course_index: 6
+sort_index: 6
 mermaid: true
 description: Connecting online learning algorithms and their regret bounds to batch and stochastic optimization settings, and discussing generalization.
 image: # placeholder

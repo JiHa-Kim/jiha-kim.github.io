@@ -1,7 +1,7 @@
 ---
 title: "Differential Geometry Part 2: Riemannian Metrics and Geodesics – Measuring and Moving"
 date: 2025-06-02 10:00 -0400 # Example Date
-course_index: 2 # Second post in the DG crash course
+sort_index: 2 # Second post in the DG crash course
 description: "Exploring Riemannian metrics for measuring distances, angles, and volumes on manifolds, and introducing geodesics as the 'straightest' paths. Essential for understanding geometric optimization."
 image: # placeholder
 categories:

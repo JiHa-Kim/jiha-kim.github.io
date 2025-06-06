@@ -1,7 +1,7 @@
 ---
 title: "Convex Analysis Part 1: Convex Sets – The Building Blocks"
 date: 2025-06-01 10:00 -0400
-course_index: 1
+sort_index: 1
 description: "An introduction to convex sets, their geometric properties, key examples, operations preserving convexity, and fundamental separation theorems."
 image: # placeholder
 categories:

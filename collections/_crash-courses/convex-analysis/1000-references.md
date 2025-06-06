@@ -1,7 +1,7 @@
 ---
 title: "Convex Analysis: References and Further Reading"
 date: 2025-06-02 10:00 -0400
-course_index: 1000
+sort_index: 1000
 categories:
 - Mathematical Optimization
 - Convex Analysis

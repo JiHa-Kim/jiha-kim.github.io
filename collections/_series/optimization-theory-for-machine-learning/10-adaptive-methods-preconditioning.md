@@ -1,7 +1,7 @@
 ---
 title: "Adaptive Methods and Preconditioning: Reshaping the Landscape"
 date: 2025-06-01 09:00 -0400
-series_index: 10
+sort_index: 10
 mermaid: true
 description: "Exploring how adaptive methods and preconditioning reshape optimization problems for faster convergence, from classical techniques to matrix-free innovations and FAdam."
 image: # placeholder

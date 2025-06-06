@@ -1,7 +1,7 @@
 ---
 title: Gradient Descent and Gradient Flow
 date: 2025-06-01 00:00 -0400 # Placeholder date
-series_index: 6 # Assuming this is the 6th post in the series as per outline
+sort_index: 6 # Assuming this is the 6th post in the series as per outline
 mermaid: true
 description: Exploring the mathematical foundations of gradient descent, its continuous analogue gradient flow, and their connections.
 image: # placeholder

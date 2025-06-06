@@ -1,8 +1,8 @@
 ---
 title: "Statistics & Info Theory Cheat Sheet: Key Formulas & Definitions"
 date: 2025-06-02 10:00 -0400 # Date after Part 2
-course_index: 999 # To place it at the end of this specific crash course
-series_index: 0 # Indicates it's part of a crash course collection
+sort_index: 999 # To place it at the end of this specific crash course
+sort_index: 0 # Indicates it's part of a crash course collection
 description: "A quick reference guide with key formulas and definitions from the Statistics and Information Theory crash course for machine learning."
 image: # placeholder
 categories:

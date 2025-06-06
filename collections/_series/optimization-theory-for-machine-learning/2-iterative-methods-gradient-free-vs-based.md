@@ -1,7 +1,7 @@
 ---
 title: "Iterative Methods: Gradient-Free vs. Gradient-Based Optimization"
 date: 2025-05-25 09:00 -0400
-series_index: 2
+sort_index: 2
 mermaid: true
 description: An introduction to iterative optimization methods, differentiating between gradient-free and gradient-based approaches, their principles, pros, cons, and applications in machine learning.
 image:

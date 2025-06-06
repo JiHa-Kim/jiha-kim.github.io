@@ -1,7 +1,7 @@
 ---
 title: "Soft Inductive Biases: Improving Generalization"
 date: 2025-06-01 10:00 -0400
-series_index: 9
+sort_index: 9
 mermaid: true
 description: "A deep dive into soft inductive biases, focusing on how regularization techniques and optimization dynamics guide machine learning models, particularly in deep learning, towards solutions that generalize well."
 categories:

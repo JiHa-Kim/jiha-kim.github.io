@@ -1,7 +1,7 @@
 ---
 title: "Momentum: Second-Order Gradient Flow ODE and a Multi-Step Method"
 date: 2025-05-18 02:57 -0400
-series_index: 11
+sort_index: 11
 mermaid: true
 description: "Delving into the momentum optimization method, understanding its origins from both second-order 'heavy ball' dynamics and as a linear multi-step method for first-order gradient flow, and extending to adaptive methods like RMSProp and Adam."
 image: # Optional: path to an image

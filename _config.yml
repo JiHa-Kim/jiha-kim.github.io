@@ -212,18 +212,9 @@ defaults:
         - toc
 
   - scope:
-      path: "collections/_series/*/index.md"
+      path: "collections/_*/*/index.md" # Matches landing pages in any collection
     values:
       layout: collection-landing
-      collection_name: series
-      sort_field: series_index
-
-  - scope:
-      path: "collections/_crash-courses/*/index.md"
-    values:
-      layout: collection-landing
-      collection_name: crash-courses
-      sort_field: course_index
 
   # Tabs: switch back to "page" layout, TOC off
   - scope:

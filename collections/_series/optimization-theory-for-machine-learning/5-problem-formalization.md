@@ -1,7 +1,7 @@
 ---
 title: Problem Formalization - First Principles and Modern Perspectives in ML Optimization
 date: 2025-06-01 09:00 -0400
-series_index: 5
+sort_index: 5
 mermaid: true
 description: Establishing the mathematical framework for machine learning optimization, integrating foundational principles with modern generalization theory to define the learning problem.
 image: # placeholder

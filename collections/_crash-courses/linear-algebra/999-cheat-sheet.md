@@ -1,7 +1,7 @@
 ---
 title: "Cheat Sheet: Linear Algebra"
 date: 2025-05-16 10:00 -0400
-course_index: 999
+sort_index: 999
 description: "A quick reference guide compiling essential theorems, identities, facts, and formulas from linear algebra, designed for the crash course on mathematical foundations for machine learning and optimization."
 image: # Add an image path here if you have one
 categories:

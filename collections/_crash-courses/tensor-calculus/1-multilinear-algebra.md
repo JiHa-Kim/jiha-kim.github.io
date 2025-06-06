@@ -1,7 +1,7 @@
 ---
 title: "Tensor Calculus Part 1: From Vectors to Tensors – Multilinear Algebra"
 date: 2025-05-19 10:00 -0400 # Adjust as needed
-course_index: 1
+sort_index: 1
 description: "Introduction to tensors, their importance in ML, Einstein summation convention, and fundamental tensor algebraic operations like outer product and contraction."
 image: # placeholder
 categories:

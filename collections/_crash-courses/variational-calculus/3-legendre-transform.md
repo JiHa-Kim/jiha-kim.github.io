@@ -1,7 +1,7 @@
 ---
 title: "Variational Calculus Part 3: Lagrangian, Hamiltonian, and the Legendre Transform"
 date: 2025-05-18 10:00 -0400
-course_index: 3 # Third post in the Variational Calculus crash course
+sort_index: 3 # Third post in the Variational Calculus crash course
 mermaid: true
 description: "Exploring Lagrangian and Hamiltonian mechanics as applications of variational principles, and introducing the Legendre transform as a bridge to duality and convex analysis."
 image: # Placeholder for a relevant image if desired

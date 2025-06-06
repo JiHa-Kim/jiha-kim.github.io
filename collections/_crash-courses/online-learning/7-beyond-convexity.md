@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 7: Beyond Convexity (Teaser)"
 date: 2025-06-01 09:00 -0400
-course_index: 7
+sort_index: 7
 mermaid: true
 description: A brief look into online learning scenarios beyond convex optimization, including bandit feedback and non-convex losses.
 image: # placeholder

@@ -1,7 +1,7 @@
 ---
 title: "Cheat Sheet: Multivariable Calculus for Optimization"
 date: 2025-05-26 10:00 -0400
-course_index: 999
+sort_index: 999
 mermaid: true
 description: A concise review of essential multivariable calculus concepts vital for understanding mathematical optimization, including partial derivatives, gradients, Hessians, and Taylor series.
 image:

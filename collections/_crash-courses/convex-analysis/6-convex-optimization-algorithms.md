@@ -1,7 +1,7 @@
 ---
 title: "Convex Analysis Part 6: Introduction to Convex Optimization Algorithms"
 date: 2025-06-02 10:00 -0400
-course_index: 6
+sort_index: 6
 description: "A comprehensive overview of fundamental algorithms for convex optimization, their mathematical properties, convergence behaviors, and interrelationships. Covers Gradient Descent, Subgradient Method, Proximal Algorithms, Mirror Descent, Newton's Method, and more."
 image: # placeholder
 categories:

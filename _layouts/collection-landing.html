@@ -5,57 +5,35 @@ refactor: true
 {% include lang.html %}
 
 {%- comment -%}
-  1) Get the collection name from the page path instead of relying on page.collection_name
-     e.g. "_crash-courses/linear-algebra/index.md" -> "crash-courses"
+  1) Get the collection name from the page path.
+     e.g., "_crash-courses/linear-algebra/index.md" -> "crash-courses"
 {%- endcomment -%}
 {% assign path_parts = page.path | split: '/' %}
 {% assign collection_folder = path_parts | first %}
 {% assign collection_name = collection_folder | remove: '_' %}
 
 {%- comment -%}
-  2) Break page.path into segments so we can grab the folder name:
-     e.g. "_crash-courses/linear-algebra/index.md"
+  2) Get the subfolder slug from the page path.
+     e.g., "_crash-courses/linear-algebra/index.md" -> "linear-algebra"
 {%- endcomment -%}
-{% assign parts = page.path | split: '/' %}
-{% assign filename = parts | last %}
+{% assign slug = path_parts | slice: 1, 1 | first %}
 
 {%- comment -%}
-  3) If this is an index.md (the landing page),
-     slug = the second segment (the folder name);
-     otherwise slug = the filename without .md
-{%- endcomment -%}
-{% if filename == 'index.md' %}
-  {% assign slug = parts | slice: 1, 1 | first %}
-{% else %}
-  {% assign slug = filename | remove: '.md' %}
-{% endif %}
-
-{%- comment -%}
-  4) Build the on-disk prefix to match only files in that folder
-     (e.g. "_crash-courses/linear-algebra/")
+  3) Build the on-disk prefix to match only files in that folder.
+     e.g., "_crash-courses/linear-algebra/"
 {%- endcomment -%}
 {% capture source_prefix %}{{ collection_folder }}/{{ slug }}/{% endcapture %}
 
 {%- comment -%}
-  5) Get the collection using the derived collection name
-     Filter by this folder, exclude the landing page itself, and sort
+  4) Get the collection items dynamically using the collection_name.
+     Then filter by the subfolder, exclude the landing page itself,
+     and sort by the universal 'sort_index' key.
 {%- endcomment -%}
-{% case collection_name %}
-  {% when 'crash-courses' %}
-    {% assign collection_items = site['crash-courses'] %}
-    {% assign sort_field = 'course_index' %}
-  {% when 'series' %}
-    {% assign collection_items = site.series %}
-    {% assign sort_field = 'series_index' %}
-  {% else %}
-    {% assign collection_items = site[collection_name] %}
-    {% assign sort_field = 'index' %}
-{% endcase %}
-
+{%- assign collection_items = site[collection_name] -%}
 {%- assign lessons = collection_items
   | where_exp: 'item', 'item.path contains source_prefix'
   | where_exp: 'item', 'item.path != page.path'
-  | sort: sort_field
+  | sort: 'sort_index'
 -%}
 
 <h1 class="ps-2 mb-4">{{ page.title }}</h1>

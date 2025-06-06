@@ -1,7 +1,7 @@
 ---
 title: "Adam Optimizer: Online Learning of Updates and Efficacy with EMA"
 date: 2025-05-25 10:00 -0400
-series_index: 13
+sort_index: 13
 mermaid: true
 description: "Exploring novel theoretical understandings of the Adam optimizer through the lens of Follow-The-Regularized-Leader for its updates, and the provable benefits of combining Adam with model exponential moving average in non-convex optimization."
 image: 

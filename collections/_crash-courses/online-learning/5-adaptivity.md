@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 5: Adaptivity (AdaGrad & Beyond)"
 date: 2025-06-01 09:00 -0400
-course_index: 5
+sort_index: 5
 mermaid: true
 description: Discussing adaptive online learning algorithms like AdaGrad, which tailor learning rates per-coordinate based on observed gradient statistics.
 image: # placeholder

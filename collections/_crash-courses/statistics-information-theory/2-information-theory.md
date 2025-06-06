@@ -1,8 +1,8 @@
 ---
 title: "Statistics & Info Theory Part 2: Information Theory Essentials for ML"
 date: 2025-06-02 10:00 -0400 # Example date, after Part 1
-course_index: 8 # Adjust if needed, assuming it's the next post
-series_index: 0 # Indicates it's part of a crash course collection
+sort_index: 8 # Adjust if needed, assuming it's the next post
+sort_index: 0 # Indicates it's part of a crash course collection
 mermaid: true
 description: "Exploring core information-theoretic concepts like entropy, mutual information, KL divergence, cross-entropy, and Fisher information, vital for advanced ML and optimization."
 image: # placeholder

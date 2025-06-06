@@ -1,7 +1,7 @@
 ---
 title: "Adam Through the Lens of Information Geometry: A Diagonal Fisher Approximation"
 date: 2025-05-22 10:00 -0400 # Adjusted date
-series_index: 12 # As per your series outline
+sort_index: 12 # As per your series outline
 mermaid: true
 description: "Exploring Adam as an approximation to natural gradient descent using the diagonal empirical Fisher Information Matrix, and improvements proposed by FAdam."
 image: # placeholder

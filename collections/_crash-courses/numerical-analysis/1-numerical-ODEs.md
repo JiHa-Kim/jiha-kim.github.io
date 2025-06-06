@@ -1,7 +1,7 @@
 ---
 title: "Crash Course: Numerical Methods for ODEs in Optimization"
 date: 2025-05-17 # Or current date
-course_index: 1
+sort_index: 1
 mermaid: true
 description: "A primer on numerical methods for solving Ordinary Differential Equations, tailored for understanding optimization algorithms like Gradient Descent and Momentum."
 image:

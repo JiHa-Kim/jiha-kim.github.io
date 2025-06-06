@@ -1,7 +1,7 @@
 ---
 title: "Cheat Sheet: Variational Calculus for Optimization"
 date: 2025-05-20 11:00 -0400 # Slightly after the last content post
-course_index: 999 # Designates this as a summary/cheat sheet
+sort_index: 999 # Designates this as a summary/cheat sheet
 mermaid: true
 description: "A concise summary of key concepts, equations, and examples from the Variational Calculus crash course, including functionals, the Euler-Lagrange equation, Lagrangian/Hamiltonian mechanics, and the Legendre transform."
 image: # Placeholder for a relevant image if desired

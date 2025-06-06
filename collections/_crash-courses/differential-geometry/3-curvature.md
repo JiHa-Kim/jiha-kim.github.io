@@ -1,7 +1,7 @@
 ---
 title: "Differential Geometry Part 3: Connections, Covariant Derivatives, and Curvature"
 date: 2025-06-02 10:00 -0400 # Example Date
-course_index: 3 # Third post in the DG crash course
+sort_index: 3 # Third post in the DG crash course
 description: "Understanding how vector fields change (connections, covariant derivatives), how vectors are transported (parallel transport), and how manifolds bend (curvature)."
 image: # placeholder
 categories:

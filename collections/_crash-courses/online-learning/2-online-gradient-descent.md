@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 2: Online Gradient Descent"
 date: 2025-06-01 09:00 -0400
-course_index: 2
+sort_index: 2
 mermaid: true
 description: Introducing Online Gradient Descent (OGD), a fundamental algorithm for online convex optimization, its update rule, and regret analysis.
 image: # placeholder

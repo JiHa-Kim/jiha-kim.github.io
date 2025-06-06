@@ -1,7 +1,7 @@
 ---
 title: "Convex Analysis Part 3: Subdifferential Calculus – Handling Non-Smoothness"
 date: 2025-06-02 10:00 -0400
-course_index: 3
+sort_index: 3
 description: "Introducing subgradients and subdifferentials to generalize derivatives for non-differentiable convex functions, along with their calculus rules and optimality conditions."
 image: # placeholder
 categories:

@@ -1,7 +1,7 @@
 ---
 title: "Differential Geometry Part 1: Smooth Manifolds and Tangent Spaces – The Landscape of Parameters"
 date: 2025-06-01 10:00 -0400 # Example Date
-course_index: 1 # First post in the DG crash course
+sort_index: 1 # First post in the DG crash course
 description: "An introduction to smooth manifolds, charts, atlases, and tangent spaces, laying the groundwork for understanding the geometry of parameter spaces in machine learning."
 image: # placeholder
 categories:

@@ -1,7 +1,7 @@
 ---
 title: "Motivating Hilbert Spaces: Encoding Geometry"
 date: 2025-05-29 09:00 -0400 # Adjusted date
-course_index: 2
+sort_index: 2
 mermaid: false # Can be set to true if diagrams are added later
 description: Generalizing the dot product to function spaces and demanding completeness leads to Hilbert spaces, essential for geometry and analysis in infinite dimensions.
 image: # placeholder

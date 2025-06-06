@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 4: Mirror Descent & Geometry"
 date: 2025-06-01 09:00 -0400
-course_index: 4
+sort_index: 4
 mermaid: true
 description: Exploring Online Mirror Descent (OMD), its use of Bregman divergences for non-Euclidean geometries, and its relationship to OGD and FTRL.
 image: # placeholder

@@ -1,7 +1,7 @@
 ---
 title: "Stochastic Gradient Descent: Noise as a Design Feature"
 date: 2025-05-31 09:00 +0000
-series_index: 8
+sort_index: 8
 mermaid: true
 description: "How SGD's inherent randomness creates implicit regularization, escapes local minima, and shapes generalization - setting the stage for soft inductive biases."
 image: # placeholder

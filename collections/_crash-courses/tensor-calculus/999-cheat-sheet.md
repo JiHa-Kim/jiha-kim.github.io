@@ -1,7 +1,7 @@
 ---
 title: "Tensor Calculus: Quick Reference Cheat Sheet"
 date: 2025-05-22 09:00 -0400
-series_index: 999 # As requested
+sort_index: 999 # As requested
 mermaid: true
 description: "A concise summary of key definitions, notations, operations, transformation laws, and differentiation rules in Tensor Calculus, primarily drawing from the crash course series."
 image: # placeholder

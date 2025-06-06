@@ -1,7 +1,7 @@
 ---
 title: "Cheat Sheet: Elementary Functional Analysis for Optimization"
 date: 2025-05-22 09:00 -0400
-course_index: 999
+sort_index: 999
 description: A concise summary of core functional analysis concepts, emphasizing bra-ket notation, dual spaces, and transformation properties, crucial for machine learning optimization theory.
 image: # Placeholder image path
 categories:

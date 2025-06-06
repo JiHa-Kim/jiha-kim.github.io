@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 0: Setting & Motivation"
 date: 2025-06-01 09:00 -0400
-course_index: 0
+sort_index: 0
 mermaid: true
 description: An introduction to the online learning paradigm, its core principles, motivations, and the sequential decision-making framework.
 image: # placeholder

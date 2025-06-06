@@ -1,7 +1,7 @@
 ---
 title: "Crash Course Cheat Sheet: Numerical Analysis for Optimization"
 date: 2025-05-18
-series_index: 999
+sort_index: 999
 mermaid: false
 description: "A quick reference guide for key concepts in numerical analysis relevant to optimization, covering ODE solvers and numerical linear algebra."
 image: # placeholder

@@ -1,7 +1,7 @@
 ---
 title: "Convex Analysis Part 5: Duality, Conjugates, and Optimality Conditions"
 date: 2025-06-02 10:00 -0400
-course_index: 5
+sort_index: 5
 description: "Exploring Lagrangian duality, the Fenchel conjugate, weak and strong duality, Slater's condition, and the Karush-Kuhn-Tucker (KKT) conditions for optimality in convex optimization."
 image: # placeholder
 categories:

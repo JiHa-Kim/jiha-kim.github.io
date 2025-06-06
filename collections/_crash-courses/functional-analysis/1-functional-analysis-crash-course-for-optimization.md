@@ -1,7 +1,7 @@
 ---
 title: "Elementary Functional Analysis: A Crash Course for Optimization"
 date: 2025-05-22 09:00 -0400
-course_index: 1
+sort_index: 1
 description: An introduction to the core concepts of functional analysis, motivated by how different mathematical 'types' (kets and bras) behave under transformations, essential for understanding machine learning optimization.
 image: # Placeholder image path
 categories:

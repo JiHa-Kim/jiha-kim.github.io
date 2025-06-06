@@ -1,7 +1,7 @@
 ---
 title: "Convex Analysis Part 4: Convex Optimization Problems – Formulation and Properties"
 date: 2025-06-02 10:00 -0400
-course_index: 4
+sort_index: 4
 description: "Defining standard convex optimization problems, exploring common classes like LP, QP, SOCP, SDP, and highlighting their key property: local optima are global optima."
 image: # placeholder
 categories:

@@ -1,7 +1,7 @@
 ---
 title: "Tensor Calculus Part 3: Differentiating Tensors and Applications in Machine Learning"
 date: 2025-05-21 14:00 -0400 # Adjust as needed
-course_index: 3
+sort_index: 3
 description: "Introduction to tensor differentiation (covariant derivative), Christoffel symbols, and the role of tensors in characterizing ML concepts like gradients, Hessians, and curvature."
 image: # placeholder
 categories:

@@ -1,7 +1,7 @@
 ---
 title: "Parameter-Free Optimization: Letting Algorithms Tune Themselves"
 date: 2025-06-05 00:00 -0400
-series_index: 15
+sort_index: 15
 mermaid: true
 description: Exploring optimization algorithms that dynamically adapt to the problem's structure, reducing or eliminating the need for manual hyperparameter tuning.
 image: # placeholder

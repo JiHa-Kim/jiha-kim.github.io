@@ -1,7 +1,7 @@
 ---
 title: "Online Learning Crash Course – Part 1: Regret & Benchmarks"
 date: 2025-06-01 09:00 -0400
-course_index: 1
+sort_index: 1
 mermaid: true
 description: Defining regret, the core performance metric in online learning, and discussing benchmarks for evaluating sequential decision-making algorithms.
 image: # placeholder

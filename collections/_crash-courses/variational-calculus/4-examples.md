@@ -1,7 +1,7 @@
 ---
 title: "Variational Calculus Part 4: Classic Examples and Special Cases"
 date: 2025-05-19 10:00 -0400
-course_index: 4 # Fourth post in the Variational Calculus crash course
+sort_index: 4 # Fourth post in the Variational Calculus crash course
 mermaid: true
 description: "Applying the Euler-Lagrange equation to solve classic variational problems like the shortest path and the brachistochrone. Discussing special cases and first integrals of the Euler-Lagrange equation."
 image: # Placeholder for a relevant image if desired

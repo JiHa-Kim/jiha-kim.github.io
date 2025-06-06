@@ -1,7 +1,7 @@
 ---
 title: "Speedrun of Common Gradient-Based ML Optimizers"
 date: 2025-05-20 00:45 -0400
-series_index: 4
+sort_index: 4
 mermaid: true
 description: A quick tour of popular gradient-based optimization algorithms in machine learning, detailing their mechanics and empirical performance characteristics.
 image:

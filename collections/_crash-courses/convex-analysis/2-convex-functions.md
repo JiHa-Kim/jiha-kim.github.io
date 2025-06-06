@@ -1,7 +1,7 @@
 ---
 title: "Convex Analysis Part 2: Convex Functions – Shaping the Landscape"
 date: 2025-06-02 10:00 -0400
-course_index: 2
+sort_index: 2
 description: "Exploring convex functions, their definitions, properties, methods for verifying convexity, key examples, and operations that preserve convexity."
 image: # placeholder
 categories:

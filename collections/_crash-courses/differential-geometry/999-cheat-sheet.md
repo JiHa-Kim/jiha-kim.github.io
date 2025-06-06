@@ -1,7 +1,7 @@
 ---
 title: "Differential Geometry Crash Course: Cheat Sheet"
 date: 2025-06-02 10:00 -0400 # Date after the last part of the DG course
-course_index: 999 # Special index for a summary/cheat sheet
+sort_index: 999 # Special index for a summary/cheat sheet
 description: "A quick reference guide summarizing key concepts, definitions, and formulas from the Differential Geometry crash course, covering manifolds, tangent spaces, metrics, geodesics, connections, and curvature."
 image: # placeholder
 categories:

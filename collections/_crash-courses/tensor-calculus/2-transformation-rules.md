@@ -1,7 +1,7 @@
 ---
 title: "Tensor Calculus Part 2: Coordinate Changes, Covariance, Contravariance, and the Metric Tensor"
 date: 2025-05-20 11:00 -0400 # Adjust as needed
-course_index: 2
+sort_index: 2
 description: "Understanding how tensor components transform under coordinate changes (covariance and contravariance, derived from basis transformations), and the fundamental role of the metric tensor in defining geometry."
 image: # placeholder
 categories:

@@ -2,7 +2,7 @@
 title: RMS Norm
 date: 2025-06-05 06:29 -0400
 description: Characterizing properties of the Root-Mean-Square Norm for vectors
-course_index: 4
+sort_index: 4
 categories:
 - Crash Courses
 - Functional Analysis

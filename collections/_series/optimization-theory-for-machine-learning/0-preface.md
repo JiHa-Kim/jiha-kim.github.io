@@ -1,7 +1,7 @@
 ---
 title: Preface
 date: 2025-05-18 00:45 -0400
-series_index: 0
+sort_index: 0
 mermaid: true
 description: Preliminary information for the blog post series on machine learning and optimization.
 image:
