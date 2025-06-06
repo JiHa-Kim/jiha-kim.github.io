@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Properties of Matrix Norms
 date: 2025-06-06 01:50 -0400
 sort_index: 6

@@ -444,10 +444,10 @@ The Riesz Representation Theorem provides the answer: in a Hilbert space, every 
 Let $$H$$ be a Hilbert space. For every continuous linear functional $$\langle \phi \vert \in H^\ast$$ (a bra), there exists a **unique** ket $$\vert y_\phi \rangle \in H$$ such that for all $$\vert x \rangle \in H$$:
 
 $$
-\langle \phi \vert \left( \vert x \rangle \right) = \langle y_\phi \vert x \rangle
+\langle \phi \vert \big( \vert x \rangle \big) = \langle y_\phi \vert x \rangle
 $$
 
-The expression on the left, $$\langle \phi \vert \left( \vert x \rangle \right)$$, represents the **action** of the abstract functional $$\langle \phi \vert \in H^\ast$$ on the ket $$\vert x \rangle$$. The expression on the right, $$\langle y_\phi \vert x \rangle$$, is the **inner product** in $$H$$ between the newly found, unique ket $$\vert y_\phi \rangle$$ and the ket $$\vert x \rangle$$. Furthermore, this correspondence defines an isometric anti-isomorphism between $$H^\ast$$ and $$H$$ (isometric isomorphism if $$H$$ is real): $$\Vert \langle \phi \vert \Vert_{H^\ast} = \Vert \vert y_\phi \rangle \Vert_H$$.
+The expression on the left, $$\langle \phi \vert \big( \vert x \rangle \big)$$, represents the **action** of the abstract functional $$\langle \phi \vert \in H^\ast$$ on the ket $$\vert x \rangle$$. The expression on the right, $$\langle y_\phi \vert x \rangle$$, is the **inner product** in $$H$$ between the newly found, unique ket $$\vert y_\phi \rangle$$ and the ket $$\vert x \rangle$$. Furthermore, this correspondence defines an isometric anti-isomorphism between $$H^\ast$$ and $$H$$ (isometric isomorphism if $$H$$ is real): $$\Vert \langle \phi \vert \Vert_{H^\ast} = \Vert \vert y_\phi \rangle \Vert_H$$.
 </blockquote>
 
 <blockquote class="box-info" markdown="1">

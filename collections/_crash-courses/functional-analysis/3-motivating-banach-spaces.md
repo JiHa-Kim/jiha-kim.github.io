@@ -3,7 +3,7 @@ title: "Motivating Banach Spaces: Norms Measure Size"
 date: 2025-06-02 09:00 -0400
 sort_index: 3
 mermaid: false
-description: Exploring why complete normed spaces without inner products (Banach spaces) are essential, with examples like L_p and C(K) spaces, and their impact on analysis and optimization.
+description: Exploring why complete normed spaces without inner products (Banach spaces) are essential, with examples like Lp and C(K) spaces, and their impact on analysis and optimization.
 image: # placeholder
 categories:
 - Mathematical Foundations
@@ -147,6 +147,8 @@ llm-instructions: |
   without an explicit request.
 ---
 
+Note: for the sake of readability, often kets (vectors) will have their type annotation dropped, writing just $$v:= \vert v \rangle$$ as it's otherwise quite messy when inside a norm. However, bras (covectors/linear functionals) will be written with their type annotation, $$\langle f \vert$$, so that we avoid ambiguity.
+
 Welcome to Part 3 of our Functional Analysis crash course. In the previous post, we explored **Hilbert spaces**—complete inner product spaces that provide a rich geometric structure with notions of length, angle, and orthogonality. They are the natural home for quantum mechanics and Fourier analysis.
 
 But what if the most natural way to measure a function's "size" doesn't come from an inner product? This question leads us directly to **Banach spaces**.
@@ -155,7 +157,7 @@ But what if the most natural way to measure a function's "size" doesn't come fro
 
 Hilbert spaces are convenient. Their inner product gives us orthogonality, projections, and the powerful Riesz Representation Theorem, which cleanly identifies a Hilbert space with its dual.
 
-However, in many applications, the concept of an "angle" is not relevant. We still need to measure the size of a vector (e.g., a function) and the distance between two vectors. Crucially, we also need our space to be **complete**—meaning that sequences that "should" converge actually do converge to a point within the space.
+However, in many applications, the concept of an "angle" is not relevant. We still need to measure the size of a vector (e.g., a function) and the distance between two vectors. Crucially, we also need our space to be **complete**—meaning that sequences that "should" converge actually do converge to a point within the space. Even when working in a space that *could* be a Hilbert space (like $$\mathbb{R}^n$$), we might intentionally choose a different norm, like the $$L_1$$ or $$L_\infty$$ norm, because its geometry is better suited to our problem.
 
 This brings us to a broader class of spaces: **Banach spaces**. By definition, these are complete normed vector spaces, but their norm does not necessarily arise from an inner product. We willingly trade the geometric luxury of an inner product for the flexibility to use norms that are better suited for the problem at hand.
 
@@ -281,22 +283,126 @@ All Hilbert spaces are Banach spaces, but the converse is not true. The spaces d
 
 *   **The sequence spaces $$\ell_p$$:** For $$1 \le p \le \infty$$, the space $$\ell_p$$ of sequences $$\mathbf{x}=(x_1, x_2, \dots)$$ with finite $$\Vert \mathbf{x} \Vert_p$$ is a Banach space. Again, only $$\ell_2$$ is a Hilbert space.
 
-## 4. The Power of Banach Spaces: Key Theorems
+## 4. The Hahn-Banach Theorem: A Pillar of Analysis
 
-Despite lacking a universal notion of orthogonality, Banach spaces have a rich analytical structure supporting many foundational theorems.
+Despite lacking a universal notion of orthogonality, Banach spaces have a rich analytical structure. The most fundamental tool for understanding this structure is the Hahn-Banach Theorem. In essence, it guarantees that there are "enough" bounded linear functionals to make the theory of dual spaces powerful and interesting.
 
-*   **Bounded Linear Operators:** The set of all bounded (continuous) linear operators from a Banach space $$X$$ to a Banach space $$Y$$, denoted $$\mathcal{B}(X,Y)$$, is itself a Banach space under the operator norm:
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem 4.1: The Hahn-Banach Theorem (Analytic Form)**
+</div>
+Let $$X$$ be a vector space over $$\mathbb{F}$$ ($$\mathbb{R}$$ or $$\mathbb{C}$$), and let $$p: X \to \mathbb{R}$$ be a sublinear functional (i.e., it satisfies $$p(\alpha x) = \alpha p(x)$$ for $$\alpha \ge 0$$ and $$p(x+y) \le p(x)+p(y)$$. The norm $$\Vert \cdot \Vert$$ is an example of a sublinear functional).
+
+Let $$Z$$ be a subspace of $$X$$, and let $$\langle g \vert$$ be a linear functional on $$Z$$ that is dominated by $$p$$, meaning $$\vert \langle g \vert z \rangle \vert \le p(z)$$ for all $$\vert z \rangle \in Z$$.
+
+Then there exists a linear functional $$\langle f \vert$$ defined on all of $$X$$ such that:
+1.  **Extension:** $$\langle f \vert z \rangle = \langle g \vert z \rangle$$ for all $$\vert z \rangle \in Z$$.
+2.  **Domination:** $$\vert \langle f \vert x \rangle \vert \le p(x)$$ for all $$\vert x \rangle \in X$$.
+</blockquote>
+
+In the context of normed spaces, we set $$p(x) = \Vert g \Vert_\ast \Vert x \Vert$$. The theorem then states that any bounded linear functional on a subspace can be extended to the entire space **without increasing its norm**.
+
+### Key Consequences of Hahn-Banach
+The Hahn-Banach theorem is a pure existence theorem (its proof relies on Zorn's Lemma), but its consequences are profound and practical.
+
+1.  **The Dual Space is Rich:** It guarantees that the dual space $$X^\ast$$ of any non-trivial normed space is itself non-trivial. It's not just an empty collection of the zero functional.
+2.  **Separation of Convex Sets:** In its geometric form, the theorem allows us to find a hyperplane that separates two disjoint convex sets. This is fundamental to optimization theory.
+3.  **Existence of "Witness" Functionals:** For any vector in the space, we can find a functional that "sees" it perfectly. This is arguably its most important consequence for analysis.
+
+<blockquote class="box-proposition" markdown="1">
+<div class="title" markdown="1">
+**Proposition 4.2: Consequence of Hahn-Banach**
+</div>
+For any non-zero vector $$\vert x_0 \rangle$$ in a normed space $$X$$, there exists a bounded linear functional $$\langle f \vert$$ in the dual space $$X^\ast$$ such that:
+
+$$
+\Vert \langle f \vert \Vert_\ast = 1 \quad \text{and} \quad \langle f \vert x_0 \rangle = \Vert x_0 \Vert
+$$
+
+</blockquote>
+
+This proposition confirms that the dual space is rich enough to distinguish all vectors. If $$\vert x \rangle \neq \vert y \rangle$$, there is a functional $$\langle f \vert$$ such that $$\langle f \vert x-y \rangle = \Vert x-y \Vert \neq 0$$, so $$\langle f \vert x \rangle \neq \langle f \vert y \rangle$$. This result is the direct justification for the duality mapping.
+
+## 5. The Dual Space and the Duality Mapping
+
+The Hahn-Banach theorem breathes life into the concept of the dual space. Let's formalize this and introduce a crucial tool: the duality mapping.
+
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition 5.1: The Dual Space and Dual Norm**
+</div>
+Let $$X$$ be a normed vector space.
+1.  The **(continuous) dual space**, denoted $$X^\ast$$, is the vector space of all bounded linear functionals $$\langle f \vert : X \to \mathbb{F}$$.
+2.  The **dual norm** (or operator norm) on $$X^\ast$$ is defined as:
 
     $$
-    \Vert T \Vert = \sup_{\Vert x \Vert_X = 1} \Vert T x \Vert_Y
+    \Vert \langle f \vert \Vert_\ast = \sup_{\Vert x \Vert \le 1} \vert \langle f \vert x \rangle \vert = \sup_{\Vert x \Vert = 1} \vert \langle f \vert x \rangle \vert
     $$
 
-*   **The Hahn-Banach Theorem:** A cornerstone of functional analysis. It essentially guarantees that there are "enough" bounded linear functionals (maps from $$X \to \mathbb{F}$$) to make the dual space interesting.
-    *   **Main Consequence:** Any bounded linear functional defined on a subspace of $$X$$ can be extended to the entire space $$X$$ **without increasing its norm**.
-    *   **Geometric Interpretation:** Disjoint convex sets can often be separated by hyperplanes.
-    *   **Practical Implication:** For any non-zero vector $$\vert x_0 \rangle \in X$$, there exists a functional $$\langle f \vert$$ in the dual space $$X^\ast$$ such that $$\Vert \langle f \vert \Vert = 1$$ and $$\langle f \vert x_0 \rangle = \Vert x_0 \Vert$$. This confirms that the dual space is rich enough to distinguish all vectors in the original space.
+It's a theorem that if $$X$$ is a Banach space, then $$X^\ast$$ is also a Banach space.
+</blockquote>
 
-*   **The "Holy Trinity" of Bounded Operators:** Three fundamental theorems governing operators between Banach spaces.
+Now, we can define a "map" that connects a vector in $$X$$ to the special functionals in $$X^\ast$$ that are guaranteed to exist by Hahn-Banach.
+
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition 5.2: The Duality Mapping**
+</div>
+Let $$X$$ be a normed space. The **duality mapping** $$J: X \to 2^{X^\ast}$$ is a (potentially multi-valued) mapping that associates each vector $$\vert x \rangle \in X$$ with the set of all functionals $$\langle f \vert \in X^\ast$$ satisfying:
+
+1.  $$\langle f \vert x \rangle = \Vert x \Vert^2$$
+2.  $$\Vert \langle f \vert \Vert_\ast = \Vert x \Vert$$
+
+We write this as $$J(x) = \{ \langle f \vert \in X^\ast : \langle f \vert x \rangle = \Vert x \Vert^2 \text{ and } \Vert \langle f \vert \Vert_\ast = \Vert x \Vert \}$$. Intuitively, the bra/covector ("ruler") is perfectly aligned with the ket/vector ("pencil") in a way that saturates the generalized Cauchy-Schwarz inequality: $$\vert \langle f \vert x \rangle \vert \le \Vert \langle f \vert \Vert_\ast \Vert x \Vert$$.
+</blockquote>
+
+This mapping generalizes the notion of a gradient and is central to nonlinear analysis and optimization theory in Banach spaces.
+
+### Justification via the Hahn-Banach Theorem
+How do we know that the set $$J(x)$$ is never empty? The Hahn-Banach theorem provides the proof.
+
+1.  **Start with a vector:** Pick any non-zero vector $$\vert x_0 \rangle \in X$$.
+2.  **Define a functional on a subspace:** Consider the one-dimensional subspace $$Z = \text{span}(\{ \vert x_0 \rangle \})$$. Define a linear functional $$\langle g \vert$$ on this subspace by its action on the basis vector:
+    
+    $$
+    \langle g \vert \alpha x_0 \rangle := \alpha \Vert x_0 \Vert^2 \quad \text{for any scalar } \alpha
+    $$
+
+3.  **Compute its norm:** The norm of $$\langle g \vert$$ on its domain $$Z$$ is:
+
+    $$
+    \Vert \langle g \vert \Vert_\ast = \sup_{\vert z \rangle \in Z, \Vert z \Vert = 1} \vert \langle g \vert z \rangle \vert = \sup_{\alpha, \Vert \alpha x_0 \Vert = 1} \vert \alpha \Vert x_0 \Vert^2 \vert
+    $$
+
+    Since $$\Vert \alpha x_0 \Vert = \vert \alpha \vert \Vert x_0 \Vert$$, the condition $$\Vert \alpha x_0 \Vert = 1$$ implies $$\vert \alpha \vert = 1 / \Vert x_0 \Vert$$. Plugging this in:
+
+    $$
+    \Vert \langle g \vert \Vert_\ast = \frac{1}{\Vert x_0 \Vert} \Vert x_0 \Vert^2 = \Vert x_0 \Vert
+    $$
+
+4.  **Extend the functional:** We now have a functional $$\langle g \vert$$ on the subspace $$Z$$ that satisfies $$\langle g \vert x_0 \rangle = \Vert x_0 \Vert^2$$ and $$\Vert \langle g \vert \Vert_\ast = \Vert x_0 \Vert$$. By the Hahn-Banach theorem, there exists a linear functional $$\langle f \vert \in X^\ast$$ that extends $$\langle g \vert$$ to all of $$X$$ **without increasing its norm**.
+5.  **Verify the properties:** This extended functional $$\langle f \vert$$ has the properties:
+    *   $$\langle f \vert x_0 \rangle = \langle g \vert x_0 \rangle = \Vert x_0 \Vert^2$$.
+    *   $$\Vert \langle f \vert \Vert_\ast = \Vert \langle g \vert \Vert_\ast = \Vert x_0 \Vert$$.
+
+This proves that for any $$\vert x_0 \rangle \in X$$, there is at least one $$\langle f \vert \in J(x_0)$$. Therefore, the duality mapping is well-defined and $$J(x)$$ is always a non-empty set.
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Contrast with Hilbert Spaces: Uniqueness vs. Existence**
+</summary>
+In a Hilbert space $$H$$, the **Riesz Representation Theorem** does the work of Hahn-Banach, but provides a much stronger result. It states that for every functional $$\langle f \vert \in H^\ast$$, there is a **unique** vector $$\vert y_f \rangle \in H$$ such that $$\langle f \vert x \rangle = \langle y_f \vert x \rangle$$ for all $$\vert x \rangle \in H$$.
+
+This uniqueness means that the duality mapping $$J(x)$$ contains only **one** element: the functional represented by $$\vert x \rangle$$ itself. So, in a Hilbert space, $$J$$ is a single-valued function, $$J: H \to H^\ast$$, and we often identify $$H$$ with $$H^\ast$$ by writing $$J(x) = x$$.
+
+In a general Banach space, the duality mapping $$J(x)$$ can be a set containing many functionals. This happens when the unit ball of the dual space has "flat spots" or "corners," a feature of non-Hilbert norms like $$L_1$$ and $$L_\infty$$.
+</details>
+
+## 6. Other Foundational Theorems and Applications
+
+The analytical power of Banach spaces is further demonstrated by a "holy trinity" of theorems about bounded operators and a powerful fixed-point theorem.
+
+*   **The "Holy Trinity" of Bounded Operators:**
     1.  **Uniform Boundedness Principle:** A family of operators that is pointwise bounded is uniformly bounded. (Pointwise good implies uniformly good).
     2.  **Open Mapping Theorem:** A surjective bounded linear operator between Banach spaces maps open sets to open sets. (A key corollary is the **Bounded Inverse Theorem**).
     3.  **Closed Graph Theorem:** An operator is bounded if and only if its graph is a closed set. This is often an easier way to prove an operator is continuous.
@@ -321,7 +427,7 @@ Despite lacking a universal notion of orthogonality, Banach spaces have a rich a
     A solution $$y(t)$$ is a fixed point of the operator $$\mathcal{T}$$ defined by the right-hand side: $$(\mathcal{T}y)(t) = \dots$$. If $$F$$ is Lipschitz continuous in its second argument, then for a small enough time interval, $$\mathcal{T}$$ is a contraction on the Banach space $$C(I)$$ of continuous functions. The Banach Fixed-Point Theorem then guarantees a unique local solution. This is the essence of the **Picard-Lindelöf theorem**.
     </blockquote>
 
-## 5. Banach Spaces in Machine Learning and Optimization
+## 7. Banach Spaces in Machine Learning and Optimization
 
 While much of ML operates in finite-dimensional Euclidean space (a Hilbert space), the theory behind advanced methods relies heavily on Banach space concepts.
 
@@ -330,7 +436,7 @@ While much of ML operates in finite-dimensional Euclidean space (a Hilbert space
 *   **Probabilistic Models:** Probability theory is built on measure theory. Spaces like $$L_1(\Omega, \mathcal{F}, P)$$ are Banach spaces essential for defining expected values, $$E[X] = \int X dP$$.
 *   **Theory of Optimization:** Analyzing the convergence of algorithms in infinite-dimensional settings (e.g., kernel methods, optimal control) requires Banach space machinery. The derivative of a functional on a Banach space (the Fréchet derivative) is an element of its dual space, a crucial distinction for the theory.
 
-## 6. Conclusion: A Broader Analytical Landscape
+## 8. Conclusion: A Broader Analytical Landscape
 
 Banach spaces generalize Hilbert spaces by dropping the requirement that a norm must come from an inner product. This trade-off is immensely fruitful. While we lose the universal geometric intuition of angles and orthogonality, we gain a far broader framework capable of handling diverse measures of "size." The $$L_1$$ norm for sparsity, the $$L_\infty$$ norm for uniform control, and the general $$L_p$$ norms for modeling different error sensitivities are indispensable tools in modern science and engineering.
 
@@ -338,19 +444,20 @@ The crucial property of **completeness** is retained, providing a solid foundati
 
 **Next Up:** In the final post of this mini-series, we will focus on linear operators, exploring how Matrix Spectral Analysis generalizes to operators on infinite-dimensional Hilbert and Banach spaces.
 
-## 7. Summary Cheat Sheet
+## 9. Summary Cheat Sheet
 
-| Concept                         | Description                                                                                                              | Key Example(s)                                                      | Why Important                                                                   |
-| :------------------------------ | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------ |
-| **Normed Space**                | Vector space with a function $$\Vert \cdot \Vert$$ defining length/size.                                                 | $$C([a,b])$$ with $$\Vert \cdot \Vert_\infty$$, $$L_p$$ spaces      | Basic structure for measuring size and distance.                                |
-| **Parallelogram Law**           | Identity: $$\Vert x+y \Vert^2 + \Vert x-y \Vert^2 = 2(\Vert x \Vert^2 + \Vert y \Vert^2)$$. Test for inner product norm. | Fails for $$L_p$$ ($$p\neq 2$$) and $$L_\infty$$ norms.             | Distinguishes Hilbert space norms from general norms.                           |
-| **$$L_p$$ Norms ($$p\neq 2$$)** | $$\Vert f \Vert_p = (\int \vert f\vert^p)^{1/p}$$. Measures size with varying sensitivity.                               | $$L_1$$ (Manhattan/taxicab).                                        | Model different error types; $$L_1$$ promotes sparsity.                         |
-| **$$L_\infty$$ Norm**           | $$\Vert f \Vert_\infty = \sup \vert f\vert$$. Measures the peak value or worst-case error.                               | Space of continuous functions $$C(K)$$.                             | Equivalent to uniform convergence.                                              |
-| **Banach Space**                | A **complete** normed vector space.                                                                                      | $$L_p$$ spaces ($$1\le p \le \infty$$), $$C(K)$$.                   | Ensures Cauchy sequences converge; robust analytical framework.                 |
-| **Dual Space $$X^\ast$$**       | Space of all bounded linear functionals $$f: X \to \mathbb{F}$$. It is always a Banach space.                            | $$(L_p)^\ast = L_q$$ for $$1<p<\infty$$. $$(L_1)^\ast = L_\infty$$. | Crucial for Hahn-Banach, reflexivity, and optimization theory (derivatives).    |
-| **Hahn-Banach Theorem**         | Guarantees norm-preserving extension of bounded linear functionals from a subspace to the full space.                    | -                                                                   | Ensures dual space $$X^\ast$$ is non-trivial; allows separation of convex sets. |
-| **Banach Fixed-Point Thm.**     | A contraction map $$T$$ on a complete metric space has a unique fixed point, $$T(x^\ast)=x^\ast$$.                       | Picard's method for solving ODEs.                                   | Guarantees existence/uniqueness of solutions; basis for iterative algorithms.   |
-| **"Holy Trinity"**              | Uniform Boundedness Principle, Open Mapping Thm., Closed Graph Thm. Foundational results for bounded linear operators.   | -                                                                   | Govern the fundamental properties of operators between Banach spaces.           |
+| Concept                         | Description                                                                                                                                                                                   | Key Example(s)                                                      | Why Important                                                                   |
+| :------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ | :------------------------------------------------------------------------------ |
+| **Normed Space**                | Vector space with a function $$\Vert \cdot \Vert$$ defining length/size.                                                                                                                      | $$C([a,b])$$ with $$\Vert \cdot \Vert_\infty$$, $$L_p$$ spaces      | Basic structure for measuring size and distance.                                |
+| **Parallelogram Law**           | Identity: $$\Vert x+y \Vert^2 + \Vert x-y \Vert^2 = 2(\Vert x \Vert^2 + \Vert y \Vert^2)$$. Test for inner product norm.                                                                      | Fails for $$L_p$$ ($$p\neq 2$$) and $$L_\infty$$ norms.             | Distinguishes Hilbert space norms from general norms.                           |
+| **$$L_p$$ Norms ($$p\neq 2$$)** | $$\Vert f \Vert_p = (\int \vert f\vert^p)^{1/p}$$. Measures size with varying sensitivity.                                                                                                    | $$L_1$$ (Manhattan/taxicab).                                        | Model different error types; $$L_1$$ promotes sparsity.                         |
+| **$$L_\infty$$ Norm**           | $$\Vert f \Vert_\infty = \sup \vert f\vert$$. Measures the peak value or worst-case error.                                                                                                    | Space of continuous functions $$C(K)$$.                             | Equivalent to uniform convergence.                                              |
+| **Banach Space**                | A **complete** normed vector space.                                                                                                                                                           | $$L_p$$ spaces ($$1\le p \le \infty$$), $$C(K)$$.                   | Ensures Cauchy sequences converge; robust analytical framework.                 |
+| **Dual Space $$X^\ast$$**       | Space of all bounded linear functionals $$f: X \to \mathbb{F}$$. It is always a Banach space.                                                                                                 | $$(L_p)^\ast = L_q$$ for $$1<p<\infty$$. $$(L_1)^\ast = L_\infty$$. | Crucial for Hahn-Banach, reflexivity, and optimization theory (derivatives).    |
+| **Hahn-Banach Theorem**         | Guarantees norm-preserving extension of bounded linear functionals from a subspace to the full space.                                                                                         | -                                                                   | Ensures dual space $$X^\ast$$ is non-trivial; allows separation of convex sets. |
+| **Duality Mapping $$J(x)$$**     | Map from $$x \in X$$ to the set of functionals $$\langle f \vert \in X^\ast$$ where $$\langle f \vert x \rangle = \Vert x \Vert^2$$ and $$\Vert \langle f \vert \Vert_\ast = \Vert x \Vert$$. | Single-valued in Hilbert spaces.                                    | Generalizes the gradient; fundamental tool in nonlinear analysis.               |
+| **Banach Fixed-Point Thm.**     | A contraction map $$T$$ on a complete metric space has a unique fixed point, $$T(x^\ast)=x^\ast$$.                                                                                            | Picard's method for solving ODEs.                                   | Guarantees existence/uniqueness of solutions; basis for iterative algorithms.   |
+| **"Holy Trinity"**              | Uniform Boundedness Principle, Open Mapping Thm., Closed Graph Thm. Foundational results for bounded linear operators.                                                                        | -                                                                   | Govern the fundamental properties of operators between Banach spaces.           |
 
 ## Further Reading
 

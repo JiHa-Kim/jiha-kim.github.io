@@ -331,19 +331,26 @@ A key feature of entrywise norms is that, in general, they are **not** sub-multi
 
 Important special cases include:
 *   **Frobenius Norm ($$p=q=2$$):** This is the most famous entrywise norm, which is also a Schatten norm ($$\Vert A \Vert_{S_2}$$). It is equivalent to the vector $$\ell_2$$-norm applied to the matrix's entries reshaped into a single vector.
+
     $$
     \Vert A \Vert_{2,2} = \left( \sum_{j=1}^n \sum_{i=1}^m \vert a_{ij} \vert^2 \right)^{1/2} = \Vert A \Vert_F
     $$
+
 *   **Maximum Absolute Value Norm ($$p=q=\infty$$):** This norm finds the largest absolute value among all matrix entries, often denoted $$\Vert A \Vert_{\max}$$.
+
     $$
     \Vert A \Vert_{\infty, \infty} = \max_{j} \left( \max_{i} \vert a_{ij} \vert \right) = \max_{i,j} \vert a_{ij} \vert
     $$
+
 *   **$$L_{2,1}$$-Norm ($$p=2, q=1$$):** This norm is the sum of the Euclidean norms of the columns.
+
     $$
     \Vert A \Vert_{2,1} = \sum_{j=1}^n \Vert a_{\cdot,j} \Vert_2 = \sum_{j=1}^n \sqrt{\sum_{i=1}^m \vert a_{ij} \vert^2}
     $$
+
     The $$L_{2,1}$$ norm is particularly useful in machine learning for inducing **group sparsity** by encouraging entire columns of a weight matrix to become zero, which is useful for feature selection in multi-task or multi-class learning settings.
 *   **$$L_{1}$$-Norm ($$p=q=1$$):** This is the sum of the absolute values of all entries.
+
     $$
     \Vert A \Vert_{1,1} = \sum_{j=1}^n \sum_{i=1}^m \vert a_{ij} \vert
     $$
