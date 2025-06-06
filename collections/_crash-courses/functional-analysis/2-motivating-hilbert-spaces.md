@@ -1,8 +1,7 @@
 ---
 title: "Motivating Hilbert Spaces: Encoding Geometry"
-date: 2025-05-29 09:00 -0400 # Adjusted date
+date: 2025-05-29 09:00 -0400
 sort_index: 2
-mermaid: false # Can be set to true if diagrams are added later
 description: Generalizing the dot product to function spaces and demanding completeness leads to Hilbert spaces, essential for geometry and analysis in infinite dimensions.
 image: # placeholder
 categories:
@@ -166,7 +165,7 @@ $$
 $$
 
 ### Generalizing to Functions: The $$L_2$$ Inner Product
-How can this extend to real-valued functions $$f(t), g(t)$$ on an interval $$[a,b]$$? View a function as a "vector" with infinitely many components, indexed by $$t \in [a,b]$$.
+How can this extend to real-valued functions $$f(t), g(t)$$ on an interval $$[a,b]$$? View a function as a "vector" with infinitely many components, indexed by $$t \in [a,b]$$. Then, as a common trick in analysis, we apply a limit on the discrete case to recover the continuous case.
 
 1.  **Approximate with Step Functions:**
     Divide $$[a,b]$$ into $$N$$ subintervals $$I_k = [t_{k-1}, t_k]$$ of width $$\Delta t_k$$. Pick sample points $$t_k^\ast \in I_k$$. Define step functions:
@@ -262,7 +261,9 @@ $$
 $$
 
 <blockquote class="box-example" markdown="1">
-<div class="title" markdown="1">**Example: Orthogonal Sines**</div>
+<div class="title" markdown="1">
+**Example: Orthogonal Sines**
+</div>
 Consider real functions on $$[-\pi, \pi]$$ with $$\langle f \vert g \rangle = \int_{-\pi}^{\pi} f(x)g(x)dx$$.
 Let $$\vert f_m \rangle \leftrightarrow f_m(x) = \sin(mx)$$ and $$\vert f_n \rangle \leftrightarrow f_n(x) = \sin(nx)$$ for positive integers $$m, n$$.
 Then $$\langle f_m \vert f_n \rangle = \int_{-\pi}^{\pi} \sin(mx)\sin(nx)dx$$.
@@ -330,6 +331,18 @@ The coefficients are the target values $$y_j$$.
    *   Biorthogonal Basis: $$\phi_i(x) = \frac{(x-x_0)^i}{i!}$$ satisfy $$\phi_i^{(j)}(x_0) = \delta_{ji}$$.
    *   Formula (Taylor Polynomial): $$P(x) = \sum_{j=0}^n f^{(j)}(x_0) \frac{(x-x_0)^j}{j!}$$.
 
+**3. Newton Interpolation:**
+   *   Functionals: Same as Lagrange, $$\langle \Lambda_j \vert P \rangle = P(x_j)$$.
+   *   Target: $$P(x_j) = y_j$$.
+   *   Basis (Newton Polynomials): $$\phi_i(x) = \prod_{k=0}^{i-1} (x - x_k)$$, for $$i \ge 1$$ and $$\phi_0(x)=1$$. This basis is computationally efficient because adding a new point only requires adding one new basis element and coefficient, unlike the Lagrange basis which must be completely recomputed.
+   *   Formula: $$P(x) = \sum_{j=0}^n c_j \phi_j(x)$$. The coefficients $$c_j$$ are called **divided differences**, denoted $$f[x_0, \dots, x_j]$$, and are determined recursively.
+
+       $$
+       c_0 = y_0, \quad c_1 = \frac{y_1 - y_0}{x_1 - x_0}, \quad c_2 = \frac{\frac{y_2 - y_1}{x_2 - x_1} - \frac{y_1 - y_0}{x_1 - x_0}}{x_2 - x_0}, \quad \dots
+       $$
+
+   *   This basis is **not** biorthogonal to the point evaluation functionals, but it provides a different, powerful approach to solving the same interpolation problem.
+
 **Note on Convergence:** Biorthogonality gives the form of interpolating functions. Whether these $$P_n(x)$$ converge to an underlying $$f(x)$$ as $$n \to \infty$$ is a separate issue in approximation theory (e.g., Runge's phenomenon, Fourier series convergence).
 </details>
 
@@ -345,7 +358,9 @@ Convergent sequences are Cauchy. The converse is not always true; the space migh
 ### The Problem of "Missing Limits"
 
 <blockquote class="box-warning" markdown="1">
-<div class="title" markdown="1">**Warning: Not All Inner Product Spaces Are Complete**</div>
+<div class="title" markdown="1">
+**Warning: Not All Inner Product Spaces Are Complete**
+</div>
 Consider $$C([-1,1])$$ (continuous functions on $$[-1,1]$$) with the $$L_2$$ inner product.
 The sequence $$f_n(x) = \tanh(nx)$$ consists of continuous functions and is Cauchy in the $$L_2$$-norm.
 However, $$f_n(x)$$ converges pointwise to the sign function:
@@ -401,56 +416,31 @@ The space $$L_2([-\pi, \pi])$$ of square-integrable complex-valued functions on 
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**Deep Dive: The Fourier Transform, Gaussians, and Rotations in Function Space**
+**Deep Dive: The Fourier Transform as a Rotation in Function Space**
 </summary>
-The Fourier Transform ($$\mathcal{F}$$) exhibits remarkable properties, especially in $$L_2$$ spaces and its relationship with Gaussian functions, linking it to rotations, complex numbers, and its significance in probability and analysis.
+The Fourier Transform ($$\mathcal{F}$$) on $$L_2(\mathbb{R})$$ has remarkable properties, linking it to rotations, complex numbers, and the Gaussian function.
 
-1.  **Common normalization $$1/\sqrt{2\pi}$$**
+**The Unitary FT and the Gaussian**
 
-    *   The standard normal PDF $$\varphi(t)=\frac{1}{\sqrt{2\pi}}\,e^{-t^2/2}$$ and the unitary Fourier transform $$\mathcal{F}\{f\}(k) =\frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty f(x)\,e^{-\,i\,xk}\,dx$$ share this factor, both stemming from $$\int_{-\infty}^\infty e^{-x^2/2}\,dx = \sqrt{2\pi}.$$
-    *   This normalizes the Gaussian's total area to 1 (probability) and makes a unit-variance Gaussian its own Fourier transform (Fourier theory).
+The unitary Fourier transform is often defined as $$\mathcal{F}\{f\}(k) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty f(x) e^{-ikx} dx$$.
+*   **Unitarity and Normalization:** The factor $$1/\sqrt{2\pi}$$ ensures $$\mathcal{F}$$ is unitary on $$L_2(\mathbb{R})$$ ($$\Vert \mathcal{F}f \Vert_2 = \Vert f \Vert_2$$) and stems from the Gaussian integral $$\int_{-\infty}^\infty e^{-x^2/2} dx = \sqrt{2\pi}$$. This same integral makes the standard normal PDF, $$\varphi(x) = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}$$, integrate to 1.
+*   **Eigenfunctions:** The Gaussian function $$g(x) = e^{-x^2/2}$$ is the unique (+1)-eigenfunction of $$\mathcal{F}$$. The full set of eigenfunctions are the **Hermite-Gaussian functions**, $$\psi_n(x)$$, which form an orthonormal basis for $$L_2(\mathbb{R})$$. They satisfy $$\mathcal{F}\{\psi_n\} = (-i)^n \psi_n$$.
+*   **Involutive Property:** Applying the transform twice gives the parity operator: $$\mathcal{F}^2 f(x) = f(-x)$$. Consequently, $$\mathcal{F}^4 = \mathrm{Id}$$, just like $$i^4 = 1$$.
 
-2.  **Unitarity and involutive property**
+**The "Quarter-Turn" Analogy Made Precise**
 
-    *   With this normalization, $$\mathcal{F}$$ is unitary on $$L^2(\mathbb{R})$$: $$\langle \mathcal{F}\{f\},\,\mathcal{F}\{g\}\rangle =\langle f,\,g\rangle$$, so $$\Vert \mathcal{F}\{f\}\Vert _{2} = \Vert f\Vert _{2}$$.
-    *   It also satisfies $$\mathcal{F}^2 f(x) = f(-x)$$ (parity operator $$P$$) and $$\mathcal{F}^4 = \mathrm{Id}$$. Thus, $$\mathcal{F}$$ is an order-4 unitary, a "square-root of parity."
+The property $$\mathcal{F}^4 = \mathrm{Id}$$ makes $$\mathcal{F}$$ analogous to a "quarter-turn" or $$90^\circ$$ rotation. This analogy is not just metaphorical; it is exact in the **time-frequency phase space**.
+*   The **Wigner Distribution**, $$W_f(x,k)$$, represents a function's energy jointly in the time ($$x$$) and frequency ($$k$$) domains.
+*   Applying the Fourier transform to a function $$f$$ corresponds to a rigid $$90^\circ$$ rotation of its Wigner distribution: $$W_{\mathcal{F}\{f\}}(x,k) = W_f(-k, x)$$. Applying it twice rotates the distribution by $$180^\circ$$, corresponding to $$W_f(-x,-k)$$, which matches the parity operation $$\mathcal{F}^2 f(x) = f(-x)$$.
 
-3.  **Gaussian as the unique eigenfunction with eigenvalue +1**
+**Generalizing to Arbitrary Rotations**
 
-    *   Solving $$\mathcal{F}\{g\}(k)=g(k)$$ forces $$g(x)\propto e^{-x^2/2}$$. No other nonzero $$L^2$$-function is its own Fourier transform.
-    *   The full eigenbasis consists of **Hermite‐Gaussian functions** $$\psi_n(x) = (\,2^n n!\sqrt\pi)^{-1/2} H_n(x)\,e^{-x^2/2},$$ with $$\mathcal{F}\{\psi_n\}(k) = (-\,i)^n\,\psi_n(k).$$
-        ($$n=0$$: Gaussian, eigenvalue +1; $$n=1$$: eigenvalue $$-\,i$$; etc.)
+This idea can be generalized. The **Fractional Fourier Transform ($$\mathcal{F}_\alpha$$)** is a family of operators that rotate a function's Wigner distribution by an arbitrary angle $$\alpha$$.
+*   $$\mathcal{F}_0 = \mathrm{Id}$$ (no rotation)
+*   $$\mathcal{F}_{\pi/2} = \mathcal{F}$$ (the standard FT)
+*   $$\mathcal{F}_{\pi} = P$$ (the parity operator)
 
-4.  **Why the Gaussian links probability and Fourier**
-
-    *   The integral $$\int e^{-x^2/2}dx=\sqrt{2\pi}$$ ensures $$\varphi(t)$$ has mass 1 (probability) and makes $$\mathcal{F}\{e^{-x^2/2}\}=e^{-k^2/2}$$ (Fourier).
-
-5.  **Analogy with $$i$$ as a “quarter‐turn”**
-
-    *   Like $$i$$ in $$\mathbb{C}$$ ($$i^2=-1, i^4=1$$), $$\mathcal{F}$$ is often called a “quarter‐turn” because $$\mathcal{F}^2 \sim -1$$ (parity) and $$\mathcal{F}^4=\mathrm{Id}$$. This analogy is exact for the action of $$\mathcal{F}$$ on the **time–frequency (phase‐space) distribution**, not the function's graph.
-
-6.  **Phase‐space picture (Wigner distribution)**
-
-    *   The **Wigner distribution** $$W_f(x,k) =\int f\bigl(x+\tfrac{y}{2}\bigr)\,\overline{f\bigl(x-\tfrac{y}{2}\bigr)}\,e^{-i\,k\,y}\,dy$$ represents a function's energy in time–frequency.
-    *   Then $$W_{\mathcal{F}\{f\}}\,(x,k) = W_f\bigl(-\,k,\,x\bigr)$$, a 90° rotation $$(x,k)\mapsto(-k,x)$$ in phase space. Two rotations yield $$(x,k)\mapsto(-x,-k)$$, matching $$\mathcal{F}^2=P$$.
-
-7.  **Fractional Fourier transforms (true rotations)**
-
-    *   A family $$\{\mathcal{F}_\alpha\}_{\alpha\in\mathbb{R}}$$ satisfies $$\mathcal{F}_\alpha\circ\mathcal{F}_\beta = \mathcal{F}_{\alpha+\beta},$$ with $$\mathcal{F}_0=\mathrm{Id}$$, $$\mathcal{F}_{\pi/2}=\mathcal{F}$$, $$\mathcal{F}_\pi = P$$.
-    *   In the Wigner picture, $$W_{\mathcal{F}_\alpha\{f\}}\,(x,k) = W_f\bigl(x\cos\alpha - k\sin\alpha,\;x\sin\alpha + k\cos\alpha\bigr)$$, a rotation by angle $$\alpha$$.
-
-8.  **Metaplectic perspective**
-
-    *   Symplectic maps $$\mathrm{Sp}(2,\mathbb{R})$$ on phase space (like rotations $$R_\alpha$$) lift via the metaplectic representation to unitary operators $$\pm\,\mathcal{F}_\alpha$$ on $$L^2(\mathbb{R})$$. Thus $$\mathcal{F}=\mathcal{F}_{\pi/2}$$ corresponds to a true quarter-turn in phase-space.
-
----
-
-### Final takeaway
-
-*   The shared $$1/\sqrt{2\pi}$$ in the normal PDF and unitary FT stems from $$\int e^{-x^2/2}dx = \sqrt{2\pi}$$.
-*   This makes $$\mathcal{F}$$ unitary and satisfy $$\mathcal{F}^2 f(x)=f(-x)$$.
-*   $$e^{-x^2/2}$$ is the unique +1 eigenfunction of $$\mathcal{F}$$.
-*   "$$\mathcal{F}$$ is a 90° rotation" holds precisely in phase-space (Wigner distribution). Literal rotations use **fractional Fourier transforms** $$\mathcal{F}_\alpha$$.
+This provides a continuous interpolation between a function and its Fourier transform. The underlying mathematical framework for these operators is the **metaplectic representation**.
 </details>
 
 ### Other Key Areas Benefiting from Hilbert Space Theory

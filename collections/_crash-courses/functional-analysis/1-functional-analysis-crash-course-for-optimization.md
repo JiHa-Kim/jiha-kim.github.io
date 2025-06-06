@@ -3,7 +3,7 @@ title: "Elementary Functional Analysis: A Crash Course for Optimization"
 date: 2025-05-22 09:00 -0400
 sort_index: 1
 description: An introduction to the core concepts of functional analysis, motivated by how different mathematical 'types' (kets and bras) behave under transformations, essential for understanding machine learning optimization.
-image: # Placeholder image path
+image:
 categories:
 - Mathematical Foundations
 - Machine Learning
@@ -188,8 +188,8 @@ Throughout this course, we will adopt **bra-ket notation**. It's more than just 
 
 *   **Kets:** Vectors in a vector space $$V$$ are denoted as kets, e.g., $$\vert v \rangle$$.
 *   **Bras:** Linear functionals on $$V$$ (elements of the dual space $$V^\ast$$) are denoted as bras, e.g., $$\langle f \vert$$.
-*   **Pairing/Action:** The action of a functional $$\langle f \vert$$ on a ket $$\vert v \rangle$$ is written $$\langle f \vert v \rangle$$. This results in a scalar.
-*   **Inner Product:** If an inner product is defined on $$V$$, the inner product between kets $$\vert v \rangle$$ and $$\vert w \rangle$$ is written $$\langle v \vert w \rangle$$. (We'll see later how the Riesz Representation Theorem connects this to the bra-ket pairing).
+*   **Pairing/Action:** The action of a functional $$\langle f \vert$$ on a ket $$\vert v \rangle$$ is written as a "bra-ket" pairing: $$\langle f \vert v \rangle := \langle f \vert \big( \vert v \rangle \big)$$. This results in a scalar. As we will see, this notation is ambiguous, but resolved due to a very powerful theorem: the **Riesz Representation Theorem**.
+*   **Inner Product:** If an inner product is defined on $$V$$, the inner product between kets $$\vert v \rangle$$ and $$\vert w \rangle$$ is also written $$\langle v \vert w \rangle$$. (We'll see later how the Riesz Representation Theorem connects this to the bra-ket pairing).
 
 This notation constantly reminds us of the distinct nature of these objects. You cannot simply "add" a bra to a ket, for instance, just as you wouldn't add a string to a float without type-casting. This "type-checking" helps maintain conceptual clarity, especially as we move to more abstract settings.
 </blockquote>
@@ -259,16 +259,16 @@ Let $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ for some positive scalar
 
 2.  **Implied Transformation of Dual Basis Bras:**
     The new dual basis bras $$\{\langle (\epsilon')^j \vert\}$$ must satisfy the defining relation with the *new* basis kets: $$\langle (\epsilon')^j \vert e'_i \rangle = \delta^j_i$$.
-    Substitute $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$:
+    Substitute $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ and use linearity:
 
     $$
-    \langle (\epsilon')^j \vert (\alpha_i \vert e_i \rangle) = \delta^j_i \quad \implies \quad \alpha_i \langle (\epsilon')^j \vert e_i \rangle = \delta^j_i
+    \alpha_i \langle (\epsilon')^j \vert e_i \rangle = \delta^j_i
     $$
 
     If we assume $$\langle (\epsilon')^j \vert = \beta_j \langle \epsilon^j \vert$$ for some scaling factor $$\beta_j$$ (no sum, relating corresponding dual basis elements), then:
 
     $$
-    \alpha_i (\beta_j \langle \epsilon^j \vert e_i \rangle) = \delta^j_i \quad \implies \quad \alpha_i \beta_j \delta^j_i = \delta^j_i
+    \alpha_i \beta_j \langle \epsilon^j \vert e_i \rangle = \delta^j_i \quad \implies \quad \alpha_i \beta_j \delta^j_i = \delta^j_i
     $$
 
     This must hold for all $$i,j$$. If $$i=j$$, then $$\alpha_j \beta_j = 1$$, so $$\beta_j = 1/\alpha_j$$. (If $$i \ne j$$, the equation is $$0=0$$).
@@ -324,12 +324,14 @@ The set of all linear functionals (bras) that can act on kets in a vector space 
 <div class="title" markdown="1">
 **The Dual Space $$V^\ast$$**
 </div>
-The dual space $$V^\ast$$ consists of all linear functionals on $$V$$. It has a vector space structure:
-*   **Addition of bras:** $$(\langle f \vert + \langle g \vert) \vert v \rangle = \langle f \vert v \rangle + \langle g \vert v \rangle$$ for any $$\vert v \rangle \in V$$.
-*   **Scalar multiplication of bras:** $$(c \langle f \vert) \vert v \rangle = c (\langle f \vert v \rangle)$$ for any scalar $$c$$ and $$\vert v \rangle \in V$$.
+The algebraic dual space $$V^\ast$$ consists of all linear functionals on $$V$$. It has a vector space structure defined by its action on kets:
+*   **Addition of bras:** The sum $$\langle f \vert + \langle g \vert$$ is the bra whose action is defined by $$\langle (f+g) \vert v \rangle = \langle f \vert v \rangle + \langle g \vert v \rangle$$ for any $$\vert v \rangle \in V$$.
+*   **Scalar multiplication of bras:** The scalar multiple $$c \langle f \vert$$ is the bra whose action is defined by $$\langle (c f) \vert v \rangle = c \langle f \vert v \rangle$$ for any scalar $$c$$ and $$\vert v \rangle \in V$$.
 
 If $$V$$ is finite-dimensional with dimension $$n$$, then $$V^\ast$$ also has dimension $$n$$. The dual space $$V^\ast$$ is the natural "home" for our "rulers" – it exists and is distinct from $$V$$ even before we introduce concepts like norms or inner products.
 </blockquote>
+
+We can also consider the dual of the dual space, $$V^{\ast\ast} = (V^\ast)^\ast$$, called the **double dual**. There is a natural map $$J: V \to V^{\ast\ast}$$ that takes a ket $$\vert v \rangle \in V$$ and turns it into a functional acting on bras via evaluation: $$J(\vert v \rangle)(\langle f \vert) = \langle f \vert v \rangle$$. For **finite-dimensional spaces, this map is an isomorphism**, meaning $$V \cong V^{\ast\ast}$$. For **infinite-dimensional spaces, however, the map is only guaranteed to be injective**. A space where this map is also surjective (an isomorphism) is called **reflexive**. Hilbert spaces and many other common Banach spaces are reflexive, but not all are.
 
 ## 3. Giving Structure to Our Objects: Norms and Completeness
 
@@ -431,27 +433,28 @@ Thus, a Hilbert space is a Banach space whose norm comes from an inner product. 
 
 ### The Riesz Representation Theorem: The "Magic" Bridge
 
-Now we arrive at a pivotal result connecting bras and kets in the context of Hilbert spaces. Remember, $$H^\ast$$ is the space of all continuous linear functionals (bras) on $$H$$.
+We now arrive at a pivotal result that connects the abstract world of bras in the dual space $$H^\ast$$ to the familiar world of kets in the Hilbert space $$H$$. This theorem addresses a potential point of confusion in our notation. We have used $$\langle f \vert v \rangle$$ to represent the pairing of a functional (a bra $$\langle f \vert$$) with a vector (a ket $$\vert v \rangle$$). We have also used $$\langle w \vert v \rangle$$ to represent the inner product of two kets. Is the $$\langle w \vert$$ in the inner product the same kind of object as the functional $$\langle f \vert$$?
+
+The Riesz Representation Theorem provides the answer: in a Hilbert space, every continuous linear functional $$\langle \phi \vert$$ can be uniquely represented *by* taking the inner product with a specific ket. This provides the justification for treating the "bra" part of an inner product as a linear functional, and for the elegant but potentially ambiguous bra-ket notation for both concepts.
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
 **Theorem 4.3: Riesz Representation Theorem (for Hilbert Spaces)**
 </div>
-Let $$H$$ be a Hilbert space. For every continuous linear functional $$\langle \phi \vert \in H^\ast$$ (a bra), there exists a **unique** ket $$\vert y_\phi \rangle \in H$$ such that:
+Let $$H$$ be a Hilbert space. For every continuous linear functional $$\langle \phi \vert \in H^\ast$$ (a bra), there exists a **unique** ket $$\vert y_\phi \rangle \in H$$ such that for all $$\vert x \rangle \in H$$:
 
 $$
-\langle \phi \vert x \rangle = \langle y_\phi \vert x \rangle \quad \text{for all } \vert x \rangle \in H
+\langle \phi \vert \left( \vert x \rangle \right) = \langle y_\phi \vert x \rangle
 $$
 
-(The LHS is the action of the abstract functional $$\langle \phi \vert$$ on $$\vert x \rangle$$. The RHS is the inner product of the specific ket $$\vert y_\phi \rangle$$ with $$\vert x \rangle$$ in $$H$$).
-Furthermore, this correspondence defines an isometric anti-isomorphism between $$H^\ast$$ and $$H$$ (isometric isomorphism if $$H$$ is real): $$\Vert \langle \phi \vert \Vert_{H^\ast} = \Vert \vert y_\phi \rangle \Vert_H$$.
+The expression on the left, $$\langle \phi \vert \left( \vert x \rangle \right)$$, represents the **action** of the abstract functional $$\langle \phi \vert \in H^\ast$$ on the ket $$\vert x \rangle$$. The expression on the right, $$\langle y_\phi \vert x \rangle$$, is the **inner product** in $$H$$ between the newly found, unique ket $$\vert y_\phi \rangle$$ and the ket $$\vert x \rangle$$. Furthermore, this correspondence defines an isometric anti-isomorphism between $$H^\ast$$ and $$H$$ (isometric isomorphism if $$H$$ is real): $$\Vert \langle \phi \vert \Vert_{H^\ast} = \Vert \vert y_\phi \rangle \Vert_H$$.
 </blockquote>
 
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
 **Implications of the Riesz Representation Theorem**
 </div>
-The Riesz Representation Theorem is profound: it tells us that for Hilbert spaces, we can *identify* every bra $$\langle \phi \vert$$ with a unique ket $$\vert y_\phi \rangle$$ through the inner product. This is why in elementary linear algebra with $$\mathbb{R}^n$$ and the dot product, we often don't strictly distinguish between row vectors (functionals) and column vectors (vectors) – any linear functional's action $$a^T x$$ can be seen as an inner product $$\langle a \vert x \rangle$$.
+The Riesz Representation Theorem is profound: it establishes a canonical **duality mapping** from the dual space $$H^\ast$$ to the primal space $$H$$. It tells us that for Hilbert spaces, we can *identify* every bra $$\langle \phi \vert$$ with a unique ket $$\vert y_\phi \rangle$$ through the inner product. This is why in elementary linear algebra with $$\mathbb{R}^n$$ and the dot product, we often don't strictly distinguish between row vectors (functionals) and column vectors (vectors) – any linear functional's action $$a^T x$$ can be seen as an inner product $$\langle a \vert x \rangle$$.
 
 However, it's crucial to remember:
 1.  This identification *depends on the inner product*. Without an inner product, or in a general Banach space, $$V^\ast$$ and $$V$$ are distinct.
@@ -470,20 +473,19 @@ A function $$T: V \to W$$ is a **linear operator** if $$T(c \vert x \rangle + \v
 
 ### The Adjoint Operator $$T^\dagger$$: How Transformations Affect "Measurements"
 
-If an operator $$T: H_1 \to H_2$$ (between Hilbert spaces) transforms kets, how does this affect a "measurement" like $$\langle w \vert (T \vert v \rangle) \rangle_{H_2}$$ where $$\langle w \vert$$ is a bra from $$H_2^\ast$$ (which we can identify with a ket in $$H_2$$ via Riesz)? Can we define an operator that describes the "transformed bra"?
+If an operator $$T: H_1 \to H_2$$ (between Hilbert spaces) transforms kets, how does this affect a "measurement" like $$\langle y \vert T \vert x \rangle_{H_2}$$ where $$\langle y \vert$$ is a bra from $$H_2^\ast$$ (which we can identify with a ket in $$H_2$$ via Riesz)? Can we define an operator that describes the "transformed bra"?
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
 **Definition 5.1: Adjoint Operator**
 </div>
-Let $$H_1, H_2$$ be Hilbert spaces. For a bounded linear operator $$T: H_1 \to H_2$$, its **adjoint operator** $$T^\dagger : H_2 \to H_1$$ is the unique bounded linear operator satisfying:
+Let $$H_1, H_2$$ be Hilbert spaces. For a bounded linear operator $$T: H_1 \to H_2$$, its **adjoint operator** $$T^\dagger : H_2 \to H_1$$ is the unique bounded linear operator satisfying for all $$\vert x \rangle \in H_1, \vert y \rangle \in H_2$$:
 
 $$
-\langle y \vert (T \vert x \rangle) \rangle_{H_2} = \langle (T^\dagger \vert y \rangle) \vert x \rangle_{H_1} \quad \text{for all } \vert x \rangle \in H_1, \vert y \rangle \in H_2
+\langle y \vert T \vert x \rangle_{H_2} = \langle T^\dagger y \vert x \rangle_{H_1}
 $$
 
-(Here, by Riesz, $$\vert y \rangle$$ on the LHS represents the functional acting on $$T\vert x \rangle$$, and $$T^\dagger \vert y \rangle$$ on the RHS represents the functional acting on $$\vert x \rangle$$).
-The existence and uniqueness of $$T^\dagger$$ for any bounded $$T$$ is guaranteed (related to Riesz). Also, $$\Vert T^\dagger \Vert = \Vert T \Vert$$.
+Here, the inner product $$\langle y \vert T \vert x \rangle$$ involves the transformed ket $$T \vert x \rangle$$. The adjoint allows us to express this same scalar value via an inner product involving a transformed bra, represented by the ket $$T^\dagger \vert y \rangle$$. The existence and uniqueness of $$T^\dagger$$ for any bounded $$T$$ is guaranteed (related to Riesz). Also, $$\Vert T^\dagger \Vert = \Vert T \Vert$$.
 </blockquote>
 
 <details class="details-block" markdown="1">
@@ -536,10 +538,10 @@ To perform optimization, we need derivatives for functions whose domains are the
 A function $$J: U \to \mathbb{R}$$ (where $$U \subseteq V$$ is open, $$V$$ is a normed space) is **Fréchet differentiable** at $$\vert x \rangle \in U$$ if there exists a bounded linear functional $$DJ(\vert x \rangle) : V \to \mathbb{R}$$ such that:
 
 $$
-\lim_{\Vert \vert h \rangle \Vert_V \to 0} \frac{\vert J(\vert x \rangle + \vert h \rangle) - J(\vert x \rangle) - (DJ(\vert x \rangle) \vert h \rangle) \vert}{\Vert \vert h \rangle \Vert_V} = 0
+\lim_{\Vert \vert h \rangle \Vert_V \to 0} \frac{\vert J(\vert x \rangle + \vert h \rangle) - J(\vert x \rangle) - \langle DJ(\vert x \rangle) \vert h \rangle \vert}{\Vert \vert h \rangle \Vert_V} = 0
 $$
 
-This is often written as $$J(\vert x \rangle + \vert h \rangle) = J(\vert x \rangle) + (DJ(\vert x \rangle) \vert h \rangle) + o(\Vert \vert h \rangle \Vert_V)$$.
+This is often written as $$J(\vert x \rangle + \vert h \rangle) = J(\vert x \rangle) + \langle DJ(\vert x \rangle) \vert h \rangle + o(\Vert \vert h \rangle \Vert_V)$$.
 The linear functional $$DJ(\vert x \rangle)$$ is the Fréchet derivative of $$J$$ at $$\vert x \rangle$$.
 </blockquote>
 
@@ -549,7 +551,7 @@ $$
 \langle DJ(\vert x \rangle) \vert \in V^\ast
 $$
 
-Its action on a "direction" ket $$\vert h \rangle$$ gives the directional derivative: $$(DJ(\vert x \rangle) \vert h \rangle) = \langle DJ(\vert x \rangle) \vert h \rangle$$.
+Its action on a "direction" ket $$\vert h \rangle$$ gives the directional derivative, written as the pairing $$\langle DJ(\vert x \rangle) \vert h \rangle$$.
 
 ### The Gradient Ket: From Bra to Ket via Riesz
 
@@ -560,10 +562,10 @@ The Fréchet derivative bra $$\langle DJ(\vert x \rangle) \vert \in H^\ast$$ cor
 <div class="title" markdown="1">
 **Definition 6.2: Gradient in a Hilbert Space**
 </div>
-The unique ket $$\vert \nabla J(\vert x \rangle) \rangle \in H$$ identified via the Riesz Representation Theorem from the Fréchet derivative functional $$\langle DJ(\vert x \rangle) \vert \in H^\ast$$ is called the **gradient** of the real-valued function $$J: H \to \mathbb{R}$$ at $$\vert x \rangle$$. It satisfies:
+The unique ket $$\vert \nabla J(\vert x \rangle) \rangle \in H$$ identified via the Riesz Representation Theorem from the Fréchet derivative functional $$\langle DJ(\vert x \rangle) \vert \in H^\ast$$ is called the **gradient** of the real-valued function $$J: H \to \mathbb{R}$$ at $$\vert x \rangle$$. It satisfies for all $$\vert h \rangle \in H$$:
 
 $$
-\underbrace{\langle DJ(\vert x \rangle) \vert h \rangle}_{\text{Action of functional}} = \underbrace{\langle \nabla J(\vert x \rangle) \vert h \rangle}_{\text{Inner product in } H} \quad \text{for all } \vert h \rangle \in H
+\underbrace{\langle DJ(\vert x \rangle) \vert \left( \vert h \rangle \right)}_{\text{Action of functional}} = \underbrace{\langle \nabla J(\vert x \rangle) \vert h \rangle}_{\text{Inner product in } H}
 $$
 
 </blockquote>
@@ -580,7 +582,7 @@ This distinction is crucial. For example, in numerical methods, the gradient des
 </blockquote>
 
 ### Second Derivatives: The Hessian Operator
-If $$J: H \to \mathbb{R}$$ is twice Fréchet differentiable, its second derivative $$D^2J(\vert x \rangle)$$ can be viewed as a bounded bilinear form on $$H \times H$$, or as a linear operator from $$H$$ to $$H^\ast$$. Applying Riesz representation ideas again, this can be identified with a bounded linear operator from $$H$$ to $$H$$, denoted $$\nabla^2 J(\vert x \rangle)$$ (or Hess $$J(\vert x \rangle)$$), called the **Hessian operator**. This operator is self-adjoint if $$J$$ is sufficiently smooth. The bilinear form is then expressed as $$D^2J(\vert x \rangle)(\vert h_1 \rangle, \vert h_2 \rangle) = \langle \vert h_1 \rangle \vert (\nabla^2 J(\vert x \rangle) \vert h_2 \rangle) \rangle_H$$.
+If $$J: H \to \mathbb{R}$$ is twice Fréchet differentiable, its second derivative $$D^2J(\vert x \rangle)$$ can be viewed as a bounded bilinear form on $$H \times H$$, or as a linear operator from $$H$$ to $$H^\ast$$. Applying Riesz representation ideas again, this can be identified with a bounded linear operator from $$H$$ to $$H$$, denoted $$\nabla^2 J(\vert x \rangle)$$ (or Hess $$J(\vert x \rangle)$$), called the **Hessian operator**. This operator is self-adjoint if $$J$$ is sufficiently smooth. The bilinear form is then expressed as $$D^2J(\vert x \rangle)(\vert h_1 \rangle, \vert h_2 \rangle) = \langle h_1 \vert \nabla^2 J(\vert x \rangle) \vert h_2 \rangle_H$$.
 
 ## 7. Conclusion: The Power of Duality and Typed Thinking
 
