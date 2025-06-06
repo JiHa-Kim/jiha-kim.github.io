@@ -348,12 +348,13 @@ Now, we can define a "map" that connects a vector in $$X$$ to the special functi
 <div class="title" markdown="1">
 **Definition 5.2: The Duality Mapping**
 </div>
-Let $$X$$ be a normed space. The **duality mapping** $$J: X \to 2^{X^\ast}$$ is a (potentially multi-valued) mapping that associates each vector $$\vert x \rangle \in X$$ with the set of all functionals $$\langle f \vert \in X^\ast$$ satisfying:
+Let $$X$$ be a normed space. The **duality mapping** $$J: X \to 2^{X^\ast}$$ (the power set of $$X^\ast$$) is a (potentially multi-valued) mapping that associates each vector $$\vert x \rangle \in X$$ with the set of all functionals $$\langle f \vert \in X^\ast$$ satisfying:
 
-1.  $$\langle f \vert x \rangle = \Vert x \Vert^2$$
-2.  $$\Vert \langle f \vert \Vert_\ast = \Vert x \Vert$$
+$$
+\Vert \langle f \vert \Vert_\ast = \Vert x \Vert
+$$
 
-We write this as $$J(x) = \{ \langle f \vert \in X^\ast : \langle f \vert x \rangle = \Vert x \Vert^2 \text{ and } \Vert \langle f \vert \Vert_\ast = \Vert x \Vert \}$$. Intuitively, the bra/covector ("ruler") is perfectly aligned with the ket/vector ("pencil") in a way that saturates the generalized Cauchy-Schwarz inequality: $$\vert \langle f \vert x \rangle \vert \le \Vert \langle f \vert \Vert_\ast \Vert x \Vert$$.
+We write this as $$J(x) = \{ \langle f \vert \in X^\ast : \Vert \langle f \vert \Vert_\ast = \Vert x \Vert \}$$. Intuitively, the bra/covector ("ruler") is perfectly aligned with the ket/vector ("pencil") in a way that saturates the generalized Cauchy-Schwarz inequality: $$\vert \langle f \vert x \rangle \vert \le \Vert \langle f \vert \Vert_\ast \Vert x \Vert$$.
 </blockquote>
 
 This mapping generalizes the notion of a gradient and is central to nonlinear analysis and optimization theory in Banach spaces.
@@ -455,7 +456,7 @@ The crucial property of **completeness** is retained, providing a solid foundati
 | **Banach Space**                | A **complete** normed vector space.                                                                                                                                                           | $$L_p$$ spaces ($$1\le p \le \infty$$), $$C(K)$$.                   | Ensures Cauchy sequences converge; robust analytical framework.                 |
 | **Dual Space $$X^\ast$$**       | Space of all bounded linear functionals $$f: X \to \mathbb{F}$$. It is always a Banach space.                                                                                                 | $$(L_p)^\ast = L_q$$ for $$1<p<\infty$$. $$(L_1)^\ast = L_\infty$$. | Crucial for Hahn-Banach, reflexivity, and optimization theory (derivatives).    |
 | **Hahn-Banach Theorem**         | Guarantees norm-preserving extension of bounded linear functionals from a subspace to the full space.                                                                                         | -                                                                   | Ensures dual space $$X^\ast$$ is non-trivial; allows separation of convex sets. |
-| **Duality Mapping $$J(x)$$**     | Map from $$x \in X$$ to the set of functionals $$\langle f \vert \in X^\ast$$ where $$\langle f \vert x \rangle = \Vert x \Vert^2$$ and $$\Vert \langle f \vert \Vert_\ast = \Vert x \Vert$$. | Single-valued in Hilbert spaces.                                    | Generalizes the gradient; fundamental tool in nonlinear analysis.               |
+| **Duality Mapping $$J(x)$$**    | Map from $$x \in X$$ to the set of functionals $$\langle f \vert \in X^\ast$$ where $$\langle f \vert x \rangle = \Vert x \Vert^2$$ and $$\Vert \langle f \vert \Vert_\ast = \Vert x \Vert$$. | Single-valued in Hilbert spaces.                                    | Generalizes the gradient; fundamental tool in nonlinear analysis.               |
 | **Banach Fixed-Point Thm.**     | A contraction map $$T$$ on a complete metric space has a unique fixed point, $$T(x^\ast)=x^\ast$$.                                                                                            | Picard's method for solving ODEs.                                   | Guarantees existence/uniqueness of solutions; basis for iterative algorithms.   |
 | **"Holy Trinity"**              | Uniform Boundedness Principle, Open Mapping Thm., Closed Graph Thm. Foundational results for bounded linear operators.                                                                        | -                                                                   | Govern the fundamental properties of operators between Banach spaces.           |
 
