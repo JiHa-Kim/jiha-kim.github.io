@@ -482,7 +482,7 @@ A practical bottleneck is computing $$\mathrm{sign}(G)$$ or the full polar decom
     <div class="title" markdown="1">
     **Example.** Polar Express vs. Newton–Schulz
     </div>
-    For a weight-gradient matrix with condition number $$10^3$$, Newton–Schulz needs **7** iterations to hit $$\|I-X^{\!\top}X\|_2 < 10^{-4}$$; Polar Express reaches the same tolerance in **3** iterations on the same GPU batch. (Amsel et al., 2025)
+    For a weight-gradient matrix with condition number $$10^3$$, Newton–Schulz needs **7** iterations to hit $$\Vert I-X^{\!\top}X\Vert _2 < 10^{-4}$$; Polar Express reaches the same tolerance in **3** iterations on the same GPU batch. (Amsel et al., 2025)
     </blockquote>
 
 *   **Robust Solvers for Full Polar Decomposition (advocated by Lau et al., 2025 for PolarGrad):**

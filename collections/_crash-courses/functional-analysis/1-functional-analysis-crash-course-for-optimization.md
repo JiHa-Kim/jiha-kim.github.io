@@ -160,29 +160,23 @@ llm-instructions: |
 
 Welcome to this crash course on Elementary Functional Analysis! This post aims to equip you with essential concepts that form the theoretical backbone for modern optimization theory, especially in machine learning. We'll explore why certain mathematical distinctions, often overlooked in basic settings, become crucial for a deeper understanding.
 
-<blockquote class="prompt-info" markdown="1">
-<p markdown="1">
-**Prerequisites:** A solid understanding of Linear Algebra and basic Calculus is assumed. Familiarity with our [Linear Algebra Crash Course](https://jiha-kim.github.io/crash-courses/linear-algebra/linear-algebra-a-geometric-perspective/) is highly recommended.
-</p>
-</blockquote>
-
 ## 1. Introduction: More Than Meets the Eye – Kets, Bras, and Invariance
 
 In introductory linear algebra, especially when working with $$\mathbb{R}^n$$ and the standard dot product, the distinction between column vectors (often representing points or directions) and row vectors (often representing linear functions acting on these column vectors) can seem somewhat arbitrary. A row vector can be seen as just the transpose of a column vector, and their product gives a scalar. But is this the full story? What if we change our coordinate system, or what if our space doesn't have a "standard" inner product readily available?
 
 This post argues there's a deeper, intrinsic difference between these types of objects, a difference that functional analysis makes precise. This distinction is crucial for understanding the behavior of mathematical objects under transformations and for correctly formulating concepts like derivatives in more general settings.
 
-### Physical Intuition: "Rulers" vs. "Pencils"
+### Physical Intuition: "Pencils" vs. "Rulers"
 
 To build intuition, let's consider two types of physical analogies:
 
-*   **Kets $$\vert v \rangle$$ as "Rulers":** Think of a ket vector, $$\vert v \rangle$$, as representing a physical entity like a displacement, a velocity, or a quantum state. It's an object with an inherent existence, magnitude, and direction, much like a ruler that measures a certain length. We'll see that components of these "ruler-like" objects transform in a particular way when we change our measurement system (basis).
+*   **Kets $$\vert v \rangle$$ as "Pencils" (or "Pencil Strokes"):** Think of a ket vector, $$\vert v \rangle$$, as representing a physical entity like a displacement, a velocity, or a quantum state. It's like drawing a line with a pencil: it has a specific direction and length, representing a change from one point to another. It is the object we want to measure, an entity with inherent existence. We'll see that components of these "pencil-like" objects transform in a particular way when we change our measurement system (basis).
 
-*   **Bras $$\langle f \vert$$ as "Pencils":** Think of a bra vector, $$\langle f \vert$$, as representing a "measurement device" or a way of extracting scalar information from kets. Imagine a topographical map where a pencil draws contour lines of constant elevation. These lines represent the gradient of the height function. The "density" and orientation of these lines (the bra) can tell you how much elevation you gain when you move a certain displacement (the ket). Components of these "pencil-like" objects transform differently than those of "rulers."
+*   **Bras $$\langle f \vert$$ as "Rulers":** Think of a bra vector, $$\langle f \vert$$, as representing a "measurement device" or a "scale" that extracts scalar information from kets. A ruler is a great example. When you apply it to a displacement vector (the pencil stroke), you get a number—a measurement, depending on how "aligned" the ruler is with the pencil, the density of the tick marks on the ruler, and the length of the pencil. Another powerful analogy is the set of contour lines on a topographical map, which represent the gradient of the height function. These lines act as a "ruler" for elevation; when you move along a path (the ket), the number of contour lines you cross (the action of the bra) tells you the change in elevation (a scalar). Components of these "ruler-like" objects transform differently than those of "pencils."
 
 ### The Invariant Scalar Product $$\langle f \vert v \rangle$$
 
-The crucial link between these two types of objects is their pairing to produce a scalar value, $$\langle f \vert v \rangle$$. This scalar represents a physical, measurable quantity – for example, the number of contour lines crossed by the ruler's displacement, or the projection of a vector onto a gradient. A fundamental principle is that such **physical quantities must be invariant** under changes of our descriptive framework (e.g., choice of coordinate system). If the components of $$\vert v \rangle$$ and $$\langle f \vert$$ change, they must do so in a coordinated manner such that $$\langle f \vert v \rangle$$ remains the same. This requirement is the key to understanding their distinct transformation properties.
+The crucial link between these two types of objects is their pairing to produce a scalar value, $$\langle f \vert v \rangle$$. This scalar represents a physical, measurable quantity – for example, the number of contour lines (the "ruler") crossed by a displacement (the "pencil stroke"), or the projection of a vector onto a gradient. A fundamental principle is that such **physical quantities must be invariant** under changes of our descriptive framework (e.g., choice of coordinate system). If the components of $$\vert v \rangle$$ and $$\langle f \vert$$ change, they must do so in a coordinated manner such that $$\langle f \vert v \rangle$$ remains the same. This requirement is the key to understanding their distinct transformation properties.
 
 ### Bra-Ket Notation: A "Type System"
 
@@ -245,8 +239,8 @@ Let $$V$$ be an $$n$$-dimensional vector space.
 Now, let's see what happens if we change our basis kets from $$\{\vert e_i \rangle\}$$ to a new set $$\{\vert e'_i \rangle\}$$. For simplicity, let's consider a scaling of each basis ket (this is a diagonal change of basis matrix):
 Let $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ for some positive scalars $$\alpha_i$$ (no sum over $$i$$ here; each basis ket is scaled individually).
 
-1.  **Transformation of Ket Components ("Rulers"):**
-    A fixed physical ket $$\vert v \rangle$$ (our "ruler") must remain the same object, regardless of the basis we use to describe it.
+1.  **Transformation of Ket Components ("Pencils"):**
+    A fixed physical ket $$\vert v \rangle$$ (our "pencil stroke") must remain the same object, regardless of the basis we use to describe it.
     Originally: $$\vert v \rangle = \sum_i v^i \vert e_i \rangle$$.
     In the new basis: $$\vert v \rangle = \sum_i (v')^i \vert e'_i \rangle$$, where $$(v')^i$$ are the new components.
     Substituting $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ into the second expression:
@@ -286,8 +280,8 @@ Let $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ for some positive scalar
 
     The dual basis bras $$\langle \epsilon^j \vert$$ also transform *contravariantly* with respect to the scaling factor $$\alpha_j$$ of their "partner" primal basis ket $$\vert e_j \rangle$$.
 
-3.  **Transformation of Bra Components ("Pencils"):**
-    A fixed physical functional $$\langle f \vert$$ (our "pencil contours") must also remain the same functional.
+3.  **Transformation of Bra Components ("Rulers"):**
+    A fixed physical functional $$\langle f \vert$$ (our "ruler" or "measurement scale") must also remain the same functional.
     Originally: $$\langle f \vert = \sum_j f_j \langle \epsilon^j \vert$$.
     In the new dual basis: $$\langle f \vert = \sum_j (f')_j \langle (\epsilon')^j \vert$$, where $$(f')_j$$ are the new components.
     Substituting $$\langle (\epsilon')^j \vert = (1/\alpha_j) \langle \epsilon^j \vert$$:
@@ -334,7 +328,7 @@ The dual space $$V^\ast$$ consists of all linear functionals on $$V$$. It has a 
 *   **Addition of bras:** $$(\langle f \vert + \langle g \vert) \vert v \rangle = \langle f \vert v \rangle + \langle g \vert v \rangle$$ for any $$\vert v \rangle \in V$$.
 *   **Scalar multiplication of bras:** $$(c \langle f \vert) \vert v \rangle = c (\langle f \vert v \rangle)$$ for any scalar $$c$$ and $$\vert v \rangle \in V$$.
 
-If $$V$$ is finite-dimensional with dimension $$n$$, then $$V^\ast$$ also has dimension $$n$$. The dual space $$V^\ast$$ is the natural "home" for our "pencils" – it exists and is distinct from $$V$$ even before we introduce concepts like norms or inner products.
+If $$V$$ is finite-dimensional with dimension $$n$$, then $$V^\ast$$ also has dimension $$n$$. The dual space $$V^\ast$$ is the natural "home" for our "rulers" – it exists and is distinct from $$V$$ even before we introduce concepts like norms or inner products.
 </blockquote>
 
 ## 3. Giving Structure to Our Objects: Norms and Completeness
@@ -590,7 +584,7 @@ If $$J: H \to \mathbb{R}$$ is twice Fréchet differentiable, its second derivati
 
 ## 7. Conclusion: The Power of Duality and Typed Thinking
 
-We began by questioning the seemingly simple nature of vectors and functionals, using the analogy of "rulers" (kets) and "pencils" (bras). We saw that their essential difference emerges when we consider how their *components* must transform under changes of basis to keep physical scalar measurements invariant. This led us to the concepts of **contravariance** (for ket components and dual basis bras) and **covariance** (for bra components).
+We began by questioning the seemingly simple nature of vectors and functionals, using the analogy of "pencils" (kets) and "rulers" (bras). We saw that their essential difference emerges when we consider how their *components* must transform under changes of basis to keep physical scalar measurements invariant. This led us to the concepts of **contravariance** (for ket components and dual basis bras) and **covariance** (for bra components).
 
 This fundamental distinction motivated the formal introduction of:
 1.  **Dual Spaces ($$V^\ast$$):** The natural home for bras, existing independently of any metric structure.
@@ -604,10 +598,10 @@ Adopting a "typed thinking" approach, facilitated by bra-ket notation, and under
 
 ## 8. Summary Cheat Sheet
 
-| Concept                                     | "Ruler/Pencil" Intuition & Transformation                                                                       | Bra-Ket & Formalism                                                                                                                                       | Relevance in ML/Optimization                                                                                                                  |
+| Concept                                     | "Pencil/Ruler" Intuition & Transformation                                                                       | Bra-Ket & Formalism                                                                                                                                       | Relevance in ML/Optimization                                                                                                                  |
 | :------------------------------------------ | :-------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ket Vector** $$\vert v \rangle$$          | "Ruler"; components $$v^i$$ transform contravariantly to basis ket changes.                                     | Element of vector space $$V$$. $$\vert v \rangle = \sum v^i \vert e_i \rangle$$.                                                                          | Represents parameters, data points, functions.                                                                                                |
-| **Bra (Dual Vector)** $$\langle f \vert$$   | "Pencil"; components $$f_j$$ transform covariantly to basis ket changes.                                        | Element of dual space $$V^\ast$$ (linear functional). $$\langle f \vert = \sum f_j \langle \epsilon^j \vert$$.                                            | Represents measurements, derivative functionals.                                                                                              |
+| **Ket Vector** $$\vert v \rangle$$          | "Pencil"; components $$v^i$$ transform contravariantly to basis ket changes.                                    | Element of vector space $$V$$. $$\vert v \rangle = \sum v^i \vert e_i \rangle$$.                                                                          | Represents parameters, data points, functions.                                                                                                |
+| **Bra (Dual Vector)** $$\langle f \vert$$   | "Ruler"; components $$f_j$$ transform covariantly to basis ket changes.                                         | Element of dual space $$V^\ast$$ (linear functional). $$\langle f \vert = \sum f_j \langle \epsilon^j \vert$$.                                            | Represents measurements, derivative functionals.                                                                                              |
 | **Dual Basis** $$\langle \epsilon^j \vert$$ | Measures components of kets. Transforms contravariantly.                                                        | Defined by $$\langle \epsilon^j \vert e_i \rangle = \delta^j_i$$.                                                                                         | Foundation for component-wise operations and understanding duality.                                                                           |
 | **Invariant Pairing**                       | Physical measurement $$\langle f \vert v \rangle$$ is independent of basis choice.                              | $$\langle f \vert v \rangle = \sum f_k v^k$$.                                                                                                             | Core of how functionals act on vectors; basis of derivative definition.                                                                       |
 | **Normed Space**                            | Defines "length" of kets.                                                                                       | $$V$$ with norm $$\Vert \cdot \Vert_V$$.                                                                                                                  | Defines distance $$\Vert \vert x \rangle - \vert y \rangle \Vert$$, convergence.                                                              |
@@ -616,13 +610,13 @@ Adopting a "typed thinking" approach, facilitated by bra-ket notation, and under
 | **Inner Product**                           | Defines angles/orthogonality between kets.                                                                      | $$\langle x \vert y \rangle$$ on $$V \times V \to \mathbb{F}$$; induces a norm.                                                                           | Generalizes dot product; essential for geometric interpretations.                                                                             |
 | **Hilbert Space**                           | Complete inner product space.                                                                                   | Ideal geometric and analytical setting.                                                                                                                   | $$\mathbb{R}^n$$ with dot product is main example.                                                                                            |
 | **Riesz Rep. Thm.**                         | In Hilbert space, a bra can be uniquely represented by a ket via inner product.                                 | For $$\langle \phi \vert \in H^\ast$$, $$\exists ! \vert y_\phi \rangle \in H$$ s.t. $$\langle \phi \vert x \rangle = \langle y_\phi \vert x \rangle_H$$. | Bridges $$H^\ast$$ and $$H$$. Justifies identifying gradient functional with a gradient ket.                                                  |
-| **Adjoint Operator $$T^\dagger$$**          | How a transformation on "rulers" ($$T$$) affects "pencil measurements". Matrix depends on basis orthonormality. | $$\langle y \vert T x \rangle = \langle T^\dagger y \vert x \rangle$$. Transformation rules are key.                                                      | Generalizes conjugate transpose. Defines self-adjointness. Essential for spectral theory and understanding operator properties under duality. |
+| **Adjoint Operator $$T^\dagger$$**          | How a transformation on "pencils" ($$T$$) affects "ruler measurements". Matrix depends on basis orthonormality. | $$\langle y \vert T x \rangle = \langle T^\dagger y \vert x \rangle$$. Transformation rules are key.                                                      | Generalizes conjugate transpose. Defines self-adjointness. Essential for spectral theory and understanding operator properties under duality. |
 | **Fréchet Derivative**                      | Linear part of change in $$J(\vert x \rangle)$$; a "measurement device" (bra).                                  | $$DJ(\vert x \rangle) \in V^\ast$$, so $$\langle DJ(\vert x \rangle) \vert$$.                                                                             | Rigorous definition of derivative functional.                                                                                                 |
 | **Gradient Ket**                            | "Ket version" of derivative in Hilbert space, points steepest ascent.                                           | $$\vert \nabla J(\vert x \rangle) \rangle \in H$$ via Riesz from $$\langle DJ(\vert x \rangle) \vert$$.                                                   | The vector used in gradient-based optimization. Type distinction from derivative (bra) is crucial.                                            |
 
 ## 9. Reflection
 
-This crash course has aimed to build the elementary concepts of functional analysis from a foundation of intuitive distinctions – how different mathematical "types" (kets representing states/objects, bras representing measurements/functionals) behave under changes of representation. The "ruler and pencil" analogy, coupled with the explicit examination of how components transform (covariance and contravariance), motivates the necessity for dual spaces and highlights the special role of Hilbert spaces where the Riesz Representation Theorem allows a canonical identification between these dual objects via the inner product.
+This crash course has aimed to build the elementary concepts of functional analysis from a foundation of intuitive distinctions – how different mathematical "types" (kets representing states/objects, bras representing measurements/functionals) behave under changes of representation. The "pencil and ruler" analogy, coupled with the explicit examination of how components transform (covariance and contravariance), motivates the necessity for dual spaces and highlights the special role of Hilbert spaces where the Riesz Representation Theorem allows a canonical identification between these dual objects via the inner product.
 
 Understanding that the Fréchet derivative is fundamentally a bra (a covector) and the gradient is its ket representation in a Hilbert space clarifies many aspects of optimization theory. Similarly, recognizing that the adjoint operator's definition is coordinate-free, while its matrix form (the transpose or conjugate transpose) is simple only in orthonormal bases, reinforces the importance of the underlying geometric and algebraic structures.
 

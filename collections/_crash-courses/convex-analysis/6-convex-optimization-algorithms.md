@@ -577,9 +577,10 @@ IPMs solve constrained convex problems by traversing the interior of the feasibl
     *   For problems $$\min_{x,z} f(x) + g(z)$$ s.t. $$Ax + Bz = c$$. Decomposes into smaller subproblems by alternating minimizations and dual updates. Popular for distributed optimization.
 
 <details class="details-block" markdown="1">
-<div class="title" markdown="1">
+<summary markdown="1">
 **Operator Splitting and Monotone Operator Theory**
-</div>
+</summary>
+
 Many advanced algorithms like ADMM, Douglas-Rachford Splitting (DRS), and Primal-Dual Hybrid Gradient (PDHG, also known as Chambolle-Pock) can be elegantly unified under the theory of **monotone operators** and **operator splitting**.
 - **Forward-Backward Splitting (FBS)**, which underpins Proximal Gradient, seeks a zero of $$A+B$$ where $$A$$ is cocoercive (e.g., a gradient) and $$B$$ is maximally monotone (e.g., a subdifferential).
 - **Douglas-Rachford Splitting (DRS)** finds a zero of $$A+B$$ where both $$A, B$$ are maximally monotone, using reflections of their resolvents (proximal operators).
@@ -596,7 +597,6 @@ This unifying perspective highlights deep connections between these methods and 
 The world of convex optimization algorithms is rich and interconnected.
 
 *   **Conceptual Map & Relationships:**
-    *(This is where a visual diagram showing relationships, e.g., along axes of "Order of Information" vs. "Handling of Non-smoothness/Structure", would be very helpful. For instance, GD is first-order for smooth; Subgradient is first-order for non-smooth; Newton is second-order for smooth; Proximal methods handle composite structures; ADMM handles coupled constraints, etc.)*
     *   **Smoothness Handling:** GD/Newton vs. Subgradient/Bundle vs. Proximal/ADMM.
     *   **Order of Information:** First-order vs. Second-order vs. Quasi-Newton.
     *   **Acceleration:** Nesterov's principle (AGD, FISTA).

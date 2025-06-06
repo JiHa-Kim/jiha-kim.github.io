@@ -356,7 +356,7 @@ All induced norms are sub-multiplicative. Here are some common induced norms:
 
     where $$\sigma_{\max}(A)$$ is the largest singular value of $$A$$. This norm has several advantages in deep learning contexts:
     *   **Layer‑wise stability:** The identity matrix (or any orthogonal matrix, assuming $$n_{out}=n_{in}$$) has an $$\Vert \cdot \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$ norm of $$1$$, irrespective of the layer width. Coupled with initialization schemes like Xavier/He (where, for instance, $$\operatorname{Var} A_{ij} = 1/n_{in}$$), newly initialized linear layers tend to have $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} \approx 1$$. This helps in preventing exploding or vanishing activations during the initial phases of training.
-    *   **Optimizer friendliness:** Optimization algorithms designed for metrized deep learning, such as **Muon**, can leverage this norm to control changes in layer weights (e.g., $$\Vert \Delta A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$). Because the norm definition inherently accounts for input and output dimensions, the same optimization hyper‑parameters (like step sizes or trust region radii defined in terms of this norm) can be more robustly applied to layers of varying widths.
+    *   **Optimizer friendliness:** Optimization algorithms designed for metrized deep learning, such as **Muon**, can leverage this norm to control changes in layer weights (e.g., $$\Vert \Delta A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$$). Because the norm definition inherently accounts for input and output dimensions, the same optimization hyper‑parameters (like step sizes or trust region radii defined in terms of this norm) can be more robustly applied to layers of varying widths.
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
@@ -489,6 +489,85 @@ While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/
     *   **Use:** Measures maximum stretching, crucial for Lipschitz constants, stability analysis.
 
 Schatten norms are unitarily invariant, meaning $$\Vert UAV \Vert_{S_p} = \Vert A \Vert_{S_p}$$ for any orthogonal/unitary matrices $$U$$ and $$V$$.
+
+### 4.1. Uniqueness of the Spectral Norm
+
+The spectral norm (Schatten $$\infty$$-norm, or operator norm $$\Vert \cdot \Vert_{\ell_2 \to \ell_2}$$) possesses a remarkable uniqueness property. It is the only matrix norm on $$\mathbb{R}^{n \times n}$$ that satisfies a specific set of conditions related to orthogonal transformations and submultiplicativity.
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem.** Uniqueness of the Spectral Norm
+</div>
+Let $$\Vert \cdot \Vert$$ be a matrix norm on $$\mathbb{R}^{n \times n}$$. If this norm satisfies the following three conditions:
+1.  **Submultiplicativity:** $$\Vert AB \Vert \le \Vert A \Vert \Vert B \Vert$$ for all $$A, B \in \mathbb{R}^{n \times n}$$.
+2.  **Normalization for Orthogonal Matrices:** $$\Vert H \Vert = 1$$ for any orthogonal matrix $$H \in O(n)$$.
+3.  **Left-Orthogonal Invariance:** $$\Vert HA \Vert = \Vert A \Vert$$ for any orthogonal matrix $$H \in O(n)$$ and any matrix $$A \in \mathbb{R}^{n \times n}$$.
+
+Then, $$\Vert A \Vert = \sigma_{\max}(A) = \Vert A \Vert_2$$ for all $$A \in \mathbb{R}^{n \times n}$$.
+</blockquote>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Proof Sketch**
+</summary>
+The proof involves two main parts: showing $$\Vert A \Vert \ge \sigma_{\max}(A)$$ and then $$\Vert A \Vert \le \sigma_{\max}(A)$$.
+
+**Part 1: $$\Vert A \Vert \ge \sigma_{\max}(A)$$**
+
+Let $$A \in \mathbb{R}^{n \times n}$$. If $$A=\mathbf{0}$$, the equality holds trivially. Assume $$A \ne \mathbf{0}$$.
+Let $$\sigma_{\max}(A)$$ be the largest singular value of $$A$$. There exist unit vectors $$u, v \in \mathbb{R}^n$$ (i.e., $$\Vert u \Vert_2 = \Vert v \Vert_2 = 1$$) such that $$Av = \sigma_{\max}(A) u$$.
+Consider the rank-one matrix $$P_v = v v^\top$$. This is an orthogonal projection onto the span of $$v$$. Its largest singular value is $$\sigma_{\max}(P_v) = 1$$.
+We have the matrix product $$A P_v = A (v v^\top) = (Av) v^\top = (\sigma_{\max}(A) u) v^\top = \sigma_{\max}(A) (u v^\top)$$.
+Let $$M = u v^\top$$. The largest singular value of $$M$$ is also $$\sigma_{\max}(M) = \Vert u \Vert_2 \Vert v \Vert_2 = 1$$.
+From submultiplicativity (Condition 1):
+
+$$
+\Vert A P_v \Vert \le \Vert A \Vert \Vert P_v \Vert
+$$
+
+Substituting $$A P_v = \sigma_{\max}(A) M$$:
+
+$$
+\Vert \sigma_{\max}(A) M \Vert \le \Vert A \Vert \Vert P_v \Vert
+$$
+
+By absolute homogeneity of norms:
+
+$$
+\sigma_{\max}(A) \Vert M \Vert \le \Vert A \Vert \Vert P_v \Vert
+$$
+
+Now we need to relate $$\Vert M \Vert$$ and $$\Vert P_v \Vert$$.
+Let $$X$$ be any rank-one matrix with $$\sigma_{\max}(X)=1$$. Write $$X = x y^\top$$ for unit vectors $$x,y \in \mathbb{R}^n$$.
+Let $$H_x$$ be an orthogonal matrix such that $$H_x x = e_1$$ (the first standard basis vector). By Condition 3 (Left-Orthogonal Invariance), $$\Vert X \Vert = \Vert x y^\top \Vert = \Vert H_x (x y^\top) \Vert = \Vert e_1 y^\top \Vert$$.
+The matrix $$e_1 y^\top$$ has its first row equal to $$y^\top$$ and all other rows are zero. Its largest singular value is $$\sigma_{\max}(e_1 y^\top) = \Vert y \Vert_2 = 1$$.
+This shows that the norm $$\Vert X \Vert$$ is constant for all rank-one matrices $$X$$ with $$\sigma_{\max}(X)=1$$ that share the same right vector $$y$$ (up to orthogonal transformation of the left vector).
+A more detailed argument (see Goldberg and Zwas, 1974) shows that $$\Vert X \Vert \ge \sigma_{\max}(X)$$ for any matrix norm satisfying Condition 2. So, $$\Vert M \Vert \ge 1$$ and $$\Vert P_v \Vert \ge 1$$.
+In fact, it can be shown that under these conditions, if $$R_1$$ and $$R_2$$ are rank-one matrices with $$\sigma_{\max}(R_1) = \sigma_{\max}(R_2) = 1$$, then $$\Vert R_1 \Vert = \Vert R_2 \Vert$$. (This relies on showing that any such matrix can be transformed into, say, $$e_1 e_1^\top$$ using left and right orthogonal transformations, and that the norm value is preserved). Let this common value be $$c$$.
+Then $$c \ge 1$$.
+The inequality becomes $$\sigma_{\max}(A) c \le \Vert A \Vert c$$.
+Since $$c > 0$$ (as $$M \ne \mathbf{0}$$), we can divide by $$c$$:
+
+$$
+\sigma_{\max}(A) \le \Vert A \Vert
+$$
+
+This part of the proof is generally accepted and relies on Condition 2 (implicitly, that $$c$$ is well-defined and non-zero) and Condition 1.
+
+**Part 2: $$\Vert A \Vert \le \sigma_{\max}(A)$$**
+
+This part is more involved. A full proof can be found in specialized literature, e.g., Theorem 1 in Lixing Lu, "Characterizations of the spectral norm," Linear Algebra and its Applications 309 (2000) 9-14. The argument often proceeds by:
+1.  Using the SVD of $$A = U \Sigma V^\top$$. By left-orthogonal invariance (Condition 3) and $$\Vert U^\top \Vert=1$$ (Condition 2):
+    $$\Vert A \Vert = \Vert U^\top A \Vert = \Vert U^\top U \Sigma V^\top \Vert = \Vert \Sigma V^\top \Vert$$.
+2.  The core of the proof is then to show that $$\Vert \Sigma V^\top \Vert \le \sigma_{\max}(\Sigma V^\top) = \sigma_{\max}(A)$$.
+    This step typically requires demonstrating that the norm of a diagonal matrix $$\mathrm{diag}(d_1, \dots, d_n)$$ with $$d_1 \ge d_2 \ge \dots \ge d_n \ge 0$$ is equal to $$d_1$$. That is, $$\Vert \Sigma \Vert = \sigma_1 = \sigma_{\max}(A)$$.
+    And further, that left-orthogonal invariance is sufficient to ensure $$\Vert \Sigma V^\top \Vert = \Vert \Sigma \Vert$$.
+
+Combining both parts, $$\Vert A \Vert = \sigma_{\max}(A)$$.
+The conditions are crucial: submultiplicativity ensures the norm interacts well with matrix products, left-orthogonal invariance connects it to singular values via SVD, and the normalization $$\Vert H \Vert=1$$ pins down the scale to match the spectral norm.
+</details>
+
+This uniqueness theorem highlights the special role of the spectral norm in matrix analysis, particularly in contexts involving orthogonal transformations and operator-like behavior.
 
 ## 5. Orthogonally Invariant Functions
 
