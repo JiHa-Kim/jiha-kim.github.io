@@ -292,9 +292,9 @@ $$
 
 This expression is dramatically simplified by one of the most beautiful and profound formulas in mathematics.
 
-<blockquote class="box-proposition" markdown="1">
+<blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
-**Proposition.** Euler's Formula
+**Theorem.** Euler's Formula
 </div>
 For any real number $$\theta$$,
 
@@ -302,7 +302,6 @@ $$
 e^{i\theta} = \cos\theta + i\sin\theta
 $$
 
-</div>
 </blockquote>
 
 Using Euler's formula, the polar form of a complex number becomes a compact exponential:
