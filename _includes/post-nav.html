@@ -9,25 +9,28 @@
 {% if page.collection and page.collection != 'posts' %}
   {%- comment -%}
     This is a page within a custom collection (like 'series' or 'crash-courses').
+    We need to filter to only items in the same subfolder.
   {%- endcomment -%}
-  {%- assign collection_data = site[page.collection] -%}
 
   {%- comment -%}
-    To ensure we only navigate within the *current* series/course,
-    we must filter the collection to items in the same parent directory.
-    - A page.path is like: '_series/my-awesome-series/part-1.md'
-    - We derive the parent prefix: '_series/my-awesome-series/'
+    Extract the subfolder from the page path.
+    e.g., "_crash-courses/functional-analysis/5-matrix-norms.md" -> "functional-analysis"
   {%- endcomment -%}
-  {%- assign path_parts = page.path | split: '/' | slice: 0, -1 -%}
-  {%- capture parent_path_prefix -%}{{ path_parts | join: '/' }}/{%- endcapture -%}
+  {% assign path_parts = page.path | split: '/' %}
+  {% assign collection_folder = path_parts | first %}
+  {% assign subfolder = path_parts | slice: 1, 1 | first %}
 
   {%- comment -%}
-    Filter the collection by the parent path and then sort by the universal 'sort_index'.
+    Build the path prefix to match only files in the same subfolder.
+    e.g., "_crash-courses/functional-analysis/"
   {%- endcomment -%}
-  {%- assign sorted = collection_data
-    | where_exp: 'item', 'item.path contains parent_path_prefix'
-    | sort: 'sort_index'
-  -%}
+  {% capture source_prefix %}{{ collection_folder }}/{{ subfolder }}/{% endcapture %}
+
+  {%- comment -%}
+    Get the collection items and filter by subfolder, then sort by sort_index.
+  {%- endcomment -%}
+  {%- assign collection_items = site[page.collection] -%}
+  {%- assign sorted = collection_items | where_exp: 'item', 'item.path contains source_prefix' | sort: 'sort_index' -%}
 
 {% else %}
   {%- comment -%}
@@ -39,10 +42,11 @@
 {%- comment -%}
   2. Find the current page's index within the sorted list.
 {%- endcomment -%}
-{% assign current_index = null %}
+{% assign current_index = -1 %}
 {% for item in sorted %}
   {% if item.url == page.url %}
     {% assign current_index = forloop.index0 %}
+    {% break %}
   {% endif %}
 {% endfor %}
 
@@ -51,7 +55,7 @@
 {%- endcomment -%}
 {% assign prev_item = null %}
 {% assign next_item = null %}
-{% if current_index %}
+{% if current_index >= 0 %}
   {% assign prev_index = current_index | minus: 1 %}
   {% assign next_index = current_index | plus: 1 %}
 
