@@ -1,6 +1,6 @@
 ---
-title: "Metrized Deep Learning: From Geometric Intuition to Principled Preconditioning with Muon and PolarGrad"
-date: 2025-06-08 09:00 -0400
+title: "Metrized Deep Learning: Muon"
+date: 2025-06-06 09:00 -0400
 series_index: 14
 mermaid: true
 description: Exploring how choosing the right norm for parameter spaces (like dimension-agnostic operator norms) and principled preconditioning (like PolarGrad) can revolutionize deep learning optimization.

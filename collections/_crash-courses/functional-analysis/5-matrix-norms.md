@@ -142,7 +142,7 @@ llm-instructions: |
 
 Welcome to this installment of our "Crash Course in Mathematical Foundations" series! As we gear up to explore the fascinating world of **metrized deep learning**, a solid understanding of matrix norms is indispensable. Matrix norms are fundamental tools in linear algebra, numerical analysis, and optimization. They allow us to measure the "size" or "magnitude" of matrices, analyze the behavior of linear transformations (like layers in a neural network), and define geometric structures on spaces of parameters.
 
-In this post, we'll review vector norms, introduce matrix norms, discuss common families like induced (operator) norms and Schatten norms, and delve into the crucial concept of norm duality. We will also touch upon the practical computational costs associated with these norms, particularly in the context of optimization algorithms like **Muon**. These concepts will pave the way for understanding how different choices of metrics can profoundly impact deep learning optimization and generalization.
+In this post, we'll review vector norms, introduce matrix norms, discuss common families like induced (operator) norms and Schatten norms, and delve into the crucial concept of norm duality. These concepts will pave the way for understanding how different choices of metrics can profoundly impact deep learning optimization and generalization.
 
 ## 1. A Quick Refresher: Vector Norms
 
@@ -159,7 +159,7 @@ A function $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is a **vector nor
 4.  **Triangle inequality (Subadditivity):** $$\Vert x + y \Vert  \le \Vert x \Vert  + \Vert y \Vert $$
 </blockquote>
 
-The most common vector norms are the **$$\ell_p$$-norms**:
+An important class of vector norms are the **$$\ell_p$$-norms**:
 
 For a vector $$x = (x_1, x_2, \ldots, x_n) \in \mathbb{R}^n$$:
 *   **$$\ell_1$$-norm (Manhattan norm):**
@@ -254,57 +254,7 @@ All induced norms are sub-multiplicative. Here are some common induced norms:
 
     where $$\sigma_{\max}(A)$$ is the largest singular value of $$A$$. This norm has several advantages in deep learning contexts:
     *   **Layer‑wise stability:** The identity matrix (or any orthogonal matrix, assuming $$n_{out}=n_{in}$$) has an $$\Vert \cdot \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$ norm of $$1$$, irrespective of the layer width. Coupled with initialization schemes like Xavier/He (where, for instance, $$\operatorname{Var} A_{ij} = 1/n_{in}$$), newly initialized linear layers tend to have $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} \approx 1$$. This helps in preventing exploding or vanishing activations during the initial phases of training.
-    *   **Optimizer friendliness:** Optimization algorithms designed for metrized deep learning, such as **Muon**, can leverage this norm to control changes in layer weights (e.g., $$\Vert \Delta A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$$). Because the norm definition inherently accounts for input and output dimensions, the same optimization hyper‑parameters (like step sizes or trust region radii defined in terms of this norm) can be more robustly applied to layers of varying widths.
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Property.** An important identity for induced norms.
-</summary>
-For an operator norm $$\Vert A \Vert_{\ell_p \to \ell_q}$$ induced by vector $$\ell_p$$ and $$\ell_q$$ norms, and their dual vector norms $$\ell_{p^\ast}$$ and $$\ell_{q^\ast}$$ (where $$1/p + 1/p^\ast  = 1$$ and $$1/q + 1/q^\ast  = 1$$), the following identity holds:
-
-$$
-\Vert A \Vert_{\ell_p \to \ell_q} = \Vert A^\top \Vert_{\ell_{q^\ast} \to \ell_{p^\ast}}
-$$
-
-For example, $$\Vert A \Vert_{\ell_1 \to \ell_1} = \Vert A^\top \Vert_{\ell_\infty \to \ell_\infty}$$.
-This identity is different from norm duality (discussed later), but it's a useful property relating the norm of a matrix to the norm of its transpose with different inducing vector norms.
-
-**Proof of the Identity:**
-Recall the definition of an induced norm:
-
-$$
-\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert x \Vert_p=1} \Vert Ax \Vert_q
-$$
-
-Also, recall the definition of a dual vector norm: $$\Vert v \Vert_q = \sup_{\Vert y \Vert_{q^\ast}=1} \vert y^\top v \vert$$.
-Substituting this into the definition of the induced norm:
-
-$$
-\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert x \Vert_p=1} \left( \sup_{\Vert y \Vert_{q^\ast}=1} \vert y^\top (Ax) \vert \right)
-$$
-
-Since $$y^\top (Ax) = (A^\top y)^\top x$$, we have:
-
-$$
-\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert x \Vert_p=1} \sup_{\Vert y \Vert_{q^\ast}=1} \vert (A^\top y)^\top x \vert
-$$
-
-We can swap the suprema (this is permissible as the domain is compact for $$x$$ and $$y$$ if we consider unit balls, or more generally by properties of sup):
-
-$$
-\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert y \Vert_{q^\ast}=1} \left( \sup_{\Vert x \Vert_p=1} \vert (A^\top y)^\top x \vert \right)
-$$
-
-The inner supremum, $$\sup_{\Vert x \Vert_p=1} \vert (A^\top y)^\top x \vert$$, is the definition of the vector norm $$\Vert A^\top y \Vert_{p^\ast}$$ (since $$(\ell_p)^\ast = \ell_{p^\ast}$$).
-So,
-
-$$
-\Vert A \Vert_{\ell_p \to \ell_q} = \sup_{\Vert y \Vert_{q^\ast}=1} \Vert A^\top y \Vert_{p^\ast}
-$$
-
-This last expression is precisely the definition of the induced norm $$\Vert A^\top \Vert_{\ell_{q^\ast} \to \ell_{p^\ast}}$$.
-Thus, the identity is proven.
-</details>
+    *   **Optimizer friendliness:** Optimization algorithms designed for metrized deep learning, such as **Muon**, can leverage this norm to control changes in layer weights (e.g., $$\Vert \Delta A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$). Because the norm definition inherently accounts for input and output dimensions, the same optimization hyper‑parameters (like step sizes or trust region radii defined in terms of this norm) can be more robustly applied to layers of varying widths.
 
 ## 4. Entrywise and Schatten Norms
 
@@ -364,7 +314,10 @@ $$
 \Vert A \Vert_{S_p} = \left( \sum_{k=1}^{\min(m,n)} \sigma_k(A)^p \right)^{1/p}
 $$
 
-#### Alternative Formulation via Trace
+<details class="details-block" markdown="1">
+<summary markdown="1">
+Alternative Formulation via Trace
+</summary>
 The singular values $$\sigma_k(A)$$ are the non-negative square roots of the eigenvalues of $$A^\top A$$ (or $$AA^\top$$). If $$\lambda_k(A^\top A)$$ are the (non-negative) eigenvalues of the positive semi-definite matrix $$A^\top A$$, then $$\sigma_k(A) = \sqrt{\lambda_k(A^\top A)}$$.
 The Schatten $$p$$-norm can then be written in terms of these eigenvalues:
 
@@ -380,6 +333,7 @@ $$
 $$
 
 While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/2}$$ generally involves an eigendecomposition of $$A^\top A$$, which is computationally similar to performing an SVD on $$A$$ to get the singular values directly. The practical computation, especially for general $$p$$, often relies on the singular values. For specific cases like $$p=2$$ (Frobenius norm), more direct methods are used as highlighted below.
+</details>
 
 #### Key Examples and Their Practical Computation:
 
@@ -391,7 +345,6 @@ While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/
         $$
 
         This is typically computed by first finding all singular values of $$A$$ (e.g., via SVD) and summing them.
-    *   **Trace Form:** $$\Vert A \Vert_{S_1} = \mathrm{Tr}\left(\sqrt{A^\top A}\right)$$. While theoretically important, this form still implicitly requires eigenvalues or a matrix square root related to SVD.
     *   **Use:** Often used as a convex surrogate for matrix rank. Computationally intensive due to SVD.
 
 *   **Frobenius Norm ($$p=2$$):** Also denoted $$\Vert A \Vert_F$$ or $$\Vert A \Vert_{S_2}$$.
@@ -403,8 +356,6 @@ While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/
 
         This is the most direct and computationally efficient way: square all elements, sum them, and take the square root. It does **not** require forming $$A^\top A$$ or computing singular values/eigenvalues explicitly.
     *   **Singular Value Form:** $$\Vert A \Vert_{S_2} = \left( \sum_{k=1}^{\min(m,n)} \sigma_k(A)^2 \right)^{1/2}$$
-    *   **Trace Form:** $$\Vert A \Vert_{S_2} = \left( \mathrm{Tr}(A^\top A) \right)^{1/2}$$.
-        While mathematically equivalent ($$\mathrm{Tr}(A^\top A) = \sum_{i,j} a_{ij}^2$$), computing via the sum of squared elements is preferred.
     *   **Use:** A common, computationally friendly matrix norm.
 
 *   **Spectral Norm ($$p=\infty$$):** Also denoted $$\Vert A \Vert_{\ell_2 \to \ell_2}$$ or $$\Vert A \Vert_{S_\infty}$$.
@@ -420,176 +371,7 @@ While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/
 
 Schatten norms are unitarily invariant, meaning $$\Vert UAV \Vert_{S_p} = \Vert A \Vert_{S_p}$$ for any orthogonal/unitary matrices $$U$$ and $$V$$.
 
-### 4.3. Uniqueness of the Spectral Norm
-
-The spectral norm (Schatten $$\infty$$-norm, or operator norm $$\Vert \cdot \Vert_{\ell_2 \to \ell_2}$$) possesses a remarkable uniqueness property. It is the only matrix norm on $$\mathbb{R}^{n \times n}$$ that satisfies a specific set of conditions related to orthogonal transformations and submultiplicativity.
-
-<blockquote class="box-theorem" markdown="1">
-<div class="title" markdown="1">
-**Theorem.** Uniqueness of the Spectral Norm
-</div>
-Let $$\Vert \cdot \Vert$$ be a matrix norm on $$\mathbb{R}^{n \times n}$$. If this norm satisfies the following three conditions:
-1.  **Submultiplicativity:** $$\Vert AB \Vert \le \Vert A \Vert \Vert B \Vert$$ for all $$A, B \in \mathbb{R}^{n \times n}$$.
-2.  **Normalization for Orthogonal Matrices:** $$\Vert H \Vert = 1$$ for any orthogonal matrix $$H \in O(n)$$.
-3.  **Left-Orthogonal Invariance:** $$\Vert HA \Vert = \Vert A \Vert$$ for any orthogonal matrix $$H \in O(n)$$ and any matrix $$A \in \mathbb{R}^{n \times n}$$.
-
-Then, $$\Vert A \Vert = \sigma_{\max}(A) = \Vert A \Vert_2$$ for all $$A \in \mathbb{R}^{n \times n}$$.
-</blockquote>
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Proof Sketch**
-</summary>
-The proof involves two main parts: showing $$\Vert A \Vert \ge \sigma_{\max}(A)$$ and then $$\Vert A \Vert \le \sigma_{\max}(A)$$.
-
-**Part 1: $$\Vert A \Vert \ge \sigma_{\max}(A)$$**
-
-Let $$A \in \mathbb{R}^{n \times n}$$. If $$A=\mathbf{0}$$, the equality holds trivially. Assume $$A \ne \mathbf{0}$$.
-Let $$\sigma_{\max}(A)$$ be the largest singular value of $$A$$. There exist unit vectors $$u, v \in \mathbb{R}^n$$ (i.e., $$\Vert u \Vert_2 = \Vert v \Vert_2 = 1$$) such that $$Av = \sigma_{\max}(A) u$$.
-Consider the rank-one matrix $$P_v = v v^\top$$. This is an orthogonal projection onto the span of $$v$$. Its largest singular value is $$\sigma_{\max}(P_v) = 1$$.
-We have the matrix product $$A P_v = A (v v^\top) = (Av) v^\top = (\sigma_{\max}(A) u) v^\top = \sigma_{\max}(A) (u v^\top)$$.
-Let $$M = u v^\top$$. The largest singular value of $$M$$ is also $$\sigma_{\max}(M) = \Vert u \Vert_2 \Vert v \Vert_2 = 1$$.
-From submultiplicativity (Condition 1):
-
-$$
-\Vert A P_v \Vert \le \Vert A \Vert \Vert P_v \Vert
-$$
-
-Substituting $$A P_v = \sigma_{\max}(A) M$$:
-
-$$
-\Vert \sigma_{\max}(A) M \Vert \le \Vert A \Vert \Vert P_v \Vert
-$$
-
-By absolute homogeneity of norms:
-
-$$
-\sigma_{\max}(A) \Vert M \Vert \le \Vert A \Vert \Vert P_v \Vert
-$$
-
-Now we need to relate $$\Vert M \Vert$$ and $$\Vert P_v \Vert$$.
-Let $$X$$ be any rank-one matrix with $$\sigma_{\max}(X)=1$$. Write $$X = x y^\top$$ for unit vectors $$x,y \in \mathbb{R}^n$$.
-Let $$H_x$$ be an orthogonal matrix such that $$H_x x = e_1$$ (the first standard basis vector). By Condition 3 (Left-Orthogonal Invariance), $$\Vert X \Vert = \Vert x y^\top \Vert = \Vert H_x (x y^\top) \Vert = \Vert e_1 y^\top \Vert$$.
-The matrix $$e_1 y^\top$$ has its first row equal to $$y^\top$$ and all other rows are zero. Its largest singular value is $$\sigma_{\max}(e_1 y^\top) = \Vert y \Vert_2 = 1$$.
-This shows that the norm $$\Vert X \Vert$$ is constant for all rank-one matrices $$X$$ with $$\sigma_{\max}(X)=1$$ that share the same right vector $$y$$ (up to orthogonal transformation of the left vector).
-A more detailed argument (see Goldberg and Zwas, 1974) shows that $$\Vert X \Vert \ge \sigma_{\max}(X)$$ for any matrix norm satisfying Condition 2. So, $$\Vert M \Vert \ge 1$$ and $$\Vert P_v \Vert \ge 1$$.
-In fact, it can be shown that under these conditions, if $$R_1$$ and $$R_2$$ are rank-one matrices with $$\sigma_{\max}(R_1) = \sigma_{\max}(R_2) = 1$$, then $$\Vert R_1 \Vert = \Vert R_2 \Vert$$. (This relies on showing that any such matrix can be transformed into, say, $$e_1 e_1^\top$$ using left and right orthogonal transformations, and that the norm value is preserved). Let this common value be $$c$$.
-Then $$c \ge 1$$.
-The inequality becomes $$\sigma_{\max}(A) c \le \Vert A \Vert c$$.
-Since $$c > 0$$ (as $$M \ne \mathbf{0}$$), we can divide by $$c$$:
-
-$$
-\sigma_{\max}(A) \le \Vert A \Vert
-$$
-
-This part of the proof is generally accepted and relies on Condition 2 (implicitly, that $$c$$ is well-defined and non-zero) and Condition 1.
-
-**Part 2: $$\Vert A \Vert \le \sigma_{\max}(A)$$**
-
-This part is more involved. A full proof can be found in specialized literature, e.g., Theorem 1 in Lixing Lu, "Characterizations of the spectral norm," Linear Algebra and its Applications 309 (2000) 9-14. The argument often proceeds by:
-1.  Using the SVD of $$A = U \Sigma V^\top$$. By left-orthogonal invariance (Condition 3) and $$\Vert U^\top \Vert=1$$ (Condition 2):
-    $$\Vert A \Vert = \Vert U^\top A \Vert = \Vert U^\top U \Sigma V^\top \Vert = \Vert \Sigma V^\top \Vert$$.
-2.  The core of the proof is then to show that $$\Vert \Sigma V^\top \Vert \le \sigma_{\max}(\Sigma V^\top) = \sigma_{\max}(A)$$.
-    This step typically requires demonstrating that the norm of a diagonal matrix $$\mathrm{diag}(d_1, \dots, d_n)$$ with $$d_1 \ge d_2 \ge \dots \ge d_n \ge 0$$ is equal to $$d_1$$. That is, $$\Vert \Sigma \Vert = \sigma_1 = \sigma_{\max}(A)$$.
-    And further, that left-orthogonal invariance is sufficient to ensure $$\Vert \Sigma V^\top \Vert = \Vert \Sigma \Vert$$.
-
-Combining both parts, $$\Vert A \Vert = \sigma_{\max}(A)$$.
-The conditions are crucial: submultiplicativity ensures the norm interacts well with matrix products, left-orthogonal invariance connects it to singular values via SVD, and the normalization $$\Vert H \Vert=1$$ pins down the scale to match the spectral norm.
-</details>
-
-This uniqueness theorem highlights the special role of the spectral norm in matrix analysis, particularly in contexts involving orthogonal transformations and operator-like behavior.
-
-## 5. Orthogonally Invariant Functions
-
-Orthogonally invariant functions play a significant role in various areas of mathematics and its applications, including the study of matrix norms (many of which are, by definition, orthogonally invariant). The characterization of these functions depends on their domain and codomain. Let $$O(n)$$ be the group of $$n \times n$$ orthogonal matrices $$Q$$ (satisfying $$Q^\top Q = Q Q^\top = I$$). We consider the most common cases below:
-
-### 5.1. Functions $$f: \mathbb{R}^n \to \mathbb{R}$$ (Scalar-valued functions of a vector)
-A function $$f: \mathbb{R}^n \to \mathbb{R}$$ is orthogonally invariant if $$f(Qx) = f(x)$$ for all $$x \in \mathbb{R}^n$$ and all $$Q \in O(n)$$.
-
-**Characterization:** Such a function $$f$$ is orthogonally invariant if and only if it can be expressed as a function of the norm (or squared norm) of $$x$$. That is, there exists a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ such that:
-
-$$
-f(x) = g(\Vert x \Vert)
-$$
-
-(Alternatively, $$f(x) = h(\Vert x \Vert^2)$$ for some $$h: \mathbb{R}_{\ge 0} \to \mathbb{R}$$).
-
-**Proof:**
-*   **If $$f(x) = g(\Vert x \Vert)$$, then $$f$$ is orthogonally invariant:**
-    For any $$Q \in O(n)$$, we have $$\Vert Qx \Vert^2 = (Qx)^\top(Qx) = x^\top Q^\top Q x = x^\top I x = x^\top x = \Vert x \Vert^2$$. So $$\Vert Qx \Vert = \Vert x \Vert$$.
-    Then $$f(Qx) = g(\Vert Qx \Vert) = g(\Vert x \Vert) = f(x)$$. Thus, $$f$$ is orthogonally invariant.
-
-*   **If $$f$$ is orthogonally invariant, then $$f(x) = g(\Vert x \Vert)$$ for some $$g$$:**
-    We need to show that if $$\Vert x \Vert = \Vert y \Vert$$, then $$f(x) = f(y)$$.
-    *   If $$\Vert x \Vert = \Vert y \Vert = 0$$, then $$x = y = 0$$, so $$f(x)=f(y)$$ trivially.
-    *   If $$\Vert x \Vert = \Vert y \Vert = r > 0$$:
-        The vectors $$x/r$$ and $$y/r$$ are unit vectors. It is a known result that for any two unit vectors $$u, v \in \mathbb{R}^n$$, there exists an orthogonal matrix $$Q \in O(n)$$ such that $$Qu = v$$.
-        So, there exists $$Q \in O(n)$$ such that $$Q(x/r) = y/r$$. This implies $$Qx = y$$.
-        Since $$f$$ is orthogonally invariant, $$f(y) = f(Qx) = f(x)$$.
-    Thus, $$f(x)$$ depends only on the norm $$\Vert x \Vert$$. We can define a function $$g: \mathbb{R}_{\ge 0} \to \mathbb{R}$$ as follows: for any $$r \ge 0$$, choose an arbitrary $$x_0 \in \mathbb{R}^n$$ such that $$\Vert x_0 \Vert = r$$ (e.g., $$x_0 = (r, 0, \dots, 0)^\top$$). Define $$g(r) = f(x_0)$$. This definition is sound because we've shown that $$f$$ takes the same value for all vectors of the same norm.
-    Then, for any $$x \in \mathbb{R}^n$$, $$f(x) = g(\Vert x \Vert)$$.
-
-**Examples:** $$f(x) = \Vert x \Vert$$, $$f(x) = \Vert x \Vert^2$$, $$f(x) = e^{-\Vert x \Vert^2}$$, $$f(x) = \sin(\Vert x \Vert)$$.
-
-### 5.2. Functions $$f: \mathbb{R}^n \to \mathbb{R}^m$$ (Vector-valued functions of a vector)
-A function $$f: \mathbb{R}^n \to \mathbb{R}^m$$ is orthogonally invariant if $$f(Qx) = f(x)$$ for all $$x \in \mathbb{R}^n$$ and all $$Q \in O(n)$$.
-
-**Characterization:** Such a function $$f$$ is orthogonally invariant if and only if it can be expressed as $$f(x) = \vec{g}(\Vert x \Vert)$$ for some function $$\vec{g}: \mathbb{R}_{\ge 0} \to \mathbb{R}^m$$.
-
-**Proof:**
-Let $$f(x) = (f_1(x), f_2(x), \dots, f_m(x))^\top$$, where $$f_i: \mathbb{R}^n \to \mathbb{R}$$ are the component functions.
-The condition $$f(Qx) = f(x)$$ means $$(f_1(Qx), \dots, f_m(Qx))^\top = (f_1(x), \dots, f_m(x))^\top$$.
-This holds if and only if $$f_i(Qx) = f_i(x)$$ for all $$i=1, \dots, m$$.
-By the characterization in Case 1, each $$f_i$$ must be of the form $$f_i(x) = g_i(\Vert x \Vert)$$ for some $$g_i: \mathbb{R}_{\ge 0} \to \mathbb{R}$$.
-So, $$f(x) = (g_1(\Vert x \Vert), \dots, g_m(\Vert x \Vert))^\top$$. We can define $$\vec{g}(r) = (g_1(r), \dots, g_m(r))^\top$$, where $$\vec{g}: \mathbb{R}_{\ge 0} \to \mathbb{R}^m$$.
-Then $$f(x) = \vec{g}(\Vert x \Vert)$$.
-
-**Important Note:** For $$x \neq 0$$, $$f(x)$$ is some vector $$\vec{v}$$. For $$f(0)$$, $$f(0)$$ is some vector $$\vec{v}_0$$. This characterization covers $$f(0)$$ by $$\vec{g}(0)$$. The only vector in $$\mathbb{R}^n$$ that is fixed by all $$Q \in O(n)$$ is the zero vector $$0$$. If we were looking for *equivariant* functions such that $$f(Qx) = Qf(x)$$, the characterization would be $$f(x) = c \frac{x}{\Vert x \Vert}$$ or $$f(x) = h(\Vert x \Vert)x$$. But for *invariant* functions $$f(Qx)=f(x)$$, the value $$f(x)$$ must be $$0$$ if $$f(x)$$ is expected to have the same symmetries as $$x$$ (e.g., if $$f(x)$$ were forced to be a multiple of $$x$$). However, this is not required. The value $$f(x)$$ is simply a point in $$\mathbb{R}^m$$ that is constant on spheres in $$\mathbb{R}^n$$.
-The only special case is $$f(x)=0$$ for all $$x$$. This is $$g(\Vert x \Vert)=0$$.
-
-### 5.3. Functions $$f: (\mathbb{R}^n)^k \to \mathbb{R}$$ (Scalar-valued functions of $$k$$ vectors)
-A function $$f(v_1, v_2, \dots, v_k)$$ where $$v_i \in \mathbb{R}^n$$ is orthogonally invariant if $$f(Qv_1, \dots, Qv_k) = f(v_1, \dots, v_k)$$ for all $$Q \in O(n)$$.
-
-**Characterization:** Such a function $$f$$ is orthogonally invariant if and only if it can be expressed as a function of the inner products $$v_i \cdot v_j$$ for $$1 \le i \le j \le k$$. That is, there exists a function $$G$$ such that:
-
-$$
-f(v_1, \dots, v_k) = G( \{v_i \cdot v_j\}_{1 \le i \le j \le k} )
-$$
-
-Note that norms are included since $$\Vert v_i \Vert^2 = v_i \cdot v_i$$.
-
-**Proof Sketch:**
-*   **If $$f$$ depends only on $$v_i \cdot v_j$$, then $$f$$ is orthogonally invariant:**
-    $$(Qv_i) \cdot (Qv_j) = (Qv_i)^\top (Qv_j) = v_i^\top Q^\top Q v_j = v_i^\top I v_j = v_i \cdot v_j$$.
-    So, all inner products are unchanged by the transformation $$v_l \mapsto Qv_l$$. Thus $$f$$ is invariant.
-
-*   **If $$f$$ is orthogonally invariant, then it depends only on the inner products:**
-    Suppose we have two sets of vectors $$\{v_1, \dots, v_k\}$$ and $$\{w_1, \dots, w_k\}$$ such that $$v_i \cdot v_j = w_i \cdot w_j$$ for all $$1 \le i,j \le k$$. This means their Gramian matrices are equal: $$V^\top V = W^\top W$$, where $$V = [v_1, \dots, v_k]$$ and $$W = [w_1, \dots, w_k]$$ are $$n \times k$$ matrices.
-    It's a known result (related to the Cholesky decomposition or SVD) that if $$V^\top V = W^\top W$$, then there exists an orthogonal matrix $$Q \in O(n)$$ such that $$Q V = W$$, i.e., $$Qv_i = w_i$$ for all $$i=1, \dots, k$$. (This holds if $$n \ge k$$ and $$V$$ has full column rank, or more generally, if the map from $$\text{span}(v_i)$$ to $$\text{span}(w_i)$$ defined by $$v_i \mapsto w_i$$ is an isometry, it can be extended to an isometry on $$\mathbb{R}^n$$).
-    Since $$f$$ is orthogonally invariant, $$f(w_1, \dots, w_k) = f(Qv_1, \dots, Qv_k) = f(v_1, \dots, v_k)$$.
-    Thus, $$f$$ only depends on the collection of inner products.
-
-### 5.4. Functions of Matrices $$F: M_{n,n}(\mathbb{R}) \to \mathbb{R}$$
-The term "orthogonally invariant" can also apply to functions of matrices. There are a few common interpretations:
-*   **Invariance under orthogonal similarity:** $$F(Q^\top A Q) = F(A)$$ for all $$A \in M_{n,n}(\mathbb{R})$$ and $$Q \in O(n)$$.
-    *   **Characterization:** Such functions are precisely the symmetric functions of the eigenvalues of $$A$$ if $$A$$ is restricted to be symmetric. For general $$A$$, they are functions of the coefficients of the characteristic polynomial of $$A$$ (e.g., trace, determinant, sums of principal minors). More fundamentally, they are functions of the (unordered) set of eigenvalues of $$A$$ (counting multiplicities), provided these eigenvalues are considered in $$\mathbb{C}$$. If $$A$$ is not normal, eigenvalues alone might not be sufficient; one might need Jordan form related invariants. However, for normal matrices $$A A^\top = A^\top A$$ (which includes symmetric, skew-symmetric, and orthogonal matrices), $$F(A)$$ is a symmetric function of its eigenvalues.
-    *   **Examples:** $$\text{trace}(A)$$, $$\det(A)$$.
-*   **Invariance under left (and/or right) orthogonal transformations:** $$F(Q_1 A Q_2^\top) = F(A)$$ for all $$Q_1, Q_2 \in O(n)$$. (Or $$F(QA)=F(A)$$ or $$F(AQ)=F(A)$$).
-    *   **Characterization (for $$F(Q_1 A Q_2^\top) = F(A)$$):** Such functions depend only on the singular values of $$A$$. $$F(A) = h(\sigma_1(A), \dots, \sigma_n(A))$$, where $$\sigma_i(A)$$ are the singular values of $$A$$ and $$h$$ is a symmetric function of its arguments.
-    *   **Example:** The Frobenius norm $$\Vert A \Vert_F = \sqrt{\text{trace}(A^\top A)} = \sqrt{\sum \sigma_i(A)^2}$$. The operator norm $$\Vert A \Vert_2 = \sigma_{\max}(A)$$.
-    *   If $$F(QA)=F(A)$$ for all $$Q \in O(n)$$, then $$F(A) = G(A^\top A)$$ for some function $$G$$.
-    *   If $$F(AQ)=F(A)$$ for all $$Q \in O(n)$$, then $$F(A) = G(A A^\top)$$ for some function $$G$$.
-
-The most standard interpretation of "orthogonally invariant functions" without further context usually refers to Case 1 or 2 (functions whose argument is a vector from $$\mathbb{R}^n$$).
-
-In summary:
-*   $$f: \mathbb{R}^n \to \mathbb{R}$$ is orthogonally invariant iff $$f(x) = g(\Vert x \Vert)$$.
-*   $$f: \mathbb{R}^n \to \mathbb{R}^m$$ is orthogonally invariant iff $$f(x) = \vec{g}(\Vert x \Vert)$$.
-*   $$f: (\mathbb{R}^n)^k \to \mathbb{R}$$ is orthogonally invariant iff $$f(v_1, \dots, v_k) = G(\{v_i \cdot v_j\}_{1 \le i \le j \le k})$$.
-*   Functions of matrices $$F(A)$$ invariant under $$Q^\top A Q$$ depend on eigenvalues (or characteristic polynomial coefficients).
-*   Functions of matrices $$F(A)$$ invariant under $$Q_1 A Q_2^\top$$ depend on singular values.
-
-## 6. The Concept of Duality in Norms
+## 5. The Concept of Duality in Norms
 
 Duality is a powerful concept in optimization and functional analysis. Every norm has an associated **dual norm**.
 
@@ -629,42 +411,140 @@ $$
 
 The element $$A$$ that achieves the supremum (or one such element if not unique) is called a **dualizing element** or **duality mapping**. Computing this dualizer can be a significant computational step in some optimization algorithms.
 
-#### Duality for Specific Matrix Norms (w.r.t. Frobenius Inner Product)
+### 5.1 The Dual of the Induced $$\ell_p \to \ell_q$$ Norm
 
-*   **Schatten Norms:** The dual of the Schatten $$p$$-norm ($$\Vert \cdot \Vert_{S_p}$$) is the Schatten $$q$$-norm ($$\Vert \cdot \Vert_{S_q}$$), where $$1/p + 1/q = 1$$.
-    *   This means the **Nuclear Norm ($$\Vert \cdot \Vert_{S_1}$$)** and the **Spectral Norm ($$\Vert \cdot \Vert_{S_\infty}$$)** are dual to each other:
+A natural and important question arises: is there a general formula for the dual of an induced norm, specifically the $$\ell_p \to \ell_q$$ norm? The answer is nuanced and connects concepts from linear algebra, functional analysis, and convex optimization: while there is a general formula for the dual of any induced norm, it doesn't always simplify to another "nice" induced norm.
 
-        $$
-        (\Vert \cdot \Vert_{S_1})^\ast  = \Vert \cdot \Vert_{S_\infty} \quad \text{and} \quad (\Vert \cdot \Vert_{S_\infty})^\ast  = \Vert \cdot \Vert_{S_1}
-        $$
+Let's break it down, starting with the general case and then specializing to the $$\ell_p \to \ell_q$$ induced norm.
 
-    *   The **Frobenius Norm ($$\Vert \cdot \Vert_{S_2}$$)** is self-dual:
+#### 1. The General Dual Norm for Matrices
 
-        $$
-        (\Vert \cdot \Vert_{S_2})^\ast  = \Vert \cdot \Vert_{S_2}
-        $$
+First, let's define the space and the dual norm concept precisely.
 
-*   **Induced $$\ell_1 \to \ell_1$$ and $$\ell_\infty \to \ell_\infty$$ Norms:**
-    *   The dual of the **Maximum Column Sum Norm ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)** is the **Maximum Row Sum Norm ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$)**:
+We consider the vector space of real $$m \times n$$ matrices, $$M_{m,n}(\mathbb{R})$$. This space is equipped with an inner product, the **Frobenius inner product** (or trace inner product):
 
-        $$
-        (\Vert \cdot \Vert_{\ell_1 \to \ell_1})^\ast  = \Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}
-        $$
+$$
+\langle A, B \rangle = \mathrm{tr}(B^T A) = \sum_{i=1}^m \sum_{j=1}^n A_{ij} B_{ij}
+$$
 
-    *   Conversely, the dual of the **Maximum Row Sum Norm ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$)** is the **Maximum Column Sum Norm ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)**:
+This inner product allows us to identify the dual space of $$M_{m,n}(\mathbb{R})$$ with itself.
 
-        $$
-        (\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty})^\ast  = \Vert \cdot \Vert_{\ell_1 \to \ell_1}
-        $$
+Given any norm $$\Vert \cdot \Vert$$ on $$M_{m,n}(\mathbb{R})$$, its **dual norm**, denoted $$\Vert \cdot \Vert_\ast$$, is defined as:
 
-<blockquote class="box-info" markdown="1">
-<div class="title" markdown="1">
-**Important Note on Spectral Norm Duality**
-</div>
-The Spectral Norm ($$\Vert A \Vert_2$$ or $$\Vert A \Vert_{\ell_2 \to \ell_2}$$) is identical to the Schatten-$$\infty$$ norm ($$\Vert A \Vert_{S_\infty}$$). Therefore, its dual with respect to the Frobenius inner product is consistently the Nuclear Norm ($$\Vert A \Vert_{S_1}$$). Any alternative derivations suggesting the spectral norm is self-dual under this specific inner product are typically referencing a different context or a specialized result not general for Frobenius duality.
-</blockquote>
+$$
+\Vert B \Vert_\ast = \sup_{\Vert A \Vert \le 1} \langle A, B \rangle = \sup_{\Vert A \Vert \le 1} \mathrm{tr}(B^T A)
+$$
 
-### 6.1 Duality Mappings: Explicit Formulas
+for any matrix $$B \in M_{m,n}(\mathbb{R})$$.
+
+#### 2. Dual of a General Induced Norm $$\Vert \cdot \Vert_X \to \Vert \cdot \Vert_Y$$
+
+Now, let's consider a specific type of norm: the induced norm (or operator norm). Let $$\Vert \cdot \Vert_X$$ be a norm on $$\mathbb{R}^n$$ and $$\Vert \cdot \Vert_Y$$ be a norm on $$\mathbb{R}^m$$. The induced norm on a matrix $$A \in M_{m,n}(\mathbb{R})$$ is:
+
+$$
+\Vert A \Vert_{X,Y} = \sup_{\Vert x \Vert_X = 1} \Vert Ax \Vert_Y
+$$
+
+We want to compute the dual of this norm, which we'll denote by $$\Vert B \Vert_{X,Y}^\ast$$. Using the definition above:
+
+$$
+\Vert B \Vert_{X,Y}^\ast = \sup_{\Vert A \Vert_{X,Y} \le 1} \mathrm{tr}(B^T A)
+$$
+
+Computing this supremum directly is difficult. However, there is a powerful representation theorem for this dual norm. It states that the dual norm is the infimum over all possible decompositions of the matrix $$B$$ into a sum of rank-one matrices.
+
+**Theorem:** The dual of the induced norm $$\Vert \cdot \Vert_{X,Y}$$ is given by:
+
+$$
+\Vert B \Vert_{X,Y}^\ast = \inf \left\{ \sum_{i=1}^k \Vert u_i \Vert_X \Vert v_i \Vert_{Y^\ast} : B = \sum_{i=1}^k v_i u_i^T, u_i \in \mathbb{R}^n, v_i \in \mathbb{R}^m \right\}
+$$
+
+where $$\Vert \cdot \Vert_{Y^\ast}$$ is the dual norm of $$\Vert \cdot \Vert_Y$$ on $$\mathbb{R}^m$$. The infimum is taken over all possible finite sums. This type of norm is a generalization of the nuclear norm (or trace norm).
+
+#### 3. The Dual of the Induced Matrix Norm $$\ell^p \to \ell^q$$
+
+Now we can apply this general result a special case.
+
+The induced matrix norm from $$\ell^p$$ to $$\ell^q$$ is:
+
+$$
+\Vert A \Vert_{p,q} = \sup_{\Vert x \Vert_p=1} \Vert Ax \Vert_q
+$$
+
+Here, the norm on the domain space is $$\Vert \cdot \Vert_X = \Vert \cdot \Vert_p$$, and the norm on the codomain space is $$\Vert \cdot \Vert_Y = \Vert \cdot \Vert_q$$.
+
+To use the theorem, we need the dual of the codomain norm, $$\Vert \cdot \Vert_{Y^\ast} = \Vert \cdot \Vert_{q^\ast}$$. The dual norm of the vector $$\ell^q$$ norm is the $$\ell^{q'}$$ norm, where $$1/q + 1/q' = 1$$.
+
+Plugging this into the general formula, we get the dual of the $$\ell^p \to \ell^q$$ induced norm:
+
+$$
+\Vert B \Vert_{p,q}^\ast = \inf \left\{ \sum_{i=1}^k \Vert u_i \Vert_p \Vert v_i \Vert_{q'} : B = \sum_{i=1}^k v_i u_i^T \right\}
+$$
+
+where $$u_i \in \mathbb{R}^n$$, $$v_i \in \mathbb{R}^m$$, and $$1/q + 1/q' = 1$$.
+
+This variational formula is the general answer. Except for a few special cases, this expression does not simplify to another induced norm $$\Vert B \Vert_{r,s}$$.
+
+#### 4. Important Special Cases
+
+Let's see how this general formula works for well-known special cases.
+
+---
+
+**Case 1: The Spectral Norm ($$p=2, q=2$$)**
+
+*   **Primary Norm:** $$\Vert A \Vert_{2,2} = \sigma_{\max}(A)$$, the largest singular value of $$A$$. This is the spectral norm.
+*   **Dual Norm Calculation:** Here $$p=2$$ and $$q=2$$, so $$q'=2$$. The formula becomes:
+
+    $$
+    \Vert B \Vert_{2,2}^\ast = \inf \left\{ \sum_{i=1}^k \Vert u_i \Vert_2 \Vert v_i \Vert_2 : B = \sum_{i=1}^k v_i u_i^T \right\}
+    $$
+
+    This is precisely the definition of the **trace norm** (or nuclear norm), which is the sum of the singular values of $$B$$.
+
+    $$
+    \Vert B \Vert_{2,2}^\ast = \sum_{i=1}^{\min(m,n)} \sigma_i(B) = \Vert B \Vert_\ast
+    $$
+
+    The infimum is achieved by the Singular Value Decomposition (SVD) of $$B$$. If $$B = \sum \sigma_i v_i u_i^T$$, this is a valid decomposition with cost $$\sum \sigma_i \Vert u_i \Vert_2 \Vert v_i \Vert_2 = \sum \sigma_i$$.
+
+**Conclusion:** The dual of the spectral norm ($$\ell^2 \to \ell^2$$) is the trace norm.
+
+---
+
+**Case 2: The Max-Entry Norm ($$p=1, q=\infty$$)**
+
+*   **Primary Norm:** $$\Vert A \Vert_{1,\infty} = \sup_{\Vert x \Vert_1=1} \Vert Ax \Vert_\infty = \max_{i,j} \vert A_{ij} \vert$$.
+*   **Dual Norm Calculation:** Here $$p=1$$ and $$q=\infty$$, so $$q'=1$$. The formula becomes:
+
+    $$
+    \Vert B \Vert_{1,\infty}^\ast = \inf \left\{ \sum_{i=1}^k \Vert u_i \Vert_1 \Vert v_i \Vert_1 : B = \sum_{i=1}^k v_i u_i^T \right\}
+    $$
+
+    It can be shown that this infimum is equal to the entry-wise $$\ell_1$$-norm of the matrix $$B$$.
+
+    $$
+    \Vert B \Vert_{1,\infty}^\ast = \sum_{i=1}^m \sum_{j=1}^n \vert B_{ij} \vert
+    $$
+
+    To see this, one can choose the decomposition $$B = \sum_{j=1}^n B_j e_j^T$$, where $$B_j$$ is the $$j$$-th column of $$B$$ and $$e_j$$ is the $$j$$-th standard basis vector. The cost is $$\sum_j \Vert B_j \Vert_1 \Vert e_j \Vert_1 = \sum_j \sum_i \vert B_{ij} \vert = \sum_{i,j} \vert B_{ij} \vert$$. A more detailed proof shows this is indeed the minimum.
+
+**Conclusion:** The dual of the $$\ell^1 \to \ell^\infty$$ norm (max-entry norm) is the entry-wise $$\ell_1$$-norm (which is also the induced $$\ell^\infty \to \ell^1$$ norm).
+
+---
+
+### Summary
+
+| Primary Norm ($$\Vert A \Vert$$)                       | Formula for $$\Vert A \Vert$$                 | Dual Norm ($$\Vert B \Vert_\ast$$)                               | Formula for $$\Vert B \Vert_\ast$$                                             |
+| ------------------------------------------------------ | --------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **General Induced Norm** $$\ell^p \to \ell^q$$         | $$\sup_{\Vert x \Vert_p=1} \Vert Ax \Vert_q$$ | **Variational/Tensor Norm**                                      | $$\inf\{\sum_i \Vert u_i \Vert_p \Vert v_i \Vert_{q'} : B=\sum_i v_i u_i^T\}$$ |
+| **Spectral Norm** $$\ell^2 \to \ell^2$$                | $$\sigma_{\max}(A)$$                          | **Trace/Nuclear Norm**                                           | $$\sum_i \sigma_i(B)$$                                                         |
+| **Max Absolute Entry Norm** $$\ell^1 \to \ell^\infty$$ | $$\max_{i,j} \vert A_{ij} \vert$$             | **Entry-wise $$\ell_1$$-norm** ($$\ell^\infty \to \ell^1$$ norm) | $$\sum_{i,j} \vert B_{ij} \vert$$                                              |
+| **Max Absolute Column Sum** $$\ell^1 \to \ell^1$$      | $$\max_j \sum_i \vert A_{ij} \vert$$          | **Max Absolute Row Sum** ($$\ell^\infty \to \ell^\infty$$ norm)  | $$\max_i \sum_j \vert B_{ij} \vert$$                                           |
+
+In summary, for a general induced norm $$\Vert \cdot \Vert_{p,q}$$, its dual is not another induced norm but rather a norm defined via a variational problem related to rank-one decompositions. This variational form only simplifies to a more common, non-induced norm in special cases.
+
+### 5.2 Duality Mappings: Explicit Formulas
 
 A **duality mapping** $$J$$ for a norm $$\Vert \cdot \Vert$$ (on a space of matrices $$\mathbb{R}^{m \times n}$$) maps a matrix $$A$$ to a matrix $$J(A)$$ such that two conditions are met:
 1.  $$\langle A, J(A) \rangle_F = \Vert A \Vert$$
@@ -749,47 +629,27 @@ $$
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**Check and Uniqueness for $$J_{S_p}(A)$$ ($$1 < p < \infty$$)**
+**Derivation of $$J_{S_p}(A)$$**
 </summary>
-**Check:**
-*   Condition 1: $$\langle A, J_{S_p}(A) \rangle_F = \mathrm{tr}( (U\Sigma V^\top)^\top \frac{U\operatorname{diag}(\sigma_i^{p-1})V^\top}{\Vert A \Vert_{S_p}^{p-1}} ) = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \mathrm{tr}( V\Sigma U^\top U\operatorname{diag}(\sigma_i^{p-1})V^\top ) = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \mathrm{tr}(\Sigma \operatorname{diag}(\sigma_i^{p-1}))$$ (using $$\mathrm{tr}(XYZ)=\mathrm{tr}(ZXY)$$ and $$U^\top U=I, V^\top V=I$$).
-    This simplifies to $$\frac{\sum_i \sigma_i \cdot \sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\sum_i \sigma_i^p}{\Vert A \Vert_{S_p}^{p-1}} = \frac{\Vert A \Vert_{S_p}^p}{\Vert A \Vert_{S_p}^{p-1}} = \Vert A \Vert_{S_p}$$.
-*   Condition 2: The singular values of $$J_{S_p}(A)$$ are $$\hat{\sigma}_i = \frac{\sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}$$ (since $$U,V$$ are orthogonal).
-    We need to check $$\Vert J_{S_p}(A) \Vert_{S_q} = 1$$.
+The derivation relies on the equality condition of Hölder's inequality applied to singular values.
+1.  **Inequality:** Von Neumann's trace inequality states $$\vert \langle A, B \rangle_F \vert \le \sum_i \sigma_i(A) \sigma_i(B)$$. Equality holds if $$A$$ and $$B$$ share the same singular vectors ($$A=U\Sigma_A V^\top, B=U\Sigma_B V^\top$$).
+2.  **Goal:** We need to find $$J(A)$$ such that $$\langle A, J(A) \rangle_F = \Vert A \Vert_{S_p}$$ and $$\Vert J(A) \Vert_{S_q} = 1$$, where $$1/p+1/q=1$$.
+3.  **Applying Hölder's:** Assuming shared singular vectors, the inner product becomes a sum over singular values: $$\sum_i \sigma_i(A) \sigma_i(J(A))$$. By Hölder's inequality for vectors:
 
     $$
-    \Vert J_{S_p}(A) \Vert_{S_q} = \left( \sum_i \hat{\sigma}_i^q \right)^{1/q} = \left( \sum_i \left(\frac{\sigma_i^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}\right)^q \right)^{1/q} = \frac{1}{\Vert A \Vert_{S_p}^{p-1}} \left( \sum_i (\sigma_i^{p-1})^q \right)^{1/q}
+    \sum_i \sigma_i(A) \sigma_i(J(A)) \le \left(\sum_i \sigma_i(A)^p\right)^{1/p} \left(\sum_i \sigma_i(J(A))^q\right)^{1/q} = \Vert A \Vert_{S_p} \Vert J(A) \Vert_{S_q}
     $$
 
-    Since $$1/p+1/q=1$$, we have $$q(p-1) = qp - q = qp - (p/(p-1)) \cdot (p-1)/p \cdot q = qp - (pq/(p-1))$$
-    No, easier: $$1/q = (p-1)/p$$, so $$p/q = p-1$$. Also, $$(p-1)q = p$$.
-    So, the sum becomes $$\left( \sum_i \sigma_i^p \right)^{1/q} = (\Vert A \Vert_{S_p}^p)^{1/q} = \Vert A \Vert_{S_p}^{p/q}$$.
-    Thus, $$\Vert J_{S_p}(A) \Vert_{S_q} = \frac{\Vert A \Vert_{S_p}^{p/q}}{\Vert A \Vert_{S_p}^{p-1}}$$.
-    Since $$p/q = p-1$$, this expression is $$\frac{\Vert A \Vert_{S_p}^{p-1}}{\Vert A \Vert_{S_p}^{p-1}} = 1$$.
+4.  **Equality Condition:** Equality holds if the vector of singular values of $$J(A)$$ is proportional to the Hölder-dual vector of the singular values of $$A$$. Specifically, for $$1<p<\infty$$, this means $$\sigma_i(J(A))^q$$ is proportional to $$\sigma_i(A)^p$$, or more directly, $$\sigma_i(J(A))$$ must be proportional to $$\sigma_i(A)^{p-1}$$.
+5.  **Finding the Constant:** Let $$\sigma_i(J(A)) = c \cdot \sigma_i(A)^{p-1}$$. We enforce the dual norm constraint $$\Vert J(A) \Vert_{S_q}=1$$:
 
-**Uniqueness:** The mapping is single-valued and smooth for $$1<p<\infty$$ if all non-zero singular values $$\sigma_i(A)$$ are distinct. If there are repeated non-zero singular values, the SVD ($$U,V$$) is not unique, but the product $$U \operatorname{diag}(\sigma_i^{p-1}) V^\top$$ remains unique. If $$A=\mathbf{0}$$, $$J(A)=\mathbf{0}$$.
-</details>
+    $$
+    1 = \left( \sum_i \sigma_i(J(A))^q \right)^{1/q} = \left( \sum_i (c \cdot \sigma_i(A)^{p-1})^q \right)^{1/q} = c \left( \sum_i \sigma_i(A)^{(p-1)q} \right)^{1/q}
+    $$
 
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Derivation for $$J_{S_p}(A)$$**
-</summary>
-We use von Neumann's trace inequality: $$\vert\mathrm{tr}(X^\top Y)\vert \le \sum_i \sigma_i(X)\sigma_i(Y)$$. Equality holds if $$X=U\Sigma_X V^\top$$ and $$Y=U\Sigma_Y V^\top$$ (shared singular vectors).
-So, if $$J(A)$$ shares singular vectors with $$A$$, $$\langle A, J(A) \rangle_F = \sum_i \sigma_i(A)\sigma_i(J(A)) $$.
-We want this to be $$\Vert A \Vert_{S_p} = (\sum_i \sigma_i(A)^p)^{1/p}$$, and we need $$\Vert J(A) \Vert_{S_q} = (\sum_i \sigma_i(J(A))^q)^{1/q} = 1$$.
-This is an instance of Hölder's inequality for the vectors of singular values $$\vec{s}_A = (\sigma_i(A))$$ and $$\vec{s}_{J(A)} = (\sigma_i(J(A)))$$:
-$$\sum_i (\vec{s}_A)_i (\vec{s}_{J(A)})_i \le \Vert \vec{s}_A \Vert_p \Vert \vec{s}_{J(A)} \Vert_q$$.
-Equality holds if $$(\vec{s}_{J(A)})_i^q$$ is proportional to $$(\vec{s}_A)_i^p$$, or more directly, if $$(\vec{s}_{J(A)})_i$$ is proportional to $$((\vec{s}_A)_i^p)^{1/q \cdot (q-1)} = (\vec{s}_A)_i^{(p-1)}$$.
-Let $$\sigma_i(J(A)) = c \cdot \sigma_i(A)^{p-1}$$ for some constant $$c > 0$$.
-The condition $$\Vert J(A) \Vert_{S_q}=1$$ implies:
-
-$$
-\left( \sum_i (c \cdot \sigma_i(A)^{p-1})^q \right)^{1/q} = c \left( \sum_i \sigma_i(A)^{(p-1)q} \right)^{1/q} = c \left( \sum_i \sigma_i(A)^p \right)^{1/q} = 1
-$$
-
-So $$c = \frac{1}{(\sum_i \sigma_i(A)^p)^{1/q}} = \frac{1}{(\Vert A \Vert_{S_p}^p)^{1/q}} = \frac{1}{\Vert A \Vert_{S_p}^{p/q}} = \frac{1}{\Vert A \Vert_{S_p}^{p-1}}$$ (since $$p/q = p-1$$).
-Thus, $$\sigma_i(J(A)) = \frac{\sigma_i(A)^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}$$.
-The matrix $$J_{S_p}(A)$$ is then constructed using the same singular vectors as $$A$$: $$J_{S_p}(A) = U \operatorname{diag}(\sigma_i(J(A))) V^\top$$.
+    Since $$(p-1)q = p$$, the sum becomes $$\sum_i \sigma_i(A)^p = \Vert A \Vert_{S_p}^p$$.
+    So, $$1 = c (\Vert A \Vert_{S_p}^p)^{1/q} = c \Vert A \Vert_{S_p}^{p/q}$$. Since $$p/q = p-1$$, we have $$c = 1 / \Vert A \Vert_{S_p}^{p-1}$$.
+6.  **Construction:** This gives $$\sigma_i(J(A)) = \frac{\sigma_i(A)^{p-1}}{\Vert A \Vert_{S_p}^{p-1}}$$. Constructing $$J(A)$$ with these singular values and shared singular vectors ($$U,V$$) from $$A$$ yields the final formula.
 </details>
 
 **Special Cases for Schatten Norms:**
@@ -848,40 +708,13 @@ $$
 
 Let $$C := M^{1/2} A M^{-1/2}$$. Then $$\Vert A \Vert_M = \sigma_{\max}(C) = \sigma_1(C)$$.
 
-**Dual Norm:** The dual of $$\Vert \cdot \Vert_M$$ is $$\Vert \cdot \Vert_{M, \ast}$$. It can be shown that $$\Vert B \Vert_{M, \ast} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_1}$$. (Note: The prompt text previously said $$\Vert \cdot \Vert_{M^{-1}}$$ which is a norm but potentially not the direct dual in this context. For operator norms induced by Mahalanobis norms, the dual is more complex. Let's assume the definition $$J_M(A)$$ is chosen to satisfy the conditions with *some* dual norm whose structure is defined by $$J_M(A)$$. For our specific formulation, we are aiming for $$\Vert J_M(A) \Vert_{M,\ast}=1$$.)
+**Dual Norm:** The dual of $$\Vert \cdot \Vert_M$$ is $$\Vert \cdot \Vert_{M, \ast}$$. It can be shown that $$\Vert B \Vert_{M, \ast} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_1}$$.
 
 **Duality Mapping:** Let $$u_1, v_1$$ be the top singular pair of $$C$$ ($$C v_1 = \sigma_1(C) u_1, C^\top u_1 = \sigma_1(C) v_1$$).
 
 $$
 \boxed{\, J_M(A) = M^{1/2} u_1 v_1^\top M^{-1/2} \,}
 $$
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Check and Uniqueness for $$J_M(A)$$**
-</summary>
-**Check:**
-*   Condition 1:
-
-    $$
-    \langle A, J_M(A) \rangle_F = \mathrm{tr}(A^\top (M^{1/2} u_1 v_1^\top M^{-1/2})) = \mathrm{tr}(v_1^\top M^{-1/2} A^\top M^{1/2} u_1)
-    $$
-
-    Let $$C = M^{1/2} A M^{-1/2}$$. Then $$C^\top = M^{-1/2} A^\top M^{1/2}$$.
-    So, $$\langle A, J_M(A) \rangle_F = \mathrm{tr}(v_1^\top C^\top u_1) = u_1^\top C v_1$$.
-    Since $$u_1, v_1$$ are the top singular pair of $$C$$, $$C v_1 = \sigma_1(C) u_1$$.
-    Thus, $$u_1^\top C v_1 = u_1^\top (\sigma_1(C) u_1) = \sigma_1(C) \Vert u_1 \Vert_2^2 = \sigma_1(C) = \Vert A \Vert_M$$.
-*   Condition 2: We need to verify $$\Vert J_M(A) \Vert_\ast = 1$$. The dual norm corresponding to $$\Vert \cdot \Vert_M$$ is $$\Vert B \Vert_{M,\ast} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_1}$$.
-    Let's compute this for $$J_M(A)$$:
-
-    $$
-    \Vert M^{-1/2} (M^{1/2} u_1 v_1^\top M^{-1/2}) M^{1/2} \Vert_{S_1} = \Vert I (u_1 v_1^\top) I \Vert_{S_1} = \Vert u_1 v_1^\top \Vert_{S_1}
-    $$
-
-    As shown before, $$\Vert u_1 v_1^\top \Vert_{S_1} = 1$$. So, Condition 2 holds.
-
-**Uniqueness:** Unique if $$\sigma_1(C)$$ is simple (up to the usual SVD sign flips for $$u_1, v_1$$).
-</details>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
@@ -920,49 +753,33 @@ $$
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**Check and Uniqueness for $$J_R(A)$$**
+**Derivation of $$J_R(A)$$**
 </summary>
-**Check:**
-*   Condition 1:
+1.  **Norm and Dual Norm:** The RMS-induced norm is $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$ where $$k = \sqrt{n_{in}/n_{out}}$$. For any norm $$\Vert \cdot \Vert' = c \Vert \cdot \Vert$$, its dual is $$(\Vert \cdot \Vert')^\ast = (1/c) \Vert \cdot \Vert_\ast$$. Since the dual of $$\Vert \cdot \Vert_{S_\infty}$$ is $$\Vert \cdot \Vert_{S_1}$$, the dual of $$\Vert \cdot \Vert_R$$ is $$\Vert B \Vert_R^\ast = (1/k) \Vert B \Vert_{S_1}$$.
+2.  **Goal:** Find $$J_R(A)$$ such that $$\langle A, J_R(A) \rangle_F = \Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$ and $$\Vert J_R(A) \Vert_R^\ast = 1$$.
+3.  **Candidate Form:** Let's propose a candidate proportional to the duality mapping for the spectral norm, $$J_{S_\infty}(A) = u_1 v_1^\top$$. Let $$J_R(A) = c \cdot u_1 v_1^\top$$.
+4.  **Condition 1 (Inner Product):** We know $$\langle A, u_1 v_1^\top \rangle_F = \Vert A \Vert_{S_\infty}$$. So,
 
     $$
-    \langle A, J_R(A) \rangle_F = \left\langle A, k u_1 v_1^\top \right\rangle_F = k \langle A, u_1 v_1^\top \rangle_F
+    \langle A, c \cdot u_1 v_1^\top \rangle_F = c \langle A, u_1 v_1^\top \rangle_F = c \Vert A \Vert_{S_\infty}
     $$
 
-    As shown for $$J_{S_\infty}(A)$$, $$\langle A, u_1 v_1^\top \rangle_F = \sigma_{\max}(A)$$.
-    So, $$\langle A, J_R(A) \rangle_F = k \, \sigma_{\max}(A) = \Vert A \Vert_R$$.
-*   Condition 2: We need $$\Vert J_R(A) \Vert_R^\ast = 1$$.
+    To match our goal, we must have $$c \Vert A \Vert_{S_\infty} = k \Vert A \Vert_{S_\infty}$$, which implies $$c=k$$.
+    Our candidate is now $$J_R(A) = k \, u_1 v_1^\top$$.
+5.  **Condition 2 (Dual Norm):** We check if this candidate has a dual norm of 1.
 
     $$
-    \Vert J_R(A) \Vert_R^\ast = \left\Vert k u_1 v_1^\top \right\Vert_R^\ast = \frac{1}{k} \left\Vert k u_1 v_1^\top \right\Vert_{S_1}
+    \Vert J_R(A) \Vert_R^\ast = \Vert k \, u_1 v_1^\top \Vert_R^\ast = \frac{1}{k} \Vert k \, u_1 v_1^\top \Vert_{S_1}
     $$
 
-    Since $$k$$ is a positive scalar, $$\left\Vert k u_1 v_1^\top \right\Vert_{S_1} = k \left\Vert u_1 v_1^\top \right\Vert_{S_1}$$.
-    We know $$\left\Vert u_1 v_1^\top \right\Vert_{S_1} = 1$$.
-    So, $$\Vert J_R(A) \Vert_R^\ast = \frac{1}{k} \cdot k \cdot 1 = 1$$.
-
-**Uniqueness:** Unique if $$\sigma_{\max}(A)$$ is simple (up to sign flips for $$u_1, v_1$$).
-</details>
-
-<details class="details-block" markdown="1">
-<summary markdown="1">
-**Derivation for $$J_R(A)$$**
-</summary>
-Let $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$. We seek $$J_R(A)$$ such that $$\langle A, J_R(A) \rangle_F = k \Vert A \Vert_{S_\infty}$$ and its dual norm $$\Vert J_R(A) \Vert_R^\ast = 1$$.
-The dual norm is $$\Vert B \Vert_R^\ast = \frac{1}{k} \Vert B \Vert_{S_1}$$.
-The duality mapping for $$\Vert \cdot \Vert_{S_\infty}$$ is $$J_{S_\infty}(A) = u_1 v_1^\top$$, which satisfies $$\langle A, u_1 v_1^\top \rangle_F = \Vert A \Vert_{S_\infty}$$ and $$\Vert u_1 v_1^\top \Vert_{S_1} = 1$$.
-Let's try a scaled version: $$J_R(A) = c \cdot u_1 v_1^\top$$ for some scalar $$c$$.
-For Condition 1:
-$$\langle A, c \, u_1 v_1^\top \rangle_F = c \langle A, u_1 v_1^\top \rangle_F = c \Vert A \Vert_{S_\infty}$$.
-We need this to be equal to $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$. So, $$c = k$$.
-This gives the candidate $$J_R(A) = k \, u_1 v_1^\top$$.
-For Condition 2:
-$$\Vert J_R(A) \Vert_R^\ast = \Vert k \, u_1 v_1^\top \Vert_R^\ast = \frac{1}{k} \Vert k \, u_1 v_1^\top \Vert_{S_1} = \frac{1}{k} \cdot k \Vert u_1 v_1^\top \Vert_{S_1} = 1 \cdot 1 = 1$$.
-Both conditions are satisfied with $$c=k$$.
+    By homogeneity of the nuclear norm, $$\Vert k \, u_1 v_1^\top \Vert_{S_1} = k \Vert u_1 v_1^\top \Vert_{S_1}$$.
+    The nuclear norm of the rank-one matrix $$u_1 v_1^\top$$ is 1.
+    So, $$\Vert J_R(A) \Vert_R^\ast = \frac{1}{k} \cdot (k \cdot 1) = 1$$.
+    Both conditions are satisfied, confirming the formula.
 </details>
 
 
-## 7. Why Matrix Norms Matter for Metrized Deep Learning
+## 6. Why Matrix Norms Matter for Metrized Deep Learning
 
 Understanding matrix norms and their duals is more than just a mathematical exercise. These concepts are foundational for "metrized deep learning" for several reasons:
 
@@ -976,12 +793,12 @@ Understanding matrix norms and their duals is more than just a mathematical exer
 
 5.  **Computational Costs in Optimization:** The choice of norm is not "free."
     *   **Norm Computation:** Calculating some norms (e.g., Frobenius) is cheap, while others (e.g., spectral, nuclear, RMS-induced) require SVDs or iterative methods, adding computational overhead per optimization step if used directly for regularization or monitoring.
-    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert  \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in Section 6.1 are crucial for implementing such optimizers.
+    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert  \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in Section 6.2 are crucial for implementing such optimizers.
     *   For common layers like Linear or Conv2D, computing these duality mappings can be expensive. For instance, if the norm involves SVD (like for Spectral, Nuclear, RMS-induced norms) or matrix square roots/inverses (Mahalanobis), this is costly. The **Muon** optimizer and related methods often employ approximations, like Newton-Schulz iterations for matrix inverses or low-rank approximations for SVD, to make these computations feasible for large deep learning models.
 
 6.  **Modular Duality:** As seen in recent research, concepts of duality can be applied modularly to layers (Linear, Conv2D, Embedding) and composed throughout a network. This allows for a "dual" perspective on the entire weight space, enabling optimizers that adapt to the specific geometry of each layer. Efficient GPU kernels for these layer-wise dualizations are an active area of development.
 
-## 8. Summary of Common Matrix Norms
+## 7. Summary of Common Matrix Norms
 
 Here's a quick cheat sheet of common matrix norms and their duals (with respect to the Frobenius inner product). For a matrix $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$:
 

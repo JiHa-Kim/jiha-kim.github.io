@@ -506,7 +506,7 @@ Adaptive optimization methods like RMSProp and Adam adjust the learning rate for
 
 ### RMSProp: Adaptive Scaling of Gradients
 
-RMSProp (Root Mean Square Propagation) scales the learning rate for each parameter by an estimate of the root mean square of recent gradients for that parameter.
+RMSProp (Root Mean Square Propagation) scales the learning rate for each parameter by an estimate of the root mean square of recent gradients for that parameter. It's similar to Adagrad, but instead of dividing by the L2 norm past gradients, it instead divides by a weighted quadratic mean (weighted RMS) of past gradients. (See [Wikipedia](https://en.wikipedia.org/wiki/Generalized_mean)'s page on power means)
 
 The discrete update rules for RMSProp (simplified, without $$\epsilon$$ and assuming component-wise operations for vectors like $$(\nabla f(\mathbf x_k))^2$$ and division/sqrt) are:
 1.  Update the squared gradient accumulator $$\mathbf s_k$$:
@@ -574,7 +574,8 @@ Now, let's compare their parameter update rules, including a small constant $$\e
     $$
 
 Comparing these two forms, this special variant of RMSProp is equivalent to Adagrad if Adagrad's global learning rate $$\eta_{Adagrad}$$ and stability constant $$\epsilon_{Adagrad}$$ were set as $$\eta_{Adagrad}(k) = \eta_{RMSProp} \sqrt{k+1}$$ and $$\epsilon_{Adagrad}(k) = \epsilon_{RMSProp}\sqrt{k+1}$$.
-If both methods used the same base learning rate $$\eta$$ and the same $$\epsilon$$ strategy (e.g., $$\epsilon_{RMSProp} = \epsilon_{Adagrad}/\sqrt{k+1}$$ or both $$\epsilon$$ are negligible), the effective learning rate for each parameter in this RMSProp variant is scaled by an additional factor of $$\sqrt{k+1}$$ compared to Adagrad. This factor accounts for the "dimension scaling factor" difference mentioned in the prompt, as it affects the per-dimension scaling of the gradient.
+
+If both methods used the same base learning rate $$\eta$$ and ignoring $$\epsilon$$, the effective learning rate for each parameter in this RMSProp variant is scaled by an additional factor of $$\sqrt{k+1}$$ compared to Adagrad.
 
 Adagrad's learning rates are known to diminish, sometimes too aggressively, because $$\sqrt{\mathbf G_k}$$ typically grows with $$k$$. If $$\sqrt{\mathbf G_k}$$ grows roughly as $$\sqrt{k+1}$$ (e.g., if gradients have, on average, constant magnitudes), Adagrad's effective learning rate decays as $$O(1/\sqrt{k+1})$$. In contrast, this RMSProp variant's effective learning rate would remain approximately constant ($$\eta \sqrt{k+1} / \sqrt{k+1} \approx \eta$$). This behavior—preventing aggressive decay of learning rates—is a primary motivation for RMSProp. Standard RMSProp, which uses a constant $$\beta_2$$ (e.g., 0.9 or 0.999), "forgets" old gradients more strongly by giving exponentially less weight to older gradients, which further helps in stabilizing the effective learning rate over long training periods compared to Adagrad.
 

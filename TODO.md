@@ -1,4 +1,5 @@
 - [ ] argue why Muon is effective (gradient aligns with input), justify duality map
+- [ ] metrized deep learning and local approximation
 - [ ] replace `series_index` and `course_index` by `sort_index`
 - [ ] dual norm visualization
 - [ ] notes on operator theory
