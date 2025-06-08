@@ -16,128 +16,6 @@ tags:
 - Optimization
 - Duality
 - Computational Cost
-llm-instructions: |
-  I am using the Chirpy theme in Jekyll.
-
-  For the metadata, you can have up to 2 levels of categories, e.g.:
-    - Machine Learning
-    - Mathematical Optimization
-  For both tags and categories, please employ capitalization for distinction.
-
-  Never introduce any non-existant path, like an image.
-  This causes build errors. For example, simply put image: # placeholder
-
-  For writing the posts, please use the Kramdown MathJax syntax.
-
-  In regular Markdown, please use the following syntax:
-
-  - Inline equations are surrounded by dollar signs on the same line: $$inline$$
-
-  - Block equations are isolated by newlines between the text above and below,
-    and newlines between the delimiters and the equation (even in lists):
-    text
-
-    $$
-    block
-    $$
-
-    text...
-  Use LaTeX commands for symbols as much as possible (e.g. $$\vert$$ for
-  absolute value, $$\ast$$ for asterisk). Avoid using the literal vertical bar
-  symbol; use \vert and \Vert.
-
-  The syntax for lists is:
-
-  1. $$inline$$ item
-  2. item $$inline$$
-  3. item
-
-      $$
-      block
-      $$
-
-      (continued) item
-  4. item
-
-  Here are examples of syntaxes that do **not** work:
-
-  1. text
-    $$
-    block
-    $$
-    text
-
-  2. text
-    $$
-    text
-    $$
-
-    text
-
-  And the correct way to include multiple block equations in a list item:
-
-  1. text
-
-    $$
-    block 1
-    $$
-
-    $$
-    block 2
-    $$
-
-    (continued) text
-
-  Inside HTML environments, like blockquotes or details blocks, you **must** add the attribute
-  `markdown="1"` to the opening tag so that MathJax and Markdown are parsed correctly.
-
-  Here are some blockquote templates you can use:
-
-  <blockquote class="box-definition" markdown="1">
-  <div class="title" markdown="1">
-  **Definition.** The natural numbers $$\mathbb{N}$$
-  </div>
-  The natural numbers are defined as $$inline$$.
-
-  $$
-  block
-  $$
-
-  </blockquote>
-
-  And a details block template:
-
-  <details class="details-block" markdown="1">
-  <summary markdown="1">
-  **Tip.** A concise title goes here.
-  </summary>
-  Here is content that can include **Markdown**, inline math $$a + b$$,
-  and block math.
-
-  $$
-  E = mc^2
-  $$
-
-  More explanatory text.
-  </details>
-
-  Similarly, for boxed environments you can define:
-    - box-definition          # Icon: `\f02e` (bookmark), Color: `#2563eb` (blue)
-    - box-lemma               # Icon: `\f022` (list-alt/bars-staggered), Color: `#16a34a` (green)
-    - box-proposition         # Icon: `\f0eb` (lightbulb), Color: `#eab308` (yellow/amber)
-    - box-theorem             # Icon: `\f091` (trophy), Color: `#dc2626` (red)
-    - box-example             # Icon: `\f0eb` (lightbulb), Color: `#8b5cf6` (purple) (for example blocks with lightbulb icon)
-    - box-info                # Icon: `\f06a` (exclamation-circle), Color: `var(--prompt-info-icon-color)` (theme-defined)
-    - box-tip                 # Icon: `\f0eb` (lightbulb, regular style), Color: `var(--prompt-tip-icon-color)` (theme-defined)
-    - box-warning             # Icon: `\f06a` (exclamation-circle), Color: `var(--prompt-warning-icon-color)` (theme-defined)
-    - box-danger              # Icon: `\f071` (exclamation-triangle), Color: `var(--prompt-danger-icon-color)` (theme-defined)
-
-  For details blocks, use:
-    - details-block           # main wrapper (styled like box-tip)
-    - the `<summary>` inside will get tip/book icons automatically
-
-  Please do not modify the sources, references, or further reading material
-  without an explicit request.
 ---
 
 Welcome to this installment of our "Crash Course in Mathematical Foundations" series! As we gear up to explore the fascinating world of **metrized deep learning**, a solid understanding of matrix norms is indispensable. Matrix norms are fundamental tools in linear algebra, numerical analysis, and optimization. They allow us to measure the "size" or "magnitude" of matrices, analyze the behavior of linear transformations (like layers in a neural network), and define geometric structures on spaces of parameters.
@@ -153,14 +31,16 @@ Before we jump into matrices, let's briefly recall vector norms. A vector norm q
 **Definition.** Vector Norm
 </div>
 A function $$\Vert \cdot \Vert : \mathbb{R}^n \to \mathbb{R}$$ is a **vector norm** if for all vectors $$x, y \in \mathbb{R}^n$$ and any scalar $$\alpha \in \mathbb{R}$$, it satisfies the following properties:
-1.  **Non-negativity:** $$\Vert x \Vert  \ge 0$$
-2.  **Positive definiteness:** $$\Vert x \Vert  = 0$$ if and only if $$x = \mathbf{0}$$ (the zero vector)
-3.  **Absolute homogeneity:** $$\Vert \alpha x \Vert  = \vert\alpha\vert \Vert x \Vert $$
-4.  **Triangle inequality (Subadditivity):** $$\Vert x + y \Vert  \le \Vert x \Vert  + \Vert y \Vert $$
+1.  **Non-negativity:** $$\Vert x \Vert \ge 0$$
+2.  **Positive definiteness:** $$\Vert x \Vert = 0$$ if and only if $$x = \mathbf{0}$$ (the zero vector)
+3.  **Absolute homogeneity:** $$\Vert \alpha x \Vert = \vert\alpha\vert \Vert x \Vert$$
+4.  **Triangle inequality (Subadditivity):** $$\Vert x + y \Vert \le \Vert x \Vert + \Vert y \Vert$$
 </blockquote>
 
-An important class of vector norms are the **$$\ell_p$$-norms**:
-
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Example.** $$\ell_p$$ norms
+</summary>
 For a vector $$x = (x_1, x_2, \ldots, x_n) \in \mathbb{R}^n$$:
 *   **$$\ell_1$$-norm (Manhattan norm):**
 
@@ -185,6 +65,7 @@ More generally, for $$p \ge 1$$, the **$$\ell_p$$-norm** is:
 $$
 \Vert x \Vert_p = \left( \sum_{i=1}^n \vert x_i \vert^p \right)^{1/p}
 $$
+</details>
 
 ## 2. Stepping Up: Matrix Norms
 
@@ -195,13 +76,13 @@ Similar to vector norms, matrix norms measure the "size" of matrices.
 **Definition.** Matrix Norm
 </div>
 A function $$\Vert \cdot \Vert : \mathbb{R}^{m \times n} \to \mathbb{R}$$ is a **matrix norm** if for all matrices $$A, B \in \mathbb{R}^{m \times n}$$ and any scalar $$\alpha \in \mathbb{R}$$, it satisfies:
-1.  **Non-negativity:** $$\Vert A \Vert  \ge 0$$
-2.  **Positive definiteness:** $$\Vert A \Vert  = 0$$ if and only if $$A = \mathbf{0}$$ (the zero matrix)
-3.  **Absolute homogeneity:** $$\Vert \alpha A \Vert  = \vert\alpha\vert \Vert A \Vert $$
-4.  **Triangle inequality (Subadditivity):** $$\Vert A + B \Vert  \le \Vert A \Vert  + \Vert B \Vert $$
+1.  **Non-negativity:** $$\Vert A \Vert \ge 0$$
+2.  **Positive definiteness:** $$\Vert A \Vert = 0$$ if and only if $$A = \mathbf{0}$$ (the zero matrix)
+3.  **Absolute homogeneity:** $$\Vert \alpha A \Vert = \vert\alpha\vert \Vert A \Vert$$
+4.  **Triangle inequality (Subadditivity):** $$\Vert A + B \Vert \le \Vert A \Vert + \Vert B \Vert$$
 
 Additionally, many (but not all) matrix norms satisfy **sub-multiplicativity**. If $$A \in \mathbb{R}^{m \times k}$$ and $$B \in \mathbb{R}^{k \times n}$$, then:
-5.  **Sub-multiplicativity:** $$\Vert AB \Vert  \le \Vert A \Vert  \Vert B \Vert $$
+5.  **Sub-multiplicativity:** $$\Vert AB \Vert \le \Vert A \Vert \Vert B \Vert$$
 This property is particularly important when analyzing compositions of linear transformations, such as sequential layers in a neural network.
 </blockquote>
 
@@ -213,8 +94,12 @@ $$
 \Vert A \Vert_{\text{dom} \to \text{codom}} = \sup_{x \ne \mathbf{0}} \frac{\Vert Ax \Vert_{\text{codom}}}{\Vert x \Vert_{\text{dom}}} = \sup_{\Vert x \Vert_{\text{dom}}=1} \Vert Ax \Vert_{\text{codom}}
 $$
 
-All induced norms are sub-multiplicative. Here are some common induced norms:
+All induced norms are sub-multiplicative.
 
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Examples.** Induced Matrix Norms
+</summary>
 *   **Maximum Column Sum Norm ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$):** Induced by the vector $$\ell_1$$-norm in both domain and codomain. For $$A \in \mathbb{R}^{m \times n}$$:
 
     $$
@@ -253,8 +138,9 @@ All induced norms are sub-multiplicative. Here are some common induced norms:
     $$
 
     where $$\sigma_{\max}(A)$$ is the largest singular value of $$A$$. This norm has several advantages in deep learning contexts:
-    *   **Layer‑wise stability:** The identity matrix (or any orthogonal matrix, assuming $$n_{out}=n_{in}$$) has an $$\Vert \cdot \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$ norm of $$1$$, irrespective of the layer width. Coupled with initialization schemes like Xavier/He (where, for instance, $$\operatorname{Var} A_{ij} = 1/n_{in}$$), newly initialized linear layers tend to have $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} \approx 1$$. This helps in preventing exploding or vanishing activations during the initial phases of training.
-    *   **Optimizer friendliness:** Optimization algorithms designed for metrized deep learning, such as **Muon**, can leverage this norm to control changes in layer weights (e.g., $$\Vert \Delta A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$). Because the norm definition inherently accounts for input and output dimensions, the same optimization hyper‑parameters (like step sizes or trust region radii defined in terms of this norm) can be more robustly applied to layers of varying widths.
+    *   **Layer-wise stability:** The identity matrix (or any orthogonal matrix, assuming $$n_{out}=n_{in}$$) has an $$\Vert \cdot \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$ norm of $$1$$, irrespective of the layer width. Coupled with initialization schemes like Xavier/He (where, for instance, $$\operatorname{Var} A_{ij} = 1/n_{in}$$), newly initialized linear layers tend to have $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} \approx 1$$. This helps in preventing exploding or vanishing activations during the initial phases of training.
+    *   **Optimizer friendliness:** Optimization algorithms designed for metrized deep learning, such as **Muon**, can leverage this norm to control changes in layer weights (e.g., $$\Vert \Delta A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$). Because the norm definition inherently accounts for input and output dimensions, the same optimization hyper-parameters (like step sizes or trust region radii defined in terms of this norm) can be more robustly applied to layers of varying widths. See the previous post on RMS norm for more.
+</details>
 
 ## 4. Entrywise and Schatten Norms
 
@@ -279,7 +165,11 @@ where $$p, q \ge 1$$.
 A key feature of entrywise norms is that, in general, they are **not** sub-multiplicative. A notable exception is the Frobenius norm ($$p=q=2$$), which does satisfy $$\Vert AB \Vert_F \le \Vert A \Vert_F \Vert B \Vert_F$$. The lack of this property makes them less suitable for analyzing compositions of linear maps compared to operator norms.
 </blockquote>
 
-Important special cases include:
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Examples.** $$L_{p,q}$$ norms
+</summary>
+
 *   **Frobenius Norm ($$p=q=2$$):** This is the most famous entrywise norm, which is also a Schatten norm ($$\Vert A \Vert_{S_2}$$). It is equivalent to the vector $$\ell_2$$-norm applied to the matrix's entries reshaped into a single vector.
 
     $$
@@ -304,10 +194,12 @@ Important special cases include:
     $$
     \Vert A \Vert_{1,1} = \sum_{j=1}^n \sum_{i=1}^m \vert a_{ij} \vert
     $$
+</details>
 
 **Duality:** With respect to the Frobenius inner product, the dual of the $$L_{p,q}$$ norm is the $$L_{p^\ast, q^\ast}$$ norm, where $$1/p + 1/p^\ast = 1$$ and $$1/q + 1/q^\ast = 1$$. For instance, the Frobenius norm ($$\Vert \cdot \Vert_{2,2}$$) is self-dual, while the dual of the max absolute value norm ($$\Vert \cdot \Vert_{\infty,\infty}$$) is the sum of absolute values norm ($$\Vert \cdot \Vert_{1,1}$$).
 
 ### 4.2. Schatten $$p$$-Norms
+
 Schatten norms are a family of norms defined using the singular values of a matrix $$A \in \mathbb{R}^{m \times n}$$. The singular values, denoted $$\sigma_k(A)$$, are typically obtained via Singular Value Decomposition (SVD). For $$p \ge 1$$, the Schatten $$p$$-norm is:
 
 $$
@@ -316,7 +208,7 @@ $$
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-Alternative Formulation via Trace
+**Alternative Formulation.** Via Trace
 </summary>
 The singular values $$\sigma_k(A)$$ are the non-negative square roots of the eigenvalues of $$A^\top A$$ (or $$AA^\top$$). If $$\lambda_k(A^\top A)$$ are the (non-negative) eigenvalues of the positive semi-definite matrix $$A^\top A$$, then $$\sigma_k(A) = \sqrt{\lambda_k(A^\top A)}$$.
 The Schatten $$p$$-norm can then be written in terms of these eigenvalues:
@@ -335,7 +227,10 @@ $$
 While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/2}$$ generally involves an eigendecomposition of $$A^\top A$$, which is computationally similar to performing an SVD on $$A$$ to get the singular values directly. The practical computation, especially for general $$p$$, often relies on the singular values. For specific cases like $$p=2$$ (Frobenius norm), more direct methods are used as highlighted below.
 </details>
 
-#### Key Examples and Their Practical Computation:
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Examples.** Schatten $$p$$-norms
+</summary>
 
 *   **Nuclear Norm ($$p=1$$):** Also denoted $$\Vert A \Vert_\ast$$ or $$\Vert A \Vert_{S_1}$$.
     *   **Definition (Primary for computation):**
@@ -368,6 +263,7 @@ While this trace formulation is mathematically sound, computing $$(A^\top A)^{p/
         This requires finding the largest singular value of $$A$$.
     *   **Computation:** Typically computed via SVD (if all singular values are needed anyway) or iterative methods like the power iteration to find the largest eigenvalue of $$A^\top A$$ (since $$\sigma_{\max}(A) = \sqrt{\lambda_{\max}(A^\top A)}$$). More expensive than Frobenius but often cheaper than full SVD if only $$\sigma_{\max}$$ is needed.
     *   **Use:** Measures maximum stretching, crucial for Lipschitz constants, stability analysis.
+</details>
 
 Schatten norms are unitarily invariant, meaning $$\Vert UAV \Vert_{S_p} = \Vert A \Vert_{S_p}$$ for any orthogonal/unitary matrices $$U$$ and $$V$$.
 
@@ -376,42 +272,67 @@ Schatten norms are unitarily invariant, meaning $$\Vert UAV \Vert_{S_p} = \Vert 
 Duality is a powerful concept in optimization and functional analysis. Every norm has an associated **dual norm**.
 
 ### Vector Norm Duality
+
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition.** Dual Vector Norm
+</div>
+
 For a vector norm $$\Vert \cdot \Vert$$ on $$\mathbb{R}^n$$, its dual norm $$\Vert \cdot \Vert_\ast$$ is defined on the dual space (which is also $$\mathbb{R}^n$$ via the standard dot product) as:
 
 $$
-\Vert y \Vert_\ast  = \sup_{x \ne \mathbf{0}} \frac{\vert y^\top x \vert}{\Vert x \Vert} = \sup_{\Vert x \Vert=1} \vert y^\top x \vert
+\Vert y \Vert_\ast = \sup_{x \ne \mathbf{0}} \frac{\vert y^\top x \vert}{\Vert x \Vert} = \sup_{\Vert x \Vert=1} \vert y^\top x \vert
 $$
 
 This relationship is captured by **Hölder's Inequality**:
 
 $$
-\vert y^\top x \vert \le \Vert y \Vert_\ast  \Vert x \Vert
+\vert y^\top x \vert \le \Vert y \Vert_\ast \Vert x \Vert
 $$
 
-Important dual pairs for $$\ell_p$$-norms: $$(\Vert \cdot \Vert_{\ell_p})^\ast  = \Vert \cdot \Vert_{\ell_q}$$ where $$1/p + 1/q = 1$$.
+</blockquote>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+Example: Dual of $$\ell_p$$ norms
+</summary>
+
+Important dual pairs for $$\ell_p$$-norms: $$(\Vert \cdot \Vert_{\ell_p})^\ast = \Vert \cdot \Vert_{\ell_q}$$ where $$1/p + 1/q = 1$$.
+</details>
 
 ### Matrix Norm Duality
+
 For matrix norms, duality is typically defined with respect to the **Frobenius inner product**:
 
 $$
 \langle A, B \rangle_F = \mathrm{tr}(A^\top B) = \sum_{i,j} a_{ij} b_{ij}
 $$
 
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition.** Dual Matrix Norm
+</div>
+
 Given a matrix norm $$\Vert \cdot \Vert$$ on $$\mathbb{R}^{m \times n}$$, its dual norm $$\Vert \cdot \Vert_\ast$$ is defined as:
 
 $$
-\Vert B \Vert_\ast  = \sup_{A \ne \mathbf{0}} \frac{\vert \langle B, A \rangle_F \vert}{\Vert A \Vert} = \sup_{\Vert A \Vert=1} \vert \langle B, A \rangle_F \vert
+\Vert B \Vert_\ast = \sup_{A \ne \mathbf{0}} \frac{\vert \langle B, A \rangle_F \vert}{\Vert A \Vert} = \sup_{\Vert A \Vert=1} \vert \langle B, A \rangle_F \vert
 $$
 
 And we have a generalized Hölder's inequality for matrices:
 
 $$
-\vert \langle B, A \rangle_F \vert \le \Vert B \Vert_\ast  \Vert A \Vert
+\vert \langle B, A \rangle_F \vert \le \Vert B \Vert_\ast \Vert A \Vert
 $$
+
+</blockquote>
 
 The element $$A$$ that achieves the supremum (or one such element if not unique) is called a **dualizing element** or **duality mapping**. Computing this dualizer can be a significant computational step in some optimization algorithms.
 
-### 5.1 The Dual of the Induced $$\ell_p \to \ell_q$$ Norm
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Example.** Dual Norms of $$\ell_p \to \ell_q$$-norms
+</summary>
 
 A natural and important question arises: is there a general formula for the dual of an induced norm, specifically the $$\ell_p \to \ell_q$$ norm? The answer is nuanced and connects concepts from linear algebra, functional analysis, and convex optimization: while there is a general formula for the dual of any induced norm, it doesn't always simplify to another "nice" induced norm.
 
@@ -521,7 +442,7 @@ Let's see how this general formula works for well-known special cases.
     \Vert B \Vert_{1,\infty}^\ast = \inf \left\{ \sum_{i=1}^k \Vert u_i \Vert_1 \Vert v_i \Vert_1 : B = \sum_{i=1}^k v_i u_i^T \right\}
     $$
 
-    It can be shown that this infimum is equal to the entry-wise $$\ell_1$$-norm of the matrix $$B$$.
+    It can be shown that this infimum is equal to the entrywise $$\ell_1$$-norm of the matrix $$B$$.
 
     $$
     \Vert B \Vert_{1,\infty}^\ast = \sum_{i=1}^m \sum_{j=1}^n \vert B_{ij} \vert
@@ -529,22 +450,23 @@ Let's see how this general formula works for well-known special cases.
 
     To see this, one can choose the decomposition $$B = \sum_{j=1}^n B_j e_j^T$$, where $$B_j$$ is the $$j$$-th column of $$B$$ and $$e_j$$ is the $$j$$-th standard basis vector. The cost is $$\sum_j \Vert B_j \Vert_1 \Vert e_j \Vert_1 = \sum_j \sum_i \vert B_{ij} \vert = \sum_{i,j} \vert B_{ij} \vert$$. A more detailed proof shows this is indeed the minimum.
 
-**Conclusion:** The dual of the $$\ell^1 \to \ell^\infty$$ norm (max-entry norm) is the entry-wise $$\ell_1$$-norm (which is also the induced $$\ell^\infty \to \ell^1$$ norm).
+**Conclusion:** The dual of the $$\ell^1 \to \ell^\infty$$ norm (max-entry norm) is the entrywise $$\ell_1$$-norm (which is also the induced $$\ell^\infty \to \ell^1$$ norm).
 
 ---
 
-### Summary
+#### Summary
 
-| Primary Norm ($$\Vert A \Vert$$)                       | Formula for $$\Vert A \Vert$$                 | Dual Norm ($$\Vert B \Vert_\ast$$)                               | Formula for $$\Vert B \Vert_\ast$$                                             |
-| ------------------------------------------------------ | --------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| **General Induced Norm** $$\ell^p \to \ell^q$$         | $$\sup_{\Vert x \Vert_p=1} \Vert Ax \Vert_q$$ | **Variational/Tensor Norm**                                      | $$\inf\{\sum_i \Vert u_i \Vert_p \Vert v_i \Vert_{q'} : B=\sum_i v_i u_i^T\}$$ |
-| **Spectral Norm** $$\ell^2 \to \ell^2$$                | $$\sigma_{\max}(A)$$                          | **Trace/Nuclear Norm**                                           | $$\sum_i \sigma_i(B)$$                                                         |
-| **Max Absolute Entry Norm** $$\ell^1 \to \ell^\infty$$ | $$\max_{i,j} \vert A_{ij} \vert$$             | **Entry-wise $$\ell_1$$-norm** ($$\ell^\infty \to \ell^1$$ norm) | $$\sum_{i,j} \vert B_{ij} \vert$$                                              |
-| **Max Absolute Column Sum** $$\ell^1 \to \ell^1$$      | $$\max_j \sum_i \vert A_{ij} \vert$$          | **Max Absolute Row Sum** ($$\ell^\infty \to \ell^\infty$$ norm)  | $$\max_i \sum_j \vert B_{ij} \vert$$                                           |
+| Primary Norm ($$\Vert A \Vert$$)                       | Formula for $$\Vert A \Vert$$                 | Dual Norm ($$\Vert B \Vert_\ast$$)                              | Formula for $$\Vert B \Vert_\ast$$                                             |
+| ------------------------------------------------------ | --------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **General Induced Norm** $$\ell^p \to \ell^q$$         | $$\sup_{\Vert x \Vert_p=1} \Vert Ax \Vert_q$$ | **Variational/Tensor Norm**                                     | $$\inf\{\sum_i \Vert u_i \Vert_p \Vert v_i \Vert_{q'} : B=\sum_i v_i u_i^T\}$$ |
+| **Spectral Norm** $$\ell^2 \to \ell^2$$                | $$\sigma_{\max}(A)$$                          | **Trace/Nuclear Norm**                                          | $$\sum_i \sigma_i(B)$$                                                         |
+| **Max Absolute Entry Norm** $$\ell^1 \to \ell^\infty$$ | $$\max_{i,j} \vert A_{ij} \vert$$             | **Entrywise $$\ell_1$$-norm** ($$\ell^\infty \to \ell^1$$ norm) | $$\sum_{i,j} \vert B_{ij} \vert$$                                              |
+| **Max Absolute Column Sum** $$\ell^1 \to \ell^1$$      | $$\max_j \sum_i \vert A_{ij} \vert$$          | **Max Absolute Row Sum** ($$\ell^\infty \to \ell^\infty$$ norm) | $$\max_i \sum_j \vert B_{ij} \vert$$                                           |
 
 In summary, for a general induced norm $$\Vert \cdot \Vert_{p,q}$$, its dual is not another induced norm but rather a norm defined via a variational problem related to rank-one decompositions. This variational form only simplifies to a more common, non-induced norm in special cases.
+</details>
 
-### 5.2 Duality Mappings: Explicit Formulas
+### Duality Mappings: Explicit Formulas
 
 A **duality mapping** $$J$$ for a norm $$\Vert \cdot \Vert$$ (on a space of matrices $$\mathbb{R}^{m \times n}$$) maps a matrix $$A$$ to a matrix $$J(A)$$ such that two conditions are met:
 1.  $$\langle A, J(A) \rangle_F = \Vert A \Vert$$
@@ -559,7 +481,7 @@ All formulas below are derived by finding the conditions for equality in Hölder
 
 **Norm:** $$\displaystyle\Vert A \Vert_{p\to q}:=\max_{\Vert x \Vert_p=1}\Vert Ax \Vert_q$$ on $$A\in\mathbb R^{m\times n}$$.
 
-**Dual Norm:** The dual norm $$\Vert \cdot \Vert_{p\to q}^\ast $$ depends on $$p,q$$. For example:
+**Dual Norm:** The dual norm $$\Vert \cdot \Vert_{p\to q}^\ast$$ depends on $$p,q$$. For example:
 *   If $$p=q=2$$ (Spectral norm), dual is Nuclear norm ($$\Vert \cdot \Vert_{S_1}$$).
 *   If $$p=q=1$$ (Max Column Sum), dual is Max Row Sum norm ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$).
 
@@ -658,7 +580,7 @@ The derivation relies on the equality condition of Hölder's inequality applied 
     Then $$p-1=1$$. The formula becomes:
 
     $$
-    \boxed{\,J_F(A) = J_{S_2}(A) = \frac{U \Sigma V^\top}{\Vert A \Vert_{S_2}} = \frac{A}{\Vert A \Vert_F}\,}
+    \boxed{\,J_F(A) = J_{S_2}(A) = \frac{A}{\Vert A \Vert_F}\,}
     $$
 
     This mapping is unique (if $$A \ne \mathbf{0}$$).
@@ -778,7 +700,6 @@ $$
     Both conditions are satisfied, confirming the formula.
 </details>
 
-
 ## 6. Why Matrix Norms Matter for Metrized Deep Learning
 
 Understanding matrix norms and their duals is more than just a mathematical exercise. These concepts are foundational for "metrized deep learning" for several reasons:
@@ -793,7 +714,7 @@ Understanding matrix norms and their duals is more than just a mathematical exer
 
 5.  **Computational Costs in Optimization:** The choice of norm is not "free."
     *   **Norm Computation:** Calculating some norms (e.g., Frobenius) is cheap, while others (e.g., spectral, nuclear, RMS-induced) require SVDs or iterative methods, adding computational overhead per optimization step if used directly for regularization or monitoring.
-    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert  \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in Section 6.2 are crucial for implementing such optimizers.
+    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in the previous section are crucial for implementing such optimizers.
     *   For common layers like Linear or Conv2D, computing these duality mappings can be expensive. For instance, if the norm involves SVD (like for Spectral, Nuclear, RMS-induced norms) or matrix square roots/inverses (Mahalanobis), this is costly. The **Muon** optimizer and related methods often employ approximations, like Newton-Schulz iterations for matrix inverses or low-rank approximations for SVD, to make these computations feasible for large deep learning models.
 
 6.  **Modular Duality:** As seen in recent research, concepts of duality can be applied modularly to layers (Linear, Conv2D, Embedding) and composed throughout a network. This allows for a "dual" perspective on the entire weight space, enabling optimizers that adapt to the specific geometry of each layer. Efficient GPU kernels for these layer-wise dualizations are an active area of development.
@@ -811,7 +732,7 @@ Here's a quick cheat sheet of common matrix norms and their duals (with respect 
 | Nuclear                   | $$\Vert A \Vert_\ast$$, $$\Vert A \Vert_{S_1}$$                                              | $$\sum_k \sigma_k(A)$$                                                   | Spectral ($$\Vert \cdot \Vert_{S_\infty}$$)                          | Expensive (SVD)              |
 | RMS-Induced Operator Norm | $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$                                              | $$\sqrt{n_{in}/n_{out}}\,\sigma_{\max}(A)$$                              | $$\sqrt{n_{out}/n_{in}}\,\Vert A \Vert_{S_1}$$ (Scaled Nuclear Norm) | Expensive (SVD/Iterative)    |
 
-## 9. Summary of Matrix Norm Inequalities
+## 8. Summary of Matrix Norm Inequalities
 
 This table summarizes key inequalities relating common matrix norms for a matrix $$A \in \mathbb{R}^{m \times n}$$.
 Here, $$\Vert A \Vert_1$$ is the max column sum (operator norm $$\ell_1 \to \ell_1$$), $$\Vert A \Vert_2$$ is the spectral norm (operator norm $$\ell_2 \to \ell_2$$), $$\Vert A \Vert_\infty$$ is the max row sum (operator norm $$\ell_\infty \to \ell_\infty$$), $$\Vert A \Vert_F$$ is the Frobenius norm, and $$\Vert A \Vert_{\max} = \max_{i,j} \vert a_{ij} \vert$$.
