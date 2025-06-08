@@ -29,7 +29,7 @@ We'll particularly focus on matrix-structured parameters (like weights in linear
 1.  **Metrized Learning & Modular Duality:** This geometric viewpoint, exemplified by optimizers like **Muon**, emphasizes choosing appropriate operator norms (e.g., dimension-agnostic spectral norms) and correctly handling the duality between parameters and gradients.
 2.  **Principled Preconditioning & PolarGrad:** This framework, introduced by Lau, Long, and Su (2025), uses the polar decomposition of gradient matrices to systematically address different types of anisotropies, offering a unifying perspective and potential improvements over existing methods.
 
-The **Muon Optimizer** has demonstrated significant empirical success, and recent work like **PolarGrad** provides a robust theoretical underpinning and extensions. Together, these ideas push the boundaries of how we understand and design optimizers for deep learning. Foundational concepts like matrix norms and duality, which are crucial for this discussion, are covered in our crash course on [Functional Analysis and Matrix Norms](/crash-courses/functional-analysis/4-matrix-norms/).
+The **Muon Optimizer** has demonstrated significant empirical success, and recent work like **PolarGrad** provides a robust theoretical underpinning and extensions. Together, these ideas push the boundaries of how we understand and design optimizers for deep learning. Foundational concepts like matrix norms and duality, which are crucial for this discussion, are covered in our crash course on Functional Analysis.
 
 ## Part 1: The Challenge of Anisotropy in Deep Learning Optimization
 
