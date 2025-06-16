@@ -273,6 +273,39 @@ Schatten norms are unitarily invariant, meaning $$\Vert UAV \Vert_{S_p} = \Vert 
 
 Duality is a powerful concept in optimization and functional analysis. Every norm has an associated **dual norm**.
 
+
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Definition.** Dual Vector Norm
+</div>
+
+Let $$V$$ be a nonzero inner product space with a norm $$\Vert \cdot \Vert$$ that is not necessarily induced by its inner product $$\langle \cdot \vert \cdot \rangle$$. The corresponding dual norm $$\Vert \cdot \Vert_\ast$$ is defined on the dual space as:
+
+$$
+\Vert y \Vert_\ast = \sup_{\begin{gather} x \in V \\ x \ne 0 \end{gather}} \frac{\vert \langle y \vert x \rangle \vert}{\Vert x \Vert} = \sup_{\begin{gather} x\in V \\ \Vert x \Vert=1 \end{gather}} \vert \langle y \vert x \rangle \vert
+$$
+
+</blockquote>
+
+This relationship is captured by **Hölder's Inequality**:
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Theorem.** Generalized Cauchy-Schwarz/Hölder's Inequality
+</div>
+
+Let $$V$$ be a nonzero inner product space with a norm $$\Vert \cdot \Vert$$ that is not necessarily induced by its inner product $$\langle \cdot \vert \cdot \rangle$$ and their corresponding dual norm $$\Vert \cdot \Vert_\ast$$. Then the following holds:
+
+$$
+\vert \langle y \vert x \rangle \vert \leq \Vert y \Vert_\ast \Vert x \Vert
+$$
+
+</blockquote>
+
+The proof of the theorem follows immediately from the definition of the dual norm.  Note that theorem itself doesn't give so much information on how to actually compute the dual norm nor how to achieve the equality. In spite of its simplicity in derivation, the investigation of special cases of this theorem will be extremely useful in the context of optimization.
+
+For instance, this can be applied to vector norms with the standard Euclidean inner product, or to matrix norms with the Frobenius inner product (which is the Euclidean inner product of the vectorized matrices). As we will see, Von Neumann's trace inequality is a specific instance of this theorem with the Frobenius inner product, the Schatten-infinity norm (operator norm) and the Schatten-1 norm (nuclear/trace norm). 
+
 ### Vector Norm Duality
 
 <blockquote class="box-definition" markdown="1">

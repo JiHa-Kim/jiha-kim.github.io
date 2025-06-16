@@ -38,5 +38,5 @@ x 10. Momentum
 x 11. Soft inductive biases (regularization)
 x 12. Adam optimizer, info geo view: diagonal Fisher information approximation
 x 13. Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
-14. Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
+* 14. Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
 15. Parameter-free optimization
