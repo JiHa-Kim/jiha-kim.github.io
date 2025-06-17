@@ -161,7 +161,7 @@ Before we jump into matrices, let's briefly recall vector norms. A vector norm q
 Let $$V$$ be a vector space over a field $$\mathbb{F}$$ with absolute value $$\vert \cdot \vert$$. A function $$\Vert \cdot \Vert : V \to \mathbb{R}$$ is a **norm** if for all $$x, y \in V$$ and $$\alpha \in \mathbb{F}$$:
 
 1. **Non-negativity:** $$\Vert x \Vert \ge 0$$
-2. **Positive definiteness:** $$\Vert x \Vert = 0 \iff x = \mathbf{0}$$
+2. **Positive definiteness:** $$\Vert x \Vert = 0 \implies x = \mathbf{0}$$
 3. **Absolute homogeneity:** $$\Vert \alpha x \Vert = \vert\alpha\vert \Vert x \Vert$$
 4. **Triangle inequality:** $$\Vert x + y \Vert \le \Vert x \Vert + \Vert y \Vert$$
 </blockquote>
