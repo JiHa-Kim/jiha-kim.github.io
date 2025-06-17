@@ -524,6 +524,7 @@ where $$\Vert \cdot \Vert_\ast$$ is the dual norm of $$\Vert \cdot \Vert$$.
 
 This $$J(A)$$ is also known as a **dualizing element**. It is an element of the subgradient of the dual norm $$\Vert \cdot \Vert_\ast$$ evaluated at $$A$$, i.e., $$J(A) \in \partial \Vert A \Vert_\ast$$. The mapping may be set-valued if the primal norm's unit ball is not strictly convex. For $$A = \mathbf{0}$$, we define $$J(\mathbf{0}) = \mathbf{0}$$.
 
+
 <details class="details-block" markdown="1">
 <summary markdown="1">
 Duality Mappings for Common Matrix Norms
@@ -542,7 +543,7 @@ The duality mapping $$J_{\ell_p \to \ell_q}(A)$$ for the induced norm $$\Vert \c
     *   $$s_u \in \mathbb{R}^n$$ satisfies $$\Vert s_u \Vert_{p'} = 1$$ and $$s_u^\top u = \Vert u \Vert_p$$.
     *   $$s_v \in \mathbb{R}^m$$ satisfies $$\Vert s_v \_q = 1$$ and $$s_v^\top v = \Vert v \Vert_{q'}$$.
 *   For $$1 < p, q' < \infty$$, these dual vectors are unique and given by:
-    $$s_u = \frac{\mathrm{sign}(u) \odot \vert u\vert ^{p-1}}{\Vert u \Vert_p^{p-1}} \quad \text{and} \quad s_v = \frac{\mathrm{sign}(v) \odot \vert v\vert ^{q'-1}}{\Vert v \Vert_{q'}^{q'-1}}$$
+    $$s_u = \frac{\mathrm{sign}(u) \odot |u|^{p-1}}{\Vert u \Vert_p^{p-1}} \quad \text{and} \quad s_v = \frac{\mathrm{sign}(v) \odot |v|^{q'-1}}{\Vert v \Vert_{q'}^{q'-1}}$$
     where the operations are element-wise.
 
 **Special Operator Norms:**
@@ -552,13 +553,12 @@ The duality mapping $$J_{\ell_p \to \ell_q}(A)$$ for the induced norm $$\Vert \c
     *   A duality mapping for $$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$ at $$A$$ is the matrix $$J(A)$$ which is zero everywhere except for row $$i_0$$, which is set to $$\mathrm{sign}(A_{i_0, :})$$.
     *   $$
         J_{\ell_1 \to \ell_1}(A) = e_{i_0} (\mathrm{sign}(A_{i_0, :}))^\top
-
         $$
 
-\ast    \ast \ast Max Row Sum ($$\ell_\infty \to \ell_\infty$$):\ast \ast 
-    \ast    Let $$j_0$$ be the index of a column of $$A$$ with the maximum absolute column sum (this corresponds to the dual norm, $$\Vert A \Vert_{\ell_1 \to \ell_1}$$).
-    \ast    A duality mapping for $$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$ at $$A$$ is the matrix $$J(A)$$ which is zero everywhere except for column $$j_0$$, which is set to $$\mathrm{sign}(A_{:, j_0})$$.
-    \ast    $$
+*   **Max Row Sum ($$\ell_\infty \to \ell_\infty$$):**
+    *   Let $$j_0$$ be the index of a column of $$A$$ with the maximum absolute column sum (this corresponds to the dual norm, $$\Vert A \Vert_{\ell_1 \to \ell_1}$$).
+    *   A duality mapping for $$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$ at $$A$$ is the matrix $$J(A)$$ which is zero everywhere except for column $$j_0$$, which is set to $$\mathrm{sign}(A_{:, j_0})$$.
+    *   $$
         J_{\ell_\infty \to \ell_\infty}(A) = (\mathrm{sign}(A_{:, j_0})) e_{j_0}^\top
         $$
 
@@ -566,75 +566,66 @@ The duality mapping $$J_{\ell_p \to \ell_q}(A)$$ for the induced norm $$\Vert \c
     *   This is a special case of the Schatten $$S_\infty$$ norm. As shown below, the duality mapping is $$J_{S_\infty}(A) = U_r V_r^\top$$, where $$A = U_r \Sigma_r V_r^\top$$ is the compact SVD of $$A$$.
 
 *   **Max Entry Norm ($$\ell_1 \to \ell_\infty$$):**
-    *   The dual norm is the entrywise $$\ell_1$$ norm, $$\sum_{i,j} \vert A_{ij}\vert $$
-    *   The duality mapping for $$\Vert\cdot\Vert_{\ell_1\to\ell_\infty}$$ at $$A$$ is a matrix whose primal norm is 1 and is a subgradient of the dual norm at $$A$$. A subgradient of $$\sum_{i,j}\vert A_{ij}\vert $$ is $$\mathrm{sign}(A)$$.
-    *   The $$\ell_1 \to \ell_\infty$$ norm of $$\mathrm{sign}(A)$$ is $$\max_{i,j}\vert \mathrm{sign}(A_{ij})\vert =1$$, so it is already normalized.
+    *   The dual norm is the entrywise $$\ell_1$$ norm, $$\sum_{i,j} |A_{ij}|$$
+    *   The duality mapping for $$\Vert\cdot\Vert_{\ell_1\to\ell_\infty}$$ at $$A$$ is a matrix whose primal norm is 1 and is a subgradient of the dual norm at $$A$$. A subgradient of $$\sum_{i,j}|A_{ij}|$$ is $$\mathrm{sign}(A)$$.
+    *   The $$\ell_1 \to \ell_\infty$$ norm of $$\mathrm{sign}(A)$$ is $$\max_{i,j}|\mathrm{sign}(A_{ij})|=1$$, so it is already normalized.
     *   $$
         J_{\ell_1 \to \ell_\infty}(A) = \mathrm{sign}(A)
-
         $$
 
 #### 2. Schatten $$S_p$$ Norms
 
-\ast \ast Norm:\ast \ast  For $$A\in\mathbb R^{m\times n}$$ with SVD $$A=U\Sigma V^{\top}$$.
+**Norm:** For $$A\in\mathbb R^{m\times n}$$ with SVD $$A=U\Sigma V^{\top}$$.
 $$\Vert A \Vert_{S_p}:=\left(\textstyle\sum_{i}\sigma_i(A)^{\,p}\right)^{1/p}$$.
 
-\ast \ast Dual Norm:\ast \ast  $$\Vert \cdot \Vert_{S_q}$$, where $$1/p+1/q=1$$.
+**Dual Norm:** $$\Vert \cdot \Vert_{S_q}$$, where $$1/p+1/q=1$$.
 
-\ast \ast Duality Mapping (for $$1 < p < \infty$$):\ast \ast  The duality mapping for $$\Vert \cdot \Vert_{S_p}$$ is derived from the subgradient of its dual norm $$\Vert \cdot \Vert_{S_q}$$.
+**Duality Mapping (for $$1 < p < \infty$$):** The duality mapping for $$\Vert \cdot \Vert_{S_p}$$ is derived from the subgradient of its dual norm $$\Vert \cdot \Vert_{S_q}$$.
 
 $$
-
 \boxed{\,J_{S_p}(A)=\frac{U\,\operatorname{diag}(\sigma_i(A)^{\,q-1})\,V^{\top}}
                           {\left(\sum_j \sigma_j(A)^q\right)^{(p-1)/p}}\,}
-
 $$
 
 (If $$A=\mathbf{0}$$, $$J_{S_p}(A)=\mathbf{0}$$. Using $$q/p=p-1$$, the denominator is $$\Vert A \Vert_{S_q}^{p-1}$$).
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-\ast \ast Derivation of $$J_{S_p}(A)$$\ast \ast 
+**Derivation of $$J_{S_p}(A)$$**
 </summary>
 We need $$J(A)$$ such that $$\Vert J(A) \Vert_{S_p}=1$$ and $$\langle A, J(A) \rangle_F = \Vert A \Vert_{S_q}$$. This $$J(A)$$ is the normalized subgradient of the $$S_q$$ norm evaluated at $$A$$. Let $$A=U\Sigma V^\top$$. We propose $$J(A) = U \Sigma' V^\top$$.
-1.  \ast \ast Inner Product Condition:\ast \ast  $$\langle A, J(A) \rangle_F = \mathrm{tr}(\Sigma^\top \Sigma') = \sum_i \sigma_i \sigma'_i$$. We need this to equal $$\Vert A \Vert_{S_q} = (\sum_i \sigma_i^q)^{1/q}$$. By Hölder's inequality for vectors, $$\sum \sigma_i \sigma'_i \le (\sum \sigma_i^q)^{1/q} (\sum (\sigma'_i)^p)^{1/p} = \Vert A \Vert_{S_q} \Vert J(A) \Vert_{S_p}$$.
-2.  \ast \ast Achieving Equality:\ast \ast  Equality is achieved if the vector of $$\sigma'_i$$ is proportional to the Hölder-dual vector of $$\sigma_i$$. Specifically, $$\sigma'_i$$ must be proportional to $$\sigma_i^{q-1}$$. Let $$\sigma'_i = c \cdot \sigma_i^{q-1}$$.
-3.  \ast \ast Norm Condition:\ast \ast  We need $$\Vert J(A) \Vert_{S_p} = 1$$.
+1.  **Inner Product Condition:** $$\langle A, J(A) \rangle_F = \mathrm{tr}(\Sigma^\top \Sigma') = \sum_i \sigma_i \sigma'_i$$. We need this to equal $$\Vert A \Vert_{S_q} = (\sum_i \sigma_i^q)^{1/q}$$. By Hölder's inequality for vectors, $$\sum \sigma_i \sigma'_i \le (\sum \sigma_i^q)^{1/q} (\sum (\sigma'_i)^p)^{1/p} = \Vert A \Vert_{S_q} \Vert J(A) \Vert_{S_p}$$.
+2.  **Achieving Equality:** Equality is achieved if the vector of $$\sigma'_i$$ is proportional to the Hölder-dual vector of $$\sigma_i$$. Specifically, $$\sigma'_i$$ must be proportional to $$\sigma_i^{q-1}$$. Let $$\sigma'_i = c \cdot \sigma_i^{q-1}$$.
+3.  **Norm Condition:** We need $$\Vert J(A) \Vert_{S_p} = 1$$.
     $$1 = \Vert J(A) \Vert_{S_p} = (\sum_i (\sigma'_i)^p)^{1/p} = (\sum_i (c \cdot \sigma_i^{q-1})^p)^{1/p} = c (\sum_i \sigma_i^{(q-1)p})^{1/p}$$.
     Since $$(q-1)p = q$$, this is $$c (\sum_i \sigma_i^q)^{1/p} = c \Vert A \Vert_{S_q}^{q/p}$$.
     So, $$c = 1 / \Vert A \Vert_{S_q}^{q/p} = 1 / \Vert A \Vert_{S_q}^{p-1}$$.
-4.  \ast \ast Final Formula:\ast \ast  $$\sigma'_i = \sigma_i^{q-1} / \Vert A \Vert_{S_q}^{p-1}$$. Assembling this into a matrix gives the formula above.
+4.  **Final Formula:** $$\sigma'_i = \sigma_i^{q-1} / \Vert A \Vert_{S_q}^{p-1}$$. Assembling this into a matrix gives the formula above.
 </details>
 
-\ast \ast Special Cases for Schatten Norms:\ast \ast 
+**Special Cases for Schatten Norms:**
 
-\ast    \ast \ast $$p=2$$ (Frobenius Norm $$\Vert \cdot \Vert_F = \Vert \cdot \Vert_{S_2}$$):\ast \ast  Self-dual ($$q=2, p=2$$).
+*   **$$p=2$$ (Frobenius Norm $$\Vert \cdot \Vert_F = \Vert \cdot \Vert_{S_2}$$):** Self-dual ($$q=2, p=2$$).
     Then $$q-1=1$$ and $$p-1=1$$. The formula becomes:
 
     $$
-
     \boxed{\,J_F(A) = J_{S_2}(A) = \frac{U \Sigma V^\top}{\Vert A \Vert_{S_2}} = \frac{A}{\Vert A \Vert_F}\,}
-
     $$
 
-\ast    \ast \ast $$p=1$$ (Nuclear Norm $$\Vert \cdot \Vert_{S_1}$$):\ast \ast  Dual is Spectral Norm ($$\Vert \cdot \Vert_{S_\infty}$$, $$q=\infty$$).
+*   **$$p=1$$ (Nuclear Norm $$\Vert \cdot \Vert_{S_1}$$):** Dual is Spectral Norm ($$\Vert \cdot \Vert_{S_\infty}$$, $$q=\infty$$).
     The duality mapping for $$S_1$$ is the subgradient of the $$S_\infty$$ norm. If $$\sigma_1 > \sigma_2$$ (largest singular value is simple), let $$u_1, v_1$$ be the top singular vectors.
 
     $$
-
     \boxed{\,J_{S_1}(A) = u_1 v_1^\top\,}
-
     $$
     
     If $$\sigma_1$$ is not simple, $$J(A)$$ can be any convex combination of $$u_i v_i^\top$$ for $$i$$ where $$\sigma_i = \sigma_1$$.
 
-\ast    \ast \ast $$p=\infty$$ (Spectral Norm $$\Vert \cdot \Vert_{S_\infty}$$):\ast \ast  Dual is Nuclear Norm ($$\Vert \cdot \Vert_{S_1}$$, $$q=1$$).
+*   **$$p=\infty$$ (Spectral Norm $$\Vert \cdot \Vert_{S_\infty}$$):** Dual is Nuclear Norm ($$\Vert \cdot \Vert_{S_1}$$, $$q=1$$).
     The duality mapping for $$S_\infty$$ is the subgradient of the $$S_1$$ norm. If $$A=U_r \Sigma_r V_r^\top$$ is the compact SVD, a canonical choice is:
 
     $$
-
     \boxed{\,J_{S_\infty}(A) = U_r V_r^\top\,}
-
     $$
     
     This is the unique minimum Frobenius norm subgradient of $$\Vert A \Vert_{S_1}$$.
@@ -642,47 +633,39 @@ We need $$J(A)$$ such that $$\Vert J(A) \Vert_{S_p}=1$$ and $$\langle A, J(A) \r
 #### 3. Mahalanobis-Induced Operator Norm
 
 Let $$M \succ 0$$ be an $$n \times n$$ SPD matrix.
-\ast \ast Norm:\ast \ast  For $$A \in \mathbb{R}^{n \times n}$$:
+**Norm:** For $$A \in \mathbb{R}^{n \times n}$$:
 
 $$
-
 \Vert A \Vert_M := \max_{x^\top M x = 1} \sqrt{(Ax)^\top M (Ax)} = \Vert M^{1/2} A M^{-1/2} \Vert_{S_\infty}
-
 $$
 
-\ast \ast Dual Norm:\ast \ast  $$\Vert B \Vert_{M, \ast} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_1}$$.
+**Dual Norm:** $$\Vert B \Vert_{M, \ast} = \Vert M^{-1/2} B M^{1/2} \Vert_{S_1}$$.
 
-\ast \ast Duality Mapping:\ast \ast  This is the subgradient of the dual norm $$\Vert \cdot \Vert_{M, \ast}$$ at $$A$$. Let $$C := M^{-1/2} A M^{1/2}$$ have compact SVD $$C = U_r \Sigma_r V_r^\top$$.
+**Duality Mapping:** This is the subgradient of the dual norm $$\Vert \cdot \Vert_{M, \ast}$$ at $$A$$. Let $$C := M^{-1/2} A M^{1/2}$$ have compact SVD $$C = U_r \Sigma_r V_r^\top$$.
 
 $$
-
 \boxed{\, J_M(A) = M^{1/2} (U_r V_r^\top) M^{-1/2} \,}
-
 $$
 
 #### 4. RMS-Induced Operator Norm
 
-\ast \ast Norm:\ast \ast  For $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$:
+**Norm:** For $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$:
 
 $$
-
 \Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}} = \sqrt{\frac{n_{in}}{n_{out}}}\,\sigma_{\max}(A)
-
 $$
 
-\ast \ast Dual Norm:\ast \ast  $$\Vert B \Vert_R^\ast = \sqrt{\frac{n_{out}}{n_{in}}}\,\Vert B \Vert_{S_1}$$.
+**Dual Norm:** $$\Vert B \Vert_R^\ast = \sqrt{\frac{n_{out}}{n_{in}}}\,\Vert B \Vert_{S_1}$$.
 
-\ast \ast Duality Mapping:\ast \ast  This is the normalized subgradient of the dual norm $$\Vert \cdot \Vert_R^\ast$$ at $$A$$. Let $$A=U_r \Sigma_r V_r^\top$$ be the compact SVD of $$A$$.
+**Duality Mapping:** This is the normalized subgradient of the dual norm $$\Vert \cdot \Vert_R^\ast$$ at $$A$$. Let $$A=U_r \Sigma_r V_r^\top$$ be the compact SVD of $$A$$.
 
 $$
-
 \boxed{\, J_R(A) = \sqrt{\frac{n_{out}}{n_{in}}} \, U_r V_r^\top \,}
-
 $$
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-\ast \ast Derivation of $$J_R(A)$$\ast \ast 
+**Derivation of $$J_R(A)$$**
 </summary>
 Let $$k = \sqrt{n_{in}/n_{out}}$$. The norm is $$\Vert A \Vert_R = k \Vert A \Vert_{S_\infty}$$ and its dual is $$\Vert A \Vert_R^\ast = (1/k) \Vert A \Vert_{S_1}$$.
 We need $$J(A)$$ such that $$\Vert J(A) \Vert_R = 1$$ and $$\langle A, J(A) \rangle_F = \Vert A \Vert_R^\ast$$.
@@ -690,29 +673,23 @@ The duality mapping $$J(A)$$ must be an element of $$\partial \Vert A \Vert_R^\a
 First:
 
 $$
-
 \partial \Vert A \Vert_R^\ast = \partial \left(\frac{1}{k} \Vert A \Vert_{S_1}\right) = \frac{1}{k} \partial \Vert A \Vert_{S_1}
-
 $$
 
 A canonical choice for a subgradient $$S \in \partial \Vert A \Vert_{S_1}$$ is $$S = U_r V_r^\top$$. So, a candidate subgradient of the dual norm is $$J_A = (1/k) U_r V_r^\top$$.
 We need to normalize this candidate so that its primal ($$R$$) norm is 1.
 
 $$
-
 \Vert J_A \Vert_R = \Vert (1/k) U_r V_r^\top \Vert_R = k \Vert (1/k) U_r V_r^\top \Vert_{S_\infty} = k \cdot (1/k) \Vert U_r V_r^\top \Vert_{S_\infty} = 1
-
 $$
 
 The candidate $$J_A$$ already has a norm of 1, so it is the duality mapping.
 
 $$
-
 J_R(A) = \frac{1}{k} U_r V_r^\top = \sqrt{\frac{n_{out}}{n_{in}}} U_r V_r^\top
-
 $$
 
-\ast Check inner product:\ast  $$\langle A, J_R(A) \rangle = \langle A, (1/k) U_r V_r^\top \rangle = (1/k) \langle A, U_r V_r^\top \rangle = (1/k) \Vert A \Vert_{S_1} = \Vert A \Vert_R^\ast$$. Both conditions hold.
+*Check inner product:* $$\langle A, J_R(A) \rangle = \langle A, (1/k) U_r V_r^\top \rangle = (1/k) \langle A, U_r V_r^\top \rangle = (1/k) \Vert A \Vert_{S_1} = \Vert A \Vert_R^\ast$$. Both conditions hold.
 </details>
 
 </details>
@@ -721,53 +698,53 @@ $$
 
 Understanding matrix norms and their duals is more than just a mathematical exercise. These concepts are foundational for "metrized deep learning" for several reasons:
 
-1.  \ast \ast Defining Geometry:\ast \ast  Norms induce metrics ($$d(W_1, W_2) = \Vert W_1 - W_2 \Vert$$). The choice of norm for the weights and activations of a neural network defines the geometry of the parameter space and representation spaces.
+1.  **Defining Geometry:** Norms induce metrics ($$d(W_1, W_2) = \Vert W_1 - W_2 \Vert$$). The choice of norm for the weights and activations of a neural network defines the geometry of the parameter space and representation spaces.
 
-2.  \ast \ast Informing Optimizer Design:\ast \ast  Many advanced optimization algorithms, like mirror descent or adaptive methods (e.g., Adam, Shampoo, \ast \ast Muon\ast \ast ), implicitly or explicitly leverage geometric information. Dual norms and duality mappings are key to understanding and deriving these methods, especially for gradient transformation.
+2.  **Informing Optimizer Design:** Many advanced optimization algorithms, like mirror descent or adaptive methods (e.g., Adam, Shampoo, **Muon**), implicitly or explicitly leverage geometric information. Dual norms and duality mappings are key to understanding and deriving these methods, especially for gradient transformation.
 
-3.  \ast \ast Regularization:\ast \ast  Norms are extensively used in regularization techniques (e.g., spectral/nuclear norm regularization for matrices) to encourage desirable properties like low rank or sparsity.
+3.  **Regularization:** Norms are extensively used in regularization techniques (e.g., spectral/nuclear norm regularization for matrices) to encourage desirable properties like low rank or sparsity.
 
-4.  \ast \ast Analyzing Network Properties:\ast \ast  Matrix norms help analyze stability, expressivity, and robustness. For instance, the spectral norm of weight matrices controls the Lipschitz constant of network layers.
+4.  **Analyzing Network Properties:** Matrix norms help analyze stability, expressivity, and robustness. For instance, the spectral norm of weight matrices controls the Lipschitz constant of network layers.
 
-5.  \ast \ast Computational Costs in Optimization:\ast \ast  The choice of norm is not "free."
-    \ast    \ast \ast Norm Computation:\ast \ast  Calculating some norms (e.g., Frobenius) is cheap, while others (e.g., spectral, nuclear, RMS-induced) require SVDs or iterative methods, adding computational overhead per optimization step if used directly for regularization or monitoring.
-    \ast    \ast \ast Dualizer Computation:\ast \ast  Optimizers like \ast \ast Muon\ast \ast  rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in the previous section are crucial for implementing such optimizers.
-    \ast    For common layers like Linear or Conv2D, computing these duality mappings can be expensive. For instance, if the norm involves SVD (like for Spectral, Nuclear, RMS-induced norms) or matrix square roots/inverses (Mahalanobis), this is costly. The \ast \ast Muon\ast \ast  optimizer and related methods often employ approximations, like Newton-Schulz iterations for matrix inverses or low-rank approximations for SVD, to make these computations feasible for large deep learning models.
+5.  **Computational Costs in Optimization:** The choice of norm is not "free."
+    *   **Norm Computation:** Calculating some norms (e.g., Frobenius) is cheap, while others (e.g., spectral, nuclear, RMS-induced) require SVDs or iterative methods, adding computational overhead per optimization step if used directly for regularization or monitoring.
+    *   **Dualizer Computation:** Optimizers like **Muon** rely on "gradient dualization," which involves finding the argument $$B$$ that saturates Hölder's inequality: $$\langle G, B \rangle = \Vert G \Vert \Vert B \Vert_\ast$$. More practically, they often need to compute the duality mapping $$J(G)$$ of the gradient $$G$$ with respect to a chosen norm $$\Vert \cdot \Vert$$. The update rule might then involve $$J(G)$$ or a related preconditioning matrix. The explicit formulas for $$J(G)$$ provided in the previous section are crucial for implementing such optimizers.
+    *   For common layers like Linear or Conv2D, computing these duality mappings can be expensive. For instance, if the norm involves SVD (like for Spectral, Nuclear, RMS-induced norms) or matrix square roots/inverses (Mahalanobis), this is costly. The **Muon** optimizer and related methods often employ approximations, like Newton-Schulz iterations for matrix inverses or low-rank approximations for SVD, to make these computations feasible for large deep learning models.
 
-6.  \ast \ast Modular Duality:\ast \ast  As seen in recent research, concepts of duality can be applied modularly to layers (Linear, Conv2D, Embedding) and composed throughout a network. This allows for a "dual" perspective on the entire weight space, enabling optimizers that adapt to the specific geometry of each layer. Efficient GPU kernels for these layer-wise dualizations are an active area of development.
+6.  **Modular Duality:** As seen in recent research, concepts of duality can be applied modularly to layers (Linear, Conv2D, Embedding) and composed throughout a network. This allows for a "dual" perspective on the entire weight space, enabling optimizers that adapt to the specific geometry of each layer. Efficient GPU kernels for these layer-wise dualizations are an active area of development.
 
 ## 7. Summary of Common Matrix Norms
 
 Here's a quick cheat sheet of common matrix norms and their duals (with respect to the Frobenius inner product). For a matrix $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$:
 
-\vert  Norm Name                 \vert  Notation(s)                                                                                  \vert  Definition                                                               \vert  Dual Norm (w.r.t. Frobenius Inner Product)                           \vert  Computational Cost (Approx.) \vert 
-\vert  ------------------------- \vert  -------------------------------------------------------------------------------------------- \vert  ------------------------------------------------------------------------ \vert  -------------------------------------------------------------------- \vert  ---------------------------- \vert 
-\vert  Max Column Sum            \vert  $$\Vert A \Vert_{\ell_1 \to \ell_1}$$ (or $$\Vert A \Vert_1$$)                               \vert  $$\max_j \sum_i \vert a_{ij} \vert$$                                     \vert  Max Row Sum ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$)    \vert  Cheap ($$O(n_{out}n_{in})$$) \vert 
-\vert  Spectral                  \vert  $$\Vert A \Vert_{\ell_2 \to \ell_2}$$ (or $$\Vert A \Vert_2$$), $$\Vert A \Vert_{S_\infty}$$ \vert  $$\sigma_{\max}(A)$$                                                     \vert  Nuclear ($$\Vert \cdot \Vert_{S_1}$$)                                \vert  Expensive (SVD/Iterative)    \vert 
-\vert  Max Row Sum               \vert  $$\Vert A \Vert_{\ell_\infty \to \ell_\infty}$$ (or $$\Vert A \Vert_\infty$$)                \vert  $$\max_i \sum_j \vert a_{ij} \vert$$                                     \vert  Max Col Sum ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)              \vert  Cheap ($$O(n_{out}n_{in})$$) \vert 
-\vert  Frobenius                 \vert  $$\Vert A \Vert_F$$, $$\Vert A \Vert_{S_2}$$                                                 \vert  $$\sqrt{\sum_{i,j} \vert a_{ij} \vert^2} = \sqrt{\sum_k \sigma_k(A)^2}$$ \vert  Frobenius ($$\Vert \cdot \Vert_F$$)                                  \vert  Cheap ($$O(n_{out}n_{in})$$) \vert 
-\vert  Nuclear                   \vert  $$\Vert A \Vert_\ast$$, $$\Vert A \Vert_{S_1}$$                                              \vert  $$\sum_k \sigma_k(A)$$                                                   \vert  Spectral ($$\Vert \cdot \Vert_{S_\infty}$$)                          \vert  Expensive (SVD)              \vert 
-\vert  RMS-Induced Operator Norm \vert  $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$                                              \vert  $$\sqrt{n_{in}/n_{out}}\,\sigma_{\max}(A)$$                              \vert  $$\sqrt{n_{out}/n_{in}}\,\Vert A \Vert_{S_1}$$ (Scaled Nuclear Norm) \vert  Expensive (SVD/Iterative)    \vert 
+| Norm Name                 | Notation(s)                                                                                  | Definition                                                               | Dual Norm (w.r.t. Frobenius Inner Product)                           | Computational Cost (Approx.) |
+| ------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------- |
+| Max Column Sum            | $$\Vert A \Vert_{\ell_1 \to \ell_1}$$ (or $$\Vert A \Vert_1$$)                               | $$\max_j \sum_i \vert a_{ij} \vert$$                                     | Max Row Sum ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$)    | Cheap ($$O(n_{out}n_{in})$$) |
+| Spectral                  | $$\Vert A \Vert_{\ell_2 \to \ell_2}$$ (or $$\Vert A \Vert_2$$), $$\Vert A \Vert_{S_\infty}$$ | $$\sigma_{\max}(A)$$                                                     | Nuclear ($$\Vert \cdot \Vert_{S_1}$$)                                | Expensive (SVD/Iterative)    |
+| Max Row Sum               | $$\Vert A \Vert_{\ell_\infty \to \ell_\infty}$$ (or $$\Vert A \Vert_\infty$$)                | $$\max_i \sum_j \vert a_{ij} \vert$$                                     | Max Col Sum ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)              | Cheap ($$O(n_{out}n_{in})$$) |
+| Frobenius                 | $$\Vert A \Vert_F$$, $$\Vert A \Vert_{S_2}$$                                                 | $$\sqrt{\sum_{i,j} \vert a_{ij} \vert^2} = \sqrt{\sum_k \sigma_k(A)^2}$$ | Frobenius ($$\Vert \cdot \Vert_F$$)                                  | Cheap ($$O(n_{out}n_{in})$$) |
+| Nuclear                   | $$\Vert A \Vert_\ast$$, $$\Vert A \Vert_{S_1}$$                                              | $$\sum_k \sigma_k(A)$$                                                   | Spectral ($$\Vert \cdot \Vert_{S_\infty}$$)                          | Expensive (SVD)              |
+| RMS-Induced Operator Norm | $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$                                              | $$\sqrt{n_{in}/n_{out}}\,\sigma_{\max}(A)$$                              | $$\sqrt{n_{out}/n_{in}}\,\Vert A \Vert_{S_1}$$ (Scaled Nuclear Norm) | Expensive (SVD/Iterative)    |
 
 ## 8. Summary of Matrix Norm Inequalities
 
 This table summarizes key inequalities relating common matrix norms for a matrix $$A \in \mathbb{R}^{m \times n}$$.
 Here, $$\Vert A \Vert_1$$ is the max column sum (operator norm $$\ell_1 \to \ell_1$$), $$\Vert A \Vert_2$$ is the spectral norm (operator norm $$\ell_2 \to \ell_2$$), $$\Vert A \Vert_\infty$$ is the max row sum (operator norm $$\ell_\infty \to \ell_\infty$$), $$\Vert A \Vert_F$$ is the Frobenius norm, and $$\Vert A \Vert_{\max} = \max_{i,j} \vert a_{ij} \vert$$.
 
-\vert  Inequality                                                          \vert  Notes / Context                                                 \vert 
-\vert  :------------------------------------------------------------------ \vert  :-------------------------------------------------------------- \vert 
-\vert  $$\Vert A \Vert_2 \le \Vert A \Vert_F$$                             \vert  Spectral norm is less than or equal to Frobenius norm.          \vert 
-\vert  $$\Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2$$     \vert  Often simplified using $$\mathrm{rank}(A) \le \min(m,n)$$.      \vert 
-\vert  $$\frac{1}{\sqrt{m}} \Vert A \Vert_\infty \le \Vert A \Vert_2$$     \vert  Lower bound for spectral norm by max row sum.                   \vert 
-\vert  $$\Vert A \Vert_2 \le \sqrt{n} \Vert A \Vert_\infty$$               \vert  Upper bound for spectral norm by max row sum.                   \vert 
-\vert  $$\frac{1}{\sqrt{n}} \Vert A \Vert_1 \le \Vert A \Vert_2$$          \vert  Lower bound for spectral norm by max column sum.                \vert 
-\vert  $$\Vert A \Vert_2 \le \sqrt{m} \Vert A \Vert_1$$                    \vert  Upper bound for spectral norm by max column sum.                \vert 
-\vert  $$\Vert A \Vert_2 \le \sqrt{\Vert A \Vert_1 \Vert A \Vert_\infty}$$ \vert  Interpolates between operator 1-norm and $$\infty$$-norm.       \vert 
-\vert  $$\Vert A \Vert_{\max} \le \Vert A \Vert_2$$                        \vert  Max absolute entry is less than or equal to spectral norm.      \vert 
-\vert  $$\Vert A \Vert_2 \le \sqrt{mn} \Vert A \Vert_{\max}$$              \vert  Upper bound for spectral norm by max absolute entry.            \vert 
-\vert  $$\Vert A \Vert_F \le \sqrt{mn} \Vert A \Vert_{\max}$$              \vert  Upper bound for Frobenius norm by max absolute entry.           \vert 
-\vert  $$\Vert A \Vert_1 \le m \Vert A \Vert_{\max}$$                      \vert  Upper bound for operator 1-norm by max absolute entry.          \vert 
-\vert  $$\Vert A \Vert_\infty \le n \Vert A \Vert_{\max}$$                 \vert  Upper bound for operator $$\infty$$-norm by max absolute entry. \vert 
+| Inequality                                                          | Notes / Context                                                 |
+| :------------------------------------------------------------------ | :-------------------------------------------------------------- |
+| $$\Vert A \Vert_2 \le \Vert A \Vert_F$$                             | Spectral norm is less than or equal to Frobenius norm.          |
+| $$\Vert A \Vert_F \le \sqrt{\mathrm{rank}(A)} \Vert A \Vert_2$$     | Often simplified using $$\mathrm{rank}(A) \le \min(m,n)$$.      |
+| $$\frac{1}{\sqrt{m}} \Vert A \Vert_\infty \le \Vert A \Vert_2$$     | Lower bound for spectral norm by max row sum.                   |
+| $$\Vert A \Vert_2 \le \sqrt{n} \Vert A \Vert_\infty$$               | Upper bound for spectral norm by max row sum.                   |
+| $$\frac{1}{\sqrt{n}} \Vert A \Vert_1 \le \Vert A \Vert_2$$          | Lower bound for spectral norm by max column sum.                |
+| $$\Vert A \Vert_2 \le \sqrt{m} \Vert A \Vert_1$$                    | Upper bound for spectral norm by max column sum.                |
+| $$\Vert A \Vert_2 \le \sqrt{\Vert A \Vert_1 \Vert A \Vert_\infty}$$ | Interpolates between operator 1-norm and $$\infty$$-norm.       |
+| $$\Vert A \Vert_{\max} \le \Vert A \Vert_2$$                        | Max absolute entry is less than or equal to spectral norm.      |
+| $$\Vert A \Vert_2 \le \sqrt{mn} \Vert A \Vert_{\max}$$              | Upper bound for spectral norm by max absolute entry.            |
+| $$\Vert A \Vert_F \le \sqrt{mn} \Vert A \Vert_{\max}$$              | Upper bound for Frobenius norm by max absolute entry.           |
+| $$\Vert A \Vert_1 \le m \Vert A \Vert_{\max}$$                      | Upper bound for operator 1-norm by max absolute entry.          |
+| $$\Vert A \Vert_\infty \le n \Vert A \Vert_{\max}$$                 | Upper bound for operator $$\infty$$-norm by max absolute entry. |
 
 In our upcoming posts on metrized deep learning, we will see how these norms and their associated geometries are not just theoretical curiosities but practical tools for building more efficient and effective deep learning models. Stay tuned!
 
