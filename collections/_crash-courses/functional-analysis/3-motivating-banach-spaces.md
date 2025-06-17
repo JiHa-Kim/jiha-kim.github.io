@@ -389,7 +389,7 @@ where $$\Vert f \Vert_\ast$$ represents the "effort budget". The maximum is achi
 Because the duality mapping corresponds to finding the covector that is linearly dependent on the vector in order to saturate the generalized Cauchy-Schwarz inequality, we can write it as a variational problem.
 
 $$
-J(x) = \underset{\langle g \vert \in X^\ast,\Vert \langle g \vert \Vert_\ast = \Vert x \Vert}{\mathrm{argmax}} \; \vert \langle g \vert x \rangle \vert
+J(x) = \underset{\langle g \vert \in X^\ast,\Vert \langle g \vert \Vert_\ast = \Vert x \Vert}{\mathrm{argmax}} \; \langle g \vert x \rangle
 $$
 
 A common interpretation is using an alternative variational formulation as seen as the proximal descent algorithm in convex optimization. If we consider a local/proximal model for a loss with $$\lambda>0$$:
