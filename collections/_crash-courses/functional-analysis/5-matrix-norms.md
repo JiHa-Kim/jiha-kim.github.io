@@ -509,21 +509,15 @@ Let's see how this general formula works for well-known special cases.
 In summary, for a general induced norm $$\Vert \cdot \Vert_{p,q}$$, its dual is not another induced norm but rather a norm defined via a variational problem related to rank-one decompositions. This variational form only simplifies to a more common, non-induced norm in special cases.
 </details>
 
-### Duality Mappings: Explicit Formulas
+### Duality Mappings: Explicit Formulas (Jeremy Bernstein's Definition)
 
-A **duality mapping** $$J$$ for a norm $$\Vert \cdot \Vert$$ (on a space of matrices $$\mathbb{R}^{m \times n}$$) maps a matrix $$A$$ to a matrix $$J(A)$$ that represents the direction of "steepest ascent" for $$A$$ as measured by the dual norm. It is the element on the primal unit sphere that maximizes the inner product with $$A$$. Formally, if $$A \ne \mathbf{0}$$, $$J(A)$$ is a matrix that satisfies two conditions:
-1.  $$
-    \Vert J(A) \Vert = 1
-
-    $$
-2.  $$
-    \langle A, J(A) \rangle_F = \Vert A \Vert_\ast
-    $$
+A **duality mapping** (as defined by Jeremy Bernstein) $$J$$ for a norm $$\Vert \cdot \Vert$$ (on a space of matrices $$\mathbb{R}^{m \times n}$$) maps a matrix $$A$$ to a matrix $$J(A)$$ that represents the direction of "steepest ascent" for $$A$$ as measured by the dual norm. It is the element on the primal unit sphere that maximizes the inner product with $$A$$. Formally, if $$A \ne \mathbf{0}$$, $$J(A)$$ is a matrix that satisfies two conditions:
+1.  $$\Vert J(A) \Vert = 1$$
+2.  $$\langle A, J(A) \rangle_F = \Vert A \Vert_\ast$$
 
 where $$\Vert \cdot \Vert_\ast$$ is the dual norm of $$\Vert \cdot \Vert$$.
 
 This $$J(A)$$ is also known as a **dualizing element**. It is an element of the subgradient of the dual norm $$\Vert \cdot \Vert_\ast$$ evaluated at $$A$$, i.e., $$J(A) \in \partial \Vert A \Vert_\ast$$. The mapping may be set-valued if the primal norm's unit ball is not strictly convex. For $$A = \mathbf{0}$$, we define $$J(\mathbf{0}) = \mathbf{0}$$.
-
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
@@ -711,14 +705,47 @@ Understanding matrix norms and their duals is more than just a mathematical exer
 
 Here's a quick cheat sheet of common matrix norms and their duals (with respect to the Frobenius inner product). For a matrix $$A \in \mathbb{R}^{n_{out} \times n_{in}}$$:
 
-| Norm Name                 | Notation(s)                                                                                  | Definition                                                               | Dual Norm (w.r.t. Frobenius Inner Product)                           | Computational Cost (Approx.) |
-| ------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------- |
-| Max Column Sum            | $$\Vert A \Vert_{\ell_1 \to \ell_1}$$ (or $$\Vert A \Vert_1$$)                               | $$\max_j \sum_i \vert a_{ij} \vert$$                                     | Max Row Sum ($$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$)    | Cheap ($$O(n_{out}n_{in})$$) |
-| Spectral                  | $$\Vert A \Vert_{\ell_2 \to \ell_2}$$ (or $$\Vert A \Vert_2$$), $$\Vert A \Vert_{S_\infty}$$ | $$\sigma_{\max}(A)$$                                                     | Nuclear ($$\Vert \cdot \Vert_{S_1}$$)                                | Expensive (SVD/Iterative)    |
-| Max Row Sum               | $$\Vert A \Vert_{\ell_\infty \to \ell_\infty}$$ (or $$\Vert A \Vert_\infty$$)                | $$\max_i \sum_j \vert a_{ij} \vert$$                                     | Max Col Sum ($$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$)              | Cheap ($$O(n_{out}n_{in})$$) |
-| Frobenius                 | $$\Vert A \Vert_F$$, $$\Vert A \Vert_{S_2}$$                                                 | $$\sqrt{\sum_{i,j} \vert a_{ij} \vert^2} = \sqrt{\sum_k \sigma_k(A)^2}$$ | Frobenius ($$\Vert \cdot \Vert_F$$)                                  | Cheap ($$O(n_{out}n_{in})$$) |
-| Nuclear                   | $$\Vert A \Vert_\ast$$, $$\Vert A \Vert_{S_1}$$                                              | $$\sum_k \sigma_k(A)$$                                                   | Spectral ($$\Vert \cdot \Vert_{S_\infty}$$)                          | Expensive (SVD)              |
-| RMS-Induced Operator Norm | $$\Vert A \Vert_{\mathrm{RMS}\to\mathrm{RMS}}$$                                              | $$\sqrt{n_{in}/n_{out}}\,\sigma_{\max}(A)$$                              | $$\sqrt{n_{out}/n_{in}}\,\Vert A \Vert_{S_1}$$ (Scaled Nuclear Norm) | Expensive (SVD/Iterative)    |
+### Matrix Norm Families: Duals and Duality Mappings
+
+| Norm Family               | Norm Expression (for matrix $$A$$)                                       | Dual Norm Expression (for matrix $$B$$)                                                                        | Duality Mapping $$J(A)$$ (for $$A \neq 0$$)                                |
+| ------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Induced Operator**      | $$\sup_{\|x\|_X=1} \|Ax\|_Y$$                                            | $$\inf \left\\{ \sum_i \|u_i\|_X \|v_i\|_{Y^*} : B = \sum_i v_i u_i^T \right\\}$$                              | Maximizer of $$\sup_{\|C\|_{X \to Y}=1} \langle A, C \rangle_F$$           |
+| **Entrywise $$L_{p,q}$$** | $$\left( \sum_j \left( \sum_i \|a_{ij}\|^p \right)^{q/p} \right)^{1/q}$$ | $$\|B\|_{p^*, q^*}$$<br>($$\frac{1}{p} \!+\! \frac{1}{p^*}\!=\!1$$, $$\frac{1}{q} \!+\! \frac{1}{q^*}\!=\!1$$) | Constructed from dual vectors of columns and global scaling                |
+| **Schatten $$p$$-norm**   | $$\left( \sum_i \sigma_i(A)^p \right)^{1/p}$$                            | $$\|B\|_{S_q}$$<br>($$\frac{1}{p} + \frac{1}{q} = 1$$)                                                         | $$\frac{U \operatorname{diag}(\sigma_i^{q-1}) V^\top}{\|A\|_{S_q}^{p-1}}$$ |
+
+#### Key Properties
+1. **Duality Condition**: For all cases, $$\langle A, J(A) \rangle_F = \|A\|_*$$ and $$\|J(A)\| = 1$$
+2. **Induced Norm Duality**:  
+   - $$X, Y$$ denote vector norms in domain/codomain
+   - $$Y^*$$ is dual norm of $$Y$$
+   - No closed-form duality mapping (requires optimization)
+3. **Entrywise Construction**:  
+   - Per-column dual vectors with global $$L_{q^*}$$ scaling
+4. **Schatten Norm**:  
+   - Requires SVD: $$A = U \operatorname{diag}(\sigma) V^\top$$
+   - $$q = p/(p-1)$$ (Hölder conjugate)
+   - Degenerate singular values → non-unique $$J(A)$$
+
+### Notable Special Cases of Matrix Norms: Duals and Duality Mappings
+
+| Norm Type                                                         | Norm Expression (for matrix $$A$$)                 | Dual Norm Expression (for matrix $$B$$)                                           | Duality Mapping $$J(A)$$ (for $$A \neq 0$$)                                                       |
+| ----------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Max Column Sum**<br>(Induced $$\ell_1 \to \ell_1$$)             | $$\max_j \sum_i \vert a_{ij} \vert$$               | $$\max_i \sum_j \vert b_{ij} \vert$$<br>(Induced $$\ell_\infty \to \ell_\infty$$) | $$e_{i_0} \cdot \text{sign}(A_{i_0,:})^\top$$<br>($$i_0 = \arg\max_i \sum_j \vert a_{ij} \vert$$) |
+| **Spectral Norm**<br>(Induced $$\ell_2 \to \ell_2$$)              | $$\sigma_{\max}(A)$$                               | $$\sum_i \sigma_i(B)$$<br>(Nuclear norm)                                          | $$U_r V_r^\top$$<br>(compact SVD: $$A = U_r \Sigma_r V_r^\top$$)                                  |
+| **Max Row Sum**<br>(Induced $$\ell_\infty \to \ell_\infty$$)      | $$\max_i \sum_j \vert a_{ij} \vert$$               | $$\max_j \sum_i \vert b_{ij} \vert$$<br>(Induced $$\ell_1 \to \ell_1$$)           | $$\text{sign}(A_{:,j_0}) \cdot e_{j_0}^\top$$<br>($$j_0 = \arg\max_j \sum_i \vert a_{ij} \vert$$) |
+| **Max Entry**<br>(Induced $$\ell_1 \to \ell_\infty$$)             | $$\max_{i,j} \vert a_{ij} \vert$$                  | $$\sum_{i,j} \vert b_{ij} \vert$$<br>(Entrywise $$\ell_1$$)                       | $$\text{sign}(A)$$                                                                                |
+| **Frobenius**<br>(Schatten $$p=2$$)                               | $$\sqrt{\sum_{i,j} a_{ij}^2}$$                     | Frobenius norm<br>(Self-dual)                                                     | $$\frac{A}{\|A\|_F}$$                                                                             |
+| **Nuclear Norm**<br>(Schatten $$p=1$$)                            | $$\sum_i \sigma_i(A)$$                             | Spectral norm<br>($$\sigma_{\max}(B)$$)                                           | $$u_1 v_1^\top$$<br>(top singular vectors)                                                        |
+| **RMS-Induced**<br>($$A \in \mathbb{R}^{n_{out} \times n_{in}}$$) | $$\sqrt{\frac{n_{in}}{n_{out}}} \sigma_{\max}(A)$$ | $$\sqrt{\frac{n_{out}}{n_{in}}} \|B\|_{S_1}$$<br>(Scaled nuclear norm)            | $$\sqrt{\frac{n_{out}}{n_{in}}} U_r V_r^\top$$<br>(compact SVD)                                   |
+| **Mahalanobis-Induced**<br>($$M \succ 0$$)                        | $$\max_{x^\top M x=1} \|Ax\|_M$$                   | $$\|M^{-1/2} B M^{1/2}\|_{S_1}$$<br>(Transformed nuclear norm)                    | $$M^{1/2} (U_r V_r^\top) M^{-1/2}$$<br>($$C = M^{-1/2} A M^{1/2}$$)                               |
+
+#### Key Notes:
+1. **Compact SVD**: $$U_r, V_r$$ contain singular vectors for non-zero singular values
+2. **Degenerate Cases**: When maximum singular values are non-unique, $$J(A)$$ becomes a convex combination of corresponding singular vectors
+3. **Practical Computation**: 
+   - Spectral/Nuclear/RMS/Mahalanobis require SVD (expensive for large matrices)
+   - Max Row/Column Sum and Max Entry have efficient $$O(mn)$$ implementations
+   - Frobenius norm is computationally cheapest (simple element-wise operations)
 
 ## 8. Summary of Matrix Norm Inequalities
 
