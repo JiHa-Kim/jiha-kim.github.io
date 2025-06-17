@@ -325,7 +325,7 @@ This proposition confirms that the dual space is rich enough to distinguish all 
 
 ## 5. The Dual Space and the Duality Mapping
 
-The Hahn-Banach theorem breathes life into the concept of the dual space. This section introduces two related, but distinct, concepts: the standard duality mapping of functional analysis, and a specific "dualize" operation used in optimization.
+The Hahn-Banach theorem breathes life into the concept of the dual space. This section introduces the duality mapping of functional analysis to type cast between the primal and dual spaces.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
@@ -350,10 +350,67 @@ Now we introduce the standard tool from functional analysis for relating the pri
 </div>
 The **duality mapping** $$J: X \to 2^{X^\ast}$$ is a mapping that associates each vector $$\vert x \rangle \in X$$ with the set of its "support functionals" $$\langle f \vert \in X^\ast$$. These are the functionals that are perfectly aligned with $$\vert x \rangle$$ in the sense that they satisfy:
 
-1.  $$\langle f \vert x \rangle = \Vert x \Vert^2$$
-2.  $$\Vert \langle f \vert \Vert_\ast = \Vert x \Vert$$
+1.  Alignment:
+
+$$\langle f \vert x \rangle = \Vert f \Vert_\ast \Vert x \Vert$$
+
+2.  Isometry:
+
+$$\Vert \langle f \vert \Vert_\ast = \Vert x \Vert$$
+
+For practical algebraic computation, we can also use the following equivalent convenient formulation.
+
+$$
+\langle f \vert x \rangle = \Vert x \Vert^2 = \Vert f \Vert_\ast^2
+$$
 
 The Hahn-Banach theorem guarantees that this set $$J(x)$$ is always non-empty. This mapping is fundamental to the theory of monotone operators and nonlinear analysis.
+</blockquote>
+
+<blockquote class="box-proposition" markdown="1">
+<div class="title" markdown="1">
+**Proposition 5.3: Properties of the Duality Mapping**
+</div>
+
+Because the duality mapping corresponds to finding the covector that is linearly dependent on the vector in order to saturate the generalized Cauchy-Schwarz inequality, we can write it as a variational problem.
+
+$$
+J(x) = \underset{\langle g \vert \in X^\ast,\Vert \langle g \vert \Vert_\ast = \Vert x \Vert}{\mathrm{argmax}} \; \langle g \vert x \rangle
+$$
+
+A common interpretation is using an alternative variational formulation as seen as the proximal descent algorithm in convex optimization (in physical terms, you might call it energy minimization or finding equilibrium in a force field). If we consider a local/proximal model for a loss with "sharpness" $$\lambda>0$$:
+
+$$
+\mathcal{L}(w+\Delta w) \approx Q_\lambda(w,\Delta w) := \mathcal{L}(w) + \langle \nabla \mathcal{L}(w) \vert \Delta w \rangle + \frac{1}{2\lambda} \Vert \Delta w \Vert^2
+$$
+
+then we see that $$J^{-1}$$ solves for the new iterate in proximal gradient descent. So it serves as a local minimization oracle.
+
+$$
+\underset{\Delta w \in X}{\mathrm{argmin}} \; Q_\lambda (w,\Delta w) = \underset{\Delta w \in X}{\mathrm{argmin}} \; \langle \nabla \mathcal{L}(w) \vert \Delta w \rangle + \frac{1}{2\lambda} \Vert \Delta w \Vert^2 = \lambda J^{-1}(\nabla \mathcal{L}(w))
+$$
+
+(Apply generalized Cauchy-Schwarz inequality to the inner product, and see that the objective becomes a quadratic function in $$\Delta w$$.)
+
+We can also give a physical analogy to Hooke's law. The function $$\phi(x) = \frac{1}{2} \Vert x \Vert^2$$ is the simplest strictly convex gauge of vector magnitude, and is Gâteaux differentiable at any $$x \ne 0$$ in any strictly convex Banach space. What's interesting is that the duality mapping is precisely the subdifferential of this function.
+
+$$
+J(x)=\partial \phi(x)
+$$
+
+Think of $$\phi(x)$$ as stored elastic energy in a spring:
+
+- Input: Stretch the string to position $$x$$ (primal space).
+- Output: Restoring force $$g \in \partial \phi(x)$$ (dual space).
+
+Then the duality mapping $$J$$ is literally the **Hooke's Law of functional analysis**:
+
+$$
+\text{Force}\; g = k \cdot \text{Displacement}\; x
+$$
+
+with stiffness $$k = \Vert x \Vert$$, but generalized to Banach spaces via $$g=J(x)$$.
+
 </blockquote>
 
 <blockquote class="box-tip" markdown="1">
@@ -370,24 +427,27 @@ $$
 
 The result of this operation is the **unit vector** $$\vert v \rangle$$ pointing in the direction of steepest increase for the functional $$\langle g \vert$$. By definition of the dual norm, the value of this maximum is $$\langle g \vert v \rangle = \Vert \langle g \vert \Vert_\ast$$.
 
-**This is not the same as the standard duality mapping $$J$$**.
-*   The standard mapping $$J$$ maps from primal to dual ($$X \to X^\ast$$) and its output's norm is $$\Vert x \Vert$$.
-*   The `dualize` operation maps from dual to primal ($$X^\ast \to X$$) and its output is always a **unit vector**.
-
 This `dualize` operation is the crucial step for converting a gradient (covector) into an update direction (vector) for optimization algorithms in general Banach spaces.
+
+Compared to the standard definition of the duality mapping $$J$$ in functional analysis, Jeremy Bernstein's definition only extracts direction, and decouples it from the gradient dual norm.
+
+$$
+\Vert \langle g \vert \Vert_\ast \text{dualize}(\langle g \vert) = J^{-1}(\langle g \vert)
+$$
+
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Contrast with Hilbert Spaces**
 </summary>
-In a Hilbert space $$H$$, life is simpler. The Riesz Representation Theorem provides a unique vector $$\vert g \rangle$$ for every covector $$\langle g \vert$$ such that $$\langle g \vert v \rangle = \langle g, v \rangle$$ (the inner product). The direction of steepest ascent for $$\langle g \vert$$ is simply the normalized vector $$\vert g \rangle / \Vert g \Vert$$. The `dualize` operation becomes:
+In a Hilbert space $$H$$ with norm induced by the inner product, life is simpler. The Riesz Representation Theorem provides a unique vector $$\vert g \rangle$$ for every covector $$\langle g \vert$$ such that $$\langle g \vert v \rangle = \langle g, v \rangle$$ (the inner product). The direction of steepest ascent for $$\langle g \vert$$ is simply the normalized vector $$\vert g \rangle / \Vert g \Vert$$. The `dualize` operation becomes:
 
 $$
 \text{dualize}(\langle g \vert) = \frac{\vert g \rangle}{\Vert g \Vert}
 $$
 
-Because of this unique correspondence, we often blur the distinction between $$H$$ and $$H^\ast$$. In a general Banach space, we must use the more general `dualize` definition involving the argmax to find this direction.
+Because of this unique correspondence, we often blur the distinction between $$H$$ and $$H^\ast$$. This is why people tend to get confused in machine learning and simply treat the gradient as a vector/ket instead of a covector/bra/linear functional/1-form. Because we parameterize everything with real numbers, people start to think we are working in $$\mathbb{R}^n$$ with the Euclidean inner product $$\langle x \vert y \rangle := x^T y$$, which is a Hilbert space. In doing so, however, we are ignoring the underlying geometry of the space, which empirically we have seen to be more appropriately captured by non-induced norms like the spectral norm in the Muon optimizer. In a general Banach space, we must use the more general `dualize` definition involving the argmax to find this direction.
 </details>
 
 ## 6. Other Foundational Theorems and Applications
