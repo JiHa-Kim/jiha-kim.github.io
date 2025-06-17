@@ -389,7 +389,13 @@ where $$\Vert f \Vert_\ast$$ represents the "effort budget". The maximum is achi
 Because the duality mapping corresponds to finding the covector that is linearly dependent on the vector in order to saturate the generalized Cauchy-Schwarz inequality, we can write it as a variational problem.
 
 $$
-J(x) = \underset{\langle g \vert \in X^\ast,\Vert \langle g \vert \Vert_\ast = \Vert x \Vert}{\mathrm{argmax}} \; \langle g \vert x \rangle
+J(x) = \underset{\langle g \vert \in X^\ast,\Vert \langle g \vert \Vert_\ast = \Vert x \Vert}{\mathrm{argmax}} \; \vert \langle g \vert x \rangle \vert
+$$
+
+The function $$\phi(x) = \frac{1}{2} \Vert x \Vert^2$$ is the simplest strictly convex gauge of vector magnitude, and is Gâteaux differentiable at any $$x \ne 0$$ in any strictly convex Banach space. What's interesting is that the duality mapping is precisely the subdifferential of this function.
+
+$$
+J(x)=\partial \phi(x)
 $$
 
 A common interpretation is using an alternative variational formulation as seen as the proximal descent algorithm in convex optimization. If we consider a local/proximal model for a loss with $$\lambda>0$$:
@@ -402,12 +408,6 @@ then we see that $$J^{-1}$$ solves for the new iterate in proximal gradient desc
 
 $$
 \underset{\Delta w \in X}{\mathrm{argmin}} \; Q_\lambda (w,\Delta w) = \underset{\Delta w \in X}{\mathrm{argmin}} \; \langle \nabla \mathcal{L}(w) \vert \Delta w \rangle + \frac{1}{2\lambda} \Vert \Delta w \Vert^2 = -\lambda J^{-1}(\nabla \mathcal{L}(w))
-$$
-
-The function $$\phi(x) = \frac{1}{2} \Vert x \Vert^2$$ is the simplest strictly convex gauge of vector magnitude, and is Gâteaux differentiable at any $$x \ne 0$$ in any strictly convex Banach space. What's interesting is that the duality mapping is precisely the subdifferential of this function.
-
-$$
-J(x)=\partial \phi(x)
 $$
 
 </blockquote>
