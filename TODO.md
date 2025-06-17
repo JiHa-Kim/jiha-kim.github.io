@@ -4,6 +4,43 @@
 - [ ] dual norm visualization
 - [ ] notes on operator theory
 
+Re-structure plan
+- [ ] overhaul: elementary functional analysis then tensor calculus then matrix analysis
+- [ ] elementary functional analysis:
+    1. Vector spaces and Dual spaces
+      - [ ] abstract definitions: vector/linear space, algebraic dual space
+      - [ ] vector vs covectors: transformation rules
+      - [ ] introduce bra-ket notation: type checking
+    2. Inner products
+      - [ ] Hilbert spaces
+      - [ ] Riesz representation theorem: inner product space isometric to dual space,
+            unique vector-covector pairing (isomorphism)
+    3. Norms and Dual Norms
+      - [ ] Banach spaces
+      - [ ] Hahn-Banach theorem
+      - [ ] Duality mapping
+
+...
+1.  Soft inductive biases (regularization)
+   - `Functional Analysis`
+   - `Tensor Calculus`
+   - `Matrix Analysis`
+   - `Differential Geometry`
+2.  Adaptive methods and preconditioning
+3.  Momentum
+   - `Statistics and Information Theory`
+   - `Information Geometry`
+4.  Adam optimizer, info geo view: diagonal Fisher information approximation
+   - `Variational Calculus`
+   - `Convex Analysis`
+   - `Online Learning`
+5.  Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
+   - `Matrix Norms` (part of `Functional Analysis`)
+6.  Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
+7.  Parameter-free optimization
+
+
+
 ## Legend 
 x=done
 *=revise

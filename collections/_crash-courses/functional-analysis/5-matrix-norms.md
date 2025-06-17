@@ -838,18 +838,18 @@ Here's a quick cheat sheet of common matrix norms and their duals (with respect 
 
 | Norm Family               | Norm Expression (for matrix $$A$$)                                       | Dual Norm Expression (for matrix $$B$$)                                                                        | Duality Mapping $$J(A)$$ (for $$A \neq 0$$)                                |
 | ------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **Induced Operator**      | $$\sup_{\|x\|_X=1} \|Ax\|_Y$$                                            | $$\inf \left\\{ \sum_i \|u_i\|_X \|v_i\|_{Y^*} : B = \sum_i v_i u_i^T \right\\}$$                              | Maximizer of $$\sup_{\|C\|_{X \to Y}=1} \langle A, C \rangle_F$$           |
-| **Entrywise $$L_{p,q}$$** | $$\left( \sum_j \left( \sum_i \|a_{ij}\|^p \right)^{q/p} \right)^{1/q}$$ | $$\|B\|_{p^*, q^*}$$<br>($$\frac{1}{p} \!+\! \frac{1}{p^*}\!=\!1$$, $$\frac{1}{q} \!+\! \frac{1}{q^*}\!=\!1$$) | Constructed from dual vectors of columns and global scaling                |
-| **Schatten $$p$$-norm**   | $$\left( \sum_i \sigma_i(A)^p \right)^{1/p}$$                            | $$\|B\|_{S_q}$$<br>($$\frac{1}{p} + \frac{1}{q} = 1$$)                                                         | $$\frac{U \operatorname{diag}(\sigma_i^{q-1}) V^\top}{\|A\|_{S_q}^{p-1}}$$ |
+| **Induced Operator**      | $$\sup_{\Vert x\Vert _X=1} \Vert Ax\Vert _Y$$                                            | $$\inf \left\\{ \sum_i \Vert u_i\Vert _X \Vert v_i\Vert _{Y^\ast } : B = \sum_i v_i u_i^T \right\\}$$                              | Maximizer of $$\sup_{\Vert C\Vert _{X \to Y}=1} \langle A, C \rangle_F$$           |
+| **Entrywise $$L_{p,q}$$** | $$\left( \sum_j \left( \sum_i \Vert a_{ij}\Vert ^p \right)^{q/p} \right)^{1/q}$$ | $$\Vert B\Vert _{p^\ast , q^\ast }$$<br>($$\frac{1}{p} \!+\! \frac{1}{p^\ast }\!=\!1$$, $$\frac{1}{q} \!+\! \frac{1}{q^\ast }\!=\!1$$) | Constructed from dual vectors of columns and global scaling                |
+| **Schatten $$p$$-norm**   | $$\left( \sum_i \sigma_i(A)^p \right)^{1/p}$$                            | $$\Vert B\Vert _{S_q}$$<br>($$\frac{1}{p} + \frac{1}{q} = 1$$)                                                         | $$\frac{U \operatorname{diag}(\sigma_i^{q-1}) V^\top}{\Vert A\Vert _{S_q}^{p-1}}$$ |
 
 #### Key Properties
-1. **Duality Condition**: For all cases, $$\langle A, J(A) \rangle_F = \|A\|_*$$ and $$\|J(A)\| = 1$$
+1. **Duality Condition**: For all cases, $$\langle A, J(A) \rangle_F = \Vert A\Vert _\ast $$ and $$\Vert J(A)\Vert  = 1$$
 2. **Induced Norm Duality**:  
    - $$X, Y$$ denote vector norms in domain/codomain
-   - $$Y^*$$ is dual norm of $$Y$$
+   - $$Y^\ast $$ is dual norm of $$Y$$
    - No closed-form duality mapping (requires optimization)
 3. **Entrywise Construction**:  
-   - Per-column dual vectors with global $$L_{q^*}$$ scaling
+   - Per-column dual vectors with global $$L_{q^\ast }$$ scaling
 4. **Schatten Norm**:  
    - Requires SVD: $$A = U \operatorname{diag}(\sigma) V^\top$$
    - $$q = p/(p-1)$$ (Hölder conjugate)
@@ -863,10 +863,10 @@ Here's a quick cheat sheet of common matrix norms and their duals (with respect 
 | **Spectral Norm**<br>(Induced $$\ell_2 \to \ell_2$$)              | $$\sigma_{\max}(A)$$                               | $$\sum_i \sigma_i(B)$$<br>(Nuclear norm)                                          | $$U_r V_r^\top$$<br>(compact SVD: $$A = U_r \Sigma_r V_r^\top$$)                                  |
 | **Max Row Sum**<br>(Induced $$\ell_\infty \to \ell_\infty$$)      | $$\max_i \sum_j \vert a_{ij} \vert$$               | $$\max_j \sum_i \vert b_{ij} \vert$$<br>(Induced $$\ell_1 \to \ell_1$$)           | $$\text{sign}(A_{:,j_0}) \cdot e_{j_0}^\top$$<br>($$j_0 = \arg\max_j \sum_i \vert a_{ij} \vert$$) |
 | **Max Entry**<br>(Induced $$\ell_1 \to \ell_\infty$$)             | $$\max_{i,j} \vert a_{ij} \vert$$                  | $$\sum_{i,j} \vert b_{ij} \vert$$<br>(Entrywise $$\ell_1$$)                       | $$\text{sign}(A)$$                                                                                |
-| **Frobenius**<br>(Schatten $$p=2$$)                               | $$\sqrt{\sum_{i,j} a_{ij}^2}$$                     | Frobenius norm<br>(Self-dual)                                                     | $$\frac{A}{\|A\|_F}$$                                                                             |
+| **Frobenius**<br>(Schatten $$p=2$$)                               | $$\sqrt{\sum_{i,j} a_{ij}^2}$$                     | Frobenius norm<br>(Self-dual)                                                     | $$\frac{A}{\Vert A\Vert _F}$$                                                                             |
 | **Nuclear Norm**<br>(Schatten $$p=1$$)                            | $$\sum_i \sigma_i(A)$$                             | Spectral norm<br>($$\sigma_{\max}(B)$$)                                           | $$u_1 v_1^\top$$<br>(top singular vectors)                                                        |
-| **RMS-Induced**<br>($$A \in \mathbb{R}^{n_{out} \times n_{in}}$$) | $$\sqrt{\frac{n_{in}}{n_{out}}} \sigma_{\max}(A)$$ | $$\sqrt{\frac{n_{out}}{n_{in}}} \|B\|_{S_1}$$<br>(Scaled nuclear norm)            | $$\sqrt{\frac{n_{out}}{n_{in}}} U_r V_r^\top$$<br>(compact SVD)                                   |
-| **Mahalanobis-Induced**<br>($$M \succ 0$$)                        | $$\max_{x^\top M x=1} \|Ax\|_M$$                   | $$\|M^{-1/2} B M^{1/2}\|_{S_1}$$<br>(Transformed nuclear norm)                    | $$M^{1/2} (U_r V_r^\top) M^{-1/2}$$<br>($$C = M^{-1/2} A M^{1/2}$$)                               |
+| **RMS-Induced**<br>($$A \in \mathbb{R}^{n_{out} \times n_{in}}$$) | $$\sqrt{\frac{n_{in}}{n_{out}}} \sigma_{\max}(A)$$ | $$\sqrt{\frac{n_{out}}{n_{in}}} \Vert B\Vert _{S_1}$$<br>(Scaled nuclear norm)            | $$\sqrt{\frac{n_{out}}{n_{in}}} U_r V_r^\top$$<br>(compact SVD)                                   |
+| **Mahalanobis-Induced**<br>($$M \succ 0$$)                        | $$\max_{x^\top M x=1} \Vert Ax\Vert _M$$                   | $$\Vert M^{-1/2} B M^{1/2}\Vert _{S_1}$$<br>(Transformed nuclear norm)                    | $$M^{1/2} (U_r V_r^\top) M^{-1/2}$$<br>($$C = M^{-1/2} A M^{1/2}$$)                               |
 
 #### Key Notes:
 1. **Compact SVD**: $$U_r, V_r$$ contain singular vectors for non-zero singular values
