@@ -367,6 +367,20 @@ $$
 The Hahn-Banach theorem guarantees that this set $$J(x)$$ is always non-empty. This mapping is fundamental to the theory of monotone operators and nonlinear analysis.
 </blockquote>
 
+<blockquote class="box-tip" markdown="1">
+<div class="title" markdown="1">
+**Analogy**: Mechanical Leverage
+</div>
+
+Think of the covector $$\langle f \vert$$ as some force, $$\vert x \rangle$$ as a desired displacement. The duality mapping embodies the *optimal mechanical advantage*:
+
+$$
+J(x) = \underset{\langle f \vert}{\mathrm{argmax}} \; \frac{\langle f \vert x \rangle}{\Vert f \Vert_\ast}
+$$
+
+where $$\Vert f \Vert_\ast$$ represents the "effort budget". The maximum is achieved when the force and displacement are collinear.
+</blockquote>
+
 <blockquote class="box-proposition" markdown="1">
 <div class="title" markdown="1">
 **Proposition 5.3: Properties of the Duality Mapping**
@@ -375,10 +389,10 @@ The Hahn-Banach theorem guarantees that this set $$J(x)$$ is always non-empty. T
 Because the duality mapping corresponds to finding the covector that is linearly dependent on the vector in order to saturate the generalized Cauchy-Schwarz inequality, we can write it as a variational problem.
 
 $$
-J(x) = \underset{\langle g \vert \in X^\ast,\Vert \langle g \vert \Vert_\ast = \Vert x \Vert}{\mathrm{argmax}} \; \langle g \vert x \rangle
+J(x) = \underset{\langle g \vert \in X^\ast,\Vert \langle g \vert \Vert_\ast = \Vert x \Vert}{\mathrm{argmax}} \; \vert \langle g \vert x \rangle \vert
 $$
 
-A common interpretation is using an alternative variational formulation as seen as the proximal descent algorithm in convex optimization (in physical terms, you might call it energy minimization or finding equilibrium in a force field). If we consider a local/proximal model for a loss with "sharpness" $$\lambda>0$$:
+A common interpretation is using an alternative variational formulation as seen as the proximal descent algorithm in convex optimization. If we consider a local/proximal model for a loss with $$\lambda>0$$:
 
 $$
 \mathcal{L}(w+\Delta w) \approx Q_\lambda(w,\Delta w) := \mathcal{L}(w) + \langle \nabla \mathcal{L}(w) \vert \Delta w \rangle + \frac{1}{2\lambda} \Vert \Delta w \Vert^2
@@ -390,26 +404,11 @@ $$
 \underset{\Delta w \in X}{\mathrm{argmin}} \; Q_\lambda (w,\Delta w) = \underset{\Delta w \in X}{\mathrm{argmin}} \; \langle \nabla \mathcal{L}(w) \vert \Delta w \rangle + \frac{1}{2\lambda} \Vert \Delta w \Vert^2 = \lambda J^{-1}(\nabla \mathcal{L}(w))
 $$
 
-(Apply generalized Cauchy-Schwarz inequality to the inner product, and see that the objective becomes a quadratic function in $$\Delta w$$.)
-
-We can also give a physical analogy to Hooke's law. The function $$\phi(x) = \frac{1}{2} \Vert x \Vert^2$$ is the simplest strictly convex gauge of vector magnitude, and is Gâteaux differentiable at any $$x \ne 0$$ in any strictly convex Banach space. What's interesting is that the duality mapping is precisely the subdifferential of this function.
+The function $$\phi(x) = \frac{1}{2} \Vert x \Vert^2$$ is the simplest strictly convex gauge of vector magnitude, and is Gâteaux differentiable at any $$x \ne 0$$ in any strictly convex Banach space. What's interesting is that the duality mapping is precisely the subdifferential of this function.
 
 $$
 J(x)=\partial \phi(x)
 $$
-
-Think of $$\phi(x)$$ as stored elastic energy in a spring:
-
-- Input: Stretch the string to position $$x$$ (primal space).
-- Output: Restoring force $$g \in \partial \phi(x)$$ (dual space).
-
-Then the duality mapping $$J$$ is literally the **Hooke's Law of functional analysis**:
-
-$$
-\text{Force}\; g = k \cdot \text{Displacement}\; x
-$$
-
-with stiffness $$k = \Vert x \Vert$$, but generalized to Banach spaces via $$g=J(x)$$.
 
 </blockquote>
 
@@ -514,4 +513,5 @@ The crucial property of **completeness** is retained, providing a solid foundati
 ## Further Reading
 
 Wikipedia contributors. (2025, April 14). Banach space. Wikipedia. https://en.wikipedia.org/wiki/Banach_space#Linear_operators,_isomorphisms
+
 Wikipedia contributors. (2024, July 26). List of Banach spaces. Wikipedia. https://en.wikipedia.org/wiki/List_of_Banach_spaces
