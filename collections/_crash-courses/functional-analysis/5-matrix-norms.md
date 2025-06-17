@@ -296,7 +296,7 @@ This relationship is captured by **Hölder's Inequality**:
 **Theorem.** Generalized Cauchy-Schwarz/Hölder's Inequality
 </div>
 
-Let $$V$$ be a nonzero inner product space over a field $$\mathcal{F}$$ with absolute value $$\vert \cdot \vert$$ with a norm $$\Vert \cdot \Vert$$ that is not necessarily induced by its inner product $$\langle \cdot \vert \cdot \rangle$$. Then the following holds:
+Let $$V$$ be a nonzero inner product space over a field $$\mathbb{F}$$ with absolute value $$\vert \cdot \vert$$ with a norm $$\Vert \cdot \Vert$$ that is not necessarily induced by its inner product $$\langle \cdot \vert \cdot \rangle$$. Then the following holds:
 
 $$
 \vert \langle y \vert x \rangle \vert \leq \Vert y \Vert_\ast \Vert x \Vert
