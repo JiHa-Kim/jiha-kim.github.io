@@ -401,7 +401,7 @@ $$
 then we see that $$J^{-1}$$ solves for the new iterate in proximal gradient descent. So it serves as a local minimization oracle.
 
 $$
-\underset{\Delta w \in X}{\mathrm{argmin}} \; Q_\lambda (w,\Delta w) = \underset{\Delta w \in X}{\mathrm{argmin}} \; \langle \nabla \mathcal{L}(w) \vert \Delta w \rangle + \frac{1}{2\lambda} \Vert \Delta w \Vert^2 = \lambda J^{-1}(\nabla \mathcal{L}(w))
+\underset{\Delta w \in X}{\mathrm{argmin}} \; Q_\lambda (w,\Delta w) = \underset{\Delta w \in X}{\mathrm{argmin}} \; \langle \nabla \mathcal{L}(w) \vert \Delta w \rangle + \frac{1}{2\lambda} \Vert \Delta w \Vert^2 = -\lambda J^{-1}(\nabla \mathcal{L}(w))
 $$
 
 The function $$\phi(x) = \frac{1}{2} \Vert x \Vert^2$$ is the simplest strictly convex gauge of vector magnitude, and is Gâteaux differentiable at any $$x \ne 0$$ in any strictly convex Banach space. What's interesting is that the duality mapping is precisely the subdifferential of this function.
