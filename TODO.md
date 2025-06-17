@@ -1,8 +1,30 @@
 - [ ] argue why Muon is effective (gradient aligns with input), justify duality map
 - [ ] metrized deep learning and local approximation
-- [ ] replace `series_index` and `course_index` by `sort_index`
 - [ ] dual norm visualization
 - [ ] notes on operator theory
+- [ ] category theory
+  - [ ] universal construction: LCM example "factor through"
+
+...
+1.  Soft inductive biases (regularization)
+   - `Functional Analysis`
+   - `Tensor Calculus`
+   - `Matrix Analysis`
+   - `Differential Geometry`
+2.  Adaptive methods and preconditioning
+3.  Momentum
+   - `Statistics and Information Theory`
+   - `Information Geometry`
+4.  Adam optimizer, info geo view: diagonal Fisher information approximation
+   - `Variational Calculus`
+   - `Convex Analysis`
+   - `Online Learning`
+5.  Adam optimizer, online learning view: Discounted Follow-The-Regularized-Leader
+   - `Matrix Norms` (part of `Functional Analysis`)
+6.  Metrized deep learning (Iso/IsoAdam, Shampoo, Muon)
+7.  Parameter-free optimization
+
+
 
 ## Legend 
 x=done

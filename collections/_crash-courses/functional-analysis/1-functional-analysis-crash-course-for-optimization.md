@@ -1,24 +1,20 @@
 ---
-title: "Elementary Functional Analysis: A Crash Course for Optimization"
+title: "Elementary Functional Analysis: Why Types Matter in Optimization"
 date: 2025-05-22 09:00 -0400
 sort_index: 1
-description: An introduction to the core concepts of functional analysis, motivated by how different mathematical 'types' (kets and bras) behave under transformations, essential for understanding machine learning optimization.
-image:
+description: Understanding the fundamental distinction between vectors and dual vectors—and why it's crucial for gradient-based optimization.
+image: #
 categories:
 - Mathematical Foundations
 - Machine Learning
 tags:
 - Functional Analysis
-- Bra-Ket Notation
 - Dual Spaces
 - Covariance
 - Contravariance
-- Normed Spaces
 - Hilbert Spaces
-- Spectral Theory
 - Gradients
 - Optimization Theory
-- Crash Course
 llm-instructions: |
   I am using the Chirpy theme in Jekyll.
 
@@ -27,12 +23,14 @@ llm-instructions: |
     - Mathematical Optimization
   For both tags and categories, please employ capitalization for distinction.
 
+  NEVER introduce any non-existant URL or path, like an image.
+  This causes build errors. For example, simply put image: # placeholder
+
   For writing the posts, please use the Kramdown MathJax syntax.
 
   In regular Markdown, please use the following syntax:
 
-  - Inline equations are surrounded by dollar signs on the same line:
-    $$inline$$
+  - Inline equations are surrounded by dollar signs on the same line: $$inline$$
 
   - Block equations are isolated by newlines between the text above and below,
     and newlines between the delimiters and the equation (even in lists):
@@ -49,7 +47,7 @@ llm-instructions: |
     text...
   Use LaTeX commands for symbols as much as possible (e.g. $$\vert$$ for
   absolute value, $$\ast$$ for asterisk). Avoid using the literal vertical bar
-  symbol; use \vert and \Vert.
+  symbol; use \vert and \Vert instead.
 
   The syntax for lists is:
 
@@ -66,13 +64,13 @@ llm-instructions: |
 
   Here are examples of syntaxes that do **not** work:
 
-  5. text
+  1. text
     $$
     block
     $$
     text
 
-  6. text
+  2. text
     $$
     text
     $$
@@ -81,7 +79,7 @@ llm-instructions: |
 
   And the correct way to include multiple block equations in a list item:
 
-  7. text
+  1. text
 
     $$
     block 1
@@ -126,19 +124,6 @@ llm-instructions: |
   More explanatory text.
   </details>
 
-  The stock blockquote classes are (colors are theme-dependent using CSS variables like `var(--prompt-info-icon-color)`):
-    - prompt-info             # Icon: `\f06a` (exclamation-circle), Color: `var(--prompt-info-icon-color)`
-    - prompt-tip              # Icon: `\f0eb` (lightbulb, regular style), Color: `var(--prompt-tip-icon-color)`
-    - prompt-warning          # Icon: `\f06a` (exclamation-circle), Color: `var(--prompt-warning-icon-color)`
-    - prompt-danger           # Icon: `\f071` (exclamation-triangle), Color: `var(--prompt-danger-icon-color)`
-
-  Your newly added math-specific prompt classes can include (styled like their `box-*` counterparts):
-    - prompt-definition       # Icon: `\f02e` (bookmark), Color: `#2563eb` (blue)
-    - prompt-lemma            # Icon: `\f022` (list-alt/bars-staggered), Color: `#16a34a` (green)
-    - prompt-proposition      # Icon: `\f0eb` (lightbulb), Color: `#eab308` (yellow/amber)
-    - prompt-theorem          # Icon: `\f091` (trophy), Color: `#dc2626` (red)
-    - prompt-example          # Icon: `\f0eb` (lightbulb), Color: `#8b5cf6` (purple)
-
   Similarly, for boxed environments you can define:
     - box-definition          # Icon: `\f02e` (bookmark), Color: `#2563eb` (blue)
     - box-lemma               # Icon: `\f022` (list-alt/bars-staggered), Color: `#16a34a` (green)
@@ -151,475 +136,468 @@ llm-instructions: |
     - box-danger              # Icon: `\f071` (exclamation-triangle), Color: `var(--prompt-danger-icon-color)` (theme-defined)
 
   For details blocks, use:
-    - details-block           # main wrapper (styled like prompt-tip)
+    - details-block           # main wrapper (styled like box-tip)
     - the `<summary>` inside will get tip/book icons automatically
 
   Please do not modify the sources, references, or further reading material
   without an explicit request.
 ---
 
-Welcome to this crash course on Elementary Functional Analysis! This post aims to equip you with essential concepts that form the theoretical backbone for modern optimization theory, especially in machine learning. We'll explore why certain mathematical distinctions, often overlooked in basic settings, become crucial for a deeper understanding.
+## 1. Introduction: The Overlooked Distinction That Matters
 
-## 1. Introduction: More Than Meets the Eye – Kets, Bras, and Invariance
+In machine learning and optimization, we constantly work with two types of mathematical objects:
+1. **Parameter vectors** (weights, biases - typically column vectors)
+2. **Gradient vectors** (derivatives of loss functions - typically row vectors)
 
-In introductory linear algebra, especially when working with $$\mathbb{R}^n$$ and the standard dot product, the distinction between column vectors (often representing points or directions) and row vectors (often representing linear functions acting on these column vectors) can seem somewhat arbitrary. A row vector can be seen as just the transpose of a column vector, and their product gives a scalar. But is this the full story? What if we change our coordinate system, or what if our space doesn't have a "standard" inner product readily available?
+In $$\mathbb{R}^n$$ with standard basis, we often casually convert between them using transposes. But this obscures a fundamental distinction that becomes critical when:
 
-This post argues there's a deeper, intrinsic difference between these types of objects, a difference that functional analysis makes precise. This distinction is crucial for understanding the behavior of mathematical objects under transformations and for correctly formulating concepts like derivatives in more general settings.
-
-### Physical Intuition: "Pencils" vs. "Rulers"
-
-To build intuition, let's consider two types of physical analogies:
-
-*   **Kets $$\vert v \rangle$$ as "Pencils" (or "Pencil Strokes"):** Think of a ket vector, $$\vert v \rangle$$, as representing a physical entity like a displacement, a velocity, or a quantum state. It's like drawing a line with a pencil: it has a specific direction and length, representing a change from one point to another. It is the object we want to measure, an entity with inherent existence. We'll see that components of these "pencil-like" objects transform in a particular way when we change our measurement system (basis).
-
-*   **Bras $$\langle f \vert$$ as "Rulers":** Think of a bra vector, $$\langle f \vert$$, as representing a "measurement device" or a "scale" that extracts scalar information from kets. A ruler is a great example. When you apply it to a displacement vector (the pencil stroke), you get a number—a measurement, depending on how "aligned" the ruler is with the pencil, the density of the tick marks on the ruler, and the length of the pencil. Another powerful analogy is the set of contour lines on a topographical map, which represent the gradient of the height function. These lines act as a "ruler" for elevation; when you move along a path (the ket), the number of contour lines you cross (the action of the bra) tells you the change in elevation (a scalar). Components of these "ruler-like" objects transform differently than those of "pencils."
-
-### The Invariant Scalar Product $$\langle f \vert v \rangle$$
-
-The crucial link between these two types of objects is their pairing to produce a scalar value, $$\langle f \vert v \rangle$$. This scalar represents a physical, measurable quantity – for example, the number of contour lines (the "ruler") crossed by a displacement (the "pencil stroke"), or the projection of a vector onto a gradient. A fundamental principle is that such **physical quantities must be invariant** under changes of our descriptive framework (e.g., choice of coordinate system). If the components of $$\vert v \rangle$$ and $$\langle f \vert$$ change, they must do so in a coordinated manner such that $$\langle f \vert v \rangle$$ remains the same. This requirement is the key to understanding their distinct transformation properties.
-
-### Bra-Ket Notation: A "Type System"
+- Working in non-standard coordinate systems
+- Using adaptive optimization algorithms
+- Moving beyond Euclidean spaces (e.g., Riemannian manifolds)
 
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
-**Understanding Bra-Ket Notation (Dirac Notation)**
+**The Core Problem**
 </div>
-Throughout this course, we will adopt **bra-ket notation**. It's more than just syntax; it's a "type system" for distinguishing vectors and linear functionals.
+Consider a loss function $$J(w)$$ where $$w \in \mathbb{R}^n$$. The gradient $$\nabla J(w)$$ is:
+- Geometrically: A row vector (covector)
+- Algebraically: Belongs to a different space than $$w$$
 
-*   **Kets:** Vectors in a vector space $$V$$ are denoted as kets, e.g., $$\vert v \rangle$$.
-*   **Bras:** Linear functionals on $$V$$ (elements of the dual space $$V^\ast$$) are denoted as bras, e.g., $$\langle f \vert$$.
-*   **Pairing/Action:** The action of a functional $$\langle f \vert$$ on a ket $$\vert v \rangle$$ is written as a "bra-ket" pairing: $$\langle f \vert v \rangle := \langle f \vert \big( \vert v \rangle \big)$$. This results in a scalar. As we will see, this notation is ambiguous, but resolved due to a very powerful theorem: the **Riesz Representation Theorem**.
-*   **Inner Product:** If an inner product is defined on $$V$$, the inner product between kets $$\vert v \rangle$$ and $$\vert w \rangle$$ is also written $$\langle v \vert w \rangle$$. (We'll see later how the Riesz Representation Theorem connects this to the bra-ket pairing).
-
-This notation constantly reminds us of the distinct nature of these objects. You cannot simply "add" a bra to a ket, for instance, just as you wouldn't add a string to a float without type-casting. This "type-checking" helps maintain conceptual clarity, especially as we move to more abstract settings.
+Treating them as interchangeable leads to subtle errors in transformation rules under reparameterization.
 </blockquote>
 
-## 2. The Heart of the Matter: How Representations Change (Covariance & Contravariance)
+### 1.1 Physical Analogy: Pencils vs. Rulers
 
-The core reason for distinguishing kets and bras lies in how their *components* transform when we change the *basis* used to describe them.
+To build intuition, consider two physical objects:
 
-### Describing Objects: Basis and Components
+*   **Kets as "Pencils" ($$\vert v \rangle$$):** Represent tangible quantities like displacements or velocities.  
+    Example: A displacement vector $$\vec{d} = 3\hat{x} + 4\hat{y}$$ in 2D space.  
+    *Property:* Its description changes inversely to measurement units (contravariant).
 
-Let $$V$$ be an $$n$$-dimensional vector space.
-*   **Basis Kets:** We choose a set of $$n$$ linearly independent kets $$\{\vert e_1 \rangle, \vert e_2 \rangle, \dots, \vert e_n \rangle\}$$ to form a basis for $$V$$. We'll often write this as $$\{\vert e_i \rangle\}$$.
-*   **Ket Components:** Any ket $$\vert v \rangle \in V$$ can be uniquely written as a linear combination of these basis kets:
+*   **Bras as "Rulers" ($$\langle f \vert$$):** Represent measurement devices or gradients.  
+    Example: A topographic map's contour lines measuring elevation change.  
+    *Property:* Its description changes with measurement units (covariant).
 
-    $$
-    \vert v \rangle = \sum_{i=1}^n v^i \vert e_i \rangle
-    $$
+**The invariant pairing**: When you move a pencil through contour lines (a ruler), the elevation change $$\langle f \vert v \rangle$$ is physical reality that must be basis-independent.
 
-    The scalars $$v^i$$ are the **components** of $$\vert v \rangle$$ with respect to the basis $$\{\vert e_i \rangle\}$$. We use an *upper index* for these components, a convention that becomes important when discussing transformation properties.
+## 2. Mathematical Foundation: Vector Spaces and Duality
 
-*   **Dual Basis Bras:** To extract these components $$v^i$$ from $$\vert v \rangle$$, or more generally, to define components for bras, we introduce the **dual basis** $$\{\langle \epsilon^1 \vert, \langle \epsilon^2 \vert, \dots, \langle \epsilon^n \vert\}$$ for the space of linear functionals $$V^\ast$$. This dual basis is defined by its action on the primal basis kets:
+### 2.1 Vector Spaces and Bases
 
-    $$
-    \langle \epsilon^j \vert e_i \rangle = \delta^j_i
-    $$
+Let $$V$$ be an $$n$$-dimensional vector space (e.g., parameter space).
 
-    where $$\delta^j_i$$ is the Kronecker delta (1 if $$i=j$$, 0 otherwise). This definition ensures that $$\langle \epsilon^j \vert v \rangle = \langle \epsilon^j \vert \left(\sum_i v^i \vert e_i \rangle\right) = \sum_i v^i \langle \epsilon^j \vert e_i \rangle = \sum_i v^i \delta^j_i = v^j$$. So, the functional $$\langle \epsilon^j \vert$$ "picks out" the $$j$$-th component of a ket.
+*   **Basis:** Choose linearly independent vectors $$\{\vert e_1 \rangle, \dots, \vert e_n \rangle\}$$  
+    (Think: coordinate axes)
+*   **Vector components:** Any $$\vert v \rangle \in V$$ expands as:  
 
-*   **Bra Components:** Any bra $$\langle f \vert \in V^\ast$$ can be uniquely written as a linear combination of these dual basis bras:
+    $$\vert v \rangle = \sum_{i=1}^n v^i \vert e_i \rangle \quad \text{(upper index)}$$
 
-    $$
-    \langle f \vert = \sum_{j=1}^n f_j \langle \epsilon^j \vert
-    $$
+    (Note: $$v^i$$ are scalars, $$\vert e_i \rangle$$ are basis vectors)
 
-    The scalars $$f_j$$ are the **components** of $$\langle f \vert$$ with respect to the dual basis $$\{\langle \epsilon^j \vert\}$$. We use a *lower index* for these components.
+### 2.2 The Dual Space: Home for "Rulers"
 
-*   **Invariant Pairing:** With these definitions, the scalar result of a bra acting on a ket is:
+The **dual space** $$V^\ast$$ contains all linear functionals (bras) $$\langle f \vert : V \to \mathbb{R}$$.
 
-    $$
-    \langle f \vert v \rangle = \left( \sum_j f_j \langle \epsilon^j \vert \right) \left( \sum_i v^i \vert e_i \rangle \right) = \sum_j \sum_i f_j v^i \langle \epsilon^j \vert e_i \rangle = \sum_j \sum_i f_j v^i \delta^j_i = \sum_k f_k v^k
-    $$
+<blockquote class="box-definition" markdown="1">
+<div class="title" markdown="1">
+**Why dual space matters**
+</div>
+In optimization:
+- $$V$$ contains parameter vectors (weights)
+- $$V^\ast$$ contains gradient vectors (derivatives)
 
-    This familiar sum-of-products form for the scalar depends on this specific relationship between the primal and dual bases.
+They are fundamentally different mathematical objects.
+</blockquote>
 
-### Thought Experiment: Changing Our Measuring Stick (Basis Transformation)
+### 2.3 Dual Basis: The Coordinate System for Rulers
 
-Now, let's see what happens if we change our basis kets from $$\{\vert e_i \rangle\}$$ to a new set $$\{\vert e'_i \rangle\}$$. For simplicity, let's consider a scaling of each basis ket (this is a diagonal change of basis matrix):
-Let $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ for some positive scalars $$\alpha_i$$ (no sum over $$i$$ here; each basis ket is scaled individually).
+For each basis $$\{\vert e_i \rangle\}$$ in $$V$$, there's a unique **dual basis** $$\{\langle \epsilon^j \vert\}$$ in $$V^\ast$$ satisfying:
 
-1.  **Transformation of Ket Components ("Pencils"):**
-    A fixed physical ket $$\vert v \rangle$$ (our "pencil stroke") must remain the same object, regardless of the basis we use to describe it.
-    Originally: $$\vert v \rangle = \sum_i v^i \vert e_i \rangle$$.
-    In the new basis: $$\vert v \rangle = \sum_i (v')^i \vert e'_i \rangle$$, where $$(v')^i$$ are the new components.
-    Substituting $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ into the second expression:
+$$
+\langle \epsilon^j \vert e_i \rangle = \delta^j_i = \begin{cases} 
+1 & \text{if } i=j \\
+0 & \text{otherwise}
+\end{cases}
+$$
 
-    $$
-    \vert v \rangle = \sum_i (v')^i (\alpha_i \vert e_i \rangle)
-    $$
+Any bra expands as:  
 
-    Comparing the coefficients of $$\vert e_i \rangle$$ with the original expression, we must have:
+$$\langle f \vert = \sum_{j=1}^n f_j \langle \epsilon^j \vert \quad \text{(lower index)}$$
 
-    $$
-    v^i = (v')^i \alpha_i \quad \implies \quad (v')^i = \frac{v^i}{\alpha_i}
-    $$
+### 2.4 The Fundamental Pairing
 
-    The components $$v^i$$ of the ket transform *inversely* to how the basis kets $$\vert e_i \rangle$$ were scaled. If a basis ket $$\vert e_i \rangle$$ gets longer ($$\alpha_i > 1$$), the corresponding component $$v^i$$ must get smaller to represent the same physical ket $$\vert v \rangle$$. This is called **contravariant transformation** of components. (Think: if your unit of length gets larger, the number of units needed to measure a fixed object gets smaller).
+The action of bra on ket gives a basis-independent scalar:
 
-2.  **Implied Transformation of Dual Basis Bras:**
-    The new dual basis bras $$\{\langle (\epsilon')^j \vert\}$$ must satisfy the defining relation with the *new* basis kets: $$\langle (\epsilon')^j \vert e'_i \rangle = \delta^j_i$$.
-    Substitute $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ and use linearity:
-
-    $$
-    \alpha_i \langle (\epsilon')^j \vert e_i \rangle = \delta^j_i
-    $$
-
-    If we assume $$\langle (\epsilon')^j \vert = \beta_j \langle \epsilon^j \vert$$ for some scaling factor $$\beta_j$$ (no sum, relating corresponding dual basis elements), then:
-
-    $$
-    \alpha_i \beta_j \langle \epsilon^j \vert e_i \rangle = \delta^j_i \quad \implies \quad \alpha_i \beta_j \delta^j_i = \delta^j_i
-    $$
-
-    This must hold for all $$i,j$$. If $$i=j$$, then $$\alpha_j \beta_j = 1$$, so $$\beta_j = 1/\alpha_j$$. (If $$i \ne j$$, the equation is $$0=0$$).
-    Thus, the new dual basis bras are related to the old ones by:
-
-    $$
-    \langle (\epsilon')^j \vert = \frac{1}{\alpha_j} \langle \epsilon^j \vert
-    $$
-
-    The dual basis bras $$\langle \epsilon^j \vert$$ also transform *contravariantly* with respect to the scaling factor $$\alpha_j$$ of their "partner" primal basis ket $$\vert e_j \rangle$$.
-
-3.  **Transformation of Bra Components ("Rulers"):**
-    A fixed physical functional $$\langle f \vert$$ (our "ruler" or "measurement scale") must also remain the same functional.
-    Originally: $$\langle f \vert = \sum_j f_j \langle \epsilon^j \vert$$.
-    In the new dual basis: $$\langle f \vert = \sum_j (f')_j \langle (\epsilon')^j \vert$$, where $$(f')_j$$ are the new components.
-    Substituting $$\langle (\epsilon')^j \vert = (1/\alpha_j) \langle \epsilon^j \vert$$:
-
-    $$
-    \langle f \vert = \sum_j (f')_j \left( \frac{1}{\alpha_j} \langle \epsilon^j \vert \right)
-    $$
-
-    Comparing coefficients of $$\langle \epsilon^j \vert$$ with the original expression for $$\langle f \vert$$:
-
-    $$
-    f_j = \frac{(f')_j}{\alpha_j} \quad \implies \quad (f')_j = f_j \alpha_j
-    $$
-
-    The components $$f_j$$ of the bra transform *in the same way* (co-variantly) as the primal basis kets $$\vert e_j \rangle$$ were scaled. If the basis kets $$\vert e_j \rangle$$ get longer ($$\alpha_j > 1$$), the components $$f_j$$ of the bra must also get larger to ensure the invariant pairing $$\sum f_k v^k = \sum (f')_k (v')^k = \sum (f_k \alpha_k) (v^k/\alpha_k)$$. This is **covariant transformation** of components.
+$$
+\langle f \vert v \rangle = \left( \sum_j f_j \langle \epsilon^j \vert \right) \left( \sum_i v^i \vert e_i \rangle \right) = \sum_{i,j} f_j v^i \underbrace{\langle \epsilon^j \vert e_i \rangle}_{\delta^j_i} = \sum_k f_k v^k
+$$
 
 <blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
-**Summary of Transformation Rules (under basis ket scaling $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$)**
+**Key Insight**
 </div>
-*   **Basis Kets:** $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$ (Scaled by $$\alpha_i$$)
-*   **Ket Components ($$v^i$$):** $$(v')^i = v^i / \alpha_i$$ (Transform **contravariantly** to basis ket scaling)
-*   **Dual Basis Bras:** $$\langle (\epsilon')^j \vert = (1/\alpha_j) \langle \epsilon^j \vert$$ (Transform **contravariantly** to *their corresponding* primal basis ket scaling)
-*   **Bra Components ($$f_j$$):** $$(f')_j = f_j \alpha_j$$ (Transform **covariantly** with *their corresponding* primal basis ket scaling)
-
-The terms "covariant" and "contravariant" precisely describe this behavior: contravariant components "counter-act" the basis change, while covariant components change "along with" the basis (or, more accurately, like the primal basis vectors themselves).
+The invariant sum $$\sum_k f_k v^k$$ requires that:
+- When basis vectors change, $$v^k$$ and $$f_k$$ must transform reciprocally
+- This is the origin of contravariance vs. covariance
 </blockquote>
 
-### The "Why": Covariance, Contravariance, and the Nature of Duality
+## 3. Transformation Laws: Why Components Change Differently
 
-This distinct transformation behavior is the fundamental mathematical reason for distinguishing kets (vectors whose components transform contravariantly) from bras (covectors/linear functionals whose components transform covariantly). The invariance of the scalar $$\langle f \vert v \rangle$$ under basis changes necessitates these reciprocal transformation rules for their respective components.
+### 3.1 Change of Basis: Scaling Example
 
-This is not just a notational quirk; it's the very essence of duality in linear algebra and forms the bedrock for more advanced concepts like tensor calculus and differential geometry, where distinguishing between covariant and contravariant indices (usually lower and upper, respectively) is paramount.
+Consider scaling basis vectors:  
 
-### Formalizing the Distinction: The Dual Space $$V^\ast$$
+$$\vert e'_i \rangle = \alpha_i \vert e_i \rangle \quad (\text{no sum})$$
 
-The set of all linear functionals (bras) that can act on kets in a vector space $$V$$ itself forms a vector space. This space is called the **(algebraic) dual space** of $$V$$, denoted $$V^\ast$$.
+**Question:** How do components of a fixed vector $$\vert v \rangle$$ change?
 
-<blockquote class="box-definition" markdown="1">
-<div class="title" markdown="1">
-**The Dual Space $$V^\ast$$**
-</div>
-The algebraic dual space $$V^\ast$$ consists of all linear functionals on $$V$$. It has a vector space structure defined by its action on kets:
-*   **Addition of bras:** The sum $$\langle f \vert + \langle g \vert$$ is the bra whose action is defined by $$\langle (f+g) \vert v \rangle = \langle f \vert v \rangle + \langle g \vert v \rangle$$ for any $$\vert v \rangle \in V$$.
-*   **Scalar multiplication of bras:** The scalar multiple $$c \langle f \vert$$ is the bra whose action is defined by $$\langle (c f) \vert v \rangle = c \langle f \vert v \rangle$$ for any scalar $$c$$ and $$\vert v \rangle \in V$$.
+**Derivation:**  
+Original: $$\vert v \rangle = v^i \vert e_i \rangle$$  
+New basis: $$\vert v \rangle = (v')^i \vert e'_i \rangle = (v')^i \alpha_i \vert e_i \rangle$$  
+Compare coefficients: $$v^i = (v')^i \alpha_i$$  
+Thus: $$\boxed{(v')^i = \frac{v^i}{\alpha_i}} \quad \text{(contravariant)}$$
 
-If $$V$$ is finite-dimensional with dimension $$n$$, then $$V^\ast$$ also has dimension $$n$$. The dual space $$V^\ast$$ is the natural "home" for our "rulers" – it exists and is distinct from $$V$$ even before we introduce concepts like norms or inner products.
-</blockquote>
+**Physical interpretation:**  
+If you double the length of basis vectors ($$\alpha_i=2$$), component values halve to represent the same displacement.
 
-We can also consider the dual of the dual space, $$V^{\ast\ast} = (V^\ast)^\ast$$, called the **double dual**. There is a natural map $$J: V \to V^{\ast\ast}$$ that takes a ket $$\vert v \rangle \in V$$ and turns it into a functional acting on bras via evaluation: $$J(\vert v \rangle)(\langle f \vert) = \langle f \vert v \rangle$$. For **finite-dimensional spaces, this map is an isomorphism**, meaning $$V \cong V^{\ast\ast}$$. For **infinite-dimensional spaces, however, the map is only guaranteed to be injective**. A space where this map is also surjective (an isomorphism) is called **reflexive**. Hilbert spaces and many other common Banach spaces are reflexive, but not all are.
+### 3.2 How Dual Vectors Transform
 
-## 3. Giving Structure to Our Objects: Norms and Completeness
+**Requirement:** Dual basis must still satisfy $$\langle (\epsilon')^j \vert e'_i \rangle = \delta^j_i$$
 
-Now that we have distinguished kets in $$V$$ and bras in $$V^\ast$$, how do we measure their "size" or "magnitude"? This is where norms come in.
+Substitute basis change:  
 
-### Measuring Kets: Normed Spaces
+$$\langle (\epsilon')^j \vert (\alpha_i \vert e_i \rangle) = \alpha_i \langle (\epsilon')^j \vert e_i \rangle = \delta^j_i$$
 
-<blockquote class="box-definition" markdown="1">
-<div class="title" markdown="1">
-**Definition 3.1: Norm on a Vector Space**
-</div>
-A **norm** on a real (or complex) vector space $$V$$ is a function $$\Vert \cdot \Vert_V : V \to \mathbb{R}$$ that associates each ket $$\vert x \rangle \in V$$ with a real number $$\Vert \vert x \rangle \Vert_V$$, satisfying for all kets $$\vert x \rangle, \vert y \rangle \in V$$ and all scalars $$c \in \mathbb{R}$$ (or $$\mathbb{C}$$):
-1.  **Non-negativity:** $$\Vert \vert x \rangle \Vert_V \ge 0$$
-2.  **Definiteness:** $$\Vert \vert x \rangle \Vert_V = 0 \iff \vert x \rangle = \vert \mathbf{0} \rangle$$ (the zero ket)
-3.  **Absolute homogeneity:** $$\Vert c \vert x \rangle \Vert_V = \vert c \vert \Vert \vert x \rangle \Vert_V$$
-4.  **Triangle inequality:** $$\Vert \vert x \rangle + \vert y \rangle \Vert_V \le \Vert \vert x \rangle \Vert_V + \Vert \vert y \rangle \Vert_V$$
+Assume $$\langle (\epsilon')^j \vert = \beta_j \langle \epsilon^j \vert$$, then:  
 
-A vector space equipped with a norm is called a **normed vector space**.
-</blockquote>
+$$\alpha_i \beta_j \langle \epsilon^j \vert e_i \rangle = \alpha_i \beta_j \delta^j_i = \delta^j_i$$  
 
-A norm allows us to define the distance between two kets as $$d(\vert x \rangle, \vert y \rangle) = \Vert \vert x \rangle - \vert y \rangle \Vert_V$$. This enables us to talk about convergence of sequences of kets: $$\vert x_k \rangle \to \vert x \rangle$$ if $$\lim_{k \to \infty} \Vert \vert x_k \rangle - \vert x \rangle \Vert_V = 0$$.
+For i=j: 
 
-### Completeness: Banach Spaces
+$$\alpha_j \beta_j = 1 \Rightarrow \beta_j = 1/\alpha_j$$  
 
-A sequence $$(\vert x_k \rangle)$$ is **Cauchy** if its elements get arbitrarily close to each other (i.e., $$\Vert \vert x_k \rangle - \vert x_m \rangle \Vert_V \to 0$$ as $$k,m \to \infty$$). Does every Cauchy sequence converge to a limit *within* the space $$V$$? Not always.
+Thus: 
 
-<blockquote class="box-definition" markdown="1">
-<div class="title" markdown="1">
-**Definition 3.2: Banach Space**
-</div>
-A **Banach space** is a normed vector space that is **complete** with respect to the metric induced by its norm. That is, every Cauchy sequence of kets in the space converges to a limit ket that is also in the space.
-</blockquote>
+$$\boxed{\langle (\epsilon')^j \vert = \frac{1}{\alpha_j} \langle \epsilon^j \vert} \quad \text{(contravariant)}$$
 
-Completeness is vital for analysis and optimization. Many algorithms generate sequences of approximate solutions; we want to ensure that if this sequence appears to be converging (is Cauchy), there's an actual solution in our space it's converging to. $$\mathbb{R}^n$$ with any standard $$\ell_p$$-norm is a Banach space.
+### 3.3 Transformation of Bra Components
 
-### Measuring Bras: The Dual Norm
-
-Given a normed space $$V$$ with norm $$\Vert \cdot \Vert_V$$, we are often interested in *continuous* linear functionals (bras). A linear functional $$\langle f \vert$$ is continuous if and only if it is **bounded**, meaning there exists a constant $$M \ge 0$$ such that for all $$\vert x \rangle \in V$$:
-
-$$
-\vert \langle f \vert x \rangle \vert \le M \Vert \vert x \rangle \Vert_V
-$$
-
-The set of all continuous linear functionals on $$V$$ forms the **topological dual space** (or continuous dual space), also denoted $$V^\ast$$. (From now on, $$V^\ast$$ will refer to this space of continuous functionals).
-We can define a norm on $$V^\ast$$, called the **dual norm** or operator norm:
-
-<blockquote class="box-definition" markdown="1">
-<div class="title" markdown="1">
-**Definition 3.3: Dual Norm**
-</div>
-For a bra $$\langle f \vert \in V^\ast$$, its **dual norm** $$\Vert \cdot \Vert_{V^\ast}$$ is defined as:
-
-$$
-\Vert \langle f \vert \Vert_{V^\ast} = \sup_{\Vert \vert x \rangle \Vert_V=1, \vert x \rangle \in V} \vert \langle f \vert x \rangle \vert = \sup_{\vert x \rangle \ne \vert \mathbf{0} \rangle_V} \frac{\vert \langle f \vert x \rangle \vert}{\Vert \vert x \rangle \Vert_V}
-$$
-
-This is the smallest $$M$$ for which the boundedness condition holds.
-</blockquote>
-
-A key result is that $$V^\ast$$ equipped with this dual norm is *always* a Banach space, regardless of whether $$V$$ itself is complete.
-
-## 4. Adding Geometric Richness: Inner Products and Hilbert Spaces
-
-Norms give us "length," but not necessarily "angles" or "orthogonality." For that, we need an inner product.
-
-### Beyond Length: Angles and Orthogonality via Inner Products
-
-<blockquote class="box-definition" markdown="1">
-<div class="title" markdown="1">
-**Definition 4.1: Inner Product**
-</div>
-An **inner product** on a vector space $$V$$ (over field $$\mathbb{F} = \mathbb{R}$$ or $$\mathbb{C}$$) is a function $$\langle \cdot \vert \cdot \rangle : V \times V \to \mathbb{F}$$ that associates any two kets $$\vert x \rangle, \vert y \rangle \in V$$ with a scalar $$\langle x \vert y \rangle \in \mathbb{F}$$, satisfying for all kets $$\vert x \rangle, \vert y \rangle, \vert z \rangle \in V$$ and scalars $$c \in \mathbb{F}$$:
-1.  **Conjugate Symmetry:** $$\langle x \vert y \rangle = \overline{\langle y \vert x \rangle}$$ (For real spaces, this is just symmetry: $$\langle x \vert y \rangle = \langle y \vert x \rangle$$).
-2.  **Linearity in the second argument (the ket):** $$\langle x \vert c y + z \rangle = c \langle x \vert y \rangle + \langle x \vert z \rangle$$
-    (This, with conjugate symmetry, implies conjugate-linearity in the first argument: $$\langle c x + y \vert z \rangle = \bar{c} \langle x \vert z \rangle + \langle y \vert z \rangle$$).
-3.  **Positive-definiteness:** $$\langle x \vert x \rangle \ge 0$$, and $$\langle x \vert x \rangle = 0 \iff \vert x \rangle = \vert \mathbf{0} \rangle$$.
-
-A vector space with an inner product is an **inner product space**.
-</blockquote>
-
-Crucially, every inner product *induces* a norm, called the natural norm:
-
-$$
-\Vert \vert x \rangle \Vert = \sqrt{\langle x \vert x \rangle}
-$$
-
-One can verify this satisfies the norm axioms. The **Cauchy-Schwarz Inequality** is fundamental here: $$\vert \langle x \vert y \rangle \vert \le \Vert \vert x \rangle \Vert \Vert \vert y \rangle \Vert$$. This allows defining angles between kets (in real spaces) via $$\cos \theta = \frac{\langle x \vert y \rangle}{\Vert x \Vert \Vert y \Vert}$$. Kets $$\vert x \rangle, \vert y \rangle$$ are **orthogonal** if $$\langle x \vert y \rangle = 0$$.
-
-### Hilbert Spaces: The Ideal Setting
-
-<blockquote class="box-definition" markdown="1">
-<div class="title" markdown="1">
-**Definition 4.2: Hilbert Space**
-</div>
-A **Hilbert space** is an inner product space that is **complete** with respect to the norm induced by its inner product.
-</blockquote>
-
-Thus, a Hilbert space is a Banach space whose norm comes from an inner product. Examples include $$\mathbb{R}^n$$ and $$\mathbb{C}^n$$ with their standard dot/Hermitian products, and function spaces like $$L_2([a,b])$$ with $$\langle f \vert g \rangle = \int_a^b \overline{f(t)}g(t)dt$$. Hilbert spaces possess both rich geometric structure (from the inner product) and desirable analytical properties (from completeness).
-
-### The Riesz Representation Theorem: The "Magic" Bridge
-
-We now arrive at a pivotal result that connects the abstract world of bras in the dual space $$H^\ast$$ to the familiar world of kets in the Hilbert space $$H$$. This theorem addresses a potential point of confusion in our notation. We have used $$\langle f \vert v \rangle$$ to represent the pairing of a functional (a bra $$\langle f \vert$$) with a vector (a ket $$\vert v \rangle$$). We have also used $$\langle w \vert v \rangle$$ to represent the inner product of two kets. Is the $$\langle w \vert$$ in the inner product the same kind of object as the functional $$\langle f \vert$$?
-
-The Riesz Representation Theorem provides the answer: in a Hilbert space, every continuous linear functional $$\langle \phi \vert$$ can be uniquely represented *by* taking the inner product with a specific ket. This provides the justification for treating the "bra" part of an inner product as a linear functional, and for the elegant but potentially ambiguous bra-ket notation for both concepts.
-
-<blockquote class="box-theorem" markdown="1">
-<div class="title" markdown="1">
-**Theorem 4.3: Riesz Representation Theorem (for Hilbert Spaces)**
-</div>
-Let $$H$$ be a Hilbert space. For every continuous linear functional $$\langle \phi \vert \in H^\ast$$ (a bra), there exists a **unique** ket $$\vert y_\phi \rangle \in H$$ such that for all $$\vert x \rangle \in H$$:
-
-$$
-\langle \phi \vert \big( \vert x \rangle \big) = \langle y_\phi \vert x \rangle
-$$
-
-The expression on the left, $$\langle \phi \vert \big( \vert x \rangle \big)$$, represents the **action** of the abstract functional $$\langle \phi \vert \in H^\ast$$ on the ket $$\vert x \rangle$$. The expression on the right, $$\langle y_\phi \vert x \rangle$$, is the **inner product** in $$H$$ between the newly found, unique ket $$\vert y_\phi \rangle$$ and the ket $$\vert x \rangle$$. Furthermore, this correspondence defines an isometric anti-isomorphism between $$H^\ast$$ and $$H$$ (isometric isomorphism if $$H$$ is real): $$\Vert \langle \phi \vert \Vert_{H^\ast} = \Vert \vert y_\phi \rangle \Vert_H$$.
-</blockquote>
+For a fixed functional $$\langle f \vert$$:  
+Original: $$\langle f \vert = f_j \langle \epsilon^j \vert$$  
+New basis: $$\langle f \vert = (f')_j \langle (\epsilon')^j \vert = (f')_j \frac{1}{\alpha_j} \langle \epsilon^j \vert$$  
+Compare coefficients: $$f_j = (f')_j / \alpha_j$$  
+Thus: $$\boxed{(f')_j = f_j \alpha_j} \quad \text{(covariant)}$$
 
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
-**Implications of the Riesz Representation Theorem**
+**Transformation Summary Table**
 </div>
-The Riesz Representation Theorem is profound: it establishes a canonical **duality mapping** from the dual space $$H^\ast$$ to the primal space $$H$$. It tells us that for Hilbert spaces, we can *identify* every bra $$\langle \phi \vert$$ with a unique ket $$\vert y_\phi \rangle$$ through the inner product. This is why in elementary linear algebra with $$\mathbb{R}^n$$ and the dot product, we often don't strictly distinguish between row vectors (functionals) and column vectors (vectors) – any linear functional's action $$a^T x$$ can be seen as an inner product $$\langle a \vert x \rangle$$.
-
-However, it's crucial to remember:
-1.  This identification *depends on the inner product*. Without an inner product, or in a general Banach space, $$V^\ast$$ and $$V$$ are distinct.
-2.  The underlying "types" (kets vs. bras, with their distinct transformation properties) are still fundamentally different. Riesz provides a canonical *mapping* between them in Hilbert spaces.
-3.  For complex Hilbert spaces, the mapping $$ \langle \phi \vert \mapsto \vert y_\phi \rangle$$ is anti-linear (conjugate-linear).
-
-This theorem is the reason why, in many practical applications within Hilbert spaces (like quantum mechanics or optimization in $$\mathbb{R}^n$$), we can often use a ket to represent a functional.
+| Object                | Transformation Rule                                                           | Type          | Optimization Analogy     |
+| --------------------- | ----------------------------------------------------------------------------- | ------------- | ------------------------ |
+| Basis vectors         | $$\vert e'_i \rangle = \alpha_i \vert e_i \rangle$$                           | -             | Coordinate system change |
+| Vector components     | $$(v')^i = v^i / \alpha_i$$                                                   | Contravariant | Parameter transformation |
+| Dual basis            | $$\langle (\epsilon')^j \vert = \frac{1}{\alpha_j} \langle \epsilon^j \vert$$ | Contravariant | -                        |
+| Functional components | $$(f')_j = f_j \alpha_j$$                                                     | Covariant     | Gradient transformation  |
 </blockquote>
 
-## 5. Transforming Objects: Linear Operators and Their Dual Nature
+### 3.4 The Critical Invariant
 
-We now consider linear maps between vector spaces.
+Verify scalar invariance:
 
-### Linear Operators: Mapping Kets to Kets ($$T: V \to W$$)
-A function $$T: V \to W$$ is a **linear operator** if $$T(c \vert x \rangle + \vert y \rangle) = c (T \vert x \rangle) + (T \vert y \rangle)$$. If $$V, W$$ are normed spaces, $$T$$ is **bounded** if $$\Vert T \vert x \rangle \Vert_W \le M \Vert \vert x \rangle \Vert_V$$ for some $$M$$. The smallest such $$M$$ is the **operator norm** $$\Vert T \Vert$$.
+$$\langle f' \vert v' \rangle = (f')_j (v')^j = (f_j \alpha_j) \left( \frac{v^j}{\alpha_j} \right) = f_j v^j = \langle f \vert v \rangle$$
 
-### The Adjoint Operator $$T^\dagger$$: How Transformations Affect "Measurements"
+<blockquote class="box-warning" markdown="1">
+<div class="title" markdown="1">
+**Why This Matters in ML**
+</div>
+When reparameterizing a model (e.g., $$w \to \tilde{w} = Aw$$ for invertible $$A$$):
+- Parameters transform contravariantly: $$\tilde{w} = A^{-1} w$$
+- Gradients transform covariantly: $$\nabla_{\tilde{w}} J = A^\top \nabla_w J$$
 
-If an operator $$T: H_1 \to H_2$$ (between Hilbert spaces) transforms kets, how does this affect a "measurement" like $$\langle y \vert T \vert x \rangle_{H_2}$$ where $$\langle y \vert$$ is a bra from $$H_2^\ast$$ (which we can identify with a ket in $$H_2$$ via Riesz)? Can we define an operator that describes the "transformed bra"?
+Mixing these transformations breaks optimization algorithms.
+</blockquote>
+
+## 4. Normed Spaces and Hilbert Spaces
+
+### 4.1 Measuring Size: Norms
+
+A **norm** $$\Vert \cdot \Vert_V$$ satisfies:
+1. $$\Vert \vert x \rangle \Vert_V \ge 0$$
+2. $$\Vert \vert x \rangle \Vert_V = 0 \iff \vert x \rangle = 0$$
+3. $$\Vert \lambda \vert x \rangle \Vert_V = \vert \lambda \vert \Vert \vert x \rangle \Vert_V$$
+4. $$\Vert \vert x \rangle + \vert y \rangle \Vert_V \le \Vert \vert x \rangle \Vert_V + \Vert \vert y \rangle \Vert_V$$
+
+**Banach space:** Complete normed space (all Cauchy sequences converge). Essential for:
+- Guaranteeing convergence of iterative optimization methods
+- Well-defined limits in infinite dimensions
+
+### 4.2 Dual Norm: Measuring Functional Strength
+
+For $$\langle f \vert \in V^\ast$$:  
+$$\Vert \langle f \vert \Vert_{V^\ast} = \sup_{\Vert \vert x \rangle \Vert_V \le 1} \vert \langle f \vert x \rangle \vert$$
+
+<blockquote class="box-tip" markdown="1">
+<div class="title" markdown="1">
+**Interpretation**
+</div>
+The dual norm measures the maximum "amplification" a functional can apply. In optimization:
+- $$\Vert \langle \nabla J \vert \Vert_{V^\ast}$$ quantifies sensitivity to perturbations
+- $$V^\ast$$ is always Banach under this norm
+</blockquote>
+
+### 4.3 Adding Geometry: Inner Products
+
+An **inner product** $$\langle \cdot \vert \cdot \rangle : V \times V \to \mathbb{R}$$ adds:
+- Angles: $$\cos \theta = \frac{\langle x \vert y \rangle}{\Vert x \Vert \Vert y \Vert}$$
+- Orthogonality: $$\langle x \vert y \rangle = 0$$
+- Induced norm: $$\Vert \vert x \rangle \Vert = \sqrt{\langle x \vert x \rangle}$$
+
+**Hilbert space:** Complete inner product space (e.g., $$\mathbb{R}^n$$ with dot product, $$L^2$$ function spaces).
+
+## 5. The Riesz Bridge: Connecting Kets and Bras
+
+### 5.1 The Fundamental Theorem
+
+<blockquote class="box-theorem" markdown="1">
+<div class="title" markdown="1">
+**Riesz Representation Theorem**
+</div>
+In a Hilbert space $$H$$, for every continuous linear functional $$\langle \phi \vert \in H^\ast$$, there exists a unique $$\vert y_\phi \rangle \in H$$ such that:  
+$$\langle \phi \vert x \rangle = \langle y_\phi \vert x \rangle \quad \forall \vert x \rangle \in H$$
+</blockquote>
+
+**Implications for optimization**:
+1. Provides formal justification for representing gradients as vectors
+2. Shows this representation depends on the inner product
+3. Explains why we "see" gradients as vectors in $$\mathbb{R}^n$$
+
+<blockquote class="box-warning" markdown="1">
+<div class="title" markdown="1">
+**Critical Distinction**
+</div>
+- The Fréchet derivative $$\langle DJ \vert$$ is intrinsically a bra (element of $$V^\ast$$)
+- The gradient $$\vert \nabla J \rangle$$ is its Riesz representation in $$H$$
+- They are different mathematical objects with different transformation properties
+</blockquote>
+
+### 5.2 Why This Matters Practically
+
+Consider reparameterizing a model from $$w$$ to $$\tilde{w} = Aw$$:
+
+| Object           | Transformation Rule                                                       | Type          |
+| ---------------- | ------------------------------------------------------------------------- | ------------- |
+| Parameters (ket) | $$\vert \tilde{w} \rangle = A^{-1} \vert w \rangle$$                      | Contravariant |
+| Gradient (bra)   | $$\langle \widetilde{\nabla J} \vert = \langle \nabla J \vert A$$         | Covariant     |
+| Gradient (ket)   | $$\vert \widetilde{\nabla J} \rangle = A^{-\top} \vert \nabla J \rangle$$ | Contravariant |
+
+<blockquote class="box-danger" markdown="1">
+<div class="title" markdown="1">
+**Common Mistake**
+</div>
+Using $$\vert \widetilde{\nabla J} \rangle = A \vert \nabla J \rangle$$ would:
+1. Mix transformation types
+2. Break gradient descent convergence
+3. Violate invariant pairing $$\langle \widetilde{\nabla J} \vert \tilde{w} \rangle \neq \langle \nabla J \vert w \rangle$$
+</blockquote>
+
+## 6. Transforming Objects: Linear Operators and Their Dual Nature
+
+### 6.1 Linear Operators: Mapping Between Spaces
+
+A **linear operator** $$T: V \to W$$ transforms kets while preserving linear structure:
+
+$$
+T(\alpha \vert x \rangle + \beta \vert y \rangle) = \alpha T\vert x \rangle + \beta T\vert y \rangle
+$$
+
+<blockquote class="box-info" markdown="1">
+<div class="title" markdown="1">
+**Why this matters in ML**
+</div>
+- Weight matrices in neural networks
+- Feature maps in kernel methods
+- Projection operators in dimensionality reduction
+</blockquote>
+
+### 6.2 The Adjoint Operator: Dualizing Transformations
+
+When we transform kets with $$T$$, how do measurements (bras) transform? The **adjoint operator** $$T^\dagger: W^\ast \to V^\ast$$ provides the dual transformation:
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
-**Definition 5.1: Adjoint Operator**
+**Definition 6.1: Adjoint Operator (Coordinate-Free)**
 </div>
-Let $$H_1, H_2$$ be Hilbert spaces. For a bounded linear operator $$T: H_1 \to H_2$$, its **adjoint operator** $$T^\dagger : H_2 \to H_1$$ is the unique bounded linear operator satisfying for all $$\vert x \rangle \in H_1, \vert y \rangle \in H_2$$:
+For Hilbert spaces $$H_1, H_2$$ and bounded operator $$T: H_1 \to H_2$$, the adjoint $$T^\dagger: H_2 \to H_1$$ satisfies:
 
 $$
-\langle y \vert T \vert x \rangle_{H_2} = \langle T^\dagger y \vert x \rangle_{H_1}
+\langle y \vert T x \rangle_{H_2} = \langle T^\dagger y \vert x \rangle_{H_1} \quad \forall \vert x \rangle \in H_1, \vert y \rangle \in H_2
 $$
 
-Here, the inner product $$\langle y \vert T \vert x \rangle$$ involves the transformed ket $$T \vert x \rangle$$. The adjoint allows us to express this same scalar value via an inner product involving a transformed bra, represented by the ket $$T^\dagger \vert y \rangle$$. The existence and uniqueness of $$T^\dagger$$ for any bounded $$T$$ is guaranteed (related to Riesz). Also, $$\Vert T^\dagger \Vert = \Vert T \Vert$$.
+</blockquote>
+
+<blockquote class="box-tip" markdown="1">
+<div class="title" markdown="1">
+**The Fundamental Duality Diagram**
+</div>
+
+$$
+\begin{array}{ccc}
+V & \xrightarrow{T} & W \\
+\downarrow & & \uparrow \\
+V^\ast & \xleftarrow{T^\dagger} & W^\ast 
+\end{array}
+$$
+
+The adjoint completes the "circuit" of transformations, preserving the scalar product $$\langle f \vert v \rangle$$.
+</blockquote>
+
+### 6.3 Basis Dependence: When Transposes Fail
+
+<blockquote class="box-warning" markdown="1">
+<div class="title" markdown="1">
+**Critical Warning**
+</div>
+The familiar matrix transpose $$A^T$$ only represents the adjoint in **orthonormal bases**. In general bases:
+
+$$
+[T^\dagger] = G_1^{-1} [T]^H G_2
+$$
+
+where:
+- $$G_1, G_2$$ are Gram matrices of inner products
+- $$[T]^H$$ is conjugate transpose of $$T$$'s matrix
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**The Transpose Revisited and Covariance/Contravariance**
+**Example: Why Basis Matters**
 </summary>
-*   **Matrix Representation (Orthonormal Bases):** If $$A$$ is the matrix of $$T$$ with respect to orthonormal bases in $$H_1$$ and $$H_2$$, then the matrix of $$T^\dagger$$ (w.r.t. those same bases) is $$A^H$$ (conjugate transpose, or $$A^T$$ for real spaces).
-*   **Non-Orthonormal Bases (Warning!):** If the bases are *not* orthonormal, the matrix of $$T^\dagger$$ is *not* simply $$A^H$$. It becomes $$[T^\dagger] = G_1^{-1} A^H G_2$$, where $$G_1, G_2$$ are the Gram matrices (matrices of inner products of basis kets) for the bases in $$H_1, H_2$$ respectively.
-    This explicitly shows how the adjoint (and thus the notion of transpose) is deeply connected to the metric structure (inner product) of the spaces and the transformation properties of basis kets/bras. The abstract definition $$\langle y \vert T x \rangle = \langle T^\dagger y \vert x \rangle$$ is coordinate-free and fundamental. It respects the "types" and ensures the scalar outcome is consistent.
+Consider $$\mathbb{R}^2$$ with:
+- Basis: $$\vert e_1 \rangle = \begin{pmatrix}1\\0\end{pmatrix}, \vert e_2 \rangle = \begin{pmatrix}1\\1\end{pmatrix}$$
+- Operator: $$T = \begin{pmatrix} 2 & 0 \\ 0 & 1 \end{pmatrix}$$
+
+Gram matrix: $$G = \begin{pmatrix}1 & 1\\1 & 2\end{pmatrix}$$
+
+True adjoint matrix:
+
+$$[T^\dagger] = G^{-1} T^T G = \begin{pmatrix}1 & -1\\0 & 1\end{pmatrix} \begin{pmatrix}2 & 0\\0 & 1\end{pmatrix} \begin{pmatrix}1 & 1\\1 & 2\end{pmatrix} = \begin{pmatrix}1 & 0\\1 & 1\end{pmatrix}$$
+
+Not equal to $$T^T = \begin{pmatrix}2 & 0\\0 & 1\end{pmatrix}$$! Using transpose directly would break invariance.
 </details>
 
-### Key Operator Types Defined by Adjoints
-Working in a single Hilbert space $$H$$ ($$T:H \to H$$):
-*   **Self-Adjoint (Hermitian):** $$T = T^\dagger$$. This means $$\langle y \vert T x \rangle = \langle T y \vert x \rangle$$. (For real spaces, symmetric operators).
-*   **Unitary (Orthogonal for real):** $$T^\dagger T = T T^\dagger = I$$ (identity). Preserves inner products: $$\langle Tx \vert Ty \rangle = \langle x \vert y \rangle$$.
-*   **Normal:** $$T T^\dagger = T^\dagger T$$. (Self-adjoint and unitary operators are normal).
+### 6.4 Special Operator Classes
 
-### Spectral Theory: Decomposing Transformations via Eigen-Objects
-Eigenvalues and eigenkets generalize from matrices. For a self-adjoint operator $$T$$:
-*   Eigenvalues are real.
-*   Eigenkets for distinct eigenvalues are orthogonal.
+| Operator Type    | Definition                    | Key Properties                            | ML Applications                             |
+| ---------------- | ----------------------------- | ----------------------------------------- | ------------------------------------------- |
+| **Self-Adjoint** | $$T = T^\dagger$$             | Real eigenvalues, orthogonal eigenvectors | Covariance matrices, Hamiltonian in QML     |
+| **Unitary**      | $$T^\dagger T = I$$           | Preserves inner products                  | Quantum circuits, orthogonal weight updates |
+| **Normal**       | $$T T^\dagger = T^\dagger T$$ | Diagonalizable                            | Stable recurrent architectures              |
+
+### 6.5 Spectral Decomposition: The Power of Duality
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
-**Theorem 5.2: Spectral Theorem for Compact Self-Adjoint Operators**
+**Spectral Theorem (Compact Self-Adjoint)**
 </div>
-Let $$T: H \to H$$ be a compact self-adjoint operator on a Hilbert space $$H$$. Then there exists an orthonormal system of eigenkets $$(\vert \phi_k \rangle)_k$$ with real eigenvalues $$(\lambda_k)_k$$ such that $$T$$ can be written as:
+For self-adjoint $$T$$ on Hilbert space $$H$$:
 
 $$
-T = \sum_{k} \lambda_k \vert \phi_k \rangle \langle \phi_k \vert
+T = \sum_k \lambda_k \vert \phi_k \rangle \langle \phi_k \vert
 $$
 
-This means for any ket $$\vert x \rangle \in H$$, $$T \vert x \rangle = \sum_k \lambda_k \langle \phi_k \vert x \rangle \vert \phi_k \rangle$$.
-(The operator $$\vert \phi_k \rangle \langle \phi_k \vert$$ is the projection onto the eigenspace of $$\vert \phi_k \rangle$$).
+- $$\lambda_k \in \mathbb{R}$$ (eigenvalues)
+- $$\langle \phi_i \vert \phi_j \rangle = \delta_{ij}$$ (orthonormal eigenvectors)
 </blockquote>
 
-This decomposition is fundamental (e.g., PCA). The bra-ket "outer product" $$\vert \phi_k \rangle \langle \phi_k \vert$$ naturally combines a ket and a bra to form an operator, highlighting their distinct roles.
-
-A similar decomposition, the **Singular Value Decomposition (SVD)**, exists for general compact operators $$T:H_1 \to H_2$$: $$T = \sum_k \sigma_k \vert u_k \rangle \langle v_k \vert$$, where $$\sigma_k$$ are singular values, and $$\{\vert u_k \rangle\}$$, $$\{\vert v_k \rangle\}$$ are orthonormal sets in $$H_2$$ and $$H_1$$ respectively.
-
-## 6. Calculus in Abstract Spaces: Optimization's Language
-
-To perform optimization, we need derivatives for functions whose domains are these abstract normed spaces (often Hilbert spaces of parameters). Let $$J: V \to \mathbb{R}$$ be a function we want to optimize (e.g., a loss function, where $$V$$ is the space of parameters).
-
-### Fréchet Derivative: The Best Linear Approximation
-<blockquote class="box-definition" markdown="1">
+<blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
-**Definition 6.1: Fréchet Derivative**
+**Why the Bra-Ket Form Matters**
 </div>
-A function $$J: U \to \mathbb{R}$$ (where $$U \subseteq V$$ is open, $$V$$ is a normed space) is **Fréchet differentiable** at $$\vert x \rangle \in U$$ if there exists a bounded linear functional $$DJ(\vert x \rangle) : V \to \mathbb{R}$$ such that:
-
-$$
-\lim_{\Vert \vert h \rangle \Vert_V \to 0} \frac{\vert J(\vert x \rangle + \vert h \rangle) - J(\vert x \rangle) - \langle DJ(\vert x \rangle) \vert h \rangle \vert}{\Vert \vert h \rangle \Vert_V} = 0
-$$
-
-This is often written as $$J(\vert x \rangle + \vert h \rangle) = J(\vert x \rangle) + \langle DJ(\vert x \rangle) \vert h \rangle + o(\Vert \vert h \rangle \Vert_V)$$.
-The linear functional $$DJ(\vert x \rangle)$$ is the Fréchet derivative of $$J$$ at $$\vert x \rangle$$.
+The projector $$\vert \phi_k \rangle \langle \phi_k \vert$$:
+- Combines ket (state) and bra (measurement)
+- Represents a rank-1 operation
+- Shows why bras/kets can't be arbitrarily interchanged
 </blockquote>
 
-Crucially, since $$DJ(\vert x \rangle)$$ maps kets from $$V$$ to scalars in $$\mathbb{R}$$ linearly and continuously, it is an element of the dual space $$V^\ast$$. That is, the Fréchet derivative itself is a **bra**:
+**Optimization Connection**: PCA/SVD are spectral decompositions:
+- Data covariance: $$C = \frac{1}{n} \sum_i \vert x_i \rangle \langle x_i \vert$$
+- Principal components: Eigenvectors of $$C$$
+
+### 6.6 Singular Value Decomposition: General Case
+
+For arbitrary $$T: H_1 \to H_2$$:
 
 $$
-\langle DJ(\vert x \rangle) \vert \in V^\ast
+T = \sum_k \sigma_k \vert u_k \rangle \langle v_k \vert
 $$
 
-Its action on a "direction" ket $$\vert h \rangle$$ gives the directional derivative, written as the pairing $$\langle DJ(\vert x \rangle) \vert h \rangle$$.
+- $$\sigma_k \geq 0$$ (singular values)
+- $$\langle u_i \vert u_j \rangle = \delta_{ij}$$, $$\langle v_i \vert v_j \rangle = \delta_{ij}$$
 
-### The Gradient Ket: From Bra to Ket via Riesz
-
-Now, if our parameter space $$V$$ is a Hilbert space $$H$$ (as is often the case, e.g., $$V=\mathbb{R}^n$$ with the dot product), we can use the Riesz Representation Theorem (Theorem 4.3).
-The Fréchet derivative bra $$\langle DJ(\vert x \rangle) \vert \in H^\ast$$ corresponds to a unique **ket** in $$H$$, which we call the **gradient** of $$J$$ at $$\vert x \rangle$$, denoted $$\vert \nabla J(\vert x \rangle) \rangle$$.
-
-<blockquote class="box-definition" markdown="1">
+<blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
-**Definition 6.2: Gradient in a Hilbert Space**
+**Duality in Action**
 </div>
-The unique ket $$\vert \nabla J(\vert x \rangle) \rangle \in H$$ identified via the Riesz Representation Theorem from the Fréchet derivative functional $$\langle DJ(\vert x \rangle) \vert \in H^\ast$$ is called the **gradient** of the real-valued function $$J: H \to \mathbb{R}$$ at $$\vert x \rangle$$. It satisfies for all $$\vert h \rangle \in H$$:
-
-$$
-\underbrace{\langle DJ(\vert x \rangle) \vert \left( \vert h \rangle \right)}_{\text{Action of functional}} = \underbrace{\langle \nabla J(\vert x \rangle) \vert h \rangle}_{\text{Inner product in } H}
-$$
-
+The SVD simultaneously diagonalizes:
+- $$T^\dagger T = \sum \sigma_k^2 \vert v_k \rangle \langle v_k \vert$$
+- $$T T^\dagger = \sum \sigma_k^2 \vert u_k \rangle \langle u_k \vert$$
+Showing how adjoints reveal hidden structure.
 </blockquote>
 
-<blockquote class="prompt-info" markdown="1">
+## 7. Optimization in Abstract Spaces
+
+### 7.1 Fréchet Derivative: The True Derivative
+
+For $$J: V \to \mathbb{R}$$, the derivative at $$\vert x \rangle$$ is defined as the unique bra $$\langle DJ(\vert x \rangle) \vert \in V^\ast$$ satisfying:  
+$$J(\vert x + h \rangle) = J(\vert x \rangle) + \langle DJ(\vert x \rangle) \vert h \rangle + o(\Vert \vert h \rangle \Vert)$$
+
+<blockquote class="box-tip" markdown="1">
 <div class="title" markdown="1">
-**Derivative (Bra) vs. Gradient (Ket)**
+**Why this matters**
 </div>
-It's vital to understand the distinction:
-*   The **Fréchet derivative** $$\langle DJ(\vert x \rangle) \vert$$ is fundamentally a bra (a covector, an element of $$H^\ast$$). It describes how the function $$J$$ changes linearly with infinitesimal changes in its input ket.
-*   The **gradient** $$\vert \nabla J(\vert x \rangle) \rangle$$ is a ket (a vector in $$H$$). It represents the direction of steepest ascent of $$J$$ at $$\vert x \rangle$$. It's the "ket version" of the derivative, made possible by the Hilbert space structure (inner product + completeness) via the Riesz Representation Theorem.
-
-This distinction is crucial. For example, in numerical methods, the gradient descent update $$\vert x_{k+1} \rangle = \vert x_k \rangle - \eta \vert \nabla J(\vert x_k \rangle) \rangle$$ involves adding two kets, which is well-defined. We couldn't directly subtract a bra from a ket.
+In non-Euclidean spaces (e.g., Riemannian manifolds):
+- The Fréchet derivative is always well-defined
+- The gradient requires additional structure (metric tensor)
+- Optimization algorithms use $$\langle DJ \vert$$ directly in momentum terms
 </blockquote>
 
-### Second Derivatives: The Hessian Operator
-If $$J: H \to \mathbb{R}$$ is twice Fréchet differentiable, its second derivative $$D^2J(\vert x \rangle)$$ can be viewed as a bounded bilinear form on $$H \times H$$, or as a linear operator from $$H$$ to $$H^\ast$$. Applying Riesz representation ideas again, this can be identified with a bounded linear operator from $$H$$ to $$H$$, denoted $$\nabla^2 J(\vert x \rangle)$$ (or Hess $$J(\vert x \rangle)$$), called the **Hessian operator**. This operator is self-adjoint if $$J$$ is sufficiently smooth. The bilinear form is then expressed as $$D^2J(\vert x \rangle)(\vert h_1 \rangle, \vert h_2 \rangle) = \langle h_1 \vert \nabla^2 J(\vert x \rangle) \vert h_2 \rangle_H$$.
+### 7.2 Gradient: The Practical Representation
 
-## 7. Conclusion: The Power of Duality and Typed Thinking
+In Hilbert spaces, via Riesz:  
+$$\vert \nabla J(\vert x \rangle) \rangle \in H \quad \text{s.t.} \quad \langle DJ(\vert x \rangle) \vert h \rangle = \langle \nabla J(\vert x \rangle) \vert h \rangle$$
 
-We began by questioning the seemingly simple nature of vectors and functionals, using the analogy of "pencils" (kets) and "rulers" (bras). We saw that their essential difference emerges when we consider how their *components* must transform under changes of basis to keep physical scalar measurements invariant. This led us to the concepts of **contravariance** (for ket components and dual basis bras) and **covariance** (for bra components).
+This enables gradient descent:  
+$$\vert x_{k+1} \rangle = \vert x_k \rangle - \eta \vert \nabla J(\vert x_k \rangle) \rangle$$
 
-This fundamental distinction motivated the formal introduction of:
-1.  **Dual Spaces ($$V^\ast$$):** The natural home for bras, existing independently of any metric structure.
-2.  **Norms:** To measure the "size" of kets and bras, leading to Banach spaces.
-3.  **Inner Products:** To introduce geometry (angles, orthogonality) into the space of kets, leading to Hilbert spaces.
-4.  **The Riesz Representation Theorem:** The crucial bridge in Hilbert spaces, allowing the identification of bras in $$H^\ast$$ with kets in $$H$$ via the inner product. This explains why the distinction is often blurred in $$\mathbb{R}^n$$ but is vital in general.
-5.  **Adjoint Operators ($$T^\dagger$$):** Defined abstractly via the inner product to respect the dual relationship. Its matrix representation's dependence on orthonormal bases (vs. Gram matrices for general bases) directly reflects the underlying transformation laws of kets and bras.
-6.  **Derivatives in Abstract Spaces:** The Fréchet derivative of a scalar function ($$J:H \to \mathbb{R}$$) is naturally a bra ($$\langle DJ \vert \in H^\ast$$). The gradient ket ($$\vert \nabla J \rangle \in H$$) is obtained via Riesz, clarifying its "type" and its role in optimization algorithms.
+<blockquote class="box-info" markdown="1">
+<div class="title" markdown="1">
+**Implementation Insight**
+</div>
+When coding optimizers:
+- Store parameters as contravariant tensors (kets)
+- Store gradients as covariant tensors (bras)
+- Convert to gradient kets only for update steps
+</blockquote>
 
-Adopting a "typed thinking" approach, facilitated by bra-ket notation, and understanding these transformation properties are key to grasping the elegant and powerful machinery of functional analysis. These concepts are not mere abstractions; they provide the rigorous language needed to analyze and develop sophisticated algorithms in machine learning, optimization, and many other scientific fields where understanding behavior under transformations and the interplay between spaces and their duals is essential. The coordinate-free definitions are particularly powerful as they capture the intrinsic properties of these mathematical objects, independent of arbitrary choices of representation.
+## 8. Conclusion: Why Types Prevent Errors
 
-## 8. Summary Cheat Sheet
+The ket/bra distinction resolves fundamental issues in optimization:
 
-| Concept                                     | "Pencil/Ruler" Intuition & Transformation                                                                       | Bra-Ket & Formalism                                                                                                                                       | Relevance in ML/Optimization                                                                                                                  |
-| :------------------------------------------ | :-------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ket Vector** $$\vert v \rangle$$          | "Pencil"; components $$v^i$$ transform contravariantly to basis ket changes.                                    | Element of vector space $$V$$. $$\vert v \rangle = \sum v^i \vert e_i \rangle$$.                                                                          | Represents parameters, data points, functions.                                                                                                |
-| **Bra (Dual Vector)** $$\langle f \vert$$   | "Ruler"; components $$f_j$$ transform covariantly to basis ket changes.                                         | Element of dual space $$V^\ast$$ (linear functional). $$\langle f \vert = \sum f_j \langle \epsilon^j \vert$$.                                            | Represents measurements, derivative functionals.                                                                                              |
-| **Dual Basis** $$\langle \epsilon^j \vert$$ | Measures components of kets. Transforms contravariantly.                                                        | Defined by $$\langle \epsilon^j \vert e_i \rangle = \delta^j_i$$.                                                                                         | Foundation for component-wise operations and understanding duality.                                                                           |
-| **Invariant Pairing**                       | Physical measurement $$\langle f \vert v \rangle$$ is independent of basis choice.                              | $$\langle f \vert v \rangle = \sum f_k v^k$$.                                                                                                             | Core of how functionals act on vectors; basis of derivative definition.                                                                       |
-| **Normed Space**                            | Defines "length" of kets.                                                                                       | $$V$$ with norm $$\Vert \cdot \Vert_V$$.                                                                                                                  | Defines distance $$\Vert \vert x \rangle - \vert y \rangle \Vert$$, convergence.                                                              |
-| **Dual Norm**                               | Defines "strength" of bras.                                                                                     | $$\Vert \langle f \vert \Vert_{V^\ast} = \sup \vert\langle f \vert v \rangle\vert / \Vert \vert v \rangle \Vert_V$$.                                      | Measures magnitude of functionals/derivatives.                                                                                                |
-| **Banach Space**                            | Complete normed space (no "holes").                                                                             | Cauchy sequences converge within the space.                                                                                                               | Ensures iterative algorithms can converge. $$V^\ast$$ is always Banach.                                                                       |
-| **Inner Product**                           | Defines angles/orthogonality between kets.                                                                      | $$\langle x \vert y \rangle$$ on $$V \times V \to \mathbb{F}$$; induces a norm.                                                                           | Generalizes dot product; essential for geometric interpretations.                                                                             |
-| **Hilbert Space**                           | Complete inner product space.                                                                                   | Ideal geometric and analytical setting.                                                                                                                   | $$\mathbb{R}^n$$ with dot product is main example.                                                                                            |
-| **Riesz Rep. Thm.**                         | In Hilbert space, a bra can be uniquely represented by a ket via inner product.                                 | For $$\langle \phi \vert \in H^\ast$$, $$\exists ! \vert y_\phi \rangle \in H$$ s.t. $$\langle \phi \vert x \rangle = \langle y_\phi \vert x \rangle_H$$. | Bridges $$H^\ast$$ and $$H$$. Justifies identifying gradient functional with a gradient ket.                                                  |
-| **Adjoint Operator $$T^\dagger$$**          | How a transformation on "pencils" ($$T$$) affects "ruler measurements". Matrix depends on basis orthonormality. | $$\langle y \vert T x \rangle = \langle T^\dagger y \vert x \rangle$$. Transformation rules are key.                                                      | Generalizes conjugate transpose. Defines self-adjointness. Essential for spectral theory and understanding operator properties under duality. |
-| **Fréchet Derivative**                      | Linear part of change in $$J(\vert x \rangle)$$; a "measurement device" (bra).                                  | $$DJ(\vert x \rangle) \in V^\ast$$, so $$\langle DJ(\vert x \rangle) \vert$$.                                                                             | Rigorous definition of derivative functional.                                                                                                 |
-| **Gradient Ket**                            | "Ket version" of derivative in Hilbert space, points steepest ascent.                                           | $$\vert \nabla J(\vert x \rangle) \rangle \in H$$ via Riesz from $$\langle DJ(\vert x \rangle) \vert$$.                                                   | The vector used in gradient-based optimization. Type distinction from derivative (bra) is crucial.                                            |
+1. **Reparameterization invariance**: Proper transformations preserve algorithm convergence
+2. **Geometric consistency**: Correct handling of non-Euclidean parameter spaces
+3. **Algorithmic clarity**: Momentum terms require covariant/contravariant consistency
 
-## 9. Reflection
+<blockquote class="box-tip" markdown="1">
+<div class="title" markdown="1">
+**Practical Cheat Sheet**
+</div>
+| Scenario                | Correct Approach                                                          |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Changing coordinates    | Transform parameters contravariantly, gradients covariantly               |
+| Implementing optimizer  | Store parameters as vectors, gradients as dual vectors                    |
+| Custom gradient descent | $$w \leftarrow w - \eta \, \text{Riesz}(\nabla J)$$ (explicit conversion) |
+| Riemannian optimization | Use $$\langle \nabla J \vert$$ directly with metric-dependent transports  |
+</blockquote>
 
-This crash course has aimed to build the elementary concepts of functional analysis from a foundation of intuitive distinctions – how different mathematical "types" (kets representing states/objects, bras representing measurements/functionals) behave under changes of representation. The "pencil and ruler" analogy, coupled with the explicit examination of how components transform (covariance and contravariance), motivates the necessity for dual spaces and highlights the special role of Hilbert spaces where the Riesz Representation Theorem allows a canonical identification between these dual objects via the inner product.
-
-Understanding that the Fréchet derivative is fundamentally a bra (a covector) and the gradient is its ket representation in a Hilbert space clarifies many aspects of optimization theory. Similarly, recognizing that the adjoint operator's definition is coordinate-free, while its matrix form (the transpose or conjugate transpose) is simple only in orthonormal bases, reinforces the importance of the underlying geometric and algebraic structures.
-
-These concepts, far from being mere abstract formalism, provide a powerful and precise language for understanding the behavior of functions and operators in spaces far more general than $$\mathbb{R}^n$$. This is indispensable for analyzing the convergence of optimization algorithms, understanding the geometry of high-dimensional parameter spaces in machine learning, and preparing for even more advanced topics like tensor calculus and differential geometry where these distinctions are central.
+The "pencils" (parameters) and "rulers" (gradients) metaphor provides enduring intuition:  
+**Physical measurements remain invariant only when transformation rules respect mathematical types.**
