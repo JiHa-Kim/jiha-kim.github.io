@@ -543,7 +543,7 @@ The duality mapping $$J_{\ell_p \to \ell_q}(A)$$ for the induced norm $$\Vert \c
     *   $$s_u \in \mathbb{R}^n$$ satisfies $$\Vert s_u \Vert_{p'} = 1$$ and $$s_u^\top u = \Vert u \Vert_p$$.
     *   $$s_v \in \mathbb{R}^m$$ satisfies $$\Vert s_v \_q = 1$$ and $$s_v^\top v = \Vert v \Vert_{q'}$$.
 *   For $$1 < p, q' < \infty$$, these dual vectors are unique and given by:
-    $$s_u = \frac{\mathrm{sign}(u) \odot |u|^{p-1}}{\Vert u \Vert_p^{p-1}} \quad \text{and} \quad s_v = \frac{\mathrm{sign}(v) \odot |v|^{q'-1}}{\Vert v \Vert_{q'}^{q'-1}}$$
+    $$s_u = \frac{\mathrm{sign}(u) \odot \vert u\vert ^{p-1}}{\Vert u \Vert_p^{p-1}} \quad \text{and} \quad s_v = \frac{\mathrm{sign}(v) \odot \vert v\vert ^{q'-1}}{\Vert v \Vert_{q'}^{q'-1}}$$
     where the operations are element-wise.
 
 **Special Operator Norms:**
@@ -551,27 +551,21 @@ The duality mapping $$J_{\ell_p \to \ell_q}(A)$$ for the induced norm $$\Vert \c
 *   **Max Column Sum ($$\ell_1 \to \ell_1$$):**
     *   Let $$i_0$$ be the index of a row of $$A$$ with the maximum absolute row sum (this corresponds to the dual norm, $$\Vert A \Vert_{\infty \to \infty}$$).
     *   A duality mapping for $$\Vert \cdot \Vert_{\ell_1 \to \ell_1}$$ at $$A$$ is the matrix $$J(A)$$ which is zero everywhere except for row $$i_0$$, which is set to $$\mathrm{sign}(A_{i_0, :})$$.
-    *   $$
-        J_{\ell_1 \to \ell_1}(A) = e_{i_0} (\mathrm{sign}(A_{i_0, :}))^\top
-        $$
+    *   $$J_{\ell_1 \to \ell_1}(A) = e_{i_0} (\mathrm{sign}(A_{i_0, :}))^\top$$
 
 *   **Max Row Sum ($$\ell_\infty \to \ell_\infty$$):**
     *   Let $$j_0$$ be the index of a column of $$A$$ with the maximum absolute column sum (this corresponds to the dual norm, $$\Vert A \Vert_{\ell_1 \to \ell_1}$$).
     *   A duality mapping for $$\Vert \cdot \Vert_{\ell_\infty \to \ell_\infty}$$ at $$A$$ is the matrix $$J(A)$$ which is zero everywhere except for column $$j_0$$, which is set to $$\mathrm{sign}(A_{:, j_0})$$.
-    *   $$
-        J_{\ell_\infty \to \ell_\infty}(A) = (\mathrm{sign}(A_{:, j_0})) e_{j_0}^\top
-        $$
+    *   $$J_{\ell_\infty \to \ell_\infty}(A) = (\mathrm{sign}(A_{:, j_0})) e_{j_0}^\top$$
 
 *   **Spectral Norm ($$\ell_2 \to \ell_2$$):**
     *   This is a special case of the Schatten $$S_\infty$$ norm. As shown below, the duality mapping is $$J_{S_\infty}(A) = U_r V_r^\top$$, where $$A = U_r \Sigma_r V_r^\top$$ is the compact SVD of $$A$$.
 
 *   **Max Entry Norm ($$\ell_1 \to \ell_\infty$$):**
-    *   The dual norm is the entrywise $$\ell_1$$ norm, $$\sum_{i,j} |A_{ij}|$$
-    *   The duality mapping for $$\Vert\cdot\Vert_{\ell_1\to\ell_\infty}$$ at $$A$$ is a matrix whose primal norm is 1 and is a subgradient of the dual norm at $$A$$. A subgradient of $$\sum_{i,j}|A_{ij}|$$ is $$\mathrm{sign}(A)$$.
-    *   The $$\ell_1 \to \ell_\infty$$ norm of $$\mathrm{sign}(A)$$ is $$\max_{i,j}|\mathrm{sign}(A_{ij})|=1$$, so it is already normalized.
-    *   $$
-        J_{\ell_1 \to \ell_\infty}(A) = \mathrm{sign}(A)
-        $$
+    *   The dual norm is the entrywise $$\ell_1$$ norm, $$\sum_{i,j} \vert A_{ij}\vert $$
+    *   The duality mapping for $$\Vert\cdot\Vert_{\ell_1\to\ell_\infty}$$ at $$A$$ is a matrix whose primal norm is 1 and is a subgradient of the dual norm at $$A$$. A subgradient of $$\sum_{i,j}\vert A_{ij}\vert $$ is $$\mathrm{sign}(A)$$.
+    *   The $$\ell_1 \to \ell_\infty$$ norm of $$\mathrm{sign}(A)$$ is $$\max_{i,j}\vert \mathrm{sign}(A_{ij})\vert =1$$, so it is already normalized.
+    *   $$J_{\ell_1 \to \ell_\infty}(A) = \mathrm{sign}(A)$$
 
 #### 2. Schatten $$S_p$$ Norms
 
