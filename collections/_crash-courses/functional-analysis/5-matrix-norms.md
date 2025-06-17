@@ -285,7 +285,7 @@ $$
 \Vert y \Vert_\ast = \sup_{x \in V, x \ne 0} \frac{\vert \langle y \vert x \rangle \vert}{\Vert x \Vert} = \sup_{x \in V, \Vert x \Vert = 1} \vert \langle y \vert x \rangle \vert
 $$
 
-In other words, it returns the maximum measurement of $$y$$ on the unit ball defined by $$\Vert \cdot \Vert$$ in $$V$$.
+In other words, it returns the maximum measurement of a covector $$y \in V^\ast = \mathcal{L}(V;\mathbb{F})$$ on the unit ball defined by $$\Vert \cdot \Vert$$ in $$V$$.
 
 </blockquote>
 
