@@ -279,11 +279,13 @@ Duality is a powerful concept in optimization and functional analysis. Every nor
 **Definition.** Dual Vector Norm
 </div>
 
-Let $$V$$ be a nonzero inner product space over a field $$\mathcal{F}$$ with absolute value $$\vert \cdot \vert$$ with a norm $$\Vert \cdot \Vert$$ that is not necessarily induced by its inner product $$\langle \cdot \vert \cdot \rangle$$. The corresponding dual norm $$\Vert \cdot \Vert_\ast$$ is defined on the dual space as:
+Let $$V$$ be a nonzero inner product space over a field $$\mathbb{F}$$ with absolute value $$\vert \cdot \vert$$ with a norm $$\Vert \cdot \Vert$$ that is not necessarily induced by its inner product $$\langle \cdot \vert \cdot \rangle$$. The corresponding dual norm $$\Vert \cdot \Vert_\ast$$ is defined on the dual space as:
 
 $$
-\Vert y \Vert_\ast = \sup_{\begin{gather} x \in V \\ x \ne 0 \end{gather}} \frac{\vert \langle y \vert x \rangle \vert}{\Vert x \Vert} = \sup_{\begin{gather} x\in V \\ \Vert x \Vert=1 \end{gather}} \vert \langle y \vert x \rangle \vert
+\Vert y \Vert_\ast = \sup_{x \in V, x \ne 0} \frac{\vert \langle y \vert x \rangle \vert}{\Vert x \Vert} = \sup_{x \in V, \Vert x \Vert = 1} \vert \langle y \vert x \rangle \vert
 $$
+
+In other words, it returns the maximum measurement of $$y$$ on the unit ball defined by $$\Vert \cdot \Vert$$ in $$V$$.
 
 </blockquote>
 
