@@ -242,6 +242,69 @@ The term "contravariant" signifies that the components transform with the "oppos
 An infinitesimal displacement $$d\mathbf{x}$$ with components $$dx^k$$ also transforms contravariantly: $$dx'^{i'} = \frac{\partial x'^{i'}}{\partial x^k} dx^k$$.
 </blockquote>
 
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example.** Transforming a Constant Vector Field to Polar Coordinates
+</div>
+Consider a constant vector field in a 2D Cartesian system ($$x^1=x, x^2=y$$) given by $$\mathbf{V} = 3 \mathbf{e}_x + 4 \mathbf{e}_y$$. So, its components are $$V^1=3$$ and $$V^2=4$$. Let's find its components $$V'^{r}$$ and $$V'^{\theta}$$ in polar coordinates ($$x'^1=r, x'^2=\theta$$).
+
+The transformation rule is $$V'^{i'} = \frac{\partial x'^{i'}}{\partial x^k} V^k$$.
+The coordinate relations are $$r = \sqrt{x^2 + y^2}$$ and $$\theta = \arctan(y/x)$$.
+
+First, we need the Jacobian components:
+*   $$\frac{\partial r}{\partial x} = \frac{x}{\sqrt{x^2+y^2}} = \frac{x}{r} = \cos\theta$$
+*   $$\frac{\partial r}{\partial y} = \frac{y}{\sqrt{x^2+y^2}} = \frac{y}{r} = \sin\theta$$
+*   $$\frac{\partial \theta}{\partial x} = \frac{-y/x^2}{1+(y/x)^2} = \frac{-y}{x^2+y^2} = \frac{-r\sin\theta}{r^2} = -\frac{\sin\theta}{r}$$
+*   $$\frac{\partial \theta}{\partial y} = \frac{1/x}{1+(y/x)^2} = \frac{x}{x^2+y^2} = \frac{r\cos\theta}{r^2} = \frac{\cos\theta}{r}$$
+
+Now apply the transformation law for each new component:
+*   $$V'^r = V'^{1'} = \frac{\partial r}{\partial x} V^1 + \frac{\partial r}{\partial y} V^2 = (\cos\theta)(3) + (\sin\theta)(4) = 3\cos\theta + 4\sin\theta$$
+*   $$V'^\theta = V'^{2'} = \frac{\partial \theta}{\partial x} V^1 + \frac{\partial \theta}{\partial y} V^2 = (-\frac{\sin\theta}{r})(3) + (\frac{\cos\theta}{r})(4) = \frac{-3\sin\theta + 4\cos\theta}{r}$$
+
+The components of the vector in polar coordinates, $$V'^r$$ and $$V'^\theta$$, are functions of the position ($$r, \theta$$), even though the original vector field was constant in Cartesian coordinates. This is a key feature of curvilinear systems.
+</blockquote>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Exercise 1.** Transform the "radial" vector field $$\mathbf{V} = x \mathbf{e}_x + y \mathbf{e}_y$$ to polar coordinates.
+</summary>
+**Solution:**
+The Cartesian components are $$V^1 = x$$ and $$V^2 = y$$. In polar coordinates, $$x=r\cos\theta$$ and $$y=r\sin\theta$$.
+The transformation is $$V'^{i'} = \frac{\partial x'^{i'}}{\partial x^k} V^k$$. We use the same Jacobian components as in the example.
+
+*   $$V'^r = \frac{\partial r}{\partial x} V^1 + \frac{\partial r}{\partial y} V^2 = (\cos\theta)(x) + (\sin\theta)(y)$$
+    Substituting $$x=r\cos\theta$$ and $$y=r\sin\theta$$:
+    $$V'^r = (\cos\theta)(r\cos\theta) + (\sin\theta)(r\sin\theta) = r(\cos^2\theta + \sin^2\theta) = r$$
+
+*   $$V'^\theta = \frac{\partial \theta}{\partial x} V^1 + \frac{\partial \theta}{\partial y} V^2 = (-\frac{\sin\theta}{r})(x) + (\frac{\cos\theta}{r})(y)$$
+    Substituting for $$x$$ and $$y$$:
+    $$V'^\theta = (-\frac{\sin\theta}{r})(r\cos\theta) + (\frac{\cos\theta}{r})(r\sin\theta) = -\sin\theta\cos\theta + \cos\theta\sin\theta = 0$$
+
+So, the components in polar coordinates are $$V'^r = r$$ and $$V'^\theta = 0$$. This makes intuitive sense: the vector field $$\mathbf{V} = x \mathbf{e}_x + y \mathbf{e}_y$$ is the position vector itself, which always points purely in the radial direction in polar coordinates, and its magnitude is $$r$$.
+</details>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Exercise 2.** A vector has components $$A'^r=1, A'^\theta=1/r$$ in polar coordinates. Find its components in Cartesian coordinates.
+</summary>
+**Solution:**
+The inverse transformation is $$A^k = \frac{\partial x^k}{\partial x'^{j'}} A'^{j'}$$.
+The coordinate relations are $$x = r\cos\theta$$ and $$y = r\sin\theta$$.
+The required Jacobian components are:
+*   $$\frac{\partial x}{\partial r} = \cos\theta$$
+*   $$\frac{\partial x}{\partial \theta} = -r\sin\theta$$
+*   $$\frac{\partial y}{\partial r} = \sin\theta$$
+*   $$\frac{\partial y}{\partial \theta} = r\cos\theta$$
+
+Now apply the transformation law:
+*   $$A^x = A^1 = \frac{\partial x}{\partial r} A'^r + \frac{\partial x}{\partial \theta} A'^\theta = (\cos\theta)(1) + (-r\sin\theta)(1/r) = \cos\theta - \sin\theta$$
+*   $$A^y = A^2 = \frac{\partial y}{\partial r} A'^r + \frac{\partial y}{\partial \theta} A'^\theta = (\sin\theta)(1) + (r\cos\theta)(1/r) = \sin\theta + \cos\theta$$
+
+So, the Cartesian components are $$A^x = \cos\theta - \sin\theta$$ and $$A^y = \sin\theta + \cos\theta$$. To express these purely in terms of $$x$$ and $$y$$, we can substitute $$\cos\theta = x/r$$ and $$\sin\theta = y/r$$ (where $$r=\sqrt{x^2+y^2}$$):
+$$A^x = \frac{x-y}{\sqrt{x^2+y^2}}$$
+$$A^y = \frac{y+x}{\sqrt{x^2+y^2}}$$
+</details>
+
 ## 4. Dual Basis Vectors and Covariant Covector Components
 
 Recall from Part 1 that associated with a vector space $$V$$ (with basis $$\{\mathbf{e}_i\}$$) is its dual space $$V^\ast$$. The dual space consists of covectors (linear functionals mapping vectors to scalars), and it has a **dual basis** $$\{\boldsymbol{\epsilon}^j\}$$ defined by the property $$\boldsymbol{\epsilon}^j(\mathbf{e}_i) = \delta^j_i$$.
@@ -324,6 +387,78 @@ The components transform "co" (with), or in the same manner as, the original bas
 An important example is the gradient of a scalar field $$\phi$$. Its components $$\frac{\partial \phi}{\partial x^k}$$ transform covariantly:
 $$ \frac{\partial \phi}{\partial x'^{i'}} = \frac{\partial x^k}{\partial x'^{i'}} \frac{\partial \phi}{\partial x^k} $$.
 </blockquote>
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example.** Transforming a Constant Covector Field
+</div>
+Consider a covector field with constant components $$W_1 = 1, W_2 = 0$$ in the Cartesian ($$x,y$$) system. Let's find its components $$W'_{r}, W'_{\theta}$$ in polar coordinates.
+
+The transformation rule is $$W'_{i'} = \frac{\partial x^k}{\partial x'^{i'}} W_k$$.
+The coordinate relations are $$x = r\cos\theta$$ and $$y = r\sin\theta$$.
+The required Jacobian components are:
+*   $$\frac{\partial x}{\partial r} = \cos\theta$$
+*   $$\frac{\partial x}{\partial \theta} = -r\sin\theta$$
+*   $$\frac{\partial y}{\partial r} = \sin\theta$$
+*   $$\frac{\partial y}{\partial \theta} = r\cos\theta$$
+
+Applying the transformation:
+*   $$W'_r = W'_{1'} = \frac{\partial x^1}{\partial x'^1} W_1 + \frac{\partial x^2}{\partial x'^1} W_2 = \frac{\partial x}{\partial r} W_1 + \frac{\partial y}{\partial r} W_2 = (\cos\theta)(1) + (\sin\theta)(0) = \cos\theta$$
+*   $$W'_\theta = W'_{2'} = \frac{\partial x^1}{\partial x'^2} W_1 + \frac{\partial x^2}{\partial x'^2} W_2 = \frac{\partial x}{\partial \theta} W_1 + \frac{\partial y}{\partial \theta} W_2 = (-r\sin\theta)(1) + (r\cos\theta)(0) = -r\sin\theta$$
+
+The new components are $$W'_r = \cos\theta$$ and $$W'_\theta = -r\sin\theta$$.
+</blockquote>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Exercise 1.** Find the covariant components of the gradient of the scalar field $$\phi(x,y) = x^2 + y^2$$ in polar coordinates.
+</summary>
+**Solution:**
+**Method 1: Transform the components.**
+First, find the covariant components in Cartesian coordinates:
+$$W_x = \frac{\partial \phi}{\partial x} = 2x$$
+$$W_y = \frac{\partial \phi}{\partial y} = 2y$$
+
+Now, transform these components to polar coordinates using $$W'_{i'} = \frac{\partial x^k}{\partial x'^{i'}} W_k$$.
+*   $$W'_r = \frac{\partial x}{\partial r} W_x + \frac{\partial y}{\partial r} W_y = (\cos\theta)(2x) + (\sin\theta)(2y)$$
+    Substitute $$x=r\cos\theta, y=r\sin\theta$$:
+    $$W'_r = (\cos\theta)(2r\cos\theta) + (\sin\theta)(2r\sin\theta) = 2r(\cos^2\theta + \sin^2\theta) = 2r$$
+
+*   $$W'_\theta = \frac{\partial x}{\partial \theta} W_x + \frac{\partial y}{\partial \theta} W_y = (-r\sin\theta)(2x) + (r\cos\theta)(2y)$$
+    Substitute $$x=r\cos\theta, y=r\sin\theta$$:
+    $$W'_\theta = (-r\sin\theta)(2r\cos\theta) + (r\cos\theta)(2r\sin\theta) = -2r^2\sin\theta\cos\theta + 2r^2\cos\theta\sin\theta = 0$$
+
+So the covariant components in polar coordinates are $$W'_r = 2r$$ and $$W'_\theta = 0$$.
+
+**Method 2: Calculate directly in polar coordinates.**
+First, express the scalar field $$\phi$$ in polar coordinates:
+$$\phi(r,\theta) = x^2 + y^2 = (r\cos\theta)^2 + (r\sin\theta)^2 = r^2$$
+Now, compute the gradient components directly in the new system:
+$$W'_r = \frac{\partial \phi}{\partial r} = \frac{\partial}{\partial r}(r^2) = 2r$$
+$$W'_\theta = \frac{\partial \phi}{\partial \theta} = \frac{\partial}{\partial \theta}(r^2) = 0$$
+The results match, verifying the transformation law.
+</details>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Exercise 2.** A covector has components $$B'_r = \sin\theta$$ and $$B'_\theta = r\cos\theta$$ in polar coordinates. Find its components in Cartesian coordinates.
+</summary>
+**Solution:**
+The inverse transformation is $$B_k = \frac{\partial x'^{j'}}{\partial x^k} B'_{j'}$$.
+The required Jacobian components are:
+*   $$\frac{\partial r}{\partial x} = \cos\theta$$
+*   $$\frac{\partial \theta}{\partial x} = -\frac{\sin\theta}{r}$$
+*   $$\frac{\partial r}{\partial y} = \sin\theta$$
+*   $$\frac{\partial \theta}{\partial y} = \frac{\cos\theta}{r}$$
+
+Now apply the transformation law:
+*   $$B_x = B_1 = \frac{\partial x'^1}{\partial x^1} B'_1 + \frac{\partial x'^2}{\partial x^1} B'_2 = \frac{\partial r}{\partial x} B'_r + \frac{\partial \theta}{\partial x} B'_\theta$$
+    $$= (\cos\theta)(\sin\theta) + (-\frac{\sin\theta}{r})(r\cos\theta) = \cos\theta\sin\theta - \sin\theta\cos\theta = 0$$
+*   $$B_y = B_2 = \frac{\partial x'^1}{\partial x^2} B'_1 + \frac{\partial x'^2}{\partial x^2} B'_2 = \frac{\partial r}{\partial y} B'_r + \frac{\partial \theta}{\partial y} B'_\theta$$
+    $$= (\sin\theta)(\sin\theta) + (\frac{\cos\theta}{r})(r\cos\theta) = \sin^2\theta + \cos^2\theta = 1$$
+
+So, the Cartesian components are $$B_x = 0$$ and $$B_y = 1$$. This covector field is constant in the Cartesian system.
+</details>
 
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
@@ -560,6 +695,61 @@ However, as soon as you move to:
 
 Then $$g_{ij} \neq \delta_{ij}$$ in general, and $$g_{ij}$$ may not even be constant. In these scenarios, $$V^i$$ and $$V_i$$ will have different numerical values and represent distinct (though related) aspects of the underlying geometric object. The distinction becomes absolutely crucial for correct calculations and conceptual understanding. For example, the gradient of a function is naturally a covariant vector, while a direction of movement might be a contravariant vector. The metric tensor is what allows us to relate them.
 </blockquote>
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example.** Lowering an Index in Polar Coordinates
+</div>
+Consider a vector in 2D polar coordinates with contravariant components $$V^r = A$$ and $$V^\theta = B/r$$, where A and B are constants. Let's find its covariant components $$V_r$$ and $$V_\theta$$.
+The metric tensor in polar coordinates is $$g_{ij} = \begin{pmatrix} 1 & 0 \\ 0 & r^2 \end{pmatrix}$$.
+The lowering operation is $$V_i = g_{ij} V^j$$.
+
+*   For the first component ($$i=r$$):
+    $$V_r = g_{rr}V^r + g_{r\theta}V^\theta = (1)(A) + (0)(B/r) = A$$
+
+*   For the second component ($$i=\theta$$):
+    $$V_\theta = g_{\theta r}V^r + g_{\theta\theta}V^\theta = (0)(A) + (r^2)(B/r) = Br$$
+
+So the covariant components are $$V_r = A$$ and $$V_\theta = Br$$. Notice how the components change from $$(A, B/r)$$ to $$(A, Br)$$ just by changing their "type" from contravariant to covariant.
+</blockquote>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Exercise 1.** A vector in polar coordinates has contravariant components $$V^r = \cos\theta$$ and $$V^\theta = -(\sin\theta)/r$$. Find its covariant components and then calculate its invariant magnitude squared, $$V \cdot V$$.
+</summary>
+**Solution:**
+First, we find the covariant components using $$V_i = g_{ij}V^j$$.
+*   $$V_r = g_{rr}V^r + g_{r\theta}V^\theta = (1)(\cos\theta) + (0)(-(\sin\theta)/r) = \cos\theta$$
+*   $$V_\theta = g_{\theta r}V^r + g_{\theta\theta}V^\theta = (0)(\cos\theta) + (r^2)(-(\sin\theta)/r) = -r\sin\theta$$
+The covariant components are $$V_r = \cos\theta$$ and $$V_\theta = -r\sin\theta$$.
+
+Now, we calculate the invariant magnitude squared. The inner product can be computed in two equivalent ways: $$g_{ij}V^iV^j$$ or $$g^{ij}V_iV_j$$ or simply $$V^i V_i$$. Let's use the third form, as it's the most direct once you have both types of components.
+$$V \cdot V = V^i V_i = V^r V_r + V^\theta V_\theta$$
+$$= (\cos\theta)(\cos\theta) + (-(\sin\theta)/r)(-r\sin\theta)$$
+$$= \cos^2\theta + \sin^2\theta = 1$$
+The magnitude squared of this vector is 1 everywhere. This vector field actually corresponds to the Cartesian basis vector $$\mathbf{e}_x$$.
+</details>
+
+<details class="details-block" markdown="1">
+<summary markdown="1">
+**Exercise 2.** A covector in polar coordinates has components $$W_r = 0$$ and $$W_\theta = r^2$$. Find its contravariant components and verify its magnitude squared.
+</summary>
+**Solution:**
+To find the contravariant components, we raise the index using the inverse metric tensor, $$W^i = g^{ij}W_j$$.
+The inverse metric in polar coordinates is $$g^{ij} = \begin{pmatrix} 1 & 0 \\ 0 & 1/r^2 \end{pmatrix}$$.
+
+*   For the first component ($$i=r$$):
+    $$W^r = g^{rr}W_r + g^{r\theta}W_\theta = (1)(0) + (0)(r^2) = 0$$
+
+*   For the second component ($$i=\theta$$):
+    $$W^\theta = g^{\theta r}W_r + g^{\theta\theta}W_\theta = (0)(0) + (1/r^2)(r^2) = 1$$
+
+The contravariant components are $$W^r = 0$$ and $$W^\theta = 1$$.
+
+Now, let's compute the magnitude squared using $$W^i W_i$$:
+$$W \cdot W = W^r W_r + W^\theta W_\theta = (0)(0) + (1)(r^2) = r^2$$
+The invariant magnitude squared of this covector field is $$r^2$$.
+</details>
 
 This concludes Part 2. We've established that the transformation properties under coordinate changes are what define tensors, differentiated between covariant and contravariant behavior by examining basis transformations, and introduced the metric tensor as the tool for defining geometry and relating covariant and contravariant quantities.
 
