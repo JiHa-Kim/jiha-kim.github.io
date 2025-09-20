@@ -389,7 +389,7 @@ A'^{i'}_{j'} = \left( \frac{\partial x'^{i'}}{\partial x^k} \right) \left( \frac
 $$
 
 This is analogous to the similarity transformation of a matrix $$M' = P M P^{-1}$$ under a change of basis, where $$P^{i'}_k = \frac{\partial x'^{i'}}{\partial x^k}$$ and $$(P^{-1})^l_{j'} = \frac{\partial x^l}{\partial x'^{j'}}$$.
-</details>
+</blockquote>
 
 <blockquote class="box-example" markdown="1">
 <div class="title" markdown="1">
@@ -410,7 +410,7 @@ $$
 
 By the chain rule (or property of inverse Jacobians), this product is exactly $$\delta^{i'}_{j'}$$.
 Thus, $$(\delta_{transf})^{i'}_{j'} = \delta^{i'}_{j'}$$. The components of the Kronecker delta are indeed the same in all coordinate systems, and it transforms correctly as an invariant (1,1)-tensor.
-</details>
+</blockquote>
 
 ## 6. The Metric Tensor ($$g_{ij}$$ and its inverse $$g^{ij}$$)
 
