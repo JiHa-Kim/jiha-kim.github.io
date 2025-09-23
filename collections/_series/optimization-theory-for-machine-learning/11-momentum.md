@@ -317,6 +317,7 @@ $$
 This equation corresponds to approximating the original ODE $$m \ddot{\mathbf x}(t) + \gamma \dot{\mathbf x}(t) + \nabla f(\mathbf x(t)) = 0$$ at time $$t_k = kh$$ using:
 -   Central difference for acceleration: $$\ddot{\mathbf x}(t_k) \approx \frac{\mathbf x_{k+1} - 2\mathbf x_k + \mathbf x_{k-1}}{h^2}$$
 -   Backward difference for velocity (in the damping term): $$\dot{\mathbf x}(t_k) \approx \frac{\mathbf x_k - \mathbf x_{k-1}}{h}$$
+-   
 This confirms that the derived PHB algorithm is a consistent discretization of the heavy ball ODE. The system-based derivation makes the choice of these specific finite differences more systematic.
 </details>
 
@@ -456,7 +457,8 @@ Let's check these for PHB as an LMM for $$\dot{\mathbf x} = -\nabla f(\mathbf x)
     $$\sigma(1) = \eta \cdot 1 = \eta$$.
     So, the consistency condition $$\rho'(1)=\sigma(1)$$ (which ensures order at least 1) requires $$1-\beta = \eta$$.
 
-This particular relationship, $$1-\beta = \eta$$, is known as the "critically damped" setting for PHB when analyzing its convergence on quadratic functions. It implies a specific tuning between the momentum parameter and the learning rate for the method to be a first-order accurate approximation (in the LMM local truncation error sense) of the gradient flow ODE $$\dot{\mathbf x} = -\nabla f(\mathbf x)$$.
+The LMM consistency condition yields $$1-\beta = \eta$$; this is separate from the traditional HB optimal tuning on quadratics.”
+
 However, PHB is an effective optimization algorithm even when $$1-\beta \neq \eta$$. The LMM formulation primarily describes its algebraic structure as a numerical integrator. Its effectiveness as an optimizer is analyzed through other means (e.g., Lyapunov stability for the discrete updates, convergence rates on specific function classes). The fact that it *is* an LMM by its form is significant, regardless of whether this specific LMM consistency condition (which relates to the local truncation error) is met for arbitrary $$\eta, \beta$$.
 </details>
 
@@ -896,7 +898,7 @@ _Note: $$\nabla f_k = \nabla f(\mathbf x_k)$$. Vector operations like square, sq
 Beyond the direct ODE derivations discussed, these optimization methods can be understood through several other rich mathematical lenses. For example:
 -   The **variational or Lagrangian perspective**, particularly using Bregman Lagrangians (as in Wibisono et al., 2016), provides a unified framework for deriving momentum methods like PHB and NAG via time-rescaling and symplectic discretization of underlying mechanical systems.
 -   A **control-theoretic view** (e.g., Lessard et al., 2016) treats the optimization process as designing a controller (the algorithm) to steer the system (the parameters) to an optimum, often by analyzing stability and performance using tools from robust control.
--   The role of **conformal symplectic integrators** (Zhang et al., 2020) explains how methods like PHB preserve certain geometric structures even in the presence of dissipation (friction), leading to favorable stability properties.
+-   The role of **conformal symplectic integrators** (Franca et al., 2020) explains how methods like PHB preserve certain geometric structures even in the presence of dissipation (friction), leading to favorable stability properties.
 -   Recent analyses of **continuous-time Adam-style methods** (e.g., Gould & Tanaka, 2024) continue to refine our understanding of stability regions and dynamics for adaptive optimizers by studying their ODE limits.
 
 These alternative viewpoints often provide complementary insights and can inspire new algorithmic designs.
@@ -904,3 +906,16 @@ These alternative viewpoints often provide complementary insights and can inspir
 ## Reflection
 
 This exploration of momentum and adaptive optimization methods through ODEs highlights a recurring theme in mathematical optimization for machine learning: many successful discrete algorithms are shadows of underlying continuous processes. The heavy ball analogy gives an intuitive grasp for classical momentum, while the LMM perspective places it firmly within the established field of numerical ODE solvers. Extending this view to adaptive methods like RMSProp and Adam shows them as more complex dynamical systems, yet still amenable to interpretation as preconditioned flows. All these viewpoints enrich our understanding beyond mere algorithmic steps, offering insights into why these methods work and how they might be improved or generalized. This connection between discrete iteration and continuous flow is a powerful paradigm for both analysis and invention in optimization.
+
+## References
+
+da Silva, A. B., & Gazeau, M. (2020). A general system of differential equations to model first-order adaptive optimization algorithms. Journal of Machine Learning Research, 21(63), 1–34.
+França, G., Robinson, D. P., & Vidal, R. (2020). Conformal symplectic and relativistic optimization. Advances in Neural Information Processing Systems (NeurIPS). https://proceedings.neurips.cc/paper/2020/file/c4b108f53550f1d5967305a9a8140ddd-Paper.pdf
+Hairer, E., & Wanner, G. (2010). Solving ordinary differential equations II: Stiff and differential-algebraic problems (2nd ed.). Springer. https://doi.org/10.1007/978-3-642-05221-7
+Iserles, A. (2009). A first course in the numerical analysis of differential equations (2nd ed.). Cambridge University Press. https://doi.org/10.1017/CBO9780511995569
+Kingma, D. P., & Ba, J. (2015). Adam: A method for stochastic optimization. International Conference on Learning Representations (ICLR). https://arxiv.org/abs/1412.6980
+Lessard, L., Recht, B., & Packard, A. (2016). Analysis and design of optimization algorithms via integral quadratic constraints. SIAM Journal on Optimization, 26(1), 57–95. https://doi.org/10.1137/15M1009597
+Polyak, B. T. (1964). Some methods of speeding up the convergence of iteration methods. USSR Computational Mathematics and Mathematical Physics, 4(5), 1–17. https://doi.org/10.1016/0041-5553(64)90137-5
+Su, W., Boyd, S., & Candès, E. J. (2016). A differential equation for modeling nesterov’s accelerated gradient method: Theory and insights. Journal of Machine Learning Research, 17(153), 1–43.
+Tieleman, T., & Hinton, G. (2012). Lecture 6.5—RMSProp: Divide the gradient by a running average of its recent magnitude. https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf
+Wibisono, A., Wilson, A. C., & Jordan, M. I. (2016). A variational perspective on accelerated methods in optimization. Proceedings of the National Academy of Sciences (PNAS), 113(47), E7351–E7358. https://doi.org/10.1073/pnas.1614734113
