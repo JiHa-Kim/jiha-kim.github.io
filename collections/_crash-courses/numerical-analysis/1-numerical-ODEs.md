@@ -442,8 +442,8 @@ $$
 Stack the stages $$k=(k_1,\dots,k_s)^\top$$. For an RK method,
 
 $$
-k ;=; f!\Big(t_n + c,h,; y_n \mathbf{1} + h,A,k\Big),\qquad
-y_{n+1} ;=; y_n + h,b^\top k,
+k = f!\Big(t_n + c,h,; y_n \mathbf{1} + h,A,k\Big),\qquad
+y_{n+1} = y_n + h,b^\top k,
 $$
 
 where $$A\in\mathbb{R}^{s\times s}$$, $$b,c\in\mathbb{R}^s$$, and $$\mathbf{1}$$ is the vector of ones (broadcasted as needed).
