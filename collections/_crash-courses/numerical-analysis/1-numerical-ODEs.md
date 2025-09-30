@@ -195,13 +195,17 @@ For these ODEs to be useful models, we need assurance that a solution exists and
 </summary>
 
 Let $$L(\theta)=\tfrac12,\theta^\top H\theta$$ with $$H\succ 0$$. Gradient flow $$\dot\theta=-H\theta$$ has solution
+
 $$
 \theta(t)=e^{-Ht},\theta(0).
 $$
+
 Then
+
 $$
 \frac{d}{dt}L(\theta(t))=\nabla L(\theta(t))^\top \dot\theta(t)=-(H\theta)^\top(H\theta)=-\Vert H\theta\Vert^2\le 0,
 $$
+
 so the loss decreases strictly unless $$\theta=0$$. Mode-wise, if $$H q_i=\lambda_i q_i$$, then $$\theta^{(i)}(t)=e^{-\lambda_i t}\theta^{(i)}(0)$$.
 
 </details>
@@ -212,15 +216,19 @@ so the loss decreases strictly unless $$\theta=0$$. Mode-wise, if $$H q_i=\lambd
 </summary>
 
 Write $$x_1=\theta,\ x_2=\dot\theta$$. The ODE
+
 $$
 \dot x_1=x_2,\qquad \dot x_2=-\frac{\gamma}{m}x_2-\frac{1}{m}\nabla L(x_1)
 $$
+
 has Lyapunov function $$\mathcal{E}(x_1,x_2)=L(x_1)+\tfrac{m}{2}\Vert x_2\Vert^2$$ with
+
 $$
 \dot{\mathcal{E}}=\nabla L^\top x_2 + m x_2^\top \dot x_2
 = \nabla L^\top x_2 + m x_2^\top!\Big(-\tfrac{\gamma}{m}x_2-\tfrac{1}{m}\nabla L\Big)
 = -\gamma \Vert x_2\Vert^2 \le 0.
 $$
+
 Thus inertia + damping dissipates kinetic energy while still descending in $$L$$.
 
 </details>
@@ -242,13 +250,17 @@ A linear multistep method is zero-stable if and only if all roots of its first c
 </summary>
 
 Exact solution satisfies
+
 $$
 y(t_{n+1})=y(t_n)+h f(t_n,y(t_n))+\tfrac{h^2}{2},y''(\xi_n),\quad \xi_n\in(t_n,t_{n+1}).
 $$
+
 Explicit Euler does $$y_{n+1}=y_n+h f(t_n,y_n)$$. The **local truncation error** (inserting the exact $$y(t_n)$$) is
+
 $$
 \tau_{n+1}=\frac{y(t_{n+1})-\big(y(t_n)+h f(t_n,y(t_n))\big)}{h}=\tfrac{h}{2},y''(\xi_n)=\mathcal{O}(h).
 $$
+
 Hence LTE $$=\mathcal{O}(h^2)$$ and global error $$=\mathcal{O}(h)$$ (order 1).
 
 </details>
@@ -259,9 +271,11 @@ Hence LTE $$=\mathcal{O}(h^2)$$ and global error $$=\mathcal{O}(h)$$ (order 1).
 </summary>
 
 AB2 is $$y_{n+1}=y_n+\tfrac{h}{2}(3f_n-f_{n-1})$$. The **first characteristic polynomial** (apply to $$\dot y=0$$) is
+
 $$
 \rho(\zeta)=\zeta^2-\zeta.
 $$
+
 Its roots are $${0,1}$$: inside/on the unit circle and the unit-modulus root is simple ⇒ **zero-stable**.
 
 </details>
@@ -296,10 +310,12 @@ where $$e$$ is the vector of ones. A crucial result is that **no explicit Runge-
 </summary>
 
 For Explicit Euler, $$R(z)=1+z$$ with $$z=h\lambda$$. If $$\lambda\in\mathbb{R}_{<0}$$, stability demands
+
 $$
-|1+h\lambda|\le 1 \iff -2\le h\lambda\le 0 \iff 0\le h\le \frac{2}{|\lambda|}.
+\vert 1+h\lambda\vert \le 1 \iff -2\le h\lambda\le 0 \iff 0\le h\le \frac{2}{\vert \lambda\vert }.
 $$
-This mirrors GD’s step bound on a quadratic with Lipschitz constant $$L=|\lambda|$$.
+
+This mirrors GD’s step bound on a quadratic with Lipschitz constant $$L=\vert \lambda\vert $$.
 
 </details>
 
@@ -356,15 +372,19 @@ $$
 </summary>
 
 On $$\dot y=\lambda y$$,
+
 $$
 y_{n+1}=y_n+h\big((1-\theta)\lambda y_n+\theta \lambda y_{n+1}\big)
 \ \Rightarrow\
 (1-\theta z) y_{n+1}=(1+(1-\theta)z) y_n,\quad z=h\lambda,
 $$
+
 so
+
 $$
 R(z)=\frac{1+(1-\theta)z}{1-\theta z}.
 $$
+
 For $$\theta=1$$ (Implicit Euler), $$R(z)=1/(1-z)$$ is A- and L-stable; for $$\theta=\tfrac12$$, $$R(z)=\frac{1+\tfrac z2}{1-\tfrac z2}$$ is A-stable but not L-stable.
 
 </details>
@@ -375,19 +395,25 @@ For $$\theta=1$$ (Implicit Euler), $$R(z)=1/(1-z)$$ is A- and L-stable; for $$\t
 </summary>
 
 Heavy-ball as first-order system:
+
 $$
 \dot\theta=v,\qquad \dot v=-\tfrac{\gamma}{m}v-\tfrac{1}{m}\nabla L(\theta).
 $$
+
 A semi-implicit Euler step (explicit in $$\theta$$, implicit in $$v$$):
+
 $$
 \theta_{k+1}=\theta_k+h v_k,\qquad
 v_{k+1}=\frac{v_k-\tfrac{h}{m}\nabla L(\theta_k)}{1+\tfrac{\gamma h}{m}}.
 $$
+
 Let $$\mu=\frac{1}{1+\tfrac{\gamma h}{m}}$$ and define $$u_k=h v_k$$. Then
+
 $$
 u_{k+1}=\mu u_k - \frac{h^2}{m}\mu \nabla L(\theta_k),\qquad
 \theta_{k+1}=\theta_k+u_k,
 $$
+
 which is a Polyak-style momentum with coefficients linked to ((h,\gamma,m)).
 
 </details>
@@ -414,21 +440,25 @@ $$
 </summary>
 
 Stack the stages $$k=(k_1,\dots,k_s)^\top$$. For an RK method,
+
 $$
 k ;=; f!\Big(t_n + c,h,; y_n \mathbf{1} + h,A,k\Big),\qquad
 y_{n+1} ;=; y_n + h,b^\top k,
 $$
+
 where $$A\in\mathbb{R}^{s\times s}$$, $$b,c\in\mathbb{R}^s$$, and $$\mathbf{1}$$ is the vector of ones (broadcasted as needed).
 
 * **Explicit RK:** $$A$$ is **strictly lower triangular**:
+
   $$
   A=\begin{pmatrix}
-  0 & 0 & \cdots & 0\
-  a_{21} & 0 & \cdots & 0\
-  a_{31} & a_{32} & \ddots & \vdots\
+  0 & 0 & \cdots & 0 \\
+  a_{21} & 0 & \cdots & 0 \\
+  a_{31} & a_{32} & \ddots & \vdots \\
   \vdots & \vdots & \ddots & 0
   \end{pmatrix}.
   $$
+
   Then $$k_1=f(t_n,y_n)$$; $$k_2$$ depends on $$k_1$$; $$k_3$$ depends on $$k_1,k_2$$; etc. We can compute stages **sequentially**—a causal, feed-forward evaluation within the step.
 
 * **Implicit RK:** some $$a_{ii}\neq 0$$ (or entries above the strict lower triangle), so $$k_i$$ appears on both sides. Stages are coupled and require solving (e.g., via Newton or fixed-point iterations). This breaks step-internal causality and is analogous to **bidirectional**/globally coupled updates.
@@ -455,22 +485,28 @@ Step-size controllers, often based on **PI or PID control theory**, use the stre
 </summary>
 
 Take $$\dot y=A y$$ with
+
 $$
 A=\begin{pmatrix}
 0 & 1\ -2 & -3
 \end{pmatrix},\quad y_0=\binom{1}{0},\ h=0.1.
 $$
+
 Compute stages
+
 $$
 k_1=Ay_n,\
 k_2=A\big(y_n+\tfrac{h}{2}k_1\big),
 k_3=A\big(y_n+\tfrac{h}{2}k_2\big),
 k_4=A\big(y_n+h k_3\big),
 $$
+
 then
+
 $$
 y_{n+1}=y_n+\tfrac{h}{6}(k_1+2k_2+2k_3+k_4).
 $$
+
 This concretely shows 4 fev/step and the weighted averaging of slopes.
 
 </details>
@@ -480,12 +516,14 @@ This concretely shows 4 fev/step and the weighted averaging of slopes.
 **Example.** Embedded 5(4) error estimate and accept/reject
 </summary>
 
-Suppose an embedded pair returns $$y^{(5)}*{n+1},,y^{(4)}*{n+1}$$ with
+Suppose an embedded pair returns $$y^{(5)}\ast {n+1},,y^{(4)}\ast {n+1}$$ with
+
 $$
-e=y^{(5)}*{n+1}-y^{(4)}*{n+1},\qquad
-\Vert e\Vert_{\mathrm{sc}}=\frac{\Vert e\Vert}{\texttt{atol}+\texttt{rtol},\Vert y^{(5)}*{n+1}\Vert}.
+e=y^{(5)}\ast {n+1}-y^{(4)}\ast {n+1},\qquad
+\Vert e\Vert_{\mathrm{sc}}=\frac{\Vert e\Vert}{\texttt{atol}+\texttt{rtol},\Vert y^{(5)}\ast {n+1}\Vert}.
 $$
-If $$\Vert e\Vert*{\mathrm{sc}}=0.8\le 1$$, **accept** and (in Part II) increase $$h$$ modestly; if $$=1.6>1$$, **reject** and retry with a smaller step. With FSAL, accepted steps reuse the final stage as the next step’s first evaluation.
+
+If $$\Vert e\Vert\ast {\mathrm{sc}}=0.8\le 1$$, **accept** and (in Part II) increase $$h$$ modestly; if $$=1.6>1$$, **reject** and retry with a smaller step. With FSAL, accepted steps reuse the final stage as the next step’s first evaluation.
 
 </details>
 
@@ -524,18 +562,24 @@ After startup, only step 2 uses a **fresh** function evaluation ⇒ about **1 fe
 </summary>
 
 BDF2 reads
+
 $$
 \frac{3y_{n+1}-4y_n+y_{n-1}}{2h}=f(t_{n+1},y_{n+1}).
 $$
+
 For $$\dot y=\lambda y$$ with $$z=h\lambda$$,
+
 $$
 (3-2z)y_{n+1}=4y_n-y_{n-1}.
 $$
+
 Let $$y_{n}=r^n$$; the amplification polynomial is
+
 $$
 (3-2z)r^2-4r+1=0.
 $$
-Stability holds when both roots satisfy $$|r|<1$$, which is true for all $$\Re z\le 0$$ (BDF2 is A-stable) though not L-stable.
+
+Stability holds when both roots satisfy $$\vert r\vert <1$$, which is true for all $$\Re z\le 0$$ (BDF2 is A-stable) though not L-stable.
 
 </details>
 
@@ -545,13 +589,17 @@ Stability holds when both roots satisfy $$|r|<1$$, which is true for all $$\Re z
 </summary>
 
 The discrete momentum update
+
 $$
 \theta_{n+1}=(1+\mu)\theta_n-\mu\theta_{n-1}-\alpha\nabla L(\theta_n)
 $$
+
 has **characteristic polynomial** (on $$\dot\theta=0$$)
+
 $$
 \rho(\zeta)=\zeta^2-(1+\mu)\zeta+\mu.
 $$
+
 Its roots are $$1$$ and $$\mu$$. Zero-stability requires roots in the unit disk and simple on the unit circle ⇒ **(\mu\in[0,1))** in standard uses.
 
 </details>
