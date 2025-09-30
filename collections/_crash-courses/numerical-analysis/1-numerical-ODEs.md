@@ -225,7 +225,7 @@ has Lyapunov function $$\mathcal{E}(x_1,x_2)=L(x_1)+\tfrac{m}{2}\Vert x_2\Vert^2
 
 $$
 \dot{\mathcal{E}}=\nabla L^\top x_2 + m x_2^\top \dot x_2
-= \nabla L^\top x_2 + m x_2^\top!\Big(-\tfrac{\gamma}{m}x_2-\tfrac{1}{m}\nabla L\Big)
+= \nabla L^\top x_2 + m x_2^\top\Big(-\tfrac{\gamma}{m}x_2-\tfrac{1}{m}\nabla L\Big)
 = -\gamma \Vert x_2\Vert^2 \le 0.
 $$
 
@@ -442,7 +442,7 @@ $$
 Stack the stages $$k=(k_1,\dots,k_s)^\top$$. For an RK method,
 
 $$
-k = f!\Big(t_n + c,h,; y_n \mathbf{1} + h,A,k\Big),\qquad
+k = f\Big(t_n + c,h,; y_n \mathbf{1} + h,A,k\Big),\qquad
 y_{n+1} = y_n + h,b^\top k,
 $$
 
