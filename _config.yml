@@ -362,6 +362,20 @@ llm-instructions: &llm-instructions
 
     </blockquote>
 
+
+    Note that the following will incorrectly render the block equation as an inline equation due to a lack of newline after the MathJax delimiter:
+
+    <blockquote class="box-definition" markdown="1">
+    <div class="title" markdown="1">
+    **Definition.** The natural numbers $$\mathbb{N}$$
+    </div>
+    The natural numbers are defined as $$inline$$.
+
+    $$
+    block
+    $$
+    </blockquote>
+
     And a details block template:
 
     <details class="details-block" markdown="1">

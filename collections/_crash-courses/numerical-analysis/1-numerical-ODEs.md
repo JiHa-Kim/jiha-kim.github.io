@@ -30,7 +30,7 @@ llm-instructions: |
 
   In regular Markdown, please use the following syntax:
 
-  - Inline equations are surrounded by dollar signs on the same line: $inline$
+  - Inline equations are surrounded by dollar signs on the same line: $$inline$$
 
   - Block equations are isolated by newlines between the text above and below,
     and newlines between the delimiters and the equation (even in lists):
@@ -45,14 +45,14 @@ llm-instructions: |
     $$block$$
 
     text...
-  Use LaTeX commands for symbols as much as possible (e.g. $\vert$ for
-  absolute value, $\ast$ for asterisk). Avoid using the literal vertical bar
+  Use LaTeX commands for symbols as much as possible (e.g. $$\vert$$ for
+  absolute value, $$\ast$$ for asterisk). Avoid using the literal vertical bar
   symbol; use \vert and \Vert instead.
 
   The syntax for lists is:
 
-  1. $inline$ item
-  2. item $inline$
+  1. $$inline$$ item
+  2. item $$inline$$
   3. item
 
       $$
@@ -98,9 +98,9 @@ llm-instructions: |
 
   <blockquote class="box-definition" markdown="1">
   <div class="title" markdown="1">
-  **Definition.** The natural numbers $\mathbb{N}$
+  **Definition.** The natural numbers $$\mathbb{N}$$
   </div>
-  The natural numbers are defined as $inline$.
+  The natural numbers are defined as $$inline$$.
 
   $$
   block
@@ -128,9 +128,9 @@ llm-instructions: |
 
   <blockquote class="box-definition" markdown="1">
   <div class="title" markdown="1">
-  **Definition.** The natural numbers $\mathbb{N}$
+  **Definition.** The natural numbers $$\mathbb{N}$$
   </div>
-  The natural numbers are defined as $inline$.
+  The natural numbers are defined as $$inline$$.
 
   $$
   block
@@ -171,7 +171,7 @@ llm-instructions: |
 
 ## Part I — Foundations: Accuracy, Stability, and Core Integrators
 
-This post provides a primer on the foundational concepts of numerical integration for ordinary differential equations (ODEs). We'll explore the core ideas of accuracy and stability and introduce the workhorse integrator families: θ-methods, Runge-Kutta methods, and linear multistep methods. The goal is to build intuition for how these methods connect to and underpin common optimization algorithms. For simplicity, we often write $f(y)$ for autonomous ODEs where the dynamics do not explicitly depend on time $$t$$.
+This post provides a primer on the foundational concepts of numerical integration for ordinary differential equations (ODEs). We'll explore the core ideas of accuracy and stability and introduce the workhorse integrator families: θ-methods, Runge-Kutta methods, and linear multistep methods. The goal is to build intuition for how these methods connect to and underpin common optimization algorithms. For simplicity, we often write $$f(y)$$ for autonomous ODEs where the dynamics do not explicitly depend on time $$t$$.
 
 ### 1. Motivation & ODE Models of Optimization
 
