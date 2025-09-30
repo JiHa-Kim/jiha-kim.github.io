@@ -12,7 +12,7 @@ tags:
 - Ordinary Differential Equations
 - Discretization
 - Euler Method
-- Runge–Kutta
+- Runge-Kutta
 - Linear Multistep
 - Stability
 - Stiffness
@@ -158,7 +158,7 @@ llm-instructions: |
 
 ## Part I — Foundations: Accuracy, Stability, and Core Integrators
 
-This post provides a primer on the foundational concepts of numerical integration for ordinary differential equations (ODEs). We'll explore the core ideas of accuracy and stability and introduce the workhorse integrator families: θ-methods, Runge-Kutta methods, and linear multistep methods. The goal is to build intuition for how these methods connect to and underpin common optimization algorithms.
+This post provides a primer on the foundational concepts of numerical integration for ordinary differential equations (ODEs). We'll explore the core ideas of accuracy and stability and introduce the workhorse integrator families: θ-methods, Runge-Kutta methods, and linear multistep methods. The goal is to build intuition for how these methods connect to and underpin common optimization algorithms. For simplicity, we often write $$f(y)$$ for autonomous ODEs where the dynamics do not explicitly depend on time $$t$$.
 
 ### 1. Motivation & ODE Models of Optimization
 
@@ -172,7 +172,7 @@ Two fundamental ODE models in optimization are:
     \dot\theta(t) = -\nabla L(\theta(t))
     $$
 
-    Here, $$\dot\theta$$ represents the time derivative of the parameters $$\theta$$. The solutions to this ODE trace paths that continuously minimize the loss.
+    Here, $$\dot\theta$$ represents the time derivative of the parameters $$\theta$$. For gradient flow, $$ \tfrac{d}{dt}L(\theta(t))=\nabla L(\theta(t))^\top \dot\theta(t)=-\Vert\nabla L(\theta(t))\Vert^2\le 0$$, so the loss is non-increasing along trajectories.
 
 *   **Heavy-Ball Momentum:** This model introduces a second-order momentum term, analogous to a physical object with mass $$m$$ moving through a viscous medium with friction coefficient $$\gamma$$:
 
@@ -180,7 +180,7 @@ Two fundamental ODE models in optimization are:
     m\ddot\theta(t) + \gamma\dot\theta(t) + \nabla L(\theta(t)) = 0
     $$
 
-    This system often converges faster than pure gradient flow by allowing the trajectory to build momentum and overshoot local minima. Stochastic extensions of these models, where the gradient is noisy, form the basis for algorithms like Stochastic Gradient Descent (SGD) and Momentum SGD.
+    This system often converges faster than pure gradient flow by incorporating inertia, which accelerates convergence, particularly on strongly convex problems, when appropriately damped.
 
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
@@ -191,11 +191,7 @@ For these ODEs to be useful models, we need assurance that a solution exists and
 
 ### 2. Consistency, Stability, and Convergence
 
-The quality of a numerical integrator is determined by the "triangle" of consistency, stability, and convergence. A method is **convergent** if its solution approaches the true ODE solution as the step size shrinks. The Lax equivalence theorem states that for a consistent method, stability is equivalent to convergence.
-
-*   **Consistency** measures how well the numerical scheme approximates the ODE at a single step. The **local truncation error (LTE)** is the error introduced in one step, assuming the previous point was on the exact solution curve. A method has **order $$p$$** if its LTE is $$O(h^{p+1})$$, where $$h$$ is the step size. The **global error** is the cumulative error after many steps, which for a stable method of order $$p$$ is typically $$O(h^p)$$.
-
-*   **Stability** concerns the propagation and accumulation of errors. For linear multistep methods (LMMs), the key concept is **zero-stability**. An LMM is zero-stable if its solutions remain bounded when applied to the simple ODE $$\dot{y} = 0$$. This property is governed by the roots of the method's characteristic polynomial.
+A method is **consistent** if its one-step local truncation error (LTE) tends to zero as $$h\to 0$$. If the LTE is $$O(h^{p+1})$$, the method has **order $$p$$** and, under stability, its **global error** is $$O(h^{p})$$. For **linear multistep methods (LMMs)**, the **Dahlquist equivalence theorem** states: *consistency + zero-stability ⇒ convergence*. Here **zero-stability** means small perturbations in starting values do not blow up as $$h\to 0$$, and it is characterized by the root condition on the characteristic polynomial (see the box below). For one-step methods (e.g., Runge-Kutta), zero-stability is automatic; stability is analyzed via the stability function on the test equation.
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
@@ -214,11 +210,11 @@ $$
 \dot{y} = \lambda y, \quad \text{Re}(\lambda) < 0
 $$
 
-Applying a numerical method to this equation with step size $$h$$ yields a recurrence of the form $$y_{n+1} = R(z)y_n$$, where $$z = h\lambda$$. The function $$R(z)$$ is the method's **stability function**. The **region of absolute stability** is the set of all $$z \in \mathbb{C}$$ for which $$\vert R(z) \vert \le 1$$.
+Applying a numerical method to this equation with step size $$h$$ yields a recurrence of the form $$y_{n+1} = R(z)y_n$$, where $$z = h\lambda$$. The function $$R(z)$$ is the method's **stability function**. The **region of absolute stability** is the set of all $$z \in \mathbb{C}$$ for which $$\vert R(z) \vert \le 1$$. For asymptotic decay of the numerical solution of $$\dot y=\lambda y$$, one needs $$\vert R(z)\vert<1$$. On the boundary $$\vert R(z)\vert=1$$ the method may be neutrally stable.
 
-*   **A-stability:** A method is A-stable if its stability region contains the entire left half-plane ($$\text{Re}(z) \le 0$$). This is a highly desirable property for problems with dynamics that decay over time.
-*   **L-stability:** A method is L-stable if it is A-stable and additionally $$\lim_{\text{Re}(z) \to -\infty} \vert R(z) \vert = 0$$. This ensures that highly stable components of the system are damped out quickly in the numerical solution.
-*   **Stiffness:** A problem is considered stiff when the step size required for stability is much smaller than the step size needed for accuracy. A-stable and L-stable methods are essential for solving stiff ODEs efficiently.
+*   **A-stability:** A method is A-stable if its stability region contains the entire left half-plane ($$\text{Re}(z) \le 0$$).
+*   **L-stability:** A method is L-stable if it is A-stable and additionally $$\lim_{\text{Re}(z) \to -\infty} \vert R(z) \vert = 0$$.
+*   **Stiffness:** A problem is considered stiff when the step size required for stability is much smaller than the step size needed for accuracy.
 
 For a Runge-Kutta method with Butcher tableau given by coefficients $$(A, b, c)$$, the stability function is:
 
@@ -226,21 +222,27 @@ $$
 R(z) = 1 + z b^\top(I - zA)^{-1}e
 $$
 
-where $$e$$ is the vector of ones. A crucial result is that **no explicit Runge-Kutta method can be A-stable**, because for an explicit method, $$R(z)$$ is a polynomial, which is unbounded as $$\text{Re}(z) \to -\infty$$.
+where $$e$$ is the vector of ones. A crucial result is that **no explicit Runge-Kutta method can be A-stable**.
 
 ### 4. The θ-methods: Unifying Euler and Trapezoid
 
-The θ-methods are a simple family of one-step integrators that provide a bridge between explicit and implicit schemes. The update rule is given by:
+The θ-methods are a simple family of one-step integrators. The update rule is given by:
 
 $$
-y_{n+1} = y_n + h \left[ (1-\theta)f(y_n) + \theta f(y_{n+1}) \right]
+y_{n+1}=y_n+h\big[(1-\theta)f(t_n,y_n)+\theta f(t_{n+1},y_{n+1})\big].
+$$
+
+Its stability function on $$\dot y=\lambda y$$ is:
+
+$$
+R(z)=\frac{1+(1-\theta)z}{1-\theta z},\qquad z=h\lambda.
 $$
 
 This family includes three famous methods:
 
-1.  **$$\theta=0$$ (Explicit Euler):** The update is $$y_{n+1} = y_n + h f(y_n)$$. This is the simplest explicit method, with order 1. Its stability function is $$R(z) = 1+z$$.
-2.  **$$\theta=1$$ (Implicit Euler):** The update is $$y_{n+1} = y_n + h f(y_{n+1})$$. This method is implicit, requiring a solve for $$y_{n+1}$$ at each step. It is of order 1, but it is both A-stable and L-stable, with stability function $$R(z) = (1-z)^{-1}$$.
-3.  **$$\theta=1/2$$ (Trapezoidal Rule):** This is an implicit method of order 2. It is A-stable but not L-stable, as $$\vert R(z) \vert \to 1$$ for $$\text{Re}(z) \to -\infty$$. Its stability function is $$R(z) = \frac{1+z/2}{1-z/2}$$.
+1.  **$$\theta=0$$ (Explicit Euler):** Order 1. Not A-stable.
+2.  **$$\theta=1$$ (Implicit Euler):** Order 1. A-stable and L-stable.
+3.  **$$\theta=1/2$$ (Trapezoidal Rule):** Order 2. A-stable but not L-stable.
 
 <blockquote class="box-info" markdown="1">
 <div class="title" markdown="1">
@@ -252,14 +254,17 @@ $$
 \theta_{n+1} = \theta_n - \alpha \nabla L(\theta_n)
 $$
 
-The stability analysis of explicit Euler on a quadratic model $$L(\theta) = \frac{1}{2}L\theta^2$$ gives the stability bound $$0 < \alpha < 2/L$$, a classic result in optimization.
+For a quadratic loss $$L(\theta)=\tfrac12\theta^\top H\theta$$ with eigenvalues $$0<\lambda_i\le \lambda_{\max}(H)=L$$, explicit Euler (= GD with step $$\alpha$$) evolves mode-wise as $$\theta^{(i)}_{n+1}=(1-\alpha\lambda_i)\theta^{(i)}_n$$. Stability requires $$\vert 1-\alpha\lambda_i\vert<1\ \forall i$$, i.e.
+
+$$
+0<\alpha<\frac{2}{L}.
+$$
+
 </blockquote>
 
 ### 5. Runge-Kutta (RK) Methods
 
-Runge-Kutta methods are a large and versatile family of one-step methods that achieve higher orders of accuracy by evaluating the function $$f$$ at intermediate points within a step.
-
-An $$s$$-stage RK method is defined by its **Butcher tableau**:
+Runge-Kutta methods are one-step methods that achieve higher orders of accuracy by evaluating $$f$$ at intermediate points within a step. An $$s$$-stage RK method is defined by its **Butcher tableau**:
 
 $$
 \begin{array}{c|c}
@@ -269,19 +274,16 @@ c & A \\
 \end{array}
 $$
 
-The order conditions are equations in terms of $$A, b, c$$ that must be satisfied. For example:
-*   Order 1: $$\sum b_i = 1$$
-*   Order 2: $$\sum b_i c_i = 1/2$$
+(Reminder: $$c_i=\sum_j a_{ij}$$ for explicit Runge-Kutta.)
 
-Well-known schemes include Heun's method (an order 2 method) and the classic RK4 method.
+The order conditions are equations in terms of $$A, b, c$$ that must be satisfied.
+*   Order 1: $$\sum_i b_i=1$$
+*   Order 2: $$\sum_i b_i c_i=\tfrac12$$
+*   Order 3: $$\sum_i b_i c_i^2=\tfrac13,\quad \sum_{i,j} b_i a_{ij} c_j=\tfrac16$$
 
-For practical use, **embedded pairs** are invaluable for adaptive step-sizing. These pairs use a single set of function evaluations to compute two solutions of different orders (e.g., order 5 and order 4). The difference between the two solutions provides an error estimate. Popular pairs include:
-*   **Dormand-Prince 5(4):** This is the method behind MATLAB's famous `ode45` solver. It is designed to minimize the error of the higher-order (5th order) solution.
-*   **Tsitouras 5(4):** A more modern and highly efficient 5(4) pair.
+**Embedded pairs & FSAL.** A 5(4) pair computes $$y^{(5)}$$ and $$y^{(4)}$$ with shared stages; their difference estimates error for adaptivity. **Dormand–Prince 5(4)** (the classic `ode45` choice) uses 7 stages but has **FSAL**, so successful steps reuse the last stage as the next step’s first—**about 6 function evaluations per accepted step**. **Tsitouras 5(4)** is a modern pair with similar accuracy and excellent efficiency in practice.
 
-Many efficient pairs feature the **First Same As Last (FSAL)** property. This means the last stage evaluation of one step can be reused as the first stage of the next, saving one function evaluation per successful step.
-
-Step-size controllers, often based on **PI or PID control theory**, use the stream of local error estimates to adjust the step size $$h$$ smoothly, aiming to keep the error below a specified relative tolerance (`rtol`) and absolute tolerance (`atol`).
+Step-size controllers, often based on **PI or PID control theory**, use the stream of local error estimates to adjust the step size $$h$$ smoothly, aiming to keep the error below specified tolerances (`rtol`/`atol`).
 
 ### 6. Linear Multistep Methods (LMMs)
 
@@ -291,27 +293,17 @@ $$
 \sum_{j=0}^{k} \alpha_j y_{n+j} = h \sum_{j=0}^{k} \beta_j f_{n+j}
 $$
 
-The method is explicit if $$\beta_k=0$$ and implicit otherwise. Two major families of LMMs are:
+*   **Adams-Bashforth (explicit) and Adams-Moulton (implicit) methods:** These are often combined in predictor-corrector pairs. MATLAB's `ode113` is a variable-step, variable-order (VSVO) solver based on this family.
 
-*   **Adams-Bashforth (explicit) and Adams-Moulton (implicit) methods:** These are widely used for non-stiff problems. They are often combined in predictor-corrector pairs (e.g., an AB4 predictor followed by an AM3 corrector), which provides an error estimate and improves stability. MATLAB's `ode113` is a variable-step, variable-order (VSVO) solver based on the Adams-Bashforth-Moulton family.
-*   **Backward Differentiation Formulas (BDFs):** These are the workhorses for stiff problems. They are implicit and have excellent stability properties for higher orders. However, the **second Dahlquist barrier** proves a fundamental limitation: an A-stable LMM cannot have an order greater than 2. BDF1 (Implicit Euler) and BDF2 are A-stable, while higher-order BDFs are not but still have large stability regions suitable for many stiff problems.
+    > **Why “1 fev/step after startup”?** The AB predictor uses only stored $$f$$-values; a single fresh $$f(t_{n+1},\tilde y_{n+1})$$ powers the AM corrector and the step’s error estimate.
+
+*   **BDF (backward differentiation formulas)** are implicit, stiff-robust multistep methods. They are **A-stable only for orders $$q\le 2$$** (BDF1 = implicit Euler, BDF2), and **zero-stable only up to $$q\le 6$$**. Orders (3)–(6) are not A-stable but have large left-half-plane sectors (A($$\alpha$$)-stability with large wedges) that are effective on many stiff problems.
 
 ### 7. Worked Connections to Optimization
 
-Let's solidify the link between numerical integration and optimization.
-
-*   **GD and Euler Stability:** As mentioned, Gradient Descent is explicit Euler on gradient flow. The stability condition for explicit Euler applied to $$\dot{y} = \lambda y$$ is $$\vert 1 + h\lambda \vert \le 1$$. For a quadratic loss with Hessian $$H$$, the eigenvalues of $$H$$ correspond to $$-\lambda$$. This gives stability limits on the learning rate $$\alpha$$ based on the largest eigenvalue (Lipschitz constant) of the Hessian.
-*   **Heavy-Ball Momentum:** The heavy-ball ODE can be written as a first-order system by defining $$v = \dot\theta$$:
-
-    $$
-    \begin{cases}
-    \dot\theta = v \\
-    \dot{v} = -\frac{\gamma}{m} v - \frac{1}{m} \nabla L(\theta)
-    \end{cases}
-    $$
-
-    Discretizing this system using a semi-implicit Euler method (explicit for $$\theta$$, implicit for $$v$$) leads directly to the Polyak momentum update equations for optimization.
-*   **Momentum as an LMM:** The standard momentum update can also be viewed as a 2-step explicit LMM. The zero-stability condition (the root condition) on this LMM imposes constraints on the momentum coefficient $$\mu$$ to ensure the optimization process doesn't diverge.
+*   **GD and Euler Stability:** As mentioned, Gradient Descent is explicit Euler on gradient flow. Stability limits on the learning rate $$\alpha$$ correspond directly to the stability region of the explicit Euler method.
+*   **Heavy-Ball Momentum:** The heavy-ball ODE can be written as a first-order system. Discretizing this system using a semi-implicit Euler method leads directly to the Polyak momentum update.
+*   **Momentum as an LMM:** The standard momentum update can also be viewed as a 2-step explicit LMM. The momentum recurrence $$(\theta_{n+1}=(1+\mu)\theta_n-\mu\theta_{n-1}-\alpha\nabla L(\theta_n))$$ has characteristic polynomial $$\zeta^2-(1+\mu)\zeta+\mu$$ with roots $$1$$ and $$\mu$$. Zero-stability requires all roots in the unit disk and simple on the unit circle ⇒ **$$\mu\in[0,1)$$** in standard uses.
 
 ---
 <blockquote class="box-tip" markdown="1">
@@ -323,3 +315,24 @@ Let's solidify the link between numerical integration and optimization.
 *   **Adaptivity:** For most problems, adaptive step-sizing using embedded pairs (like Dormand-Prince) is far more efficient than using a fixed step size.
 *   **Euler ↔ GD:** The simplest numerical method, explicit Euler, is equivalent to the fundamental optimization algorithm, Gradient Descent. This connection provides a bridge for analyzing optimization methods using ODE theory.
 </blockquote>
+
+## References
+
+* E. Hairer, S. P. Nørsett, G. Wanner. *Solving Ordinary Differential Equations I: Nonstiff Problems* (Springer). Authoritative for RK theory, order conditions, and stability; see Chs. II–IV. ([SpringerLink][1])
+* E. Hairer, G. Wanner. *Solving Ordinary Differential Equations II: Stiff and Differential-Algebraic Problems* (Springer). Core reference for stiffness, BDF, Rosenbrock/linearly-implicit methods. ([SpringerLink][2])
+* J. C. Butcher. *Numerical Methods for Ordinary Differential Equations* (Wiley). Deep dive on Runge–Kutta order theory and stability. ([Wiley Online Library][3])
+* J. R. Dormand, P. J. Prince. “A family of embedded Runge–Kutta formulae.” *J. Comput. Appl. Math.*, 1980. Classic source of the 5(4) pair behind `ode45`; FSAL and stage coefficients. ([ScienceDirect][4])
+* C. Tsitouras. “Runge–Kutta pairs of order 5(4) satisfying only the first column simplifying assumption.” *Appl. Numer. Math.*, 2011. Modern efficient 5(4) pairs (Tsit5). ([ScienceDirect][5])
+* G. Dahlquist. “A special stability problem for linear multistep methods.” *BIT*, 1963. The classic paper underpinning LMM stability barriers and the equivalence theorem. ([math.unipd.it][6])
+* P. E. Kloeden, E. Platen. *Numerical Solution of Stochastic Differential Equations* (Springer). Standard reference for Euler–Maruyama, Milstein, strong/weak orders (you’ll cite this in Part II). ([SpringerLink][7])
+* MATLAB `ode45` documentation. Notes that `ode45` uses the Dormand–Prince explicit RK 5(4) pair with adaptive steps. Useful practical cross-reference. ([mathworks.com][8])
+
+[1]: https://link.springer.com/book/10.1007/978-3-540-78862-1 "Solving Ordinary Differential Equations I: Nonstiff Problems"
+[2]: https://link.springer.com/book/10.1007/978-3-642-05221-7 "Solving Ordinary Differential Equations II"
+[3]: https://onlinelibrary.wiley.com/doi/book/10.1002/9781119121534 "Numerical Methods for Ordinary Differential Equations"
+[4]: https://www.sciencedirect.com/science/article/pii/0771050X80900133/pdf?md5=7337cc66c9ff13c6a764d87cd2327ae1&pid=1-s2.0-0771050X80900133-main.pdf&utm_source=chatgpt.com "A family of embedded Runge-Kutta formulae"
+[5]: https://www.sciencedirect.com/science/article/pii/S0898122111004706 "Runge–Kutta pairs of order 5(4) satisfying only the first ..."
+[6]: https://www.math.unipd.it/~alvise/AN_2017/LETTURE/DAHLQUIST_STAB.pdf "A special stability problem for linear multistep methods"
+[7]: https://link.springer.com/book/10.1007/978-3-662-12616-5 "Numerical Solution of Stochastic Differential Equations"
+[8]: https://www.mathworks.com/help/matlab/ref/ode45.html "ode45 - Solve nonstiff differential equations"
+
