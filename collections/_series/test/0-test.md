@@ -144,5 +144,5 @@ llm-instructions: |
   without an explicit request.
 ---
 
-![test](./image.png)
-![test](image.png)
+<!-- ![test](./image.png)
+![test](image.png) -->
