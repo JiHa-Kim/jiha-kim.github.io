@@ -1,6 +1,6 @@
 ---
 layout: post
-title: test folder
+title: test root
 date: 2025-10-02 16:11 -0400
 categories:
 - Series
