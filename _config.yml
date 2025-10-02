@@ -198,6 +198,7 @@ defaults:
       permalink: /posts/:title/
       toc: true
       math: true
+      author: jiha
       panel_includes:
         - toc
 
@@ -208,6 +209,7 @@ defaults:
       layout: post
       toc: true
       math: true
+      author: jiha
       panel_includes:
         - toc
 
