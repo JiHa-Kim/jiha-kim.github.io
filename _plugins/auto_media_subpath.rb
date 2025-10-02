@@ -41,28 +41,31 @@ Jekyll::Hooks.register :documents, :pre_render do |doc|
       # 3) Assign exactly the same path as the final URL folder:
       doc.data['media_subpath'] = "/posts/#{slug}"
   
-    else
-      #
-      # ANY OTHER COLLECTION: (_notes, _series, _crash-courses, etc.)
-      # Suppose the source is
-      #   collections/_notes/martingales/index.md
-      # Then:
-      #   doc.relative_path => "_notes/martingales/index.md"
-      #   File.dirname(...) => "_notes/martingales"
-      # We strip "_notes/" to get "martingales",
-      # then join with "/notes" to form "/notes/martingales".
-      #
-      rel_dir = File.dirname(doc.relative_path)
-      # If the file is not inside a subdirectory, skip
-      # (it might be a top-level collection page).
-      next if rel_dir.nil? || rel_dir == '.' || rel_dir.empty?
-  
-      # Remove the leading "<_collection_name>/" segment,
-      # e.g. "_notes/martingales" → "martingales"
-      dir_slug = rel_dir.sub(%r!^[^/]+/!, '')
-  
-      # Prepend the collection label (which is "notes", "series", "crash-courses", …)
-      doc.data['media_subpath'] = "/#{doc.collection.label}/#{dir_slug}"
-    end
+      else
+      # ANY OTHER COLLECTION
+      # Build a robust dir_slug that works whether the doc is:
+      # - in nested folders (collections/_foo/dir1/dir2/index.md)
+      # - a single file at collection root (collections/_foo/topic.md)
+      # - a top-level index.md (collections/_foo/index.md)
+      rel_path = doc.relative_path # e.g. "_series/test/1-test/1-test.md"
+      parts = rel_path.split("/")
+
+      # parts[0] is like "_series"
+      # If it's nested, join everything between collection folder and filename.
+      if parts.length >= 3
+          dir_slug = parts[1..-2].join("/") # "test/1-test"
+      else
+          # No subdir: fall back to the filename (without ext), unless it's "index"
+          base = doc.basename_without_ext
+          dir_slug = (base.downcase == "index") ? "" : base
+      end
+
+      # Prepend the collection label (e.g., "series", "notes", "crash-courses")
+      doc.data["media_subpath"] =
+          if dir_slug.empty?
+          "/#{doc.collection.label}"
+          else
+          "/#{doc.collection.label}/#{dir_slug}"
+          end
+      end
   end
-  
