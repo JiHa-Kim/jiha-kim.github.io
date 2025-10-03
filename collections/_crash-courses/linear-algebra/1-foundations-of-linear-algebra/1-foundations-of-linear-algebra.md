@@ -155,7 +155,7 @@ llm-instructions: |
 
 Linear algebra is the backbone of countless scientific and engineering disciplines. This first part of our crash course explores linear algebra from a geometric viewpoint, focusing on the foundational concepts in Euclidean spaces ($$\mathbb{R}^2$$ and $$\mathbb{R}^3$$) where we can visualize them. We'll cover vectors, vector spaces, linear transformations, matrices, determinants, and how these concepts relate to solving systems of linear equations.
 
-Despite focusing on geometric interpretations, I decided not to include images, as there are great resources and visualizations done by others. For instance, I highly recommend [Gregory Gunderson's blog](https://gregorygundersen.com/blog/tags/la/) or Grant Sanderson's (aka 3Blue1Brown) work both on [YouTube](https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab) and [Khan Academy](https://www.khanacademy.org/math/linear-algebra). Also, Fields medalist James Maynard's [Oxford lectures on Linear Algebra II](https://www.youtube.com/watch?v=pQhVDRojC1U) is incredibly insightful, really building the intuition from scratch geometrically without assuming proven theorems as obvious or axiomatic as is typical of textbooks on the topic. These inspired the general approach of this post and many of the ideas presented here.
+There are great resources and visualizations done by others. For instance, I highly recommend [Gregory Gunderson's blog](https://gregorygundersen.com/blog/tags/la/) or Grant Sanderson's (aka 3Blue1Brown) work both on [YouTube](https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab) and [Khan Academy](https://www.khanacademy.org/math/linear-algebra). Also, Fields medalist James Maynard's [Oxford lectures on Linear Algebra II](https://www.youtube.com/watch?v=pQhVDRojC1U) is incredibly insightful, really building the intuition from scratch geometrically without assuming proven theorems as obvious or axiomatic as is typical of textbooks on the topic. These inspired the general approach of this post and many of the ideas presented here.
 
 ## 1. The Stage: Vectors and Vector Spaces
 
@@ -179,6 +179,7 @@ Vectors can be manipulated through two primary operations:
     *   If $$c > 0$$, the direction remains the same.
     *   If $$c < 0$$, the direction is reversed.
     *   If $$c = 0$$, the result is the **zero vector** $$\vec{0}$$ (a point at the origin).
+
 
 A **vector space** is a collection of vectors where these operations (addition and scalar multiplication) are well-defined and follow a set of axioms (associativity, commutativity, distributivity, existence of a zero vector, additive inverses, etc.). For our purposes, $$\mathbb{R}^n$$ with the standard vector addition and scalar multiplication is the quintessential vector space. The formal definition of an abstract vector space will be discussed in Part 2 of this linear algebra series.
 
@@ -210,6 +211,9 @@ Let $$\vec{u} = \begin{pmatrix} 1 \\ 2 \end{pmatrix}$$ and $$\vec{v} = \begin{pm
 
     This vector has the same length as $$\vec{v}$$ but points in the opposite direction.
 </blockquote>
+
+![Example: Vector addition and scalar multiplication](vector_addition_and_scaling.png)
+_Example: Vector addition and scalar multiplication_
 
 ### 1.1. Measuring Within Space: Dot Product, Length, and Orthogonality
 
@@ -349,6 +353,8 @@ This makes sense geometrically: $$\vec{u}$$ points along the line $$y=x$$, and $
 $$
 \text{proj}_{\vec{v}} \vec{u} = \underbrace{\vec{u}\cdot \left(\frac{\vec{v}}{\Vert \vec{v} \Vert} \right)}_{\text{signed length}} \underbrace{\frac{\vec{v}}{\Vert \vec{v} \Vert}}_{\text{direction}} = \frac{\vec{u} \cdot \vec{v}}{ \Vert \vec{v} \Vert ^2} \vec{v}
 $$
+
+![Vector projection](vector_projection.png)
 
 The scalar part $$\frac{\vec{u} \cdot \vec{v}}{ \Vert \vec{v} \Vert }$$ is the signed length of this projection. Projections onto subspaces will be covered in Part 2.
 
