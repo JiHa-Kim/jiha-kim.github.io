@@ -259,6 +259,9 @@ $$\begin{cases}
 
 In words, an acute angle between two vectors means they are positively correlated, an obtuse angle means they are negatively correlated, and a right angle means they are uncorrelated (orthogonal).
 
+![Dot product and angles](dot_product_and_angles.png)
+_Dot product and angles_
+
 See {% cite gregorygundersonTwoFormsDot2018 --file crash-courses/linear-algebra/linear-algebra-1.bib %} for in-depth explanation and geometric visualization.
 
 </blockquote>
@@ -355,6 +358,7 @@ $$
 $$
 
 ![Vector projection](vector_projection.png)
+_Vector projection_
 
 The scalar part $$\frac{\vec{u} \cdot \vec{v}}{ \Vert \vec{v} \Vert }$$ is the signed length of this projection. Projections onto subspaces will be covered in Part 2.
 
