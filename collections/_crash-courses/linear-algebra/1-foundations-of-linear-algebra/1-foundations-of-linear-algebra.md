@@ -428,7 +428,9 @@ $$
 
 This provides motivation for a more general product between two vectors that is very similar.
 
-The cross product as defined for $$\mathbb{R}^3$$ is a special case of a more fundamental concept from **exterior algebra**: the **exterior product** (or **wedge product**), denoted $$\vec{u} \wedge \vec{v}$$.
+The cross product as defined for $$\mathbb{R}^3$$ is a special case of a more fundamental concept from **exterior algebra**: the **exterior product** (or **wedge product**), denoted $$\vec{u} \wedge \vec{v}$$. In **geometric algebra**, we define the **product between two vectors** as:
+
+$$\vec{a}\vec{b}=\vec{a} \cdot \vec{b}+\vec{a} \wedge \vec{b}.$$
 
 While the **inner product** (dot product) $$\vec{u} \cdot \vec{v}$$ takes two vectors and produces a scalar (capturing notions of projection and angle), the exterior product $$\vec{u} \wedge \vec{v}$$ takes two vectors and produces a different kind of algebraic object called a **bivector**.
 
