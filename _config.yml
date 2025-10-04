@@ -249,6 +249,10 @@ exclude:
   - purgecss.js
   - rollup.config.js
   - "package*.json"
+  - node_modules
+  - vendor
+  - tmp
+  - scripts
 
 plugins:
   - jekyll-tagories
