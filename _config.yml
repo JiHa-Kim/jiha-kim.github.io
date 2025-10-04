@@ -186,39 +186,34 @@ collections:
     permalink: /crash-courses/:path/
 
 defaults:
+  # 1) Global defaults for all content
+  - scope:
+      path: ""
+    values:
+      layout: post
+      toc: true
+      math: true
+      author: jiha
+      panel_includes:
+        - toc
+
+  # 2) Permalink overrides for different collections
   - scope:
       type: collection
     values:
-      permalink: /:collection/:path/
+      permalink: /:collection/:path/ # Generic collection permalink
 
   - scope:
       type: posts
     values:
-      layout: post
-      permalink: /posts/:title/
-      toc: true
-      math: true
-      author: jiha
-      panel_includes:
-        - toc
-
-  # 1) Global: everything uses "post" layout with TOC on
-  - scope:
-      path: "" # applies to every content document
-    values:
-      layout: post
-      toc: true
-      math: true
-      author: jiha
-      panel_includes:
-        - toc
+      permalink: /posts/:title/ # Specific permalink for posts
 
   - scope:
       path: "collections/_*/*/index.md" # Matches landing pages in any collection
     values:
       layout: collection-landing
 
-  # Tabs: switch back to "page" layout, TOC off
+  # 3) Specific overrides for the 'tabs' collection
   - scope:
       type: tabs
     values:
