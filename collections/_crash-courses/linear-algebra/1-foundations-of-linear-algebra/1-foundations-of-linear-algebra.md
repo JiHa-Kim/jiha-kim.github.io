@@ -168,18 +168,22 @@ Our discussion begins with the fundamental objects of linear algebra: vectors.
 Geometrically, a **vector** in $$\mathbb{R}^n$$ is an arrow originating from a central point (the **origin** $$\vec{0}$$) and pointing to a coordinate $$(x_1, x_2, \dots, x_n)$$. It encapsulates both **direction** and **magnitude** (length).
 For example, $$\vec{v} = \begin{pmatrix} 2 \\ 1 \end{pmatrix}$$ in $$\mathbb{R}^2$$ is an arrow from $$(0,0)$$ to $$(2,1)$$.
 Vectors are often written as column matrices.
+
+As we will see, this is the most naive definition of vectors that is typically used in a first presentation. We'll start by working with it to build intuition, but we'll eventually bring it to higher abstraction levels in order to make them more general and powerful.
+
+![Vector](vector.png)
+_Vector $$\begin{pmatrix} 2 \\ 1 \end{pmatrix}$$ in $$\mathbb{R}^2$$_
 </blockquote>
 
 Vectors can be manipulated through two primary operations:
 
-1.  **Vector Addition:** $$\vec{u} + \vec{v}$$. Geometrically, place the tail of vector $$\vec{v}$$ at the head (tip) of vector $$\vec{u}$$. The sum $$\vec{u} + \vec{v}$$ is the new vector from the origin (or tail of $$\vec{u}$$) to the head of the translated $$\vec{v}$$. This is often called the **parallelogram law**, as $$\vec{u}$$, $$\vec{v}$$, and $$\vec{u}+\vec{v}$$ form three sides of a parallelogram if they share the same origin.
+1.  **Vector Addition:** $$\vec{u} + \vec{v}$$. Geometrically, place the tail of vector $$\vec{v}$$ at the head (tip) of vector $$\vec{u}$$. The sum $$\vec{u} + \vec{v}$$ is the new vector from the origin (or tail of $$\vec{u}$$) to the head of the translated $$\vec{v}$$. This is sometimes called the **parallelogram law**, as $$\vec{u}$$, $$\vec{v}$$, and $$\vec{u}+\vec{v}$$ form three sides of a parallelogram if they share the same origin. However, the parallelogram law in more advanced contexts also refers to a different theorem relating the sides and the diagonals of a parallelogram, so you can also call it "tip to tail" vector addition, since at the tip of the first vector, you place the tail of the second.
 2.  **Scalar Multiplication:** $$c\vec{v}$$, where $$c$$ is a scalar (a real number, unless stated otherwise). This operation scales the vector $$\vec{v}$$.
     *   If $$\vert c \vert > 1$$, the vector is stretched.
     *   If $$0 < \vert c \vert < 1$$, the vector is shrunk.
     *   If $$c > 0$$, the direction remains the same.
     *   If $$c < 0$$, the direction is reversed.
     *   If $$c = 0$$, the result is the **zero vector** $$\vec{0}$$ (a point at the origin).
-
 
 A **vector space** is a collection of vectors where these operations (addition and scalar multiplication) are well-defined and follow a set of axioms (associativity, commutativity, distributivity, existence of a zero vector, additive inverses, etc.). For our purposes, $$\mathbb{R}^n$$ with the standard vector addition and scalar multiplication is the quintessential vector space. The formal definition of an abstract vector space will be discussed in Part 2 of this linear algebra series.
 
@@ -270,6 +274,8 @@ See {% cite gregorygundersonTwoFormsDot2018 --file crash-courses/linear-algebra/
 <summary markdown="1">
 **Details.** Derivation: Equivalence of Geometric and Algebraic Dot Product (2D)
 </summary>
+
+![Cosine law for dot product](cosine_law.png)
 
 Consider two vectors $$\vec{a} = \begin{pmatrix} a_1 \\ a_2 \end{pmatrix}$$ and $$\vec{b} = \begin{pmatrix} b_1 \\ b_2 \end{pmatrix}$$. Let $$\theta$$ be the angle between them.
 By the Law of Cosines on the triangle formed by $$\vec{a}$$, $$\vec{b}$$, and $$\vec{b}-\vec{a}$$:
@@ -384,15 +390,49 @@ $$
 
 Note that $$\vec{a} \times \vec{b} = - (\vec{b} \times \vec{a})$$ (it's anti-commutative).
 Also, if $$\vec{a}$$ and $$\vec{b}$$ are parallel or anti-parallel ($$\theta=0^\circ$$ or $$\theta=180^\circ$$), then $$\sin\theta=0$$, so $$\vec{a} \times \vec{b} = \vec{0}$$.
+
+![Cross product](cross_product.png)
 </blockquote>
 
 <details class="details-block" markdown="1">
 <summary markdown="1">
-**Details.** A Deeper Dive: Cross Product and the Exterior Product
+**Details.** The Wedge Product, A More Natural Cross Product
 </summary>
+The cross product is actually a pretty unnatural concept. If you have used it in engineering contexts, you know that it's often used to represent quantities about rotation, e.g. torque. However, this is very unnatural. A rotation happens in a plane, i.e. a 2D subspace. So why do we need to introduce an additional third dimension to solve problems? The answer is that we shouldn't. We can work directly in that plane. 
+
+You have likely heard the statement that "you can't multiply two vectors like you multiply two scalars". Supposedly, you can only use the dot product OR the cross product. If you've ever played with complex numbers, though, you might have found some curious behavior that makes the following exploration less surprising. A complex number is essentially like a 2D vector, having two perpendicular coordinates:
+
+$$a+ib\cong \begin{pmatrix} a \\ b \end{pmatrix}$$
+
+where $$i^2 = -1$$. We also know that multiplication of complex numbers is well-defined:
+
+$$(a+ib)(c+id)=(ac-bd)+i(ad+bc)$$
+
+Yet, we are supposed to believe that we can multiply complex numbers, but not 2D vectors? Of course, that doesn't make sense. Look at the following:
+
+$$\overline{(a+ib)}(c+id)=(a-ib)(c+id)=(ac+bd)+i(ad-bc)$$
+
+What do you notice about the real part of this product? Indeed, it's precisely the dot product!
+
+$$\begin{pmatrix} a \\ b \end{pmatrix} \cdot \begin{pmatrix} c \\ d \end{pmatrix} = ac+bd$$
+
+And if you already have seen some linear algebra before, you'll be even more suspicious, as the imaginary part is precisely the determinant.
+
+$$
+\begin{vmatrix}
+a & c \\
+b & d
+\end{vmatrix}
+= ad-bc
+$$
+
+This provides motivation for a more general product between two vectors that is very similar.
+
 The cross product as defined for $$\mathbb{R}^3$$ is a special case of a more fundamental concept from **exterior algebra**: the **exterior product** (or **wedge product**), denoted $$\vec{u} \wedge \vec{v}$$.
 
 While the **inner product** (dot product) $$\vec{u} \cdot \vec{v}$$ takes two vectors and produces a scalar (capturing notions of projection and angle), the exterior product $$\vec{u} \wedge \vec{v}$$ takes two vectors and produces a different kind of algebraic object called a **bivector**.
+
+Just like our vectors are "oriented line segments", we can think of **bivectors** as an "oriented plane segment".
 
 *   **Geometric Meaning:** A bivector $$\vec{u} \wedge \vec{v}$$ represents an *oriented parallelogram* (an area element) in the plane spanned by $$\vec{u}$$ and $$\vec{v}$$. Its magnitude is the area of this parallelogram, and its orientation indicates the sense of circulation from $$\vec{u}$$ to $$\vec{v}$$.
 *   **Connection to Cross Product (in $$\mathbb{R}^3$$):** In the specific case of $$\mathbb{R}^3$$, there's a unique correspondence (via the Hodge dual) between bivectors and vectors. The bivector $$\vec{u} \wedge \vec{v}$$ can be associated with a vector that is orthogonal to the plane of $$\vec{u}$$ and $$\vec{v}$$, and whose magnitude is the area of the parallelogram they span. This associated vector is precisely the cross product $$\vec{u} \times \vec{v}$$. In other dimensions (e.g., $$\mathbb{R}^2$$ or $$\mathbb{R}^4$$), the wedge product of two vectors doesn't naturally yield another vector in the same space in this way. For instance, in $$\mathbb{R}^2$$, $$\vec{e}_1 \wedge \vec{e}_2$$ is a bivector representing the unit area, akin to a scalar for orientation purposes.
@@ -400,6 +440,7 @@ While the **inner product** (dot product) $$\vec{u} \cdot \vec{v}$$ takes two ve
 
 So, while the cross product is a very useful tool in 3D geometry and physics, its "true nature" as a part of exterior algebra is a more advanced topic.
 
+![Cross product vs wedge product](cross_vs_wedge_product.png)
 <details class="details-block" markdown="1">
 <summary markdown="1">
 **Details.** Pseudovectors: The "Weirdness" of Cross Product under Reflection
@@ -511,6 +552,8 @@ Geometrically, a set of vectors is linearly independent if no vector in the set 
 *   Two non-zero vectors are linearly dependent if and only if they are collinear (being scalar multiples of each other, they lie on the same line, which has dimension 1).
 *   Three vectors in $$\mathbb{R}^3$$ are linearly dependent if and only if they are coplanar (lie on the same plane through the origin, which has dimension 2).
 Thus, for $$k$$ vectors, if they are linearly *dependent*, we have $$\dim \mathrm{Span}(\vec{v}_1, \dots, \vec{v}_k) < k$$. Conversely, if $$k$$ vectors are linearly *independent*, they span a $$k$$-dimensional space: $$\dim \mathrm{Span}(\vec{v}_1, \dots, \vec{v}_k) = k$$.
+
+![Linear dependence vs independence](linear_dependence_vs_independence.png)
 </blockquote>
 
 <blockquote class="box-definition" markdown="1">
@@ -586,6 +629,8 @@ A transformation $$T$$ is **linear** if it satisfies two geometric conditions:
 This means the transformation might stretch, rotate, shear, or reflect the space, but it does so uniformly.
 </blockquote>
 
+![Linear transformation](linear_transformation.png)
+
 While this geometric picture is highly intuitive, especially in 2D and 3D, relying solely on it can be limiting. To rigorously prove properties of these transformations and to extend these ideas to settings beyond visualizable Euclidean space (like spaces of functions or higher-dimensional data), we need a more formal, algebraic definition. The key is to capture the essence of "preserving grid lines and even spacing" in algebraic terms. This leads us to identify properties like additivity and homogeneity as fundamental. These algebraic properties are not only easier to work with for proving general theorems but also form the basis for generalizing the concept of linearity to other mathematical structures.
 
 This geometric intuition leads to precise algebraic properties:
@@ -658,6 +703,8 @@ Let $$T: \mathbb{R}^2 \to \mathbb{R}^2$$ be a transformation that rotates every 
 
         They are equal.
     Since both conditions hold, the rotation is a linear transformation.
+
+![Rotation: linear transformation](rotation.png)
 </blockquote>
 
 <blockquote class="box-example" markdown="1">
@@ -669,6 +716,8 @@ Consider $$T: \mathbb{R}^2 \to \mathbb{R}^2$$ defined by $$T\begin{pmatrix} x \\
 Let's check $$T(\vec{0})$$: $$T\begin{pmatrix} 0 \\ 0 \end{pmatrix} = \begin{pmatrix} 0+1 \\ 0 \end{pmatrix} = \begin{pmatrix} 1 \\ 0 \end{pmatrix} \neq \vec{0}$$.
 
 Since the origin is not fixed (or by failing homogeneity/additivity), this transformation is **not linear**.
+
+![Translation: non-linear transformation](translation.png)
 </blockquote>
 
 **Linear Transformation Exercises:**
@@ -741,6 +790,51 @@ $$
 So, for any vector $$\vec{x} = \begin{pmatrix} x \\ y \end{pmatrix}$$, $$T(\vec{x}) = A\vec{x} = \begin{pmatrix} 0 & -1 \\ 1 & 0 \end{pmatrix} \begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} -y \\ x \end{pmatrix}$$, which matches our earlier formula.
 </blockquote>
 
+<blockquote class="box-tip" markdown="1">
+<div class="title" markdown="1">
+**Tip.** Indexing Notation for Matrix Entries
+</div>
+
+Since we can encode a matrix's entries in a rectangular table, we can iterate over two indices to identify any entry. So we write $$A=A_{ij}$$, where the first index $$i$$ loops over the **horizontal rows** and the second index $$j$$ loops over the **vertical columns**.
+</blockquote>
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Example.** Indexing Notation for Matrix Entries
+</div>
+
+For $$A\in \mathbb{R}^{3 \times 2}$$, i.e. 3 rows and 2 columns:
+
+$$
+A = \begin{pmatrix}
+A_{11} & A_{12} \\
+A_{21} & A_{22} \\
+A_{31} & A_{32}
+\end{pmatrix}
+$$
+
+and the matrix is determined by its entries.
+</blockquote>
+
+<blockquote class="box-example" markdown="1">
+<div class="title" markdown="1">
+**Exercise.** Identity Matrix
+</div>
+Think about a square matrix $$I\in \mathbb{R}^{n \times n}$$ where $$I_{ij}=1$$ if $$i=j$$ or $$0$$ otherwise. $$I$$ is called the **identity matrix**. Basically, everything along the main diagonal (from top left to bottom right) is $$1$$, and everything else is $$0$$.
+
+$$
+I = \begin{pmatrix}
+1 & 0 & 0 & \cdots & 0 \\
+0 & 1 & 0 & \cdots & 0 \\
+0 & 0 & 1 & \cdots & 0 \\
+\vdots& & & \ddots &   \\
+0 & 0 & 0 & \cdots & 1
+\end{pmatrix}
+$$
+
+What is the effect of the linear transformation $$I$$? Hint: look at the form of our basis vectors $$e_i$$ again.
+</blockquote>
+
 ### 4.1. Composition of Transformations and Matrix Multiplication
 
 If you apply one linear transformation $$T_1$$ (matrix $$A_1$$) and then another $$T_2$$ (matrix $$A_2$$), the combined effect is also a linear transformation $$T = T_2 \circ T_1$$ (apply $$T_1$$ first, then $$T_2$$). Its matrix is the product $$A = A_2 A_1$$.
@@ -759,11 +853,22 @@ A = \begin{pmatrix} 1 & 0.5 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} 0 & -1 \\ 1 &
 $$
 
 Let's see where $$\vec{e}_1$$ goes under the composite transformation:
-$$T_1(\vec{e}_1) = \begin{pmatrix} 0 \\ 1 \end{pmatrix} = \vec{e}_2$$.
-$$T_2(\vec{e}_2) = \begin{pmatrix} 0.5 \\ 1 \end{pmatrix}$$. This is the first column of $$A$$. Correct.
+
+$$T_1(\vec{e}_1) = \begin{pmatrix} 0 \\ 1 \end{pmatrix} = \vec{e}_2$$
+
+$$T_2(\vec{e}_2) = \begin{pmatrix} 0.5 \\ 1 \end{pmatrix}$$
+
+This is the first column of $$A$$. Correct.
+
 Let's see where $$\vec{e}_2$$ goes:
-$$T_1(\vec{e}_2) = \begin{pmatrix} -1 \\ 0 \end{pmatrix} = -\vec{e}_1$$.
-$$T_2(-\vec{e}_1) = \begin{pmatrix} 1 & 0.5 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} -1 \\ 0 \end{pmatrix} = \begin{pmatrix} -1 \\ 0 \end{pmatrix}$$. This is the second column of $$A$$. Correct.
+
+$$T_1(\vec{e}_2) = \begin{pmatrix} -1 \\ 0 \end{pmatrix} = -\vec{e}_1$$
+
+$$T_2(-\vec{e}_1) = \begin{pmatrix} 1 & 0.5 \\ 0 & 1 \end{pmatrix} \begin{pmatrix} -1 \\ 0 \end{pmatrix} = \begin{pmatrix} -1 \\ 0 \end{pmatrix}$$
+
+This is the second column of $$A$$. Correct.
+
+![Composition of rotation and shear](composition.png)
 </blockquote>
 
 **Matrix & Transformation Exercises:**
@@ -772,7 +877,7 @@ $$T_2(-\vec{e}_1) = \begin{pmatrix} 1 & 0.5 \\ 0 & 1 \end{pmatrix} \begin{pmatri
 2.  Find the matrix for the linear transformation $$T: \mathbb{R}^2 \to \mathbb{R}^2$$ that projects vectors onto the line $$y=x$$. (Hint: Where do $$\vec{e}_1$$ and $$\vec{e}_2$$ land?)
 3.  Find the matrix for the linear transformation $$T: \mathbb{R}^3 \to \mathbb{R}^2$$ defined by $$T\begin{pmatrix} x \\ y \\ z \end{pmatrix} = \begin{pmatrix} x+y \\ y-z \end{pmatrix}$$.
 4.  If $$A = \begin{pmatrix} 1 & 0 \\ 0 & 0 \end{pmatrix}$$, describe geometrically what the transformation $$T(\vec{x}) = A\vec{x}$$ does to vectors in $$\mathbb{R}^2$$.
-5.  If $$T: \mathbb{R}^n \to \mathbb{R}^m$$ and $$S: \mathbb{R}^m \to \mathbb{R}^p$$ are linear transformations with matrices $$A$$ and $$B$$ respectively, the composition $$S \circ T$$ (meaning $$S(T(\vec{x}))$$) is also a linear transformation. What is its matrix?
+5.  If $$T: \mathbb{R}^n \to \mathbb{R}^m$$ and $$S: \mathbb{R}^m \to \mathbb{R}^p$$ are linear transformations with matrices $$A$$ and $$B$$ respectively, the composition $$S \circ T$$ (meaning $$S(T(\vec{x}))$$) is also a linear transformation. What is its matrix? (Hint: Consider the action of the composition on the basis vectors $$e_i\in \mathbb{R}^n$$. Use matrix indexing notation for easier calculations.)
 
 See {% cite gregorygundersonMatricesFunctionsMatrices2022 --file crash-courses/linear-algebra/linear-algebra-1.bib %} and {% cite gregorygundersonGeometricalUnderstandingMatrices2018 --file crash-courses/linear-algebra/linear-algebra-1.bib %} for more.
 
@@ -793,6 +898,8 @@ The "volume" refers to area in $$\mathbb{R}^2$$, volume in $$\mathbb{R}^3$$, and
     *   $$\det(A) > 0$$: Preserves orientation. (e.g. a rotation)
     *   $$\det(A) < 0$$: Reverses orientation (e.g. a reflection).
     *   $$\det(A) = 0$$: Collapses space to a lower dimension. This means the columns of $$A$$ are linearly dependent, and the matrix $$A$$ is singular (not invertible). The "volume" of the transformed parallelepiped is zero because it's flattened into a lower-dimensional shape (a line or a point if in 2D, a plane or line or point if in 3D, etc.).
+
+![Determinant](determinant.png)
 
 <blockquote class="box-theorem" markdown="1">
 <div class="title" markdown="1">
@@ -826,6 +933,8 @@ Geometrically, a shear transformation maps a square to a parallelogram with the 
 The standard basis vector $$\vec{e}_1 = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$$ maps to $$\begin{pmatrix} 1 \\ 0 \end{pmatrix}$$.
 The standard basis vector $$\vec{e}_2 = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$$ maps to $$\begin{pmatrix} k \\ 1 \end{pmatrix}$$.
 The unit square (formed by $$\vec{e}_1, \vec{e}_2$$) is transformed into a parallelogram with vertices at $$(0,0), (1,0), (k,1), (1+k,1)$$. The area of this parallelogram is base $$\times$$ height $$= 1 \times 1 = 1$$.
+
+![Determinant of a shearing transformation](shear_determinant.png)
 </blockquote>
 
 **Important Properties of Determinants:**
@@ -876,6 +985,8 @@ Let $$A = \begin{pmatrix} 1 & 2 \\ 3 & -1 \end{pmatrix}$$, $$\vec{x} = \begin{pm
 Here, $$\det(A) = (1)(-1) - (2)(3) = -1 - 6 = -7 \neq 0$$. So, A is invertible and a unique solution exists.
 The transformation $$A$$ maps the plane to itself without collapsing it. We are looking for the unique vector $$\vec{x}$$ that gets mapped to $$\vec{b}$$.
 (Solving this system yields $$x=1, y=2$$. So $$\vec{x}=\begin{pmatrix} 1 \\ 2 \end{pmatrix}$$ is the solution.)
+
+![System of linear equations](affine_system.png)
 </blockquote>
 
 **System of Equations Exercises:**
@@ -913,18 +1024,14 @@ The geometric viewpoint of linear algebra is highly useful to reason about some 
 
 Here are some examples.
 
-1. Similarity in Geometry
-In geometry, it is known that scaling a shape by a factor of $$k$$ changes its volume by a factor of $$k^n$$, where $$n$$ is the dimension of the space. This feels somewhat correct, but hard to fully justify intuitively. However, with the properties of the determinant, this is obvious: we are applying a scaling transformation $$kI$$ where $$I$$ is the identity transformation, i.e. each basis vector is scaled by a factor of $$k$$. From the globality of the determinant, the whole shape's volume is scaled by $$det(kI)=k^n$$.
-
-2. Cavalier's principle
-Cavalier's principle states that two regions that differ only up to translations in a single direction have equal volume. In linear algebraic terms, is simply that a shearing transformation does not affect volume. 
+1. Similarity in Geometry: In geometry, it is known that scaling a shape by a factor of $$k$$ changes its volume by a factor of $$k^n$$, where $$n$$ is the dimension of the space. This feels somewhat correct, but hard to fully justify intuitively. However, with the properties of the determinant, this is obvious: we are applying a scaling transformation $$kI$$ where $$I$$ is the identity transformation, i.e. each basis vector is scaled by a factor of $$k$$. From the globality of the determinant, the whole shape's volume is scaled by $$det(kI)=k^n$$.
+2. Cavalier's principle: Cavalier's principle states that two regions that differ only up to translations in a single direction have equal volume. In linear algebraic terms, is simply that a shearing transformation does not affect volume. 
 
 Here are some concrete examples of intuition it provides.
 
-1. Area of an ellipse
-You might have derived the formula for the area enclosed by an ellipse in multivariable calculus, and you would find this procedure quite tedious. However, knowing that the area of the unit disk is $$\pi$$ is sufficient to conclude that, by appropriately rotating the basis vectors and scaling them by the lengths of the semi-diagonals of the ellipse $$a$$ and $$b$$, the area of the ellipse is $$\pi \cdot a \cdot b$$.
-2. Area of a Parallelogram from its Defining Vectors
-   The definition of the determinant tells us that $$\vert\det(A)\vert$$ is the factor by which the transformation $$T(\vec{x})=A\vec{x}$$ scales areas (in 2D) or volumes (in 3D). This arises because a linear transformation maps the standard basis vectors, which form a unit square (in 2D) or unit cube (in 3D) of area/volume 1, to a parallelogram or parallelepiped whose area/volume is $$\vert\det(A)\vert$$.
+1. Area of an ellipse: You might have derived the formula for the area enclosed by an ellipse in multivariable calculus, and you would find this procedure quite tedious. However, knowing that the area of the unit disk is $$\pi$$ is sufficient to conclude that, by appropriately rotating the basis vectors and scaling them by the lengths of the semi-diagonals of the ellipse $$a$$ and $$b$$, the area of the ellipse is $$\pi \cdot a \cdot b$$. 
+![Unit disk linearly transformed into ellipse](disk_to_ellipse.png)
+2. Area of a Parallelogram from its Defining Vectors: The definition of the determinant tells us that $$\vert\det(A)\vert$$ is the factor by which the transformation $$T(\vec{x})=A\vec{x}$$ scales areas (in 2D) or volumes (in 3D). This arises because a linear transformation maps the standard basis vectors, which form a unit square (in 2D) or unit cube (in 3D) of area/volume 1, to a parallelogram or parallelepiped whose area/volume is $$\vert\det(A)\vert$$.
 
    We can use this directly: if we want to find the area of a parallelogram spanned by two vectors $$\vec{u}$$ and $$\vec{v}$$ in $$\mathbb{R}^2$$, we can construct a matrix $$M$$ whose columns are these vectors: $$M = [\vec{u} \ \vec{v}]$$. The linear transformation $$T(\vec{x}) = M\vec{x}$$ maps the standard basis vector $$\vec{e}_1 = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$$ to $$\vec{u}$$ and $$\vec{e}_2 = \begin{pmatrix} 0 \\ 1 \end{pmatrix}$$ to $$\vec{v}$$.
    Thus, the unit square spanned by $$\vec{e}_1$$ and $$\vec{e}_2$$ is transformed into the parallelogram spanned by $$\vec{u}$$ and $$\vec{v}$$. The area of this parallelogram is therefore $$ \vert \det(M) \vert \times \text{Area}(\text{unit square}) =  \vert \det(M) \vert \times 1 =  \vert \det(M) \vert $$.
@@ -933,8 +1040,7 @@ You might have derived the formula for the area enclosed by an ellipse in multiv
    This provides a fundamental geometric interpretation for the determinant computation: it's the signed area (or volume) of the shape formed by its column vectors. This is a direct consequence of the local-to-global scaling property, applied to the specific case where the "shape" is defined by the vectors themselves relative to the origin.
    In $$\mathbb{R}^3$$, the volume of the parallelepiped spanned by three vectors $$\vec{u}, \vec{v}, \vec{w}$$ is similarly given by $$ \vert \det([\vec{u} \ \vec{v} \ \vec{w}]) \vert $$.
 
-3. Transformation of the Center of Mass
-   Consider a system of $$k$$ point masses $$m_1, m_2, \dots, m_k$$ located at positions $$\vec{p}_1, \vec{p}_2, \dots, \vec{p}_k$$ in $$\mathbb{R}^n$$. The center of mass of this system is a weighted average of the positions:
+3. Transformation of the Center of Mass: Consider a system of $$k$$ point masses $$m_1, m_2, \dots, m_k$$ located at positions $$\vec{p}_1, \vec{p}_2, \dots, \vec{p}_k$$ in $$\mathbb{R}^n$$. The center of mass of this system is a weighted average of the positions:
 
    $$
    \vec{R}_{CM} = \frac{m_1\vec{p}_1 + m_2\vec{p}_2 + \dots + m_k\vec{p}_k}{m_1 + m_2 + \dots + m_k} = \frac{\sum_{i=1}^k m_i \vec{p}_i}{M_{total}}
@@ -966,7 +1072,8 @@ You might have derived the formula for the area enclosed by an ellipse in multiv
    \vec{R}_{CM}' = A \vec{R}_{CM}
    $$
 
-   This result demonstrates that the center of mass of the transformed system is simply the transformation of the original center of mass. Instead of recomputing the center of mass from all $$k$$ new positions (a potentially tedious "local" recalculation), we can apply the linear transformation $$A$$ just once to the original, "global" center of mass vector $$\vec{R}_{CM}$$. This powerful simplification is a direct consequence of linearity, showing how the transformation's consistent action on individual components translates to a consistent action on an aggregate property derived from them.
+   This result demonstrates that the center of mass of the transformed system is simply the transformation of the original center of mass. Instead of recomputing the center of mass from all $$k$$ new positions (a potentially tedious "local" recalculation), we can apply the linear transformation $$A$$ just once to the original, "global" center of mass vector $$\vec{R}_{CM}$$. This powerful simplification is a direct consequence of linearity, showing how the transformation's consistent action on individual components translates to a consistent action on an aggregate property derived from them. 
+   ![Transformed center of mass](transformed_center_of_mass.png)
 
 ## Conclusion for Part 1
 
