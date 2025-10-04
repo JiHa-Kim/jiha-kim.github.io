@@ -20,3 +20,5 @@ group :jekyll_plugins do
   gem 'jekyll-tagories'
   gem 'jekyll-scholar'
 end
+
+gem "liquid-c"               # C-accelerated Liquid
