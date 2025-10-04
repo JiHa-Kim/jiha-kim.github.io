@@ -212,6 +212,7 @@ defaults:
       path: "collections/_*/*/index.md" # Matches landing pages in any collection
     values:
       layout: collection-landing
+      permalink: /:collection/:slug/
 
   # 3) Specific overrides for the 'tabs' collection
   - scope:
