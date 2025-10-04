@@ -491,7 +491,8 @@ Geometrically:
 *   $$\text{Span}(\vec{v}_1, \cdot, \vec{v}_n)$$ is the $$n$$-dimensional *hyperplane* (higher-dimensional analog of lines and planes, "flat" spaces) the origin containing $$\vec{v}_1, \dots, \vec{v}_n$$.
 </blockquote>
 
-![Span and linear combinations in R^2](span_and_linear_combination.png)
+![Span and linear combinations](span_and_linear_combination.png)
+_Span and linear combinations in $$\mathbb{R}^2$$_
 
 <blockquote class="box-definition" markdown="1">
 <div class="title" markdown="1">
