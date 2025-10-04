@@ -1,40 +1,36 @@
-<!-- Get 5 last posted/updated posts -->
+<!-- Get 5 last posted/updated entries across ALL collections that use layout: post -->
 
 {% assign MAX_SIZE = 5 %}
 
-{% assign all_list = '' | split: '' %}
+{%- assign all_list = '' | split: '' -%}
 
-{% for post in site.posts %}
-  {% assign datetime = post.last_modified_at | default: post.date %}
+{%- comment -%}
+  Collect every outputted doc from every collection whose layout is 'post'.
+  (Your hook only adds last_modified_at when layout == 'post', so we mirror that.)
+{%- endcomment -%}
+{%- for coll in site.collections -%}
+  {%- assign docs = coll.docs | where_exp: 'd', 'd.output != false' | where_exp: 'd', 'd.layout == "post"' -%}
+  {%- for d in docs -%}
+    {%- assign ts = d.last_modified_at | default: d.date | date: '%Y%m%d%H%M%S' -%}
+    {%- capture elem -%}{{ ts }}::{{ d.url | relative_url }}::{{ d.title | escape }}{%- endcapture -%}
+    {%- assign all_list = all_list | push: elem -%}
+  {%- endfor -%}
+{%- endfor -%}
 
-  {% capture elem %}
-    {{- datetime | date: "%Y%m%d%H%M%S" -}}::{{- forloop.index0 -}}
-  {% endcapture %}
+{%- assign update_list = all_list | sort | reverse | slice: 0, MAX_SIZE -%}
 
-  {% assign all_list = all_list | push: elem %}
-{% endfor %}
-
-{% assign all_list = all_list | sort | reverse %}
-
-{% assign update_list = '' | split: '' %}
-
-{% for entry in all_list limit: MAX_SIZE %}
-  {% assign update_list = update_list | push: entry %}
-{% endfor %}
-
-{% if update_list.size > 0 %}
+{%- if update_list.size > 0 -%}
   <section id="access-lastmod">
     <h2 class="panel-heading">{{- site.data.locales[include.lang].panel.lastmod -}}</h2>
     <ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2">
-      {% for item in update_list %}
-        {% assign index = item | split: '::' | last | plus: 0 %}
-        {% assign post = site.posts[index] %}
-        {% assign url = post.url | relative_url %}
+      {%- for item in update_list -%}
+        {%- assign parts = item | split: '::' -%}
+        {%- assign url = parts[1] -%}
+        {%- assign title = parts[2] -%}
         <li class="text-truncate lh-lg">
-          <a href="{{ url }}">{{ post.title }}</a>
+          <a href="{{ url }}">{{ title }}</a>
         </li>
-      {% endfor %}
+      {%- endfor -%}
     </ul>
   </section>
-  <!-- #access-lastmod -->
-{% endif %}
+{%- endif -%}
