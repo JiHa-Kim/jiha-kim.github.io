@@ -1,0 +1,619 @@
+/* ===========================================================================
+ * Obsidian-like Callouts for Jekyll Chirpy
+ * - Extends your existing boxes.scss using Sass modules.
+ * - Avoids @extend on compound selectors (Sass deprecation).
+ * - Fixes duplicate auto-title on <details> variants.
+ * =========================================================================== */
+
+@use 'boxes' as bx;
+
+/* --------------------------------------------------------------------------
+ * A. Math-family additions (styled consistently with your math-box mixin)
+ *    These mirror your Obsidian set: corollary, remark, proof, principle,
+ *    axiom, postulate, conjecture, claim, notation, algorithm, problem,
+ *    exercise, solution, assumption, convention, fact.
+ * -------------------------------------------------------------------------- */
+
+.box-corollary {
+  @include bx.math-box(
+    #3c78d7,
+    #3c78d7,
+    rgba(#3c78d7, 0.08),
+    '\f126',
+    'Corollary'
+  ); /* fa-code-branch */
+}
+
+.box-remark {
+  @include bx.math-box(
+    #7a7a7a,
+    #7a7a7a,
+    rgba(#7a7a7a, 0.06),
+    '\f4ad',
+    'Remark'
+  ); /* fa-comment-dots */
+  border-left-style: dashed;
+}
+
+.box-proof {
+  @include bx.math-box(
+    #9a9a9a,
+    #9a9a9a,
+    rgba(#9a9a9a, 0.06),
+    '\f14a',
+    'Proof'
+  ); /* fa-check-square */
+  .title {
+    font-style: italic;
+  }
+}
+
+.box-principle {
+  @include bx.math-box(
+    #6496be,
+    #6496be,
+    rgba(#6496be, 0.08),
+    '\f24e',
+    'Principle'
+  ); /* fa-balance-scale */
+}
+
+.box-axiom {
+  @include bx.math-box(
+    #a064be,
+    #a064be,
+    rgba(#a064be, 0.08),
+    '\f13a',
+    'Axiom'
+  ); /* fa-paragraph (pilcrow-ish) */
+  .title {
+    > * {
+      font-style: italic;
+    }
+  }
+}
+
+.box-postulate {
+  @include bx.math-box(
+    #a064be,
+    #a064be,
+    rgba(#a064be, 0.08),
+    '\f13a',
+    'Postulate'
+  ); /* fa-paragraph */
+  .title {
+    > * {
+      font-style: italic;
+    }
+  }
+}
+
+.box-conjecture {
+  @include bx.math-box(
+    #d26464,
+    #d26464,
+    rgba(#d26464, 0.08),
+    '\f059',
+    'Conjecture'
+  ); /* fa-question-circle */
+  border-left-style: dashed;
+}
+
+.box-claim {
+  @include bx.math-box(
+    #787878,
+    #787878,
+    rgba(#787878, 0.04),
+    '\f08d',
+    'Claim'
+  ); /* fa-thumbtack */
+}
+
+.box-notation {
+  @include bx.math-box(
+    #b4b4b4,
+    #b4b4b4,
+    rgba(#b4b4b4, 0.06),
+    '\f68b',
+    'Notation'
+  ); /* math-adjacent icon */
+}
+
+.box-algorithm {
+  @include bx.math-box(
+    #50b4a0,
+    #50b4a0,
+    rgba(#50b4a0, 0.08),
+    '\f542',
+    'Algorithm'
+  ); /* fa-project-diagram */
+}
+
+.box-problem {
+  @include bx.math-box(
+    #f08232,
+    #f08232,
+    rgba(#f08232, 0.08),
+    '\f044',
+    'Problem'
+  ); /* fa-edit */
+}
+
+.box-exercise {
+  @include bx.math-box(
+    #f08232,
+    #f08232,
+    rgba(#f08232, 0.08),
+    '\f044',
+    'Exercise'
+  ); /* fa-edit */
+}
+
+.box-solution {
+  @include bx.math-box(
+    #46aa46,
+    #46aa46,
+    rgba(#46aa46, 0.08),
+    '\f0eb',
+    'Solution'
+  ); /* fa-lightbulb */
+  margin-top: 0.3rem;
+}
+
+.box-assumption {
+  @include bx.math-box(
+    #c8c8c8,
+    #c8c8c8,
+    rgba(#c8c8c8, 0.06),
+    '\f05a',
+    'Assumption'
+  ); /* fa-info-circle */
+  border-left-style: dotted;
+}
+
+.box-convention {
+  @include bx.math-box(
+    #c8c8c8,
+    #c8c8c8,
+    rgba(#c8c8c8, 0.06),
+    '\f05a',
+    'Convention'
+  ); /* fa-info-circle */
+  border-left-style: dotted;
+}
+
+.box-fact {
+  @include bx.math-box(
+    #c8c8c8,
+    #c8c8c8,
+    rgba(#c8c8c8, 0.06),
+    '\f129',
+    'Fact'
+  ); /* fa-info */
+  border-left-style: dotted;
+}
+
+/* --------------------------------------------------------------------------
+ * B. Built-in Obsidian callout aliases → your existing standard boxes
+ *    (these don't change visuals; they just let you use Obsidian-like names)
+ * -------------------------------------------------------------------------- */
+
+.box-note {
+  @extend .box-info;
+}
+.box-abstract {
+  @extend .box-info;
+}
+.box-summary {
+  @extend .box-info;
+}
+.box-tldr {
+  @extend .box-info;
+}
+.box-todo {
+  @extend .box-info;
+}
+.box-hint {
+  @extend .box-tip;
+}
+.box-important {
+  @extend .box-tip;
+}
+.box-success {
+  @extend .box-tip;
+}
+.box-check {
+  @extend .box-tip;
+}
+.box-done {
+  @extend .box-tip;
+}
+.box-question {
+  @extend .box-info;
+}
+.box-help {
+  @extend .box-info;
+}
+.box-faq {
+  @extend .box-info;
+}
+.box-caution {
+  @extend .box-warning;
+}
+.box-attention {
+  @extend .box-warning;
+}
+.box-failure {
+  @extend .box-danger;
+}
+.box-fail {
+  @extend .box-danger;
+}
+.box-missing {
+  @extend .box-danger;
+}
+.box-error {
+  @extend .box-danger;
+}
+.box-bug {
+  @extend .box-danger;
+}
+.box-quote {
+  @extend .box-info;
+}
+.box-cite {
+  @extend .box-info;
+}
+
+/* --------------------------------------------------------------------------
+ * C. Collapsible variants — make <details> use the box’s palette & icon,
+ *    and DISABLE math-box auto-title pseudo-elements (which caused duplicates).
+ * -------------------------------------------------------------------------- */
+
+/* Helper mixin: apply details chrome with custom colors/icons */
+@mixin details-math(
+  $border,
+  $accent,
+  $bg,
+  $icon-closed,
+  $icon-open: $icon-closed,
+  $fa-style: 'solid'
+) {
+  @include bx.details-box(
+    $border,
+    $accent,
+    $bg,
+    $icon-closed,
+    $icon-open,
+    $fa-style
+  );
+  > summary {
+    color: $accent;
+  }
+}
+
+/* 1) Disable auto-title (from math-box’s :not(:has(> .title))) on <details> */
+details.details-block.box-proof,
+details.details-block.box-theorem,
+details.details-block.box-proposition,
+details.details-block.box-lemma,
+details.details-block.box-corollary,
+details.details-block.box-example,
+details.details-block.box-remark,
+details.details-block.box-principle,
+details.details-block.box-axiom,
+details.details-block.box-postulate,
+details.details-block.box-conjecture,
+details.details-block.box-claim,
+details.details-block.box-notation,
+details.details-block.box-algorithm,
+details.details-block.box-problem,
+details.details-block.box-exercise,
+details.details-block.box-solution,
+details.details-block.box-assumption,
+details.details-block.box-convention,
+details.details-block.box-fact {
+  padding-top: 0;
+  &::before,
+  &::after {
+    content: none !important;
+  }
+}
+
+/* 2) Per-type <details> header recoloring + icons */
+details.details-block.box-proof {
+  @include details-math(#9a9a9a, #9a9a9a, rgba(#9a9a9a, 0.06), '\f14a');
+} /* fa-check-square */
+details.details-block.box-theorem {
+  @include details-math(#dc2626, #dc2626, rgba(#dc2626, 0.08), '\f091');
+} /* fa-trophy */
+details.details-block.box-proposition {
+  @include details-math(#eab308, #eab308, rgba(#eab308, 0.08), '\f0eb');
+} /* fa-lightbulb */
+details.details-block.box-lemma {
+  @include details-math(#16a34a, #16a34a, rgba(#16a34a, 0.08), '\f022');
+} /* fa-list-alt */
+details.details-block.box-corollary {
+  @include details-math(#3c78d7, #3c78d7, rgba(#3c78d7, 0.08), '\f126');
+} /* fa-code-branch */
+details.details-block.box-example {
+  @include details-math(#8b5cf6, #8b5cf6, rgba(#8b5cf6, 0.08), '\f0eb');
+} /* fa-lightbulb */
+details.details-block.box-remark {
+  @include details-math(#7a7a7a, #7a7a7a, rgba(#7a7a7a, 0.06), '\f4ad');
+  border-left-style: dashed;
+}
+details.details-block.box-principle {
+  @include details-math(#6496be, #6496be, rgba(#6496be, 0.08), '\f24e');
+}
+details.details-block.box-axiom {
+  @include details-math(#a064be, #a064be, rgba(#a064be, 0.08), '\f13a');
+}
+details.details-block.box-postulate {
+  @include details-math(#a064be, #a064be, rgba(#a064be, 0.08), '\f13a');
+}
+details.details-block.box-conjecture {
+  @include details-math(#d26464, #d26464, rgba(#d26464, 0.08), '\f059');
+  border-left-style: dashed;
+}
+details.details-block.box-claim {
+  @include details-math(#787878, #787878, rgba(#787878, 0.04), '\f08d');
+}
+details.details-block.box-notation {
+  @include details-math(#b4b4b4, #b4b4b4, rgba(#b4b4b4, 0.06), '\f68b');
+}
+details.details-block.box-algorithm {
+  @include details-math(#50b4a0, #50b4a0, rgba(#50b4a0, 0.08), '\f542');
+}
+details.details-block.box-problem {
+  @include details-math(#f08232, #f08232, rgba(#f08232, 0.08), '\f044');
+}
+details.details-block.box-exercise {
+  @include details-math(#f08232, #f08232, rgba(#f08232, 0.08), '\f044');
+}
+details.details-block.box-solution {
+  @include details-math(#46aa46, #46aa46, rgba(#46aa46, 0.08), '\f0eb');
+}
+details.details-block.box-assumption {
+  @include details-math(#c8c8c8, #c8c8c8, rgba(#c8c8c8, 0.06), '\f05a');
+  border-left-style: dotted;
+}
+details.details-block.box-convention {
+  @include details-math(#c8c8c8, #c8c8c8, rgba(#c8c8c8, 0.06), '\f05a');
+  border-left-style: dotted;
+}
+details.details-block.box-fact {
+  @include details-math(#c8c8c8, #c8c8c8, rgba(#c8c8c8, 0.06), '\f129');
+  border-left-style: dotted;
+}
+
+/* Optional QED helper (manual): place <span class="qed">…</span> as last child */
+.box-proof .qed {
+  display: block;
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+ * D. Dark theme overrides (match your base dark-mode pattern)
+ * -------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  .box-corollary {
+    @include bx.math-box(
+      #224d8e,
+      #8ab4ff,
+      rgba(#3c78d7, 0.1),
+      '\f126',
+      'Corollary'
+    );
+  }
+  .box-remark {
+    @include bx.math-box(
+      #525252,
+      #cfcfcf,
+      rgba(#7a7a7a, 0.08),
+      '\f4ad',
+      'Remark'
+    );
+  }
+  .box-proof {
+    @include bx.math-box(
+      #5f5f5f,
+      #d1d5db,
+      rgba(#9a9a9a, 0.08),
+      '\f14a',
+      'Proof'
+    );
+    .title {
+      font-style: italic;
+    }
+  }
+  .box-principle {
+    @include bx.math-box(
+      #3d617f,
+      #9ac3e3,
+      rgba(#6496be, 0.1),
+      '\f24e',
+      'Principle'
+    );
+  }
+  .box-axiom {
+    @include bx.math-box(
+      #6b3e86,
+      #d8b4fe,
+      rgba(#a064be, 0.1),
+      '\f13a',
+      'Axiom'
+    );
+    .title {
+      > * {
+        font-style: italic;
+      }
+    }
+  }
+  .box-postulate {
+    @include bx.math-box(
+      #6b3e86,
+      #d8b4fe,
+      rgba(#a064be, 0.1),
+      '\f13a',
+      'Postulate'
+    );
+    .title {
+      > * {
+        font-style: italic;
+      }
+    }
+  }
+  .box-conjecture {
+    @include bx.math-box(
+      #7a2a2a,
+      #fca5a5,
+      rgba(#d26464, 0.1),
+      '\f059',
+      'Conjecture'
+    );
+  }
+  .box-claim {
+    @include bx.math-box(
+      #4b4b4b,
+      #e5e7eb,
+      rgba(#787878, 0.08),
+      '\f08d',
+      'Claim'
+    );
+  }
+  .box-notation {
+    @include bx.math-box(
+      #727272,
+      #e5e7eb,
+      rgba(#b4b4b4, 0.08),
+      '\f68b',
+      'Notation'
+    );
+  }
+  .box-algorithm {
+    @include bx.math-box(
+      #2e6e63,
+      #9ae6d6,
+      rgba(#50b4a0, 0.1),
+      '\f542',
+      'Algorithm'
+    );
+  }
+  .box-problem {
+    @include bx.math-box(
+      #92400e,
+      #fdba74,
+      rgba(#f08232, 0.1),
+      '\f044',
+      'Problem'
+    );
+  }
+  .box-exercise {
+    @include bx.math-box(
+      #92400e,
+      #fdba74,
+      rgba(#f08232, 0.1),
+      '\f044',
+      'Exercise'
+    );
+  }
+  .box-solution {
+    @include bx.math-box(
+      #166534,
+      #86efac,
+      rgba(#46aa46, 0.1),
+      '\f0eb',
+      'Solution'
+    );
+  }
+  .box-assumption {
+    @include bx.math-box(
+      #5f5f5f,
+      #e5e7eb,
+      rgba(#c8c8c8, 0.08),
+      '\f05a',
+      'Assumption'
+    );
+  }
+  .box-convention {
+    @include bx.math-box(
+      #5f5f5f,
+      #e5e7eb,
+      rgba(#c8c8c8, 0.08),
+      '\f05a',
+      'Convention'
+    );
+  }
+  .box-fact {
+    @include bx.math-box(
+      #5f5f5f,
+      #e5e7eb,
+      rgba(#c8c8c8, 0.08),
+      '\f129',
+      'Fact'
+    );
+  }
+
+  /* Dark variants for <details> headers (mirrored accents) */
+  details.details-block.box-theorem {
+    @include details-math(#991b1b, #f87171, rgba(#dc2626, 0.08), '\f091');
+  }
+  details.details-block.box-proposition {
+    @include details-math(#a16207, #fbbf24, rgba(#eab308, 0.08), '\f0eb');
+  }
+  details.details-block.box-lemma {
+    @include details-math(#15803d, #4ade80, rgba(#16a34a, 0.08), '\f022');
+  }
+  details.details-block.box-example {
+    @include details-math(#6d28d9, #a78bfa, rgba(#7d48f8, 0.08), '\f0eb');
+  }
+  details.details-block.box-corollary {
+    @include details-math(#224d8e, #8ab4ff, rgba(#3c78d7, 0.1), '\f126');
+  }
+  details.details-block.box-remark {
+    @include details-math(#525252, #cfcfcf, rgba(#7a7a7a, 0.08), '\f4ad');
+  }
+  details.details-block.box-proof {
+    @include details-math(#5f5f5f, #d1d5db, rgba(#9a9a9a, 0.08), '\f14a');
+  }
+  details.details-block.box-principle {
+    @include details-math(#3d617f, #9ac3e3, rgba(#6496be, 0.1), '\f24e');
+  }
+  details.details-block.box-axiom {
+    @include details-math(#6b3e86, #d8b4fe, rgba(#a064be, 0.1), '\f13a');
+  }
+  details.details-block.box-postulate {
+    @include details-math(#6b3e86, #d8b4fe, rgba(#a064be, 0.1), '\f13a');
+  }
+  details.details-block.box-conjecture {
+    @include details-math(#7a2a2a, #fca5a5, rgba(#d26464, 0.1), '\f059');
+  }
+  details.details-block.box-claim {
+    @include details-math(#4b4b4b, #e5e7eb, rgba(#787878, 0.08), '\f08d');
+  }
+  details.details-block.box-notation {
+    @include details-math(#727272, #e5e7eb, rgba(#b4b4b4, 0.08), '\f68b');
+  }
+  details.details-block.box-algorithm {
+    @include details-math(#2e6e63, #9ae6d6, rgba(#50b4a0, 0.1), '\f542');
+  }
+  details.details-block.box-problem {
+    @include details-math(#92400e, #fdba74, rgba(#f08232, 0.1), '\f044');
+  }
+  details.details-block.box-exercise {
+    @include details-math(#92400e, #fdba74, rgba(#f08232, 0.1), '\f044');
+  }
+  details.details-block.box-solution {
+    @include details-math(#166534, #86efac, rgba(#46aa46, 0.1), '\f0eb');
+  }
+  details.details-block.box-assumption {
+    @include details-math(#5f5f5f, #e5e7eb, rgba(#c8c8c8, 0.08), '\f05a');
+  }
+  details.details-block.box-convention {
+    @include details-math(#5f5f5f, #e5e7eb, rgba(#c8c8c8, 0.08), '\f05a');
+  }
+  details.details-block.box-fact {
+    @include details-math(#5f5f5f, #e5e7eb, rgba(#c8c8c8, 0.08), '\f129');
+  }
+}
