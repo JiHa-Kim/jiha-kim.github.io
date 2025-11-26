@@ -15,6 +15,7 @@ image:
   path: continuous_brownian_3d_smooth.gif
   alt: 3D plot of 2D Continous Brownian Motion Distributions
 math: true
+weight: -1
 ---
 
 # **Introduction to Stochastic Calculus**
@@ -23,7 +24,7 @@ Notation and code for generating visuals are presented in the [Appendix](#append
 
 ### **0. Introduction**
 
-This document is a brief introduction to stochastic calculus. Like, an actual introduction. Not the textbook "introductions" which immediately blast you with graduate-level probability theory axioms and definitions.
+This document is a brief introduction to stochastic calculus.
 
 The goal of this blog post is more to focus on the physical intuition and derivation of Brownian motion, which is the foundation of stochastic calculus. I will avoid very technical formalisms such as probability spaces, measure theory, filtrations, etc. in favor of a more informal approach by considering only well-behaved cases. I also try to avoid introducing too many new concepts and vocabulary.
 

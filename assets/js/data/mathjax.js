@@ -1,10 +1,11 @@
 MathJax = {
   loader: {
-    load: ['ui/lazy'], // load the lazy-typesetting extension
+    // Add '[tex]/cancel' and '[tex]/color' to the load array
+    load: ['ui/lazy', '[tex]/cancel', '[tex]/color'],
   },
   options: {
-    lazyMargin: '200px', // start typesetting 200px before in-view
-    lazyAlwaysTypeset: null, // only typeset when intersecting
+    lazyMargin: '200px',
+    lazyAlwaysTypeset: null,
   },
   tex: {
     inlineMath: [
@@ -16,5 +17,6 @@ MathJax = {
       ['\\[', '\\]'],
     ],
     tags: 'ams',
+    packages: { '[+]': ['cancel', 'color'] },
   },
 };

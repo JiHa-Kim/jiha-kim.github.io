@@ -28,8 +28,16 @@ TYPE_MAP = {
 }
 
 # Types that should default to "open" if they are collapsible and no +/− is given
-# Note: In standard Obsidian, these aren't collapsible by default, but this preserves your logic.
 DEFAULT_OPEN_TYPES = {"question","help","faq"}
+
+# Environments where we should NOT apply auto-formatting (glyph replacements)
+SKIP_FORMATTING_ENVS = {
+    "align", "align*", "equation", "equation*", "gather", "gather*",
+    "multline", "multline*", "split", "cases", "dcases", "array",
+    "matrix", "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix",
+    "aligned", "alignedat", "gathered", "subequations", "flalign",
+    "flalign*", "eqnarray"
+}
 
 # --- Helpers ----------------------------------------------------------------
 
@@ -62,26 +70,83 @@ def _restore_regions(text: str, buckets: List[str]) -> str:
 
 # --- Math conversion ---------------------------------------------------------
 
-def convert_block_math(text: str) -> str:
-    """Convert Obsidian $$...$$ blocks to Chirpy Kramdown \\[...\\] syntax."""
-    # Multiline: $$ \n ... \n $$
-    def repl_multiline(m):
-        inner = m.group(1).strip("\n")
-        return r"\\[" + "\n" + inner + "\n" + r"\\]"
-    text = re.sub(r"(?m)^\s*\$\$\s*\n([\s\S]*?)\n\s*\$\$\s*$", repl_multiline, text)
+def cleanup_latex_syntax(content: str) -> str:
+    """
+    Applies specific glyph replacements to clean up 'lazy' LaTeX.
+    Ported from fix-math.sh.
+    """
+    # 1. ... -> \dots (with space)
+    content = content.replace("...", r"\dots ")
 
-    # Single line block: $$ ... $$
-    def repl_singleline(m):
-        return r"\\[ " + m.group(1).strip() + r" \\]"
-    text = re.sub(r"(?<!\$)\$\$(?!\$)\s*([^\n]+?)\s*(?<!\$)\$\$(?!\$)", repl_singleline, text)
-    return text
+    # 2. \| or || -> \Vert (with space)
+    content = content.replace(r"\|", r"\Vert ")
+    content = content.replace("||", r"\Vert ")
+
+    # 3. | -> \vert (using negative lookbehind to ensure we don't match \| or \Vert)
+    #    matches a pipe that is NOT preceded by a backslash
+    content = re.sub(r'(?<!\\)\|', r'\\vert ', content)
+
+    # 4. * -> \ast (with space)
+    content = content.replace("*", r"\ast ")
+
+    # 5. ~ -> \sim (with space)
+    content = content.replace("~", r"\sim ")
+
+    return content
+
+def convert_block_math(text: str) -> str:
+    """
+    Normalize Obsidian $$...$$ blocks.
+
+    1. Finds $$...$$ sequences.
+    2. Checks if they contain specific environments (align, etc).
+    3. If NOT, applies cleanup_latex_syntax (replacing *, |, etc).
+    4. Formats as strict Kramdown blocks with newlines.
+    """
+
+    # Regex Breakdown:
+    # (?m)              : Multiline mode
+    # (?:^([\t ]*))?    : Group 1: Leading indentation
+    # (?<!\\)(?<!\$)\$\$(?!\$) : Match $$ start
+    # ([\s\S]+?)        : Group 2: Content (non-greedy)
+    # (?<!\\)(?<!\$)\$\$(?!\$) : Match $$ end
+
+    pattern = re.compile(
+        r"(?m)(?:^([\t ]*))?(?<!\\)(?<!\$)\$\$(?!\$)([\s\S]+?)(?<!\\)(?<!\$)\$\$(?!\$)"
+    )
+
+    def repl(m):
+        indent = m.group(1) or ""
+        content = m.group(2)
+
+        # Check if this block contains an environment that should be skipped
+        has_env = False
+        for env in SKIP_FORMATTING_ENVS:
+            if f"\\begin{{{env}}}" in content:
+                has_env = True
+                break
+
+        # If no complex environment is found, apply the cleanup logic
+        if not has_env:
+            content = cleanup_latex_syntax(content)
+
+        # Strip whitespace to prevent double newlines, then format
+        content = content.strip()
+        return f"\n{indent}$$\n{content}\n{indent}$$\n"
+
+    return pattern.sub(repl, text)
 
 def convert_inline_math(text: str) -> str:
     """Convert Obsidian $...$ inline math to Chirpy Kramdown \\(...\\) syntax."""
     # Look for $...$ that isn't $$...$$ and isn't escaped.
-    # We use [^$\n] to ensure we don't match across newlines or grab $$
     pattern = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)(?<!\$)\$(?!\$)")
-    return pattern.sub(lambda m: r"\\(" + m.group(1) + r"\\)", text)
+
+    def repl(m):
+        # Apply cleanup to inline math as well (fixes |x| -> \vert x \vert)
+        content = cleanup_latex_syntax(m.group(1))
+        return r"\\(" + content + r"\\)"
+
+    return pattern.sub(repl, text)
 
 # --- Callout parsing ---------------------------------------------------------
 
@@ -99,62 +164,91 @@ def parse_callout_block(lines: List[str], i: int) -> Tuple[Optional[str], int]:
         return None, i
 
     ctype = m.group("typ").lower()
-    state = m.group("state")  # '+' open, '-' closed, None unknown
+    state = m.group("state")
     title = (m.group("title") or "").strip()
 
-    # Gather content: strip ONE level of '>'
     content_lines = []
     i += 1
+
+    in_code_fence = False
+    in_math_block = False
+
     while i < len(lines):
         line = lines[i]
         stripped = line.lstrip()
-        if stripped.startswith(">"):
-            # Determine how much indent was used before the '>'
-            # Standard markdown usually requires a space after '>', but Obsidian is flexible.
-            # We remove the first '>' and the first space if present.
-            content_without_marker = re.sub(r'^\s*>\s?', '', line, count=1)
-            content_lines.append(content_without_marker)
+        is_quoted = stripped.startswith(">")
+
+        if is_quoted:
+            content_part = re.sub(r'^\s*>\s?', '', line, count=1)
+        else:
+            content_part = line
+
+        keep_line = False
+
+        if is_quoted:
+            keep_line = True
+        elif in_code_fence or in_math_block:
+            keep_line = True
+        elif not line.strip():
+            break
+        else:
+            break
+
+        if keep_line:
+            content_lines.append(content_part)
+
+            if re.match(r'^\s*```', content_part):
+                if not in_math_block:
+                    in_code_fence = not in_code_fence
+
+            if re.match(r'^\s*\$\$\s*$', content_part):
+                if not in_code_fence:
+                    in_math_block = not in_math_block
+
             i += 1
         else:
             break
 
-    # Recursively process the body (handles nested callouts)
     raw_body = "\n".join(content_lines)
     processed_body = convert_callouts(raw_body)
 
-    # If the body ended with a newline, preserve it for markdown block separation
     if raw_body.strip():
         processed_body = "\n" + processed_body.strip() + "\n"
     else:
         processed_body = "\n"
 
-    # Map to class
     box_class = TYPE_MAP.get(ctype, "box-info")
-
-    # Logic: If +/- is provided, it is a <details>.
-    # If not, checks DEFAULT_OPEN_TYPES. If not there, it's a standard blockquote box.
     is_collapsible = (state is not None) or (ctype in DEFAULT_OPEN_TYPES)
     is_open = (state == "+") or (ctype in DEFAULT_OPEN_TYPES)
 
-    title_div = f'\n<div class="title" markdown="1">{title}</div>' if title else ""
+    if title:
+        title_html = (
+            f'<div class="title" markdown="1">\n'
+            f'{title}\n'
+            f'</div>'
+        )
+    else:
+        title_html = ""
 
-    # Note: indenting HTML blocks inside the string isn't strictly necessary
-    # but helps read debug output.
     if is_collapsible:
         open_attr = " open" if is_open else ""
-        # Default title if none provided for collapsible
         summary_text = title if title else ctype.capitalize()
+        summary_html = (
+            f'<summary markdown="1">\n'
+            f'{summary_text}\n'
+            f'</summary>'
+        )
         html = (
             f'<details class="{box_class}"{open_attr} markdown="1">\n'
-            f'<summary markdown="1">{summary_text}</summary>\n'
+            f'{summary_html}'
             f'{processed_body}'
             f'</details>'
         )
     else:
+        inner_content = f"{title_html}{processed_body}" if title_html else processed_body
         html = (
-            f'<blockquote class="{box_class}" markdown="1">'
-            f'{title_div}'
-            f'{processed_body}'
+            f'<blockquote class="{box_class}" markdown="1">\n'
+            f'{inner_content}'
             f'</blockquote>'
         )
 
@@ -166,7 +260,6 @@ def convert_callouts(md: str) -> str:
     i = 0
     while i < len(lines):
         line = lines[i]
-        # Only check for callout start if line starts with '>'
         if line.lstrip().startswith(">") and CALLOUT_START_RE.match(line):
             html, i2 = parse_callout_block(lines, i)
             if html is not None:
@@ -180,31 +273,16 @@ def convert_callouts(md: str) -> str:
 # --- Whole-file transform ----------------------------------------------------
 
 def transform_markdown(src: str) -> str:
-    # 1) Protect code/HTML regions (so we don't process math/callouts inside code blocks)
     protected, buckets = _protect_regions(src)
-
-    # 2) Callouts (Recursive)
-    # This must happen before math if we want math inside callouts to work safely,
-    # though usually math and callouts are orthogonal.
     protected = convert_callouts(protected)
-
-    # 3) Math: display then inline
     protected = convert_block_math(protected)
     protected = convert_inline_math(protected)
-
-    # 4) Restore protected regions
     return _restore_regions(protected, buckets)
 
 # --- CLI --------------------------------------------------------------------
 
 def process_path(in_path: Path, out_dir: Optional[Path] = None, root_input: Optional[Path] = None):
-    """
-    in_path: The specific file or folder being processed.
-    out_dir: The root output directory.
-    root_input: The root of the input scan (used for calculating relative paths).
-    """
     if in_path.is_dir():
-        # If recursively scanning, ensure we know the root for relative paths
         current_root = root_input if root_input else in_path
         for p in sorted(in_path.rglob("*.md")):
             process_path(p, out_dir, current_root)
@@ -214,7 +292,6 @@ def process_path(in_path: Path, out_dir: Optional[Path] = None, root_input: Opti
             converted = transform_markdown(txt)
 
             if out_dir:
-                # Calculate relative path to preserve folder structure
                 if root_input:
                     rel_path = in_path.relative_to(root_input)
                 else:
@@ -225,7 +302,6 @@ def process_path(in_path: Path, out_dir: Optional[Path] = None, root_input: Opti
                 dst.write_text(converted, encoding="utf-8")
                 print(f"[OK] {in_path} -> {dst}", file=sys.stderr)
             else:
-                # Stdout mode
                 print(converted)
         except Exception as e:
             print(f"[ERR] Failed to process {in_path}: {e}", file=sys.stderr)
