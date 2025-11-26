@@ -64,13 +64,13 @@ Discretizing the gradient flow ODE through the forward difference operator is ca
 We replace \\(\frac{d}{dt}\\) by \\(\frac{\Delta_{h}}{\Delta_{h}t}\\) in the gradient flow ODE:
 
 $$
-\frac{\Delta_{h}}{\Delta_{h}t}w_{t}=-\Delta_{w_{t}}f(w_{t})=\frac{w_{t+h}-w_{t}}{h}
+\frac{\Delta_{h}}{\Delta_{h}t}w_{t}=-\nabla f(w_{t})=\frac{w_{t+h}-w_{t}}{h}
 $$
 
 Solving for \\(w_{t+h}\\) gives the explicit form:
 
 $$
-w_{t+h}=w_{t}-\nabla f(w_{t})
+w_{t+h}=w_{t}-h\nabla f(w_{t})
 $$
 
 </blockquote>
