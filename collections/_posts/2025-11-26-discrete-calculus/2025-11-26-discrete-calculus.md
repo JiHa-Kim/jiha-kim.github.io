@@ -3,7 +3,7 @@ layout: post
 title: Discrete Calculus
 date: 2025-11-26 05:52 +0000
 description: An introduction to Discrete Calculus, a theory for sums and differences of sequences as opposed to derivatives and integrals of functions in infinitesimal calculus.
-image: 
+image: ./discrete_calculus_thumbnail.svg
 categories:
 - Mathematical Foundations
 tags:
