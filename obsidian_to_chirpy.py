@@ -96,20 +96,14 @@ def cleanup_latex_syntax(content: str) -> str:
 
 def convert_block_math(text: str) -> str:
     """
-    Normalize Obsidian $$...$$ blocks.
+    Normalize Obsidian $$...$$ blocks into Kramdown-safe MathJax blocks.
 
     1. Finds $$...$$ sequences.
     2. Checks if they contain specific environments (align, etc).
     3. If NOT, applies cleanup_latex_syntax (replacing *, |, etc).
-    4. Formats as strict Kramdown blocks with newlines.
+    4. Wraps the result in a <div markdown="0"> with \[ ... \] delimiters
+       so Kramdown does not touch the TeX and MathJax can render it.
     """
-
-    # Regex Breakdown:
-    # (?m)              : Multiline mode
-    # (?:^([\t ]*))?    : Group 1: Leading indentation
-    # (?<!\\)(?<!\$)\$\$(?!\$) : Match $$ start
-    # ([\s\S]+?)        : Group 2: Content (non-greedy)
-    # (?<!\\)(?<!\$)\$\$(?!\$) : Match $$ end
 
     pattern = re.compile(
         r"(?m)(?:^([\t ]*))?(?<!\\)(?<!\$)\$\$(?!\$)([\s\S]+?)(?<!\\)(?<!\$)\$\$(?!\$)"
@@ -130,21 +124,39 @@ def convert_block_math(text: str) -> str:
         if not has_env:
             content = cleanup_latex_syntax(content)
 
-        # Strip whitespace to prevent double newlines, then format
         content = content.strip()
-        return f"\n{indent}$$\n{content}\n{indent}$$\n"
+
+        # Build the inner TeX: \[ ... \]
+        inner = "\\[\n" + content + "\n\\]"
+
+        # Wrap in an HTML block that disables Markdown parsing
+        return (
+            f"\n{indent}<div class=\"math-block\" markdown=\"0\">\n"
+            f"{inner}\n"
+            f"{indent}</div>\n"
+        )
 
     return pattern.sub(repl, text)
 
 def convert_inline_math(text: str) -> str:
-    """Convert Obsidian $...$ inline math to Chirpy Kramdown \\(...\\) syntax."""
+    """Convert Obsidian $...$ inline math to Kramdown-friendly MathJax syntax.
+
+    We wrap the \\(...\\) in <span markdown="0"> so Kramdown does not
+    interpret underscores, asterisks, etc, before MathJax sees them.
+    """
     # Look for $...$ that isn't $$...$$ and isn't escaped.
     pattern = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)(?<!\$)\$(?!\$)")
 
     def repl(m):
-        # Apply cleanup to inline math as well (fixes |x| -> \vert x \vert)
+        # Apply cleanup to inline math as well (fixes |x| -> \vert x \vert etc.)
         content = cleanup_latex_syntax(m.group(1))
-        return r"\\(" + content + r"\\)"
+
+        # Build the MathJax inline form \(...\)
+        inner = r"\(" + content + r"\)"
+
+        # Wrap in a span that disables Markdown parsing inside
+        # so Kramdown will not turn _ into <em>, etc.
+        return f'<span class="math-inline" markdown="0">{inner}</span>'
 
     return pattern.sub(repl, text)
 
