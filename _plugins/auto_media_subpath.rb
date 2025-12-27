@@ -9,20 +9,20 @@
 #        page.media_subpath = "/posts/my-post"
 #      which exactly matches the final output folder under /posts/my-post/.
 #
-#   2) For any other collection (e.g. _notes, _series, _crash-courses, etc.),
+#   2) For any other collection (e.g. _series, _crash-courses, etc.),
 #      it looks at the directory name inside that collection to form:
 #        page.media_subpath = "/<collection-label>/<that-directory>"
 #      so that if you have
-#        collections/_notes/martingales/index.md
+#        collections/_crash-courses/martingales/index.md
 #      it becomes
-#        page.media_subpath = "/notes/martingales"
+#        page.media_subpath = "/crash-courses/martingales"
 #
 #   You can still override per-page by adding `media_subpath: …` in front-matter.
 
 Jekyll::Hooks.register :documents, :pre_render do |doc|
     # If the user already set media_subpath manually, do nothing.
     next if doc.data.key?('media_subpath')
-  
+
     case doc.collection.label
     when 'posts'
       #
@@ -34,13 +34,13 @@ Jekyll::Hooks.register :documents, :pre_render do |doc|
       # 1) Get the base filename without extension, e.g.:
       #      "2025-04-28-some-slug"
       raw = doc.basename_without_ext
-  
+
       # 2) Strip off the leading "YYYY-MM-DD-"
       slug = raw.sub(/^\d{4}-\d{2}-\d{2}-/, '')
-  
+
       # 3) Assign exactly the same path as the final URL folder:
       doc.data['media_subpath'] = "/posts/#{slug}"
-  
+
       else
       # ANY OTHER COLLECTION
       # Build a robust dir_slug that works whether the doc is:
@@ -60,12 +60,12 @@ Jekyll::Hooks.register :documents, :pre_render do |doc|
           dir_slug = (base.downcase == "index") ? "" : base
       end
 
-      # Prepend the collection label (e.g., "series", "notes", "crash-courses")
+      # Prepend the collection label (e.g., "series", "crash-courses")
       doc.data["media_subpath"] =
           if dir_slug.empty?
           "/#{doc.collection.label}"
           else
           "/#{doc.collection.label}/#{dir_slug}"
           end
-      end
+    end
   end

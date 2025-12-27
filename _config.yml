@@ -174,10 +174,6 @@ collections:
     output: true
     sort_by: order
 
-  notes:
-    output: true
-    permalink: /notes/:path/
-
   series:
     output: true
     permalink: /series/:path/
@@ -265,7 +261,6 @@ jekyll-archives:
     - tags
   collections: # tell it which collections to scan
     - posts
-    - notes
     - series
     - crash-courses
   layouts:
@@ -387,19 +382,16 @@ jekyll_compose:
       tags:
         -
       <<: *llm-instructions
-    notes: # <- collection name == folder name (_notes)
-      categories:
-        - Notes # optional: puts every note on its own shelf
       <<: *llm-instructions
-    crash-courses: # <- collection name == folder name (_notes)
+    crash-courses: # <- collection name == folder name (crash_courses)
       categories:
-        - Crash Course # optional: puts every note on its own shelf
+        - Crash Course
       tags:
         -
       <<: *llm-instructions
-    series: # <- collection name == folder name (_notes)
+    series:
       categories:
-        - Series # optional: puts every note on its own shelf
+        - Series
       tags:
         -
       <<: *llm-instructions
