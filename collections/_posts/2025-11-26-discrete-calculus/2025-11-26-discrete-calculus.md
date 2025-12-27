@@ -2494,3 +2494,7 @@ Derive the **Summation by Parts** formula by summing the discrete product rule i
 6. The terms are <span class="math-inline" markdown="0">\(n^3 - n\)</span> (or <span class="math-inline" markdown="0">\(1n^\underline{3} + 3n^\underline{2} + 2n^\underline{1}\)</span> before conversion).
 7. This recovers <span class="math-inline" markdown="0">\(\binom{n+1}{k} - \binom{n}{k} = \binom{n}{k-1}\)</span>, which is Pascal's Identity.
 8. Sum both sides of <span class="math-inline" markdown="0">\(\Delta(u_k v_k) = u_k \Delta v_k + v_{k+1} \Delta u_k\)</span>. Rearrange to isolate <span class="math-inline" markdown="0">\(\sum u \Delta v\)</span>. Note that the boundary term is <span class="math-inline" markdown="0">\([u_k v_k]_a^b\)</span>.
+
+## References and Further Reading
+
+{% bibliography --file posts/2025-11-26-discrete-calculus/discrete-calculus.bib %}
