@@ -14,6 +14,8 @@ tags:
 math: true
 ---
 
+Link to PyTorch implementation on GitHub: https://github.com/JiHa-Kim/fast-matrix-invsqrt
+
 ## 1. Background and motivation
 
 Many ML systems repeatedly need to "whiten" or precondition vectors using a covariance-like SPD matrix <span class="math-inline" markdown="0">\(A \succ 0\)</span>. A canonical operator is the inverse square root <span class="math-inline" markdown="0">\(A^{-1/2}\)</span>, defined as the unique SPD matrix <span class="math-inline" markdown="0">\(X\)</span> such that
