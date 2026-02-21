@@ -165,7 +165,7 @@ d_i = \frac{1}{\sqrt{\sum_j |A_{ij}|}}, \qquad A \leftarrow D A D,
 
 implemented as `mode == "aol"`.
 
-This is in the spirit of matrix equilibration / diagonal scaling methods {% cite ruiz2001scaling %} used to reduce extreme row/column scaling while preserving symmetry.
+This is in the spirit of matrix equilibration / diagonal scaling methods {% cite ruiz2001scaling --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %} used to reduce extreme row/column scaling while preserving symmetry.
 
 ### 5.2 Upper scaling via a row-sum bound (GPU-friendly <span class="math-inline" markdown="0">\(\lambda_{\max}\)</span> proxy)
 
