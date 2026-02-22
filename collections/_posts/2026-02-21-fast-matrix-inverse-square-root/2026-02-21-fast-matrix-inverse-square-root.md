@@ -18,7 +18,7 @@ Link to PyTorch implementation on GitHub: https://github.com/JiHa-Kim/fast-matri
 
 ## 1. Background and motivation
 
-Many ML systems repeatedly need to "whiten" or precondition vectors using a covariance-like SPD matrix <span class="math-inline" markdown="0">\(A \succ 0\)</span>. A canonical operator is the inverse square root <span class="math-inline" markdown="0">\(A^{-1/2}\)</span>, defined as the unique SPD matrix <span class="math-inline" markdown="0">\(X\)</span> such that
+Many ML systems repeatedly need to "whiten" or precondition vectors using a covariance-like SPD matrix <span class="math-inline" markdown="0">\(A \succ 0\)</span> {% cite amariNaturalGradientWorks1998 --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %} {% cite davidonVARIABLEMETRICMETHOD1959 --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %} {% cite anilScalableSecondOrder2021a --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %} {% cite rohananil[@_arohan_]JustFunLinear2024 --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}. A canonical operator is the inverse square root <span class="math-inline" markdown="0">\(A^{-1/2}\)</span>, defined as the unique SPD matrix <span class="math-inline" markdown="0">\(X\)</span> such that
 
 <div class="math-block" markdown="0">
 \[
@@ -35,7 +35,7 @@ In deep learning settings, two practical constraints dominate:
 
 This repo is built around that viewpoint: implement a small family of matmul-only inverse-square-root iterations, normalize inputs to make them behave well under fixed budgets, and decide winners empirically using a benchmark harness.
 
-Recent work on GPU-friendly polar/sign methods in ML makes the same point: high accuracy is often unnecessary, while GEMM-only iterations and fast early progress matter {% cite amsel2025polar --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}.
+Recent work on GPU-friendly polar/sign methods in ML makes the same point: high accuracy is often unnecessary, while GEMM-only iterations and fast early progress matter {% cite anilScalableSecondOrder2021a --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %} {% cite amselPolarExpressOptimal2025a --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %} {% cite boissinTurboMuonAcceleratingOrthogonalityBased2025a --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}
 
 ---
 
@@ -86,7 +86,7 @@ X_{k+1} = X_k\left(\frac{3}{2}I - \frac{1}{2} A X_k^2\right).
 \]
 </div>
 
-If we start with <span class="math-inline" markdown="0">\(X_0 = \alpha I\)</span>, then each <span class="math-inline" markdown="0">\(X_k\)</span> is a matrix polynomial in <span class="math-inline" markdown="0">\(A\)</span> and therefore commutes with <span class="math-inline" markdown="0">\(A\)</span>. In that regime, the iteration acts eigenvalue-wise like the scalar update. This "polynomial in the input matrix" structure is central in classic Newton-type analyses for related matrix functions (notably the polar decomposition) {% cite higham1986newton --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}.
+If we start with <span class="math-inline" markdown="0">\(X_0 = \alpha I\)</span>, then each <span class="math-inline" markdown="0">\(X_k\)</span> is a matrix polynomial in <span class="math-inline" markdown="0">\(A\)</span> and therefore commutes with <span class="math-inline" markdown="0">\(A\)</span>. In that regime, the iteration acts eigenvalue-wise like the scalar update. This "polynomial in the input matrix" structure is central in classic Newton-type analyses for related matrix functions (notably the polar decomposition).
 
 ### 3.3 The coupled GEMM-only update used in this repo (NS3/NS4)
 
@@ -141,7 +141,7 @@ A widely used local convergence guarantee for Newton-Schulz style coupled iterat
 \]
 </div>
 
-in a consistent norm, which (for SPD and spectral norm) implies eigenvalues of <span class="math-inline" markdown="0">\(Y_0\)</span> lie in <span class="math-inline" markdown="0">\((0,2)\). This is the practical condition emphasized in iSQRT-COV, which uses coupled Newton-Schulz iterations to avoid GPU-unfriendly SVD/EIG while noting the method is locally convergent and requires proper normalization {% cite li2018towards --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}.
+in a consistent norm, which (for SPD and spectral norm) implies eigenvalues of <span class="math-inline" markdown="0">\(Y_0\)</span> lie in <span class="math-inline" markdown="0">\((0,2)\). This is the practical condition emphasized in iSQRT-COV, which uses coupled Newton-Schulz iterations to avoid GPU-unfriendly SVD/EIG while noting the method is locally convergent and requires proper normalization.
 
 ### 4.2 NS3 scalar basin intuition
 
@@ -167,7 +167,7 @@ d_i = \frac{1}{\sqrt{\sum_j |A_{ij}|}}, \qquad A \leftarrow D A D,
 
 implemented as `mode == "aol"`.
 
-This is in the spirit of matrix equilibration / diagonal scaling methods {% cite ruiz2001scaling --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %} used to reduce extreme row/column scaling while preserving symmetry.
+This is in the spirit of matrix equilibration / diagonal scaling methods {% cite ruizScalingAlgorithmEquilibrate --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %} used to reduce extreme row/column scaling while preserving symmetry.
 
 ### 5.2 Upper scaling via a row-sum bound (GPU-friendly <span class="math-inline" markdown="0">\(\lambda_{\max}\)</span> proxy)
 
@@ -203,7 +203,7 @@ A_{\mathrm{norm}} \leftarrow A_{\mathrm{norm}} + \delta I, \qquad \delta := \max
 
 then renormalizes by a row-sum bound again.
 
-This uses Gershgorin's theorem: all eigenvalues lie within Gershgorin discs (intervals for symmetric matrices), so the quantity above provides a cheap, conservative lower bound; shifting by <span class="math-inline" markdown="0">\(\delta I\)</span> increases all eigenvalues. {% cite gershgorin1931uber --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}
+This uses Gershgorin's theorem: all eigenvalues lie within Gershgorin discs (intervals for symmetric matrices), so the quantity above provides a cheap, conservative lower bound; shifting by <span class="math-inline" markdown="0">\(\delta I\)</span> increases all eigenvalues. {% cite Gerschgorin1931 --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}
 
 ### 5.4 Why <span class="math-inline" markdown="0">\(\ell_{\mathrm{target}} = 0.05\)</span> is a reasonable fixed-budget choice
 
@@ -215,7 +215,7 @@ The code and CLI defaults explicitly bake in <span class="math-inline" markdown=
 
 ## 6. Polar-Express-style polynomial schedules (PE-NS3 and PE2)
 
-Newton-Schulz uses a fixed affine polynomial <span class="math-inline" markdown="0">\(q(y)=1.5-0.5y\). A known drawback (also emphasized in recent ML-oriented polar/sign work) is slow initial progress when eigenvalues are not already close to 1. Polar Express addresses this by adapting the polynomial update each iteration via a minimax design, while remaining GEMM-only and stable in bf16 {% cite amsel2025polar --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}.
+Newton-Schulz uses a fixed affine polynomial <span class="math-inline" markdown="0">\(q(y)=1.5-0.5y\). A known drawback (also emphasized in recent ML-oriented polar/sign work) is slow initial progress when eigenvalues are not already close to 1. Polar Express addresses this by adapting the polynomial update each iteration via a minimax design, while remaining GEMM-only and stable in bf16 {% cite amselPolarExpressOptimal2025a --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}.
 
 This repo adapts the same principle to inverse square root.
 
@@ -256,7 +256,7 @@ In code, this is implemented with:
 
 See the affine and quadratic fitting closures in `coeff_tuner.py`.
 
-This "minimax polynomial per step" mechanism is exactly the conceptual link to Polar Express {% cite amsel2025polar --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}.
+This "minimax polynomial per step" mechanism is exactly the conceptual link to Polar Express {% cite amselPolarExpressOptimal2025a --file posts/2026-02-21-fast-matrix-inverse-square-root/fast-matrix-invsqrt.bib %}.
 
 ### 6.3 Interval propagation (why the tuner updates <span class="math-inline" markdown="0">\((\ell,u]\)</span> per step)
 

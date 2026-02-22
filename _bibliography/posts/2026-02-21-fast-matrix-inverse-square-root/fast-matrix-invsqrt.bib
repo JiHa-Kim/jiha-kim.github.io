@@ -1,40 +1,203 @@
-@article{higham1986newton,
-  title={Newton's method for the matrix square root},
-  author={Higham, Nicholas J},
-  journal={Numerische Mathematik},
-  volume={48},
-  number={1},
-  pages={97--117},
-  year={1986},
-  publisher={Springer}
+@article{amariNaturalGradientWorks1998,
+  title = {Natural {{Gradient Works Efficiently}} in {{Learning}}},
+  author = {Amari, Shun-ichi},
+  year = 1998,
+  month = feb,
+  journal = {Neural Computation},
+  volume = {10},
+  number = {2},
+  pages = {251--276},
+  issn = {0899-7667},
+  doi = {10.1162/089976698300017746},
+  url = {https://web.archive.org/web/20170706021357/http://cognet.mit.edu/system/cogfiles/journalpdfs/089976698300017746.pdf},
+  urldate = {2026-02-22},
+  abstract = {When a parameter space has a certain underlying structure, the ordinary gradient of a function does not represent its steepest direction, but the natural gradient does. Information geometry is used for calculating the natural gradients in the parameter space of perceptrons, the space of matrices (for blind source separation), and the space of linear dynamical systems (for blind source deconvolution). The dynamical behavior of natural gradient online learning is analyzed and is proved to be Fisher efficient, implying that it has asymptotically the same performance as the optimal batch estimation of parameters. This suggests that the plateau phenomenon, which appears in the backpropagation learning algorithm of multilayer perceptrons, might disappear or might not be so serious when the natural gradient is used. An adaptive method of updating the learning rate is proposed and analyzed.}
 }
 
-@article{amsel2025polar,
-  title={The Polar Express: Optimal Matrix Sign Methods and Their Application to the Muon Algorithm},
-  author={Amsel, Noah and Persson, David and Musco, Christopher and Gower, Robert},
-  journal={arXiv preprint arXiv:2505.16932},
-  year={2025}
+@misc{amselPolarExpressOptimal2025a,
+  title = {The {{Polar Express}}: {{Optimal Matrix Sign Methods}} and {{Their Application}} to the {{Muon Algorithm}}},
+  shorttitle = {The {{Polar Express}}},
+  author = {Amsel, Noah and Persson, David and Musco, Christopher and Gower, Robert M.},
+  year = 2025,
+  month = sep,
+  number = {arXiv:2505.16932},
+  eprint = {2505.16932},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2505.16932},
+  url = {http://arxiv.org/abs/2505.16932},
+  urldate = {2026-02-21},
+  abstract = {Computing the polar decomposition and the related matrix sign function has been a well-studied problem in numerical analysis for decades. Recently, it has emerged as an important subroutine within the Muon algorithm for training deep neural networks. However, the requirements of this application differ sharply from classical settings: deep learning demands GPU-friendly algorithms that prioritize high throughput over high precision. We introduce Polar Express, a new method for computing the polar decomposition. Like Newton-Schulz and other classical polynomial methods, our approach uses only matrix-matrix multiplications, making it very efficient on GPUs. Inspired by earlier work of Chen \& Chow and Nakatsukasa \& Freund, Polar Express adapts the update rule at each iteration by solving a minimax optimization problem. We prove that this strategy minimizes error in a worst-case sense, allowing Polar Express to converge as rapidly as possible both in the early iterations and asymptotically. We also address finite-precision issues, making it practical to use in bfloat16. When integrated into the Muon training framework, our method leads to consistent improvements in validation loss when training a GPT-2 model on one billion tokens from the FineWeb dataset, outperforming recent alternatives across a range of learning rates.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computation and Language,Computer Science - Machine Learning,Mathematics - Numerical Analysis,Mathematics - Optimization and Control}
 }
 
-@article{li2018towards,
-  title={Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization},
-  author={Li, Peihua and Xie, Jiangyuan and Wang, Qilong and Zuo, Wangmeng},
-  journal={arXiv preprint arXiv:1712.01034},
-  year={2018}
+@misc{anilScalableSecondOrder2021a,
+  title = {Scalable {{Second Order Optimization}} for {{Deep Learning}}},
+  author = {Anil, Rohan and Gupta, Vineet and Koren, Tomer and Regan, Kevin and Singer, Yoram},
+  year = 2021,
+  month = mar,
+  number = {arXiv:2002.09018},
+  eprint = {2002.09018},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2002.09018},
+  url = {http://arxiv.org/abs/2002.09018},
+  urldate = {2026-02-22},
+  abstract = {Optimization in machine learning, both theoretical and applied, is presently dominated by first-order gradient methods such as stochastic gradient descent. Second-order optimization methods, that involve second derivatives and/or second order statistics of the data, are far less prevalent despite strong theoretical properties, due to their prohibitive computation, memory and communication costs. In an attempt to bridge this gap between theoretical and practical optimization, we present a scalable implementation of a second-order preconditioned method (concretely, a variant of full-matrix Adagrad), that along with several critical algorithmic and numerical improvements, provides significant convergence and wall-clock time improvements compared to conventional first-order methods on state-of-the-art deep models. Our novel design effectively utilizes the prevalent heterogeneous hardware architecture for training deep models, consisting of a multicore CPU coupled with multiple accelerator units. We demonstrate superior performance compared to state-of-the-art on very large learning tasks such as machine translation with Transformers, language modeling with BERT, click-through rate prediction on Criteo, and image classification on ImageNet with ResNet-50.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Optimization and Control,Statistics - Machine Learning}
 }
 
-@techreport{ruiz2001scaling,
-  title={A Scaling Algorithm to Equilibrate Both Rows and Columns Norms in Matrices},
-  author={Ruiz, Daniel},
-  institution={RAL-TR-2001-034},
-  year={2001}
+@misc{boissinTurboMuonAcceleratingOrthogonalityBased2025a,
+  title = {Turbo-{{Muon}}: {{Accelerating Orthogonality-Based Optimization}} with {{Pre-Conditioning}}},
+  shorttitle = {Turbo-{{Muon}}},
+  author = {Boissin, Thibaut and Massena, Thomas and Mamalet, Franck and Serrurier, Mathieu},
+  year = 2025,
+  month = dec,
+  number = {arXiv:2512.04632},
+  eprint = {2512.04632},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2512.04632},
+  url = {http://arxiv.org/abs/2512.04632},
+  urldate = {2026-02-21},
+  abstract = {Orthogonality-based optimizers, such as Muon, have recently shown strong performance across large-scale training and community-driven efficiency challenges. However, these methods rely on a costly gradient orthogonalization step. Even efficient iterative approximations such as Newton-Schulz remain expensive, typically requiring dozens of matrix multiplications to converge. We introduce a preconditioning procedure that accelerates Newton-Schulz convergence and reduces its computational cost. We evaluate its impact and show that the overhead of our preconditioning can be made negligible. Furthermore, the faster convergence it enables allows us to remove one iteration out of the usual five without degrading approximation quality. Our publicly available implementation achieves up to a 2.8x speedup in the Newton-Schulz approximation. We also show that this has a direct impact on end-to-end training runtime with 5-10\% improvement in realistic training scenarios across two efficiency-focused tasks. On challenging language or vision tasks, we validate that our method maintains equal or superior model performance while improving runtime. Crucially, these improvements require no hyperparameter tuning and can be adopted as a simple drop-in replacement. Our code is publicly available on github.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence}
 }
 
-@book{gershgorin1931uber,
-  title={{\"U}ber die Abgrenzung der Eigenwerte einer Matrix},
-  author={Gershgorin, S},
-  journal={Izv. Akad. Nauk. USSR Otd. Fiz.-Mat. Nauk},
-  volume={6},
-  pages={749--754},
-  year={1931}
+@techreport{davidonVARIABLEMETRICMETHOD1959,
+  title = {{{VARIABLE METRIC METHOD FOR MINIMIZATION}}},
+  author = {Davidon, W. C.},
+  year = 1959,
+  month = may,
+  number = {ANL-5990},
+  institution = {Argonne National Lab., Lemont, Ill.},
+  doi = {10.2172/4252678},
+  url = {https://www.osti.gov/biblio/4252678},
+  urldate = {2026-02-22},
+  abstract = {A method is presented for numerically determining local minima of differentiable functions of several variables. In the proeess of locating each minimum, a matrix is determined which characterizes the behavior of the function about the minimum. For a region in which thc function depends quadratically on the variables, no more than N iterations are required, where N is the number of variables. By suitable choice of starting values and without modification of the procedure, linear constraints can be imposed upon the variables. (auth)},
+  langid = {english}
+}
+
+@article{Gerschgorin1931,
+  title = {\"Uber Die {{Abgrenzung}} Der {{Eigenwerte}} Einer {{Matrix}}},
+  author = {Gerschgorin, S.},
+  year = 1931,
+  journal = {Izvestiya Akademii Nauk SSSR, Seriya Matematicheskaya},
+  number = {6},
+  pages = {749--754},
+  url = {http://mi.mathnet.ru/eng/im5235}
+}
+
+@article{guoSchurNewtonMethod2006,
+  title = {A {{Schur}}--{{Newton Method}} for the {{Matrix}} \textbackslash lowercase\textbraceleft\textbackslash boldmath {\emph{p}} \textbraceright th {{Root}} and Its {{Inverse}}},
+  author = {Guo, Chun-Hua and Higham, Nicholas J.},
+  year = 2006,
+  month = jan,
+  journal = {SIAM Journal on Matrix Analysis and Applications},
+  volume = {28},
+  number = {3},
+  pages = {788--804},
+  issn = {0895-4798, 1095-7162},
+  doi = {10.1137/050643374},
+  url = {http://epubs.siam.org/doi/10.1137/050643374},
+  urldate = {2026-02-22},
+  abstract = {Newton's method for the inverse matrix pth root, A-1/p, has the attraction that it involves only matrix multiplication. We show that if the starting matrix is c-1I for c {$\in$} R+ then the iteration converges quadratically to A-1/p if the eigenvalues of A lie in a wedge-shaped convex set containing the disc \textbraceleft z : \textbar z - cp\textbar{} {$<$} cp\textbraceright. We derive an optimal choice of c for the case where A has real, positive eigenvalues. An application is described to roots of transition matrices from Markov models, in which for certain problems the convergence condition is satisfied with c = 1. Although the basic Newton iteration is numerically unstable, a coupled version is stable and a simple modification of it provides a new coupled iteration for the matrix pth root. For general matrices we develop a hybrid algorithm that computes a Schur decomposition, takes square roots of the upper (quasi-) triangular factor, and applies the coupled Newton iteration to a matrix for which fast convergence is guaranteed. The new algorithm can be used to compute either A1/p or A-1/p, and for large p that are not highly composite it is more efficient than the method of Smith based entirely on the Schur decomposition.},
+  langid = {english}
+}
+
+@misc{guptaShampooPreconditionedStochastic2018,
+  title = {Shampoo: {{Preconditioned Stochastic Tensor Optimization}}},
+  shorttitle = {Shampoo},
+  author = {Gupta, Vineet and Koren, Tomer and Singer, Yoram},
+  year = 2018,
+  month = mar,
+  number = {arXiv:1802.09568},
+  eprint = {1802.09568},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.1802.09568},
+  url = {http://arxiv.org/abs/1802.09568},
+  urldate = {2026-02-22},
+  abstract = {Preconditioned gradient methods are among the most general and powerful tools in optimization. However, preconditioning requires storing and manipulating prohibitively large matrices. We describe and analyze a new structure-aware preconditioning algorithm, called Shampoo, for stochastic optimization over tensor spaces. Shampoo maintains a set of preconditioning matrices, each of which operates on a single dimension, contracting over the remaining dimensions. We establish convergence guarantees in the stochastic convex setting, the proof of which builds upon matrix trace inequalities. Our experiments with state-of-the-art deep learning models show that Shampoo is capable of converging considerably faster than commonly used optimizers. Although it involves a more complex update rule, Shampoo's runtime per step is comparable to that of simple gradient methods such as SGD, AdaGrad, and Adam.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Optimization and Control,Statistics - Machine Learning}
+}
+
+@article{highamMatrixProcrustesProblems,
+  title = {Matrix {{Procrustes Problems}}},
+  author = {Higham, Nick},
+  langid = {english}
+}
+
+@misc{highamWhatGershgorinsTheorem2022,
+  title = {What {{Is Gershgorin}}'s {{Theorem}}?},
+  author = {Higham, Nick},
+  year = 2022,
+  month = nov,
+  journal = {Nick Higham},
+  url = {https://nhigham.com/2022/11/22/what-is-gershgorins-theorem/},
+  urldate = {2026-02-22},
+  abstract = {For a given \$latex n\textbackslash times n\$ matrix, Gershgorin's theorem defines \$latex n\$ discs in the complex plane whose union contains the eigenvalues of the matrix. The theorem can provide approximati\dots},
+  langid = {english}
+}
+
+@book{hornMatrixAnalysis2017a,
+  title = {Matrix Analysis},
+  author = {Horn, Roger A. and Johnson, Charles R.},
+  year = 2017,
+  edition = {Second edition, corrected reprint},
+  publisher = {Cambridge University Press},
+  address = {New York, NY},
+  isbn = {978-0-521-83940-2 978-0-521-54823-6},
+  langid = {english}
+}
+
+@article{kovarikIterativeMethodsImproving1970,
+  title = {Some {{Iterative Methods}} for {{Improving Orthonormality}}},
+  author = {Kovarik, Zdislav},
+  year = 1970,
+  month = sep,
+  journal = {SIAM Journal on Numerical Analysis},
+  volume = {7},
+  number = {3},
+  pages = {386--389},
+  publisher = {{Society for Industrial and Applied Mathematics}},
+  issn = {0036-1429},
+  doi = {10.1137/0707031},
+  url = {https://epubs.siam.org/doi/10.1137/0707031},
+  urldate = {2026-02-21},
+  abstract = {The first iterative methods used for solving large linear systems were based on relaxation of the coordinates. Beginning with a given approximate solution, these methods modify the components of the approximation, one or a few at a time and in a certain order, until convergence is reached. Each of these modifications, called relaxation steps, is aimed at annihilating one or a few components of the residual vector. Now these techniques are rarely used separately. However, when combined with the more efficient methods described in later chapters, they can be quite successful. Moreover, there are a few application areas where variations of these methods are still quite popular.4.1 Jacobi, Gauss---Seidel, and Successive OverrelaxationThis chapter begins by reviewing the basic iterative methods for solving linear systems. Given an n \texttimes{} n real matrix A and a real n-vector b, the problem considered is as follows: Find x belonging to {$\mathbb{R}$}n such that 4.1 Equation (4.1) is a linear system, A is the coefficient matrix, b is the right-hand side vector, and x is the vector of unknowns. Most of the methods covered in this chapter involve passing from one iterate to the next by modifying one or a few components of an approximate vector solution at a time. This is natural since there are simple criteria when modifying a component in order to improve an iterate. One example is to annihilate some component(s) of the residual vector b - Ax. The convergence of these methods is rarely guaranteed for all matrices, but a large body of theory exists for the case where the coefficient matrix arises from the finite difference discretization of elliptic partial differential equations (PDEs).}
+}
+
+@misc{MuonOptimizerHidden,
+  title = {Muon: {{An}} Optimizer for Hidden Layers in Neural Networks \textbar{} {{Keller Jordan}} Blog},
+  url = {https://kellerjordan.github.io/posts/muon/},
+  urldate = {2026-02-22}
+}
+
+@misc{NewtonSchulzDocsmodulasystems,
+  title = {Newton-{{Schulz}} - Docs.Modula.Systems},
+  url = {https://docs.modula.systems/algorithms/newton-schulz/},
+  urldate = {2026-02-21}
+}
+
+@misc{rohananil[@_arohan_]JustFunLinear2024,
+  type = {Tweet},
+  title = {Just Some Fun Linear Algebra: {{Shampoo L}}(t) = {{L}}(t-1) + {{Gt}} @ {{Gt}}.{{T R}}(t) = {{R}}(t-1) + {{Gt}}.{{T}} @ {{Gt Update}} Rule: {{L}}(t)\textasciicircum\textbraceleft -1/4\textbraceright{} @ {{Gt}} @ {{R}}(t)\textasciicircum\textbraceleft -1/4\textbraceright{} {{One}} Sided {{Shampoo}} (for Embedding or Very Large Layers) {{Update}}: {{L}}(t)\textasciicircum\textbraceleft -1/2\textbraceright{} @ {{Gt}} or {{Gt}} @ {{R}}(t)\textasciicircum\textbraceleft -1/2\textbraceright{} @kellerjordan0 Modification, No},
+  author = {{rohan anil [@\_arohan\_]}},
+  year = 2024,
+  month = oct,
+  journal = {Twitter},
+  url = {https://x.com/_arohan_/status/1843050297985466565},
+  urldate = {2026-02-22},
+  langid = {english}
+}
+
+@article{ruizScalingAlgorithmEquilibrate,
+  title = {A Scaling Algorithm to Equilibrate Both Rows and Columns Norms in Matrices},
+  author = {Ruiz, Daniel},
+  langid = {english}
 }
