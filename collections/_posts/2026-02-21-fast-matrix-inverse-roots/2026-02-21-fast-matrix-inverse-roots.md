@@ -1,13 +1,14 @@
 ---
 layout: post
-title: Matrix Inverse Square Root (SPD) with Fixed-Budget GEMM Kernels
+title: Matrix Inverse Roots with Fixed-Budget GEMM Kernels
 date: 2026-02-21 18:00 +0000
-description: A practical guide to matrix inverse square root iterations for SPD matrices, focusing on GPU-friendly GEMM kernels and fixed-budget convergence.
+description: A practical guide to matrix inverse p-th root iterations for SPD matrices, focusing on GPU-friendly GEMM kernels and fixed-budget convergence.
 categories:
   - Machine Learning
   - Numerical Optimization
 tags:
-  - Matrix Inverse Square Root
+  - Matrix Inverse
+  - Matrix Inverse Roots
   - GEMM
   - Newton-Schulz
   - Polar Express
