@@ -27,7 +27,7 @@ $$
 A^{-1/p}
 $$
 
-appear in preconditioning, whitening, second-order optimization {% cite davidonVARIABLEMETRICMETHOD1959 amariNaturalGradientWorks1998 %}, and matrix-normalization layers. In practical ML systems, the bottleneck is not just asymptotic complexity; it is *hardware efficiency*. GPU throughput strongly favors matrix multiplication (GEMM), while full eigendecomposition and factorizations are expensive and less throughput-friendly.
+appear in preconditioning, whitening, second-order optimization {% cite davidonVARIABLEMETRICMETHOD1959 amariNaturalGradientWorks1998 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}, and matrix-normalization layers. In practical ML systems, the bottleneck is not just asymptotic complexity; it is *hardware efficiency*. GPU throughput strongly favors matrix multiplication (GEMM), while full eigendecomposition and factorizations are expensive and less throughput-friendly.
 
 This repository is built around that practical regime:
 
@@ -46,7 +46,7 @@ $$
 A^{-1/p} = Q \Lambda^{-1/p} Q^T,
 $$
 
-where `A = Q \Lambda Q^T` and `\Lambda = diag(\lambda_i)` with `\lambda_i > 0` {% cite hornMatrixAnalysis2017a highamFunctionsOfMatrices2008 %}.
+where `A = Q \Lambda Q^T` and `\Lambda = diag(\lambda_i)` with `\lambda_i > 0` {% cite hornMatrixAnalysis2017a highamFunctionsOfMatrices2008 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
 Two computational tasks are central:
 
@@ -59,7 +59,7 @@ The second task can be much cheaper if solved without materializing dense `A^{-1
 
 ## 3. Spectral shaping via preconditioning
 
-Polynomial fixed-point methods are sensitive to the spectral interval. The repository therefore preconditions each SPD input before iteration {% cite ruizScalingAlgorithmEquilibrate %}.
+Polynomial fixed-point methods are sensitive to the spectral interval. The repository therefore preconditions each SPD input before iteration {% cite ruizScalingAlgorithmEquilibrate --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
 Given raw `A`, the pipeline (implemented in `precond_spd`) combines:
 
@@ -77,7 +77,7 @@ $$
 g_{lo} = \min_i \left(a_{ii} - \sum_{j \ne i} |a_{ij}|\right),
 $$
 
-then diagonal correction when needed to enforce target floor `l_target`. This stage is based on Gershgorin's circle theorem {% cite Gerschgorin1931 highamWhatGershgorinsTheorem2022 %}.
+then diagonal correction when needed to enforce target floor `l_target`. This stage is based on Gershgorin's circle theorem {% cite Gerschgorin1931 highamWhatGershgorinsTheorem2022 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
 This stage is mathematically simple but operationally crucial: it shrinks the spectral interval into a range where short polynomial schedules are effective.
 
@@ -111,7 +111,7 @@ $$
 X_{t+1} = X_t B_t.
 $$
 
-The repository implements two variants {% cite kovarikIterativeMethodsImproving1970 %}.
+The repository implements two variants {% cite kovarikIterativeMethodsImproving1970 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
 ### 4.1 Uncoupled variant
 
@@ -140,7 +140,7 @@ in the commuting polynomial model. This avoids full `X_t^p A` recomputation each
 
 ## 5. Newton baseline and PE-Quad generalization
 
-For `p=2`, classical inverse Newton-Schulz {% cite NewtonSchulzDocsmodulasystems %} uses
+For `p=2`, classical inverse Newton-Schulz {% cite NewtonSchulzDocsmodulasystems --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %} uses
 
 $$
 q(y)=\frac{3}{2}-\frac{1}{2}y.
@@ -148,7 +148,7 @@ $$
 
 In this repository that baseline is presented as `Inverse-Newton` in benchmark harnesses.
 
-The main method family is **PE-Quad** (quadratic polynomial schedules) {% cite amselPolarExpressOptimal2025a %}, where each iteration has its own tuned `(a_t,b_t,c_t)`. Conceptually this follows the same philosophy as modern polar/sign polynomial methods {% cite chenIterativeMethodsComputing1991 nakatsukasaComputingPolarDecomposition2016 %}: optimize finite-step contraction over a spectral interval rather than relying on a single fixed affine map. In this repository, that baseline is presented as `Inverse-Newton` (referencing the Schur-Newton framework {% cite guoSchurNewtonMethod2006 %}) in benchmark harnesses.
+The main method family is **PE-Quad** (quadratic polynomial schedules) {% cite amselPolarExpressOptimal2025a --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}, where each iteration has its own tuned `(a_t,b_t,c_t)`. Conceptually this follows the same philosophy as modern polar/sign polynomial methods {% cite chenIterativeMethodsComputing1991 nakatsukasaComputingPolarDecomposition2016 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}: optimize finite-step contraction over a spectral interval rather than relying on a single fixed affine map. In this repository, that baseline is presented as `Inverse-Newton` (referencing the Schur-Newton framework {% cite guoSchurNewtonMethod2006 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}) in benchmark harnesses.
 
 ---
 
@@ -187,7 +187,7 @@ $$
 f(x)=x^{-1/p}
 $$
 
-on `[l_{min}, l_{max}]` with a Chebyshev polynomial, then evaluates `f(A)B` via Clenshaw recurrence {% cite clenshawNOTEONMINIMIZATION1955 %}.
+on `[l_{min}, l_{max}]` with a Chebyshev polynomial, then evaluates `f(A)B` via Clenshaw recurrence {% cite clenshawNOTEONMINIMIZATION1955 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
 Map interval to `[-1,1]`:
 
@@ -232,10 +232,10 @@ Latest benchmark artifacts in this repository were regenerated on **2026-02-25**
 High-level pattern from the inverse-root sweep (`p in {1,2,3,4,8}`, sizes `256,512,1024`):
 
 - `p=1`: Newton baseline frequently wins both speed and residual.
-- `p=2,3,4`: coupled PE-Quad is often fastest {% cite amselPolarExpressOptimal2025a %}.
+- `p=2,3,4`: coupled PE-Quad is often fastest {% cite amselPolarExpressOptimal2025a --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 - high exponent (`p=8`): uncoupled PE-Quad dominates residual quality in the tested grid.
 
-For second-order optimization contexts, these roots are essential for preconditioners like Shampoo {% cite guptaShampooPreconditionedStochastic2018 anilScalableSecondOrder2021a rohananil_arohan_JustFunLinear2024 %} and Muon {% cite boissinTurboMuonAcceleratingOrthogonalityBased2025a MuonOptimizerHidden %}.
+For second-order optimization contexts, these roots are essential for preconditioners like Shampoo {% cite guptaShampooPreconditionedStochastic2018 anilScalableSecondOrder2021a rohananil_arohan_JustFunLinear2024 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %} and Muon {% cite boissinTurboMuonAcceleratingOrthogonalityBased2025a MuonOptimizerHidden --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
 For direct apply (`p=2`, `n=2048` cases), Chebyshev direct apply is typically fastest and lowest-memory in current measurements.
 
