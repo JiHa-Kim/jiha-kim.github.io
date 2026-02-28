@@ -96,22 +96,27 @@ def cleanup_latex_syntax(content: str) -> str:
 
 def convert_block_math(text: str) -> str:
     """
-    Normalize Obsidian $$...$$ blocks into Kramdown-safe MathJax blocks.
+    Normalize Obsidian $$...$$ and \[...\] blocks into Kramdown-safe MathJax blocks.
 
-    1. Finds $$...$$ sequences.
+    1. Finds $$...$$ or \[...\] sequences.
     2. Checks if they contain specific environments (align, etc).
     3. If NOT, applies cleanup_latex_syntax (replacing *, |, etc).
     4. Wraps the result in a <div markdown="0"> with \[ ... \] delimiters
        so Kramdown does not touch the TeX and MathJax can render it.
     """
 
+    # Matches $$ ... $$ OR \[ ... \]
     pattern = re.compile(
-        r"(?m)(?:^([\t ]*))?(?<!\\)(?<!\$)\$\$(?!\$)([\s\S]+?)(?<!\\)(?<!\$)\$\$(?!\$)"
+        r"(?m)(?:^([\t ]*))?(?:"
+        r"(?<!\\)(?<!\$)\$\$(?!\$)([\s\S]+?)(?<!\\)(?<!\$)\$\$(?!\$)|"
+        r"\\\[([\s\S]+?)\\\]"
+        r")"
     )
 
     def repl(m):
         indent = m.group(1) or ""
-        content = m.group(2)
+        # Content can be in group 2 ($$) or group 3 (\[)
+        content = m.group(2) or m.group(3)
 
         # Check if this block contains an environment that should be skipped
         has_env = False
@@ -139,17 +144,26 @@ def convert_block_math(text: str) -> str:
     return pattern.sub(repl, text)
 
 def convert_inline_math(text: str) -> str:
-    """Convert Obsidian $...$ inline math to Kramdown-friendly MathJax syntax.
+    """Convert Obsidian $...$ and \(...\) inline math to Kramdown-friendly MathJax syntax.
 
     We wrap the \\(...\\) in <span markdown="0"> so Kramdown does not
     interpret underscores, asterisks, etc, before MathJax sees them.
     """
+    # Matches $ ... $ OR \( ... \)
     # Look for $...$ that isn't $$...$$ and isn't escaped.
-    pattern = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)(?<!\$)\$(?!\$)")
+    pattern = re.compile(
+        r"(?:"
+        r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)(?<!\$)\$(?!\$)|"
+        r"\\\(([\s\S]+?)\\\)"
+        r")"
+    )
 
     def repl(m):
+        # Content can be in group 1 ($) or group 2 (\()
+        content = m.group(1) or m.group(2)
+        
         # Apply cleanup to inline math as well (fixes |x| -> \vert x \vert etc.)
-        content = cleanup_latex_syntax(m.group(1))
+        content = cleanup_latex_syntax(content)
 
         # Build the MathJax inline form \(...\)
         inner = r"\(" + content + r"\)"
