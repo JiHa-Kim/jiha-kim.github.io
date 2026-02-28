@@ -8,11 +8,13 @@ categories:
   - Numerical Linear Algebra
 tags:
   - Matrix Inverse Roots
+  - Matrix Inverse
   - Polar Decomposition
+  - Polar Express
   - Newton-Schulz
   - Muon
   - Preconditioning
-  - Mixed Precision
+  - Matrix Polynomials
 math: true
 ---
 
