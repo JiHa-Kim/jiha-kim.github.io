@@ -20,6 +20,17 @@ Link to PyTorch implementation on GitHub: https://github.com/JiHa-Kim/fast-matri
 
 # Matrix Inverse p-th Roots for SPD Matrices: A GPU-Oriented Mathematical Overview
 
+This post explains the mathematical ideas and engineering choices behind a small PyTorch library for computing matrix inverse roots and inverse applies using a fixed-budget, GEMM-dominant kernel style.
+
+The guiding constraints are practical:
+
+- fixed small iteration budgets (few steps, not asymptotic convergence),
+- GPU throughput (GEMM is king),
+- mixed precision robustness (bf16/fp16-friendly),
+- direct-apply support for skinny right-hand sides.
+
+---
+
 ## 1. Why inverse p-th roots matter
 
 Given a symmetric positive definite (SPD) matrix <span class="math-inline" markdown="0">\(A\)</span>, operators of the form
@@ -30,20 +41,13 @@ A^{-1/p}
 \]
 </div>
 
-appear in preconditioning, whitening, second-order optimization {% cite davidonVARIABLEMETRICMETHOD1959 amariNaturalGradientWorks1998 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}, and matrix-normalization layers. In practical ML systems, the bottleneck is not just asymptotic complexity; it is *hardware efficiency*. GPU throughput strongly favors matrix multiplication (GEMM), while full eigendecomposition and factorizations are expensive and less throughput-friendly.
-
-This repository is built around that practical regime:
-
-- fixed small iteration budgets,
-- GEMM-dominant updates,
-- mixed precision robustness (especially bf16),
-- explicit benchmarking on realistic SPD test families.
+appear in preconditioning, whitening, and second-order optimization {% cite davidonVARIABLEMETRICMETHOD1959 amariNaturalGradientWorks1998 guptaShampooPreconditionedStochastic2018 anilScalableSecondOrder2021a --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}. In practical ML systems, the bottleneck is not just asymptotic complexity; it is hardware efficiency. GPU throughput strongly favors matrix multiplication (GEMM), while full eigendecomposition and many factorization-heavy workflows are not ideal for high-throughput, low-precision training loops.
 
 ---
 
 ## 2. Problem statement and the SPD structure
 
-For <span class="math-inline" markdown="0">\(A \in \mathbb{R}^{n \times n}\)</span>, <span class="math-inline" markdown="0">\(A = A^T\)</span>, <span class="math-inline" markdown="0">\(A > 0\)</span>, the principal inverse p-th root is
+For <span class="math-inline" markdown="0">\(A \in \mathbb{R}^{n \times n}\)</span>, <span class="math-inline" markdown="0">\(A = A^T\)</span>, <span class="math-inline" markdown="0">\(A \succ 0\)</span>, the principal inverse p-th root is
 
 <div class="math-block" markdown="0">
 \[
@@ -51,26 +55,26 @@ A^{-1/p} = Q \Lambda^{-1/p} Q^T,
 \]
 </div>
 
-where <span class="math-inline" markdown="0">\(A = Q \Lambda Q^T\)</span> and <span class="math-inline" markdown="0">\(\Lambda = \text{diag}(\lambda_i)\)</span> with <span class="math-inline" markdown="0">\(\lambda_i > 0\)</span> {% cite hornMatrixAnalysis2017a highamFunctionsOfMatrices2008 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
+where <span class="math-inline" markdown="0">\(A = Q \Lambda Q^T\)</span> and <span class="math-inline" markdown="0">\(\Lambda = \mathrm{diag}(\lambda_i)\)</span> with <span class="math-inline" markdown="0">\(\lambda_i > 0\)</span> {% cite hornMatrixAnalysis2017a --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
 Two computational tasks are central:
 
 1. **Explicit root construction**: compute <span class="math-inline" markdown="0">\(X \approx A^{-1/p}\)</span>.
 2. **Direct apply**: compute <span class="math-inline" markdown="0">\(Z \approx A^{-1/p} B\)</span> for <span class="math-inline" markdown="0">\(B \in \mathbb{R}^{n \times k}\)</span> with <span class="math-inline" markdown="0">\(k \ll n\)</span>.
 
-The second task can be much cheaper if solved without materializing dense <span class="math-inline" markdown="0">\(A^{-1/p}\)</span>.
+The second task can be much cheaper if we avoid materializing a dense <span class="math-inline" markdown="0">\(A^{-1/p}\)</span>.
 
 ---
 
 ## 3. Spectral shaping via preconditioning
 
-Polynomial fixed-point methods are sensitive to the spectral interval. The repository therefore preconditions each SPD input before iteration {% cite ruizScalingAlgorithmEquilibrate --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
+Short, fixed-budget polynomial iterations are sensitive to the spectral interval. The library therefore normalizes and optionally equilibrates each SPD input before iteration.
 
-Given raw <span class="math-inline" markdown="0">\(A\)</span>, the pipeline (implemented in `precond_spd`) combines:
+Given raw <span class="math-inline" markdown="0">\(A\)</span>, the SPD pipeline (`precond_spd`) combines:
 
-1. Optional scaling mode (`none`, `frob`, `aol`).
-2. Optional ridge shift.
-3. Upper normalization using a row-sum bound:
+1. Optional scaling mode (`none`, `frob`, `aol`, `jacobi`, `ruiz`).
+2. Optional ridge shift (<span class="math-inline" markdown="0">\(A \leftarrow A + \lambda I\)</span>).
+3. Upper normalization using an inexpensive bound:
 
 <div class="math-block" markdown="0">
 \[
@@ -78,21 +82,23 @@ u = \max_i \sum_j \vert A_{ij}\vert,\qquad A \leftarrow A/u.
 \]
 </div>
 
-4. Lower-floor enforcement using a Gershgorin-style proxy:
+4. Lower-floor enforcement using a Gershgorin-style proxy
 
 <div class="math-block" markdown="0">
 \[
-g_{lo} = \min_i \left(a_{ii} - \sum_{j \ne i} \vert a_{ij}\vert\right),
+g_{\mathrm{lo}} = \min_i \left(a_{ii} - \sum_{j \ne i} \vert a_{ij}\vert\right),
 \]
 </div>
 
-then diagonal correction when needed to enforce target floor <span class="math-inline" markdown="0">\(l_{\text{target}}\)</span>. This stage is based on Gershgorin's circle theorem {% cite Gerschgorin1931 highamWhatGershgorinsTheorem2022 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
+then a diagonal correction when needed to enforce a target floor <span class="math-inline" markdown="0">\(l_{\text{target}}\)</span>. This leverages the intuition of Gershgorin bounds {% cite Gerschgorin1931 highamWhatGershgorinsTheorem2022 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
-This stage is mathematically simple but operationally crucial: it shrinks the spectral interval into a range where short polynomial schedules are effective.
+This stage is mathematically simple but operationally crucial: it shrinks the effective spectral range into a regime where a short polynomial schedule can produce stable contraction.
 
 ---
 
-## 4. Polynomial inverse-root iteration framework
+## 4. A residual-driven iteration: make a matrix go to the identity
+
+A convenient way to target inverse roots is to track a residual that should converge to <span class="math-inline" markdown="0">\(I\)</span>.
 
 Let
 
@@ -109,18 +115,12 @@ The core step uses a polynomial multiplier
 <div class="math-block" markdown="0">
 \[
 B_t = q_t(Y_t),
+\qquad
+q_t(y) = a_t + b_t y + c_t y^2,
 \]
 </div>
 
-with <span class="math-inline" markdown="0">\(q_t\)</span> typically quadratic:
-
-<div class="math-block" markdown="0">
-\[
-q_t(y) = a_t + b_t y + c_t y^2.
-\]
-</div>
-
-Then update:
+and updates
 
 <div class="math-block" markdown="0">
 \[
@@ -128,158 +128,231 @@ X_{t+1} = X_t B_t.
 \]
 </div>
 
-The repository implements two variants {% cite kovarikIterativeMethodsImproving1970 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
-
-### 4.1 Uncoupled variant
-
-Recompute <span class="math-inline" markdown="0">\(Y_t\)</span> from scratch each step:
+In the "commuting" spectral model (the usual mental model for these iterations), eigenvalues evolve by a scalar map. If <span class="math-inline" markdown="0">\(y\)</span> is an eigenvalue of <span class="math-inline" markdown="0">\(Y_t\)</span>, the next residual eigenvalue is approximately
 
 <div class="math-block" markdown="0">
 \[
-Y_t = X_t^p A,\qquad X_{t+1}=X_t q_t(Y_t).
+y^+ = \phi_t(y) = y \, q_t(y)^p.
 \]
 </div>
 
-Pros:
-- lower persistent state,
-- conceptually simple,
-- often strong residual quality at harder exponents.
-
-### 4.2 Coupled variant
-
-Carry both <span class="math-inline" markdown="0">\(X_t\)</span> and <span class="math-inline" markdown="0">\(Y_t\)</span>:
-
-<div class="math-block" markdown="0">
-\[
-X_{t+1}=X_t B_t,\qquad Y_{t+1}=B_t^p Y_t
-\]
-</div>
-
-in the commuting polynomial model. This avoids full <span class="math-inline" markdown="0">\(X_t^p A\)</span> recomputation each step and is often faster in wall-clock terms.
+The schedule selection machinery in this repo is built around designing <span class="math-inline" markdown="0">\(q_t\)</span> so that <span class="math-inline" markdown="0">\(\phi_t\)</span> rapidly contracts an interval <span class="math-inline" markdown="0">\([l, 1]\)</span> toward <span class="math-inline" markdown="0">\(1\)</span>.
 
 ---
 
-## 5. Newton baseline and PE-Quad generalization
+## 5. Coupled iteration: update both the operator and the residual
 
-For <span class="math-inline" markdown="0">\(p=2\)</span>, classical inverse Newton-Schulz {% cite NewtonSchulzDocsmodulasystems --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %} uses
+A key design choice in this code is a coupled iteration that carries both <span class="math-inline" markdown="0">\(X_t\)</span> and <span class="math-inline" markdown="0">\(Y_t\)</span> forward, rather than recomputing <span class="math-inline" markdown="0">\(Y_t = X_t^p A\)</span> from scratch each step.
+
+### 5.1 Generic coupled update (commuting model)
+
+After forming <span class="math-inline" markdown="0">\(B_t = q_t(Y_t)\)</span>:
 
 <div class="math-block" markdown="0">
 \[
-q(y)=\frac{3}{2}-\frac{1}{2}y.
+X_{t+1} = X_t B_t,
+\qquad
+Y_{t+1} \approx B_t^p Y_t.
 \]
 </div>
 
-In this repository that baseline is presented as `Inverse-Newton` in benchmark harnesses.
+The implementation uses only GEMMs, with specialized fast paths for common small <span class="math-inline" markdown="0">\(p\)</span> and for the affine case <span class="math-inline" markdown="0">\(c_t = 0\)</span>.
 
-The main method family is **PE-Quad** (quadratic polynomial schedules) {% cite amselPolarExpressOptimal2025a --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}, where each iteration has its own tuned <span class="math-inline" markdown="0">\((a_t,b_t,c_t)\)</span>. Conceptually this follows the same philosophy as modern polar/sign polynomial methods {% cite chenIterativeMethodsComputing1991 nakatsukasaComputingPolarDecomposition2016 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}: optimize finite-step contraction over a spectral interval rather than relying on a single fixed affine map. In this repository, that baseline is presented as `Inverse-Newton` (referencing the Schur-Newton framework {% cite guoSchurNewtonMethod2006 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}) in benchmark harnesses.
+### 5.2 SPD-aware symmetric updates
+
+For SPD matrices, symmetry is precious in low precision. When `assume_spd=True`, the code prefers symmetric "sandwich" updates for the residual when possible, e.g. for even <span class="math-inline" markdown="0">\(p\)</span>:
+
+<div class="math-block" markdown="0">
+\[
+Y_{t+1} \leftarrow B_t^{p/2} Y_t B_t^{p/2},
+\]
+</div>
+
+with optional explicit symmetrization
+
+<div class="math-block" markdown="0">
+\[
+Y \leftarrow \frac{1}{2}(Y + Y^T)
+\]
+</div>
+
+to suppress antisymmetric drift in bf16.
+
+This SPD-coupled philosophy is standard in matrix-function iterations: the goal is not only convergence in exact arithmetic, but stability under finite precision and fixed budgets {% cite guoSchurNewtonMethod2006 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
 ---
 
-## 6. Complexity and memory tradeoffs
+## 6. Solving and applying without materializing dense inverse roots
 
-### 6.1 Explicit root paths
+Many ML use cases do not need <span class="math-inline" markdown="0">\(X \approx A^{-1/p}\)</span> explicitly. They only need <span class="math-inline" markdown="0">\(Z = A^{-1/p} B\)</span> for a (possibly skinny) <span class="math-inline" markdown="0">\(B\)</span>.
 
-Both uncoupled and coupled explicit-root methods are GEMM-based and fundamentally <span class="math-inline" markdown="0">\(O(n^3)\)</span> per step.
+The library supports both:
 
-- Coupled can save time by avoiding some recomputations.
-- Uncoupled usually uses fewer persistent <span class="math-inline" markdown="0">\(n \times n\)</span> buffers.
+### 6.1 Materialize-then-apply
 
-The code also includes key engineering optimizations:
+Compute <span class="math-inline" markdown="0">\(X_T \approx A^{-1/p}\)</span> and then multiply:
 
-- workspace reuse (`ws`) to avoid repeated allocations,
-- `out=` matmul paths,
-- fused `addmm`/`baddbmm`,
-- specialization for common small exponents (<span class="math-inline" markdown="0">\(p=2\)</span>, <span class="math-inline" markdown="0">\(p=3\)</span>, <span class="math-inline" markdown="0">\(p=4\)</span> paths).
+<div class="math-block" markdown="0">
+\[
+Z = X_T B.
+\]
+</div>
 
-### 6.2 Direct apply path (<span class="math-inline" markdown="0">\(A^{-1/p}B\)</span>)
+This is attractive when the same <span class="math-inline" markdown="0">\(A\)</span> will be reused across many right-hand sides (or across many optimizer steps), since you pay the root cost once.
 
-If only <span class="math-inline" markdown="0">\(A^{-1/p}B\)</span> is needed, direct apply can avoid explicit dense inverse-root construction:
+### 6.2 Direct solve/apply (evolve the RHS)
 
-- explicit route: roughly <span class="math-inline" markdown="0">\(O(n^3) + O(n^2 k)\)</span>,
-- direct polynomial apply: roughly <span class="math-inline" markdown="0">\(O(n^2 k \ast \text{degree})\)</span> for fixed degree.
+Instead of evolving <span class="math-inline" markdown="0">\(X_t\)</span>, evolve the RHS directly:
 
-For large <span class="math-inline" markdown="0">\(n\)</span> and moderate <span class="math-inline" markdown="0">\(k\)</span>, this can be a major practical win.
+<div class="math-block" markdown="0">
+\[
+Z_{t+1} = B_t Z_t,
+\qquad
+Z_0 = B.
+\]
+</div>
+
+After <span class="math-inline" markdown="0">\(T\)</span> steps,
+
+<div class="math-block" markdown="0">
+\[
+Z_T = \left(\prod_{t=0}^{T-1} B_t \right) B \approx A^{-1/p} B.
+\]
+</div>
+
+This avoids ever forming a dense <span class="math-inline" markdown="0">\(X\)</span>. It is often cheaper when <span class="math-inline" markdown="0">\(k \ll n\)</span>, since each step is dominated by an <span class="math-inline" markdown="0">\(n \times n\)</span> times <span class="math-inline" markdown="0">\(n \times k\)</span> GEMM.
+
+### 6.3 Terminal RHS-direct optimization (skinny RHS)
+
+On the final step (when the algorithm does not need to update <span class="math-inline" markdown="0">\(Y\)</span> anymore), the implementation can avoid materializing the dense polynomial matrix <span class="math-inline" markdown="0">\(B_t\)</span> and instead compute
+
+<div class="math-block" markdown="0">
+\[
+(a I + b Y + c Y^2) Z
+\]
+</div>
+
+using only RHS GEMMs:
+
+- compute <span class="math-inline" markdown="0">\(YZ\)</span>,
+- compute <span class="math-inline" markdown="0">\(Y(YZ) = Y^2 Z\)</span>,
+- combine with scalars <span class="math-inline" markdown="0">\(a,b,c\)</span>.
+
+This is a big win when <span class="math-inline" markdown="0">\(k \ll n\)</span>.
 
 ---
 
-## 7. Chebyshev direct apply and Clenshaw recurrence
+## 7. Newton baseline and PE-Quad schedules
 
-The repository's `apply_inverse_proot_chebyshev` approximates
+### 7.1 Inverse-Newton affine step (general p)
 
-<div class="math-block" markdown="0">
-\[
-f(x)=x^{-1/p}
-\]
-</div>
-
-on <span class="math-inline" markdown="0">\([l_{\min}, l_{\text{max}}]\)</span> with a Chebyshev polynomial, then evaluates <span class="math-inline" markdown="0">\(f(A)B\)</span> via Clenshaw recurrence {% cite clenshawNOTEONMINIMIZATION1955 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
-
-Map interval to <span class="math-inline" markdown="0">\([-1,1]\)</span>:
+A common affine baseline (used as a safe and cheap candidate in scheduling logic) is
 
 <div class="math-block" markdown="0">
 \[
-t(x)=\frac{2x-(l_{\text{max}}+l_{\min})}{l_{\text{max}}-l_{\min}}.
+q_{\mathrm{Newton}}(y) = \frac{p+1-y}{p}.
 \]
 </div>
 
-With coefficients <span class="math-inline" markdown="0">\(c_k\)</span>, evaluate stably backward:
+This matches the code's `inverse_newton_coeffs(p)` in the schedule tuner.
+
+### 7.2 PE-Quad: per-step quadratic coefficients
+
+The main method family here is a short schedule of quadratic polynomials:
 
 <div class="math-block" markdown="0">
 \[
-y_k = c_k B + 2\,t(A)y_{k+1} - y_{k+2},
+q_t(y) = a_t + b_t y + c_t y^2,
+\qquad t = 0,1,\dots,T-1.
 \]
 </div>
 
-then recover <span class="math-inline" markdown="0">\(Z = f(A)B\)</span> from the final recurrence state.
+Rather than using a single fixed polynomial map, the schedule chooses different coefficients per step to improve contraction in a fixed number of steps. This mirrors the broader modern trend of "finite-step optimal" polynomial iterations used in ML-adjacent matrix computations (for example, in polar/sign methods and their applications) {% cite amselPolarExpressOptimal2025a --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
 
-Important practical condition: choose <span class="math-inline" markdown="0">\(l_{\min}\)</span> safely. If the true spectrum drops below the approximation interval, error can degrade quickly.
+Concretely, the schedule builder in this repo uses a scalar interval model: it predicts how an eigenvalue interval <span class="math-inline" markdown="0">\([l, 1]\)</span> transforms under
+
+<div class="math-block" markdown="0">
+\[
+\phi_t(y) = y q_t(y)^p,
+\]
+</div>
+
+and uses that to tune <span class="math-inline" markdown="0">\((a_t,b_t,c_t)\)</span> for robust contraction while keeping <span class="math-inline" markdown="0">\(q_t(y)\)</span> positive on the working interval (important for odd <span class="math-inline" markdown="0">\(p\)</span>).
 
 ---
 
-## 8. Numerical stability in mixed precision
+## 8. Complexity and memory tradeoffs
 
-The repository uses several stability controls that are mathematically mild but practically important:
+### 8.1 Root materialization (dense X)
 
-1. Symmetrization of iterates (<span class="math-inline" markdown="0">\(X\)</span> or <span class="math-inline" markdown="0">\(Y\)</span>) to suppress antisymmetric drift.
+Materializing <span class="math-inline" markdown="0">\(X\)</span> is inherently dense and costs roughly <span class="math-inline" markdown="0">\(O(n^3)\)</span> per iteration step, because each step applies matrix polynomials via GEMMs.
+
+The engineering focus is therefore:
+
+- a small fixed number of steps,
+- explicit reuse of workspace buffers to avoid allocations,
+- fused BLAS calls (`addmm`, `baddbmm`) where possible,
+- specialization for common exponents (fast paths for <span class="math-inline" markdown="0">\(p=2\)</span>, <span class="math-inline" markdown="0">\(p=3\)</span>, <span class="math-inline" markdown="0">\(p=4\)</span>),
+- optional symmetrization at a configurable cadence.
+
+### 8.2 Direct apply (dense Y, skinny RHS)
+
+Direct apply stores <span class="math-inline" markdown="0">\(Y\)</span> as dense but only applies the step polynomial to a skinny matrix <span class="math-inline" markdown="0">\(Z\)</span>. If <span class="math-inline" markdown="0">\(k \ll n\)</span>, the dominant work per step is closer to <span class="math-inline" markdown="0">\(O(n^2 k)\)</span> plus the cost of updating <span class="math-inline" markdown="0">\(Y\)</span> (which is still dense, unless frozen at the tail).
+
+Practically, this is why the library exposes a strategy switch: if you expect to reuse the same <span class="math-inline" markdown="0">\(A\)</span> across many right-hand sides, it can be better to materialize once; otherwise, direct apply can be cheaper.
+
+---
+
+## 9. Gram matrix workflows and caching
+
+A common ML pattern is that <span class="math-inline" markdown="0">\(A\)</span> is a Gram matrix:
+
+<div class="math-block" markdown="0">
+\[
+A = G^T G.
+\]
+</div>
+
+The library provides a dedicated Gram SPD pipeline that:
+
+- forms <span class="math-inline" markdown="0">\(G^T G\)</span>,
+- applies Gram-aware normalization (e.g., "col-norm" mode corresponds to Jacobi scaling on the Gram),
+- optionally caches the preconditioned <span class="math-inline" markdown="0">\(A_{\mathrm{norm}}\)</span> keyed on the underlying tensor storage/version.
+
+There is also a dual identity for RHS in the range of <span class="math-inline" markdown="0">\(G^T\)</span>:
+
+<div class="math-block" markdown="0">
+\[
+(G^T G)^{-1/p} G^T B = G^T (G G^T)^{-1/p} B,
+\]
+</div>
+
+which can be useful when <span class="math-inline" markdown="0">\(G\)</span> is very rectangular and it is cheaper to work in the smaller dimension.
+
+---
+
+## 10. Numerical stability in mixed precision
+
+The stability controls in this code are mild mathematically, but essential in bf16/fp16:
+
+1. Symmetrization of the residual <span class="math-inline" markdown="0">\(Y\)</span> (SPD case) to reduce drift.
 2. Symmetrization cadence (`symmetrize_every`) to trade extra work for stability.
-3. Terminal-step optimization in coupled paths:
-   - skip final <span class="math-inline" markdown="0">\(Y\)</span> update when output needs only final <span class="math-inline" markdown="0">\(X\)</span> or <span class="math-inline" markdown="0">\(Z\)</span>.
-4. SPD-oriented preconditioning to keep polynomial dynamics in a stable interval.
-
-Together these allow short, high-throughput runs in bf16 without collapsing quality metrics.
+3. Affine fast paths (skip computing <span class="math-inline" markdown="0">\(Y^2\)</span> when <span class="math-inline" markdown="0">\(c=0\)</span>).
+4. Terminal-step optimization: freeze the residual update near the end if only the final output is needed.
+5. Preconditioning to control spectral spread so the polynomial maps stay in a stable regime.
 
 ---
 
-## 9. Reading the current benchmark evidence
+## 11. Conceptual takeaway
 
-Latest benchmark artifacts in this repository were regenerated on **2026-02-25** and include:
+The mathematical story of this repository is not "one iteration wins always." It is:
 
-- inverse-root sweep: `results/benchmark_report.md`,
-- solve/apply report: `reports/chebyshev_solve_benchmark.md`,
-- raw solve logs in `artifacts/benchmarks/`.
+1. Shape the spectrum first (cheap preconditioning).
+2. Use a fixed-budget polynomial iteration that matches GPU hardware (GEMM-heavy).
+3. Separate explicit-root and direct-apply use cases, and choose dynamically.
+4. Keep stability knobs simple and explicit for low-precision operation.
 
-High-level pattern from the inverse-root sweep (<span class="math-inline" markdown="0">\(p \in \{1,2,3,4,8\}\)</span>, sizes <span class="math-inline" markdown="0">\(256,512,1024\)</span>):
-
-- <span class="math-inline" markdown="0">\(p=1\)</span>: Newton baseline frequently wins both speed and residual.
-- <span class="math-inline" markdown="0">\(p=2,3,4\)</span>: coupled PE-Quad is often fastest {% cite amselPolarExpressOptimal2025a --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
-- high exponent (<span class="math-inline" markdown="0">\(p=8\)</span>): uncoupled PE-Quad dominates residual quality in the tested grid.
-
-For second-order optimization contexts, these roots are essential for preconditioners like Shampoo {% cite guptaShampooPreconditionedStochastic2018 anilScalableSecondOrder2021a rohananil_arohan_JustFunLinear2024 --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %} and Muon {% cite boissinTurboMuonAcceleratingOrthogonalityBased2025a MuonOptimizerHidden --file posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib %}.
-
-For direct apply (<span class="math-inline" markdown="0">\(p=2\)</span>, <span class="math-inline" markdown="0">\(n=2048\)</span> cases), Chebyshev direct apply is typically fastest and lowest-memory in current measurements.
-
----
-
-## 10. Conceptual takeaway
-
-The mathematical story of this repository is not "one algorithm wins always." It is:
-
-1. Shape the spectrum first.
-2. Use polynomial maps that match hardware (GEMM-heavy, short schedules).
-3. Separate explicit-root and direct-apply use cases.
-4. Let measured finite-budget behavior guide method choice.
-
-That combination is what makes inverse p-th-root methods practical for modern GPU training systems.
+That combination is what makes inverse p-th-root methods practical inside modern GPU training systems.
 
 ---
 
