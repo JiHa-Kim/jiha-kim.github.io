@@ -1,8 +1,9 @@
 ---
 layout: post
-title: Inverse Root Express: Porting Muon-Style Polar Tricks to Fast A^{-1/p}B
+title: Inverse Root Express - Porting Muon-Style Polar Tricks to Fast \(A^{-1/p}B\)
 date: 2026-02-27 18:00 +0000
 description: A roadmap for GPU-friendly inverse p-th root applies and fast solves, inspired by Muon, Polar Express, and Turbo-Muon.
+image: ./matrix_inverse_roots_thumbnail.png
 categories:
   - Machine Learning
   - Numerical Linear Algebra
