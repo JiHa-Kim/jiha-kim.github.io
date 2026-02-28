@@ -19,7 +19,7 @@ tags:
 math: true
 ---
 
-# Inverse Root Express: from "good-enough polar" to fast A^{-1/p}B
+# Inverse Root Express: from "good-enough polar" to fast <span class="math-inline" markdown="0">\(A^{-1/p}B\)</span>
 
 Modern ML training pipelines keep rediscovering the same bottleneck: at some point you want to apply a matrix inverse or inverse root to a vector or block of vectors, fast enough to sit in an optimizer inner loop.
 
