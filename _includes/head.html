@@ -10,7 +10,9 @@
   >
 
   {%- capture seo_tags -%}
-    {% seo title=false %}
+    {% if jekyll.environment == 'production' %}
+      {% seo title=false %}
+    {% endif %}
   {%- endcapture -%}
 
   <!-- Setup Open Graph image -->

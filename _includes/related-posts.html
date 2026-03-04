@@ -7,7 +7,7 @@
 {%- endcomment -%}
 
 {%- assign coll = site.collections | where: 'label', page.collection | first -%}
-{%- if coll and coll.docs and coll.docs.size > 1 -%}
+{%- if coll and coll.docs and coll.docs.size > 1 and jekyll.environment == 'production' -%}
   {%- assign docs = coll.docs -%}
 
   {%- comment -%} Choose a sort key {%- endcomment -%}
