@@ -1,3 +1,5 @@
+---
+---
 MathJax = {
   loader: {
     // Add '[tex]/cancel' and '[tex]/color' to the load array
