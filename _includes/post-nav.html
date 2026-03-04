@@ -1,46 +1,25 @@
-{% assign previous = site.data.locales[include.lang].post.button.previous %}
-{% assign next = site.data.locales[include.lang].post.button.next %}
-
 {%- comment -%}
-  1. Determine the set of pages to navigate through.
-     - If the page is in a collection (and not 'posts'), we navigate within that specific series/course.
-     - Otherwise, we navigate through the regular blog posts.
+  1. Determine the set of pages and the navigation logic.
+     - site.posts: Sort is Newest-first (descending).
+     - Collections: Sort is usually sort_index (ascending).
 {%- endcomment -%}
-{% if page.collection and page.collection != 'posts' %}
-  {%- comment -%}
-    This is a page within a custom collection (like 'series' or 'crash-courses').
-    We need to filter to only items in the same subfolder.
-  {%- endcomment -%}
 
-  {%- comment -%}
-    Extract the subfolder from the page path.
-    e.g., "_crash-courses/functional-analysis/5-matrix-norms.md" -> "functional-analysis"
-  {%- endcomment -%}
+{% if page.collection and page.collection != 'posts' %}
   {% assign path_parts = page.path | split: '/' %}
   {% assign collection_folder = path_parts | first %}
   {% assign subfolder = path_parts | slice: 1, 1 | first %}
-
-  {%- comment -%}
-    Build the path prefix to match only files in the same subfolder.
-    e.g., "_crash-courses/functional-analysis/"
-  {%- endcomment -%}
   {% capture source_prefix %}{{ collection_folder }}/{{ subfolder }}/{% endcapture %}
 
-  {%- comment -%}
-    Get the collection items and filter by subfolder, then sort by sort_index.
-  {%- endcomment -%}
   {%- assign collection_items = site[page.collection] -%}
   {%- assign sorted = collection_items | where_exp: 'item', 'item.path contains source_prefix' | sort: 'sort_index' -%}
-
+  {% assign is_descending = false %}
 {% else %}
-  {%- comment -%}
-    This is a regular blog post. Navigation will be through all posts by date.
-  {%- endcomment -%}
   {%- assign sorted = site.posts -%}
+  {% assign is_descending = true %}
 {% endif %}
 
 {%- comment -%}
-  2. Find the current page's index within the sorted list.
+  2. Find the current page's index.
 {%- endcomment -%}
 {% assign current_index = -1 %}
 {% for item in sorted %}
@@ -51,51 +30,55 @@
 {% endfor %}
 
 {%- comment -%}
-  3. Determine the previous and next items.
+  3. Identify Older vs Newer based on sort direction.
+     - Descending (Posts): i+1 is Older, i-1 is Newer.
+     - Ascending (Collections): i+1 is Newer, i-1 is Older.
 {%- endcomment -%}
-{% assign prev_item = null %}
-{% assign next_item = null %}
-{% if current_index >= 0 %}
-  {% assign prev_index = current_index | minus: 1 %}
-  {% assign next_index = current_index | plus: 1 %}
+{% assign older_item = null %}
+{% assign newer_item = null %}
 
-  {% if prev_index >= 0 %}
-    {% assign prev_item = sorted[prev_index] %}
+{% if current_index >= 0 %}
+  {% if is_descending %}
+    {% comment %} Newest-first: next index (i+1) is older, prev index (i-1) is newer {% endcomment %}
+    {% assign older_index = current_index | plus: 1 %}
+    {% assign newer_index = current_index | minus: 1 %}
+  {% else %}
+    {% comment %} Ascending: next index (i+1) is newer, prev index (i-1) is older {% endcomment %}
+    {% assign older_index = current_index | minus: 1 %}
+    {% assign newer_index = current_index | plus: 1 %}
   {% endif %}
 
-  {% if next_index < sorted.size %}
-    {% assign next_item = sorted[next_index] %}
+  {% if older_index >= 0 and older_index < sorted.size %}
+    {% assign older_item = sorted[older_index] %}
+  {% endif %}
+  {% if newer_index >= 0 and newer_index < sorted.size %}
+    {% assign newer_item = sorted[newer_index] %}
   {% endif %}
 {% endif %}
 
+{% assign older_label = site.data.locales[include.lang].post.button.previous %}
+{% assign newer_label = site.data.locales[include.lang].post.button.next %}
+
 {%- comment -%}
-  4. Render the navigation buttons.
+  4. Render buttons: Older (Left) | Newer (Right)
 {%- endcomment -%}
 <nav class="post-navigation d-flex justify-content-between" aria-label="Post Navigation">
-  {% if prev_item %}
-    <a
-      href="{{ site.baseurl }}{{ prev_item.url }}"
-      class="btn btn-outline-primary"
-      aria-label="{{ previous }}"
-    >
-      <p>{{ prev_item.title }}</p>
+  {% if older_item %}
+    <a href="{{ site.baseurl }}{{ older_item.url }}" class="btn btn-outline-primary" aria-label="{{ older_label }}">
+      <p>{{ older_item.title }}</p>
     </a>
   {% else %}
-    <div class="btn btn-outline-primary disabled" aria-label="{{ previous }}">
+    <div class="btn btn-outline-primary disabled" aria-label="{{ older_label }}">
       <p>-</p>
     </div>
   {% endif %}
 
-  {% if next_item %}
-    <a
-      href="{{ site.baseurl }}{{ next_item.url }}"
-      class="btn btn-outline-primary"
-      aria-label="{{ next }}"
-    >
-      <p>{{ next_item.title }}</p>
+  {% if newer_item %}
+    <a href="{{ site.baseurl }}{{ newer_item.url }}" class="btn btn-outline-primary" aria-label="{{ newer_label }}">
+      <p>{{ newer_item.title }}</p>
     </a>
   {% else %}
-    <div class="btn btn-outline-primary disabled" aria-label="{{ next }}">
+    <div class="btn btn-outline-primary disabled" aria-label="{{ newer_label }}">
       <p>-</p>
     </div>
   {% endif %}
