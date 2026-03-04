@@ -48,9 +48,9 @@ For the compact SVD <span class="math-inline" markdown="0">\(G=U\Sigma V^\top\)<
 </div>
 
 In Muon, we typically do not need high accuracy, but we do want:
-1) a fast GPU path (mostly GEMMs),
-2) numerical stability in bf16,
-3) a way to certify that <span class="math-inline" markdown="0">\(\sigma_i(U)\)</span> are close to <span class="math-inline" markdown="0">\(1\)</span>.
+1. a fast GPU path (mostly GEMMs),
+2. numerical stability in bf16,
+3. a way to certify that <span class="math-inline" markdown="0">\(\sigma_i(U)\)</span> are close to <span class="math-inline" markdown="0">\(1\)</span>.
 
 Newton-Schulz/Polar Express iterations: normalize singular values to unit interval <span class="math-inline" markdown="0">\([0,1]\)</span> then directly compute with rectangular GEMMs.
 
@@ -269,7 +269,7 @@ and choose the nearest polynomial <span class="math-inline" markdown="0">\(p_{\r
 5. <span class="math-inline" markdown="0">\(\widetilde B \leftarrow DBD\)</span> (elementwise scaling: <span class="math-inline" markdown="0">\(\widetilde B_{ij}=d_i B_{ij} d_j\)</span>)
 
 ### Phase 1: Safe scaling to <span class="math-inline" markdown="0">\((0,1]\)</span> and global minimax steps
-1. Upper bound <span class="math-inline" markdown="0">\(\Lambda \ge \lambda_{\max}(\widetilde B)\)</span> (Gershgorin <span class="math-inline" markdown="0">\(\Vert \widetilde B\Vert _\infty\)</span> or 1-2 power iters)
+1. Upper bound <span class="math-inline" markdown="0">\(\Lambda \ge \lambda_{\max}(\widetilde B)\)</span> (Gershgorin <span class="math-inline" markdown="0">\(\Vert \widetilde B\Vert _\infty\)</span>)
 2. Scale:
 
    <div class="math-block" markdown="0">
@@ -279,8 +279,8 @@ and choose the nearest polynomial <span class="math-inline" markdown="0">\(p_{\r
    </div>
 
    so <span class="math-inline" markdown="0">\(\lambda(A)\subset(0,1]\)</span>
-3. Initialize <span class="math-inline" markdown="0">\(Z \leftarrow I\)</span>
-4. Repeat in restart blocks (<span class="math-inline" markdown="0">\(T_{\text{block}}\in\{2,3\}\)</span>):
+1. Initialize <span class="math-inline" markdown="0">\(Z \leftarrow I\)</span>
+2. Repeat in restart blocks (<span class="math-inline" markdown="0">\(T_{\text{block}}\in\{2,3\}\)</span>):
    - <span class="math-inline" markdown="0">\(S \leftarrow Z^\top A Z\)</span>
    - if <span class="math-inline" markdown="0">\(\Vert S-I\Vert _F \le \rho_{\text{switch}}\)</span> (e.g. <span class="math-inline" markdown="0">\(0.5\)</span>): break
    - choose <span class="math-inline" markdown="0">\(q_\ell\)</span> (table lookup for a conservative <span class="math-inline" markdown="0">\(\ell\)</span>) and apply:
@@ -371,12 +371,12 @@ Phase 1:
 
 Phase 2:
 9. for <span class="math-inline" markdown="0">\(t=1,2\)</span>:
-   a. <span class="math-inline" markdown="0">\(S \leftarrow Z^\top A Z\)</span>
-   b. <span class="math-inline" markdown="0">\(\delta_S \leftarrow \Vert S-I\Vert _F\)</span>
-   c. if <span class="math-inline" markdown="0">\(\delta_S \le \eta\)</span>: break
-   d. <span class="math-inline" markdown="0">\(\rho_{\text{design}} \leftarrow \gamma\delta_S\)</span>
-   e. select minimax <span class="math-inline" markdown="0">\(p_{\rho_{\text{design}}}\)</span>
-   f. <span class="math-inline" markdown="0">\(Z \leftarrow Z\,p_{\rho_{\text{design}}}(S-I)\)</span>
+   1. <span class="math-inline" markdown="0">\(S \leftarrow Z^\top A Z\)</span>
+   2. <span class="math-inline" markdown="0">\(\delta_S \leftarrow \Vert S-I\Vert _F\)</span>
+   3. if <span class="math-inline" markdown="0">\(\delta_S \le \eta\)</span>: break
+   4. <span class="math-inline" markdown="0">\(\rho_{\text{design}} \leftarrow \gamma\delta_S\)</span>
+   5. select minimax <span class="math-inline" markdown="0">\(p_{\rho_{\text{design}}}\)</span>
+   6. <span class="math-inline" markdown="0">\(Z \leftarrow Z\,p_{\rho_{\text{design}}}(S-I)\)</span>
 
 Finish:
 10. <span class="math-inline" markdown="0">\(Z_{\widetilde B} \leftarrow \alpha Z\)</span>  (approx <span class="math-inline" markdown="0">\(\widetilde B^{-1/2}\)</span>)
