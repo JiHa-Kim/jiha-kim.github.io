@@ -1,68 +1,12 @@
-{%- comment -%}
-  Fast related posts:
-    • Same-collection only
-    • Order = by date (if page.date), else by 'order' front-matter, else by path
-    • Picks: Next, Previous, and one deterministic “random”
-    • Works for posts and custom collections
-{%- endcomment -%}
-
-{%- assign coll = site.collections | where: 'label', page.collection | first -%}
-{%- if coll and coll.docs and coll.docs.size > 1 and jekyll.environment == 'production' -%}
-  {%- assign docs = coll.docs -%}
-
-  {%- comment -%} Choose a sort key {%- endcomment -%}
-  {%- assign ordered_docs = docs | sort: 'path' -%}
-  {%- if page.order -%}
-    {%- assign ordered_docs = docs | sort: 'order' -%}
-  {%- endif -%}
-  {%- if page.date -%}
-    {%- assign ordered_docs = docs | sort: 'date' -%}
-  {%- endif -%}
-
-  {%- comment -%} Find current index in ordered_docs {%- endcomment -%}
-  {%- assign idx = -1 -%}
-  {%- for d in ordered_docs -%}
-    {%- if d.id == page.id -%}
-      {%- assign idx = forloop.index0 -%}
-      {%- break -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {%- if idx == -1 -%}{% assign idx = 0 %}{%- endif -%}
-
-  {%- assign count = ordered_docs.size -%}
-
-  {%- comment -%} Compute next/prev with wrap-around {%- endcomment -%}
-  {%- assign next_i = idx | plus: 1 -%}
-  {%- if next_i >= count -%}{%- assign next_i = 0 -%}{%- endif -%}
-
-  {%- assign prev_i = idx | minus: 1 -%}
-  {%- if prev_i < 0 -%}{%- assign prev_i = count | minus: 1 -%}{%- endif -%}
-
-  {%- comment -%} Deterministic “random”: offset from idx by |page.url| {%- endcomment -%}
-  {%- assign seed = page.url | size -%}
-  {%- assign rand_i = idx | plus: seed | modulo: count -%}
-
-  {%- comment -%} Avoid duplicates (and self) {%- endcomment -%}
-  {%- if rand_i == idx or rand_i == next_i or rand_i == prev_i -%}
-    {%- assign rand_i = rand_i | plus: 1 | modulo: count -%}
-  {%- endif -%}
-  {%- if count < 3 -%}{%- assign rand_i = null -%}{%- endif -%}
-
-  {%- comment -%} Build the final list (Next, Previous, Random if available) {%- endcomment -%}
-  {%- assign picks = '' | split: '' -%}
-  {%- assign picks = picks | push: next_i -%}
-  {%- if prev_i != next_i -%}{%- assign picks = picks | push: prev_i -%}{%- endif -%}
-  {%- if rand_i -%}{%- assign picks = picks | push: rand_i -%}{%- endif -%}
-
+{%- if page.calculated_related_posts and page.calculated_related_posts.size > 0 -%}
   <aside id="related-posts" aria-labelledby="related-label">
     <h3 class="mb-4" id="related-label">
       {{- site.data.locales[include.lang].post.relate_posts | default: 'Related' -}}
     </h3>
 
     <nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4">
-      {%- for i in picks -%}
-        {%- assign doc = ordered_docs[i] -%}
-        {%- if doc and doc.url and doc.id != page.id -%}
+      {%- for doc in page.calculated_related_posts -%}
+        {%- if doc and doc.url -%}
           <article class="col">
             <a href="{{ doc.url | relative_url }}" class="post-preview card h-100">
               <div class="card-body">
