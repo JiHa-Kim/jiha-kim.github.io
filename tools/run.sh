@@ -14,6 +14,7 @@ help() {
   echo "Options:"
   echo "     -H, --host [HOST]    Host to bind to."
   echo "     -p, --production     Run Jekyll in 'production' mode."
+  echo "     -L, --limit-posts N  Limit the number of posts to parse and publish."
   echo "     -h, --help           Print this help information."
 }
 
@@ -27,6 +28,10 @@ while (($#)); do
   -p | --production)
     prod=true
     shift
+    ;;
+  -L | --limit-posts)
+    command="$command --limit_posts $2"
+    shift 2
     ;;
   -h | --help)
     help
