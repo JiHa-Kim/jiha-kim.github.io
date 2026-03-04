@@ -14,6 +14,9 @@
   overflow: hidden;
   color: var(--text-color);
   position: relative; /* CRITICAL: Anchors absolute children */
+
+  &.fill { background: var(--box-bg-color); }
+  &.flat { background: transparent; }
 }
 
 /* 2. Content Padding */
@@ -54,6 +57,7 @@
 
 /* 4. Static Standard Box */
 @mixin standard-box($border-color, $accent, $icon, $bg, $fa-style: 'solid') {
+  --box-bg-color: #{$bg};
   @include base-box;
   @include box-content;
   @include box-title($accent, $bg, $icon, $fa-style);
@@ -62,11 +66,12 @@
 
 /* 5. Static Math Box (Theorem/Proof/etc) */
 @mixin math-box($border, $accent, $bg, $icon, $label: null, $fa-style: 'solid') {
+  --box-bg-color: #{$bg};
   @include base-box;
   @include box-content;
   @include box-title($accent, $bg, $icon, $fa-style, true);
   border-left: 0.25rem solid $border;
-  background: $bg;
+  background: $bg; /* Math boxes default to filled */
 
   @if $label {
     /* Case A: User provided a Title (e.g. > [!proof] My Title). Inject label into it. */
@@ -101,6 +106,7 @@
 
 /* 6. Collapsible Details Box */
 @mixin details-box($border, $accent, $bg, $icon-closed: '\f02e', $icon-open: '\f518', $fa-style: 'solid') {
+  --box-bg-color: #{$bg};
   @include base-box;
   border-left: 0.25rem solid $border;
   padding: 0;
@@ -151,7 +157,7 @@
 @keyframes bop { 50% { transform: scale(1.12); } }
 
 /* ===========================================================================
- * Definitions
+ * Global Theme Variables
  * =========================================================================== */
 
 :root {
@@ -167,32 +173,6 @@
   --prompt-gray-bg: rgba(156, 163, 175, 0.1);
 }
 
-/* Standard Boxes */
-.box-info:not(details) { @include standard-box(var(--prompt-info-icon), var(--prompt-info-icon), '\f06a', var(--prompt-info-bg)); }
-details.box-info { @include details-box(var(--prompt-info-icon), var(--prompt-info-icon), var(--prompt-info-bg), '\f06a'); }
-
-.box-tip:not(details) { @include standard-box(var(--prompt-tip-icon), var(--prompt-tip-icon), '\f0eb', var(--prompt-tip-bg), 'regular'); }
-details.box-tip { @include details-box(var(--prompt-tip-icon), var(--prompt-tip-icon), var(--prompt-tip-bg), '\f0eb', '\f0eb', 'regular'); }
-
-.box-warning:not(details) { @include standard-box(var(--prompt-warning-icon), var(--prompt-warning-icon), '\f06a', var(--prompt-warning-bg)); }
-details.box-warning { @include details-box(var(--prompt-warning-icon), var(--prompt-warning-icon), var(--prompt-warning-bg), '\f06a'); }
-
-.box-danger:not(details) { @include standard-box(var(--prompt-danger-icon), var(--prompt-danger-icon), '\f071', var(--prompt-danger-bg)); }
-details.box-danger { @include details-box(var(--prompt-danger-icon), var(--prompt-danger-icon), var(--prompt-danger-bg), '\f071'); }
-
-/* Base Math Boxes */
-.box-definition:not(details) { @include math-box(#2563eb, #2563eb, rgba(#2563eb, 0.08), '\f02e', 'Definition'); }
-.box-lemma:not(details) { @include math-box(#16a34a, #16a34a, rgba(#16a34a, 0.08), '\f022', 'Lemma'); }
-.box-proposition:not(details) { @include math-box(#eab308, #eab308, rgba(#eab308, 0.08), '\f0eb', 'Proposition'); }
-.box-theorem:not(details) { @include math-box(#dc2626, #dc2626, rgba(#dc2626, 0.08), '\f091', 'Theorem'); }
-.box-example:not(details) { @include math-box(#8b5cf6, #8b5cf6, rgba(#8b5cf6, 0.08), '\f0eb', 'Example'); }
-
-/* Fallback */
-details.details-block {
-  @include details-box(var(--prompt-tip-icon), var(--prompt-tip-icon), var(--prompt-tip-bg));
-}
-
-/* Dark Mode */
 @media (prefers-color-scheme: dark) {
   :root {
     --prompt-info-icon: #38bdf8; --prompt-info-bg: rgba(56, 189, 248, 0.1);
@@ -201,9 +181,4 @@ details.details-block {
     --prompt-danger-icon: #f87171; --prompt-danger-bg: rgba(248, 113, 113, 0.1);
     --prompt-gray-icon: #d1d5db; --prompt-gray-bg: rgba(209, 213, 219, 0.1);
   }
-  .box-definition:not(details) { @include math-box(#1e40af, #60a5fa, rgba(#2563eb, 0.08), '\f02e', 'Definition'); }
-  .box-theorem:not(details) { @include math-box(#991b1b, #f87171, rgba(#dc2626, 0.08), '\f091', 'Theorem'); }
-  .box-example:not(details) { @include math-box(#6d28d9, #a78bfa, rgba(#7d48f8, 0.08), '\f0eb', 'Example'); }
-  .box-lemma:not(details) { @include math-box(#15803d, #4ade80, rgba(#16a34a, 0.08), '\f022', 'Lemma'); }
-  .box-proposition:not(details) { @include math-box(#a16207, #fbbf24, rgba(#eab308, 0.08), '\f0eb', 'Proposition'); }
 }

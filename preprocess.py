@@ -9,21 +9,21 @@ from typing import List, Tuple, Optional
 # Map Obsidian callout types -> Chirpy box classes
 TYPE_MAP = {
     # math family
-    "definition":"box-definition","lemma":"box-lemma","proposition":"box-proposition",
-    "theorem":"box-theorem","example":"box-example","corollary":"box-corollary",
-    "remark":"box-remark","proof":"box-proof","principle":"box-principle","axiom":"box-axiom",
-    "postulate":"box-postulate","conjecture":"box-conjecture","claim":"box-claim",
-    "notation":"box-notation","algorithm":"box-algorithm","problem":"box-problem",
-    "exercise":"box-exercise","solution":"box-solution","assumption":"box-assumption",
-    "convention":"box-convention","fact":"box-fact",
-    # standard + aliases
-    "note":"box-info","abstract":"box-info","summary":"box-info","tldr":"box-info","todo":"box-info",
-    "info":"box-info",
-    "tip":"box-tip","hint":"box-tip","important":"box-tip","success":"box-tip","check":"box-tip","done":"box-tip",
-    "warning":"box-warning","caution":"box-warning","attention":"box-warning",
-    "danger":"box-danger","error":"box-danger","bug":"box-danger","failure":"box-danger","fail":"box-danger","missing":"box-danger",
-    "quote":"box-info","cite":"box-info",
-    "question":"box-info","help":"box-info","faq":"box-info",
+    "definition": "box-definition", "lemma": "box-lemma", "proposition": "box-proposition",
+    "theorem": "box-theorem", "example": "box-example", "corollary": "box-corollary",
+    "remark": "box-remark", "proof": "box-proof", "principle": "box-principle", "axiom": "box-axiom",
+    "postulate": "box-postulate", "conjecture": "box-conjecture", "claim": "box-claim",
+    "notation": "box-notation", "algorithm": "box-algorithm", "problem": "box-problem",
+    "exercise": "box-exercise", "solution": "box-solution", "assumption": "box-assumption",
+    "convention": "box-convention", "fact": "box-fact",
+    # standard family
+    "info": "box-info", "note": "box-note", "abstract": "box-abstract", "summary": "box-summary",
+    "tldr": "box-tldr", "todo": "box-todo", "tip": "box-tip", "hint": "box-hint",
+    "important": "box-important", "success": "box-success", "check": "box-check", "done": "box-done",
+    "question": "box-question", "help": "box-help", "faq": "box-faq",
+    "warning": "box-warning", "caution": "box-caution", "attention": "box-attention",
+    "danger": "box-danger", "error": "box-error", "bug": "box-bug", "failure": "box-failure",
+    "fail": "box-fail", "missing": "box-missing", "quote": "box-quote", "cite": "box-cite",
 }
 
 # Types that should default to "open" if they are collapsible and no +/− is given
@@ -176,7 +176,7 @@ def convert_inline_math(text: str) -> str:
 # --- Callout parsing ---------------------------------------------------------
 
 CALLOUT_START_RE = re.compile(
-    r'^\s*>\s*\[\!(?P<typ>[A-Za-z0-9_-]+)\](?P<state>[\+\-])?\s*(?P<title>.*)?$'
+    r'^\s*>\s*\[\!(?P<typ>[A-Za-z0-9_-]+)\](?P<state>[\+\-])?(?:\s+(?P<title>.*?(?=\s+\{\.|$)))?(?:\s+\{\.(?P<attr>[A-Za-z0-9_-]+)\})?\s*$'
 )
 
 def parse_callout_block(lines: List[str], i: int) -> Tuple[Optional[str], int]:
@@ -190,6 +190,7 @@ def parse_callout_block(lines: List[str], i: int) -> Tuple[Optional[str], int]:
 
     ctype = m.group("typ").lower()
     state = m.group("state")
+    attr = m.group("attr")
     title = (m.group("title") or "").strip()
 
     content_lines = []
@@ -243,6 +244,9 @@ def parse_callout_block(lines: List[str], i: int) -> Tuple[Optional[str], int]:
         processed_body = "\n"
 
     box_class = TYPE_MAP.get(ctype, "box-info")
+    if attr:
+        box_class += f" {attr}"
+
     is_collapsible = (state is not None) or (ctype in DEFAULT_OPEN_TYPES)
     is_open = (state == "+") or (ctype in DEFAULT_OPEN_TYPES)
 
