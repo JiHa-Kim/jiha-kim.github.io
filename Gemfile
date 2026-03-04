@@ -19,4 +19,5 @@ group :jekyll_plugins do
   gem 'jekyll-compose'
   gem 'jekyll-tagories'
   gem 'jekyll-scholar'
+  gem 'liquid-c'
 end
