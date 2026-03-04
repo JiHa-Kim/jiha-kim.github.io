@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import re
 import sys
-import os
 from pathlib import Path
 from typing import List, Tuple, Optional
 
@@ -71,7 +70,7 @@ def _restore_regions(text: str, buckets: List[str]) -> str:
 # --- Math conversion ---------------------------------------------------------
 
 def cleanup_latex_syntax(content: str) -> str:
-    """
+    r"""
     Applies specific glyph replacements to clean up 'lazy' LaTeX.
     Ported from fix-math.sh.
     """
@@ -95,7 +94,7 @@ def cleanup_latex_syntax(content: str) -> str:
     return content
 
 def convert_block_math(text: str) -> str:
-    """
+    r"""
     Normalize Obsidian $$...$$ and \[...\] blocks into Kramdown-safe MathJax blocks.
 
     1. Finds $$...$$ or \[...\] sequences.
@@ -181,7 +180,7 @@ CALLOUT_START_RE = re.compile(
 )
 
 def parse_callout_block(lines: List[str], i: int) -> Tuple[Optional[str], int]:
-    """
+    r"""
     Given lines and an index at a callout start, consume contiguous '>' lines,
     recursively process the content, and return converted HTML + new index.
     """
