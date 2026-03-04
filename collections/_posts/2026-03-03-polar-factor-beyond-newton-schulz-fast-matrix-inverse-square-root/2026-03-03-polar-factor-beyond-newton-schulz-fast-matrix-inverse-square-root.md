@@ -43,7 +43,7 @@ For the compact SVD <span class="math-inline" markdown="0">\(G=U\Sigma V^\top\)<
 
 <div class="math-block" markdown="0">
 \[
-\mathrm{polar}(G)=G\vert G\vert ^{-1/2} \quad\text{("direction" part: unitary polar factor)})
+\mathrm{polar}(G)=G\vert G\vert ^{-1} \quad\text{("direction" part: unitary polar factor)})
 \]
 </div>
 
