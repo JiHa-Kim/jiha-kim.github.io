@@ -229,6 +229,15 @@ X_{t+1} = \frac{1}{2} X_t \left(3I - X_t^\ast X_t\right),
 </div>
 
 after scaling so <span class="math-inline" markdown="0">\(\lVert X_0 \rVert_2 < 1\)</span>.
+
+<blockquote class="box-update" markdown="1">
+<div class="title" markdown="1">
+**Update.** State-of-the-Art (SOTA) Methods
+</div>
+While Newton-Schulz is the classic matmul-only approximation, recent developments in high-performance ML have introduced more efficient and stable alternatives:
+- **[Polar Express](https://arxiv.org/abs/2505.16932)**: A fast and robust method for polar decomposition in deep learning.
+- **Turbo-Muon AOL ([arXiv:2512.04632](https://arxiv.org/abs/2512.04632))**: Approaches like All-On-Layer (AOL) specifically optimize the throughput of these orthogonalization steps.
+</blockquote>
 </blockquote>
 
 ## 9) Practical speed trick: realify complex blocks
