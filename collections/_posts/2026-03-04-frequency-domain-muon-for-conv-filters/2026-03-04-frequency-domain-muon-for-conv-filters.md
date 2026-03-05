@@ -25,9 +25,12 @@ math: true
 This note covers what changes relative to the CIFAR-10 speedrun: we stop orthogonalizing a reshape of the conv tensor, and instead orthogonalize the convolution *operator*.
 </blockquote>
 
+- **Original speedrun repo**: [KellerJordan/cifar10-airbench](https://github.com/KellerJordan/cifar10-airbench)
+- **PoC implementation**: [JiHa-Kim/ortho-conv-cifar10](https://github.com/JiHa-Kim/ortho-conv-cifar10)
+
 ## 1) What the speedrun does
 
-The speedrun takes a conv weight/update tensor, reshapes it into a matrix (for example <span class="math-inline" markdown="0">\((C_{\mathrm{out}}, C_{\mathrm{in}} k_H k_W)\)</span>), then applies a polar-factor style projection to make that reshaped update "orthogonal".
+The [CIFAR-10 speedrun](https://github.com/KellerJordan/cifar10-airbench) takes a conv weight/update tensor, reshapes it into a matrix (for example <span class="math-inline" markdown="0">\((C_{\mathrm{out}}, C_{\mathrm{in}} k_H k_W)\)</span>), then applies a polar-factor style projection to make that reshaped update "orthogonal".
 
 This is efficient, but it enforces orthogonality of a chosen *unfolding*, not orthogonality of the actual convolution operator acting on feature maps.
 
