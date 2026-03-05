@@ -12,6 +12,7 @@ tags:
   - Optimization
   - Fourier Transform
   - Signal Processing
+  - Computational Complexity
 math: true
 ---
 
@@ -70,6 +71,22 @@ Assume circular boundary conditions over spatial positions:
 - shifts wrap: <span class="math-inline" markdown="0">\(p \mapsto p+\delta\)</span> mod <span class="math-inline" markdown="0">(H,W)</span>
 
 Under this "circular conv" model, <span class="math-inline" markdown="0">\(T_K\)</span> is block-circulant and is diagonalized by the spatial DFT. This is exact for circular conv, not for zero-padding. The point is to define and enforce orthogonality in the basis where the translation-equivariant operator cleanly decomposes.
+</blockquote>
+
+<blockquote class="box-caution" markdown="1">
+<div class="title" markdown="1">
+**Caution.** Intractability of the Spatial Operator
+</div>
+In theory, one could form the full linear operator matrix $T_K$. However, for a $C_{\mathrm{out}} \times C_{\mathrm{in}}$ convolution on an $H \times W$ grid, $T_K$ is a matrix of size $(C_{\mathrm{out}} HW) \times (C_{\mathrm{in}} HW)$.
+
+**Naive Cost Example:**
+For a standard layer with $C=512$ and $H=W=32$ ($N = 1024$):
+- **Memory**: The matrix has $(512 \cdot 1024)^2 \approx 2.7 \times 10^{11}$ entries. In float32, this is **~1.1 TB**, far exceeding GPU memory.
+- **Computation**: A polar decomposition ($O(N^3)$) would require $\approx (5 \cdot 10^5)^3 \approx 1.25 \times 10^{17}$ FLOPs.
+
+By diagonalizing via DFT, we exploit the block-circulant structure to process $HW$ independent matrices of size $C_{\mathrm{out}} \times C_{\mathrm{in}}$.
+- **Diagonalized Cost**: $1024 \times (512^3) \approx 1.3 \times 10^{11}$ FLOPs.
+This makes the computation **~1,000,000x faster** and reduces the working memory to purely the weights and their Fourier transform.
 </blockquote>
 
 ## 4) In Fourier space, conv becomes per-frequency channel mixing
