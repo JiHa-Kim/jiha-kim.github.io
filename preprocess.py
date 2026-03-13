@@ -43,7 +43,10 @@ SKIP_FORMATTING_ENVS = {
 # Allow whitespace before backticks for indented blocks
 CODE_FENCE_RE = re.compile(r"(^\s*```.*?$)(.*?)(^\s*```$)", re.M | re.S)
 INLINE_CODE_RE = re.compile(r"`[^`\n]*`")
-HTML_BLOCK_RE = re.compile(r"(?is)<(blockquote|details)(\s[^>]*)?>.*?</\1>")
+# HTML regions to protect (e.g. math already processed or raw HTML that shouldn't be touched)
+MATH_BLOCK_RE = re.compile(r"(?is)<div class=\"math-block\"[^>]*>.*?</div>")
+MATH_INLINE_RE = re.compile(r"(?is)<span class=\"math-inline\"[^>]*>.*?</span>")
+
 
 def _protect_regions(text: str) -> Tuple[str, List[str]]:
     r"""
@@ -58,7 +61,8 @@ def _protect_regions(text: str) -> Tuple[str, List[str]]:
 
     # Order matters: Blocks first, then inline
     text = CODE_FENCE_RE.sub(stash, text)
-    text = HTML_BLOCK_RE.sub(stash, text)
+    text = MATH_BLOCK_RE.sub(stash, text)
+    text = MATH_INLINE_RE.sub(stash, text)
     text = INLINE_CODE_RE.sub(stash, text)
     return text, buckets
 
