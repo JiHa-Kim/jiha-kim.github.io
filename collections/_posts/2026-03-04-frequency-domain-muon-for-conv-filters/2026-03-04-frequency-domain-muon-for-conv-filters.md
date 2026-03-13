@@ -80,15 +80,15 @@ Under this "circular conv" model, <span class="math-inline" markdown="0">\(T_K\)
 <div class="title" markdown="1">
 **Caution.** Intractability of the Spatial Operator
 </div>
-In theory, one could form the full linear operator matrix $T_K$. However, for a $C_{\mathrm{out}} \times C_{\mathrm{in}}$ convolution on an $H \times W$ grid, $T_K$ is a matrix of size $(C_{\mathrm{out}} HW) \times (C_{\mathrm{in}} HW)$.
+In theory, one could form the full linear operator matrix <span class="math-inline" markdown="0">\(T_K\)</span>. However, for a <span class="math-inline" markdown="0">\(C_{\mathrm{out}} \times C_{\mathrm{in}}\)</span> convolution on an <span class="math-inline" markdown="0">\(H \times W\)</span> grid, <span class="math-inline" markdown="0">\(T_K\)</span> is a matrix of size <span class="math-inline" markdown="0">\((C_{\mathrm{out}} HW) \times (C_{\mathrm{in}} HW)\)</span>.
 
 **Naive Cost Example:**
-For a standard layer with $C=512$ and $H=W=32$ ($N = 1024$):
-- **Memory**: The matrix has $(512 \cdot 1024)^2 \approx 2.7 \times 10^{11}$ entries. In float32, this is **~1.1 TB**, far exceeding GPU memory.
-- **Computation**: A polar decomposition ($O(N^3)$) would require $\approx (5 \cdot 10^5)^3 \approx 1.25 \times 10^{17}$ FLOPs.
+For a standard layer with <span class="math-inline" markdown="0">\(C=512\)</span> and <span class="math-inline" markdown="0">\(H=W=32\)</span> (<span class="math-inline" markdown="0">\(N = 1024\)</span>):
+- **Memory**: The matrix has <span class="math-inline" markdown="0">\((512 \cdot 1024)^2 \approx 2.7 \times 10^{11}\)</span> entries. In float32, this is **~1.1 TB**, far exceeding GPU memory.
+- **Computation**: A polar decomposition (<span class="math-inline" markdown="0">\(O(N^3)\)</span>) would require <span class="math-inline" markdown="0">\(\approx (5 \cdot 10^5)^3 \approx 1.25 \times 10^{17}\)</span> FLOPs.
 
-By diagonalizing via DFT, we exploit the block-circulant structure to process $HW$ independent matrices of size $C_{\mathrm{out}} \times C_{\mathrm{in}}$.
-- **Diagonalized Cost**: $1024 \times (512^3) \approx 1.3 \times 10^{11}$ FLOPs.
+By diagonalizing via DFT, we exploit the block-circulant structure to process <span class="math-inline" markdown="0">\(HW\)</span> independent matrices of size <span class="math-inline" markdown="0">\(C_{\mathrm{out}} \times C_{\mathrm{in}}\)</span>.
+- **Diagonalized Cost**: <span class="math-inline" markdown="0">\(1024 \times (512^3) \approx 1.3 \times 10^{11}\)</span> FLOPs.
 This makes the computation **~1,000,000x faster** and reduces the working memory to purely the weights and their Fourier transform.
 </blockquote>
 
