@@ -14,7 +14,9 @@ tags:
   - Lion
   - Numerical Methods
   - Game Theory
-math: true
+image:
+  path: orbit_euler_vs_verlet.gif
+  alt: Orbit simulation showing energy conservation in Velocity Verlet vs drift in Forward Euler
 ---
 
 # Gradient-Based Optimization and Differential Equations
