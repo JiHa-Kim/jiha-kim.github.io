@@ -16,8 +16,6 @@ tags:
 - Riemann Tensor
 - Machine Learning
 - Crash Course
-llm-instructions: |
-  # (Same LLM instructions as before)
 ---
 
 ## Introduction

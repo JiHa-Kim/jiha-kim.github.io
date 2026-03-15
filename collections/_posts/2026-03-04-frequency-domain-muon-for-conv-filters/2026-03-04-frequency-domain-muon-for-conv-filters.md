@@ -243,36 +243,13 @@ While Newton-Schulz is the classic matmul-only approximation, recent development
 </blockquote>
 </blockquote>
 
-## 9) Practical speed trick: realify complex blocks
-
-<blockquote class="box-tip" markdown="1">
-<div class="title" markdown="1">
-**Real Embedding Trick**
-</div>
-Per-frequency blocks are complex. To use real GEMMs, embed <span class="math-inline" markdown="0">\(A \in \mathbb{C}^{m \times n}\)</span> into
-
-<div class="math-block" markdown="0">
-\[
-\Phi(A) =
-\begin{pmatrix}
-\Re A & -\Im A \\
-\Im A & \Re A
-\end{pmatrix}
-\in \mathbb{R}^{2m \times 2n}.
-\]
-</div>
-
-This preserves the relevant algebra for transpose/conjugate-transpose products, so Newton-Schulz can run in real arithmetic.
-</blockquote>
-
-## 10) Summary (delta only)
+## 9) Summary
 
 1. Stop orthogonalizing a conv-tensor unfolding.
 2. Use circular conv so the operator diagonalizes under the spatial DFT.
 3. Work with per-frequency channel blocks <span class="math-inline" markdown="0">\(\hat{G}[\omega]\)</span> on an <span class="math-inline" markdown="0">\(M \times M\)</span> grid.
 4. For each <span class="math-inline" markdown="0">\(\omega\)</span>, set <span class="math-inline" markdown="0">\(\Delta \hat{K}[\omega] = -\mathrm{polar}(\hat{G}[\omega])\)</span> (approx via Newton-Schulz).
 5. Enforce Hermitian symmetry so <span class="math-inline" markdown="0">\(\Delta K\)</span> is real after inverse DFT.
-6. Use <span class="math-inline" markdown="0">\(\Phi\)</span> to implement complex math with real GEMMs if needed.
 
 ## Appendix: Core equations
 

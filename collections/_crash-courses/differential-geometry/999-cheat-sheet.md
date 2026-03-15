@@ -17,8 +17,6 @@ tags:
 - Connections
 - Curvature
 - Crash Course
-llm-instructions: |
-  # (Same LLM instructions as provided previously)
 ---
 
 ## Introduction
