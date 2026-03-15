@@ -11,7 +11,7 @@
   border-radius: 0.25rem;
   margin: 1rem 0;
   box-shadow: var(--language-border-color) 1px 1px 2px 1px;
-  overflow: hidden;
+  overflow: visible;
   color: var(--text-color);
   position: relative; /* CRITICAL: Anchors absolute children */
 
@@ -37,6 +37,8 @@
     padding: 0.55rem 1rem;
     margin: -0.6rem -1rem 0.6rem -1rem;
     line-height: 1.15;
+    border-top-left-radius: calc(0.25rem - 1px);
+    border-top-right-radius: calc(0.25rem - 1px);
 
     @if $border {
       border-bottom: 1px solid rgba($accent, 0.15);
@@ -122,6 +124,8 @@
     line-height: 1.15;
     color: $accent;
     font-weight: 600;
+    border-top-left-radius: calc(0.25rem - 1px);
+    border-top-right-radius: calc(0.25rem - 1px);
 
     &::-webkit-details-marker, &::marker { display: none; }
 
