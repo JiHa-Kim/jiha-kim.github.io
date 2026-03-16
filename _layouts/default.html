@@ -4,9 +4,9 @@ layout: compress
 
 <!doctype html>
 
-{% include_cached origin-type.html %}
+{% include origin-type.html %}
 
-{% include_cached lang.html %}
+{% include lang.html %}
 
 {% if site.theme_mode %}
   {% capture prefer_mode %}data-mode="{{ site.theme_mode }}"{% endcapture %}
@@ -26,7 +26,7 @@ layout: compress
         <div class="row flex-grow-1">
           <main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4">
             {% if layout.layout == 'default' %}
-              {% include_cached refactor-content.html content=content lang=lang %}
+              {% include refactor-content.html content=content lang=lang %}
             {% else %}
               {{ content }}
             {% endif %}
