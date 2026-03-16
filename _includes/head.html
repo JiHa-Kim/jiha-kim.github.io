@@ -61,7 +61,6 @@
 
   {% include_cached favicons.html %}
 
-  {% capture has_h2_h3 %}{% if page.content contains '<h2' or page.content contains '<h3' %}true{% else %}false{% endif %}{% endcapture %}
   {% include_cached head/assets.html
     type=type
     lang=lang
@@ -70,6 +69,6 @@
     math=page.math
     toc=site.toc
     page_toc=page.toc
-    has_h2_h3=has_h2_h3
+    has_h2_h3=page.has_h2_h3
   %}
 </head>

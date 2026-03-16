@@ -7,12 +7,8 @@ layout: compress
 {% assign type = site.data.origin_type %}
 {% assign lang = page.lang %}
 
-{% if site.theme_mode %}
-  {% capture prefer_mode %}data-mode="{{ site.theme_mode }}"{% endcapture %}
-{% endif %}
-
 <!-- `site.alt_lang` can specify a language different from the UI -->
-<html lang="{{ page.lang | default: site.alt_lang | default: site.lang }}" {{ prefer_mode }}>
+<html lang="{{ page.lang | default: site.alt_lang | default: site.lang }}" {{ site.data.prefer_mode }}>
   {% include head.html %}
 
   <body>

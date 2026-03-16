@@ -1,0 +1,15 @@
+<article class="col">
+  <a href="{{ include.url | relative_url }}" class="post-preview card h-100">
+    <div class="card-body">
+      {%- include_cached datetime.html date=include.date lang=include.lang -%}
+      <h4 class="pt-0 my-2">{{ include.title }}</h4>
+      <div class="text-muted">
+        <p>{%- include_cached post-description.html
+          description=include.description
+          excerpt=include.excerpt
+          lang=include.lang
+        -%}</p>
+      </div>
+    </div>
+  </a>
+</article>
