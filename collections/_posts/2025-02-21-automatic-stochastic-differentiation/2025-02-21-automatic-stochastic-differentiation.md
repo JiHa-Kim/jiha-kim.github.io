@@ -51,7 +51,7 @@ This naturally encodes the product rule: $$(ab)' = a b' + a' b$$.
 In stochastic calculus, however, a key difference arises: the quadratic variation of a Brownian motion $$B_t$$ is nonzero. In fact, if we define
 
 $$
-\Delta B_t := B_t - B_0 \sim N(0,t),
+\Delta B_t := B_t - B_0 ~N(0,t),
 $$
 
 then symbolically we have
@@ -67,8 +67,8 @@ $$
 $$
 
 with the following interpretation:
-- We set the “base differential” $$dB_t \sim \epsilon$$ (so that the linear term corresponds to the Brownian increment).
-- Since $$dB_t^2 \sim dt$$, we interpret $$\epsilon^2 \sim dt$$.
+- We set the “base differential” $$dB_t ~\epsilon$$ (so that the linear term corresponds to the Brownian increment).
+- Since $$dB_t^2 ~dt$$, we interpret $$\epsilon^2 ~dt$$.
 - All higher-order terms vanish: $$\epsilon^3 = 0$$.
 
 Then, for a stochastic differential equation such as
@@ -98,7 +98,7 @@ For example, using this framework you can derive Itô’s lemma.
 Using $$\mathbb{R}[\epsilon]/\epsilon^3$$ with
 
 $$
-\epsilon \sim dB_t,\quad \epsilon^2 \sim dt,\quad \epsilon^3=0,
+\epsilon ~dB_t,\quad \epsilon^2 ~dt,\quad \epsilon^3=0,
 $$
 
 and writing
@@ -153,7 +153,7 @@ $$
 $$
 
 with:
-- $$\epsilon \sim dB_t$$ (the Brownian increment), with the property that $$\epsilon^2 \sim dt$$,
+- $$\epsilon ~dB_t$$ (the Brownian increment), with the property that $$\epsilon^2 ~dt$$,
 - $$\epsilon^3 = 0$$ (all higher-order terms vanish).
 
 Then, as noted, the SDE
@@ -186,7 +186,7 @@ $$
 df = f'(X_t)dX_t + \frac{1}{2} f''(X_t)(dX_t)^2,
 $$
 
-with $$(dB_t)^2\sim dt$$ so that the second-order term is nonzero. In order to recover the familiar chain rule,
+with $$(dB_t)^2~dt$$ so that the second-order term is nonzero. In order to recover the familiar chain rule,
 
 $$
 df = f'(X_t)\circ dX_t,

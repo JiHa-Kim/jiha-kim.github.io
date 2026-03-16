@@ -29,8 +29,17 @@ After updating, verify the site still builds and tests pass:
 bash tools/test.sh
 ```
 
-### Python scripts
-The Python scripts in this repository (e.g., `obsidian_to_chirpy.py`) currently only use the Python standard library and do not require external dependencies.
+## Local Preview (Obsidian-style)
+
+This site natively supports Obsidian-style math and callouts. When you run the Jekyll server locally, a custom plugin handles the conversion automatically.
+
+To preview your changes:
+
+```bash
+bundle exec jekyll s
+```
+
+This ensures that your files in `collections/` remain in their original Obsidian format while being rendered correctly in the browser.
 
 ## Verification
 Always run the local test suite before pushing changes:

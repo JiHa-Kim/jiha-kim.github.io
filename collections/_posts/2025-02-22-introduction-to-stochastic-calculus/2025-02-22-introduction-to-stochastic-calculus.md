@@ -127,19 +127,19 @@ Here, $$X(t)$$ will encode our displacement at the $$t$$-th step where $$t \in \
 Then, the overall displacement $$S(n)$$ is:
 
 $$
-S(n) = X(1) + X(2) + \dots + X(n) = \sum_{t=1}^n X(t)
+S(n) = X(1) + X(2) + ...+ X(n) = \sum_{t=1}^n X(t)
 $$
 
 So there it is! The central limit theorem states more precisely that given $$n$$ independent and identically distributed random variables $$X_1, X_2, \dots, X_n$$ with mean $$\mu$$ and variance $$\sigma^2$$, we have:
 
 $$
-X_1 + \dots + X_n \sim N(n\mu, n\sigma^2) \text{ as } n \to \infty
+X_1 + ...+ X_n ~N(n\mu, n\sigma^2) \text{ as } n \to \infty
 $$
 
 This is precisely what we need. As we take $$n \to \infty$$, we have that
 
 $$
-S(n) \sim N(0, n)
+S(n) ~N(0, n)
 $$
 
 such that
@@ -188,8 +188,8 @@ Let $$W(t)$$ be the position of the Brownian motion at time $$t$$, and let $$\De
 Then, we write some properties of Brownian motion:
 
 1. $$W(0)=0$$ almost surely
-2. \$$W(t)\sim N(0,t)$$
-    - With the first condition, this is often written equivalently as $$\Delta W(s,t)\sim N(0,t-s)$$ for all $$s \ne t$$
+2. \$$W(t)~N(0,t)$$
+    - With the first condition, this is often written equivalently as $$\Delta W(s,t)~N(0,t-s)$$ for all $$s \ne t$$
 3. $$\Delta W(t_1,t_2)$$ is independent of $$\Delta W(t_2,t_3)$$ for arbitrary distinct $$t_1 < t_2 \le t_3$$
 
 We can straightforwardly use these conditions are enough to find
@@ -226,7 +226,7 @@ $$
 \lim_{dt \to 0} \frac{W(t + dt) - W(t)}{dt} = \lim_{dt \to 0} \frac{\Delta W(t, t + dt)}{dt}
 $$
 
-Since $$\Delta W(t, t + dt) \sim N(0, dt) = \sqrt{dt} \, N(0, 1)$$:
+Since $$\Delta W(t, t + dt) ~N(0, dt) = \sqrt{dt} \, N(0, 1)$$:
 
 $$
 \frac{\Delta W(t, t + dt)}{dt} = \frac{\sqrt{dt} \, N(0, 1)}{dt} = \frac{1}{\sqrt{dt}} N(0, 1)
@@ -244,7 +244,7 @@ $$
 dW := W(t + dt) - W(t) = \Delta W(t, t + dt)
 $$
 
-From Section 3, $$W(t + dt) - W(t) \sim N(0, dt)$$, so:
+From Section 3, $$W(t + dt) - W(t) ~N(0, dt)$$, so:
 
 $$
 dW = \sqrt{dt} \, N(0, 1)
@@ -258,7 +258,7 @@ Now consider $$(dW)^2$$. Its expected value is $$dt$$, but what about its variab
 
 #### **The Itô Integral: Integrating Against Randomness**
 
-In regular calculus, $$\int_a^b f(x) \, dx$$ approximates the area under a curve by summing rectangles, $$\sum f(x_i) \Delta x$$, and taking the limit as $$\Delta x \to 0$$. For Brownian motion, we want something like $$\int_0^t f(s) \, dW(s)$$, where $$dW(s)$$ replaces $$dx$$. Here, the steps are random: $$\Delta W(s_i, s_{i+1}) \sim \sqrt{\Delta s} \, N(0, 1)$$. We approximate:
+In regular calculus, $$\int_a^b f(x) \, dx$$ approximates the area under a curve by summing rectangles, $$\sum f(x_i) \Delta x$$, and taking the limit as $$\Delta x \to 0$$. For Brownian motion, we want something like $$\int_0^t f(s) \, dW(s)$$, where $$dW(s)$$ replaces $$dx$$. Here, the steps are random: $$\Delta W(s_i, s_{i+1}) ~\sqrt{\Delta s} \, N(0, 1)$$. We approximate:
 
 $$
 \int_0^t f(s) \, dW(s) \approx \sum_{i=0}^{n-1} f(s_i) [\Delta W(s_i, s_{i+1})]
@@ -374,7 +374,7 @@ $$
 X(t) = \int_0^t \mu \, ds + \int_0^t \sigma \, dW(s) = \mu t + \sigma W(t)
 $$
 
-Since $$W(t) \sim N(0, t)$$, we have $$X(t) \sim N(\mu t, \sigma^2 t)$$—a process drifting linearly with noise spreading over time. It’s a basic model for things like a stock with steady growth and volatility.
+Since $$W(t) ~N(0, t)$$, we have $$X(t) ~N(\mu t, \sigma^2 t)$$—a process drifting linearly with noise spreading over time. It’s a basic model for things like a stock with steady growth and volatility.
 
 ![Sample SDE Path](sample_SDE.png)
 _[Code](#b3-python-code-for-basic-sde-simulation) 2D image: Sample SDE path with mu=1.0, sigma=0.5_
@@ -522,7 +522,7 @@ $$
 b(X+\frac{1}{2}dX) dW = b(X)dW + b_X(X)\frac{1}{2}dX dW + o(dt)
 $$
 
-Now, if we plug in $$dX=a dt + b dW$$, the first term vanishes, leaving $$b_X b \frac{1}{2}dW^2 \sim \frac{1}{2}b_X b dt$$ (where the arguments $$X$$ are left implicit).
+Now, if we plug in $$dX=a dt + b dW$$, the first term vanishes, leaving $$b_X b \frac{1}{2}dW^2 ~\frac{1}{2}b_X b dt$$ (where the arguments $$X$$ are left implicit).
 
 Hence:
 
@@ -609,7 +609,7 @@ Here is a list of notation used in this document:
 - $$\Delta W(t_1,t_2)$$ is the displacement of a Brownian motion from time $$t_1$$ to time $$t_2$$
 - $$dt$$ is an infinitesimal time increment
 - $$dW := \Delta W(t,t+dt)$$ is an infinitesimal increment of Brownian motion over time
-- $$(dW)^2 \sim dt$$ denotes that $$(dW^2) = dt + o(dt)$$ where $$\lim_{t \to 0} \frac{o(dt)}{dt} = 0$$, such that $$(dW)^2$$ is asymptotically equal to $$dt$$ in the mean-square limit:
+- $$(dW)^2 ~dt$$ denotes that $$(dW^2) = dt + o(dt)$$ where $$\lim_{t \to 0} \frac{o(dt)}{dt} = 0$$, such that $$(dW)^2$$ is asymptotically equal to $$dt$$ in the mean-square limit:
 
 $$
 \lim_{dt \to 0} \frac{E[(dW)^2-dt]^2}{dt}=0

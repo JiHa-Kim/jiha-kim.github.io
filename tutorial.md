@@ -56,23 +56,24 @@ As shown in {% cite smith2023 --file posts/my-post/ref.bib %}, ...
 {% bibliography --file posts/my-post/ref.bib %}
 ```
 
-## Preprocessing with `preprocess.py`
+## Preprocessing with `obsidian_preprocess.rb`
 
-If you are drafting notes in Obsidian (or elsewhere) and want to convert them to Chirpy-compatible Markdown (handling callouts, MathJax normalization, etc.), use the `preprocess.py` script.
+You can draft notes in Obsidian using standard callouts and math syntax. A Jekyll plugin (`_plugins/obsidian_preprocess.rb`) automatically converts them to Chirpy-compatible Markdown during the build process, both locally and in CI.
 
 ### Usage
 
-Run the script providing the input file or directory:
+No manual action is required. Simply run the standard Jekyll commands:
 
 ```bash
-python3 preprocess.py path/to/your/post.md > path/to/your/post.md.tmp && mv path/to/your/post.md.tmp path/to/your/post.md
+bundle exec jekyll s  # Local preview
+bundle exec jekyll b  # Build site
 ```
 
-Note: The script currently outputs to stdout, so redirection is necessary to overwrite the existing file.
+The plugin ensures that your source files stay in their original format.
 
 ### What it does
 
 - **Callouts**: Converts Obsidian-style `> [!info]` callouts to Chirpy `box-info` blockquotes/details.
 - **MathJax**: Wraps block math (`$$...$$` or `\[...\]`) and inline math (`$...$` or `\(...\)`) in `<div class="math-block">` and `<span class="math-inline">` respectively, disabling Kramdown's markdown processing inside them to avoid conflicts.
-- **LaTeX Cleanup**: Automatically replaces certain "lazy" LaTeX glyphs (like `...` with `\dots`, `|` with `\vert`, etc.) when they are not inside complex environments.
+- **LaTeX Cleanup**: Automatically replaces certain "lazy" LaTeX glyphs (like `...` with `\dots`, `|` with `\vert$, etc.) when they are not inside complex environments.
 
