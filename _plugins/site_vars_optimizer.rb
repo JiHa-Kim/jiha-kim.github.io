@@ -92,6 +92,11 @@ module Jekyll
         html << %(<meta name="twitter:site" content="@#{site.config['twitter']['username']}" />)
         html << %(<meta name="twitter:creator" content="@#{site.config['twitter']['username']}" />)
       end
+      if item.data['precomputed_social_image']
+        html << %(<meta property="og:image" content="#{item.data['precomputed_social_image']}" />)
+        html << %(<meta name="twitter:card" content="summary_large_image" />)
+        html << %(<meta property="twitter:image" content="#{item.data['precomputed_social_image']}" />)
+      end
 
       html.join("\n")
     end
@@ -102,25 +107,18 @@ module Jekyll
     site = item.site
     next unless item.output_ext == '.html'
 
-    # 1. Fix page.image path to be absolute
+    # 1. Precomputed SEO social image (Keep original item.data['image'] relative/intact)
     if item.data['image']
       src = item.data['image'].is_a?(Hash) ? item.data['image']['path'] : item.data['image']
       unless src.to_s.include?('://')
-        abs_url = SiteVarsOptimizer.media_url(site, src, subpath: item.data['media_subpath'], absolute: true)
-        if item.data['image'].is_a?(Hash)
-          item.data['image']['path'] = abs_url
-        else
-          item.data['image'] = abs_url
-        end
+        item.data['precomputed_social_image'] = SiteVarsOptimizer.media_url(site, src, subpath: item.data['media_subpath'], absolute: true)
       end
     elsif site.config['social_preview_image']
       item.data['precomputed_social_image'] = SiteVarsOptimizer.media_url(site, site.config['social_preview_image'], absolute: true)
     end
 
     # 2. Pre-render SEO tags in Ruby natively to bypass Liquid overhead
-    if Jekyll.env == 'production'
-      item.data['precomputed_seo_html'] = SiteVarsOptimizer.render_seo(site, item)
-    end
+    item.data['precomputed_seo_html'] = SiteVarsOptimizer.render_seo(site, item)
   end
 
   # High-performance Ruby-based HTML Compression

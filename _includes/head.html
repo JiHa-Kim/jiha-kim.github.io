@@ -11,11 +11,6 @@
 
   {{ page.precomputed_seo_html }}
 
-  {% if page.image == nil and site.social_preview_image %}
-    <meta property="og:image" content="{{ page.precomputed_social_image }}">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta property="twitter:image" content="{{ page.precomputed_social_image }}">
-  {% endif %}
 
   <title>
     {%- unless page.layout == 'home' -%}
