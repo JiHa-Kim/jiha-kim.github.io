@@ -103,7 +103,16 @@
 
   <script src="{{ '/assets/js/dist/theme.min.js' | relative_url }}"></script>
 
-  {% include js-selector.html lang=lang %}
+  {% capture has_h2_h3 %}{% if page.content contains '<h2' or page.content contains '<h3' %}true{% else %}false{% endif %}{% endcapture %}
+  {% include_cached js-selector.html
+    lang=lang
+    layout=page.layout
+    mermaid=page.mermaid
+    math=page.math
+    toc=site.toc
+    page_toc=page.toc
+    has_h2_h3=has_h2_h3
+  %}
 
   {% if jekyll.environment == 'production' %}
     <!-- PWA -->
