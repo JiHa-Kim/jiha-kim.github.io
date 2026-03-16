@@ -35,7 +35,7 @@ I hope that a wider audience can feel inspired as to how stochastic calculus eme
 Brownian motion and Itô calculus are notable examples of fairly high-level mathematics that are applied to model the real world. Stock prices jiggle erratically, molecules bounce in fluids, and noise partially corrupts signals. Stochastic calculus gives us tools to predict, optimize, and understand these messy systems in a simpified model.
 
 - **Physics**: Einstein used Brownian motion to prove atoms exist—its jittering matched molecular collisions.
-- **Finance**: Option pricing (e.g., the famous Black-Scholes equation) relies on stochastic differential equations like $$dS = \mu S dt + \sigma S dW$$.
+- **Finance**: Option pricing (e.g., the famous Black-Scholes equation) relies on stochastic differential equations like $dS = \mu S dt + \sigma S dW$.
 - **Biology**: Random walks model how species spread or neurons fire.
 
 This is just the tip of the iceberg. More and more applications are emerging, notably in machine learning, as [Song et al. (2021)](https://arxiv.org/abs/2011.13456) have shown in their great paper "Score-Based Generative Modeling through Stochastic Differential Equations".
@@ -55,16 +55,16 @@ $$
 \end{array}
 $$
 
-Using 0-indexing, the number of ways to reach the $$k$$-th spot in the $$n$$-th row is $$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$. For example, in row 3, there are $$\binom{3}{2} = 3$$ ways to hit position 2.
+Using 0-indexing, the number of ways to reach the $k$-th spot in the $n$-th row is $\binom{n}{k} = \frac{n!}{k!(n-k)!}$. For example, in row 3, there are $\binom{3}{2} = 3$ ways to hit position 2.
 
 ![Pascal's Triangle Paths for 3 choose 2](binom_3_2_paths_pascal.svg)
 _[Code](#b5-latex-code-for-tikz-diagram-of-paths-in-pascals-triangle) 2D image: All 3 paths for the 2nd position in the 3rd row of Pascal's triangle_
 
 Why care? This setup powers the binomial distribution, which models repeated trials with two outcomes—win or lose, heads or tails. Think of:
-- A basketball player shooting free throws with probability $$p$$ of success and $$q = 1 - p$$ of failure.
+- A basketball player shooting free throws with probability $p$ of success and $q = 1 - p$ of failure.
 - A gambler betting on dice rolls.
 
-Pascal’s triangle tells us there are $$\binom{n}{k}$$ ways to get $$k$$ wins in $$n$$ trials. If the trials are **independent**, we can use the multiplication rule for probabilities:
+Pascal’s triangle tells us there are $\binom{n}{k}$ ways to get $k$ wins in $n$ trials. If the trials are **independent**, we can use the multiplication rule for probabilities:
 
 > Note that the independence assumption is **strong**. Real life isn’t always so clean—winning streaks in games often tie to mentality or momentum, not just chance. Keep in mind that this model can and will be inaccurate, especially visibile for very long streaks in phenomena like stock prices or sports. However, in more common scenarios, it usually approximates reality well.
 
@@ -72,7 +72,7 @@ $$
 P(A \text{ and } B \text{ and } C \dots) = P(A) P(B) P(C) \dots
 $$
 
-For one sequence with $$k$$ wins (probability $$p$$ each) and $$n - k$$ losses (probability $$q$$ each), the probability is $$p^k q^{n-k}$$. Multiply by the number of ways to arrange those wins, and we get:
+For one sequence with $k$ wins (probability $p$ each) and $n - k$ losses (probability $q$ each), the probability is $p^k q^{n-k}$. Multiply by the number of ways to arrange those wins, and we get:
 
 $$
 P(k \text{ wins in } n \text{ trials}) = \binom{n}{k} p^k q^{n-k}
@@ -93,18 +93,18 @@ For these, the binomial model gets messy as trials pile up. Calculus, with its f
 
 It’s actually known what happens to the binomial distribution as it becomes continuous. But what does that conversion mean mathematically? Let’s dig in with examples and then formalize it.
 
-In calculus, going from discrete to continuous means shrinking step sizes and cranking up the number of steps. For an interval $$[a, b]$$, we:
-1. Split it into $$n$$ chunks of size $$h = \frac{b - a}{n}$$,
+In calculus, going from discrete to continuous means shrinking step sizes and cranking up the number of steps. For an interval $[a, b]$, we:
+1. Split it into $n$ chunks of size $h = \frac{b - a}{n}$,
 2. Sum up contributions (like a Riemann sum),
-3. Let $$n \to \infty$$ and $$h \to 0$$, landing on an integral.
+3. Let $n \to \infty$ and $h \to 0$, landing on an integral.
 
 Can we adapt this to the binomial distribution? Let’s try.
 
-Picture the $$n$$-th row of Pascal’s triangle as a random walk: at each of $$n$$ steps, we move $$+1$$ (a win) or $$-1$$ (a loss).
+Picture the $n$-th row of Pascal’s triangle as a random walk: at each of $n$ steps, we move $+1$ (a win) or $-1$ (a loss).
 
-We'll set the probabability of winning as $$p = 0.5$$ as a first example since it's symmetric, making each direction equally likely and simpler to work with.
+We'll set the probabability of winning as $p = 0.5$ as a first example since it's symmetric, making each direction equally likely and simpler to work with.
 
-The number of ways to get $$k$$ wins (and $$n - k$$ losses) is $$\binom{n}{k}$$. Let's try to plot this for a different values $$n$$ over $$k$$. (The code can be found in the [Appendix](#b1-python-code-for-binomial-plots).)
+The number of ways to get $k$ wins (and $n - k$ losses) is $\binom{n}{k}$. Let's try to plot this for a different values $n$ over $k$. (The code can be found in the [Appendix](#b1-python-code-for-binomial-plots).)
 
 ![Plots for n=5,10,25,50,100](random_walk_combined.png)
 _[Code](#b1-python-code-for-binomial-plots) 2D image: Binomial distribution plots for n=5,10,25,50,100_
@@ -122,21 +122,21 @@ X(t) = \begin{cases}
 \end{cases}
 $$
 
-Here, $$X(t)$$ will encode our displacement at the $$t$$-th step where $$t \in \{1,\dots,n\}$$ is an indexing parameter. As before, we assume that $$X(t_1)$$ is independent of $$X(t_2)$$ for $$t_1 \ne t_2 $$. At each step $$t$$, $$X(t)$$ has mean $$0$$ and variance $$1$$.
+Here, $X(t)$ will encode our displacement at the $t$-th step where $t \in \{1,\dots,n\}$ is an indexing parameter. As before, we assume that $X(t_1)$ is independent of $X(t_2)$ for $t_1 \ne t_2 $. At each step $t$, $X(t)$ has mean $0$ and variance $1$.
 
-Then, the overall displacement $$S(n)$$ is:
+Then, the overall displacement $S(n)$ is:
 
 $$
 S(n) = X(1) + X(2) + ...+ X(n) = \sum_{t=1}^n X(t)
 $$
 
-So there it is! The central limit theorem states more precisely that given $$n$$ independent and identically distributed random variables $$X_1, X_2, \dots, X_n$$ with mean $$\mu$$ and variance $$\sigma^2$$, we have:
+So there it is! The central limit theorem states more precisely that given $n$ independent and identically distributed random variables $X_1, X_2, \dots, X_n$ with mean $\mu$ and variance $\sigma^2$, we have:
 
 $$
 X_1 + ...+ X_n ~N(n\mu, n\sigma^2) \text{ as } n \to \infty
 $$
 
-This is precisely what we need. As we take $$n \to \infty$$, we have that
+This is precisely what we need. As we take $n \to \infty$, we have that
 
 $$
 S(n) ~N(0, n)
@@ -167,7 +167,7 @@ Let's consider a scenario faced by Scottish botanist **Robert Brown** in the 182
 
 Brown realized that its movement was surprisingly erratic. It seemed like the small-scale nature of the setup resulted in such sensitivity to fluctuations, so much is that the real movement from external forces would completely overtake the previous one. Hence, in a simplified mathematical model we scale consider the events at different times as *independent*.
 
-In addition, there is positional symmetry: the average position of the particle at time $$t$$ seemed to float approximately around the origin.
+In addition, there is positional symmetry: the average position of the particle at time $t$ seemed to float approximately around the origin.
 
 Motivated by these observations as well as our previous intuition on continuous random walks, let's first think about a simplified model for 1-dimensional discrete case. We'll list some properties that a continuous random walk should have.
 
@@ -177,34 +177,34 @@ Motivated by these observations as well as our previous intuition on continuous 
 4. **Continuity**: The walk is continuous, with no jumps or gaps.
 5. **Normality**: As we established by taking discrete random walks in the continuous limit, the distribution of positions at any given time should be normal.
 
-So let's write this mathematically. Such a random variable is usually denoted either by $$B_t$$ for "Brownian motion", which is the physical phenomenon, or $$W_t$$ for "Wiener process", in honor of the mathematician **Norbert Wiener** who developed a lot of its early theory.
+So let's write this mathematically. Such a random variable is usually denoted either by $B_t$ for "Brownian motion", which is the physical phenomenon, or $W_t$ for "Wiener process", in honor of the mathematician **Norbert Wiener** who developed a lot of its early theory.
 
-I will use $$W(t)$$ to emphasize its dependence on $$t$$.
+I will use $W(t)$ to emphasize its dependence on $t$.
 
-Let $$W(t)$$ be the position of the Brownian motion at time $$t$$, and let $$\Delta W(t_1,t_2)$$ be the displacement of the Brownian motion from time $$t_1$$ to time $$t_2$$.
+Let $W(t)$ be the position of the Brownian motion at time $t$, and let $\Delta W(t_1,t_2)$ be the displacement of the Brownian motion from time $t_1$ to time $t_2$.
 
-> Note that, unlike the discrete case, we cannot consider a single increment and have a single index $$t$$ for displacements as we did with $$X(t)$$. As mentioned, the continuous case requires considering intervals instead of single steps.
+> Note that, unlike the discrete case, we cannot consider a single increment and have a single index $t$ for displacements as we did with $X(t)$. As mentioned, the continuous case requires considering intervals instead of single steps.
 
 Then, we write some properties of Brownian motion:
 
-1. $$W(0)=0$$ almost surely
-2. \$$W(t)~N(0,t)$$
-    - With the first condition, this is often written equivalently as $$\Delta W(s,t)~N(0,t-s)$$ for all $$s \ne t$$
-3. $$\Delta W(t_1,t_2)$$ is independent of $$\Delta W(t_2,t_3)$$ for arbitrary distinct $$t_1 < t_2 \le t_3$$
+1. $W(0)=0$ almost surely
+2. \$W(t)~N(0,t)$
+    - With the first condition, this is often written equivalently as $\Delta W(s,t)~N(0,t-s)$ for all $s \ne t$
+3. $\Delta W(t_1,t_2)$ is independent of $\Delta W(t_2,t_3)$ for arbitrary distinct $t_1 < t_2 \le t_3$
 
 We can straightforwardly use these conditions are enough to find
 
-1. $$E[W(t)]=0$$ for all $$t$$
-2. $$Var(W(t))=t$$ for all $$t$$
+1. $E[W(t)]=0$ for all $t$
+2. $Var(W(t))=t$ for all $t$
 
 This is analogous to the discrete case.
 
 But it also turns out that these conditions are sufficient to prove continuity, although it's more involved:
 
-1. The sample path $$t \mapsto W(t) $$ is almost surely uniformly Hölder continuous for each exponent $$\gamma < \frac{1}{2}$$, but is nowhere Hölder continuous for $$\gamma >= \frac{1}{2}$$. [p.30,33 of source](https://math.nyu.edu/~bourgade/SA2010/StochasticAnalysis.pdf#page30)
-    - In particular, a sample path $$t \mapsto W(t)$$ is almost surely nowhere differentiable.
+1. The sample path $t \mapsto W(t) $ is almost surely uniformly Hölder continuous for each exponent $\gamma < \frac{1}{2}$, but is nowhere Hölder continuous for $\gamma >= \frac{1}{2}$. [p.30,33 of source](https://math.nyu.edu/~bourgade/SA2010/StochasticAnalysis.pdf#page30)
+    - In particular, a sample path $t \mapsto W(t)$ is almost surely nowhere differentiable.
 
-So, $$W(t)$$ is our mathematical model for Brownian motion: a continuous, random, zero-mean process with variance proportional to time. It’s wild—it’s globally somewhat predictable yet locally completely unpredictable. A plot of 
+So, $W(t)$ is our mathematical model for Brownian motion: a continuous, random, zero-mean process with variance proportional to time. It’s wild—it’s globally somewhat predictable yet locally completely unpredictable. A plot of 
 W(t) looks like a jagged mess, but it’s got structure under the hood. (You can generate one yourself with the code in [Appendix](#b2-python-code-for-brownian-motion-plot).)
 
 ![Sample Brownian Motion Path](sample_brownian_motion.png)
@@ -220,69 +220,69 @@ Now, let’s take this beast and do something useful with it.
 
 ### **4. Itô Calculus**
 
-Brownian motion $$W(t)$$ is continuous but so irregular that it’s nowhere differentiable. To see why, consider the rate of change over a small interval $$dt$$:
+Brownian motion $W(t)$ is continuous but so irregular that it’s nowhere differentiable. To see why, consider the rate of change over a small interval $dt$:
 
 $$
 \lim_{dt \to 0} \frac{W(t + dt) - W(t)}{dt} = \lim_{dt \to 0} \frac{\Delta W(t, t + dt)}{dt}
 $$
 
-Since $$\Delta W(t, t + dt) ~N(0, dt) = \sqrt{dt} \, N(0, 1)$$:
+Since $\Delta W(t, t + dt) ~N(0, dt) = \sqrt{dt} \, N(0, 1)$:
 
 $$
 \frac{\Delta W(t, t + dt)}{dt} = \frac{\sqrt{dt} \, N(0, 1)}{dt} = \frac{1}{\sqrt{dt}} N(0, 1)
 $$
 
-As $$dt \to 0$$, $$\frac{1}{\sqrt{dt}}$$ grows without bound, and the expression becomes dominated by random fluctuations—it doesn’t converge to a finite derivative. This rules out standard calculus for handling Brownian motion, but we still need a way to work with processes driven by it, like stock prices or particle diffusion.
+As $dt \to 0$, $\frac{1}{\sqrt{dt}}$ grows without bound, and the expression becomes dominated by random fluctuations—it doesn’t converge to a finite derivative. This rules out standard calculus for handling Brownian motion, but we still need a way to work with processes driven by it, like stock prices or particle diffusion.
 
 In the 1940s, Kiyosi Itô developed a framework to address this: **Itô calculus**. Rather than forcing Brownian motion into the rules of regular calculus, Itô built a new system tailored to its random nature, forming the foundation of stochastic calculus.
 
-#### **The Increment $$dW$$ and Its Properties**
+#### **The Increment $dW$ and Its Properties**
 
-Define the small change in Brownian motion over an interval $$dt$$:
+Define the small change in Brownian motion over an interval $dt$:
 
 $$
 dW := W(t + dt) - W(t) = \Delta W(t, t + dt)
 $$
 
-From Section 3, $$W(t + dt) - W(t) ~N(0, dt)$$, so:
+From Section 3, $W(t + dt) - W(t) ~N(0, dt)$, so:
 
 $$
 dW = \sqrt{dt} \, N(0, 1)
 $$
 
-Unlike the deterministic $$dx$$ in regular calculus, $$dW$$ is random—its magnitude scales with $$\sqrt{dt}$$, and its sign depends on a standard normal distribution $$N(0, 1)$$. It’s a small but erratic step, with:
-- $$E[dW] = 0$$,
-- $$Var(dW) = E[(dW)^2] = dt$$.
+Unlike the deterministic $dx$ in regular calculus, $dW$ is random—its magnitude scales with $\sqrt{dt}$, and its sign depends on a standard normal distribution $N(0, 1)$. It’s a small but erratic step, with:
+- $E[dW] = 0$,
+- $Var(dW) = E[(dW)^2] = dt$.
 
-Now consider $$(dW)^2$$. Its expected value is $$dt$$, but what about its variability? The variance is $$Var[(dW)^2] = 2 dt^2$$, which becomes negligible as $$dt \to 0$$. This stability allows us to treat $$(dW)^2 \approx dt$$ in Itô calculus (formally, in the mean-square sense—see the [Appendix](#a1-notation) for details). In contrast to regular calculus, where $$(dx)^2$$ is too small to matter, $$(dW)^2$$ is on the same scale as $$dt$$, which changes how we handle calculations.
+Now consider $(dW)^2$. Its expected value is $dt$, but what about its variability? The variance is $Var[(dW)^2] = 2 dt^2$, which becomes negligible as $dt \to 0$. This stability allows us to treat $(dW)^2 \approx dt$ in Itô calculus (formally, in the mean-square sense—see the [Appendix](#a1-notation) for details). In contrast to regular calculus, where $(dx)^2$ is too small to matter, $(dW)^2$ is on the same scale as $dt$, which changes how we handle calculations.
 
 #### **The Itô Integral: Integrating Against Randomness**
 
-In regular calculus, $$\int_a^b f(x) \, dx$$ approximates the area under a curve by summing rectangles, $$\sum f(x_i) \Delta x$$, and taking the limit as $$\Delta x \to 0$$. For Brownian motion, we want something like $$\int_0^t f(s) \, dW(s)$$, where $$dW(s)$$ replaces $$dx$$. Here, the steps are random: $$\Delta W(s_i, s_{i+1}) ~\sqrt{\Delta s} \, N(0, 1)$$. We approximate:
+In regular calculus, $\int_a^b f(x) \, dx$ approximates the area under a curve by summing rectangles, $\sum f(x_i) \Delta x$, and taking the limit as $\Delta x \to 0$. For Brownian motion, we want something like $\int_0^t f(s) \, dW(s)$, where $dW(s)$ replaces $dx$. Here, the steps are random: $\Delta W(s_i, s_{i+1}) ~\sqrt{\Delta s} \, N(0, 1)$. We approximate:
 
 $$
 \int_0^t f(s) \, dW(s) \approx \sum_{i=0}^{n-1} f(s_i) [\Delta W(s_i, s_{i+1})]
 $$
 
-over a partition $$s_0, s_1, \dots, s_n$$ of $$[0, t]$$, then let $$n \to \infty$$. Unlike a deterministic integral, the result is a random variable, reflecting $$W(t)’s$$ randomness. Using $$f(s_i)$$ from the left endpoint keeps the integral “non-anticipating”—we only use information up to time $$s_i$$, which aligns with the forward-evolving nature of stochastic processes.
+over a partition $s_0, s_1, \dots, s_n$ of $[0, t]$, then let $n \to \infty$. Unlike a deterministic integral, the result is a random variable, reflecting $W(t)’s$ randomness. Using $f(s_i)$ from the left endpoint keeps the integral “non-anticipating”—we only use information up to time $s_i$, which aligns with the forward-evolving nature of stochastic processes.
 
 #### **Itô’s Lemma: A Chain Rule for Randomness**
 
-For a function $$f(t, W(t))$$, regular calculus gives:
+For a function $f(t, W(t))$, regular calculus gives:
 
 $$
 df = \frac{\partial f}{\partial t} dt + \frac{\partial f}{\partial W} dW
 $$
 
-But Brownian motion’s roughness requires a second-order term. Taylor-expand $$f(t, W(t))$$:
+But Brownian motion’s roughness requires a second-order term. Taylor-expand $f(t, W(t))$:
 
 $$
 df = \frac{\partial f}{\partial t} dt + \frac{\partial f}{\partial W} dW + \frac{1}{2} \frac{\partial^2 f}{\partial W^2} (dW)^2 + \text{smaller terms}
 $$
 
-As $$dt \to 0$$:
-- $$dt^2$$ and $$dt \, dW$$ vanish,
-- $$(dW)^2 \approx dt$$ stays significant.
+As $dt \to 0$:
+- $dt^2$ and $dt \, dW$ vanish,
+- $(dW)^2 \approx dt$ stays significant.
 
 This leaves:
 
@@ -290,20 +290,20 @@ $$
 df = \frac{\partial f}{\partial t} dt + \frac{\partial f}{\partial W} dW + \frac{1}{2} \frac{\partial^2 f}{\partial W^2} dt
 $$
 
-This is **Itô’s Lemma**. The extra $$\frac{1}{2} \frac{\partial^2 f}{\partial W^2} dt$$ arises because $$(dW)^2$$ contributes at the $$dt$$ scale, capturing the effect of Brownian motion’s curvature.
+This is **Itô’s Lemma**. The extra $\frac{1}{2} \frac{\partial^2 f}{\partial W^2} dt$ arises because $(dW)^2$ contributes at the $dt$ scale, capturing the effect of Brownian motion’s curvature.
 
-Since we have the algebraic heuristic $$dW^2 = dt$$, we could in some define everything in terms of powers $$dW$$ to expand things algebraically and implicitly compute derivative rules.
+Since we have the algebraic heuristic $dW^2 = dt$, we could in some define everything in terms of powers $dW$ to expand things algebraically and implicitly compute derivative rules.
 
-This is precisely the idea behind my blog post on [Automatic Stochastic Differentiation](/posts/automatic-stochastic-differentiation/index.html), where we use $$\mathbb{R}[\epsilon]/\epsilon^3$$ in a similar fashion to dual numbers $$\mathbb{R}[\epsilon]/\epsilon^2$$ for automatic differentiation in deterministic calculus.
+This is precisely the idea behind my blog post on [Automatic Stochastic Differentiation](/posts/automatic-stochastic-differentiation/index.html), where we use $\mathbb{R}[\epsilon]/\epsilon^3$ in a similar fashion to dual numbers $\mathbb{R}[\epsilon]/\epsilon^2$ for automatic differentiation in deterministic calculus.
 
 If you haven't already, I highly recommend checking it out.
 
-#### **Example: $$f(W) = W^2$$**
+#### **Example: $f(W) = W^2$**
 
-Take $$f(t, W(t)) = W^2$$:
-- $$\frac{\partial f}{\partial t} = 0$$,
-- $$\frac{\partial f}{\partial W} = 2W$$,
-- $$\frac{\partial^2 f}{\partial W^2} = 2$$.
+Take $f(t, W(t)) = W^2$:
+- $\frac{\partial f}{\partial t} = 0$,
+- $\frac{\partial f}{\partial W} = 2W$,
+- $\frac{\partial^2 f}{\partial W^2} = 2$.
 
 Then:
 
@@ -311,19 +311,19 @@ $$
 d(W^2) = 0 \cdot dt + 2W \, dW + \frac{1}{2} \cdot 2 \cdot dt = 2W \, dW + dt
 $$
 
-Integrate from 0 to $$t$$ (with $$W(0) = 0$$):
+Integrate from 0 to $t$ (with $W(0) = 0$):
 
 $$
 W(t)^2 = \int_0^t 2W(s) \, dW(s) + t
 $$
 
-The $$t$$ term matches $$E[W(t)^2] = t$$, and the integral is a random component with mean 0, consistent with Brownian motion’s properties.
+The $t$ term matches $E[W(t)^2] = t$, and the integral is a random component with mean 0, consistent with Brownian motion’s properties.
 
 ---
 
 ### **5. Stochastic Differential Equations**
 
-Itô calculus gives us tools—integrals and a chain rule—to handle Brownian motion. Now we can model systems where randomness and trends coexist, using **stochastic differential equations (SDEs)**. Unlike regular differential equations (e.g., $$\frac{dx}{dt} = -kx$$) that describe smooth dynamics, SDEs blend deterministic behavior with stochastic noise, fitting phenomena like stock prices or diffusing particles.
+Itô calculus gives us tools—integrals and a chain rule—to handle Brownian motion. Now we can model systems where randomness and trends coexist, using **stochastic differential equations (SDEs)**. Unlike regular differential equations (e.g., $\frac{dx}{dt} = -kx$) that describe smooth dynamics, SDEs blend deterministic behavior with stochastic noise, fitting phenomena like stock prices or diffusing particles.
 
 #### **Defining an SDE**
 
@@ -333,17 +333,17 @@ $$
 dX(t) = a(t, X(t)) \, dt + b(t, X(t)) \, dW(t)
 $$
 
-- $$X(t)$$: The evolving quantity (e.g., position or price).
-- $$a(t, X(t)) \, dt$$: The “drift”—the systematic part, scaled by $$dt$$.
-- $$b(t, X(t)) \, dW(t)$$: The “diffusion”—random perturbations from Brownian motion.
+- $X(t)$: The evolving quantity (e.g., position or price).
+- $a(t, X(t)) \, dt$: The “drift”—the systematic part, scaled by $dt$.
+- $b(t, X(t)) \, dW(t)$: The “diffusion”—random perturbations from Brownian motion.
 
-Here, $$a$$ and $$b$$ are functions of time and state, and $$dW(t) = \sqrt{dt} \, N(0, 1)$$ brings the noise. Solutions to SDEs aren’t fixed curves but random paths, each run producing a different trajectory with statistical patterns we can study.
+Here, $a$ and $b$ are functions of time and state, and $dW(t) = \sqrt{dt} \, N(0, 1)$ brings the noise. Solutions to SDEs aren’t fixed curves but random paths, each run producing a different trajectory with statistical patterns we can study.
 
 #### **Itô’s Lemma Revisited**
 
-Itô’s lemma actually applies to a function $$f(t, X(t))$$ and its stochastic derivative $$df(t, X(t))$$ for a general $$dX(t) = b(t,X(t))dt+\sigma(t,X(t))dW$$, and this is done through the linearity of the Itô differential (as seen using the $$\mathbb{R}[\epsilon]/\epsilon^3$$ formulation).
+Itô’s lemma actually applies to a function $f(t, X(t))$ and its stochastic derivative $df(t, X(t))$ for a general $dX(t) = b(t,X(t))dt+\sigma(t,X(t))dW$, and this is done through the linearity of the Itô differential (as seen using the $\mathbb{R}[\epsilon]/\epsilon^3$ formulation).
 
-Considering that $$dX=O(dW)$$, we consider terms up to $$dX^2=O(dW^2)$$:
+Considering that $dX=O(dW)$, we consider terms up to $dX^2=O(dW^2)$:
 
 $$
 \begin{aligned}
@@ -357,7 +357,7 @@ which is the general form typically presented.
 
 #### **Drift and Diffusion**
 
-The drift $$a(t, X)$$ sets the average direction, like a current pushing a particle. The diffusion $$b(t, X)$$ determines the random jitter’s strength. If $$b = 0$$, we get a standard ODE; if $$a = 0$$, it’s just scaled Brownian motion. Together, they model systems with both structure and uncertainty.
+The drift $a(t, X)$ sets the average direction, like a current pushing a particle. The diffusion $b(t, X)$ determines the random jitter’s strength. If $b = 0$, we get a standard ODE; if $a = 0$, it’s just scaled Brownian motion. Together, they model systems with both structure and uncertainty.
 
 Take a simple case:
 
@@ -365,16 +365,16 @@ $$
 dX(t) = \mu \, dt + \sigma \, dW(t)
 $$
 
-- $$\mu$$: Constant drift.
-- $$\sigma$$: Constant noise amplitude.
+- $\mu$: Constant drift.
+- $\sigma$: Constant noise amplitude.
 
-Starting at $$X(0) = 0$$, integrate:
+Starting at $X(0) = 0$, integrate:
 
 $$
 X(t) = \int_0^t \mu \, ds + \int_0^t \sigma \, dW(s) = \mu t + \sigma W(t)
 $$
 
-Since $$W(t) ~N(0, t)$$, we have $$X(t) ~N(\mu t, \sigma^2 t)$$—a process drifting linearly with noise spreading over time. It’s a basic model for things like a stock with steady growth and volatility.
+Since $W(t) ~N(0, t)$, we have $X(t) ~N(\mu t, \sigma^2 t)$—a process drifting linearly with noise spreading over time. It’s a basic model for things like a stock with steady growth and volatility.
 
 ![Sample SDE Path](sample_SDE.png)
 _[Code](#b3-python-code-for-basic-sde-simulation) 2D image: Sample SDE path with mu=1.0, sigma=0.5_
@@ -387,14 +387,14 @@ $$
 dS(t) = \mu S(t) \, dt + \sigma S(t) \, dW(t)
 $$
 
-- $$S(t)$$: The state (e.g., stock price).
-- $$\mu S(t)$$: Proportional drift.
-- $$\sigma S(t)$$: Proportional noise.
+- $S(t)$: The state (e.g., stock price).
+- $\mu S(t)$: Proportional drift.
+- $\sigma S(t)$: Proportional noise.
 
-The percentage change $$\frac{dS}{S} = \mu \, dt + \sigma \, dW$$ has a trend and randomness. To solve, let $$f = \ln S$$:
-- $$\frac{\partial f}{\partial t} = 0$$,
-- $$\frac{\partial f}{\partial S} = \frac{1}{S}$$,
-- $$\frac{\partial^2 f}{\partial S^2} = -\frac{1}{S^2}$$.
+The percentage change $\frac{dS}{S} = \mu \, dt + \sigma \, dW$ has a trend and randomness. To solve, let $f = \ln S$:
+- $\frac{\partial f}{\partial t} = 0$,
+- $\frac{\partial f}{\partial S} = \frac{1}{S}$,
+- $\frac{\partial^2 f}{\partial S^2} = -\frac{1}{S^2}$.
 
 Using Itô’s lemma:
 
@@ -406,7 +406,7 @@ $$
 = \left( \mu - \frac{1}{2} \sigma^2 \right) dt + \sigma \, dW
 $$
 
-Integrate from $$0$$ to $$t$$:
+Integrate from $0$ to $t$:
 
 $$
 \ln S(t) - \ln S(0) = \left( \mu - \frac{1}{2} \sigma^2 \right) t + \sigma W(t)
@@ -416,7 +416,7 @@ $$
 S(t) = S(0) \exp\left( \left( \mu - \frac{1}{2} \sigma^2 \right) t + \sigma W(t) \right)
 $$
 
-The drift is adjusted by $$-\frac{1}{2} \sigma^2$$ due to the second-order effect of noise, and $$\sigma W(t)$$ adds random fluctuations. This form underlies the Black-Scholes model in finance.
+The drift is adjusted by $-\frac{1}{2} \sigma^2$ due to the second-order effect of noise, and $\sigma W(t)$ adds random fluctuations. This form underlies the Black-Scholes model in finance.
 
 ![Sample Geometric Brownian Motion Path](gbm_path.png)
 _[Code](#b4-python-code-for-geometric-brownian-motion-simulation) 2D image: A sample path of a geometric Brownian motion with parameters μ = 0.15 and σ = 0.2_
@@ -426,7 +426,7 @@ _[Code](#c3-3d-animation-of-geometric-brownian-motion) 3D animation: Geometric B
 
 #### **Beyond Analytics**
 
-Analytical solutions like GBM’s are exceptions. Most SDEs require numerical simulation (e.g., stepping $$X(t + \Delta t) = X(t) + \mu \Delta t + \sigma \sqrt{\Delta t} \, N(0, 1)$$) or statistical analysis via equations like Fokker-Planck. See the [appendix](#b3-python-code-for-basic-sde-simulation) for simulation code.
+Analytical solutions like GBM’s are exceptions. Most SDEs require numerical simulation (e.g., stepping $X(t + \Delta t) = X(t) + \mu \Delta t + \sigma \sqrt{\Delta t} \, N(0, 1)$) or statistical analysis via equations like Fokker-Planck. See the [appendix](#b3-python-code-for-basic-sde-simulation) for simulation code.
 
 ---
 
@@ -443,9 +443,9 @@ $$
 df = \frac{\partial f}{\partial t} dt + \frac{\partial f}{\partial X} dX
 $$
 
-The answer is yes, and it’s called **Stratonovich calculus**. Let's explore a bit. First, the deterministic part clearly satisfies the regular chain rule, since we can directly apply it using linearity. The trouble arises in the stochastic part, which we need to analyze. This means we only need to consider a function $$f(X(t))$$.
+The answer is yes, and it’s called **Stratonovich calculus**. Let's explore a bit. First, the deterministic part clearly satisfies the regular chain rule, since we can directly apply it using linearity. The trouble arises in the stochastic part, which we need to analyze. This means we only need to consider a function $f(X(t))$.
 
-Remember, for the Itô form, we chose to define the integral by choosing the left endpoint of each interval. In other words, it is this stochastic part that will vary. To delete this second order term, we need to somehow absorb it into the stochastic part by defining some Stratonovich differential, typically denoted by $$\circ dW$$.
+Remember, for the Itô form, we chose to define the integral by choosing the left endpoint of each interval. In other words, it is this stochastic part that will vary. To delete this second order term, we need to somehow absorb it into the stochastic part by defining some Stratonovich differential, typically denoted by $\circ dW$.
 
 Going back to our Riemann sum definitions, our degrees of freedom lie in the choice of the evaluation point for each interval:
 
@@ -453,9 +453,9 @@ $$
 \int_{0}^{T} f(X(t)) \diamond dW = \lim_{n \to \infty} \sum_{i=0}^{n-1} f(X(t_i) + \lambda \Delta X(t_i,t_{i+1})) \Delta W(t_i, t_{i+1})
 $$
 
-where $$\lambda \in [0,1]$$ is a constant that linearly interpolates between the left and right endpoints of each interval giving a corresponding differential $$\diamond dW$$, and $$\Delta X(t_i,t_{i+1}):=X(t_{i+1})-X(t_i)$$.
+where $\lambda \in [0,1]$ is a constant that linearly interpolates between the left and right endpoints of each interval giving a corresponding differential $\diamond dW$, and $\Delta X(t_i,t_{i+1}):=X(t_{i+1})-X(t_i)$.
 
-In the deterministic case, since we always have $$O(dX^2) \to 0$$, it doesn't matter where we choose the evaluation point. However, in the stochastic case, remember that $$O(dW^2) \to O(dt)$$, so we need a more careful choice of evaluation point.
+In the deterministic case, since we always have $O(dX^2) \to 0$, it doesn't matter where we choose the evaluation point. However, in the stochastic case, remember that $O(dW^2) \to O(dt)$, so we need a more careful choice of evaluation point.
 
 Mathematically, our goal is to define a new stochastic integral that preserves the standard chain rule:
 
@@ -475,13 +475,13 @@ $$
 \frac{f(X+\Delta X)-f(X)}{\Delta X} = f_X(X+\lambda \Delta X)
 $$
 
-But watch what happens as we take the Taylor expansion on both sides about $$X$$ (recalling that $$o(\Delta X^2)\to 0$$):
+But watch what happens as we take the Taylor expansion on both sides about $X$ (recalling that $o(\Delta X^2)\to 0$):
 
 $$
 f_X + \frac{1}{2}f_{XX}\Delta X = f_X + \lambda f_{XX}\Delta X
 $$
 
-Comparing coefficients, we wish to set $$\lambda = 1/2$$ to preserve the chain rule. So Stratonovich integrals are defined by the midpoint evaluation rule:
+Comparing coefficients, we wish to set $\lambda = 1/2$ to preserve the chain rule. So Stratonovich integrals are defined by the midpoint evaluation rule:
 
 $$
 \begin{aligned}
@@ -492,21 +492,21 @@ $$
 
 #### Conversion Formula between Itô and Stratonovich
 
-There is a formula to convert the Stratonovich differential into a corresponding Itô SDE that depends on the Itô differential as well as the volatility function $$\sigma$$.
+There is a formula to convert the Stratonovich differential into a corresponding Itô SDE that depends on the Itô differential as well as the volatility function $\sigma$.
 
-Recall that Itô's lemma states that for $$dX = a dt + b dW$$:
+Recall that Itô's lemma states that for $dX = a dt + b dW$:
 
 $$
 df = f_t dt + f_X dX + \frac{1}{2}f_{XX} dX^2 = (af_t + \frac{1}{2} b^2 f_{XX}) dt + bf_X dW
 $$
 
-In parallel, we defined Stratonovich's chain rule to satisfy for $$dX = \tilde a dt + \tilde b \circ dW$$:
+In parallel, we defined Stratonovich's chain rule to satisfy for $dX = \tilde a dt + \tilde b \circ dW$:
 
 $$
 df = f_t dt + f_X \circ dX = (f_t + \tilde a f_X) dt + \tilde b f_X \circ dW
 $$
 
-Hence, between Itô and Stratonovich SDEs, we have in both cases that the differential is scaled by the volatility function of $$X$$ and $$f_X$$, but the drift function changes. Let's find a conversion formula between the two.
+Hence, between Itô and Stratonovich SDEs, we have in both cases that the differential is scaled by the volatility function of $X$ and $f_X$, but the drift function changes. Let's find a conversion formula between the two.
 
 Suppose we have:
 
@@ -514,15 +514,15 @@ $$
 dX = a dt + b dW = \tilde a dt + b \circ dW
 $$
 
-Then, our objective is to find $$\tilde a$$ in terms of $$a$$.
+Then, our objective is to find $\tilde a$ in terms of $a$.
 
-Recall from the integral definition that $$b(X) \circ dW = b(X+\frac{1}{2}dX) dW$$. If we Taylor expand around $$X$$, we have:
+Recall from the integral definition that $b(X) \circ dW = b(X+\frac{1}{2}dX) dW$. If we Taylor expand around $X$, we have:
 
 $$
 b(X+\frac{1}{2}dX) dW = b(X)dW + b_X(X)\frac{1}{2}dX dW + o(dt)
 $$
 
-Now, if we plug in $$dX=a dt + b dW$$, the first term vanishes, leaving $$b_X b \frac{1}{2}dW^2 ~\frac{1}{2}b_X b dt$$ (where the arguments $$X$$ are left implicit).
+Now, if we plug in $dX=a dt + b dW$, the first term vanishes, leaving $b_X b \frac{1}{2}dW^2 ~\frac{1}{2}b_X b dt$ (where the arguments $X$ are left implicit).
 
 Hence:
 
@@ -534,41 +534,41 @@ $$
 
 Stratonovich calculus, with its midpoint evaluation rule, adjusts how we handle stochastic integrals compared to Itô’s left-endpoint approach. This shift makes it valuable in certain fields where its properties align with physical systems or simplify calculations. Below are some practical applications, each with a concrete mathematical example.
 
-- **Physics with Multiplicative Noise**: In physical systems, noise often scales with the state—like a particle in a fluid where random kicks depend on its position. Consider a damped oscillator with position $$X(t)$$ under state-dependent noise:
+- **Physics with Multiplicative Noise**: In physical systems, noise often scales with the state—like a particle in a fluid where random kicks depend on its position. Consider a damped oscillator with position $X(t)$ under state-dependent noise:
   
   $$
   dX = -k X \, dt + \sigma X \circ dW
   $$
   
-  Here, $$k > 0$$ is the damping constant, $$\sigma$$ is the noise strength, and $$\circ dW$$ denotes the Stratonovich differential. Using Stratonovich’s chain rule, for $$f(X) = \ln X$$:
+  Here, $k > 0$ is the damping constant, $\sigma$ is the noise strength, and $\circ dW$ denotes the Stratonovich differential. Using Stratonovich’s chain rule, for $f(X) = \ln X$:
   
   $$
   d(\ln X) = \frac{1}{X} (-k X \, dt + \sigma X \circ dW) = -k \, dt + \sigma \circ dW
   $$
 
-  This integrates to $$X(t) = X(0) e^{-kt + \sigma W(t)}$$, matching the expected exponential decay with noise. Stratonovich fits here because it preserves symmetries in continuous physical processes, unlike Itô, which adds a $$\frac{1}{2} \sigma^2 X \, dt$$ drift term.
+  This integrates to $X(t) = X(0) e^{-kt + \sigma W(t)}$, matching the expected exponential decay with noise. Stratonovich fits here because it preserves symmetries in continuous physical processes, unlike Itô, which adds a $\frac{1}{2} \sigma^2 X \, dt$ drift term.
 
-- **Wong-Zakai Theorem and Smooth Noise**: Real-world noise isn’t perfectly white (uncorrelated like $$dW$$)—it’s often smoother. The Wong-Zakai theorem shows that approximating smooth noise (e.g., $$\eta(t)$$ with correlation time $$\epsilon$$) as $$\epsilon \to 0$$ yields a Stratonovich SDE. Take a simple system:
+- **Wong-Zakai Theorem and Smooth Noise**: Real-world noise isn’t perfectly white (uncorrelated like $dW$)—it’s often smoother. The Wong-Zakai theorem shows that approximating smooth noise (e.g., $\eta(t)$ with correlation time $\epsilon$) as $\epsilon \to 0$ yields a Stratonovich SDE. Take a simple system:
   
   $$
   \dot{x} = a x + b x \eta(t)
   $$
   
-  As $$\eta(t) \to$$ white noise, this becomes $$dX = a X \, dt + b X \circ dW$$. In Stratonovich form, the solution is $$X(t) = X(0) e^{a t + b W(t)}$$. This is useful in engineering, like modeling voltage in a circuit with thermal fluctuations, where noise has slight smoothness.
+  As $\eta(t) \to$ white noise, this becomes $dX = a X \, dt + b X \circ dW$. In Stratonovich form, the solution is $X(t) = X(0) e^{a t + b W(t)}$. This is useful in engineering, like modeling voltage in a circuit with thermal fluctuations, where noise has slight smoothness.
 
-- **Stochastic Control**: In control problems, Stratonovich can simplify dynamics under feedback. Consider a system with control input $$u(t)$$ and noise:
+- **Stochastic Control**: In control problems, Stratonovich can simplify dynamics under feedback. Consider a system with control input $u(t)$ and noise:
   
   $$
   dX = (a X + u) \, dt + \sigma X \circ dW
   $$
   
-  For $$f(X) = X^2$$, the Stratonovich rule gives:
+  For $f(X) = X^2$, the Stratonovich rule gives:
   
   $$
   d(X^2) = 2X (a X + u) \, dt + 2X \cdot \sigma X \circ dW = (2a X^2 + 2X u) \, dt + 2\sigma X^2 \circ dW
   $$
   
-  The lack of a second-derivative term (unlike Itô’s $$+ \sigma^2 X^2 dt$$) aligns with classical control intuition, making it easier to design $$u(t)$$ for, say, stabilizing a noisy pendulum or a drone in wind.
+  The lack of a second-derivative term (unlike Itô’s $+ \sigma^2 X^2 dt$) aligns with classical control intuition, making it easier to design $u(t)$ for, say, stabilizing a noisy pendulum or a drone in wind.
 
 - **Biological Diffusion**: In biology, noise can depend on spatial gradients, like protein diffusion across a cell. Model this as:
   
@@ -576,9 +576,9 @@ Stratonovich calculus, with its midpoint evaluation rule, adjusts how we handle 
   dX = \mu \, dt + \sigma(X) \circ dW, \quad \sigma(X) = \sqrt{2D (1 + k X^2)}
   $$
   
-  where $$D$$ is diffusivity and $$k$$ adjusts noise with position. Stratonovich ensures the diffusion term reflects physical conservation laws, matching experimental data in systems like bacterial motility better than Itô, which alters the drift.
+  where $D$ is diffusivity and $k$ adjusts noise with position. Stratonovich ensures the diffusion term reflects physical conservation laws, matching experimental data in systems like bacterial motility better than Itô, which alters the drift.
 
-- **Numerical Stability**: For simulations, Stratonovich pairs well with midpoint methods. Take $$dX = -a X \, dt + \sigma \circ dW$$. A Stratonovich discretization might use:
+- **Numerical Stability**: For simulations, Stratonovich pairs well with midpoint methods. Take $dX = -a X \, dt + \sigma \circ dW$. A Stratonovich discretization might use:
   
   $$
   X_{n+1} = X_n - a \left(\frac{X_n + X_{n+1}}{2}\right) \Delta t + \sigma \Delta W_n
@@ -586,9 +586,9 @@ Stratonovich calculus, with its midpoint evaluation rule, adjusts how we handle 
 
   This implicit scheme leverages the midpoint rule, reducing numerical artifacts in models like chemical kinetics compared to Itô’s explicit steps.
 
-The choice between Stratonovich and Itô depends on context. Stratonovich suits systems where noise is tied to physical continuity or symmetry, while Itô dominates in finance for its non-anticipating properties. The conversion $$a = \tilde{a} + \frac{1}{2} b b_X$$ lets you switch forms as needed.
+The choice between Stratonovich and Itô depends on context. Stratonovich suits systems where noise is tied to physical continuity or symmetry, while Itô dominates in finance for its non-anticipating properties. The conversion $a = \tilde{a} + \frac{1}{2} b b_X$ lets you switch forms as needed.
 
-## Appendix
+## Appendix {#appendix}
 ### A.0. Further Reading
 - [An Intuitive Introduction For Understanding and Solving Stochastic Differential Equations - Chris Rackauckas (2017)](https://www.chrisrackauckas.com/assets/Papers/ChrisRackauckas-IntuitiveSDEs.pdf)
 - [Stochastic analysis - Paul Bourgade (2010)](https://math.nyu.edu/~bourgade/SA2010/StochasticAnalysis.pdf)
@@ -600,23 +600,23 @@ The choice between Stratonovich and Itô depends on context. Stratonovich suits 
 ### A.1. Notation
 Here is a list of notation used in this document:
 
-- $$\binom{n}{k}=\frac{n!}{k!(n-k)!}$$ is the binomial coefficient
-- $$X: \Omega \to \mathbb{R}$$ is a random variable from a sample space $$\Omega$$ to a real number
-- $$P(A)$$ is the probability of event $$A$$
-- $$E[X]=\int_{\omega \in \Omega} X(\omega) dP(\omega)$$ is the expected value of $$X$$
-- $$N(\mu, \sigma^2)$$ is a normal distribution with mean $$\mu$$ and variance $$\sigma^2$$
-- $$W(t)$$ is the position of a Brownian motion at time $$t$$
-- $$\Delta W(t_1,t_2)$$ is the displacement of a Brownian motion from time $$t_1$$ to time $$t_2$$
-- $$dt$$ is an infinitesimal time increment
-- $$dW := \Delta W(t,t+dt)$$ is an infinitesimal increment of Brownian motion over time
-- $$(dW)^2 ~dt$$ denotes that $$(dW^2) = dt + o(dt)$$ where $$\lim_{t \to 0} \frac{o(dt)}{dt} = 0$$, such that $$(dW)^2$$ is asymptotically equal to $$dt$$ in the mean-square limit:
+- $\binom{n}{k}=\frac{n!}{k!(n-k)!}$ is the binomial coefficient
+- $X: \Omega \to \mathbb{R}$ is a random variable from a sample space $\Omega$ to a real number
+- $P(A)$ is the probability of event $A$
+- $E[X]=\int_{\omega \in \Omega} X(\omega) dP(\omega)$ is the expected value of $X$
+- $N(\mu, \sigma^2)$ is a normal distribution with mean $\mu$ and variance $\sigma^2$
+- $W(t)$ is the position of a Brownian motion at time $t$
+- $\Delta W(t_1,t_2)$ is the displacement of a Brownian motion from time $t_1$ to time $t_2$
+- $dt$ is an infinitesimal time increment
+- $dW := \Delta W(t,t+dt)$ is an infinitesimal increment of Brownian motion over time
+- $(dW)^2 ~dt$ denotes that $(dW^2) = dt + o(dt)$ where $\lim_{t \to 0} \frac{o(dt)}{dt} = 0$, such that $(dW)^2$ is asymptotically equal to $dt$ in the mean-square limit:
 
 $$
 \lim_{dt \to 0} \frac{E[(dW)^2-dt]^2}{dt}=0
 $$
 
-- $$f_t:=\frac{\partial f}{\partial t}$$ is the partial derivative of $$f$$ with respect to $$t$$
-- $$f_xx:=\frac{\partial^2 f}{\partial x^2}$$ is the second order partial derivative of $$f$$ with respect to $$x$$
+- $f_t:=\frac{\partial f}{\partial t}$ is the partial derivative of $f$ with respect to $t$
+- $f_xx:=\frac{\partial^2 f}{\partial x^2}$ is the second order partial derivative of $f$ with respect to $x$
 
 ### B.1. Python code for binomial plots
 
