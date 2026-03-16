@@ -23,7 +23,8 @@ module Jekyll
         site.data['prefer_mode'] = %(data-mode="#{site.config['theme_mode']}")
       end
 
-      # 3. Pre-calculate Document-specific variables
+      # 3. Pre-calculate Favicon Path
+      site.data['favicon_path'] = File.join(site.baseurl || '', '/assets/img/favicons')
       site.each_site_file do |item|
         next unless item.respond_to?(:data)
         
@@ -128,6 +129,7 @@ module Jekyll
     if Jekyll.env == 'production' && item.output_ext == '.html' && item.data['compress'] != false
       # Basic efficient whitespace removal
       # 1. Strip comments (optional, but good for size)
+      # Preserve [if IE] style comments
       item.output.gsub!(/<!--(?!\[if).*?-->/m, '')
       # 2. Collapse whitespace between tags
       item.output.gsub!(/>\s+</, '><')
