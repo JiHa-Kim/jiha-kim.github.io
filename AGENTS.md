@@ -4,6 +4,7 @@ This file contains instructions for AI agents when creating or modifying content
 
 ## General Guidelines
 - I am using the Chirpy theme in Jekyll with a custom pre-processor (`preprocess.py`).
+- **Automation**: The pre-processor runs automatically in GitHub Actions on every push. You should commit files in the **Obsidian-style math and callout format** (see below); the CI will handle the conversion to the processed HTML format required by the theme.
 - Maintain a consistent tone and style across posts.
 
 ## Metadata
