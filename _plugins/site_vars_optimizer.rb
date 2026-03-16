@@ -44,4 +44,18 @@ module Jekyll
       end
     end
   end
+
+  # High-performance Ruby-based HTML Compression
+  # Replaces the theme's extremely slow Liquid-based compress.html layout
+  Hooks.register [:posts, :pages, :docs], :post_render do |item|
+    if Jekyll.env == 'production' && item.output_ext == '.html' && item.data['compress'] != false
+      # Basic efficient whitespace removal
+      # 1. Strip comments (optional, but good for size)
+      item.output.gsub!(/<!--(?!\[if).*?-->/m, '')
+      # 2. Collapse whitespace between tags
+      item.output.gsub!(/>\s+</, '><')
+      # 3. Trim leading/trailing whitespace
+      item.output.strip!
+    end
+  end
 end

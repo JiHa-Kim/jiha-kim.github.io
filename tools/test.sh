@@ -58,14 +58,9 @@ main() {
     JEKYLL_ENV=development bundle exec jekyll b \
       -d "$SITE_DIR$_baseurl" -c "$_config" --incremental
   else
-    # clean up
-    if [[ -d $SITE_DIR ]]; then
-      rm -rf "$SITE_DIR"
-    fi
-
-    # build
+    # build (incremental for speed, but production env)
     JEKYLL_ENV=production bundle exec jekyll b \
-      -d "$SITE_DIR$_baseurl" -c "$_config"
+      -d "$SITE_DIR$_baseurl" -c "$_config" --incremental
 
     # test
     bundle exec htmlproofer "$SITE_DIR" \
