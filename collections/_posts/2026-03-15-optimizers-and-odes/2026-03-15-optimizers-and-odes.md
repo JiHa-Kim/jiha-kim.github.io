@@ -400,13 +400,12 @@ $$
 3. **Momentum**: Multi-stage solvers can incorporate historical momentum tracks acting as a predictor-corrector. Instead of maintaining an exponential moving average over raw gradients, we maintain momentum over the RK estimated gradients $g^*$ from the lookahead step:
    
    $$
-m_{n+1} = \beta m_n + g^*(\theta_n, h)
-\]
+   m_{n+1} = \beta m_n + g^*(\theta_n, h)
+   $$
    
-   <div class="math-block" markdown="0">
-\[
+   $$
    \theta_{n+1} = \theta_n - h m_{n+1}
-$$
+   $$
 
 The frontier of optimizer research is shifting from "inventing new heuristics" to "how do we map the proven stability of classical integrators onto the constraints of the GPU." By adapting RK4 with these methods fundamentally rooted in advanced differential equation solvers, they may become the new standard.
 

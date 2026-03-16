@@ -54,7 +54,7 @@ This is efficient, but it enforces orthogonality of a chosen *unfolding*, not or
 > [!info] **Assumption.** Circular Boundary Conditions
 > Assume circular boundary conditions over spatial positions:
 > - $p \in \Omega = \mathbb{Z}_H \times \mathbb{Z}_W$
-> - shifts wrap: $p \mapsto p+\delta$ mod <span class="math-inline" markdown="0">(H,W)</span>
+> - shifts wrap: $p \mapsto p+\delta$ mod $(H,W)$
 >
 > Under this "circular conv" model, $T_K$ is block-circulant and is diagonalized by the spatial DFT. This is exact for circular conv, not for zero-padding. The point is to define and enforce orthogonality in the basis where the translation-equivariant operator cleanly decomposes.
 
@@ -170,14 +170,11 @@ This is efficient, but it enforces orthogonality of a chosen *unfolding*, not or
 >
 > after scaling so $\lVert X_0 \rVert_2 < 1$.
 >
-> <blockquote class="box-update" markdown="1">
-> <div class="title" markdown="1">
-> **Update.** State-of-the-Art (SOTA) Methods
-> </div>
+> > [!update] **Update.** State-of-the-Art (SOTA) Methods
 > While Newton-Schulz is the classic matmul-only approximation, recent developments in high-performance ML have introduced more efficient and stable alternatives:
 > - **[Polar Express](https://arxiv.org/abs/2505.16932)**: A fast and robust method for polar decomposition in deep learning.
 > - **Turbo-Muon AOL ([arXiv:2512.04632](https://arxiv.org/abs/2512.04632))**: Approaches like All-On-Layer (AOL) specifically optimize the throughput of these orthogonalization steps.
-</blockquote>
+>
 
 ## 9) Summary
 
