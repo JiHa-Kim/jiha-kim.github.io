@@ -1,6 +1,6 @@
 <!-- Refactor the HTML structure -->
 
-{% assign _content = include.content %}
+{% assign _content = include.content | default: content %}
 
 <!--
   In order to allow a wide table to scroll horizontally,

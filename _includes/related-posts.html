@@ -1,29 +1,7 @@
 {%- if page.calculated_related_posts and page.calculated_related_posts.size > 0 -%}
-  <aside id="related-posts" aria-labelledby="related-label">
-    <h3 class="mb-4" id="related-label">
-      {{- site.data.locales[include.lang].post.relate_posts | default: 'Related' -}}
-    </h3>
-
-    <nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4">
-      {%- for doc in page.calculated_related_posts -%}
-        {%- if doc and doc.url -%}
-          <article class="col">
-            <a href="{{ doc.url | relative_url }}" class="post-preview card h-100">
-              <div class="card-body">
-                {%- include_cached datetime.html date=doc.date lang=include.lang -%}
-                <h4 class="pt-0 my-2">{{ doc.title }}</h4>
-                <div class="text-muted">
-                  <p>{%- include_cached post-description.html
-                    description=doc.description
-                    excerpt=doc.excerpt
-                    lang=include.lang
-                  -%}</p>
-                </div>
-              </div>
-            </a>
-          </article>
-        {%- endif -%}
-      {%- endfor -%}
-    </nav>
-  </aside>
+  {%- assign related_ids = page.calculated_related_posts | map: 'id' | join: ',' -%}
+  {%- include_cached related-posts-inner.html
+    related_ids=related_ids
+    lang=include.lang
+  -%}
 {%- endif -%}
