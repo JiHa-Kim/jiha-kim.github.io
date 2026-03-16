@@ -13,6 +13,7 @@ SITE_DIR="_site"
 _config="_config.yml"
 
 _baseurl=""
+_fast="false"
 
 help() {
   echo "Build and test the site content"
@@ -23,6 +24,7 @@ help() {
   echo
   echo "Options:"
   echo '     -c, --config   "<config_a[,config_b[...]]>"    Specify config file(s)'
+  echo "     -f, --fast               Fast iterative build for local development (no minification, incremental, no htmlproofer)."
   echo "     -h, --help               Print this information."
 }
 
@@ -49,21 +51,27 @@ read_baseurl() {
 }
 
 main() {
-  # clean up
-  if [[ -d $SITE_DIR ]]; then
-    rm -rf "$SITE_DIR"
-  fi
-
   read_baseurl
 
-  # build
-  JEKYLL_ENV=production bundle exec jekyll b \
-    -d "$SITE_DIR$_baseurl" -c "$_config"
+  if [[ "$_fast" == "true" ]]; then
+    # fast build
+    JEKYLL_ENV=development bundle exec jekyll b \
+      -d "$SITE_DIR$_baseurl" -c "$_config" --incremental
+  else
+    # clean up
+    if [[ -d $SITE_DIR ]]; then
+      rm -rf "$SITE_DIR"
+    fi
 
-  # test
-  bundle exec htmlproofer "$SITE_DIR" \
-    --disable-external \
-    --ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/"
+    # build
+    JEKYLL_ENV=production bundle exec jekyll b \
+      -d "$SITE_DIR$_baseurl" -c "$_config"
+
+    # test
+    bundle exec htmlproofer "$SITE_DIR" \
+      --disable-external \
+      --ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/"
+  fi
 }
 
 while (($#)); do
@@ -72,6 +80,10 @@ while (($#)); do
   -c | --config)
     _config="$2"
     shift
+    shift
+    ;;
+  -f | --fast)
+    _fast="true"
     shift
     ;;
   -h | --help)
