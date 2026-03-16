@@ -4,9 +4,8 @@ layout: compress
 
 <!doctype html>
 
-{% include origin-type.html %}
-
-{% include lang.html %}
+{% assign type = site.data.origin_type %}
+{% assign lang = page.lang %}
 
 {% if site.theme_mode %}
   {% capture prefer_mode %}data-mode="{{ site.theme_mode }}"{% endcapture %}

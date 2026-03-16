@@ -13,7 +13,11 @@
                 {%- include_cached datetime.html date=doc.date lang=include.lang -%}
                 <h4 class="pt-0 my-2">{{ doc.title }}</h4>
                 <div class="text-muted">
-                  <p>{%- include_cached post-description.html id=doc.id lang=include.lang -%}</p>
+                  <p>{%- include_cached post-description.html
+                    description=doc.description
+                    excerpt=doc.excerpt
+                    lang=include.lang
+                  -%}</p>
                 </div>
               </div>
             </a>
