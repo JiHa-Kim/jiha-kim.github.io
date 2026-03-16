@@ -43,6 +43,83 @@ module Jekyll
         end
       end
     end
+
+    def self.media_url(site, src, subpath: nil, absolute: false)
+      url = src
+      return url if url.nil? || url.include?(':')
+
+      # 1. Add subpath
+      url = File.join(subpath || '', url)
+      # 2. Add CDN
+      if site.config['cdn']
+        url = File.join(site.config['cdn'], url)
+      end
+      # 3. Clean slashes
+      url = url.gsub('///', '/').gsub('//', '/')
+      
+      return url if url.include?('://')
+
+      # 4. Handle baseurl/url
+      if absolute
+        File.join(site.config['url'], site.baseurl, url)
+      else
+        File.join(site.baseurl, url)
+      end
+    end
+    def self.render_seo(site, item)
+      title = item.data['title'] || site.config['title']
+      description = item.data['description'] || item.data['excerpt'] || site.config['description']
+      author = item.data['author'] || site.config.dig('social', 'name')
+      url = File.join(site.config['url'], site.baseurl, item.url).gsub(/\/$/, '/index.html').gsub(/\/$/, '')
+      # Canonical URL fix
+      canonical_url = File.join(site.config['url'], site.baseurl, item.url)
+
+      html = []
+      html << %(<meta name="generator" content="Jekyll v#{Jekyll::VERSION}" />)
+      html << %(<meta property="og:title" content="#{title}" />)
+      html << %(<meta name="author" content="#{author}" />)
+      html << %(<meta property="og:locale" content="#{item.data['lang'] || 'en'}" />)
+      html << %(<meta name="description" content="#{description}" />)
+      html << %(<meta property="og:description" content="#{description}" />)
+      html << %(<link rel="canonical" href="#{canonical_url}" />)
+      html << %(<meta property="og:url" content="#{canonical_url}" />)
+      html << %(<meta property="og:site_name" content="#{site.config['title']}" />)
+      html << %(<meta property="og:type" content="#{item.data['layout'] == 'post' ? 'article' : 'website'}" />)
+      html << %(<meta name="twitter:card" content="summary" />)
+      html << %(<meta property="twitter:title" content="#{title}" />)
+      if site.config.dig('twitter', 'username')
+        html << %(<meta name="twitter:site" content="@#{site.config['twitter']['username']}" />)
+        html << %(<meta name="twitter:creator" content="@#{site.config['twitter']['username']}" />)
+      end
+
+      html.join("\n")
+    end
+  end
+
+  # Pre-calculate SEO and absolute image URLs to avoid expensive Liquid logic
+  Hooks.register [:posts, :pages, :docs], :pre_render do |item, payload|
+    site = item.site
+    next unless item.output_ext == '.html'
+
+    # 1. Fix page.image path to be absolute
+    if item.data['image']
+      src = item.data['image'].is_a?(Hash) ? item.data['image']['path'] : item.data['image']
+      unless src.to_s.include?('://')
+        abs_url = SiteVarsOptimizer.media_url(site, src, subpath: item.data['media_subpath'], absolute: true)
+        if item.data['image'].is_a?(Hash)
+          item.data['image']['path'] = abs_url
+        else
+          item.data['image'] = abs_url
+        end
+      end
+    elsif site.config['social_preview_image']
+      item.data['precomputed_social_image'] = SiteVarsOptimizer.media_url(site, site.config['social_preview_image'], absolute: true)
+    end
+
+    # 2. Pre-render SEO tags in Ruby natively to bypass Liquid overhead
+    if Jekyll.env == 'production'
+      item.data['precomputed_seo_html'] = SiteVarsOptimizer.render_seo(site, item)
+    end
   end
 
   # High-performance Ruby-based HTML Compression
