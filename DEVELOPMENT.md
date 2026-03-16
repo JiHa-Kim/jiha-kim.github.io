@@ -41,6 +41,25 @@ bundle exec jekyll s
 
 This ensures that your files in `collections/` remain in their original Obsidian format while being rendered correctly in the browser.
 
+## Local CI Replication
+
+To replicate the GitHub Actions workflow locally (build + test), use the provided test script:
+
+```bash
+bash tools/test.sh
+```
+
+This script performs the following steps:
+1.  **Cleanup**: Removes existing `_site` directory.
+2.  **Build**: Runs `bundle exec jekyll build` with `JEKYLL_ENV=production`.
+3.  **Verify**: Runs `bundle exec htmlproofer` to catch broken links and HTML errors.
+
+> [!TIP]
+> If you have [act](https://github.com/nektos/act) and Docker installed, you can run the exact `.yml` workflow:
+> ```bash
+> act
+> ```
+
 ## Verification
 Always run the local test suite before pushing changes:
 ```bash
