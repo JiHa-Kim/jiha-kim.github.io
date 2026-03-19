@@ -77,7 +77,7 @@ Both produce Gibbs or exponential-weights solutions. The regularized softmax vie
 > We write **one layer** at a time. Within a layer, we suppress the layer index $\ell$ and the head index $h$ wherever they are not essential:
 >
 > | Symbol | Meaning |
-> |--------|---------|
+> | :--- | :--- |
 > | $H \in \mathbb{R}^{T \times d}$ | hidden states entering the layer |
 > | $\mathcal{N}(x) = x / \mathrm{rms}(x)$ | gainless RMS normalization |
 > | $W_Q, W_K, W_V, W_O$ | projection weights (per head) |
