@@ -27,7 +27,7 @@ math: true
 > 3. **Residual updates** are Euclidean trust-region (proximal) steps.
 > 4. **The MLP** is a learned transport map in normalized coordinates.
 >
-> The two cleanest constrained attention formulations are an **entropy-constrained** variant and a **KL-constrained** variant, both producing Gibbs / exponential-weights solutions. This viewpoint is the inner analogue of the outer Muon-style worldview: choose the best feasible direction inside the geometry dictated by the architecture, instead of starting from a penalty parameter and treating geometry as secondary.
+> The two cleanest constrained attention formulations are an **entropy-constrained** variant and a **KL-constrained** variant, both producing Gibbs / exponential-weights solutions.[^litman] This viewpoint is the inner analogue of the outer Muon-style worldview: choose the best feasible direction inside the geometry dictated by the architecture, instead of starting from a penalty parameter and treating geometry as secondary.
 
 ---
 
@@ -282,7 +282,7 @@ This is exactly the **exponential-weights form** associated with KL-simplex proj
 > [!fact] Important Instantiations
 > **Uniform prior.** $q = \mathrm{uniform}$ recovers ordinary softmax: $a^\star = \mathrm{softmax}(s / \lambda^\star)$.
 >
-> **Previous-layer prior.** Setting $q$ to the attention weights from the previous layer makes attention a true **mirror-descent-like update**.
+> **Previous-layer prior.** Setting $q$ to the attention weights from the previous layer makes attention a true **mirror-descent-like update**.[^nickhar]
 >
 > **Learned or carried state.** A persistent $q$ carried across layers gives a **persistent dual variable** — closer to a real optimizer architecture than recomputing attention from scratch each layer.
 
@@ -438,7 +438,11 @@ Under crude linearization, different parameter groups would inherit different pr
 
 [^bregman]: Efficient Bregman Projections onto the Simplex. [PDF](https://bayen.berkeley.edu/sites/default/files/efficient_bregman_projections.pdf).
 
+[^litman]: Scaled-Dot-Product Attention as One-Sided Entropic Optimal Transport. [arXiv:2508.08369](https://arxiv.org/abs/2508.08369).
+
 [^muon]: Muon: An optimizer for hidden layers in neural networks. [Muon](https://kellerjordan.github.io/posts/muon/).
+
+[^nickhar]: Fenchel Duality, Bregman Divergences. [UBC CPSC 531 Notes 20](https://www.cs.ubc.ca/~nickhar/F18-531/Notes20.pdf).
 
 [^polargrad]: PolarGrad: A Class of Matrix-Gradient Optimizers from a Unifying Preconditioning Perspective. [arXiv:2505.21799](https://arxiv.org/html/2505.21799v3).
 
