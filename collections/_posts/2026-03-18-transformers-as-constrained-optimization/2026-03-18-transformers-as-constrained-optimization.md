@@ -151,7 +151,7 @@ $$
 \mathrm{softmax}(s + c\,\mathbf{1}) = \mathrm{softmax}(s).
 $$
 
-So logits live naturally in the quotient space $\mathbb{R}^t / \mathrm{span}\{\mathbf{1}\}$. A canonical gauge choice is, for example, $\sum_i s_i = 0$. This is a **true symmetry** of the attention row map.
+So logits live naturally in the quotient space $\mathbb{R}^t / \mathrm{span}\{\mathbf{1}\}$. A canonical gauge choice is, for example, $\sum_i s_i = 0$. This is a **true symmetry** of the attention row map. (In practice, we leverage this by subtracting the max logit for numerical stability.)
 
 ### 3.3 Entropy as "Sharpness Gauge"
 
