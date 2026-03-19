@@ -130,9 +130,10 @@ module Jekyll
         elsif in_code_fence || in_math_block
           keep_line = true
         elsif line.strip.empty?
-          # Blank line inside callout allowed if next line is quoted or we are in a block
+          # Blank line inside callout allowed ONLY if we are in a block (code or math)
+          # In standard Markdown, a truly blank line breaks a blockquote.
           next_line = lines[i+1]
-          if next_line && (next_line.lstrip.start_with?(">") || in_code_fence || in_math_block)
+          if next_line && (in_code_fence || in_math_block)
              keep_line = true
           else
              break
