@@ -155,7 +155,8 @@ module Jekyll
       # Recursively convert callouts in body
       raw_body = content_lines.join("\n")
       processed_body = convert_callouts(raw_body)
-      processed_body = "\n" + processed_body.strip + "\n" unless processed_body.strip.empty?
+      # Robustly separate body from surrounding tags with double newlines
+      processed_body = "\n\n" + processed_body.strip + "\n\n" unless processed_body.strip.empty?
 
       box_class = TYPE_MAP[ctype] || "box-info"
       box_class += " #{attr}" if attr
@@ -170,13 +171,13 @@ module Jekyll
           <details class="#{box_class}"#{open_attr} markdown="1">
           <summary markdown="1">
           #{summary_text}
-          </summary>#{processed_body}</details>
+          </summary>\n\n#{processed_body}</details>
         HTML
       else
         title_html = !title.empty? ? "<div class=\"title\" markdown=\"1\">\n#{title}\n</div>" : ""
         html = <<~HTML
           <blockquote class="#{box_class}" markdown="1">
-          #{title_html}#{processed_body}</blockquote>
+          #{title_html}\n\n#{processed_body}</blockquote>
         HTML
       end
 
