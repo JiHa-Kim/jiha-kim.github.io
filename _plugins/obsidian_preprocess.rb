@@ -161,9 +161,14 @@ module Jekyll
         
         next_line = content_lines[idx+1]
         if next_line && !in_code && !line.strip.empty? && !next_line.strip.empty?
-          # In these technical posts, treat every line break as a paragraph break
-          # to ensure math blocks and comments stay separated.
-          joined_body << "\n"
+          # Do not split table rows (lines starting with '|')
+          is_table_row = line.strip.start_with?('|') && next_line.strip.start_with?('|')
+          
+          unless is_table_row
+            # In these technical posts, treat every line break as a paragraph break
+            # to ensure math blocks and comments stay separated.
+            joined_body << "\n"
+          end
         end
       end
 
