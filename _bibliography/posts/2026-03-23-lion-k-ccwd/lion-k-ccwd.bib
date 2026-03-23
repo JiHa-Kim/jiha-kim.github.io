@@ -105,24 +105,6 @@
   keywords = {Computer Science - Machine Learning}
 }
 
-@misc{marekSmallBatchSize2025a,
-  title = {Small {{Batch Size Training}} for {{Language Models}}: {{When Vanilla SGD Works}}, and {{Why Gradient Accumulation Is Wasteful}}},
-  shorttitle = {Small {{Batch Size Training}} for {{Language Models}}},
-  author = {Marek, Martin and Lotfi, Sanae and Somasundaram, Aditya and Wilson, Andrew Gordon and Goldblum, Micah},
-  year = 2025,
-  month = jul,
-  number = {arXiv:2507.07101},
-  eprint = {2507.07101},
-  primaryclass = {cs},
-  publisher = {arXiv},
-  doi = {10.48550/arXiv.2507.07101},
-  url = {http://arxiv.org/abs/2507.07101},
-  urldate = {2026-03-23},
-  abstract = {Conventional wisdom dictates that small batch sizes make language model pretraining and fine-tuning unstable, motivating gradient accumulation, which trades off the number of optimizer steps for a proportional increase in batch size. While it is common to decrease the learning rate for smaller batch sizes, other hyperparameters are often held fixed. In this work, we revisit small batch sizes all the way down to batch size one, and we propose a rule for scaling Adam hyperparameters to small batch sizes. We find that small batch sizes (1) train stably, (2) are consistently more robust to hyperparameter choices, (3) achieve equal or better per-FLOP performance than larger batch sizes, and (4) notably enable stable language model training with vanilla SGD, even without momentum, despite storing no optimizer state. Building on these results, we provide practical recommendations for selecting a batch size and setting optimizer hyperparameters. We further recommend against gradient accumulation unless training on multiple devices with multiple model replicas, bottlenecked by inter-device bandwidth.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Machine Learning}
-}
-
 @misc{mlodozeniecCompletedHyperparameterTransfer2025,
   title = {Completed {{Hyperparameter Transfer}} across {{Modules}}, {{Width}}, {{Depth}}, {{Batch}} and {{Duration}}},
   author = {Mlodozeniec, Bruno and Ablin, Pierre and B{\'e}thune, Louis and Busbridge, Dan and Klein, Michal and Ramapuram, Jason and Cuturi, Marco},
