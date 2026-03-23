@@ -186,6 +186,29 @@ defaults:
   # 1) Global defaults for all content
   - scope:
       path: ""
+      type: posts
+    values:
+      layout: post
+      toc: true
+      math: true
+      author: jiha
+      panel_includes:
+        - toc
+
+  - scope:
+      path: ""
+      type: crash-courses
+    values:
+      layout: post
+      toc: true
+      math: true
+      author: jiha
+      panel_includes:
+        - toc
+
+  - scope:
+      path: ""
+      type: series
     values:
       layout: post
       toc: true
