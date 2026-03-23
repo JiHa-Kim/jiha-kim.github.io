@@ -86,8 +86,10 @@ In decoupled weight decay, the physically meaningful quantity is the per-step mu
 > [!lemma] Steady-State Parameter Norm
 > The steady-state parameter norm satisfies (to leading order in small $\eta$):
 > $$
-> \mathbb{E}|\theta|^2 \approx \frac{\gamma^2 C_u^2}{2\eta} S
+> \mathbb{E}|\theta|^2 \approx \frac{\gamma^2 C_u^2}{2\eta} S = \frac{\gamma_{\text{eff}}^2 C_u^2}{2\eta}
 > $$
+> where $\gamma_{\text{eff}} := \gamma \sqrt{S}$ is the **effective learning rate** accounting for momentum.
+>
 > To target a steady-state squared norm $C_\theta^2$, solve for $\eta$:
 > $$
 > \eta \approx \frac{\gamma^2 C_u^2 S}{2C_\theta^2} \qquad \Longrightarrow \qquad \lambda \approx \frac{\gamma C_u^2 S}{2C_\theta^2}
@@ -253,6 +255,13 @@ When the batch size or duration changes, the per-step $\beta$ must be adjusted t
 > \beta' = \beta^{m_B / m_D} \qquad \text{equivalently} \qquad \beta' = 2^{-\Delta\tau'/H}
 > $$
 > where $\Delta\tau' = B'/T'$ is the token step size of the target run.
+
+> [!important] Effective Learning Rate Correction
+> Changing $\beta$ alters the correlation factor $S$, which changes the optimizer's random-walk step size. To transfer perfectly across different momentum values, adjust the base learning rate so the **effective learning rate** $\gamma_{\text{eff}} = \gamma\sqrt{S}$ is invariant:
+> $$
+> \gamma' = \gamma \sqrt{\frac{S(\beta_{\text{eff}}, \beta_2)}{S(\beta_{\text{eff}}', \beta_2')}}
+> $$
+> This ensures that the total parameter displacement scale is preserved.
 
 > [!remark]- Why Not Just Keep $\beta$ Fixed?
 > If you double the batch size without adjusting $\beta$, the EMA forgets twice as fast in token space — the momentum window shrinks by half. For small-batch scaling this is especially destructive {% cite marekSmallBatchSize2025 %}.
