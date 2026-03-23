@@ -245,7 +245,7 @@ Using the Complete(d)P framework {% cite mlodozeniecCompletedHyperparameterTrans
 >
 > | Component | Scaling Rule |
 > | :--- | :--- |
-> | Residual branch multiplier | $\text{residual\_multiplier}' = \text{residual\_multiplier}\cdot m_L^{-\alpha}$, with $\alpha\in\left[\frac{1}{2},1\right]$ |
+> | Residual branch multiplier | $\text{residual_multiplier}' = \text{residual_multiplier}\cdot m_L^{-\alpha}$, with $\alpha\in\left[\frac{1}{2},1\right]$ |
 > | Init variance: hidden weights | $\mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}$ |
 > | Init variance: output weights | $\mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}$ |
 
