@@ -1,0 +1,198 @@
+@misc{AsymptoticEstimationAdamWs,
+  title = {Asymptotic {{Estimation}} of {{AdamW}}'s {{Weight RMS}} ({{Part}} 1) - {{Science Space}}\textbar{{Scientific Spaces}}},
+  url = {https://kexue.fm/archives/11307},
+  urldate = {2026-03-22}
+}
+
+@misc{bernstein2025deriving,
+  title = {Deriving Muon},
+  author = {Bernstein, Jeremy},
+  year = 2025,
+  url = {https://jeremybernste.in/writing/deriving-muon}
+}
+
+@misc{chenCautiousWeightDecay2026,
+  title = {Cautious {{Weight Decay}}},
+  author = {Chen, Lizhang and Li, Jonathan and Liang, Kaizhao and Su, Baiyu and Xie, Cong and Pierse, Nuo Wang and Liang, Chen and Lao, Ni and Liu, Qiang},
+  year = 2026,
+  month = feb,
+  number = {arXiv:2510.12402},
+  eprint = {2510.12402},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2510.12402},
+  url = {http://arxiv.org/abs/2510.12402},
+  urldate = {2026-03-23},
+  abstract = {We introduce Cautious Weight Decay (CWD), a one-line, optimizer-agnostic modification that applies weight decay only to parameter coordinates whose signs align with the optimizer update. Unlike standard decoupled decay, which implicitly optimizes a regularized or constrained objective, CWD preserves the original loss and admits a bilevel interpretation: it induces sliding-mode behavior upon reaching the stationary manifold, allowing it to search for locally Pareto-optimal stationary points of the unmodified objective. In practice, CWD is a drop-in change for optimizers such as AdamW, Lion, and Muon, requiring no new hyperparameters or additional tuning. For language model pre-training and ImageNet classification, CWD consistently improves final loss and accuracy at million- to billion-parameter scales.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Optimization and Control,Statistics - Machine Learning}
+}
+
+@misc{chouCorrectionDecoupledWeight2026,
+  title = {Correction of {{Decoupled Weight Decay}}},
+  author = {Chou, Jason Chuan-Chih},
+  year = 2026,
+  month = feb,
+  number = {arXiv:2512.08217},
+  eprint = {2512.08217},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2512.08217},
+  url = {http://arxiv.org/abs/2512.08217},
+  urldate = {2026-03-22},
+  abstract = {Decoupled weight decay, solely responsible for the performance advantage of AdamW over Adam, has long been set to proportional to learning rate \${$\gamma\$$} without questioning. Some researchers have recently challenged such assumption and argued that decoupled weight decay should be set \$\textbackslash propto {$\gamma$}\textasciicircum 2\$ instead based on orthogonality arguments at steady state. To the contrary, we find that eliminating the contribution of the perpendicular component of the update to the weight norm leads to little change to the training dynamics. Instead, we derive that decoupled weight decay \$\textbackslash propto {$\gamma$}\textasciicircum 2\$ results in stable weight norm based on the simple assumption that updates become independent of the weights at steady state, regardless of the nature of the optimizer. Based on the same assumption, we derive and empirically verify that the Total Update Contribution (TUC) of a minibatch under the Scion optimizer is better characterized by the momentum-dependent effective learning rate whose optimal value transfers and we show that decoupled weight decay \$\textbackslash propto {$\gamma$}\textasciicircum 2\$ leads to stable weight and gradient norms and allows us to better control the training dynamics and improve the model performance.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning}
+}
+
+@misc{defazioWhyGradientsRapidly2025,
+  title = {Why {{Gradients Rapidly Increase Near}} the {{End}} of {{Training}}},
+  author = {Defazio, Aaron},
+  year = 2025,
+  month = jun,
+  number = {arXiv:2506.02285},
+  eprint = {2506.02285},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2506.02285},
+  url = {http://arxiv.org/abs/2506.02285},
+  urldate = {2026-03-22},
+  abstract = {During long-duration Large Language Model (LLM) training runs the gradient norm increases rapidly near the end of training. In this short note, we show that this increase is due to an unintended interaction between weight decay, normalization layers, and the learning rate schedule. We propose a simple correction that fixes this behavior while also resulting in lower loss values throughout training.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning}
+}
+
+@misc{jordan2024muon,
+  title = {Muon: {{An}} Optimizer for Hidden Layers in Neural Networks},
+  author = {Jordan, Keller and Jin, Yuchen and Boza, Vlado and You, Jiacheng and Cesista, Franz and Newhouse, Laker and Bernstein, Jeremy},
+  year = 2024,
+  url = {https://kellerjordan.github.io/posts/muon/}
+}
+
+@misc{marekSmallBatchSize2025,
+  title = {Small {{Batch Size Training}} for {{Language Models}}: {{When Vanilla SGD Works}}, and {{Why Gradient Accumulation Is Wasteful}}},
+  shorttitle = {Small {{Batch Size Training}} for {{Language Models}}},
+  author = {Marek, Martin and Lotfi, Sanae and Somasundaram, Aditya and Wilson, Andrew Gordon and Goldblum, Micah},
+  year = 2025,
+  month = jul,
+  number = {arXiv:2507.07101},
+  eprint = {2507.07101},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2507.07101},
+  url = {http://arxiv.org/abs/2507.07101},
+  urldate = {2026-03-22},
+  abstract = {Conventional wisdom dictates that small batch sizes make language model pretraining and fine-tuning unstable, motivating gradient accumulation, which trades off the number of optimizer steps for a proportional increase in batch size. While it is common to decrease the learning rate for smaller batch sizes, other hyperparameters are often held fixed. In this work, we revisit small batch sizes all the way down to batch size one, and we propose a rule for scaling Adam hyperparameters to small batch sizes. We find that small batch sizes (1) train stably, (2) are consistently more robust to hyperparameter choices, (3) achieve equal or better per-FLOP performance than larger batch sizes, and (4) notably enable stable language model training with vanilla SGD, even without momentum, despite storing no optimizer state. Building on these results, we provide practical recommendations for selecting a batch size and setting optimizer hyperparameters. We further recommend against gradient accumulation unless training on multiple devices with multiple model replicas, bottlenecked by inter-device bandwidth.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning}
+}
+
+@misc{marekSmallBatchSize2025a,
+  title = {Small {{Batch Size Training}} for {{Language Models}}: {{When Vanilla SGD Works}}, and {{Why Gradient Accumulation Is Wasteful}}},
+  shorttitle = {Small {{Batch Size Training}} for {{Language Models}}},
+  author = {Marek, Martin and Lotfi, Sanae and Somasundaram, Aditya and Wilson, Andrew Gordon and Goldblum, Micah},
+  year = 2025,
+  month = jul,
+  number = {arXiv:2507.07101},
+  eprint = {2507.07101},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2507.07101},
+  url = {http://arxiv.org/abs/2507.07101},
+  urldate = {2026-03-23},
+  abstract = {Conventional wisdom dictates that small batch sizes make language model pretraining and fine-tuning unstable, motivating gradient accumulation, which trades off the number of optimizer steps for a proportional increase in batch size. While it is common to decrease the learning rate for smaller batch sizes, other hyperparameters are often held fixed. In this work, we revisit small batch sizes all the way down to batch size one, and we propose a rule for scaling Adam hyperparameters to small batch sizes. We find that small batch sizes (1) train stably, (2) are consistently more robust to hyperparameter choices, (3) achieve equal or better per-FLOP performance than larger batch sizes, and (4) notably enable stable language model training with vanilla SGD, even without momentum, despite storing no optimizer state. Building on these results, we provide practical recommendations for selecting a batch size and setting optimizer hyperparameters. We further recommend against gradient accumulation unless training on multiple devices with multiple model replicas, bottlenecked by inter-device bandwidth.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning}
+}
+
+@misc{mlodozeniecCompletedHyperparameterTransfer2025,
+  title = {Completed {{Hyperparameter Transfer}} across {{Modules}}, {{Width}}, {{Depth}}, {{Batch}} and {{Duration}}},
+  author = {Mlodozeniec, Bruno and Ablin, Pierre and B{\'e}thune, Louis and Busbridge, Dan and Klein, Michal and Ramapuram, Jason and Cuturi, Marco},
+  year = 2025,
+  month = dec,
+  number = {arXiv:2512.22382},
+  eprint = {2512.22382},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2512.22382},
+  url = {http://arxiv.org/abs/2512.22382},
+  urldate = {2026-03-22},
+  abstract = {Hyperparameter tuning can dramatically impact training stability and final performance of large-scale models. Recent works on neural network parameterisations, such as \${$\mu\$$}P, have enabled transfer of optimal global hyperparameters across model sizes. These works propose an empirical practice of search for optimal global base hyperparameters at a small model size, and transfer to a large size. We extend these works in two key ways. To handle scaling along most important scaling axes, we propose the Complete\$\textasciicircum\textbraceleft (d)\textbraceright\$ Parameterisation that unifies scaling in width and depth -- using an adaptation of CompleteP -- as well as in batch-size and training duration. Secondly, with our parameterisation, we investigate per-module hyperparameter optimisation and transfer. We characterise the empirical challenges of navigating the high-dimensional hyperparameter landscape, and propose practical guidelines for tackling this optimisation problem. We demonstrate that, with the right parameterisation, hyperparameter transfer holds even in the per-module hyperparameter regime. Our study covers an extensive range of optimisation hyperparameters of modern models: learning rates, AdamW parameters, weight decay, initialisation scales, and residual block multipliers. Our experiments demonstrate significant training speed improvements in Large Language Models with the transferred per-module hyperparameters.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Statistics - Machine Learning}
+}
+
+@misc{MuPZhiShang2XianXingCengYuZuiSuXiaJiangKeXueKongJian|Scientific,
+  title = {{{MuP之上}}：2. 线性层与最速下降 - 科学空间\textbar{{Scientific Spaces}}},
+  url = {https://kexue.fm/archives/11605},
+  urldate = {2026-03-22}
+}
+
+@misc{MuPZhiShang3TeShuQingKuangTeShuChuLiKeXueKongJian|Scientific,
+  title = {{{MuP之上}}：3. 特殊情况特殊处理 - 科学空间\textbar{{Scientific Spaces}}},
+  url = {https://kexue.fm/archives/11647},
+  urldate = {2026-03-22}
+}
+
+@misc{yangSpectralConditionFeature2024,
+  title = {A {{Spectral Condition}} for {{Feature Learning}}},
+  author = {Yang, Greg and Simon, James B. and Bernstein, Jeremy},
+  year = 2024,
+  month = may,
+  number = {arXiv:2310.17813},
+  eprint = {2310.17813},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2310.17813},
+  url = {http://arxiv.org/abs/2310.17813},
+  urldate = {2026-03-22},
+  abstract = {The push to train ever larger neural networks has motivated the study of initialization and training at large network width. A key challenge is to scale training so that a network's internal representations evolve nontrivially at all widths, a process known as feature learning. Here, we show that feature learning is achieved by scaling the spectral norm of weight matrices and their updates like \$\textbackslash sqrt\textbraceleft\textbackslash texttt\textbraceleft fan-out\textbraceright/\textbackslash texttt\textbraceleft fan-in\textbraceright\textbraceright\$, in contrast to widely used but heuristic scalings based on Frobenius norm and entry size. Our spectral scaling analysis also leads to an elementary derivation of \textbackslash emph\textbraceleft maximal update parametrization\textbraceright. All in all, we aim to provide the reader with a solid conceptual understanding of feature learning in neural networks.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning}
+}
+
+@misc{yangTensorProgramsTuning2022,
+  title = {Tensor {{Programs V}}: {{Tuning Large Neural Networks}} via {{Zero-Shot Hyperparameter Transfer}}},
+  shorttitle = {Tensor {{Programs V}}},
+  author = {Yang, Greg and Hu, Edward J. and Babuschkin, Igor and Sidor, Szymon and Liu, Xiaodong and Farhi, David and Ryder, Nick and Pachocki, Jakub and Chen, Weizhu and Gao, Jianfeng},
+  year = 2022,
+  month = mar,
+  number = {arXiv:2203.03466},
+  eprint = {2203.03466},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2203.03466},
+  url = {http://arxiv.org/abs/2203.03466},
+  urldate = {2026-03-22},
+  abstract = {Hyperparameter (HP) tuning in deep learning is an expensive process, prohibitively so for neural networks (NNs) with billions of parameters. We show that, in the recently discovered Maximal Update Parametrization (muP), many optimal HPs remain stable even as model size changes. This leads to a new HP tuning paradigm we call muTransfer: parametrize the target model in muP, tune the HP indirectly on a smaller model, and zero-shot transfer them to the full-sized model, i.e., without directly tuning the latter at all. We verify muTransfer on Transformer and ResNet. For example, 1) by transferring pretraining HPs from a model of 13M parameters, we outperform published numbers of BERT-large (350M parameters), with a total tuning cost equivalent to pretraining BERT-large once; 2) by transferring from 40M parameters, we outperform published numbers of the 6.7B GPT-3 model, with tuning cost only 7\% of total pretraining cost. A Pytorch implementation of our technique can be found at github.com/microsoft/mup and installable via `pip install mup`.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Neural and Evolutionary Computing,Condensed Matter - Disordered Systems and Neural Networks}
+}
+
+@misc{yangTensorProgramsVI2023,
+  title = {Tensor {{Programs VI}}: {{Feature Learning}} in {{Infinite-Depth Neural Networks}}},
+  shorttitle = {Tensor {{Programs VI}}},
+  author = {Yang, Greg and Yu, Dingli and Zhu, Chen and Hayou, Soufiane},
+  year = 2023,
+  month = oct,
+  number = {arXiv:2310.02244},
+  eprint = {2310.02244},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2310.02244},
+  url = {http://arxiv.org/abs/2310.02244},
+  urldate = {2026-03-22},
+  abstract = {By classifying infinite-width neural networks and identifying the *optimal* limit, Tensor Programs IV and V demonstrated a universal way, called \${$\mu\$$}P, for *widthwise hyperparameter transfer*, i.e., predicting optimal hyperparameters of wide neural networks from narrow ones. Here we investigate the analogous classification for *depthwise parametrizations* of deep residual networks (resnets). We classify depthwise parametrizations of block multiplier and learning rate by their infinite-width-then-depth limits. In resnets where each block has only one layer, we identify a unique optimal parametrization, called Depth-\${$\mu\$$}P that extends \${$\mu\$$}P and show empirically it admits depthwise hyperparameter transfer. We identify *feature diversity* as a crucial factor in deep networks, and Depth-\${$\mu\$$}P can be characterized as maximizing both feature learning and feature diversity. Exploiting this, we find that absolute value, among all homogeneous nonlinearities, maximizes feature diversity and indeed empirically leads to significantly better performance. However, if each block is deeper (such as modern transformers), then we find fundamental limitations in all possible infinite-depth limits of such parametrizations, which we illustrate both theoretically and empirically on simple networks as well as Megatron transformer trained on Common Crawl.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Neural and Evolutionary Computing,Condensed Matter - Disordered Systems and Neural Networks,Mathematics - Probability}
+}
+
+@misc{kaddour2025cautious,
+      title={Cautious Weight Decay},
+      author={Jean Kaddour and Luca Schmid and Johannes Haensch and Maksim E. Kinakh and Rylan Schaeffer and Sanmi Koyejo},
+      year={2025},
+      eprint={2510.12402},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2510.12402}
+}
