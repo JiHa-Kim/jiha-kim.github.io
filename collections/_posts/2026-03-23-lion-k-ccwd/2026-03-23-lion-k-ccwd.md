@@ -54,7 +54,7 @@ scholar:
 
 ## 2. Cautious Weight Decay (CWD)
 
-Cautious Weight Decay (CWD) modifies standard decoupled decay to decay only coordinates whose signs align with the optimizer update direction {% cite kaddour2025cautious %}.
+Cautious Weight Decay (CWD) modifies standard decoupled decay to decay only coordinates whose signs align with the optimizer update direction {% cite chenCautiousWeightDecay2026 %}.
 
 > [!definition] CWD Mask and Update
 > Let the CWD mask be:
