@@ -29,22 +29,18 @@ scholar:
 
 > [!algorithm] Lion-$\mathcal{K}$ Update Rule {% cite chenLionSecretlySolves2025 %}
 > **Input:** Parameters $\theta_t$, gradient $g_t = \nabla f(\theta_t)$, momentum state $m_t$, direction map $\nabla \mathcal{K}$.
->
 > **Step 1 — Momentum update:**
 > $$
 > m_{t+1} = \beta_2 m_t + (1-\beta_2) g_t
 > $$
->
 > **Step 2 — Direction input** (a common Lion-$\mathcal{K}$ choice):
 > $$
 > z_t = \beta_1 m_{t+1} + (1-\beta_1) g_t
 > $$
->
 > **Step 3 — Direction map:**
 > $$
 > u_t = -\nabla \mathcal{K}(z_t)
 > $$
->
 > **Step 4 — Parameter update** (with decoupled decay):
 > $$
 > \theta_{t+1} = (1-\eta_t)\theta_t + \gamma_t u_t
@@ -66,7 +62,6 @@ Cautious Weight Decay (CWD) modifies standard decoupled decay to "decay only the
 > $$
 > M_t \in \{0,1\}^{\mathrm{shape}(\theta)},\qquad (M_t)_i = \mathbf{1}_{\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}}
 > $$
->
 > Apply decay only on masked coordinates:
 > $$
 > \theta_{t+1} = \theta_t - \eta_t (M_t \odot \theta_t) + \gamma_t u_t
@@ -96,7 +91,6 @@ The steady-state norm equation from AdamC {% cite defazioWhyGradientsRapidly2025
 > $$
 > \mathbb{E}|\theta|^2 \approx \frac{\gamma^2 C_u^2}{2\eta} S
 > $$
->
 > To target a steady-state squared norm $C_\theta^2$, solve for $\eta$:
 > $$
 > \eta \approx \frac{\gamma^2 C_u^2 S}{2C_\theta^2} \qquad \Longrightarrow \qquad \lambda \approx \frac{\gamma C_u^2 S}{2C_\theta^2}
@@ -257,12 +251,10 @@ Momentum coefficients $\beta_1, \beta_2$ control how quickly the EMA forgets. Wh
 > $$
 > H = -\frac{B}{\log_2 \beta}
 > $$
->
 > Holding $H$ fixed while changing batch size from $B$ to $B'$ (and correspondingly steps from $T$ to $T'$) gives:
 > $$
 > \beta' = \beta^{m_B / m_D} \qquad \text{equivalently} \qquad \beta' = 2^{-\Delta\tau'/H}
 > $$
->
 > where $\Delta\tau' = B'/T'$ is the token step size of the target run.
 
 > [!remark]- Why Not Just Keep $\beta$ Fixed?
@@ -274,30 +266,26 @@ Momentum coefficients $\beta_1, \beta_2$ control how quickly the EMA forgets. Wh
 
 > [!algorithm] Complete Transfer Pipeline
 > **Input:** Base run parameters $\gamma_g$, $\beta_{1,2}$, target norm $C_{\theta,g}^2$, mask rate $p_g$, correlation $S_g$.
->
 > **Step 1 — Store base parameters.**
 > Extract $\gamma_g$, $\beta_{1,2}$, target norm $C_{\theta,g}^2$, $p_g$, and $S_g$ from the base run.
->
 > **Step 2 — Apply parameterization.**
 > Apply initialization variances and residual multiplier targets using Complete(d)P (Section 5.1).
->
 > **Step 3 — Compute target iterations & LR.**
 > Compute $T'$ and module-wise $\gamma_g'$ including $s_{BD}$ (Section 5.2).
->
 > **Step 4 — Transfer betas.**
 > Use token half-lives: $\beta' = 2^{-\Delta\tau'/H}$ or explicitly $\beta' = \beta^{m_B/m_D}$.
->
 > **Step 5 — Compute CCWD.**
 > Calculate dynamic decay factor per group:
 > $$
 > \eta_g = \frac{(\gamma'_g)^2 C_{u,g}^2 S_g}{2 C_{\theta,g}^2 \cdot p_g}
 > $$
->
 > **Step 6 — Execute.**
 > Run the Lion-$\mathcal{K}$ operator mapped by $-\nabla \mathcal{K}$, tracking $M_t$ and applying masked decay proportional to $\eta_g$.
 
 > [!warning] Caveats for Output Layers
 > The steady-state independence orthogonality assumption frequently breaks down for the cross-entropy output layer. You may need to exclude the output unembedding layer from corrected decay or manage it separately {% cite chouCorrectionDecoupledWeight2026 %}.
+
+---
 
 ## 7. Summary: The Lion-$\mathcal{K}$ CCWD Algorithm
 
@@ -307,36 +295,28 @@ Momentum coefficients $\beta_1, \beta_2$ control how quickly the EMA forgets. Wh
 > **Require:** Per-group target norms $C_{\theta,g}^2$, mask rates $p_g$, correlation factors $S_g$
 >
 > **for** $t = 0, 1, 2, \dots$ **do**
->
 > $\quad$ $g_t \leftarrow \nabla f(\theta_t)$
 >
 > $\quad$ *// Momentum update*
->
 > $\quad$ $m_{t+1} \leftarrow \beta_2\, m_t + (1-\beta_2)\, g_t$
 >
 > $\quad$ *// Direction*
->
 > $\quad$ $z_t \leftarrow \beta_1\, m_{t+1} + (1-\beta_1)\, g_t$
-> 
 > $\quad$ $u_t \leftarrow -\nabla \mathcal{K}(z_t)$
 >
 > $\quad$ *// Cautious mask*
-> 
 > $\quad$ $(M_t)_i \leftarrow \mathbf{1}\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}$
 >
 > $\quad$ *// Corrected decay (per parameter group $g$)*
-> 
 > $\quad$ $\displaystyle\eta_g \leftarrow \frac{\gamma_g^2\, C_{u,g}^2\, S_g}{2\, p_g\, C_{\theta,g}^2}$
 >
 > $\quad$ *// Parameter update*
-> 
 > $\quad$ $\theta_{t+1} \leftarrow \theta_t - \eta_g\,(M_t \odot \theta_t) + \gamma_g\, u_t$
->
 > **end for**
 
 ## Conclusion
 
-Combining Complete(d)P {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, AdamC {% cite defazioWhyGradientsRapidly2025 %} / ScionC {% cite chouCorrectionDecoupledWeight2026 %}, bounded direction maps of Lion-$\mathcal{K}$ {% cite chenLionSecretlySolves2025 %}, and CCWD {% cite kaddour2025cautious %} yields a theoretically solid hyperparameter transfer mechanism. Utilizing the analytical formulation with a dynamic $\kappa$ integrator ensures your model maintains precise token-level alignment across varying training scenarios without excessive trial-and-error tuning.
+Combining Complete(d)P {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, AdamC/ScionC {% cite chouCorrectionDecoupledWeight2026 %}, bounded direction maps of Lion-$\mathcal{K}$ and CCWD {% cite chenCautiousWeightDecay2026 %} yields a theoretically solid hyperparameter transfer mechanism. Utilizing the analytical formulation with a dynamic $\kappa$ integrator ensures your model maintains precise token-level alignment across varying training scenarios without excessive trial-and-error tuning.
 
 ## References
 

@@ -152,11 +152,29 @@ module Jekyll
         end
       end
 
+      # Smart joiner that injects extra newlines for block-level elements
+      joined_body = String.new
+      in_code = false
+      content_lines.each_with_index do |line, idx|
+        joined_body << line << "\n"
+        in_code = !in_code if line.lstrip.start_with?("```")
+        
+        next_line = content_lines[idx+1]
+        if next_line && !in_code && !line.strip.empty? && !next_line.strip.empty?
+          # In these technical posts, treat every line break as a paragraph break
+          # to ensure math blocks and comments stay separated.
+          joined_body << "\n"
+        end
+      end
+
       # Recursively convert callouts in body
-      raw_body = content_lines.join("\n")
-      processed_body = convert_callouts(raw_body)
+      processed_body = convert_callouts(joined_body)
+
       # Robustly separate body from surrounding tags with double newlines
       processed_body = "\n\n" + processed_body.strip + "\n\n" unless processed_body.strip.empty?
+
+
+
 
       box_class = TYPE_MAP[ctype] || "box-info"
       box_class += " #{attr}" if attr
