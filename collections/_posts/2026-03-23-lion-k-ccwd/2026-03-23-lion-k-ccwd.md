@@ -267,13 +267,13 @@ Momentum coefficients $\beta_1, \beta_2$ control how quickly the EMA forgets. Wh
 > [!algorithm] Complete Transfer Pipeline
 > **Input:** Base run parameters $\gamma_g$, $\beta_{1,2}$, target norm $C_{\theta,g}^2$, mask rate $p_g$, correlation $S_g$.
 > **Step 1 — Store base parameters.**
-> Extract $\gamma_g$, $\beta_{1,2}$, target norm $C_{\theta,g}^2$, $p_g$, and $S_g$ from the base run.
+> Extract&nbsp;$\gamma_g$,&nbsp;$\beta_{1,2}$,&nbsp;target norm&nbsp;$C_{\theta,g}^2$,&nbsp;$p_g$, and&nbsp;$S_g$&nbsp;from the base run.
 > **Step 2 — Apply parameterization.**
 > Apply initialization variances and residual multiplier targets using Complete(d)P (Section 5.1).
 > **Step 3 — Compute target iterations & LR.**
-> Compute $T'$ and module-wise $\gamma_g'$ including $s_{BD}$ (Section 5.2).
+> Compute&nbsp;$T'$&nbsp;and module-wise&nbsp;$\gamma_g'$&nbsp;including&nbsp;$s_{BD}$&nbsp;(Section 5.2).
 > **Step 4 — Transfer betas.**
-> Use token half-lives: $\beta' = 2^{-\Delta\tau'/H}$ or explicitly $\beta' = \beta^{m_B/m_D}$.
+> Use token half-lives:&nbsp;$\beta' = 2^{-\Delta\tau'/H}$&nbsp;or explicitly&nbsp;$\beta' = \beta^{m_B/m_D}$.
 > **Step 5 — Compute CCWD.**
 > Calculate dynamic decay factor per group:
 > $$
@@ -294,24 +294,24 @@ Momentum coefficients $\beta_1, \beta_2$ control how quickly the EMA forgets. Wh
 > **Require:** Learning rate $\gamma$, momentum coefficients $\beta_1, \beta_2$
 > **Require:** Per-group target norms $C_{\theta,g}^2$, mask rates $p_g$, correlation factors $S_g$
 >
-> **for** $t = 0, 1, 2, \dots$ **do**
-> $\quad$ $g_t \leftarrow \nabla f(\theta_t)$
+> **for**&nbsp;$t = 0, 1, 2, \dots$&nbsp;**do**
+> $\quad$&nbsp;$g_t \leftarrow \nabla f(\theta_t)$
 >
-> $\quad$ *// Momentum update*
-> $\quad$ $m_{t+1} \leftarrow \beta_2\, m_t + (1-\beta_2)\, g_t$
+> $\quad$&nbsp;*// Momentum update*
+> $\quad$&nbsp;$m_{t+1} \leftarrow \beta_2\, m_t + (1-\beta_2)\, g_t$
 >
-> $\quad$ *// Direction*
-> $\quad$ $z_t \leftarrow \beta_1\, m_{t+1} + (1-\beta_1)\, g_t$
-> $\quad$ $u_t \leftarrow -\nabla \mathcal{K}(z_t)$
+> $\quad$&nbsp;*// Direction*
+> $\quad$&nbsp;$z_t \leftarrow \beta_1\, m_{t+1} + (1-\beta_1)\, g_t$
+> $\quad$&nbsp;$u_t \leftarrow -\nabla \mathcal{K}(z_t)$
 >
-> $\quad$ *// Cautious mask*
-> $\quad$ $(M_t)_i \leftarrow \mathbf{1}\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}$
+> $\quad$&nbsp;*// Cautious mask*
+> $\quad$&nbsp;$(M_t)_i \leftarrow \mathbf{1}\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}$
 >
-> $\quad$ *// Corrected decay (per parameter group $g$)*
-> $\quad$ $\displaystyle\eta_g \leftarrow \frac{\gamma_g^2\, C_{u,g}^2\, S_g}{2\, p_g\, C_{\theta,g}^2}$
+> $\quad$&nbsp;*// Corrected decay (per parameter group $g$)*
+> $\quad$&nbsp;$\displaystyle\eta_g \leftarrow \frac{\gamma_g^2\, C_{u,g}^2\, S_g}{2\, p_g\, C_{\theta,g}^2}$
 >
-> $\quad$ *// Parameter update*
-> $\quad$ $\theta_{t+1} \leftarrow \theta_t - \eta_g\,(M_t \odot \theta_t) + \gamma_g\, u_t$
+> $\quad$&nbsp;*// Parameter update*
+> $\quad$&nbsp;$\theta_{t+1} \leftarrow \theta_t - \eta_g\,(M_t \odot \theta_t) + \gamma_g\, u_t$
 > **end for**
 
 ## Conclusion
