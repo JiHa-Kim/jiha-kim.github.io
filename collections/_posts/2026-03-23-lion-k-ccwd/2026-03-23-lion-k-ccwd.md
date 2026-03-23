@@ -17,45 +17,43 @@ scholar:
   bibliography: posts/2026-03-23-lion-k-ccwd/lion-k-ccwd.bib
 ---
 
-## Introduction
-
-We want a robust transformation that takes a tuned "base run" and produces a "target run" (with different width, depth, batch size, or duration) such that the training dynamics stay as similar as possible.
-
-To achieve this, we make two key assumptions:
-
-1. **Additive updates accumulate like a random walk.** If your optimizer direction is normalized (e.g., using sign, LMO, or another bounded map), the total update magnitude over $T$ steps behaves like $\gamma\sqrt{T}$. This justifies the $\sqrt{B/D}$ scaling of the per-step step size.
-2. **Multiplicative effects (memory, decay) are best parameterized by half-lives in tokens.** (see discrete calculus post for explanation of natural numeral base $2$ in discrete processes vs base $e$ in continuous processes). This yields exact bounded formulas for betas and decay rather than linear approximations. This "half-life in tokens" perspective is also essential for small-batch scaling {% cite marekSmallBatchSize2025 %}.
-
-This post provides a comprehensive recipe for **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)**, alongside a complete hyperparameter-transfer transform encompassing both initialization/parameterization and optimizer hyperparameters.
+> [!info] Overview
+> This post provides a complete recipe for **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)**, alongside hyperparameter-transfer rules for scaling across width, depth, batch size, and duration. We make two key assumptions:
+>
+> 1. **Additive updates accumulate like a random walk.** If your optimizer direction is normalized (e.g., sign, LMO, or another bounded map), the total update magnitude over $T$ steps behaves like $\gamma\sqrt{T}$. This justifies the $\sqrt{B/D}$ scaling of the per-step step size.
+> 2. **Multiplicative effects (memory, decay) are best parameterized by half-lives in tokens.** (See discrete calculus post for explanation of natural numeral base $2$ in discrete processes vs base $e$ in continuous processes.) This yields exact bounded formulas for betas and decay rather than linear approximations. This "half-life in tokens" perspective is also essential for small-batch scaling {% cite marekSmallBatchSize2025 %}.
 
 ---
 
 ## 1. Lion-$\mathcal{K}$
 
-A convenient formulation of Lion-$\mathcal{K}$ uses two Exponential Moving Averages (EMAs) and a direction map $\nabla \mathcal{K}$:
+> [!algorithm] Lion-$\mathcal{K}$ Update Rule
+> **Input:** Parameters $\theta_t$, gradient $g_t = \nabla f(\theta_t)$, momentum state $m_t$, direction map $\nabla \mathcal{K}$.
+>
+> **Step 1 — Momentum update:**
+> $$
+> m_{t+1} = \beta_2 m_t + (1-\beta_2) g_t
+> $$
+>
+> **Step 2 — Direction input** (a common Lion-$\mathcal{K}$ choice):
+> $$
+> z_t = \beta_1 m_{t+1} + (1-\beta_1) g_t
+> $$
+>
+> **Step 3 — Direction map:**
+> $$
+> u_t = -\nabla \mathcal{K}(z_t)
+> $$
+>
+> **Step 4 — Parameter update** (with decoupled decay):
+> $$
+> \theta_{t+1} = (1-\eta_t)\theta_t + \gamma_t u_t
+> $$
 
-* **Gradient:** $g_t = \nabla f(\theta_t)$
-* **Momentum state:**
-  $$
-  m_{t+1} = \beta_2 m_t + (1-\beta_2) g_t
-  $$
-* **Direction input** (a common Lion-$\mathcal{K}$ choice):
-  $$
-  z_t = \beta_1 m_{t+1} + (1-\beta_1) g_t
-  $$
-* **Direction map:**
-  $$
-  u_t = -\nabla \mathcal{K}(z_t)
-  $$
-* **Parameter update** (with decoupled decay):
-  $$
-  \theta_{t+1} = (1-\eta_t)\theta_t + \gamma_t u_t
-  $$
+This matches the Lion-$\kappa$ family, where $\nabla \mathcal{K}$ generalizes the sign operation and yields a constrained/composite optimization interpretation.
 
 > [!info] Special Cases of Lion-$\mathcal{K}$
 > - **Scion:** Scion sits naturally inside the Lion-$\mathcal{K}$ frame, where $\partial\mathcal{K}$ is chosen to be a Linear Minimization Oracle (LMO) over a norm ball.
-
-This matches the Lion-$\kappa$ family, where $\nabla \mathcal{K}$ generalizes the sign operation and yields a constrained/composite optimization interpretation.
 
 ---
 
@@ -63,112 +61,96 @@ This matches the Lion-$\kappa$ family, where $\nabla \mathcal{K}$ generalizes th
 
 Cautious Weight Decay (CWD) modifies standard decoupled decay to "decay only the coordinates whose signs align with the optimizer update direction" {% cite kaddour2025cautious %}.
 
-Let the CWD mask be:
-$$
-M_t \in \{0,1\}^{\mathrm{shape}(\theta)},\qquad (M_t)_i = \mathbf{1}_{\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}}
-$$
-
-And apply decay only on masked coordinates:
-$$
-\theta_{t+1} = \theta_t - \eta_t (M_t \odot \theta_t) + \gamma_t u_t
-$$
-
----
-
-## 3. Hyperparameter Transfer: What Changes Under Scaling
-
-Define the scaling ratios (base $\to$ target):
-$$
-m_N = \frac{N'}{N},\quad m_L = \frac{L'}{L},\quad m_B = \frac{B'}{B},\quad m_D = \frac{D'}{D}
-$$
-
-Using the Complete(d)P framework {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, we can define scaling rules for Transformer models.
-
-### 3.1 Initialization and Parameterization Transform
-
-The minimal "do not break scaling" rules encompass:
-
-* **Residual branch multiplier** (attention and MLP residuals):
-  $$
-  \text{residual_multiplier}' = \text{residual_multiplier}\cdot m_L^{-\alpha} \quad\text{with}\quad \alpha\in\left[\frac{1}{2},1\right]
-  $$
-* **Init variance: hidden weights**:
-  $$
-  \mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}
-  $$
-* **Init variance: unembedding/output weights**:
-  $$
-  \mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}
-  $$
-
-### 3.2 Training Steps and Per-Module Learning Rates
-
-Since steps scale as $T \propto D/B$, the target horizon is:
-$$
-T' = T \cdot \frac{m_D}{m_B}
-$$
-
-Let the batch/duration scale factor be $s_{BD} := \sqrt{m_B/m_D}$. The per-tensor learning rate multipliers become:
-
-* **Input embeddings:** $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot s_{BD}$
-* **Hidden weights:** $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_N^{-1} \cdot m_L^{\alpha-1} \cdot s_{BD}$
-* **Hidden bias/norm:** $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot s_{BD}$
-* **Unembedding/output weights:** $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_N^{-1} \cdot s_{BD}$
+> [!definition] CWD Mask and Update
+> Let the CWD mask be:
+> $$
+> M_t \in \{0,1\}^{\mathrm{shape}(\theta)},\qquad (M_t)_i = \mathbf{1}_{\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}}
+> $$
+>
+> Apply decay only on masked coordinates:
+> $$
+> \theta_{t+1} = \theta_t - \eta_t (M_t \odot \theta_t) + \gamma_t u_t
+> $$
 
 ---
 
-## 4. Correct Weight Decay: From AdamC/ScionC to Lion-$\mathcal{K}$
+## 3. Corrected Weight Decay
 
 In decoupled weight decay, the physically meaningful reduction is the per-step multiplicative factor $\eta$, not the decay coefficient $\lambda$ (often written $\eta = \gamma \lambda$).
 
-The steady-state norm equation from AdamC/ScionC {% cite chouCorrectionDecoupledWeight2026 %} demonstrates that stability requires $\eta \propto \gamma^2$. 
+The steady-state norm equation from AdamC/ScionC {% cite chouCorrectionDecoupledWeight2026 %} demonstrates that stability requires $\eta \propto \gamma^2$.
 
-### The Core Lemma
+> [!assumption] Steady-State Assumptions
+> 1. $u_t$ has stable RMS size: $\mathbb{E}|u_t|^2 \approx C_u^2$.
+> 2. Cross-term vanishes in expectation: $\mathbb{E}\langle \theta_t,u_t\rangle \approx 0$.
+> 3. $u_t$ may be correlated across time due to momentum.
 
-Assume:
-1. $u_t$ has stable RMS size: $\mathbb{E}\vert u_t \vert^2 \approx C_u^2$.
-2. Cross-term vanishes in expectation: $\mathbb{E}\langle \theta_t,u_t\rangle \approx 0$.
-3. $u_t$ may be correlated across time due to momentum.
+> [!notation] Momentum Correlation Factor
+> For the standard update $\theta_{t+1} = (1-\eta)\theta_t + \gamma u_t$, define a normalized direction autocorrelation $\rho_k$ and a correlation-sum factor $S$:
+> $$
+> \rho_k := \frac{\mathbb{E}\langle u_t,u_{t-k}\rangle}{\mathbb{E}|u_t|^2},\qquad \rho_0=1,\qquad S := 1 + 2\sum_{k\ge 1}\rho_k
+> $$
 
-For the standard update $\theta_{t+1} = (1-\eta)\theta_t + \gamma u_t$, we define a normalized direction autocorrelation $\rho_k$ and a correlation-sum factor $S$:
-$$
-\rho_k := \frac{\mathbb{E}\langle u_t,u_{t-k}\rangle}{\mathbb{E}\vert u_t \vert^2},\qquad \rho_0=1,\qquad S := 1 + 2\sum_{k\ge 1}\rho_k
-$$
+> [!lemma] Steady-State Parameter Norm
+> The steady-state parameter norm satisfies (to leading order in small $\eta$):
+> $$
+> \mathbb{E}|\theta|^2 \approx \frac{\gamma^2 C_u^2}{2\eta} S
+> $$
+>
+> To target a steady-state squared norm $C_\theta^2$, solve for $\eta$:
+> $$
+> \eta \approx \frac{\gamma^2 C_u^2 S}{2C_\theta^2} \qquad \Longrightarrow \qquad \lambda \approx \frac{\gamma C_u^2 S}{2C_\theta^2}
+> $$
 
-The steady-state parameter norm satisfies (to leading order in small $\eta$):
-$$
-\mathbb{E}\vert \theta\vert^2 \approx \frac{\gamma^2 C_u^2}{2\eta} S
-$$
+> [!proof]- Derivation of the Steady-State Norm
+> Consider the one-step energy expansion:
+>
+> $$
+> |\theta_{t+1}|^2 = |(1-\eta)\theta_t + \gamma u_t|^2
+> $$
+>
+> Expanding and taking expectations under the steady-state assumptions:
+>
+> $$
+> \mathbb{E}|\theta_{t+1}|^2 = (1-\eta)^2 \mathbb{E}|\theta_t|^2 + 2\gamma(1-\eta)\underbrace{\mathbb{E}\langle \theta_t, u_t\rangle}_{\approx 0} + \gamma^2 \mathbb{E}|u_t|^2
+> $$
+>
+> At steady state $\mathbb{E}|\theta_{t+1}|^2 = \mathbb{E}|\theta_t|^2 = C_\theta^2$:
+>
+> $$
+> C_\theta^2 = (1-\eta)^2 C_\theta^2 + \gamma^2 C_u^2 S
+> $$
+>
+> $$
+> C_\theta^2 [1 - (1-\eta)^2] = \gamma^2 C_u^2 S
+> $$
+>
+> For small $\eta$: $1 - (1-\eta)^2 = 2\eta - \eta^2 \approx 2\eta$, giving the result.
 
-To target a steady-state squared norm $C_\theta^2$, solve for $\eta$:
-$$
-\eta \approx \frac{\gamma^2 C_u^2 S}{2C_\theta^2} \qquad \Longrightarrow \qquad \lambda \approx \frac{\gamma C_u^2 S}{2C_\theta^2}
-$$
-
-> [!note] Geometric correlation mapping
+> [!note] Geometric Correlation Mapping
 > If $\rho_k = \beta^k$ (geometric decay via effective momentum $\beta$), then $S = \frac{1+\beta}{1-\beta}$, which perfectly aligns with the ScionC derivations mapped to $\beta$ notation.
 
 ---
 
-## 5. Corrected Cautious Weight Decay (CCWD)
+## 4. Corrected Cautious Weight Decay (CCWD)
 
 > [!proposition] CCWD Multiplier Formula
 > The correct weight decay multiplier $\eta$ for a masked decay fraction $q$ is:
 > $$
 > \eta = \frac{\gamma^2 C_u^2 S}{2 q C_\theta^2}
 > $$
-> 
+>
 > | Variable | Meaning |
 > | :--- | :--- |
 > | $\gamma$ | Learning rate |
-> | $C_u^2 \approx \mathbb{E}\vert u_t\vert^2$ | Steady-state update variance |
+> | $C_u^2 \approx \mathbb{E}|u_t|^2$ | Steady-state update variance |
 > | $S \approx \frac{1+\beta_2}{1-\beta_2}$ | Momentum correlation factor |
 > | $C_\theta^2$ | Target steady-state parameter norm |
 > | $q \approx p_g$ | Masked decay fraction |
 
 > [!important] Avoiding New Hyperparameters
 > You don't need to manually guess $C_\theta^2$ and $q$. You can profile a base run and measure:
-> - **$C_{\theta,g}^2$**: Expected parameter norm $\mathbb{E}\vert \theta_g\vert^2$
+> - **$C_{\theta,g}^2$**: Expected parameter norm $\mathbb{E}|\theta_g|^2$
 > - **$p_g$**: Average mask rate $\mathbb{E}[\text{mean}(M_{t,g})]$ for group $g$ 
 > - **$S_g$**: Derived empirically from $\rho_k$ or approximated via $\frac{1+\beta_2}{1-\beta_2}$
 
@@ -178,20 +160,20 @@ $$
 > **Step 1: Exact One-Step Energy Change**
 > Let $d_t := M_t \odot \theta_t$. The update is $\theta_{t+1} = \theta_t - \eta d_t + \gamma u_t$. Expanding the squared norm:
 > $$
-> \vert \theta_{t+1}\vert^2 = \vert \theta_t\vert^2 - (2\eta - \eta^2)\vert d_t\vert^2 + 2\gamma\langle \theta_t - \eta d_t, u_t\rangle + \gamma^2\vert u_t\vert^2
+> |\theta_{t+1}|^2 = |\theta_t|^2 - (2\eta - \eta^2)|d_t|^2 + 2\gamma\langle \theta_t - \eta d_t, u_t\rangle + \gamma^2|u_t|^2
 > $$
 > 
 > **Step 2: Masking Fraction $q_t$**
 > Define the fraction of the squared norm being shrunk:
 > $$
-> q_t := \frac{\vert d_t\vert^2}{\vert \theta_t\vert^2} = \frac{\vert M_t \odot \theta_t\vert^2}{\vert \theta_t\vert^2}
+> q_t := \frac{|d_t|^2}{|\theta_t|^2} = \frac{|M_t \odot \theta_t|^2}{|\theta_t|^2}
 > $$
-> Thus, $(2\eta-\eta^2)\vert d_t\vert^2 = (2\eta-\eta^2) q_t \vert \theta_t\vert^2 \approx 2\eta q_t \vert \theta_t\vert^2$.
+> Thus, $(2\eta-\eta^2)|d_t|^2 = (2\eta-\eta^2) q_t |\theta_t|^2 \approx 2\eta q_t |\theta_t|^2$.
 > 
 > **Step 3: Steady-State Assumption**
 > Assuming independence ($\mathbb{E}\langle \theta_t, u_t \rangle \approx 0$) and incorporating the momentum correlation factor $S$, the expected steady-state norm satisfies:
 > $$
-> \mathbb{E}\vert \theta \vert^2 \approx \frac{\gamma^2 C_u^2}{2\eta q} S \quad \Longrightarrow \quad \eta = \frac{\gamma^2 C_u^2 S}{2 q C_\theta^2}
+> \mathbb{E}|\theta|^2 \approx \frac{\gamma^2 C_u^2}{2\eta q} S \quad \Longrightarrow \quad \eta = \frac{\gamma^2 C_u^2 S}{2 q C_\theta^2}
 > $$
 
 > [!note]- Optional $\kappa$ Feedback Controller
@@ -199,7 +181,7 @@ $$
 > 
 > **Calculate the observed ratio:**
 > $$
-> R_t := \frac{\vert \theta_t\vert^2}{C_\theta^2}
+> R_t := \frac{|\theta_t|^2}{C_\theta^2}
 > $$
 > 
 > **Update the scale correction $\kappa$ multiplicatively ($c$ is a small gain, e.g., $0.05$):**
@@ -216,18 +198,95 @@ $$
 
 ---
 
+## 5. Hyperparameter Transfer: What Changes Under Scaling
+
+> [!notation] Scaling Ratios
+> Define the scaling ratios (base $\to$ target):
+>
+> | Ratio | Definition | Meaning |
+> | :---: | :---: | :--- |
+> | $m_N$ | $N'/N$ | Width multiplier |
+> | $m_L$ | $L'/L$ | Depth multiplier |
+> | $m_B$ | $B'/B$ | Batch size multiplier |
+> | $m_D$ | $D'/D$ | Data/duration multiplier |
+
+Using the Complete(d)P framework {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, we can define scaling rules for Transformer models.
+
+### 5.1 Initialization and Parameterization Transform
+
+> [!fact] Initialization Scaling Rules
+>
+> | Component | Scaling Rule |
+> | :--- | :--- |
+> | Residual branch multiplier | $\text{residual_multiplier}' = \text{residual_multiplier}\cdot m_L^{-\alpha}$, with $\alpha\in\left[\frac{1}{2},1\right]$ |
+> | Init variance: hidden weights | $\mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}$ |
+> | Init variance: output weights | $\mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}$ |
+
+### 5.2 Training Steps and Per-Module Learning Rates
+
+Since steps scale as $T \propto D/B$, the target horizon is:
+$$
+T' = T \cdot \frac{m_D}{m_B}
+$$
+
+Let the batch/duration scale factor be $s_{BD} := \sqrt{m_B/m_D}$.
+
+> [!fact] Per-Module Learning Rate Multipliers
+>
+> | Module | Scaling Rule |
+> | :--- | :--- |
+> | Input embeddings | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot s_{BD}$ |
+> | Hidden weights | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_N^{-1} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
+> | Hidden bias/norm | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
+> | Output weights | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_N^{-1} \cdot s_{BD}$ |
+
+### 5.3 Momentum Transfer via Token Half-Lives
+
+Momentum coefficients $\beta_1, \beta_2$ control how quickly the EMA forgets. When the batch size or duration changes, the number of gradient steps per "token of experience" changes, so the per-step $\beta$ must be adjusted to preserve the same forgetting rate in token space.
+
+> [!proposition] Beta Transfer Rule
+> Define the half-life $H$ of an EMA with coefficient $\beta$ and batch size $B$ as the number of **tokens** after which the weight on an old gradient drops to $\frac{1}{2}$:
+> $$
+> H = -\frac{B}{\log_2 \beta}
+> $$
+>
+> Holding $H$ fixed while changing batch size from $B$ to $B'$ (and correspondingly steps from $T$ to $T'$) gives:
+> $$
+> \beta' = \beta^{m_B / m_D} \qquad \text{equivalently} \qquad \beta' = 2^{-\Delta\tau'/H}
+> $$
+>
+> where $\Delta\tau' = B'/T'$ is the token step size of the target run.
+
+> [!remark]- Why Not Just Keep $\beta$ Fixed?
+> If you double the batch size without adjusting $\beta$, the EMA now forgets twice as fast in token space — the momentum window shrinks by half. For small-batch scaling this is especially destructive: the momentum half-life in tokens should stay constant to preserve the signal-to-noise tradeoff {% cite marekSmallBatchSize2025 %}.
+
+---
+
 ## 6. The Full Transformation Recipe
 
-This acts as a complete compiler for transferring your base run properties to a target run configuration.
-
-| Step  | Component                  | Action                                                                                                                                  |
-| :---: | :------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **Store Base Parameters**  | Extract $\gamma_g$, $\beta_{1,2}$, target norm $C_{\theta,g}^2$, $p_g$, and $S_g$ from the base run.                                    |
-| **2** | **Apply Parameterization** | Apply initialization variances and residual multiplier targets using Complete(d)P.                                                      |
-| **3** | **Target Iterations & LR** | Compute $T'$ and module-wise $\gamma_g'$ (including $s_{BD}$).                                                                          |
-| **4** | **Transfer Betas**         | Use token half-lives: $\beta' = 2^{-\Delta\tau'/H}$ or explicitly $\beta' = \beta^{m_B/m_D}$                                            |
-| **5** | **Compute CCWD**           | Calculate dynamic decay factor: $\eta_g = \frac{(\gamma'_g)^2 C_{u,g}^2 S_g}{2 C_{\theta,g}^2 \cdot p_g}$                               |
-| **6** | **Execute**                | Run the Lion-$\mathcal{K}$ operator mapped by $-\nabla \mathcal{K}$, tracking $M_t$ and applying masked decay proportional to $\eta_g$. |
+> [!algorithm] Complete Transfer Pipeline
+> **Input:** Base run parameters $\gamma_g$, $\beta_{1,2}$, target norm $C_{\theta,g}^2$, mask rate $p_g$, correlation $S_g$.
+>
+> **Step 1 — Store base parameters.**
+> Extract $\gamma_g$, $\beta_{1,2}$, target norm $C_{\theta,g}^2$, $p_g$, and $S_g$ from the base run.
+>
+> **Step 2 — Apply parameterization.**
+> Apply initialization variances and residual multiplier targets using Complete(d)P (Section 5.1).
+>
+> **Step 3 — Compute target iterations & LR.**
+> Compute $T'$ and module-wise $\gamma_g'$ including $s_{BD}$ (Section 5.2).
+>
+> **Step 4 — Transfer betas.**
+> Use token half-lives: $\beta' = 2^{-\Delta\tau'/H}$ or explicitly $\beta' = \beta^{m_B/m_D}$.
+>
+> **Step 5 — Compute CCWD.**
+> Calculate dynamic decay factor per group:
+> $$
+> \eta_g = \frac{(\gamma'_g)^2 C_{u,g}^2 S_g}{2 C_{\theta,g}^2 \cdot p_g}
+> $$
+>
+> **Step 6 — Execute.**
+> Run the Lion-$\mathcal{K}$ operator mapped by $-\nabla \mathcal{K}$, tracking $M_t$ and applying masked decay proportional to $\eta_g$.
 
 > [!warning] Caveats for Output Layers
 > The steady-state independence orthogonality assumption frequently breaks down for the cross-entropy output layer. You may need to exclude the output unembedding layer from corrected decay or manage it separately {% cite chouCorrectionDecoupledWeight2026 %}.
