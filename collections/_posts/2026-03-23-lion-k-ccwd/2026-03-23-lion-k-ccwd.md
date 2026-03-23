@@ -239,41 +239,7 @@ In decoupled weight decay, the physically meaningful quantity is the per-step mu
 
 Using the Complete(d)P framework {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, we define scaling rules for Transformer models.
 
-### 5.1 Initialization and Parameterization
-
-> [!fact] Initialization Scaling Rules
->
-> | Component | Scaling Rule |
-> | :--- | :--- |
-> | Residual branch multiplier | $\text{residual_multiplier}' = \text{residual_multiplier}\cdot m_L^{-\alpha}$, with $\alpha\in\left[\frac{1}{2},1\right]$ |
-> | Init variance: hidden weights | $\mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}$ |
-> | Init variance: output weights | $\mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}$ |
-
-> [!remark] Choosing $\alpha$: Random Walk vs. Coherent Residuals
-> - **$\alpha = \frac{1}{2}$ (random walk):** Layer outputs are approximately independent and isotropic. Their sum grows as $\sqrt{L}$, so each branch scales by $1/\sqrt{L}$.
-> - **$\alpha = 1$ (coherent):** Residual branches are aligned, accumulating linearly as $L$, requiring $1/L$ scaling.
->
-> In practice, $\alpha = 1$ is conservative; $\alpha = \frac{1}{2}$ often works better empirically for moderate depth ranges.
-
-### 5.2 Learning Rates and Training Steps
-
-Since steps scale as $T \propto D/B$, the target horizon is:
-$$
-T' = T \cdot \frac{m_D}{m_B}
-$$
-
-Let the batch/duration scale factor be $s_{BD} := \sqrt{m_B/m_D}$.
-
-> [!fact] Per-Module Learning Rate Multipliers
->
-> | Module | Scaling Rule |
-> | :--- | :--- |
-> | Input embeddings | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot s_{BD}$ |
-> | Hidden weights | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_N^{-1} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
-> | Hidden bias/norm | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
-> | Output weights | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_N^{-1} \cdot s_{BD}$ |
-
-### 5.3 Momentum Transfer via Token Half-Lives
+### 5.1 Momentum Transfer (Token Half-Lives)
 
 When the batch size or duration changes, the per-step $\beta$ must be adjusted to preserve the same forgetting rate in token space.
 
@@ -290,6 +256,67 @@ When the batch size or duration changes, the per-step $\beta$ must be adjusted t
 
 > [!remark]- Why Not Just Keep $\beta$ Fixed?
 > If you double the batch size without adjusting $\beta$, the EMA forgets twice as fast in token space — the momentum window shrinks by half. For small-batch scaling this is especially destructive {% cite marekSmallBatchSize2025 %}.
+
+### 5.2 Width and Depth Transfer: Optimizer-Dependent Rules
+
+The transfer rules for model scale ($m_N$ and $m_L$) depend heavily on the optimizer's underlying geometry and Linear Minimization Oracle (LMO). 
+
+#### 5.2.1 Standard Euclidean Optimizers (Adam, SGD, Lion)
+
+For optimizers where the update direction's magnitude is width-dependent, $\mu$P requires a compensating $m_N^{-1}$ factor in the learning rate to ensure stable feature learning.
+
+> [!fact] Standard Scaling Rules
+>
+> | Component | Scaling Rule |
+> | :--- | :--- |
+> | Residual branch multiplier | $\text{residual_multiplier}' = \text{residual_multiplier}\cdot m_L^{-\alpha}$, with $\alpha\in\left[\frac{1}{2},1\right]$ |
+> | Init variance: hidden | $\mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}$ |
+> | Init variance: output | $\mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}$ |
+> | LR: Input embeddings | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot s_{BD}$ |
+> | LR: Hidden weights | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_N^{-1} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
+> | LR: Hidden bias/norm | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
+> | LR: Output weights | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_N^{-1} \cdot s_{BD}$ |
+
+> [!remark] Choosing $\alpha$: Random Walk vs. Coherent Residuals
+> - **$\alpha = \frac{1}{2}$ (random walk):** Layer outputs are approximately independent and isotropic. Their sum grows as $\sqrt{L}$, so each branch scales by $1/\sqrt{L}$.
+> - **$\alpha = 1$ (coherent):** Residual branches are aligned, accumulating linearly as $L$, requiring $1/L$ scaling.
+>
+> In practice, $\alpha = 1$ is conservative; $\alpha = \frac{1}{2}$ often works better empirically for moderate depth ranges.
+
+#### 5.2.2 Spectral-Norm Optimizers (Scion, Muon)
+
+> [!important] Width-Invariant LMOs
+> In the Scion framework {% cite pethickTrainingDeepLearning2025a %}, geometry-aware LMOs (Linear Minimization Oracles) are defined for **all** layers, not just hidden weights. Because each layer's LMO explicitly absorbs the dimension-dependent scaling factor, the optimizer intrinsically normalizes out the width dependence. 
+> 
+> As a result, the width multiplier $m_N$ disappears entirely from the learning rate and initialization transfer rules.
+
+> [!fact] Scion Scaling Rules
+>
+> | Module | Recommended LMO | Initialization | LR $\gamma'$ Scaling |
+> | :--- | :--- | :--- | :--- |
+> | Input embeddings | ColNorm | Column-normalized Gaussian | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot s_{BD}$ |
+> | Hidden weights | Spectral | Semi-orthogonal | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
+> | Hidden bias/norm | RMS | Zeros | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
+> | Output weights | Sign | Random sign | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot s_{BD}$ |
+
+> [!fact] Recommended Operator Norms and LMOs for Deep Learning
+> The choice of LMO depends on the input assumptions and the layer position. Below is the configuration proposed by the Scion authors {% cite pethickTrainingDeepLearning2025a %}, using the reduced SVD $W_\ell = U \Sigma V^\top \in \mathbb{R}^{d_{\rm out} \times d_{\rm in}}$:
+>
+> **Table 3: LMO Choices across layers**
+>
+> | Parameter | $W_1$ (image domain) | $\{W_\ell\}_{\ell \in [2,\dots,L-1]}$ | $W_L$ | $b_\ell$ |
+> | :--- | :--- | :--- | :--- | :--- |
+> | **Norm** | $\text{RMS} \to \text{RMS}$ | $\text{RMS} \to \text{RMS}$ | $\text{RMS} \to \infty$ *(or $1 \to \infty$)* | $\text{RMS}$ |
+> | **LMO** | $-\max(1, \sqrt{\frac{d_{\rm out}}{d_{\rm in}}})UV^\top$ | $-\sqrt{\frac{d_{\rm out}}{d_{\rm in}}} U V^\top$ | $\text{row}_i(W_L) \mapsto -\frac{\text{row}_i(W_L)}{\sqrt{d_{\rm in}} \|\text{row}_i(W_L)\|_2}$ *(or $-\frac{1}{d_{\rm in}} \text{sign}(W_L)$)* | $-\frac{b_\ell}{\|b_\ell\|_{\rm RMS}}$ |
+> | **Init.** | Semi-orthogonal | Semi-orthogonal | Row-wise normalized Gaussian *(or Random sign)* | $0$ |
+>
+> **Table 4: Example LMO Choices for 1-hot Encoded Inputs**
+>
+> | Parameter | $W_1$ (1-hot encoded input) |
+> | :--- | :--- |
+> | **Norm** | $1 \to \text{RMS}$ *(or $1 \to \infty$)* |
+> | **LMO** | $\text{col}_j(W_1) \mapsto -\sqrt{d_{\rm out}} \frac{\text{col}_j(W_1)}{\|\text{col}_j(W_1)\|_2}$ *(or $-\text{sign}(W_1)$)* |
+> | **Init.** | Column-wise normalized Gaussian *(or Random sign)* |
 
 ---
 
