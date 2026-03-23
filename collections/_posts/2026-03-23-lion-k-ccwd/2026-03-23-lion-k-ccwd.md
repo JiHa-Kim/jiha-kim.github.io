@@ -20,7 +20,7 @@ scholar:
 > [!info] Overview
 > This post provides a complete recipe for **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)**, alongside hyperparameter-transfer rules for scaling across width, depth, batch size, and duration. We make two key assumptions:
 >
-> 1. **Additive updates accumulate like a random walk.** If your optimizer direction is normalized (e.g., sign, LMO, or another bounded map), the total update magnitude over $T$ steps behaves like $\gamma\sqrt{T}$. This justifies the $\sqrt{B/D}$ scaling of the per-step step size.
+> 1. **Normalized updates accumulate like a random walk.** If your optimizer direction is bounded (e.g., sign, LMO) and successive directions are approximately independent and isotropic, the total parameter displacement after $T$ steps scales as $\gamma\sqrt{T}$ rather than $\gamma T$. Since $T = D/B$, matching the total displacement across runs with different batch size $B$ or duration $D$ requires scaling the per-step learning rate as $\gamma \propto \sqrt{B/D}$.
 > 2. **Multiplicative effects (memory, decay) are best parameterized by half-lives in tokens.** (See discrete calculus post for explanation of natural numeral base $2$ in discrete processes vs base $e$ in continuous processes.) This yields exact bounded formulas for betas and decay rather than linear approximations. This "half-life in tokens" perspective is also essential for small-batch scaling {% cite marekSmallBatchSize2025 %}.
 
 ---
@@ -53,7 +53,7 @@ scholar:
 This matches the Lion-$\kappa$ family, where $\nabla \mathcal{K}$ generalizes the sign operation and yields a constrained/composite optimization interpretation.
 
 > [!info] Special Cases of Lion-$\mathcal{K}$
-> - **Scion:** Scion sits naturally inside the Lion-$\mathcal{K}$ frame, where $\partial\mathcal{K}$ is chosen to be a Linear Minimization Oracle (LMO) over a norm ball.
+> - **Scion:** Scion sits naturally inside the Lion-$\mathcal{K}$ frame, where $\partial\mathcal{K}$ is chosen to be a Linear Minimization Oracle (LMO) over a norm ball. This includes Muon, Lion and Normalized-SGD.
 
 ---
 
@@ -222,6 +222,14 @@ Using the Complete(d)P framework {% cite mlodozeniecCompletedHyperparameterTrans
 > | Init variance: hidden weights | $\mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}$ |
 > | Init variance: output weights | $\mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}$ |
 
+> [!remark] Choosing $\alpha$: Random Walk vs. Coherent Residuals
+> The exponent $\alpha$ controls how the residual branch contribution scales with depth $L$. The choice reflects your assumption about how layer outputs combine across the $L$ residual branches:
+>
+> - **$\alpha = \frac{1}{2}$ (random walk):** If successive residual contributions are approximately **independent and isotropic**, their sum grows as $\sqrt{L}$. To keep the total residual magnitude stable when scaling depth, each branch must be scaled down by $1/\sqrt{L}$, i.e. $\alpha = \frac{1}{2}$. This is the same logic as the $\sqrt{T}$ accumulation for optimizer steps.
+> - **$\alpha = 1$ (coherent):** If residual branches are **aligned or correlated** (e.g., all layers push the representation in a similar direction), contributions accumulate linearly as $L$, requiring each branch to be scaled by $1/L$.
+>
+> In practice, early in training residuals tend to be closer to independent ($\alpha \approx \frac{1}{2}$), while later in training they may become more coherent. The safe default is $\alpha = 1$ (conservative), but $\alpha = \frac{1}{2}$ often works better empirically for wide, shallow-to-moderate depth ranges.
+
 ### 5.2 Training Steps and Per-Module Learning Rates
 
 Since steps scale as $T \propto D/B$, the target horizon is:
@@ -290,6 +298,41 @@ Momentum coefficients $\beta_1, \beta_2$ control how quickly the EMA forgets. Wh
 
 > [!warning] Caveats for Output Layers
 > The steady-state independence orthogonality assumption frequently breaks down for the cross-entropy output layer. You may need to exclude the output unembedding layer from corrected decay or manage it separately {% cite chouCorrectionDecoupledWeight2026 %}.
+
+## 7. Summary: The Lion-$\mathcal{K}$ CCWD Algorithm
+
+> [!algorithm] Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay
+> **Require:** Initial parameters $\theta_0$, initial momentum $m_0 = 0$, direction map $\nabla \mathcal{K}$
+> **Require:** Learning rate $\gamma$, momentum coefficients $\beta_1, \beta_2$
+> **Require:** Per-group target norms $C_{\theta,g}^2$, mask rates $p_g$, correlation factors $S_g$
+>
+> **for** $t = 0, 1, 2, \dots$ **do**
+>
+> $\quad$ $g_t \leftarrow \nabla f(\theta_t)$
+>
+> $\quad$ *// Momentum update*
+>
+> $\quad$ $m_{t+1} \leftarrow \beta_2\, m_t + (1-\beta_2)\, g_t$
+>
+> $\quad$ *// Direction*
+>
+> $\quad$ $z_t \leftarrow \beta_1\, m_{t+1} + (1-\beta_1)\, g_t$
+> 
+> $\quad$ $u_t \leftarrow -\nabla \mathcal{K}(z_t)$
+>
+> $\quad$ *// Cautious mask*
+> 
+> $\quad$ $(M_t)_i \leftarrow \mathbf{1}\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}$
+>
+> $\quad$ *// Corrected decay (per parameter group $g$)*
+> 
+> $\quad$ $\displaystyle\eta_g \leftarrow \frac{\gamma_g^2\, C_{u,g}^2\, S_g}{2\, p_g\, C_{\theta,g}^2}$
+>
+> $\quad$ *// Parameter update*
+> 
+> $\quad$ $\theta_{t+1} \leftarrow \theta_t - \eta_g\,(M_t \odot \theta_t) + \gamma_g\, u_t$
+>
+> **end for**
 
 ## Conclusion
 
