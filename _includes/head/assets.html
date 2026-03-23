@@ -50,7 +50,6 @@
   has_h2_h3=include.has_h2_h3
 %}
 
-{% if jekyll.environment == 'production' %}
   <!-- PWA -->
   {% if site.pwa.enabled %}
     <script
@@ -58,6 +57,8 @@
       src="{{ '/app.min.js' | relative_url }}?baseurl={{ site.baseurl | default: '' }}&register={{ site.pwa.cache.enabled }}"
     ></script>
   {% endif %}
+
+{% if jekyll.environment == 'production' %}
 
   <!-- Web Analytics -->
   {% for analytics in site.analytics %}
