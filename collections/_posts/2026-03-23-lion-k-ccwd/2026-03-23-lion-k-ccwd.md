@@ -121,8 +121,56 @@ The steady-state norm equation from AdamC {% cite defazioWhyGradientsRapidly2025
 >
 > For small $\eta$: $1 - (1-\eta)^2 = 2\eta - \eta^2 \approx 2\eta$, giving the result.
 
-> [!note] Geometric Correlation Mapping
-> If $\rho_k = \beta^k$ (geometric decay via effective momentum $\beta$), then $S = \frac{1+\beta}{1-\beta}$, which perfectly aligns with the ScionC derivations mapped to $\beta$ notation.
+> [!proposition] Correlation Factor for Lion-$\mathcal{K}$ with Nesterov Momentum
+> In Lion-$\mathcal{K}$, the direction input is $z_t = \beta_1 m_{t+1} + (1-\beta_1) g_t = \beta_1\beta_2\, m_t + (1-\beta_1\beta_2)\, g_t$. Expressing $z_t$ as a weighted sum of past gradients, the filter weights are:
+>
+> | Lag $\ell$ | Weight $w_\ell$ |
+> |:---:|:---|
+> | $0$ | $1-\beta_1\beta_2$ |
+> | $\ell \geq 1$ | $\beta_1\beta_2(1-\beta_2)\beta_2^{\ell-1}$ |
+>
+> Under the assumption of independent gradients ($\mathbb{E}\langle g_s, g_{s'}\rangle = C'^2\,\delta_{ss'}$), the autocorrelation $A_k = C'^2\sum_{\ell} w_\ell w_{\ell+k}$ yields the correlation-sum factor:
+> $$
+> S(\beta_1,\beta_2) = \frac{1+\beta_2}{(1+\beta_2)(1-2\beta_1\beta_2) + 2\beta_1^2\beta_2^2}
+> $$
+
+> [!proof]- Derivation of $S(\beta_1,\beta_2)$
+> **Lag-0 autocorrelation.** $A_0 = w_0^2 + \sum_{\ell\geq 1}w_\ell^2$:
+>
+> $$
+> A_0 = (1-\beta_1\beta_2)^2 + \frac{(\beta_1\beta_2)^2(1-\beta_2)}{1+\beta_2} = \frac{(1+\beta_2)(1-2\beta_1\beta_2) + 2\beta_1^2\beta_2^2}{1+\beta_2}
+> $$
+>
+> **Lag-$k$ autocorrelation** ($k \geq 1$):
+>
+> $$
+> A_k = \frac{\beta_1\beta_2(1-\beta_2)(1+\beta_2-\beta_1\beta_2)}{1+\beta_2}\cdot\beta_2^{k-1}
+> $$
+>
+> **Summing.** $\sum_{k\geq 1} A_k = \frac{\beta_1\beta_2(1+\beta_2-\beta_1\beta_2)}{1+\beta_2}$. Since $S = (A_0 + 2\sum_{k\geq 1}A_k)/A_0$, expanding the numerator:
+>
+> $$
+> A_0 + 2\sum_{k\geq 1}A_k = \frac{(1+\beta_2) - 2\beta_1\beta_2(1+\beta_2) + 2\beta_1^2\beta_2^2 + 2\beta_1\beta_2(1+\beta_2) - 2\beta_1^2\beta_2^2}{1+\beta_2} = 1
+> $$
+>
+> giving $S = 1/A_0$, which yields the stated result.
+
+> [!proposition] Analytical Momentum Correlation $S$
+> Standard Adam/Scion assumes $u_t$ closely tracks the momentum EMA $m_t$, yielding $S \approx \frac{1+\beta_2}{1-\beta_2}$. However, Lion's update direction $z_t$ is a mixture of momentum and the current gradient, which drastically alters the expected correlation sum!
+>
+> Let $z_t$ be a convex combination of the *old* momentum $m_t$ (which decays by $\beta_2$) and the current gradient $g_t$:
+> $$
+> z_t = \beta_{\text{eff}} m_t + (1-\beta_{\text{eff}}) g_t
+> $$
+>
+> - For **Standard Lion** ($z_t = \beta_1 m_t + (1-\beta_1) g_t$), we have $\beta_{\text{eff}} = \beta_1$.
+> - For **Nesterov Lion-K** ($z_t = \beta_1 m_{t+1} + (1-\beta_1) g_t$), substituting $m_{t+1}$ yields $\beta_{\text{eff}} = \beta_1 \beta_2$.
+>
+> The exact analytical correlation sum $S_z = \mathbb{E}[|z|^2]^{-1} \sum_{k=-\infty}^\infty \mathbb{E}\langle z_t, z_{t-k} \rangle$ for this mixture evaluates to:
+> $$
+> S_z = \frac{1+\beta_2}{ (1-\beta_{\text{eff}})^2(1+\beta_2) + \beta_{\text{eff}}^2(1-\beta_2) }
+> $$
+> Because the sign/$\mathcal{K}$ map preserves most correlation structure (e.g., via the arcsine law), we can confidently use $S \approx S_z$. Failing to account for this mixture—and the Nesterov shift to $\beta_1 \beta_2$—leads to severely incorrect decay multipliers.
 
 ---
 
@@ -138,7 +186,7 @@ The steady-state norm equation from AdamC {% cite defazioWhyGradientsRapidly2025
 > | :--- | :--- |
 > | $\gamma$ | Learning rate |
 > | $C_u^2 \approx \mathbb{E}|u_t|^2$ | Steady-state update variance |
-> | $S \approx \frac{1+\beta_2}{1-\beta_2}$ | Momentum correlation factor |
+> | $S = S(\beta_1,\beta_2)$ | Momentum correlation factor (Section 3) |
 > | $C_\theta^2$ | Target steady-state parameter norm |
 > | $q \approx p_g$ | Masked decay fraction |
 
@@ -146,7 +194,7 @@ The steady-state norm equation from AdamC {% cite defazioWhyGradientsRapidly2025
 > You don't need to manually guess $C_\theta^2$ and $q$. You can profile a base run and measure:
 > - **$C_{\theta,g}^2$**: Expected parameter norm $\mathbb{E}|\theta_g|^2$
 > - **$p_g$**: Average mask rate $\mathbb{E}[\text{mean}(M_{t,g})]$ for group $g$ 
-> - **$S_g$**: Derived empirically from $\rho_k$ or approximated via $\frac{1+\beta_2}{1-\beta_2}$
+> - **$S_g$**: Derived empirically from $\rho_k$ or via $S(\beta_1,\beta_2) = \frac{1+\beta_2}{(1+\beta_2)(1-2\beta_1\beta_2) + 2\beta_1^2\beta_2^2}$
 
 > [!proof]- Derivation of CCWD
 > CWD operates via masked decay. Because fewer coordinates are shrunk per step, a naive identical $\eta$ no longer preserves the target steady-state norm.
