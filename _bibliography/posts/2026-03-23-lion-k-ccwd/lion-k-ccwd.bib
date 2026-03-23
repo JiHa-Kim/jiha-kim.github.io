@@ -28,6 +28,24 @@
   keywords = {Computer Science - Machine Learning,Mathematics - Optimization and Control,Statistics - Machine Learning}
 }
 
+@misc{chenLionSecretlySolves2025,
+  title = {Lion {{Secretly Solves Constrained Optimization}}: {{As Lyapunov Predicts}}},
+  shorttitle = {Lion {{Secretly Solves Constrained Optimization}}},
+  author = {Chen, Lizhang and Liu, Bo and Liang, Kaizhao and Liu, Qiang},
+  year = 2025,
+  month = jul,
+  number = {arXiv:2310.05898},
+  eprint = {2310.05898},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2310.05898},
+  url = {http://arxiv.org/abs/2310.05898},
+  urldate = {2026-03-23},
+  abstract = {Lion (Evolved Sign Momentum), a new optimizer discovered through program search, has shown promising results in training large AI models. It performs comparably or favorably to AdamW but with greater memory efficiency. As we can expect from the results of a random search program, Lion incorporates elements from several existing algorithms, including signed momentum, decoupled weight decay, Polak, and Nesterov momentum, but does not fit into any existing category of theoretically grounded optimizers. Thus, even though Lion appears to perform well as a general-purpose optimizer for a wide range of tasks, its theoretical basis remains uncertain. This lack of theoretical clarity limits opportunities to further enhance and expand Lion's efficacy. This work aims to demystify Lion. Based on both continuous-time and discrete-time analysis, we demonstrate that Lion is a theoretically novel and principled approach for minimizing a general loss function \$f(x)\$ while enforcing a bound constraint \$\textbackslash\textbar x\textbackslash\textbar\_\textbackslash infty \textbackslash leq 1/{$\lambda\$$}. Lion achieves this through the incorporation of decoupled weight decay, where \${$\lambda\$$} represents the weight decay coefficient. Our analysis is made possible by the development of a new Lyapunov function for the Lion updates. It applies to a broader family of Lion-\${$\kappa\$$} algorithms, where the \$\textbackslash text\textbraceleft sign\textbraceright (\textbackslash cdot)\$ operator in Lion is replaced by the subgradient of a convex function \${$\kappa\$$}, leading to the solution of a general composite optimization problem of \$\textbackslash min\_x f(x) + {$\kappa$}\textasciicircum *(x)\$. Our findings provide valuable insights into the dynamics of Lion and pave the way for further improvements and extensions of Lion-related algorithms.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Mathematics - Optimization and Control,Statistics - Applications,Statistics - Machine Learning}
+}
+
 @misc{chouCorrectionDecoupledWeight2026,
   title = {Correction of {{Decoupled Weight Decay}}},
   author = {Chou, Jason Chuan-Chih},
@@ -122,6 +140,12 @@
   keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Statistics - Machine Learning}
 }
 
+@misc{MuonNuclearLion,
+  title = {Muon Is a {{Nuclear Lion King}}},
+  url = {https://www.cs.utexas.edu/~lqiang/lionk/html/intro.html},
+  urldate = {2026-03-23}
+}
+
 @misc{MuPZhiShang2XianXingCengYuZuiSuXiaJiangKeXueKongJian|Scientific,
   title = {{{MuP之上}}：2. 线性层与最速下降 - 科学空间\textbar{{Scientific Spaces}}},
   url = {https://kexue.fm/archives/11605},
@@ -185,14 +209,4 @@
   abstract = {By classifying infinite-width neural networks and identifying the *optimal* limit, Tensor Programs IV and V demonstrated a universal way, called \${$\mu\$$}P, for *widthwise hyperparameter transfer*, i.e., predicting optimal hyperparameters of wide neural networks from narrow ones. Here we investigate the analogous classification for *depthwise parametrizations* of deep residual networks (resnets). We classify depthwise parametrizations of block multiplier and learning rate by their infinite-width-then-depth limits. In resnets where each block has only one layer, we identify a unique optimal parametrization, called Depth-\${$\mu\$$}P that extends \${$\mu\$$}P and show empirically it admits depthwise hyperparameter transfer. We identify *feature diversity* as a crucial factor in deep networks, and Depth-\${$\mu\$$}P can be characterized as maximizing both feature learning and feature diversity. Exploiting this, we find that absolute value, among all homogeneous nonlinearities, maximizes feature diversity and indeed empirically leads to significantly better performance. However, if each block is deeper (such as modern transformers), then we find fundamental limitations in all possible infinite-depth limits of such parametrizations, which we illustrate both theoretically and empirically on simple networks as well as Megatron transformer trained on Common Crawl.},
   archiveprefix = {arXiv},
   keywords = {Computer Science - Neural and Evolutionary Computing,Condensed Matter - Disordered Systems and Neural Networks,Mathematics - Probability}
-}
-
-@misc{kaddour2025cautious,
-      title={Cautious Weight Decay},
-      author={Jean Kaddour and Luca Schmid and Johannes Haensch and Maksim E. Kinakh and Rylan Schaeffer and Sanmi Koyejo},
-      year={2025},
-      eprint={2510.12402},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2510.12402}
 }

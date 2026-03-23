@@ -27,7 +27,7 @@ scholar:
 
 ## 1. Lion-$\mathcal{K}$
 
-> [!algorithm] Lion-$\mathcal{K}$ Update Rule
+> [!algorithm] Lion-$\mathcal{K}$ Update Rule {% cite chenLionSecretlySolves2025 %}
 > **Input:** Parameters $\theta_t$, gradient $g_t = \nabla f(\theta_t)$, momentum state $m_t$, direction map $\nabla \mathcal{K}$.
 >
 > **Step 1 — Momentum update:**
@@ -78,7 +78,7 @@ Cautious Weight Decay (CWD) modifies standard decoupled decay to "decay only the
 
 In decoupled weight decay, the physically meaningful reduction is the per-step multiplicative factor $\eta$, not the decay coefficient $\lambda$ (often written $\eta = \gamma \lambda$).
 
-The steady-state norm equation from AdamC/ScionC {% cite chouCorrectionDecoupledWeight2026 %} demonstrates that stability requires $\eta \propto \gamma^2$.
+The steady-state norm equation from AdamC {% cite defazioWhyGradientsRapidly2025 %} / ScionC {% cite chouCorrectionDecoupledWeight2026 %} demonstrates that stability requires $\eta \propto \gamma^2$.
 
 > [!assumption] Steady-State Assumptions
 > 1. $u_t$ has stable RMS size: $\mathbb{E}|u_t|^2 \approx C_u^2$.
@@ -336,7 +336,7 @@ Momentum coefficients $\beta_1, \beta_2$ control how quickly the EMA forgets. Wh
 
 ## Conclusion
 
-Combining Complete(d)P {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, AdamC/ScionC {% cite chouCorrectionDecoupledWeight2026 %}, bounded direction maps of Lion-$\mathcal{K}$, and CCWD {% cite kaddour2025cautious %} yields a theoretically solid hyperparameter transfer mechanism. Utilizing the analytical formulation with a dynamic $\kappa$ integrator ensures your model maintains precise token-level alignment across varying training scenarios without excessive trial-and-error tuning.
+Combining Complete(d)P {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, AdamC {% cite defazioWhyGradientsRapidly2025 %} / ScionC {% cite chouCorrectionDecoupledWeight2026 %}, bounded direction maps of Lion-$\mathcal{K}$ {% cite chenLionSecretlySolves2025 %}, and CCWD {% cite kaddour2025cautious %} yields a theoretically solid hyperparameter transfer mechanism. Utilizing the analytical formulation with a dynamic $\kappa$ integrator ensures your model maintains precise token-level alignment across varying training scenarios without excessive trial-and-error tuning.
 
 ## References
 
