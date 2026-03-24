@@ -21,7 +21,7 @@ scholar:
 > This post derives **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)** and provides hyperparameter-transfer rules for scaling across width, depth, batch size, and duration.
 >
 > **Key assumptions:**
-> 1. **Normalized updates accumulate like a random walk.** For bounded optimizer directions (sign, LMO), total parameter displacement after $T$ steps scales as $\gamma\sqrt{T}$, requiring $\gamma \propto \sqrt{B/D}$.
+> 1. **Normalized updates accumulate like a random walk.** For bounded optimizer directions (sign, LMO), total parameter displacement after $T = D/B$ steps scales as $\gamma\sqrt{T}$, requiring $\gamma \propto 1/\sqrt{T}$.
 > 2. **Momentum and decay are parameterized by half-lives in tokens.** This yields exact formulas for betas and decay instead of linear approximations {% cite marekSmallBatchSize2025 %}.
 
 ---
@@ -238,6 +238,7 @@ In decoupled weight decay, the physically meaningful quantity is the per-step mu
 > | $m_L$ | $L'/L$ | Depth multiplier |
 > | $m_B$ | $B'/B$ | Batch size multiplier |
 > | $m_D$ | $D'/D$ | Data/duration multiplier |
+> | $m_T$ | $m_D/m_B$ | Total steps multiplier |
 
 Using the Complete(d)P framework {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, we define scaling rules for Transformer models.
 
@@ -252,9 +253,9 @@ When the batch size or duration changes, the per-step $\beta$ must be adjusted t
 > $$
 > Holding $H$ fixed while changing batch size gives:
 > $$
-> \beta' = \beta^{m_B / m_D} \qquad \text{equivalently} \qquad \beta' = 2^{-\Delta\tau'/H}
+> \beta' = \beta^{1/m_T} \qquad \text{equivalently} \qquad \beta' = 2^{-\Delta\tau'/H}
 > $$
-> where $\Delta\tau' = B'/T'$ is the token step size of the target run.
+> where $\Delta\tau' = B'$ is the token step size of the target run.
 
 > [!important] Effective Learning Rate Correction
 > Changing $\beta$ alters the correlation factor $S$, which changes the optimizer's random-walk step size. To transfer perfectly across different momentum values, adjust the base learning rate so the **effective learning rate** $\gamma_{\text{eff}} = \gamma\sqrt{S}$ is invariant:
@@ -281,10 +282,10 @@ For optimizers where the update direction's magnitude is width-dependent, $\mu$P
 > | Residual branch multiplier | $\text{residual_multiplier}' = \text{residual_multiplier}\cdot m_L^{-\alpha}$, with $\alpha\in\left[\frac{1}{2},1\right]$ |
 > | Init variance: hidden | $\mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}$ |
 > | Init variance: output | $\mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}$ |
-> | LR: Input embeddings | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot s_{BD}$ |
-> | LR: Hidden weights | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_N^{-1} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
-> | LR: Hidden bias/norm | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
-> | LR: Output weights | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_N^{-1} \cdot s_{BD}$ |
+> | LR: Input embeddings | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot m_T^{-1/2}$ |
+> | LR: Hidden weights | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_N^{-1} \cdot m_L^{\alpha-1} \cdot m_T^{-1/2}$ |
+> | LR: Hidden bias/norm | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot m_T^{-1/2}$ |
+> | LR: Output weights | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_N^{-1} \cdot m_T^{-1/2}$ |
 
 > [!remark] Choosing $\alpha$: Random Walk vs. Coherent Residuals
 > - **$\alpha = \frac{1}{2}$ (random walk):** Layer outputs are approximately independent and isotropic. Their sum grows as $\sqrt{L}$, so each branch scales by $1/\sqrt{L}$.
@@ -303,10 +304,10 @@ For optimizers where the update direction's magnitude is width-dependent, $\mu$P
 >
 > | Module | Recommended LMO | Initialization | LR $\gamma'$ Scaling |
 > | :--- | :--- | :--- | :--- |
-> | Input embeddings | ColNorm | Column-normalized Gaussian | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot s_{BD}$ |
-> | Hidden weights | Spectral | Semi-orthogonal | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
-> | Hidden bias/norm | RMS | Zeros | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot s_{BD}$ |
-> | Output weights | Sign | Random sign | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot s_{BD}$ |
+> | Input embeddings | ColNorm | Column-normalized Gaussian | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot m_T^{-1/2}$ |
+> | Hidden weights | Spectral | Semi-orthogonal | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_L^{\alpha-1} \cdot m_T^{-1/2}$ |
+> | Hidden bias/norm | RMS | Zeros | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot m_T^{-1/2}$ |
+> | Output weights | Sign | Random sign | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_T^{-1/2}$ |
 
 > [!fact] Recommended Operator Norms and LMOs for Deep Learning
 > The choice of LMO depends on the input assumptions and the layer position. Below is the configuration proposed by the Scion authors {% cite pethickTrainingDeepLearning2025a %}, using the reduced SVD $W_\ell = U \Sigma V^\top \in \mathbb{R}^{d_{\rm out} \times d_{\rm in}}$:
