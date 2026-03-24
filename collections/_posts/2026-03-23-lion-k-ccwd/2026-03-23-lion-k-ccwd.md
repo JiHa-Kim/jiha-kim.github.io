@@ -2,7 +2,7 @@
 layout: post
 title: "Lion-K CCWD: Corrected Cautious Weight Decay and Hyperparameter Transfer"
 date: 2026-03-23 11:00 +0000
-description: "Derivation of Lion-K with Corrected Cautious Weight Decay (CCWD) and transformation rules for hyperparameter transfer."
+description: "Derivation of the Lion-K optimizer with Corrected Cautious Weight Decay (CCWD) and transformation rules for hyperparameter transfer."
 categories:
   - Machine Learning
   - Mathematical Optimization
