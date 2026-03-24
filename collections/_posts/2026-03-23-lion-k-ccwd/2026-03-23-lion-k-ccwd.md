@@ -282,10 +282,10 @@ For optimizers where the update direction's magnitude is width-dependent, $\mu$P
 > | Residual branch multiplier | $\text{residual_multiplier}' = \text{residual_multiplier}\cdot m_L^{-\alpha}$, with $\alpha\in\left[\frac{1}{2},1\right]$ |
 > | Init variance: hidden | $\mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}$ |
 > | Init variance: output | $\mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}$ |
-> | LR: Input embeddings | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot m_T^{-1/2}$ |
-> | LR: Hidden weights | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_N^{-1} \cdot m_L^{\alpha-1} \cdot m_T^{-1/2}$ |
-> | LR: Hidden bias/norm | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot m_T^{-1/2}$ |
-> | LR: Output weights | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_N^{-1} \cdot m_T^{-1/2}$ |
+> | LR: Input embeddings | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_N^{-1} \cdot m_L^{\alpha-1}}$ |
+> | LR: Hidden weights | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#e67e22}{m_N^{-1}} \cdot \color{#27ae60}{m_L^{\alpha-1}}$ |
+> | LR: Hidden bias/norm | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \phantom{m_N^{-1} \cdot} \color{#27ae60}{m_L^{\alpha-1}}$ |
+> | LR: Output weights | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#e67e22}{m_N^{-1}} \phantom{\cdot m_L^{\alpha-1}}$ |
 
 > [!remark] Choosing $\alpha$: Random Walk vs. Coherent Residuals
 > - **$\alpha = \frac{1}{2}$ (random walk):** Layer outputs are approximately independent and isotropic. Their sum grows as $\sqrt{L}$, so each branch scales by $1/\sqrt{L}$.
@@ -304,10 +304,10 @@ For optimizers where the update direction's magnitude is width-dependent, $\mu$P
 >
 > | Module | Recommended LMO | Initialization | LR $\gamma'$ Scaling |
 > | :--- | :--- | :--- | :--- |
-> | Input embeddings | ColNorm | Column-normalized Gaussian | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot m_T^{-1/2}$ |
-> | Hidden weights | Spectral | Semi-orthogonal | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot m_L^{\alpha-1} \cdot m_T^{-1/2}$ |
-> | Hidden bias/norm | RMS | Zeros | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot m_L^{\alpha-1} \cdot m_T^{-1/2}$ |
-> | Output weights | Sign | Random sign | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot m_T^{-1/2}$ |
+> | Input embeddings | ColNorm | Column-normalized Gaussian | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_L^{\alpha-1}}$ |
+> | Hidden weights | Spectral | Semi-orthogonal | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#27ae60}{m_L^{\alpha-1}}$ |
+> | Hidden bias/norm | RMS | Zeros | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#27ae60}{m_L^{\alpha-1}}$ |
+> | Output weights | Sign | Random sign | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_L^{\alpha-1}}$ |
 
 > [!fact] Recommended Operator Norms and LMOs for Deep Learning
 > The choice of LMO depends on the input assumptions and the layer position. Below is the configuration proposed by the Scion authors {% cite pethickTrainingDeepLearning2025a %}, using the reduced SVD $W_\ell = U \Sigma V^\top \in \mathbb{R}^{d_{\rm out} \times d_{\rm in}}$:
