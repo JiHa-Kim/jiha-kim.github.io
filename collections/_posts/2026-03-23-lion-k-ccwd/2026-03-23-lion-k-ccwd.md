@@ -307,7 +307,7 @@ For optimizers where the update direction's magnitude is width-dependent, $\mu$P
 > | Input embeddings | ColNorm | Column-normalized Gaussian | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_L^{\alpha-1}}$ |
 > | Hidden weights | Spectral | Semi-orthogonal | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#27ae60}{m_L^{\alpha-1}}$ |
 > | Hidden bias/norm | RMS | Zeros | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#27ae60}{m_L^{\alpha-1}}$ |
-> | Output weights | Sign | Random sign | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_L^{\alpha-1}}$ |
+> | Output weights | Row-Norm | Row-normalized Gaussian | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_L^{\alpha-1}}$ |
 
 > [!fact] Recommended Operator Norms and LMOs for Deep Learning
 > The choice of LMO depends on the input assumptions and the layer position. Below is the configuration proposed by the Scion authors {% cite pethickTrainingDeepLearning2025a %}, using the reduced SVD $W_\ell = U \Sigma V^\top \in \mathbb{R}^{d_{\rm out} \times d_{\rm in}}$:
