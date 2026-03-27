@@ -17,6 +17,9 @@ scholar:
   bibliography: posts/2026-03-23-lion-k-ccwd/lion-k-ccwd.bib
 ---
 
+> [!info] PyTorch implementation on GitHub
+> https://github.com/JiHa-Kim/ScionC
+
 > [!info] Overview
 > This post derives **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)** and provides hyperparameter-transfer rules for scaling across width, depth, batch size, and duration.
 >
