@@ -10,33 +10,23 @@ module Jekyll
       end
 
       def cite(keys)
-        # Ensure we have a place to store our back-references
         page = context.registers[:page]
         page['scholar_backlinks'] ||= Hash.new { |h, k| h[k] = [] }
         
-        # We need to render each key to get its link, 
-        # but we also need to add a unique ID to the citation link itself.
-        
-        # If multiple keys are cited together, they share the same link in the default configuration
-        # (unless separate_links is true).
-        
+        # Track citations and inject unique IDs for backtracking
         if config['separate_links']
-          # Handle separate links case
           rendered_links = keys.map do |key|
             if bibliography.key?(key)
               entry = bibliography[key]
               
-              # Track this citation occurrence
               idx = page['scholar_backlinks'][key].length + 1
               backref_id = "cite-#{key}-#{idx}"
               page['scholar_backlinks'][key] << backref_id
               
-              # Render the citation text
               rendered = render_citation([entry])
                 .sub(/^#{Regexp.escape(csl_prefix)}/, '')
                 .sub(/#{Regexp.escape(csl_suffix)}$/, '')
               
-              # Render with the unique ID for backtracking
               link_to link_target_for(key), rendered, {
                 class: config['cite_class'],
                 id: backref_id
@@ -48,7 +38,7 @@ module Jekyll
           
           csl_prefix + rendered_links.join(delimiter) + csl_suffix
         else
-          # Handle combined links case (default)
+          # Default case: combined links
           backref_ids = []
           keys.each do |key|
             if bibliography.key?(key)
@@ -59,7 +49,6 @@ module Jekyll
             end
           end
           
-          # Use the first backref_id for the group's ID
           primary_id = backref_ids.first
           
           if bibliography.key?(keys[0])
@@ -75,10 +64,9 @@ module Jekyll
       end
 
       def bibliography_tag(entry, index)
-        # Render the standard bibliography entry
         reference = old_bibliography_tag(entry, index)
         
-        # Append backlinks if they exist and are enabled
+        # Append back-references if enabled
         return reference unless scholar_backlinks_config['enabled']
 
         page = context.registers[:page]
@@ -89,7 +77,6 @@ module Jekyll
           css_class = scholar_backlinks_config['class'] || "scholar-backlink"
 
           links_html = backlinks.each_with_index.map do |id, i|
-            # Match the footnote style of the theme if possible
             label = backlinks.length > 1 ? (i + 1).to_s : symbol
             "<a href=\"##{id}\" class=\"#{css_class}\">#{label}</a>"
           end.join(" ")
