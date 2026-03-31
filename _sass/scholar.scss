@@ -1,0 +1,21 @@
+
+span.scholar-backlinks {
+  margin-left: 0.5rem;
+  font-size: 0.8em;
+  vertical-align: super;
+  line-height: normal;
+
+  a.scholar-backlink {
+    text-decoration: none;
+    color: var(--highlight-color);
+    padding: 0 0.1rem;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Ensure smooth scrolling when clicking backlinks */
+html {
+  scroll-behavior: smooth;
+}
