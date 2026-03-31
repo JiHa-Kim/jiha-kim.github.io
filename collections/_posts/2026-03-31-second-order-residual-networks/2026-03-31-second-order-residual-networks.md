@@ -31,7 +31,7 @@ scholar:
 
 ## 1. First-Order Depth Dynamics
 
-A residual network{% cite heDeepResidualLearning2015 %} computes
+A residual network {% cite heDeepResidualLearning2015 %} computes
 
 $$
 x_{l+1} = x_l + f_l(x_l),
@@ -44,7 +44,7 @@ $$
 $$
 
 > [!remark] Connection to ODEs
-> This is a forward Euler step on the ODE $\dot{x}(t) = f(x(t))$, with the layer index as "time." This interpretation is the basis of the Neural ODE framework{% cite chenNeuralOrdinaryDifferential2019 %} and is discussed in more detail in [Optimizers and ODEs](/posts/optimizers-and-odes/).
+> This is a forward Euler step on the ODE $\dot{x}(t) = f(x(t))$, with the layer index as "time." This interpretation is the basis of the Neural ODE framework {% cite chenNeuralOrdinaryDifferential2019 %} and is discussed in more detail in [Optimizers and ODEs](/posts/optimizers-and-odes/).
 
 The residual form is a good idea because the identity map is built in, so each layer only needs to learn a small correction. But what kinds of depth trajectories can this first-order law produce?
 
@@ -134,7 +134,7 @@ $$
 where $\gamma_l := 1 - m_l$ is the **damping coefficient**. This is the discrete version of a damped, driven oscillator. The second-order difference $\Delta^2 x_l = x_{l+2} - 2x_{l+1} + x_l$ measures the "curvature" of the depth trajectory, just as the second derivative measures curvature in continuous time.
 
 > [!remark] Prior work
-> Sander et al.{% cite sanderMomentumResidualNeural2021 %} proposed Momentum ResNets, adding a momentum term to ResNet blocks motivated by invertibility and memory efficiency. Their architecture is equivalent to this second-order form. The emphasis here is on the finite-difference perspective: what modes of propagation does the second-order structure enable that first-order cannot?
+> Sander et al. {% cite sanderMomentumResidualNeural2021 %} proposed Momentum ResNets, adding a momentum term to ResNet blocks motivated by invertibility and memory efficiency. Their architecture is equivalent to this second-order form. The emphasis here is on the finite-difference perspective: what modes of propagation does the second-order structure enable that first-order cannot?
 
 ---
 
@@ -220,9 +220,9 @@ $$
 
 This is the key comparison:
 
-| Depth model | Scalar output | Family |
-| :--- | :--- | :--- |
-| First-order: $\Delta x_l = \frac{\alpha}{L} x_l$ | $x_L \approx e^\alpha \, c$ | Exponentials |
+| Depth model                                             | Scalar output                  | Family       |
+| :------------------------------------------------------ | :----------------------------- | :----------- |
+| First-order: $\Delta x_l = \frac{\alpha}{L} x_l$        | $x_L \approx e^\alpha \, c$    | Exponentials |
 | Second-order: $\Delta^2 x_l = -\frac{\beta^2}{L^2} x_l$ | $x_L \approx \cos(\beta) \, c$ | Oscillations |
 
 First-order residuals naturally express exponential depth effects. Second-order depth laws naturally express oscillatory depth effects. This is a qualitatively richer family of behaviors.
@@ -277,7 +277,7 @@ The content trajectory is $0 \to 1 \to 0.7 \to 1.15 \to 0.975$. The oscillation 
 ---
 ## 5. Connection to Recurrent Architectures
 
-The second-order residual block is a form of gated recurrence over depth.{% cite hochreiterLongShortTermMemory1997 %} To make this precise, let us compare the update equations side by side.
+The second-order residual block is a form of gated recurrence over depth. {% cite hochreiterLongShortTermMemory1997 %} To make this precise, let us compare the update equations side by side.
 
 ### LSTM (recurrence over time)
 
@@ -301,12 +301,12 @@ This has exactly the same structure: $m_l$ plays the role of the forget gate (ho
 
 ### What maps to what
 
-| LSTM (over time $t$) | Second-order residual (over depth $l$) |
-| :--- | :--- |
-| Cell state $c_t$ | Velocity $v_l$ |
-| Hidden state $h_t$ | Content $x_l$ |
-| Forget gate $f_t$ | Carry coefficient $m_l$ |
-| Input gate $i_t$ | Forcing scale $\eta_l$ |
+| LSTM (over time $t$)    | Second-order residual (over depth $l$)     |
+| :---------------------- | :----------------------------------------- |
+| Cell state $c_t$        | Velocity $v_l$                             |
+| Hidden state $h_t$      | Content $x_l$                              |
+| Forget gate $f_t$       | Carry coefficient $m_l$                    |
+| Input gate $i_t$        | Forcing scale $\eta_l$                     |
 | Candidate $\tilde{c}_t$ | Block output $f_l(\operatorname{LN}(x_l))$ |
 
 The content $x_l$ is analogous to the readout of the LSTM: it is the "visible" state that downstream layers operate on. The velocity $v_l$ is the internal memory that accumulates and filters the update stream.
@@ -405,14 +405,14 @@ $$
 
 This is the mathematical language shared by many architectures:
 
-| Architecture | Recurrence type |
-| :--- | :--- |
-| Residual networks{% cite heDeepResidualLearning2015 %} | 1st-order, identity-centered |
-| Second-order residuals | 2nd-order, damped |
-| RNNs | General 1st-order on augmented state |
-| LSTMs{% cite hochreiterLongShortTermMemory1997 %} | Structured 1st-order with gating |
-| Linear attention{% cite katharopoulosTransformersAreRNNs2020 %} | Iterative state update |
-| State-space models | Linear recurrence $z_{l+1} = A z_l + B u_l$ |
+| Architecture                                                     | Recurrence type                             |
+| :--------------------------------------------------------------- | :------------------------------------------ |
+| Residual networks {% cite heDeepResidualLearning2015 %}          | 1st-order, identity-centered                |
+| Second-order residuals                                           | 2nd-order, damped                           |
+| RNNs                                                             | General 1st-order on augmented state        |
+| LSTMs {% cite hochreiterLongShortTermMemory1997 %}               | Structured 1st-order with gating            |
+| Linear attention {% cite katharopoulosTransformersAreRNNs2020 %} | Iterative state update                      |
+| State-space models                                               | Linear recurrence $z_{l+1} = A z_l + B u_l$ |
 
 All the standard tools apply to this framework: linearization, characteristic polynomials, root placement, and spectral stability analysis. The second-order case is the simplest non-trivial instance, and as we saw, it already produces qualitatively richer behavior than the first-order case.
 
