@@ -5,6 +5,10 @@ module Jekyll
       alias_method :old_cite, :cite
       alias_method :old_bibliography_tag, :bibliography_tag
 
+      def scholar_backlinks_config
+        config['backlinks'] || { 'enabled' => false }
+      end
+
       def cite(keys)
         # Ensure we have a place to store our back-references
         page = context.registers[:page]
@@ -45,12 +49,6 @@ module Jekyll
           csl_prefix + rendered_links.join(delimiter) + csl_suffix
         else
           # Handle combined links case (default)
-          # In this case, one link points to multiple entries in the bibliography?
-          # Actually, link_target_for(keys[0]) only points to the first key.
-          
-          # I'll treat it as a citation of the first key primarily, or all of them.
-          # To be safe and simple, let's track all keys in this citation.
-          
           backref_ids = []
           keys.each do |key|
             if bibliography.key?(key)
@@ -80,16 +78,20 @@ module Jekyll
         # Render the standard bibliography entry
         reference = old_bibliography_tag(entry, index)
         
-        # Append backlinks if they exist
+        # Append backlinks if they exist and are enabled
+        return reference unless scholar_backlinks_config['enabled']
+
         page = context.registers[:page]
         backlinks = page['scholar_backlinks'] && page['scholar_backlinks'][entry.key]
         
         if backlinks && !backlinks.empty?
+          symbol = scholar_backlinks_config['symbol'] || "&#8617;&#xfe0e;"
+          css_class = scholar_backlinks_config['class'] || "scholar-backlink"
+
           links_html = backlinks.each_with_index.map do |id, i|
             # Match the footnote style of the theme if possible
-            # Here I use the standard ↩ symbol
-            symbol = backlinks.length > 1 ? (i + 1).to_s : "&#8617;&#xfe0e;"
-            "<a href=\"##{id}\" class=\"scholar-backlink\">#{symbol}</a>"
+            label = backlinks.length > 1 ? (i + 1).to_s : symbol
+            "<a href=\"##{id}\" class=\"#{css_class}\">#{label}</a>"
           end.join(" ")
           
           reference + " <span class=\"scholar-backlinks\">#{links_html}</span>"

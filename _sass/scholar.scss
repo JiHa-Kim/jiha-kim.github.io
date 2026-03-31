@@ -1,16 +1,23 @@
 
 span.scholar-backlinks {
-  margin-left: 0.5rem;
-  font-size: 0.8em;
-  vertical-align: super;
-  line-height: normal;
+  margin-left: 0.4rem;
+  font-size: 0.75em;
+  vertical-align: top;
+  position: relative;
+  top: -0.2em;
+  opacity: 0.8;
 
   a.scholar-backlink {
     text-decoration: none;
-    color: var(--highlight-color);
-    padding: 0 0.1rem;
+    color: var(--link-color);
+    padding: 0 0.2rem;
+    transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    font-weight: bold;
+
     &:hover {
-      text-decoration: underline;
+      color: var(--link-hover-color);
+      text-decoration: none;
+      opacity: 1;
     }
   }
 }
