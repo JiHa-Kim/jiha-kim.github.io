@@ -82,6 +82,8 @@ Inflate with $u \leftarrow u + \eta \frac{\|X\|_F^2}{s_x^2}$ for matmul rounding
 
 The following procedure, **Clean Rational Polar (CRP)**, explicitly integrates the adaptive bound logic and the denominator-stabilized Cholesky factorization required for low-precision stability.
 
+<div class="algorithm-container">
+<div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Clean Rational Polar (CRP)</div>
 <pre class="pseudocode">
 \begin{algorithmic}
 \PROCEDURE{CRP}{$X \in \mathbb{R}^{M \times N}$}
@@ -122,6 +124,7 @@ The following procedure, **Clean Rational Polar (CRP)**, explicitly integrates t
 \ENDPROCEDURE
 \end{algorithmic}
 </pre>
+</div>
 
 ---
 

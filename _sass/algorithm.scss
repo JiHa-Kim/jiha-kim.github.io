@@ -1,46 +1,76 @@
 .algorithm-container {
-  border-top: 1.8px solid var(--main-border-color, #333);
-  border-bottom: 1.8px solid var(--main-border-color, #333);
+  /* LaTeX-style rules (thick top/bottom, thin middle) */
+  border-top: 2px solid var(--text-color, #000);
+  border-bottom: 2px solid var(--text-color, #000);
   margin: 2rem 0;
   padding: 0;
-  background-color: var(--main-wrapper-bg, transparent);
+  background-color: var(--main-wrapper-bg, #fff); /* Force a clean paper-like background */
+  color: #1a1a1a !important; /* High contrast for the algorithm itself */
 
   .algorithm-header {
-    font-weight: bold;
-    font-family: var(--main-font);
-    padding: 0.6rem 0.8rem;
-    border-bottom: 1px solid var(--main-border-color, #333);
-    color: var(--heading-color);
-    display: block;
-    font-size: 0.95rem;
+    font-family: "Times New Roman", Times, serif;
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1.2px solid var(--text-color, #000);
+    font-size: 1.05rem;
+    
+    .algorithm-kw {
+      font-weight: bold;
+    }
   }
 
   /* Target pseudocode.js output */
   .pseudocode, .ps-root {
     margin: 0 !important;
-    padding: 0.8rem !important;
+    padding: 0.5rem 0.8rem !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-    font-size: 0.9rem !important;
-    line-height: 1.5 !important;
     
-    .ps-line {
-        padding-left: 1.5em !important;
-        text-indent: -1.5em !important;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 1.0rem !important;
+    line-height: 1.4 !important;
+
+    /* Line numbers */
+    .ps-line > .ps-linenum {
+      font-family: inherit !important;
+      font-size: 0.85em !important;
+      color: #777 !important;
+      min-width: 2em !important;
+      text-align: right !important;
+      margin-right: 0.8em !important;
+      &::after {
+        content: ":";
+      }
     }
-    
-    /* Ensure indentation from pseudocode.js is respected but fits our container */
+
+    /* Keywords (procedure, loop, if, etc.) */
+    .ps-keyword {
+      font-weight: bold !important;
+      font-family: inherit !important;
+    }
+
+    /* Indentation lines (the vertical bars) */
     .ps-code {
-        padding-left: 0 !important;
+      border-left: 1px solid #ccc !important;
+      margin-left: 0.5em !important;
+      padding-left: 1em !important;
+    }
+
+    /* Comments */
+    .ps-comment {
+      color: #555 !important;
+      font-style: normal !important;
+      &::before {
+          content: "▷ ";
+      }
     }
   }
 
-  /* Dark mode adjustments if needed */
+  /* Handle dark mode - keep it paper-like but maybe slightly darker if preferred, 
+     but the request asked for the LaTeX look, which is white background.
+     Let's make sure it's readable in dark mode by keeping the background light or darkening the paper. */
   [data-mode='dark'] & {
-    border-color: #555;
-    .algorithm-header {
-      border-color: #555;
-    }
+    background-color: #fdfdfd; /* Off-white for dark mode to reduce glare but keep paper feel */
+    color: #1a1a1a !important;
   }
 }
