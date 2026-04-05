@@ -1,0 +1,46 @@
+.algorithm-container {
+  border-top: 1.8px solid var(--main-border-color, #333);
+  border-bottom: 1.8px solid var(--main-border-color, #333);
+  margin: 2rem 0;
+  padding: 0;
+  background-color: var(--main-wrapper-bg, transparent);
+
+  .algorithm-header {
+    font-weight: bold;
+    font-family: var(--main-font);
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--main-border-color, #333);
+    color: var(--heading-color);
+    display: block;
+    font-size: 0.95rem;
+  }
+
+  /* Target pseudocode.js output */
+  .pseudocode, .ps-root {
+    margin: 0 !important;
+    padding: 0.8rem !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    
+    .ps-line {
+        padding-left: 1.5em !important;
+        text-indent: -1.5em !important;
+    }
+    
+    /* Ensure indentation from pseudocode.js is respected but fits our container */
+    .ps-code {
+        padding-left: 0 !important;
+    }
+  }
+
+  /* Dark mode adjustments if needed */
+  [data-mode='dark'] & {
+    border-color: #555;
+    .algorithm-header {
+      border-color: #555;
+    }
+  }
+}
