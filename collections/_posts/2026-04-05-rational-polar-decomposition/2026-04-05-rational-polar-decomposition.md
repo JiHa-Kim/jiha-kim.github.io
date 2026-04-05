@@ -85,7 +85,7 @@ The following procedure, **Clean Rational Polar (CRP)**, explicitly integrates t
 <pre class="pseudocode">
 \begin{algorithmic}
 \PROCEDURE{CRP}{$X \in \mathbb{R}^{M \times N}$}
-    \STATE $X \leftarrow X / 2^{\lfloor \log_2(\max |X_{ij}|) \rceil}$ \COMMENT{Range scaling}
+    \STATE $X \leftarrow X / 2^{\lfloor \log_2(\max \vert X_{ij}\vert ) \rceil}$ \COMMENT{Range scaling}
     \STATE $G \leftarrow \frac{1}{2}(X^\top X + (X^\top X)^\top)$
     \STATE $D \leftarrow \text{diag}(\max(G_{ii}, 10^{-30}))^{-1/2}$
     \STATE $B \leftarrow DGD, \quad B_{ii} \leftarrow 1$
@@ -100,10 +100,14 @@ The following procedure, **Clean Rational Polar (CRP)**, explicitly integrates t
             \IF{$L$ exists}
                 \STATE \BREAK
             \ELSE
-                \IF{$\tau = 0$} $\tau \leftarrow 10^{-6} \cdot \operatorname{tr}(S)/N$ \ELSE $\tau \leftarrow 10\tau$ \ENDIF
+            \IF{$\tau = 0$}
+                \STATE $\tau \leftarrow 10^{-6} \cdot \operatorname{tr}(S)/N$
+            \ELSE
+                \STATE $\tau \leftarrow 10\tau$
             \ENDIF
-        \ENDWHILE
-        \STATE $\rho \leftarrow \tau / (\operatorname{tr}(B)/N)$
+        \ENDIF
+    \ENDWHILE
+    \STATE $\rho \leftarrow \tau / (\operatorname{tr}(B)/N)$
         \IF{$\rho > 10^{-3}$}
             \STATE $\ell_0 \leftarrow \min(10\ell_0, 0.1)$ \COMMENT{Increase floor and restart}
         \ELSE
