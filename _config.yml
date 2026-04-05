@@ -265,10 +265,16 @@ exclude:
   - purgecss.js
   - rollup.config.js
   - "package*.json"
-  - node_modules
   - vendor
   - tmp
   - scripts
+  - .git
+  - .github
+  - .agents
+  - .gemini
+  - "Gemfile*"
+  - "*.bak"
+  - "*.old"
 
 plugins:
   - jekyll-tagories

@@ -9,6 +9,11 @@ module Jekyll
         config['backlinks'] || { 'enabled' => false }
       end
 
+      # Cache rendered citations to avoid re-running expensive scholar logic
+      def citation_cache
+        @citation_cache ||= {}
+      end
+
       def cite(keys)
         page = context.registers[:page]
         page['scholar_backlinks'] ||= Hash.new { |h, k| h[k] = [] }
@@ -23,9 +28,9 @@ module Jekyll
               backref_id = "cite-#{key}-#{idx}"
               page['scholar_backlinks'][key] << backref_id
               
-              rendered = render_citation([entry])
+              rendered = (citation_cache[key] ||= render_citation([entry])
                 .sub(/^#{Regexp.escape(csl_prefix)}/, '')
-                .sub(/#{Regexp.escape(csl_suffix)}$/, '')
+                .sub(/#{Regexp.escape(csl_suffix)}$/, ''))
               
               link_to link_target_for(key), rendered, {
                 class: config['cite_class'],
@@ -53,7 +58,10 @@ module Jekyll
           
           if bibliography.key?(keys[0])
             items = keys.map { |k| bibliography[k] }.compact
-            link_to link_target_for(keys[0]), render_citation(items), {
+            cache_key = keys.join(',')
+            rendered = (citation_cache[cache_key] ||= render_citation(items))
+
+            link_to link_target_for(keys[0]), rendered, {
               class: config['cite_class'],
               id: primary_id
             }
