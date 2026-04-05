@@ -70,6 +70,10 @@
   {% endfor %}
 {% endif %}
 
+{% if include.math %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pseudocode@latest/build/pseudocode.min.css">
+{% endif %}
+
 {% include metadata-hook.html %}
 
 {% include extend-head.html %}

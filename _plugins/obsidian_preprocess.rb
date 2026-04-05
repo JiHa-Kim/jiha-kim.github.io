@@ -37,7 +37,7 @@ module Jekyll
       flalign* eqnarray
     ].freeze
 
-    PROTECT_RE = /((?:^\s*```.*?$)(?:.*?)(?:^\s*```$)|(?i:<div class="math-block"[^>]*>.*?<\/div>)|(?i:<span class="math-inline"[^>]*>.*?<\/span>)|(?:`[^`\n]*`))/m
+    PROTECT_RE = /((?:^\s*```.*?$)(?:.*?)(?:^\s*```$)|(?i:<pre[^>]*>.*?<\/pre>)|(?i:<div class="math-block"[^>]*>.*?<\/div>)|(?i:<span class="math-inline"[^>]*>.*?<\/span>)|(?:`[^`\n]*`))/m
 
     def generate(site)
       site.posts.docs.each { |doc| process_doc(doc) }
