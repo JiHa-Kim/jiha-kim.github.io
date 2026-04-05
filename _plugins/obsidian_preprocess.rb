@@ -51,8 +51,6 @@ module Jekyll
       return unless doc.data['layout'] # Only process content with layouts
       return unless doc.content
 
-      # Check if already processed (idempotency)
-      return if doc.content.include?('class="math-block"') || doc.content.include?('class="math-inline"')
 
       doc.content = transform_markdown(doc.content)
     end

@@ -19,6 +19,6 @@ MathJax = {
       ['\\[', '\\]'],
     ],
     tags: 'ams',
-    packages: { '[+]': ['cancel', 'color'] },
+    packages: { '[+]': ['cancel', 'color', 'ams'] },
   },
 };

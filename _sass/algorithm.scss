@@ -9,7 +9,7 @@
 
   .algorithm-header {
     font-family: var(--main-font); /* Respect theme font */
-    padding: 0.2rem 0; /* NO horizontal padding */
+    padding: 0.3rem 0.5rem;
     border-bottom: 0.8px solid var(--text-color);
     font-size: 0.95rem;
     line-height: normal;
@@ -22,7 +22,7 @@
   /* Target pseudocode.js output */
   .pseudocode, .ps-root {
     margin: 0 !important;
-    padding: 0 !important; /* Truly NO padding all the way on the left */
+    padding: 0.2rem 0.5rem !important; /* Extremely compact like LaTeX */
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -31,49 +31,27 @@
     font-size: 1.0rem !important;
     line-height: 1.4 !important;
 
-    /* Truly zero out left-most indentation */
-    .ps-algorithm {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* Outermost block: No indent, no vertical bar */
-    .ps-algorithm > .ps-block {
-        margin-left: 0 !important;
-        border-left: none !important;
-        padding-left: 0 !important;
-    }
-
-    /* Nested blocks: Add vertical bars and moderate indentation */
-    .ps-block .ps-block {
-      border-left: 1.0px solid var(--main-border-color, #ccc) !important;
-      margin-left: 1.2em !important; 
-      padding-left: 0.5em !important;
-    }
-
-    /* Keep individual lines compact */
-    .ps-line {
-      padding-left: 0 !important;
-      margin-left: 0 !important;
-    }
-
     /* Line numbers */
     .ps-line > .ps-linenum {
       font-family: inherit !important;
       font-size: 0.8em !important;
       color: var(--text-muted-color, #777) !important;
-      min-width: 1.0em !important;
+      min-width: 1.5em !important;
       text-align: right !important;
-      margin-right: 0.5em !important;
-      padding-left: 0 !important;
-      margin-left: 0 !important;
-      left: 0 !important; /* Force flush left */
+      margin-right: 0.6em !important;
     }
 
-    /* Keywords */
+    /* Keywords (procedure, loop, if, etc.) */
     .ps-keyword {
       font-weight: bold !important;
       font-family: inherit !important;
+    }
+
+    /* Indentation lines (the vertical bars) */
+    .ps-code {
+      border-left: 0.8px solid var(--main-border-color, #ccc) !important;
+      margin-left: 0.6em !important;
+      padding-left: 0.8em !important;
     }
 
     /* Comments */

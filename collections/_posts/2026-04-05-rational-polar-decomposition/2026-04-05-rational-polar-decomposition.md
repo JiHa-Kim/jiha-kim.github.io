@@ -80,13 +80,13 @@ Inflate with $u \leftarrow u + \eta \frac{\|X\|_F^2}{s_x^2}$ for matmul rounding
 
 ## 3. The End-to-End Algorithm (Explicit Version)
 
-The following procedure, **Clean Rational Polar (CRP)**, explicitly integrates the adaptive bound logic and the denominator-stabilized Cholesky factorization required for low-precision stability.
+The following procedure, **Rational Polar Decomposition**, explicitly integrates the adaptive bound logic and the denominator-stabilized Cholesky factorization required for low-precision stability.
 
 <div class="algorithm-container">
-<div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Clean Rational Polar (CRP)</div>
+<div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Rational Polar Decomposition</div>
 <pre class="pseudocode">
 \begin{algorithmic}
-\PROCEDURE{CRP}{$X \in \mathbb{R}^{M \times N}$}
+\PROCEDURE{RationalPolar}{$X \in \mathbb{R}^{M \times N}$}
     \STATE $X \leftarrow X / 2^{\lfloor \log_2(\max \vert X_{ij}\vert ) \rceil}$ \COMMENT{Range scaling}
     \STATE $G \leftarrow \frac{1}{2}(X^\top X + (X^\top X)^\top)$
     \STATE $D \leftarrow \text{diag}(\max(G_{ii}, 10^{-30}))^{-1/2}$
