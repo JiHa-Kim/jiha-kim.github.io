@@ -31,15 +31,14 @@
       display: flex;
       align-items: flex-start;
       padding: 0.1rem 0;
-      /* Indentation using the CSS variable set by the Ruby preprocessor */
-      padding-left: calc(var(--indent, 0) * 1.6em);
       position: relative;
 
       /* Indentation markers (vertical bars) */
       &::before {
         content: "";
         position: absolute;
-        left: calc(var(--indent, 0) * 1.6em - 0.8em);
+        /* Gutter width (3.5em) + current indent - offset */
+        left: calc(3.5em + (var(--indent, 0) * 1.6em) - 0.8em);
         top: 0;
         bottom: 0;
         width: 1px;
@@ -54,17 +53,20 @@
     }
 
     .algo-linenum {
-      min-width: 2.2em;
+      width: 2.5em;
+      min-width: 2.5em;
       text-align: right;
-      margin-right: 1.2em;
+      margin-right: 1.0em;
       color: var(--text-muted-color, #777);
       user-select: none;
       font-size: 0.85em;
+      font-family: var(--main-font); /* Numbers look cleaner in sans-serif/serif */
     }
 
     .algo-content {
       flex: 1;
       white-space: pre-wrap;
+      padding-left: calc(var(--indent, 0) * 1.6em);
     }
 
     .algo-kw {
