@@ -32,24 +32,6 @@
       align-items: flex-start;
       padding: 0.1rem 0;
       position: relative;
-
-      /* Indentation markers (vertical bars) */
-      &::before {
-        content: "";
-        position: absolute;
-        /* Gutter width (3.5em) + current indent - offset */
-        left: calc(3.5em + (var(--indent, 0) * 1.6em) - 0.8em);
-        top: 0;
-        bottom: 0;
-        width: 1px;
-        background-color: var(--main-border-color, #444);
-        display: block;
-      }
-
-      /* Hide the first bar (root level) */
-      &[style*="--indent: 0"]::before {
-        display: none;
-      }
     }
 
     .algo-linenum {
@@ -67,6 +49,21 @@
       flex: 1;
       white-space: pre-wrap;
       padding-left: calc(var(--indent, 0) * 1.6em);
+      
+      /* Multi-level indentation guides */
+      /* Each bar is at the center (0.8em) of each 1.6em indentation block */
+      background-image: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent 0.8em,
+        var(--main-border-color, #444) 0.8em,
+        var(--main-border-color, #444) calc(0.8em + 1px),
+        transparent calc(0.8em + 1px),
+        transparent 1.6em
+      );
+      background-repeat: no-repeat;
+      /* Only show bars for the number of indents (up to current) */
+      background-size: calc(var(--indent, 0) * 1.6em) 100%;
     }
 
     .algo-kw {
