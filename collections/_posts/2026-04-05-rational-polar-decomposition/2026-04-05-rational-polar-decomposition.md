@@ -86,40 +86,43 @@ The following procedure, **Rational Polar Decomposition**, explicitly integrates
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Rational Polar Decomposition</div>
 <pre class="pseudocode">
 \begin{algorithmic}
-\PROCEDURE{RationalPolar}{$X \in \mathbb{R}^{M \times N}$}
-    \STATE $X \leftarrow X / 2^{\lfloor \log_2(\max \vert X_{ij}\vert ) \rceil}$ \COMMENT{Range scaling}
-    \STATE $G \leftarrow \frac{1}{2}(X^\top X + (X^\top X)^\top)$
-    \STATE $D \leftarrow \text{diag}(\max(G_{ii}, 10^{-30}))^{-1/2}$
-    \STATE $B \leftarrow DGD, \quad B_{ii} \leftarrow 1$
-    \STATE Compute moment bound $u$, $\sigma \leftarrow \sqrt{u} \cdot \text{safety} + \epsilon$
-    \STATE $X \leftarrow X/\sigma, \quad B \leftarrow B/\sigma^2$
-    \REPEAT
-        \STATE Compute coefficients $(\alpha_k, \beta_k, c_k, \delta)_k$ from active $\ell_0$
-        \STATE $S \leftarrow B + \frac{1}{c_0} I, \quad \tau \leftarrow 0$
-        \WHILE{true}
-            \STATE $\tilde{S} \leftarrow S + \tau I$
-            \STATE \textbf{try} $L = \text{Cholesky}(\tilde{S})$
-            \IF{$L$ exists}
-                \STATE \BREAK
-            \ELSE
-            \IF{$\tau = 0$}
-                \STATE $\tau \leftarrow 10^{-6} \cdot \operatorname{tr}(S)/N$
-            \ELSE
-                \STATE $\tau \leftarrow 10\tau$
-            \ENDIF
+\PROCEDURE{Sym}{A}
+    \RETURN $\frac{1}{2}(A + A^\top)$
+\ENDPROCEDURE
+
+\PROCEDURE{FactorizeSafe}{A}
+    \STATE $S \leftarrow A, \quad \tau \leftarrow 0$
+    \WHILE{true}
+        \STATE \textbf{try} $L \leftarrow \text{Cholesky}(S + \tau I)$
+        \IF{$L$ exists}
+            \RETURN $\{L, \tau\}$
+        \ELSE
+            \STATE $\tau \leftarrow \max(10^{-6} \cdot \operatorname{tr}(S)/N, 10\tau)$
         \ENDIF
     \ENDWHILE
-    \STATE $\rho \leftarrow \tau / (\operatorname{tr}(B)/N)$
+\ENDPROCEDURE
+
+\PROCEDURE{RationalPolar}{$X \in \mathbb{R}^{M \times N}$}
+    \STATE $X \leftarrow X / 2^{\lfloor \log_2(\max \vert X_{ij}\vert ) \rceil}$ \COMMENT{GEMM-safe scaling}
+    \STATE $G \leftarrow \text{Sym}(X^\top X)$
+    \STATE $D \leftarrow \text{diag}(\max(\text{diag}(G), 10^{-30}))^{-1/2}$
+    \STATE $B \leftarrow \text{Sym}(D G D), \quad \text{diag}(B) \leftarrow 1$
+    \STATE $\sigma \leftarrow \sqrt{\text{MomentBound}(B)} \cdot \text{safety} + \epsilon$
+    \STATE $X \leftarrow X/\sigma, \quad B \leftarrow B/\sigma^2$
+    \REPEAT
+        \STATE $\{ \alpha_k, \beta_k, c_k, \delta \}_k \leftarrow \text{ComputeCoefficients}(\ell_0)$
+        \STATE $\{L, \tau\} \leftarrow \text{FactorizeSafe}(B + \frac{1}{c_0} I)$
+        \STATE $\rho \leftarrow \tau / (\operatorname{tr}(B)/N)$
         \IF{$\rho > 10^{-3}$}
-            \STATE $\ell_0 \leftarrow \min(10\ell_0, 0.1)$ \COMMENT{Increase floor and restart}
+             \STATE $\ell_0 \leftarrow \min(10\ell_0, 0.1)$ \COMMENT{Restart with higher floor}
         \ELSE
-            \STATE \BREAK
+             \STATE \BREAK
         \ENDIF
     \UNTIL{false}
-    \STATE $H_0 \leftarrow \frac{1}{c_0} (L L^\top)^{-1}, \quad K_0 \leftarrow I - H_0, \quad M_0 \leftarrow \alpha_0 I + \beta_0 H_0$
-    \STATE $B_1 \leftarrow I + \delta(c_0\alpha_0^2 B + 2\alpha_0\beta_0 K_0 + \beta_0^2 H_0 K_0)$
-    \STATE Factor $B_1$ with stabilized Cholesky (as above)
-    \STATE $T \leftarrow M_0 B_1^{-1}, \quad K_{\text{final}} \leftarrow \alpha_1 M_0 + \beta_1 T$
+    \STATE $H_0 \leftarrow \frac{1}{c_0} \text{inv}(L L^\top), \quad K_0 \leftarrow I - H_0, \quad M_0 \leftarrow \alpha_0 I + \beta_0 H_0$
+    \STATE $B_1 \leftarrow \text{Sym}(I + \delta(c_0\alpha_0^2 B + 2\alpha_0\beta_0 K_0 + \beta_0^2 H_0 K_0))$
+    \STATE $L_1, \_ \leftarrow \text{FactorizeSafe}(B_1)$
+    \STATE $T \leftarrow M_0 \cdot \text{inv}(L_1 L_1^\top), \quad K_{\text{final}} \leftarrow \alpha_1 M_0 + \beta_1 T$
     \RETURN $Q = (X D) K_{\text{final}} D$
 \ENDPROCEDURE
 \end{algorithmic}
