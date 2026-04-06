@@ -2,6 +2,7 @@
 
 require 'jekyll'
 require 'rexml/document'
+require 'digest'
 
 module Jekyll
   class ObsidianPreprocess < Jekyll::Generator
@@ -49,29 +50,46 @@ module Jekyll
 
     def process_doc(doc)
       return unless doc.data['layout'] # Only process content with layouts
-      return unless doc.content
+      return unless doc.content && !doc.content.empty?
 
+      # Optimization: Skip if no Obsidian-style elements exist
+      # This saves significant regex work on simple pages.
+      return unless doc.content.include?('>') || doc.content.include?('$') || doc.content.include?('<pre class="pseudocode">')
 
-      doc.content = transform_markdown(doc.content)
+      # Use a persistent memory cache to avoid re-transforming unchanged content
+      # during 'jekyll serve' (incremental builds).
+      $obsidian_preprocess_cache ||= {}
+      content_hash = Digest::MD5.hexdigest(doc.content)
+      
+      if $obsidian_preprocess_cache.key?(content_hash)
+        doc.content = $obsidian_preprocess_cache[content_hash]
+      else
+        transformed = transform_markdown(doc.content)
+        $obsidian_preprocess_cache[content_hash] = transformed
+        doc.content = transformed
+      end
     end
 
     def transform_markdown(content)
+      # 1. Convert Algorithms (must run before protection hides <pre> blocks)
+      content = convert_algorithms(content)
+
       buckets = []
       
-      # 1. Protect code and existing HTML/Math regions
+      # 2. Protect code and existing HTML/Math regions
       content = content.gsub(PROTECT_RE) do |match|
         buckets << match
         "@@PROTECT#{buckets.length - 1}@@"
       end
 
-      # 2. Convert Callouts
+      # 3. Convert Callouts
       content = convert_callouts(content)
 
-      # 3. Convert Math
+      # 4. Convert Math
       content = convert_block_math(content)
       content = convert_inline_math(content)
 
-      # 4. Restore Regions
+      # 5. Restore Regions
       buckets.each_with_index do |payload, i|
         content.gsub!("@@PROTECT#{i}@@", payload)
       end
@@ -233,6 +251,97 @@ module Jekyll
       text = text.gsub("*", "\\ast ")
       text = text.gsub("~", "\\sim ")
       text
+    end
+    def convert_algorithms(md)
+      # Match <pre class="pseudocode">...</pre>
+      md.gsub(/<pre class="pseudocode">(.*?)<\/pre>/m) do
+        inner = $1
+        html = parse_pseudocode(inner)
+        "<div class=\"custom-algo\" markdown=\"0\">\n#{html}\n</div>"
+      end
+    end
+
+    def parse_pseudocode(text)
+      lines = text.split("\n")
+      output = []
+      line_num = 1
+      indent_level = 0
+      
+      lines.each do |line|
+        line = line.strip
+        next if line.empty?
+        next if line.include?("\\begin{algorithmic}") || line.include?("\\end{algorithmic}")
+
+        # Determine if this line opens or closes a block
+        is_opener = (line =~ /\\(IF|WHILE|PROCEDURE|FOR|REPEAT|ELSE)(?![A-Z])/) && !(line =~ /\\END/)
+        is_closer = (line =~ /\\(ENDIF|ENDWHILE|ENDPROCEDURE|ENDFOR|UNTIL|ELSE)(?![A-Z])/)
+
+        # Decrement indentation BEFORE rendering if it's a closer
+        indent_level -= 1 if is_closer && indent_level > 0
+
+        # Process the command and text for display (DO NOT modify the original line used for logic)
+        processed_line = process_algo_line(line.dup)
+        
+        output << "<div class=\"algo-line\" style=\"--indent: #{indent_level};\">"
+        output << "  <span class=\"algo-linenum\">#{line_num}:</span>"
+        output << "  <span class=\"algo-content\">#{processed_line}</span>"
+        output << "</div>"
+
+        # Increment indentation AFTER rendering if it's an opener
+        indent_level += 1 if is_opener
+        
+        line_num += 1
+      end
+      
+      output.join("\n")
+    end
+
+    def process_algo_line(line)
+      # Robust balanced brace matching for LaTeX arguments
+      # handles nesting like { \mathbb{R} }
+      brace_match = /\{(?:[^{}]++|\g<0>)*\}/
+
+      # 1. State marker (hide)
+      line.gsub!("\\STATE", "")
+
+      # 2. Block starters with 1 arg: \IF{cond}, \WHILE{cond}, etc.
+      line.gsub!(/\\IF(#{brace_match})/) { "<span class=\"algo-kw\">if </span>#{$1[1..-2]} <span class=\"algo-kw\">then</span>" }
+      line.gsub!(/\\WHILE(#{brace_match})/) { "<span class=\"algo-kw\">while </span>#{$1[1..-2]} <span class=\"algo-kw\">do</span>" }
+      line.gsub!(/\\FOR(#{brace_match})/) { "<span class=\"algo-kw\">for </span>#{$1[1..-2]} <span class=\"algo-kw\">do</span>" }
+      line.gsub!(/\\UNTIL(#{brace_match})/) { "<span class=\"algo-kw\">until </span>#{$1[1..-2]}" }
+
+      # 3. Procedure with 2 args: \PROCEDURE{Name}{Args}
+      line.gsub!(/\\PROCEDURE(#{brace_match})(#{brace_match})/) do
+        name = $1[1..-2]
+        args = $2[1..-2]
+        "<span class=\"algo-kw\">procedure </span> <span class=\"algo-func\">#{name}</span>(#{args})"
+      end
+
+      # 4. Simple keywords (no args)
+      simple_kw = {
+        "\\REPEAT" => "repeat",
+        "\\ELSE" => "else",
+        "\\BREAK" => "break",
+        "\\RETURN" => "return",
+        "\\CONTINUE" => "continue",
+        "\\ENDIF" => "end if",
+        "\\ENDWHILE" => "end while",
+        "\\ENDFOR" => "end for",
+        "\\ENDPROCEDURE" => "end procedure"
+      }
+      simple_kw.each do |latex, plain|
+         line.gsub!(Regexp.escape(latex), "<span class=\"algo-kw\">#{plain}</span>")
+      end
+
+      # 5. Comments: \COMMENT{text}
+      line.gsub!(/\\COMMENT(#{brace_match})/) do
+        "<span class=\"algo-comment\">&nbsp;&nbsp;// #{$1[1..-2]}</span>"
+      end
+
+      # 6. Cleanup backslashed braces
+      line = line.gsub("\\{", "{").gsub("\\}", "}")
+      
+      line.strip
     end
   end
 end

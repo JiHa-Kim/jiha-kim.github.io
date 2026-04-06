@@ -1,4 +1,5 @@
-# frozen_string_literal: true
+require 'jekyll'
+require 'digest'
 
 module Jekyll
   # This plugin pre-calculates common variables that are otherwise
@@ -39,8 +40,18 @@ module Jekyll
         end
 
         # Header detection for TOC/Math (avoiding expensive contains checks in Liquid)
+        # Use a memory cache to avoid scanning content of every single file every time
         if item.respond_to?(:content) && item.content
-          item.data['has_h2_h3'] = item.content.include?('<h2') || item.content.include?('<h3')
+          $site_vars_cache ||= {}
+          cache_key = Digest::MD5.hexdigest("#{item.path}_#{item.content}")
+          
+          if $site_vars_cache.key?(cache_key)
+            item.data['has_h2_h3'] = $site_vars_cache[cache_key]
+          else
+            has_h2_h3 = item.content.include?('<h2') || item.content.include?('<h3')
+            $site_vars_cache[cache_key] = has_h2_h3
+            item.data['has_h2_h3'] = has_h2_h3
+          end
         end
       end
     end
