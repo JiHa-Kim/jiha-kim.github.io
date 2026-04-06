@@ -2,65 +2,87 @@
   /* Use theme-integrated rules (thick top/bottom, thin middle) */
   border-top: 1.5px solid var(--text-color);
   border-bottom: 1.5px solid var(--text-color);
-  margin: 1.5rem 0;
-  padding: 0;
+  margin: 2rem 0;
+  padding: 0.5rem 0;
   background-color: var(--main-wrapper-bg, transparent);
   color: var(--text-color);
 
   .algorithm-header {
-    font-family: var(--main-font); /* Respect theme font */
-    padding: 0.3rem 0.5rem;
+    font-family: var(--main-font);
+    padding: 0.4rem 1rem;
     border-bottom: 0.8px solid var(--text-color);
-    font-size: 0.95rem;
-    line-height: normal;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
     
     .algorithm-kw {
       font-weight: bold;
+      text-transform: capitalize;
     }
   }
 
-  /* Target pseudocode.js output */
-  .pseudocode, .ps-root {
-    margin: 0 !important;
-    padding: 0.2rem 0.5rem !important; /* Extremely compact like LaTeX */
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    
-    font-family: inherit !important; /* Respect theme font */
-    font-size: 1.0rem !important;
-    line-height: 1.4 !important;
+  /* Custom Preprocessed Algorithm */
+  .custom-algo {
+    font-family: "Source Code Pro", "Cascadia Code", "Fira Code", monospace;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    padding: 0.5rem 1rem;
 
-    /* Line numbers */
-    .ps-line > .ps-linenum {
-      font-family: inherit !important;
-      font-size: 0.8em !important;
-      color: var(--text-muted-color, #777) !important;
-      min-width: 1.5em !important;
-      text-align: right !important;
-      margin-right: 0.6em !important;
-    }
+    .algo-line {
+      display: flex;
+      align-items: flex-start;
+      padding: 0.1rem 0;
+      /* Indentation using the CSS variable set by the Ruby preprocessor */
+      padding-left: calc(var(--indent, 0) * 1.6em);
+      position: relative;
 
-    /* Keywords (procedure, loop, if, etc.) */
-    .ps-keyword {
-      font-weight: bold !important;
-      font-family: inherit !important;
-    }
-
-    /* Indentation lines (the vertical bars) */
-    .ps-code {
-      border-left: 0.8px solid var(--main-border-color, #ccc) !important;
-      margin-left: 0.6em !important;
-      padding-left: 0.8em !important;
-    }
-
-    /* Comments */
-    .ps-comment {
-      color: var(--text-muted-color, #555) !important;
-      font-style: normal !important;
+      /* Indentation markers (vertical bars) */
       &::before {
-          content: "▷ ";
+        content: "";
+        position: absolute;
+        left: calc(var(--indent, 0) * 1.6em - 0.8em);
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background-color: var(--main-border-color, #444);
+        display: block;
       }
+
+      /* Hide the first bar (root level) */
+      &[style*="--indent: 0"]::before {
+        display: none;
+      }
+    }
+
+    .algo-linenum {
+      min-width: 2.2em;
+      text-align: right;
+      margin-right: 1.2em;
+      color: var(--text-muted-color, #777);
+      user-select: none;
+      font-size: 0.85em;
+    }
+
+    .algo-content {
+      flex: 1;
+      white-space: pre-wrap;
+    }
+
+    .algo-kw {
+      font-weight: bold !important;
+      color: var(--text-color);
+    }
+
+    .algo-func {
+      font-weight: 600;
+      font-style: italic;
+      color: var(--text-color);
+    }
+
+    .algo-comment {
+      color: var(--text-muted-color, #777);
+      font-style: italic;
+      font-family: var(--main-font);
+      font-size: 0.95em;
     }
   }
 }
