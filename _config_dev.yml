@@ -1,0 +1,15 @@
+# Development overrides for faster builds
+# Use with: jekyll build --config _config.yml,_config_dev.yml
+
+# Disable jekyll-archives in development to avoid rendering 100+ tag/category pages
+# on every single change.
+jekyll-archives:
+  enabled: []
+
+# Optional: Disable scholar if not needed during active writing
+# scholar:
+#   enabled: false
+
+# Speed up SASS compilation
+sass:
+  style: expanded # Faster than compressed

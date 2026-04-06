@@ -5,6 +5,7 @@
 prod=false
 command="bundle exec jekyll s -l --incremental"
 host="127.0.0.1"
+config="_config.yml"
 
 help() {
   echo "Usage:"
@@ -45,7 +46,13 @@ while (($#)); do
   esac
 done
 
-command="$command -H $host"
+if ! $prod; then
+  if [ -f "_config_dev.yml" ]; then
+    config="$config,_config_dev.yml"
+  fi
+fi
+
+command="$command --config $config -H $host"
 
 if $prod; then
   command="JEKYLL_ENV=production $command"
