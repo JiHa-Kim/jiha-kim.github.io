@@ -65,9 +65,9 @@ In low precision (FP16 or TF32), the Gram matrix $G = X^\top X$ can suffer from 
 We work in the "column-space view" $X \in \mathbb{R}^{M \times N}, M \ge N$.
 For $A \in \mathbb{R}^{m \times n}$, we set $X = A$ if $m \ge n$ and $X = A^\top$ otherwise.
 
-**1. Symmetrize**: $G \leftarrow \tfrac12(G+G^\top)$.
-**2. Jacobi Preconditioning**: $D = \operatorname{rsqrt}(\max(G_{ii}, d_{\min}))$.
-**3. Jacobi Gram**: $\tilde{A} \leftarrow DGD$.
+1. **Symmetrize**: $G \leftarrow \tfrac12(G+G^\top)$.
+2. **Jacobi Preconditioning**: $D = \operatorname{rsqrt}(\max(G_{ii}, d_{\min}))$.
+3. **Jacobi Gram**: $\tilde{A} \leftarrow DGD$.
 
 ### 2.2 Moment-Based Upper Bounds
 We avoid expensive power iterations for $\lambda_{\max}$ by using a moment-based upper bound $u = \min(u_M, u_F)$ computed from $\tilde{A}$:
