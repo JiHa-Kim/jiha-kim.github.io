@@ -83,8 +83,21 @@ This script performs the following steps:
 > act
 > ```
 
+## Git Hook Setup (Enforcement)
+
+To automatically run the local test suite before every push and prevent CI failures on remote:
+
+```bash
+bash tools/setup-hooks.sh
+```
+
+Once installed, `git push` will execute `tools/test.sh` and block the push if it fails. 
+
+> [!TIP]
+> In emergencies, you can skip this check with `git push --no-verify`.
+
 ## Verification
-Always run the local test suite before pushing changes:
+Always run the local test suite before pushing changes (or rely on the git hook):
 ```bash
 bash tools/test.sh
 ```
