@@ -29,6 +29,29 @@ After updating, verify the site still builds and tests pass:
 bash tools/test.sh
 ```
 
+## Build Optimization & Profiling
+
+To speed up local development and identify bottlenecks, use the following techniques:
+
+### Incremental Builds
+For faster local previews, enable incremental builds. Jekyll will only re-generate files that have changed:
+```bash
+bundle exec jekyll s --incremental
+```
+
+### Profiling
+To see which pages or liquid templates are taking the most time to render:
+```bash
+bundle exec jekyll build --profile
+```
+The output will show a table of the slowest files, helping you identify complex math or large collections that may need optimization.
+
+### Persistent Caching
+The custom `ObsidianPreprocess` plugin uses a disk-backed cache in `.jekyll-cache/`. This cache is shared between builds. If you ever need to force a full re-process of all files, you can clear the cache:
+```bash
+rm -rf .jekyll-cache
+```
+
 ## Local Preview (Obsidian-style)
 
 This site natively supports Obsidian-style math and callouts. When you run the Jekyll server locally, a custom plugin handles the conversion automatically.
