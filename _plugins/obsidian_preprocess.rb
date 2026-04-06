@@ -64,13 +64,13 @@ module Jekyll
       if $obsidian_preprocess_cache.key?(content_hash)
         doc.content = $obsidian_preprocess_cache[content_hash]
       else
-        transformed = transform_markdown(doc.content)
+        transformed = transform_markdown(doc.content, doc)
         $obsidian_preprocess_cache[content_hash] = transformed
         doc.content = transformed
       end
     end
 
-    def transform_markdown(content)
+    def transform_markdown(content, doc)
       # 1. Convert Algorithms (must run before protection hides <pre> blocks)
       content = convert_algorithms(content)
 
@@ -94,8 +94,88 @@ module Jekyll
         content.gsub!("@@PROTECT#{i}@@", payload)
       end
 
+      # 6. High-Performance Refactoring (Ported from Liquid)
+      content = refactor_tables(content)
+      content = refactor_checkboxes(content)
+      content = refactor_images(content, doc)
+      content = refactor_headings(content)
+
       content
     end
+
+    def refactor_tables(content)
+      return content unless content.include?('<table')
+      # Wrap tables except those already inside a code block
+      content.gsub(/<table.*?<\/table>/m) do |table|
+        "<div class=\"table-wrapper\">#{table}</div>"
+      end
+    end
+
+    def refactor_checkboxes(content)
+      return content unless content.include?('type="checkbox"')
+      content.gsub(/<input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" \/>/, '<i class="fas fa-check-circle fa-fw checked"></i>')
+             .gsub(/<input type="checkbox" class="task-list-item-checkbox" disabled="disabled" \/>/, '<i class="far fa-circle fa-fw"></i>')
+    end
+
+    def refactor_headings(content)
+      # Process h2, h3, h4, h5
+      content.gsub(/<h([2-5]) id="([^"]+)">(.+?)<\/h\1>/) do
+        level = $1
+        id = $2
+        text = $3
+        anchor = "<a href=\"##{id}\" class=\"anchor text-muted\"><i class=\"fas fa-hashtag\"></i></a>"
+        "<h#{level} id=\"#{id}\"><span class=\"me-2\">#{text}</span>#{anchor}</h#{level}>"
+      end
+    end
+
+    def refactor_images(content, doc)
+      return content unless content.include?('<img ')
+      media_subpath = doc.data['media_subpath'] || ""
+      
+      content.gsub(/<img (.*?)>/) do |match|
+        attrs_str = $1
+        attrs = parse_html_attrs(attrs_str)
+        
+        src = attrs['src']
+        next match unless src # Safety
+        
+        # Handle media_subpath
+        unless src.start_with?('http', '//', '/')
+          src = File.join('/', media_subpath, src).gsub(/\/+/, '/')
+        end
+        
+        # Apply lazy loading and shimmer
+        classes = (attrs['class'] || "").split(' ')
+        classes << 'shimmer' unless attrs['lqip']
+        
+        new_attrs = attrs.dup
+        new_attrs['src'] = src
+        new_attrs['loading'] = 'lazy'
+        new_attrs['class'] = classes.join(' ')
+        
+        img_tag = "<img #{serialize_attrs(new_attrs)}>"
+        
+        # Wrap in popup link if not on home page
+        if doc.data['layout'] == 'home'
+          "<div class=\"preview-img #{new_attrs['class']}\">#{img_tag}</div>"
+        else
+          "<a href=\"#{src}\" class=\"popup img-link #{new_attrs['class']}\">#{img_tag}</a>"
+        end
+      end
+    end
+
+    def parse_html_attrs(str)
+      attrs = {}
+      str.scan(/(\w+)="([^"]*)"/).each do |k, v|
+        attrs[k] = v
+      end
+      attrs
+    end
+
+    def serialize_attrs(attrs)
+      attrs.map { |k, v| "#{k}=\"#{v}\"" }.join(' ')
+    end
+
 
     def convert_callouts(md)
       lines = md.split("\n")
