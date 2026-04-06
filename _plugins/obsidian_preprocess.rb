@@ -337,7 +337,12 @@ module Jekyll
         "<span class=\"algo-comment\">&nbsp;&nbsp;// #{$~[:braces][1..-2]}</span>"
       end
 
-      # 6. Cleanup backslashed braces
+      # 6. Standard LaTeX Text Formatting (within the algo block)
+      line = line.gsub(/\\textbf(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<strong>#{$~[:braces][1..-2]}</strong>" }
+      line = line.gsub(/\\textit(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<em>#{$~[:braces][1..-2]}</em>" }
+      line = line.gsub(/\\texttt(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<code>#{$~[:braces][1..-2]}</code>" }
+
+      # 7. Cleanup backslashed braces
       line = line.gsub("\\{", "{").gsub("\\}", "}")
       
       line.strip
