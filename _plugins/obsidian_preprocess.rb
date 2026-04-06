@@ -56,17 +56,16 @@ module Jekyll
       # This saves significant regex work on simple pages.
       return unless doc.content.include?('>') || doc.content.include?('$') || doc.content.include?('<pre class="pseudocode">')
 
-      # Use a persistent memory cache to avoid re-transforming unchanged content
-      # during 'jekyll serve' (incremental builds).
-      $obsidian_preprocess_cache ||= {}
-      content_hash = Digest::MD5.hexdigest(doc.content)
+      # Use Jekyll's persistent cache (stored in .jekyll-cache/)
+      @cache ||= Jekyll::Cache.new("ObsidianPreprocess")
       
-      if $obsidian_preprocess_cache.key?(content_hash)
-        doc.content = $obsidian_preprocess_cache[content_hash]
-      else
-        transformed = transform_markdown(doc.content, doc)
-        $obsidian_preprocess_cache[content_hash] = transformed
-        doc.content = transformed
+      # The cache key includes the content and layout/media_subpath which affect the transformation
+      cache_key = Digest::MD5.hexdigest("#{doc.content}#{doc.data['layout']}#{doc.data['media_subpath']}")
+      
+      doc.content = @cache.getset(cache_key) do
+        # Log only when actually transforming (cache miss)
+        Jekyll.logger.debug "ObsidianPreprocess:", "Cache miss for #{doc.relative_path}, transforming..."
+        transform_markdown(doc.content, doc)
       end
     end
 
