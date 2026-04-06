@@ -1,4 +1,6 @@
-{%- if page.calculated_related_posts and page.calculated_related_posts.size > 0 -%}
+{%- if page.related_posts_html -%}
+  {{ page.related_posts_html }}
+{%- elsif page.calculated_related_posts and page.calculated_related_posts.size > 0 -%}
   {%- assign related_ids = page.calculated_related_posts | map: 'id' | join: ',' -%}
   {%- include_cached related-posts-inner.html
     related_ids=related_ids

@@ -68,7 +68,42 @@ module Jekyll
       end
 
       # Pick the top 3 best-matching documents
-      doc.data['calculated_related_posts'] = sorted_related.take(3).map(&:first)
+      related = sorted_related.take(3).map(&:first)
+      doc.data['calculated_related_posts'] = related
+      
+      # 5. Pre-render HTML to save Liquid rendering time (Targeting ~6s savings)
+      next if related.empty?
+
+      # Use a simple Ruby-based template to avoid Liquid overhead
+      html_output = [
+        '<aside id="related-posts" aria-labelledby="related-label">',
+        '  <h3 class="mb-4" id="related-label">Related</h3>',
+        '  <nav class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4">'
+      ]
+
+      related.each do |other|
+        url = site.baseurl + other.url
+        title = other.data['title']
+        date = other.data['date'] ? other.data['date'].strftime('%Y-%m-%d') : ''
+        description = other.data['description'] || (other.content ? other.content[0..150] + '...' : '')
+        
+        html_output << "    <article class=\"col\">"
+        html_output << "      <a href=\"#{url}\" class=\"post-preview card h-100\">"
+        html_output << "        <div class=\"card-body\">"
+        html_output << "          <span class=\"text-muted small mb-2 d-block\">#{date}</span>"
+        html_output << "          <h4 class=\"pt-0 my-2\">#{title}</h4>"
+        html_output << "          <div class=\"text-muted\">"
+        html_output << "            <p>#{description}</p>"
+        html_output << "          </div>"
+        html_output << "        </div>"
+        html_output << "      </a>"
+        html_output << "    </article>"
+      end
+
+      html_output << '  </nav>'
+      html_output << '</aside>'
+      
+      doc.data['related_posts_html'] = html_output.join("\n")
     end
   end
 end

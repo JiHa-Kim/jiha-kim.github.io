@@ -19,15 +19,7 @@
 
         <div class="row flex-grow-1">
           <main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4">
-            {% if layout.layout == 'default' %}
-              {% include_cached refactor-content.html
-                id=page.id
-                lastmod=page.last_modified_at
-                lang=lang
-              %}
-            {% else %}
-              {{ content }}
-            {% endif %}
+                        {{ content }}
           </main>
 
           <!-- panel -->
