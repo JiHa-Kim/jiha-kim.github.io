@@ -3,13 +3,13 @@
   border-top: 1.5px solid var(--text-color);
   border-bottom: 1.5px solid var(--text-color);
   margin: 2rem 0;
-  padding: 0.5rem 0;
+  padding: 0; /* Header handles its own spacing */
   background-color: var(--main-wrapper-bg, transparent);
   color: var(--text-color);
 
   .algorithm-header {
     font-family: var(--main-font);
-    padding: 0.4rem 1rem;
+    padding: 0.6rem 1rem;
     border-bottom: 0.8px solid var(--text-color);
     font-size: 1.05rem;
     margin-bottom: 0.5rem;

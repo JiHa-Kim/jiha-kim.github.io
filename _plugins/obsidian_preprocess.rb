@@ -297,24 +297,22 @@ module Jekyll
     end
 
     def process_algo_line(line)
-      # Robust balanced brace matching for LaTeX arguments
-      # handles nesting like { \mathbb{R} }
-      brace_match = /\{(?:[^{}]++|\g<0>)*\}/
-
       # 1. State marker (hide)
-      line.gsub!("\\STATE", "")
+      line = line.gsub("\\STATE", "")
 
       # 2. Block starters with 1 arg: \IF{cond}, \WHILE{cond}, etc.
-      line.gsub!(/\\IF(#{brace_match})/) { "<span class=\"algo-kw\">if </span>#{$1[1..-2]} <span class=\"algo-kw\">then</span>" }
-      line.gsub!(/\\WHILE(#{brace_match})/) { "<span class=\"algo-kw\">while </span>#{$1[1..-2]} <span class=\"algo-kw\">do</span>" }
-      line.gsub!(/\\FOR(#{brace_match})/) { "<span class=\"algo-kw\">for </span>#{$1[1..-2]} <span class=\"algo-kw\">do</span>" }
-      line.gsub!(/\\UNTIL(#{brace_match})/) { "<span class=\"algo-kw\">until </span>#{$1[1..-2]}" }
+      # We use (?<braces>...) to define a named group for balanced braces and \g<braces> to recurse.
+      line = line.gsub(/\\IF(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<span class=\"algo-kw\">if </span>#{$~[:braces][1..-2]} <span class=\"algo-kw\">then</span>" }
+      line = line.gsub(/\\WHILE(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<span class=\"algo-kw\">while </span>#{$~[:braces][1..-2]} <span class=\"algo-kw\">do</span>" }
+      line = line.gsub(/\\FOR(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<span class=\"algo-kw\">for </span>#{$~[:braces][1..-2]} <span class=\"algo-kw\">do</span>" }
+      line = line.gsub(/\\UNTIL(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<span class=\"algo-kw\">until </span>#{$~[:braces][1..-2]}" }
 
       # 3. Procedure with 2 args: \PROCEDURE{Name}{Args}
-      line.gsub!(/\\PROCEDURE(#{brace_match})(#{brace_match})/) do
-        name = $1[1..-2]
-        args = $2[1..-2]
-        "<span class=\"algo-kw\">procedure </span> <span class=\"algo-func\">#{name}</span>(#{args})"
+      # Re-use the named group 'braces' by calling it again with \g<braces>
+      line = line.gsub(/\\PROCEDURE(?<name>\{(?:[^{}]++|\g<name>)*\})(?<args>\{(?:[^{}]++|\g<args>)*\})/) do
+        n = $~[:name][1..-2]
+        a = $~[:args][1..-2]
+        "<span class=\"algo-kw\">procedure </span> <span class=\"algo-func\">#{n}</span>(#{a})"
       end
 
       # 4. Simple keywords (no args)
@@ -330,12 +328,13 @@ module Jekyll
         "\\ENDPROCEDURE" => "end procedure"
       }
       simple_kw.each do |latex, plain|
-         line.gsub!(Regexp.escape(latex), "<span class=\"algo-kw\">#{plain}</span>")
+         # Use Regexp.new to match the literal backslash but not escape the whole thing into a literal string search
+         line = line.gsub(Regexp.new(Regexp.escape(latex)), "<span class=\"algo-kw\">#{plain}</span>")
       end
 
       # 5. Comments: \COMMENT{text}
-      line.gsub!(/\\COMMENT(#{brace_match})/) do
-        "<span class=\"algo-comment\">&nbsp;&nbsp;// #{$1[1..-2]}</span>"
+      line = line.gsub(/\\COMMENT(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) do
+        "<span class=\"algo-comment\">&nbsp;&nbsp;// #{$~[:braces][1..-2]}</span>"
       end
 
       # 6. Cleanup backslashed braces
