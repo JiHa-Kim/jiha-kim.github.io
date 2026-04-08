@@ -309,7 +309,10 @@ module Jekyll
         has_env = SKIP_FORMATTING_ENVS.any? { |env| math_content.include?("\\begin{#{env}}") }
         math_content = cleanup_latex_syntax(math_content) unless has_env
         
-        "\n#{indent}<div class=\"math-block\" markdown=\"0\">\n\\[\n#{math_content.strip}\n\\]\n#{indent}</div>\n"
+        # Double backslashes to protect them from Kramdown unescaping
+        math_content = math_content.strip.gsub('\\', '\\\\\\\\')
+        
+        "\n#{indent}<div class=\"math-block\" markdown=\"0\">\n\\[\n#{math_content}\n\\]\n#{indent}</div>\n"
       end
     end
 
@@ -317,6 +320,8 @@ module Jekyll
       content.gsub(/(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)(?<!\$)\$(?!\$)|\\\(([\s\S]+?)\\\)/) do
         math_content = $1 || $2
         math_content = cleanup_latex_syntax(math_content)
+        # Double backslashes to protect them from Kramdown unescaping
+        math_content = math_content.gsub('\\', '\\\\\\\\')
         "<span class=\"math-inline\" markdown=\"0\">\\(#{math_content}\\)</span>"
       end
     end
