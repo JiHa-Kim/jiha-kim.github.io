@@ -135,9 +135,43 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Stable Hybrid Polar: 1 DWH + 2 PE</div>
 <pre class="pseudocode">
 \begin{algorithmic}
+\PROCEDURE{Sym}{A}
+    \RETURN $\frac{1}{2}(A + A^\top)$
+\ENDPROCEDURE
+
+\PROCEDURE{MomentUpperBound}{G}
+    \STATE $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
+    \RETURN $u_M$
+\ENDPROCEDURE
+
+\PROCEDURE{SafeSolveSPD}{S}
+    \STATE $\tau \leftarrow 0$
+    \WHILE{true}
+        \STATE \textbf{try} $L \leftarrow \mathrm{Cholesky}(S + \tau I)$
+        \IF{success}
+            \RETURN $\mathrm{solve}(L L^\top, I)$
+        \ELSE
+            \STATE $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$
+        \ENDIF
+    \ENDWHILE
+\ENDPROCEDURE
+
 \PROCEDURE{HybridPolar}{$X \in \mathbb{R}^{M \times N}$}
-    \STATE $Y \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(Y^\top Y)$ \COMMENT{ Jacobi Preconditioning }
-    \STATE $u \leftarrow \mathrm{MomentUpperBound}(G), \quad B \leftarrow G/u, \quad Y \leftarrow Y/\sqrt{u}$
+    \IF{$M < N$}
+        \STATE $X \leftarrow X^\top$
+    \ENDIF
+
+    \STATE \COMMENT{--- Preconditioning & Form Gram ---}
+    \STATE $s_{\mathrm{glob}} \leftarrow 2^{\lfloor \log_2(\max |X_{ij}|) \rceil}$
+    \STATE $X \leftarrow X / s_{\mathrm{glob}}$
+    \STATE $d_j \leftarrow 1/\max(\|X_{:j}\|_2, d_{\min})$
+    \STATE $D \leftarrow \operatorname{diag}(d_j)$
+    \STATE $Y \leftarrow X D$
+    \STATE $G \leftarrow \mathrm{Sym}(Y^\top Y)$
+
+    \STATE \COMMENT{--- Normalize Gram ---}
+    \STATE $u \leftarrow \mathrm{MomentUpperBound}(G)$
+    \STATE $B \leftarrow G/u, \quad Y \leftarrow Y/\sqrt{u}$
     \STATE $K \leftarrow I$
 
     \STATE \COMMENT{--- Step 1: DWH ($\ell_0 = 10^{-3}$) ---}
