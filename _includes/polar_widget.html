@@ -140,7 +140,7 @@
     flex: 1;
     min-width: 300px;
     position: relative;
-    background: #fff;
+    background: var(--main-bg, #fff);
     border-radius: 12px;
     padding: 12px;
     border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
@@ -148,8 +148,8 @@
     height: 100%;
 }
 [data-mode="dark"] .pw-graph {
-    background: #1b1b1e;
-    border-color: rgba(255,255,255,0.05);
+    background: var(--main-bg, #1b1b1e);
+    border-color: var(--card-border, rgba(255,255,255,0.05));
 }
 .pw-method-card {
     background: var(--card-bg, rgba(120, 120, 120, 0.05));
@@ -490,6 +490,24 @@ document.addEventListener("DOMContentLoaded", function() {
     logXAxis.addEventListener('change', generateData);
     logErrorAxis.addEventListener('change', generateData);
 
+    function getThemeColors() {
+        const style = getComputedStyle(document.documentElement);
+        const isDark = document.documentElement.getAttribute("data-mode") === "dark";
+        
+        // Use the site's text color variable, with forced contrast fallbacks
+        let textColor = style.getPropertyValue('--text-color').trim();
+        if (!textColor) {
+            textColor = isDark ? "#f0f0f0" : "#222";
+        }
+
+        return {
+            grid: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+            ticks: textColor,
+            text: textColor
+        };
+    }
+
+    const theme = getThemeColors();
     const ctx = document.getElementById('polarPatternChart').getContext('2d');
     let chart = new Chart(ctx, {
         type: 'line',
@@ -500,7 +518,10 @@ document.addEventListener("DOMContentLoaded", function() {
             animation: { duration: 200 },
             interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { position: 'top', labels: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "#ccc" : "#444" } },
+                legend: { 
+                    position: 'top', 
+                    labels: { color: theme.text } 
+                },
                 tooltip: {
                     callbacks: {
                         title: (ctx) => `x = ${Number(ctx[0].parsed.x).toPrecision(4)}`,
@@ -511,17 +532,17 @@ document.addEventListener("DOMContentLoaded", function() {
             scales: {
                 x: {
                     type: 'linear',
-                    title: { display: true, text: 'Input Singular Value x' },
+                    title: { display: true, text: 'Input Singular Value x', color: theme.ticks },
                     min: 0, max: 1.1,
-                    grid: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" },
-                    ticks: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "#aaa" : "#555" }
+                    grid: { color: theme.grid },
+                    ticks: { color: theme.ticks }
                 },
                 y: {
                     type: 'linear',
-                    title: { display: true, text: 'Mapped Value f(x)' },
+                    title: { display: true, text: 'Mapped Value f(x)', color: theme.ticks },
                     min: 0, max: 1.1,
-                    grid: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" },
-                    ticks: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "#aaa" : "#555" }
+                    grid: { color: theme.grid },
+                    ticks: { color: theme.ticks }
                 }
             }
         }
@@ -654,11 +675,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.attributeName === "data-mode") {
-                const mode = document.documentElement.getAttribute("data-mode");
-                chart.options.scales.x.grid.color = mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
-                chart.options.scales.y.grid.color = mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
-                chart.options.scales.x.ticks.color = mode === "dark" ? "#aaa" : "#555";
-                chart.options.scales.y.ticks.color = mode === "dark" ? "#aaa" : "#555";
+                const theme = getThemeColors();
+                
+                chart.options.plugins.legend.labels.color = theme.text;
+                chart.options.scales.x.grid.color = theme.grid;
+                chart.options.scales.x.ticks.color = theme.ticks;
+                chart.options.scales.x.title.color = theme.ticks;
+                chart.options.scales.y.grid.color = theme.grid;
+                chart.options.scales.y.ticks.color = theme.ticks;
+                chart.options.scales.y.title.color = theme.ticks;
+                
                 renderMethodsUI();
                 chart.update();
             }
