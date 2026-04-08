@@ -123,7 +123,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 
 ### 3.1 Stability Primitives
 
-1.  **Column Normalization**: Divide $X$ by global scale $s_{\text{glob}}$, then compute FP32 column norms $n_j = \|X_{:j}\|_2$. Let $D = \text{diag}(1/\max(n_j, d_{\min}))$. Working with $Y = XD$ ensures the Gram diagonals stay near 1.
+1.  **Column Normalization**: Compute FP32 column norms $n_j = \|X_{:j}\|_2$. Let $D = \text{diag}(1/\max(n_j, d_{\min}))$. Working with $Y = XD$ ensures the Gram diagonals stay near 1.
 2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
     $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
     where $\eta$ is a safety margin. This bound is tighter than scaling the full $u$ because it only adds a small multiple of the mean eigenvalue.
@@ -178,8 +178,6 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
     \ENDIF
 
     \STATE \COMMENT{--- Preconditioning & Form Gram ---}
-    \STATE $s_{\mathrm{glob}} \leftarrow 2^{\lfloor \log_2(\max |X_{ij}|) \rceil}$
-    \STATE $X \leftarrow X / s_{\mathrm{glob}}$
     \STATE $d_j \leftarrow 1/\max(\|X_{:j}\|_2, d_{\min})$
     \STATE $D \leftarrow \operatorname{diag}(d_j), \quad Y \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(Y^\top Y)$
 
