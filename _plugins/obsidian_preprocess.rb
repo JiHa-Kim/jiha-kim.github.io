@@ -94,10 +94,7 @@ module Jekyll
       end
 
       # 6. High-Performance Refactoring (Ported from Liquid)
-      content = refactor_tables(content)
-      content = refactor_checkboxes(content)
-      content = refactor_images(content, doc)
-      content = refactor_headings(content)
+      # These operate on HTML and have been moved to a :post_convert hook below.
 
       content
     end
@@ -250,12 +247,14 @@ module Jekyll
       # Smart joiner that injects extra newlines for block-level elements
       joined_body = String.new
       in_code = false
+      in_math = false
       content_lines.each_with_index do |line, idx|
         joined_body << line << "\n"
         in_code = !in_code if line.lstrip.start_with?("```")
+        in_math = !in_math if line.strip == "$$" && !in_code
         
         next_line = content_lines[idx+1]
-        if next_line && !in_code && !line.strip.empty? && !next_line.strip.empty?
+        if next_line && !in_code && !in_math && !line.strip.empty? && !next_line.strip.empty?
           # Do not split table rows (lines starting with '|')
           is_table_row = line.strip.start_with?('|') && next_line.strip.start_with?('|')
           
@@ -426,5 +425,17 @@ module Jekyll
       
       line.strip
     end
+  end
+end
+
+# Register post_convert hook for HTML refactorings
+Jekyll::Hooks.register [:pages, :documents], :post_convert do |doc|
+  # Only process full HTML content docs
+  if doc.content
+    preprocessor = Jekyll::ObsidianPreprocess.new(nil)
+    doc.content = preprocessor.refactor_tables(doc.content)
+    doc.content = preprocessor.refactor_checkboxes(doc.content)
+    doc.content = preprocessor.refactor_images(doc.content, doc)
+    doc.content = preprocessor.refactor_headings(doc.content)
   end
 end
