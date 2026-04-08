@@ -249,16 +249,20 @@ where:
 > import numpy as np
 >
 > def dwh_coeffs(ell):
->     gamma = (4 * (1 - ell**2) / ell**4) ** (1.0 / 3.0)
->     r = np.sqrt(1 + gamma)
->     a = r + 0.5 * np.sqrt(8 - 4 * gamma + 8 * (2 - ell**2) / (ell**2 * r))
+>     gamma_inner = (4 * (1 - ell**2) / ell**4) ** (1.0 / 3.0)
+>     r = np.sqrt(1 + gamma_inner)
+>     a = r + 0.5 * np.sqrt(8 - 4 * gamma_inner + 8 * (2 - ell**2) / (ell**2 * r))
 >     b = (a - 1) ** 2 / 4
 >     c = a + b - 1
->     return a, b, c
+>     
+>     alpha = b / c
+>     beta = (a - alpha) / c
+>     gamma = 1 / c
+>     return alpha, beta, gamma
 >
 >
-> def dwh_map(x, a, b, c):
->     return x * (a + b * x**2) / (1 + c * x**2)
+> def dwh_map(x, alpha, beta, gamma):
+>     return alpha * x + beta * x / (gamma + x**2)
 >
 >
 > def analytic_pe_coeffs(ell):
@@ -288,8 +292,8 @@ where:
 >
 > # Reproduce progression
 > ell_0 = 1e-3
-> a, b, c = dwh_coeffs(ell_0)
-> ell_1 = dwh_map(ell_0, a, b, c)
+> alpha, beta, gamma = dwh_coeffs(ell_0)
+> ell_1 = dwh_map(ell_0, alpha, beta, gamma)
 > print(f"DWH: [{ell_1:.4f}, 1]")
 > a1, b1, c1 = analytic_pe_coeffs(ell_1)
 > u1 = a1 + b1 + c1
@@ -300,7 +304,7 @@ where:
 > ell_3 = ell_2*(a2 + b2*ell_2**2 + c2*ell_2**4)/u2
 > print(f"PE2: [{ell_3:.4f}, 1]")
 > ```
-> </blockquote>
+
 
 ---
 
