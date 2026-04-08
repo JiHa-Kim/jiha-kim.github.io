@@ -142,10 +142,12 @@ The following support procedures handle symmetrization, robust eigenvalue upper-
     \RETURN $\frac{1}{2}(A + A^\top)$
 \ENDPROCEDURE
 
+
 \PROCEDURE{MomentUpperBound}{G}
     \STATE $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     \RETURN $u_M$
 \ENDPROCEDURE
+
 
 \PROCEDURE{SafeSolveSPD}{S}
     \STATE $\tau \leftarrow 0$
@@ -251,8 +253,10 @@ where:
 >     c = a + b - 1
 >     return a, b, c
 >
+>
 > def dwh_map(x, a, b, c):
 >     return x * (a + b * x**2) / (1 + c * x**2)
+>
 >
 > def analytic_pe_coeffs(ell):
 >     L2, L4, L6 = ell**2, ell**4, ell**6
@@ -277,6 +281,7 @@ where:
 >             c, b, a = 2/D, -5*c/3*S, 5*c*P
 >             if 1 - ell*(a + b*ell**2 + c*ell**4) < 1: return a, b, c
 >     return None
+>
 >
 > # Reproduce progression
 > ell_0 = 1e-3
