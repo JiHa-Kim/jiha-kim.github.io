@@ -109,21 +109,11 @@ This lets us write the update as $R = \alpha I + \beta (\gamma I + B)^{-1}$, com
 We use the degree-5 odd polynomial $p(x) = x(a + bx^2 + cx^4)$. To keep the top endpoint fixed, we normalize by $p(1)$: $\hat{p}(x) = p(x)/(a+b+c)$.
 
 > [!theorem] Closed-Form PE Coefficients (Gram-Quadratic)
-> Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of $F(q_0; \ell) = 0$ (see Appendix B) that yields equioscillation with minimax error $E < 1$. Define:
+> Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of $F(q_0; \ell) = 0$ (see Appendix A and B) that yields equioscillation with minimax error $E < 1$. Define:
 > $$r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)},\quad S = q_0^2 + r^2,\quad P = q_0^2 r^2,\quad D = \left(1 - \frac{5}{3}S + 5P\right) + \ell\left(\ell^4 - \frac{5}{3}S\ell^2 + 5P\right).$$
 > Then the minimax coefficients are:
 > $$c = \frac{2}{D},\qquad b = -\frac{5c}{3}\,S,\qquad a = 5cP.$$
 
-> [!remark] Isolation of the Minimax Root
-> The degree-9 equation $F(q_0; \ell) = 0$ is obtained by eliminating other variables and thus contains extraneous branches that do not correspond to the minimax solution.
-> 
-> Let $V = \operatorname{span}\{x, x^3, x^5\}$ and $e(x) = 1 - p(x)$ on $[\ell, 1]$. Since $V$ is a 3-dimensional Haar (Chebyshev) space on the positive interval, the best uniform approximant $p^* \in V$ is uniquely characterized by the existence of $4$ points $\ell \le x_0 < x_1 < x_2 < x_3 \le 1$ such that $e^*(x_j) = \pm E$ with alternating signs.
-> 
-> In our parametrization, the error $e(x)$ has critical points precisely at $q_0$ and $r$. A real root $q_0$ of $F(q_0;\ell) = 0$ is therefore the **unique** valid minimax solution if and only if it produces an ordering:
-> $$ \ell < q_0 < r < 1 $$
-> and alternating error signs:
-> $$ e(\ell) > 0, \quad e(q_0) < 0, \quad e(r) > 0, \quad e(1) < 0 $$
-> Since $e(x) = 1 - p(x)$, we isolate the root by rigorously verifying that $p(\ell)$ and $p(r)$ dip strictly underneath $1$ (yielding $E > 0$), whereas $p(q_0)$ and $p(1)$ push strictly above $1$ (yielding $-E < 0$). Extraneous roots will natively fail this geometric alternation condition!
 
 ---
 
@@ -270,7 +260,19 @@ where:
 - $F_2(q_0) = 3600q_0^5 + 5800q_0^4 + 3900q_0^3 + 1750q_0^2 + 600q_0 + 100$
 - $F_3(q_0) = 125(2q_0 + 1)^3$
 
-## Appendix B: Verification Code
+## Appendix B: Isolation of the Minimax Root
+
+The degree-9 equation $F(q_0; \ell) = 0$ is obtained by eliminating other variables and thus contains extraneous branches that do not correspond to the minimax solution.
+
+Let $V = \operatorname{span}\{x, x^3, x^5\}$ and $e(x) = 1 - p(x)$ on $[\ell, 1]$. Since $V$ is a 3-dimensional Haar (Chebyshev) space on the positive interval, the best uniform approximant $p^* \in V$ is uniquely characterized by the existence of $4$ points $\ell \le x_0 < x_1 < x_2 < x_3 \le 1$ such that $e^*(x_j) = \pm E$ with alternating signs.
+
+In our parametrization, the error $e(x)$ has critical points precisely at $q_0$ and $r$. A real root $q_0$ of $F(q_0;\ell) = 0$ is therefore the **unique** valid minimax solution if and only if it produces an ordering:
+$$ \ell < q_0 < r < 1 $$
+and alternating error signs:
+$$ e(\ell) > 0, \quad e(q_0) < 0, \quad e(r) > 0, \quad e(1) < 0 $$
+Since $e(x) = 1 - p(x)$, we isolate the root by rigorously verifying that $p(\ell)$ and $p(r)$ dip strictly underneath $1$ (yielding $E > 0$), whereas $p(q_0)$ and $p(1)$ push strictly above $1$ (yielding $-E < 0$). Extraneous roots will natively fail this geometric alternation condition!
+
+## Appendix C: Verification Code
 
 > [!example]- Python: Scalar Iteration and Analytic PE Coefficients
 > ```python
