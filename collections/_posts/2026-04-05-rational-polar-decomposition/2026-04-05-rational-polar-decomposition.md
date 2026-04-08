@@ -27,41 +27,31 @@ scholar:
 
 ## 1. Why a Hybrid?
 
+Iterative methods for the polar factor work by applying a scalar iteration $f(x)$ to the singular values $\sigma_i$ of $A$. After normalization so that $\sigma_{\max} = 1$, the goal is to drive the lower endpoint of the singular value interval $\ell \to 1$.
+
 ### 1.1 The Two Scalar Maps
 
-Iterative methods for the polar factor work by applying a scalar function $f(x)$ to the singular values $\sigma_i$ of $A$. After normalizing so that $\sigma_{\max} = 1$, the current singular-value interval is $[\ell, 1]$ and the iteration drives $\ell \to 1$.
-
-- **DWH (rational)**: the Dynamic Weighted Halley map {% cite nakatsukasaOptimizingHalleyIteration2010 %} applies
+- **DWH (rational)**: the Dynamic Weighted Halley map {% cite nakatsukasaOptimizingHalleyIteration2010 %} applies the rational function:
 
 $$
-f_{\text{DWH}}(x) = x\frac{a + bx^2}{1 + cx^2},
+f_{\text{DWH}}(x) = x\frac{a + bx^2}{1 + cx^2}
 $$
 
-where the coefficients $a, b, c$ are chosen optimally for the current floor $\ell$.
+where the coefficients $a, b, c$ are chosen optimally for the current floor $\ell$. Rational maps are exceptionally powerful at lifting small $\ell$ but require a linear solve per update step.
 
-- **Polar Express (polynomial)**: the degree-5 PE map {% cite polarExpress2025 %} applies
-
-$$
-p(x) = x(a + bx^2 + cx^4) = ax + bx^3 + cx^5,
-$$
-
-where $(a, b, c)$ solve the minimax problem $\min_{a,b,c}\max_{x \in [\ell,1]} |1 - p(x)|$.
-
-The key empirical fact:
-- **Rational wins in the hard regime** (small $\ell$, high condition number).
-- **Polynomial wins once the interval is already easy** ($\ell$ not too small), and it is cheaper per step (no linear solve).
-
-So the best pattern is not "all rational" or "all polynomial." It is:
+- **Polar Express (polynomial)**: the degree-5 PE map {% cite polarExpress2025 %} applies the odd polynomial:
 
 $$
-\boxed{\text{1 DWH step} \;\to\; \text{2 normalized PE quintic steps}.}
+p(x) = x(a + bx^2 + cx^4) = ax + bx^3 + cx^5
 $$
 
-### 1.2 The Comparison That Motivates the Switch
+where $(a, b, c)$ solve the minimax problem $\min_{a,b,c}\max_{x \in [\ell,1]} |1 - p(x)|$. Polynomials are cheaper per step (no solve) but struggle once $\ell$ is very small.
 
-All comparisons use the same normalization: after each PE step we divide by $p(1)$ so that $\hat{p}(1) = 1$; DWH already satisfies $f_{\text{DWH}}(1) = 1$. The running interval is always $[\ell_k, 1]$.
+The key empirical fact: **Rational wins in the hard regime** (high condition number), while **Polynomial wins once the interval is easy**.
 
-For each starting $\ell$, we report the final lower endpoint. Larger is better.
+### 1.2 Motivation: Crossing the Crossover
+
+The following table reports the final lower endpoint for different starting floors $\ell$. Larger is better. (Polynomial steps are normalized so $\hat{p}(1)=1$).
 
 | Start $\ell$       | 1 DWH    | 2 PE     | 5 PE        |
 |:-------------------|:---------|:---------|:------------|
@@ -74,28 +64,17 @@ For each starting $\ell$, we report the final lower endpoint. Larger is better.
 | $10^{-4}$          | 0.116562 | 0.001811 | 0.133854    |
 | $10^{-6}$          | 0.025194 | 0.000018 | 0.001398    |
 
-Two crossover facts:
+At the standard design floor of $\ell_0 = 10^{-3}$: **2 PE steps from scratch are useless**, and even 5 PE steps leave significant error. However, a single DWH step lifts the floor to $\approx 0.25$—exactly where polynomial iterations enter their "sweet spot."
 
-- **2 PE beats 1 DWH** only once $\ell \gtrsim 8.9 \times 10^{-2}$.
-- **5 PE beats 1 DWH** once $\ell \gtrsim 8.0 \times 10^{-5}$.
+### 1.3 The Hybrid Sweet Spot
 
-So from scratch at $\ell = 10^{-3}$: 2 PE is much worse than 1 DWH; 5 PE is better than 1 DWH but still leaves a lot on the table.
-
-### 1.3 Key Result: 1 DWH + 2 PE at $\ell_0 = 10^{-3}$
-
-| Method | Final interval | Lower endpoint | Polar error $1-\ell$ |
-|---|---:|---:|---:|
-| 1 DWH | $[0.248039, 1]$ | 0.248039 | 0.751961 |
-| 2 PE | $[0.018033, 1]$ | 0.018033 | 0.981967 |
-| 5 PE | $[0.796221, 1]$ | 0.796221 | 0.203779 |
-| **1 DWH + 2 PE** | $[0.995160, 1]$ | **0.995160** | **0.004840** |
+For $\ell_0 = 10^{-3}$, the best pattern is not "all rational" or "all polynomial." It is the synergy of both:
 
 $$
-\boxed{\text{At } \ell_0 = 10^{-3},\; \text{1 DWH + 2 PE is dramatically better than 5 PE from scratch}.}
+\boxed{\text{1 DWH step} \;\to\; \text{2 normalized PE quintic steps}.}
 $$
 
-### 1.4 The Hybrid Progression
-
+The progression at $\ell_0 = 10^{-3}$ demonstrates the efficiency:
 $$
 [10^{-3},1]
 \;\xrightarrow{\;\text{1 DWH}\;}
@@ -106,400 +85,126 @@ $$
 [0.995160,1].
 $$
 
-The first DWH step gets past the regime where polynomial steps struggle. Once $\ell \approx 0.25$, the degree-5 PE map is already in its sweet spot, and one more PE step nearly finishes the job.
-
 ---
 
-## 2. The DWH Front-End
+## 2. Theoretical Components
 
-### 2.1 The Rational Map
+### 2.1 The DWH Front-End (Rational)
 
-Given a design floor $\ell \in (0, 1]$, the DWH scalar map is
-
+Given a design floor $\ell \in (0, 1]$, the DWH coefficients $a, b, c$ are computed as:
 $$
-f(x) = x\frac{a + bx^2}{1 + cx^2},
-$$
-
-with coefficients computed offline in FP64:
-
-$$
-\gamma(\ell) = \left(\frac{4(1 - \ell^2)}{\ell^4}\right)^{1/3},\qquad r = \sqrt{1 + \gamma},
+\gamma = \left(\frac{4(1 - \ell^2)}{\ell^4}\right)^{1/3},\quad r = \sqrt{1 + \gamma},\quad a = r + \frac{1}{2}\sqrt{8 - 4\gamma + \frac{8(2 - \ell^2)}{\ell^2 r}}, \quad b = \frac{(a-1)^2}{4}, \quad c = a+b-1.
 $$
 
-$$
-a(\ell) = r + \frac{1}{2}\sqrt{8 - 4\gamma + \frac{8(2 - \ell^2)}{\ell^2 r}},
-$$
-
-$$
-b(\ell) = \frac{(a-1)^2}{4},\qquad c(\ell) = a + b - 1.
-$$
-
-For the Gram-space iteration, we use the "apply-friendly" reparametrization:
-
+In the Gram-space iteration ($B = A^\top A$), we use the **"apply-friendly" reparametrization**:
 $$
 \alpha = \frac{b}{c},\qquad \beta = a - \alpha.
 $$
+This lets us write the update as $R = \alpha I + \beta (I + cB)^{-1}$, avoiding the formation of large intermediate matrices and requiring only one SPD solve.
 
-This lets us write the Gram-space DWH step as $R = \alpha I + \beta (I + cB)^{-1}$, avoiding the formation of large intermediate matrices.
+### 2.2 Polar Express Cleanup (Polynomial)
 
----
-
-## 3. Polar Express Cleanup
-
-### 3.1 Degree-5 Map and Normalization
-
-Each PE cleanup step applies the degree-5 odd polynomial in the Gram-quadratic form:
-
-$$
-q(s) = a + bs + cs^2,\qquad p(x) = xq(x^2) = ax + bx^3 + cx^5.
-$$
-
-The coefficients $(a, b, c)$ solve the minimax problem:
-
-$$
-\min_{a,b,c}\;\max_{x \in [\ell,1]}\;|1 - xq(x^2)|.
-$$
-
-For the hybrid, we normalize each PE step by $p(1) = a + b + c$ so that the top endpoint stays pinned at 1:
-
-$$
-\hat{p}(x) = \frac{p(x)}{p(1)},\qquad \hat{p}(1) = 1.
-$$
-
-This is the right normalization for Muon-style usage, where we want a controlled dynamic range at every stage.
-
-### 3.2 Analytic Solution for PE Coefficients
+We use the degree-5 odd polynomial $p(x) = x(a + bx^2 + cx^4)$. To keep the top endpoint fixed, we normalize by $p(1)$: $\hat{p}(x) = p(x)/(a+b+c)$.
 
 > [!theorem] Closed-Form PE Coefficients (Gram-Quadratic)
-> Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of $F(q_0; \ell) = 0$ that yields equioscillation with minimax error $E < 1$, where
->
-> $$
-> \begin{aligned}
-> F(q_0; \ell) &= -2048q_0^9 - 5888q_0^8 - 9608q_0^7 - 7728q_0^6 - 1288q_0^5 \\
-> &\quad + 1748q_0^4 + 888q_0^3 + 8q_0^2 - 72q_0 - 12 \\
-> &\quad + \ell^2(4520q_0^7 + 9340q_0^6 + 10990q_0^5 + 8525q_0^4 + 3200q_0^3 + 80q_0^2 - 240q_0 - 40) \\
-> &\quad - \ell^4(3600q_0^5 + 5800q_0^4 + 3900q_0^3 + 1750q_0^2 + 600q_0 + 100) \\
-> &\quad + \ell^6(1000q_0^3 + 1500q_0^2 + 750q_0 + 125).
-> \end{aligned}
-> $$
->
-> Define the auxiliary quantities
->
-> $$
-> r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)},\qquad r = \sqrt{r^2},
-> $$
->
-> $$
-> S = q_0^2 + r^2,\qquad P = q_0^2 r^2,
-> $$
->
-> $$
-> D = \left(1 - \frac{5}{3}S + 5P\right) + \ell\left(\ell^4 - \frac{5}{3}S\ell^2 + 5P\right).
-> $$
->
-> Then the minimax coefficients are
->
-> $$
-> c = \frac{2}{D},\qquad b = -\frac{5c}{3}\,S,\qquad a = 5cP.
-> $$
->
-> The minimax error and symmetric image are
->
-> $$
-> E = 1 - p(\ell) = 1 - \ell(a + b\ell^2 + c\ell^4),\qquad p([\ell, 1]) = [1-E, 1+E].
-> $$
+> Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of $F(q_0; \ell) = 0$ (see Appendix B) that yields equioscillation with minimax error $E < 1$. Define:
+> $$r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)},\quad S = q_0^2 + r^2,\quad P = q_0^2 r^2,\quad D = \left(1 - \frac{5}{3}S + 5P\right) + \ell\left(\ell^4 - \frac{5}{3}S\ell^2 + 5P\right).$$
+> Then the minimax coefficients are:
+> $$c = \frac{2}{D},\qquad b = -\frac{5c}{3}\,S,\qquad a = 5cP.$$
 
-> [!remark] Implementation Note
-> The degree-9 polynomial $F$ may have more than one root in $(\ell, 1)$. The correct root is the one that yields the genuine equioscillation (minimax error $E < 1$). In practice, for moderate $\ell$ (such as the intervals arising after a DWH step), there is typically a unique valid root that is easy to isolate by bisection or a standard root finder in FP64.
-
-This replaces a generic Remez solver with a single polynomial root plus closed-form expressions—trivially computable offline with a CAS or a small script.
-
-### 3.3 Concrete Coefficients for the Default Design
-
-For the default design floor $\ell_0 = 10^{-3}$:
-
-**DWH step** ($[\ell_0, 1] \to [0.248039, 1]$):
-
-$$
-a_0 = 251.9921050507,\qquad b_0 = 15749.2591994423,\qquad c_0 = 16000.2513044930.
-$$
-
-**PE step 1** on $[0.248039, 1]$ (raw coefficients, $q_0 \approx 0.4855$):
-
-$$
-a_1 = 3.8244529380,\qquad b_1 = -7.1810660563,\qquad c_1 = 4.5133462439.
-$$
-
-Top-end value $u_1 = p_1(1) = 1.1567331257$. Normalized coefficients:
-
-$$
-\hat{a}_1 = 3.3062534938,\qquad \hat{b}_1 = -6.2080577594,\qquad \hat{c}_1 = 3.9018042657.
-$$
-
-This sends $[0.248039, 1] \mapsto [0.729007, 1]$.
-
-**PE step 2** on $[0.729007, 1]$ (raw coefficients, $q_0 \approx 0.8009$):
-
-$$
-a_2 = 2.1994442294,\qquad b_2 = -1.9796606135,\qquad c_2 = 0.7826424106.
-$$
-
-Top-end value $u_2 = p_2(1) = 1.0024260266$. Normalized coefficients:
-
-$$
-\hat{a}_2 = 2.1941212330,\qquad \hat{b}_2 = -1.9748695275,\qquad \hat{c}_2 = 0.7807482945.
-$$
-
-This sends $[0.729007, 1] \mapsto [0.995160, 1]$.
+> [!remark] Root Isolation
+> The degree-9 polynomial $F$ typically has a unique valid root in $(\ell, 1)$ that yields $E < 1$. It is easily isolated via bisection in FP64.
 
 ---
 
-## 4. Stability Primitives
+## 3. Hardware-Aware Implementation
 
-The guiding principle:
+In ML applications, the polar decomposition must be stable under FP16/BF16 arithmetic. We work in the tall orientation $X \in \mathbb{R}^{M \times N}, M \ge N$.
 
-$$
-\boxed{\text{Keep the working matrix and the small-side Gram in the same } O(1) \text{ dynamic range at every stage.}}
-$$
+### 3.1 Stability Primitives
 
-We work in the tall orientation $X \in \mathbb{R}^{M \times N}$, $M \ge N$. For $A \in \mathbb{R}^{m \times n}$, set $X = A$ if $m \ge n$ and $X = A^\top$ otherwise.
+1.  **Column Normalization**: Divide $X$ by global scale $s_{\text{glob}}$, then compute FP32 column norms $n_j = \|X_{:j}\|_2$. Let $D = \text{diag}(1/\max(n_j, d_{\min}))$. Working with $Y = XD$ ensures the Gram diagonals stay near 1.
+2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
+    $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
+    where $\eta$ is a safety margin. This bound is tighter than scaling the full $u$ because it only adds a small multiple of the mean eigenvalue.
+3.  **Safe SPD Solve**: For $(I + cB)$, we use Cholesky with adaptive jitter. If it fails, we add diagonal shift $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$ and retry.
 
-### 4.1 GEMM-Safe Scaling and Column Normalization
-
-1. **Global scaling.** Since the polar factor is scale-invariant, divide by a power-of-two or max-absolute-value to prevent overflow:
-
-$$
-X \leftarrow X / s_{\text{glob}}.
-$$
-
-2. **Column normalization (Jacobi preconditioning).** Compute column norms in FP32:
-
-$$
-n_j = \|X_{:j}\|_2,\qquad d_j = \frac{1}{\max(n_j, d_{\min})},\qquad D = \operatorname{diag}(d_j),\qquad Y = XD.
-$$
-
-This keeps the Gram diagonals near 1, improving conditioning for the FP16/BF16 GEMM.
-
-### 4.2 Moment-Based Upper Bound
-
-We avoid power iteration for $\lambda_{\max}$ by using a moment-based upper bound computed from the Gram $G = \text{Sym}(Y^\top Y)$:
-
-$$
-u_M = \frac{\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N},\qquad u_F = \|G\|_F,
-$$
-
-$$
-u = \min(u_M, u_F) \cdot (1 + \eta),
-$$
-
-where $\eta$ is a small safety margin for matmul rounding. Then $B = G/u$ has $\lambda_{\max}(B) \le 1$.
-
-### 4.3 Symmetrization
-
-After every $N \times N$ product, force symmetry: $B \leftarrow \tfrac{1}{2}(B + B^\top)$. This prevents drift that creates spurious negative eigenvalues in low precision {% cite daoAILabGramNewtonSchulz2026 %}.
-
-### 4.4 Safe SPD Solve
-
-For the DWH denominator $(I + cB)$, we use Cholesky with adaptive jitter. If Cholesky fails (due to near-singularity from negative eigenvalue drift), we add a small diagonal shift:
-
-$$
-\tau \leftarrow \max(\tau_{\min},\; 10\tau + \tau_{\min}),
-$$
-
-and retry. This ensures a valid factorization without biasing the numerator.
-
----
-
-## 5. The Full Algorithm: 1 DWH + 2 PE
-
-All heavy computation is:
-- one rectangular Gram GEMM: $Y^\top Y$ (size $M \times N \to N \times N$);
-- one rectangular apply GEMM: $YK$ (size $M \times N \times N \times N \to M \times N$).
-
-Everything in between is small-side ($N \times N$).
+### 3.2 The Full Algorithm
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Stable Hybrid Polar: 1 DWH + 2 PE</div>
 <pre class="pseudocode">
 \begin{algorithmic}
-\PROCEDURE{Sym}{A}
-    \RETURN $\frac{1}{2}(A + A^\top)$
-\ENDPROCEDURE
-
-\PROCEDURE{MomentUpperBound}{G}
-    \STATE $u_M \leftarrow \dfrac{\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
-    \STATE $u_F \leftarrow \|G\|_F$
-    \RETURN $\min(u_M, u_F)\cdot (1+\eta)$
-\ENDPROCEDURE
-
-\PROCEDURE{SafeSolveSPD}{S}
-    \STATE $\tau \leftarrow 0$
-    \WHILE{true}
-        \STATE \textbf{try} $L \leftarrow \mathrm{Cholesky}(S + \tau I)$
-        \IF{success}
-            \RETURN $\mathrm{solve}(L L^\top, I)$
-        \ELSE
-            \STATE $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$
-        \ENDIF
-    \ENDWHILE
-\ENDPROCEDURE
-
 \PROCEDURE{HybridPolar}{$X \in \mathbb{R}^{M \times N}$}
-    \IF{$M < N$}
-        \STATE $X \leftarrow X^\top$
-    \ENDIF
-
-    \STATE \COMMENT{--- Preconditioning ---}
-    \STATE $s_{\mathrm{glob}} \leftarrow 2^{\lfloor \log_2(\max |X_{ij}|) \rceil}$
-    \STATE $X \leftarrow X / s_{\mathrm{glob}}$
-    \STATE $d_j \leftarrow 1/\max(\|X_{:j}\|_2, d_{\min})$ \COMMENT{FP32 column norms}
-    \STATE $D \leftarrow \operatorname{diag}(d_j)$
-    \STATE $Y \leftarrow X D$
-
-    \STATE \COMMENT{--- Form and normalize Gram ---}
-    \STATE $G \leftarrow \mathrm{Sym}(Y^\top Y)$ \COMMENT{FP16/BF16 matmul, FP32 accumulation}
-    \STATE $u \leftarrow \mathrm{MomentUpperBound}(G)$
-    \STATE $B \leftarrow G/u,\quad Y \leftarrow Y/\sqrt{u}$
-
+    \STATE $Y \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(Y^\top Y)$ \COMMENT{ Jacobi Preconditioning }
+    \STATE $u \leftarrow \mathrm{MomentUpperBound}(G), \quad B \leftarrow G/u, \quad Y \leftarrow Y/\sqrt{u}$
     \STATE $K \leftarrow I$
 
-    \STATE \COMMENT{--- Step 1: DWH (reparametrized) for $\ell_0 = 10^{-3}$ ---}
-    \STATE $H \leftarrow \mathrm{SafeSolveSPD}(I + c_0 B)$ \COMMENT{$H = (I + c_0 B)^{-1}$}
-    \STATE $R_0 \leftarrow \alpha_0 I + \beta_0 H$ \COMMENT{$\alpha_0 = b_0/c_0,\;\beta_0 = a_0 - \alpha_0$}
-    \STATE $K \leftarrow K R_0$
-    \STATE $B \leftarrow \mathrm{Sym}(R_0\, B\, R_0)$
+    \STATE \COMMENT{--- Step 1: DWH ($\ell_0 = 10^{-3}$) ---}
+    \STATE $H \leftarrow \mathrm{SafeSolveSPD}(I + c_0 B)$
+    \STATE $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
 
-    \STATE \COMMENT{--- Step 2: normalized PE quintic on $[0.248039, 1]$ ---}
-    \STATE $Q_1 \leftarrow \hat{a}_1 I + \hat{b}_1 B + \hat{c}_1 B^2$
-    \STATE $K \leftarrow K Q_1$
-    \STATE $B \leftarrow \mathrm{Sym}(Q_1\, B\, Q_1)$
+    \STATE \COMMENT{--- Steps 2-3: Normalized PE Cleanup ---}
+    \FOR{$i=1, 2$}
+        \STATE $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow \mathrm{Sym}(Q_i B Q_i)$
+    \ENDFOR
 
-    \STATE \COMMENT{--- Step 3: normalized PE quintic on $[0.729007, 1]$ ---}
-    \STATE $Q_2 \leftarrow \hat{a}_2 I + \hat{b}_2 B + \hat{c}_2 B^2$
-    \STATE $K \leftarrow K Q_2$
-
-    \STATE \COMMENT{--- Output ---}
-    \RETURN $Q = Y K$ \COMMENT{second and final rectangular GEMM}
+    \RETURN $Q = Y K$ \COMMENT{Final rectangular GEMM}
 \ENDPROCEDURE
 \end{algorithmic}
 </pre>
 </div>
 
 > [!remark] Why $Q = YK$, not $Q = YKD$?
-> The Gram-space iteration finds $K$ such that $K^\top B K \approx I$, where $B = DGD/u$ and $G = X^\top X$. This means $K \approx B^{-1/2} = \sqrt{u}\,(DGD)^{-1/2}$. Since the Jacobi preconditioner $D$ makes $DGD$ close to spectrally equivalent to $D^{-1} G^{-1/2} D^{-1}$ (the off-diagonal coupling is mild after equilibration), the product $YK = (XD/\sqrt{u}) \cdot \sqrt{u}\,(DGD)^{-1/2} \approx XG^{-1/2} = \text{polar}(X)$. An extra factor of $D$ would destroy orthogonality.
-
-### 5.1 Default Offline Constants
-
-For the default design floor $\ell_0 = 10^{-3}$:
-
-- **DWH** ($\alpha_0 = b_0/c_0$, $\beta_0 = a_0 - \alpha_0$):
-
-$$
-a_0 = 251.9921050507,\quad b_0 = 15749.2591994423,\quad c_0 = 16000.2513044930,
-$$
-
-$$
-\alpha_0 = 0.9843132398,\quad \beta_0 = 251.0077918109.
-$$
-
-- **PE step 1** (normalized):
-
-$$
-\hat{a}_1 = 3.3062534938,\quad \hat{b}_1 = -6.2080577594,\quad \hat{c}_1 = 3.9018042657.
-$$
-
-- **PE step 2** (normalized):
-
-$$
-\hat{a}_2 = 2.1941212330,\quad \hat{b}_2 = -1.9748695275,\quad \hat{c}_2 = 0.7807482945.
-$$
+> The Jacobi preconditioner $D$ is absorbed into the Gram iteration. $K$ effectively finds the inverse square root of $D (X^\top X) D$. The product $YK = (XD) K$ then correctly provides the polar factor of $X$. An extra factor of $D$ would violate orthogonality.
 
 ---
 
-## 6. Discussion
+## 4. Design Constants ($\ell_0 = 10^{-3}$)
 
-### 6.1 Efficiency
+Fixed constants for implementation, computed offline in FP64:
 
-- **Two rectangular GEMMs**: exactly one $Y^\top Y$ and one $YK$. All other operations are $N \times N$ or diagonal.
-- **No eigenvalues**: power iteration is replaced by moment scaling ($\lambda_{\max}$) and adaptive denominator tracking ($\lambda_{\min}$).
-- **Minimized latency**: the small-side $N \times N$ work (Cholesky, triangular solves, polynomial evaluation) is fast on tensor cores.
-
-### 6.2 Why Normalize by $p(1)$?
-
-The normalization $\hat{p}(x) = p(x)/p(1)$ keeps the top endpoint pinned at 1. This is the right universal target for the polar factor (which should map $\sigma_{\max} = 1$ to itself), and it keeps the dynamic range bounded throughout the iteration.
-
-### 6.3 Comparison to Pure Approaches
-
-- **Pure polynomial (5 PE)**: at $\ell_0 = 10^{-3}$, reaches only $[0.796, 1]$. Good for well-conditioned problems but inadequate for the default floor.
-- **Pure rational (2 DWH)**: reaches excellent convergence but each step requires a Cholesky plus triangular solves. The hybrid replaces the second (expensive) DWH step with two cheap polynomial evaluations.
-- **Hybrid (1 DWH + 2 PE)**: reaches $[0.995, 1]$, better than 5 PE with only 3 iterations total (1 Cholesky + 2 polynomial evaluations in the small side).
+| Step | Parameters | Values |
+|:---|:---|:---|
+| **DWH** | $\alpha_0, \beta_0, c_0$ | $0.984313, 251.00779, 16000.25$ |
+| **PE 1** | $\hat{a}_1, \hat{b}_1, \hat{c}_1$ | $3.306253, -6.208058, 3.901804$ |
+| **PE 2** | $\hat{a}_2, \hat{b}_2, \hat{c}_2$ | $2.194121, -1.974869, 0.780748$ |
 
 ---
 
-## Conclusion
+### 5. Discussion
 
-The scalar story is clear:
+- **Efficiency**: Only two rectangular GEMMs ($Y^\top Y$ and $YK$) are required. All other heavy computation is performed on small $N \times N$ matrices in Gram space, which is computationally negligible when $M \gg N$.
+- **Reduced Small-Side Latency**: Compared to a standard two-step DWH approach, the hybrid replaces the second SPD solve with two cheap polynomial matrix evaluations, significantly reducing latency on modern hardware.
+- **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
 
-- **From scratch**, rational is better on the hard early regime, while polynomial takes over only once the interval is already easy.
-- **At the default $\ell_0 = 10^{-3}$**, two PE steps alone are nowhere near enough, while five PE steps are decent but loose.
-- **One DWH step followed by two normalized degree-5 PE steps** achieves $[0.995, 1]$ — dramatically better than 5 PE from scratch, with all operations in the small-side Gram after the initial $Y^\top Y$.
-
-$$
-\boxed{\text{1 DWH step} + \text{2 normalized PE quintic steps}.}
-$$
+Combining rational robustess with polynomial speed results in a polar decomposition that is both fast enough for inner-loop training and robust enough for real-world ML spectral distributions.
 
 ---
 
-## Appendix A: Pure DWH Algorithm
+## Appendix A: Pure DWH Algorithm (Reference)
 
-> [!example]- Pure Rational Polar Decomposition (for reference)
-> The following algorithm uses two DWH iterations (no polynomial steps). It is included for reference; the hybrid algorithm in §5 is preferred for practical use.
->
-> The DWH step in Gram space uses the factored form:
->
-> $$
-> H = \frac{1}{c}(I + cB)^{-1},\qquad K = I - H,\qquad M = \alpha I + \beta H,
-> $$
->
-> where $\alpha = b/c$ and $\beta = a - \alpha$. The Gram update for two consecutive DWH steps is:
->
-> $$
-> B_1 = \text{Sym}\bigl(I + \delta(c\alpha^2 B + 2\alpha\beta K + \beta^2 HK)\bigr),
-> $$
->
-> with the accumulated transform $K_{\text{final}} = M_0 \cdot (L_1 L_1^\top)^{-1} \cdot (\alpha_1 M_0 + \beta_1 \cdot \text{id})$.
+> [!example]- Pure Rational Polar Decomposition
+> The DWH step in Gram space update: $B_{k+1} = \text{Sym}(R_k B_k R_k)$ with $K_{k+1} = K_k R_k$. For higher-precision needs, one can use two DWH steps, but the hybrid is faster on hardware for ML.
 
-## Appendix B: PE Coefficient Polynomial (Expanded Form)
+## Appendix B: PE Coefficient Polynomial
 
-The degree-9 polynomial $F(q_0; \ell)$ from §3.2, grouped by powers of $\ell^2$:
-
+The degree-9 polynomial $F(q_0; \ell)$ from §2.2:
 $$
 F(q_0; \ell) = F_0(q_0) + \ell^2 F_1(q_0) - \ell^4 F_2(q_0) + \ell^6 F_3(q_0),
 $$
-
-where
-
-$$
-\begin{aligned}
-F_0(q_0) &= -2048q_0^9 - 5888q_0^8 - 9608q_0^7 - 7728q_0^6 - 1288q_0^5 \\
-&\quad + 1748q_0^4 + 888q_0^3 + 8q_0^2 - 72q_0 - 12, \\[4pt]
-F_1(q_0) &= 4520q_0^7 + 9340q_0^6 + 10990q_0^5 + 8525q_0^4 + 3200q_0^3 + 80q_0^2 - 240q_0 - 40, \\[4pt]
-F_2(q_0) &= 3600q_0^5 + 5800q_0^4 + 3900q_0^3 + 1750q_0^2 + 600q_0 + 100, \\[4pt]
-F_3(q_0) &= 1000q_0^3 + 1500q_0^2 + 750q_0 + 125.
-\end{aligned}
-$$
-
-Note that $F_3(q_0) = 125(2q_0 + 1)^3$ and partial factorizations exist for higher-degree terms, but the expanded form above is the most convenient for direct evaluation.
+where:
+- $F_0(q_0) = -2048q_0^9 - 5888q_0^8 - 9608q_0^7 - 7728q_0^6 - 1288q_0^5 + 1748q_0^4 + 888q_0^3 + 8q_0^2 - 72q_0 - 12$
+- $F_1(q_0) = 4520q_0^7 + 9340q_0^6 + 10990q_0^5 + 8525q_0^4 + 3200q_0^3 + 80q_0^2 - 240q_0 - 40$
+- $F_2(q_0) = 3600q_0^5 + 5800q_0^4 + 3900q_0^3 + 1750q_0^2 + 600q_0 + 100$
+- $F_3(q_0) = 125(2q_0 + 1)^3$
 
 ## Appendix C: Verification Code
 
 > [!example]- Python: Scalar Iteration and Analytic PE Coefficients
-> The following script reproduces the comparison tables and verifies the analytic PE coefficient formula. It can also be used to compute coefficients for custom design floors.
->
 > ```python
 > import numpy as np
 >
-> # === DWH Coefficients ===
 > def dwh_coeffs(ell):
 >     gamma = (4 * (1 - ell**2) / ell**4) ** (1.0 / 3.0)
 >     r = np.sqrt(1 + gamma)
@@ -511,66 +216,45 @@ Note that $F_3(q_0) = 125(2q_0 + 1)^3$ and partial factorizations exist for high
 > def dwh_map(x, a, b, c):
 >     return x * (a + b * x**2) / (1 + c * x**2)
 >
-> # === Analytic PE Coefficients (Gram-quadratic) ===
 > def analytic_pe_coeffs(ell):
 >     L2, L4, L6 = ell**2, ell**4, ell**6
->
 >     def F(q):
->         return (
->             -2048*q**9 - 5888*q**8 - 9608*q**7 - 7728*q**6
->             - 1288*q**5 + 1748*q**4 + 888*q**3 + 8*q**2 - 72*q - 12
->             + L2 * (4520*q**7 + 9340*q**6 + 10990*q**5 + 8525*q**4
->                     + 3200*q**3 + 80*q**2 - 240*q - 40)
->             - L4 * (3600*q**5 + 5800*q**4 + 3900*q**3
->                     + 1750*q**2 + 600*q + 100)
->             + L6 * (1000*q**3 + 1500*q**2 + 750*q + 125)
->         )
->
->     # Find valid root in (ell, 1) by scanning + bisection
+>         return (-2048*q**9 - 5888*q**8 - 9608*q**7 - 7728*q**6 - 1288*q**5 + 1748*q**4 + 888*q**3 + 8*q**2 - 72*q - 12
+>                 + L2 * (4520*q**7 + 9340*q**6 + 10990*q**5 + 8525*q**4 + 3200*q**3 + 80*q**2 - 240*q - 40)
+>                 - L4 * (3600*q**5 + 5800*q**4 + 3900*q**3 + 1750*q**2 + 600*q + 100)
+>                 + L6 * (1000*q**3 + 1500*q**2 + 750*q + 125))
 >     qs = np.linspace(ell + 1e-12, 1 - 1e-12, 100000)
 >     Fvals = np.array([F(q) for q in qs])
->     best = None
 >     for i in range(len(Fvals) - 1):
 >         if Fvals[i] * Fvals[i + 1] <= 0:
 >             lo, hi = qs[i], qs[i + 1]
 >             for _ in range(100):
 >                 mid = (lo + hi) / 2
->                 if F(mid) * F(lo) <= 0:
->                     hi = mid
->                 else:
->                     lo = mid
+>                 if F(mid) * F(lo) <= 0: hi = mid
+>                 else: lo = mid
 >             q0 = (lo + hi) / 2
->             # Compute coefficients for this root
 >             r2 = (2*q0**3 + 4*q0**2 + 6*q0 + 3) / (5 * (2*q0 + 1))
->             S = q0**2 + r2
->             P = q0**2 * r2
+>             S, P = q0**2 + r2, q0**2 * r2
 >             D = (1 - 5/3*S + 5*P) + ell*(ell**4 - 5/3*S*ell**2 + 5*P)
->             c = 2 / D
->             b = -5*c/3 * S
->             a = 5*c*P
->             E = 1 - ell * (a + b*ell**2 + c*ell**4)
->             if E < 1:  # valid minimax root
->                 best = (a, b, c, E)
->     return best
+>             c, b, a = 2/D, -5*c/3*S, 5*c*P
+>             if 1 - ell*(a + b*ell**2 + c*ell**4) < 1: return a, b, c
+>     return None
 >
-> # === Reproduce the hybrid progression at ell_0 = 1e-3 ===
-> ell = 1e-3
-> a, b, c = dwh_coeffs(ell)
-> ell1 = dwh_map(ell, a, b, c)
-> print(f"After DWH:  [{ell1:.10f}, 1]")
->
-> a1, b1, c1, E1 = analytic_pe_coeffs(ell1)
+> # Reproduce progression
+> ell_0 = 1e-3
+> a, b, c = dwh_coeffs(ell_0)
+> ell_1 = dwh_map(ell_0, a, b, c)
+> print(f"DWH: [{ell_1:.4f}, 1]")
+> a1, b1, c1 = analytic_pe_coeffs(ell_1)
 > u1 = a1 + b1 + c1
-> ell2 = ell1 * (a1 + b1*ell1**2 + c1*ell1**4) / u1
-> print(f"After PE1:  [{ell2:.10f}, 1]")
-> print(f"  normalized: a={a1/u1:.10f}, b={b1/u1:.10f}, c={c1/u1:.10f}")
->
-> a2, b2, c2, E2 = analytic_pe_coeffs(ell2)
+> ell_2 = ell_1*(a1 + b1*ell_1**2 + c1*ell_1**4)/u1
+> print(f"PE1: [{ell_2:.4f}, 1]")
+> a2, b2, c2 = analytic_pe_coeffs(ell_2)
 > u2 = a2 + b2 + c2
-> ell3 = ell2 * (a2 + b2*ell2**2 + c2*ell2**4) / u2
-> print(f"After PE2:  [{ell3:.10f}, 1]")
-> print(f"  normalized: a={a2/u2:.10f}, b={b2/u2:.10f}, c={c2/u2:.10f}")
+> ell_3 = ell_2*(a2 + b2*ell_2**2 + c2*ell_2**4)/u2
+> print(f"PE2: [{ell_3:.4f}, 1]")
 > ```
+> </blockquote>
 
 ---
 
