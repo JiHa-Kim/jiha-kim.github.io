@@ -53,16 +53,16 @@ The key empirical fact: **Rational wins in the hard regime** (high condition num
 
 The following table reports the final lower endpoint for different starting floors $\ell$. Larger is better. (Polynomial steps are normalized so $\hat{p}(1)=1$).
 
-| Start $\ell$       | 1 DWH    | 2 PE     | 5 PE        |
-|:-------------------|:---------|:---------|:------------|
-| $10^{-1}$          | 0.865659 | 0.882043 | 0.999999989 |
-| $9 \times 10^{-2}$ | 0.850958 | 0.852727 | 0.999999954 |
-| $8 \times 10^{-2}$ | 0.833906 | 0.816042 | 0.999999999 |
-| $5 \times 10^{-2}$ | 0.761019 | 0.642311 | 1.000000000 |
-| $10^{-2}$          | 0.505336 | 0.171507 | 0.999997565 |
-| $10^{-3}$          | 0.248039 | 0.018033 | 0.796221    |
-| $10^{-4}$          | 0.116562 | 0.001811 | 0.133854    |
-| $10^{-6}$          | 0.025194 | 0.000018 | 0.001398    |
+| Start $\ell$       | 1 PE      | 1 DWH    | 2 PE     | 5 PE        |
+|:-------------------|:----------|:---------|:---------|:------------|
+| $10^{-1}$          | 0.446899  | 0.865659 | 0.882043 | 0.999999989 |
+| $9 \times 10^{-2}$ | 0.402120  | 0.850958 | 0.852727 | 0.999999954 |
+| $8 \times 10^{-2}$ | 0.356949  | 0.833906 | 0.816042 | 0.999999999 |
+| $5 \times 10^{-2}$ | 0.220748  | 0.761019 | 0.642311 | 1.000000000 |
+| $10^{-2}$          | 0.042954  | 0.505336 | 0.171507 | 0.999997565 |
+| $10^{-3}$          | 0.004261  | 0.248039 | 0.018033 | 0.796221    |
+| $10^{-4}$          | 0.000426  | 0.116562 | 0.001811 | 0.133854    |
+| $10^{-6}$          | 0.000004  | 0.025194 | 0.000018 | 0.001398    |
 
 At the standard design floor of $\ell_0 = 10^{-3}$: **2 PE steps from scratch are useless**, and even 5 PE steps leave significant error. However, a single DWH step lifts the floor to $\approx 0.25$—exactly where polynomial iterations enter their "sweet spot."
 
@@ -182,12 +182,7 @@ Combining rational robustess with polynomial speed results in a polar decomposit
 
 ---
 
-## Appendix A: Pure DWH Algorithm (Reference)
-
-> [!example]- Pure Rational Polar Decomposition
-> The DWH step in Gram space update: $B_{k+1} = \text{Sym}(R_k B_k R_k)$ with $K_{k+1} = K_k R_k$. For higher-precision needs, one can use two DWH steps, but the hybrid is faster on hardware for ML.
-
-## Appendix B: PE Coefficient Polynomial
+## Appendix A: PE Coefficient Polynomial
 
 The degree-9 polynomial $F(q_0; \ell)$ from §2.2:
 $$
@@ -199,7 +194,7 @@ where:
 - $F_2(q_0) = 3600q_0^5 + 5800q_0^4 + 3900q_0^3 + 1750q_0^2 + 600q_0 + 100$
 - $F_3(q_0) = 125(2q_0 + 1)^3$
 
-## Appendix C: Verification Code
+## Appendix B: Verification Code
 
 > [!example]- Python: Scalar Iteration and Analytic PE Coefficients
 > ```python
