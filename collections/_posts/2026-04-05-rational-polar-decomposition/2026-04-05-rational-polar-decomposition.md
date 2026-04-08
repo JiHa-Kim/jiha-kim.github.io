@@ -133,11 +133,10 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 
 ### 3.1 Stability Primitives
 
-1.  **Deferred Tall-Matrix Operations**: Memory bandwidth on the tall $M \times N$ matrix is the primary hardware bottleneck. We completely eliminate $O(MN)$ element-wise sweeps by deferring all scaling:
-    - We extract column square-norms directly from the diagonal of the un-normalized Gram matrix $G_X = X^\top X$, avoiding a separate read pass. Let $D = \text{diag}(\text{rsqrt}((G_X)_{jj} + \epsilon))$.
-    - The normalized Gram matrix is cleanly computed in the small space as $G = D G_X D$.
-    - The global scale factor $1/\sqrt{u}$ is pushed into the small-side accumulator $K \leftarrow \frac{1}{\sqrt{u}}I$.
-    This drops all redundant memory IO. The $M$-dimensional matrix $X$ is read exactly twice (for the two GEMMs).
+1.  **Robust Pre-conditioning (ColNorm)**: To alleviate precision errors and reduce dynamic range instability in low-precision (FP16/BF16) arithmetic, we normalize the columns of $X$ before forming the Gram matrix. This is mathematically equivalent to Jacobi scaling the Gram matrix but remains robust even when the raw inputs $X$ vary by orders of magnitude.
+    - We compute column sums-of-squares in one pass and apply the scaling directly to $X$: $X \leftarrow X D$, where $D = \text{diag}(\text{rsqrt}(\sum_i X_{ij}^2 + \epsilon))$.
+    - The normalized Gram matrix is then $G = X^\top X$, which now has a unit diagonal and bounded eigenvalues.
+    While this adds an element-wise pass over $X$, it prevents the intermediate $X^\top X$ from overflowing or losing critical precision bits during accumulation.
 2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
     $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
     where $\eta$ is a safety margin. This bound is tighter than scaling the full $u$ because it only adds a small multiple of the mean eigenvalue.
@@ -210,10 +209,10 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
         \STATE $X \leftarrow X^\top$
     \ENDIF
 
-    \STATE \COMMENT{--- Preconditioning & Form Gram ---}
-    \STATE $G_X \leftarrow \mathrm{Sym}(X^\top X)$
-    \STATE $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}((G_X)_{jj} + \epsilon))$
-    \STATE $G \leftarrow \mathrm{Sym}(D G_X D)$
+    \STATE \COMMENT{--- Preconditioning (ColNorm) & Form Gram ---}
+    \STATE $d \leftarrow \operatorname{colNorms}(X)^2 + \epsilon$
+    \STATE $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}(d))$
+    \STATE $X \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(X^\top X)$
 
     \STATE \COMMENT{--- Normalize Gram ---}
     \STATE $u \leftarrow \mathrm{MomentUpperBound}(G)$
@@ -228,7 +227,7 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
         \STATE $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow \mathrm{Sym}(Q_i B Q_i)$
     \ENDFOR
 
-    \RETURN $Q = X (D K)$ \COMMENT{Final rectangular GEMM}
+    \RETURN $Q = X K$ \COMMENT{Final rectangular GEMM}
 \ENDPROCEDURE
 \end{algorithmic}
 </pre>
@@ -251,8 +250,8 @@ Fixed constants for implementation, computed offline in FP64:
 
 ### 5. Discussion
 
-- **Efficiency**: The algorithm executes exactly two tall rectangular GEMMs ($X^\top X$ and $X(DK)$) and requires zero element-wise passes over $X$. All normalizations and spectral shifts are absorbed into the $N \times N$ Gram space, which is computationally negligible when $M \gg N$.
-- **Reduced Small-Side Latency**: Compared to a standard two-step DWH approach, the hybrid replaces the second SPD solve with two cheap polynomial matrix evaluations, significantly reducing latency on modern hardware.
+- **Numerical Robustness**: By performing column-wise normalization (ColNorm) on $X$ before accumulating the Gram matrix, we shield the algorithm from dynamic range overflows and precision loss in low-precision (BF16/FP16) arithmetic.
+- **Balanced Latency**: While pre-scaling adds one element-wise pass over the tall matrix $X$, the cost is offset by the reduction in small-side complexity compared to pure rational iterations. The algorithm still performs exactly two tall rectangular GEMMs.
 - **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
 
 Combining rational robustess with polynomial speed results in a polar decomposition that is both fast enough for inner-loop training and robust enough for real-world ML spectral distributions.
