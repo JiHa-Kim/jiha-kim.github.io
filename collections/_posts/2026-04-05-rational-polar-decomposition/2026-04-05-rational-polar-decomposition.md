@@ -131,8 +131,11 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 
 ### 3.2 The Full Algorithm
 
+### 3.2 Stability and Utility Primitives
+
+The following support procedures handle symmetrization, robust eigenvalue upper-bounding, and safe SPD inversions in the presence of floating-point drift.
+
 <div class="algorithm-container">
-<div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Stable Hybrid Polar: 1 DWH + 2 PE</div>
 <pre class="pseudocode">
 \begin{algorithmic}
 \PROCEDURE{Sym}{A}
@@ -155,7 +158,18 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
         \ENDIF
     \ENDWHILE
 \ENDPROCEDURE
+\end{algorithmic}
+</pre>
+</div>
 
+### 3.3 The Main Hybrid Algorithm
+
+With the primitives defined, the full hybrid polar decomposition is expressed as a three-step spectral update entirely in the small-side Gram space.
+
+<div class="algorithm-container">
+<div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Stable Hybrid Polar: 1 DWH + 2 PE</div>
+<pre class="pseudocode">
+\begin{algorithmic}
 \PROCEDURE{HybridPolar}{$X \in \mathbb{R}^{M \times N}$}
     \IF{$M < N$}
         \STATE $X \leftarrow X^\top$
@@ -165,14 +179,11 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
     \STATE $s_{\mathrm{glob}} \leftarrow 2^{\lfloor \log_2(\max |X_{ij}|) \rceil}$
     \STATE $X \leftarrow X / s_{\mathrm{glob}}$
     \STATE $d_j \leftarrow 1/\max(\|X_{:j}\|_2, d_{\min})$
-    \STATE $D \leftarrow \operatorname{diag}(d_j)$
-    \STATE $Y \leftarrow X D$
-    \STATE $G \leftarrow \mathrm{Sym}(Y^\top Y)$
+    \STATE $D \leftarrow \operatorname{diag}(d_j), \quad Y \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(Y^\top Y)$
 
     \STATE \COMMENT{--- Normalize Gram ---}
     \STATE $u \leftarrow \mathrm{MomentUpperBound}(G)$
-    \STATE $B \leftarrow G/u, \quad Y \leftarrow Y/\sqrt{u}$
-    \STATE $K \leftarrow I$
+    \STATE $B \leftarrow G/u, \quad Y \leftarrow Y/\sqrt{u}, \quad K \leftarrow I$
 
     \STATE \COMMENT{--- Step 1: DWH ($\ell_0 = 10^{-3}$) ---}
     \STATE $H \leftarrow \mathrm{SafeSolveSPD}(I + c_0 B)$
