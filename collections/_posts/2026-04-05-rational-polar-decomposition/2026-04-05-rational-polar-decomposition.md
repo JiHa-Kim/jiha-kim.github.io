@@ -123,7 +123,11 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 
 ### 3.1 Stability Primitives
 
-1.  **Column Normalization**: Rather than a slow `1 / max(sqrt(S), eps)` operation, we use the hardware-native reciprocal square root. We compute the sum of squares $S_j = \|X_{:j}\|_2^2$ in FP32, and let $D = \text{diag}(\text{rsqrt}(S_j + \epsilon))$. Working with $Y = XD$ ensures the Gram diagonals stay near 1.
+1.  **Deferred Tall-Matrix Operations**: Memory bandwidth on the tall $M \times N$ matrix is the primary hardware bottleneck. We completely eliminate $O(MN)$ element-wise sweeps by deferring all scaling:
+    - We extract column square-norms directly from the diagonal of the un-normalized Gram matrix $G_X = X^\top X$, avoiding a separate read pass. Let $D = \text{diag}(\text{rsqrt}((G_X)_{jj} + \epsilon))$.
+    - The normalized Gram matrix is cleanly computed in the small space as $G = D G_X D$.
+    - The global scale factor $1/\sqrt{u}$ is pushed into the small-side accumulator $K \leftarrow \frac{1}{\sqrt{u}}I$.
+    This drops all redundant memory IO. The $M$-dimensional matrix $X$ is read exactly twice (for the two GEMMs).
 2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
     $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
     where $\eta$ is a safety margin. This bound is tighter than scaling the full $u$ because it only adds a small multiple of the mean eigenvalue.
@@ -178,12 +182,13 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
     \ENDIF
 
     \STATE \COMMENT{--- Preconditioning & Form Gram ---}
-    \STATE $d_j \leftarrow \mathrm{rsqrt}(\|X_{:j}\|_2^2 + \epsilon)$
-    \STATE $D \leftarrow \operatorname{diag}(d_j), \quad Y \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(Y^\top Y)$
+    \STATE $G_X \leftarrow \mathrm{Sym}(X^\top X)$
+    \STATE $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}((G_X)_{jj} + \epsilon))$
+    \STATE $G \leftarrow \mathrm{Sym}(D G_X D)$
 
     \STATE \COMMENT{--- Normalize Gram ---}
     \STATE $u \leftarrow \mathrm{MomentUpperBound}(G)$
-    \STATE $B \leftarrow G/u, \quad Y \leftarrow Y/\sqrt{u}, \quad K \leftarrow I$
+    \STATE $B \leftarrow G/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
 
     \STATE \COMMENT{--- Step 1: DWH ($\ell_0 = 10^{-3}$) ---}
     \STATE $H \leftarrow \mathrm{SafeSolveSPD}(\gamma_0 I + B)$
@@ -194,7 +199,7 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
         \STATE $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow \mathrm{Sym}(Q_i B Q_i)$
     \ENDFOR
 
-    \RETURN $Q = Y K$ \COMMENT{Final rectangular GEMM}
+    \RETURN $Q = X (D K)$ \COMMENT{Final rectangular GEMM}
 \ENDPROCEDURE
 \end{algorithmic}
 </pre>
@@ -217,7 +222,7 @@ Fixed constants for implementation, computed offline in FP64:
 
 ### 5. Discussion
 
-- **Efficiency**: Only two rectangular GEMMs ($Y^\top Y$ and $YK$) are required. All other heavy computation is performed on small $N \times N$ matrices in Gram space, which is computationally negligible when $M \gg N$.
+- **Efficiency**: The algorithm executes exactly two tall rectangular GEMMs ($X^\top X$ and $X(DK)$) and requires zero element-wise passes over $X$. All normalizations and spectral shifts are absorbed into the $N \times N$ Gram space, which is computationally negligible when $M \gg N$.
 - **Reduced Small-Side Latency**: Compared to a standard two-step DWH approach, the hybrid replaces the second SPD solve with two cheap polynomial matrix evaluations, significantly reducing latency on modern hardware.
 - **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
 
