@@ -155,8 +155,6 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 </pre>
 </div>
 
-> [!remark] Why $Q = YK$, not $Q = YKD$?
-> The Jacobi preconditioner $D$ is absorbed into the Gram iteration. $K$ effectively finds the inverse square root of $D (X^\top X) D$. The product $YK = (XD) K$ then correctly provides the polar factor of $X$. An extra factor of $D$ would violate orthogonality.
 
 ---
 
