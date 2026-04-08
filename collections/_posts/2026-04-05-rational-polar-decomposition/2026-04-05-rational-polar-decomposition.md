@@ -53,16 +53,16 @@ The key empirical fact: **Rational wins in the hard regime** (high condition num
 
 The following table reports the final lower endpoint for different starting floors $\ell$. Larger is better. (Polynomial steps are normalized so $\hat{p}(1)=1$).
 
-| Start $\ell$       | 1 PE      | 1 DWH    | 2 PE     | 5 PE        |
-|:-------------------|:----------|:---------|:---------|:------------|
-| $10^{-1}$          | 0.446899  | 0.865659 | 0.882043 | 0.999999989 |
-| $9 \times 10^{-2}$ | 0.402120  | 0.850958 | 0.852727 | 0.999999954 |
-| $8 \times 10^{-2}$ | 0.356949  | 0.833906 | 0.816042 | 0.999999999 |
-| $5 \times 10^{-2}$ | 0.220748  | 0.761019 | 0.642311 | 1.000000000 |
-| $10^{-2}$          | 0.042954  | 0.505336 | 0.171507 | 0.999997565 |
-| $10^{-3}$          | 0.004261  | 0.248039 | 0.018033 | 0.796221    |
-| $10^{-4}$          | 0.000426  | 0.116562 | 0.001811 | 0.133854    |
-| $10^{-6}$          | 0.000004  | 0.025194 | 0.000018 | 0.001398    |
+| Start $\ell$       | 1 PE     | 1 DWH    | 2 PE     | 5 PE        |
+| :----------------- | :------- | :------- | :------- | :---------- |
+| $10^{-1}$          | 0.446899 | 0.865659 | 0.882043 | 0.999999989 |
+| $9 \times 10^{-2}$ | 0.402120 | 0.850958 | 0.852727 | 0.999999954 |
+| $8 \times 10^{-2}$ | 0.356949 | 0.833906 | 0.816042 | 0.999999999 |
+| $5 \times 10^{-2}$ | 0.220748 | 0.761019 | 0.642311 | 1.000000000 |
+| $10^{-2}$          | 0.042954 | 0.505336 | 0.171507 | 0.999997565 |
+| $10^{-3}$          | 0.004261 | 0.248039 | 0.018033 | 0.796221    |
+| $10^{-4}$          | 0.000426 | 0.116562 | 0.001811 | 0.133854    |
+| $10^{-6}$          | 0.000004 | 0.025194 | 0.000018 | 0.001398    |
 
 At the standard design floor of $\ell_0 = 10^{-3}$: **2 PE steps from scratch are useless**, and even 5 PE steps leave significant error. However, a single DWH step lifts the floor to $\approx 0.25$—exactly where polynomial iterations enter their "sweet spot."
 
@@ -141,6 +141,25 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
     $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
     where $\eta$ is a safety margin. This bound is tighter than scaling the full $u$ because it only adds a small multiple of the mean eigenvalue.
+
+> [!proof]- Proof of the Moment Bound
+> Assume the eigenvalues are ordered $\lambda_1 \ge \lambda_2 \ge \dots \ge \lambda_N$. Let $\mu = \frac{1}{N} \operatorname{tr}(G)$ be the mean and $V = \sum (\lambda_k - \mu)^2$ be the total variance. Since $\sum (\lambda_k - \mu) = 0$, we have:
+> $$
+> \lambda_1 - \mu = \sum_{k=2}^N (\mu - \lambda_k)
+> $$
+> Squaring both sides and applying Cauchy-Schwarz:
+> $$
+> (\lambda_1 - \mu)^2 = \left( \sum_{k=2}^N 1 \cdot (\mu - \lambda_k) \right)^2 \le (N-1) \sum_{k=2}^N (\lambda_k - \mu)^2
+> $$
+> Substituting $\sum_{k=2}^N (\lambda_k - \mu)^2 = V - (\lambda_1 - \mu)^2$ gives:
+> $$
+> (\lambda_1 - \mu)^2 \le (N-1) \left( V - (\lambda_1 - \mu)^2 \right) \implies N(\lambda_1 - \mu)^2 \le (N-1)V
+> $$
+> Finally, substituting $V = \|G\|_F^2 - N\mu^2$ and taking the square root:
+> $$
+> \lambda_1 \le \mu + \sqrt{\frac{N-1}{N} V} = \frac{\operatorname{tr}(G) + \sqrt{(N-1)(N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}
+> $$
+
 3.  **Safe SPD Solve**: For $(\gamma_0 I + B)$, we use Cholesky with adaptive jitter. If it fails, we add diagonal shift $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$ and retry.
 
 ### 3.2 The Full Algorithm
@@ -222,9 +241,9 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
 
 Fixed constants for implementation, computed offline in FP64:
 
-| Step | Parameters | Values |
-|:---|:---|:---|
-| **DWH** | $\alpha_0, \beta_0, \gamma_0$ | $0.984313, 0.015688, 0.000062$ |
+| Step     | Parameters                        | Values                          |
+| :------- | :-------------------------------- | :------------------------------ |
+| **DWH**  | $\alpha_0, \beta_0, \gamma_0$     | $0.984313, 0.015688, 0.000062$  |
 | **PE 1** | $\hat{a}_1, \hat{b}_1, \hat{c}_1$ | $3.306253, -6.208058, 3.901804$ |
 | **PE 2** | $\hat{a}_2, \hat{b}_2, \hat{c}_2$ | $2.194121, -1.974869, 0.780748$ |
 
