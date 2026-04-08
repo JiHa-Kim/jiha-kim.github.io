@@ -1,0 +1,428 @@
+<div class="polar-widget" id="polarWidget">
+    <div class="pw-controls">
+        <h4 style="margin-top: 0;">Interactive Map Simulator</h4>
+        
+        <div class="pw-control-group" style="padding-bottom: 10px; border-bottom: 1px solid var(--card-border, rgba(100,100,100,0.2));">
+            <label>Initial $\log_{10}(\ell_0)$:</label>
+            <input type="number" class="pw-num" id="ellSlider" min="-12" max="-0.01" step="0.25" value="-3" />
+            
+            <div class="pw-control-group-row" style="padding-top: 10px;">
+                <label><input type="checkbox" id="logXAxis" /> Log X</label>
+                <label><input type="checkbox" id="logErrorAxis" /> Log Error $|1-y|$</label>
+            </div>
+        </div>
+        
+        <div id="methodsContainer" style="display: flex; flex-direction: column; gap: 15px; margin-top: 5px;">
+            <!-- Methods will be injected here -->
+        </div>
+        
+        <button id="addMethodBtn" style="margin-top: 10px; padding: 8px 12px; border-radius: 6px; border: 1px solid #8e24aa; background: rgba(142, 36, 170, 0.1); color: var(--text-color, inherit); cursor: pointer; font-weight: bold;">+ Add Method Comparison</button>
+    </div>
+    <div class="pw-graph">
+        <canvas id="polarPatternChart"></canvas>
+    </div>
+</div>
+
+<style>
+.polar-widget {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    background: var(--card-bg, rgba(120, 120, 120, 0.05));
+    border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+    border-radius: 16px;
+    padding: 24px;
+    margin: 2.5rem 0;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+}
+.pw-controls {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.pw-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.pw-control-group label {
+    font-size: 0.9em;
+    font-weight: 600;
+}
+.pw-control-group input[type=number] {
+    width: 100px;
+    padding: 6px 10px;
+    border: 1px solid var(--card-border, rgba(100, 100, 100, 0.3));
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-color, inherit);
+    font-size: 1em;
+    outline: none;
+    transition: all 0.2s;
+}
+.pw-control-group input[type=number]:focus {
+    border-color: #8e24aa;
+}
+.pw-control-group-row {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85em;
+    user-select: none;
+}
+.pw-control-group-row label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.pw-graph {
+    flex: 2;
+    min-width: 300px;
+    position: relative;
+    background: #fff; /* Enforce white background for the chart to make colors pop, or adapt to dark mode */
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+[data-mode="dark"] .pw-graph {
+    background: #23222b;
+    border-color: rgba(255,255,255,0.1);
+}
+.pw-metrics {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Math Core
+    function dwh_coeffs(ell) {
+        let gamma_inner = Math.pow(4 * (1 - ell * ell) / Math.pow(ell, 4), 1.0 / 3.0);
+        let r = Math.sqrt(1 + gamma_inner);
+        let innerSqrt = 8 - 4 * gamma_inner + 8 * (2 - ell * ell) / (ell * ell * r);
+        let a = r + 0.5 * Math.sqrt(Math.max(0, innerSqrt));
+        let b = Math.pow(a - 1, 2) / 4;
+        let c = a + b - 1;
+        
+        let alpha = b / c;
+        let beta = (a - alpha) / c;
+        let gamma = 1 / c;
+        return { alpha, beta, gamma };
+    }
+
+    function dwh_map(x, coeffs) {
+        return coeffs.alpha * x + coeffs.beta * x / (coeffs.gamma + x * x);
+    }
+
+    function analytic_pe_coeffs(ell) {
+        let L2 = ell * ell, L4 = L2 * L2, L6 = L4 * L2;
+        let F = (q) => {
+            return (-2048 * Math.pow(q, 9) - 5888 * Math.pow(q, 8) - 9608 * Math.pow(q, 7) - 7728 * Math.pow(q, 6) - 1288 * Math.pow(q, 5) + 1748 * Math.pow(q, 4) + 888 * Math.pow(q, 3) + 8 * q * q - 72 * q - 12
+                + L2 * (4520 * Math.pow(q, 7) + 9340 * Math.pow(q, 6) + 10990 * Math.pow(q, 5) + 8525 * Math.pow(q, 4) + 3200 * Math.pow(q, 3) + 80 * q * q - 240 * q - 40)
+                - L4 * (3600 * Math.pow(q, 5) + 5800 * Math.pow(q, 4) + 3900 * Math.pow(q, 3) + 1750 * q * q + 600 * q + 100)
+                + L6 * (1000 * Math.pow(q, 3) + 1500 * q * q + 750 * q + 125));
+        };
+        
+        let n_points = 500;
+        let step = (1 - 1e-12 - (ell + 1e-12)) / n_points;
+        let qs = [], Fvals = [];
+        for (let i = 0; i <= n_points; i++) {
+            let q = ell + 1e-12 + i * step;
+            qs.push(q);
+            Fvals.push(F(q));
+        }
+
+        for (let i = 0; i < Fvals.length - 1; i++) {
+            if (Fvals[i] * Fvals[i + 1] <= 0) {
+                let lo = qs[i], hi = qs[i + 1];
+                for (let j = 0; j < 50; j++) {
+                    let mid = (lo + hi) / 2;
+                    if (F(mid) * F(lo) <= 0) hi = mid;
+                    else lo = mid;
+                }
+                let q0 = (lo + hi) / 2;
+                let r2 = (2 * Math.pow(q0, 3) + 4 * q0 * q0 + 6 * q0 + 3) / (5 * (2 * q0 + 1));
+                let S = q0 * q0 + r2;
+                let P = q0 * q0 * r2;
+                let D = (1 - 5 / 3 * S + 5 * P) + ell * (Math.pow(ell, 4) - 5 / 3 * S * ell * ell + 5 * P);
+                let c = 2 / D;
+                let b = -5 * c / 3 * S;
+                let a = 5 * c * P;
+                if ((1 - ell * (a + b * L2 + c * L4)) < 1) {
+                let p_r = Math.sqrt(r2) * (a + b * r2 + c * r2 * r2);
+                let p_l = ell * (a + b * L2 + c * L4);
+                let p_q0 = q0 * (a + b * q0 * q0 + c * q0 * q0 * q0 * q0);
+                let p_1 = a + b + c;
+                
+                let r = Math.sqrt(r2);
+                if (r2 > 0 && ell < q0 && q0 < r && r < 1) {
+                    let E_ell = 1 - p_l;
+                    let E_r = 1 - p_r;
+                    let E_q0 = p_q0 - 1;
+                    let E_1 = p_1 - 1;
+                    
+                    let errs = [E_ell, E_r, E_q0, E_1];
+                    let all_positive = E_ell > 0 && E_r > 0 && E_q0 > 0 && E_1 > 0;
+                    let max_e = Math.max(...errs);
+                    let min_e = Math.min(...errs);
+                    
+                    if (all_positive && (max_e - min_e < 1e-4)) {
+                        return { a, b, c };
+                    }
+                }
+                }
+            }
+        }
+        return {a: 1.875, b: -1.25, c: 0.375}; // Fallback to standard degree-5 Taylor bounds if it fails
+    }
+
+    function pe_map(x, coeffs) {
+        let u = coeffs.a + coeffs.b + coeffs.c;
+        let x2 = x * x;
+        return x * (coeffs.a + coeffs.b * x2 + coeffs.c * x2 * x2) / u;
+    }
+
+    // Colors for multiple methods
+    const methodColors = [
+        { border: '#8e24aa', bg: 'rgba(142, 36, 170, 0.1)' },
+        { border: '#00acc1', bg: 'rgba(0, 172, 193, 0.1)' },
+        { border: '#fb8c00', bg: 'rgba(251, 140, 0, 0.1)' },
+        { border: '#43a047', bg: 'rgba(67, 160, 71, 0.1)' },
+        { border: '#e53935', bg: 'rgba(229, 57, 53, 0.1)' }
+    ];
+
+    let methods = [
+        { dwh: 1, pe: 2 }
+    ];
+
+    // UI Elements
+    const ellSlider = document.getElementById('ellSlider');
+    const logXAxis = document.getElementById('logXAxis');
+    const logErrorAxis = document.getElementById('logErrorAxis');
+    const methodsContainer = document.getElementById('methodsContainer');
+    const addMethodBtn = document.getElementById('addMethodBtn');
+    
+    function renderMethodsUI() {
+        methodsContainer.innerHTML = '';
+        methods.forEach((m, idx) => {
+            let colorObj = methodColors[idx % methodColors.length];
+            let div = document.createElement('div');
+            div.style.borderLeft = `4px solid ${colorObj.border}`;
+            div.style.paddingLeft = '10px';
+            div.style.position = 'relative';
+            
+            div.innerHTML = `
+                <div style="font-weight: bold; font-size: 0.85em; margin-bottom: 5px; color: ${document.documentElement.getAttribute("data-mode") === "dark" ? "#ddd" : "#444"};">
+                    Method ${idx + 1}
+                    ${methods.length > 1 ? `<button class="remove-btn" data-idx="${idx}" style="position: absolute; right: 0; top: 0; background: transparent; border: none; color: #e53935; cursor: pointer;">✕</button>` : ''}
+                </div>
+                <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                    <div class="pw-control-group">
+                        <label style="font-size: 0.8em;">DWH Steps:</label>
+                        <input type="number" class="m-dwh" data-idx="${idx}" min="0" max="6" step="1" value="${m.dwh}" style="width: 60px; padding: 4px;" />
+                    </div>
+                    <div class="pw-control-group">
+                        <label style="font-size: 0.8em;">PE Steps:</label>
+                        <input type="number" class="m-pe" data-idx="${idx}" min="0" max="6" step="1" value="${m.pe}" style="width: 60px; padding: 4px;" />
+                    </div>
+                </div>
+            `;
+            methodsContainer.appendChild(div);
+        });
+
+        document.querySelectorAll('.m-dwh').forEach(el => el.addEventListener('change', (e) => {
+            methods[e.target.dataset.idx].dwh = parseInt(e.target.value);
+            generateData();
+        }));
+        document.querySelectorAll('.m-pe').forEach(el => el.addEventListener('change', (e) => {
+            methods[e.target.dataset.idx].pe = parseInt(e.target.value);
+            generateData();
+        }));
+        document.querySelectorAll('.remove-btn').forEach(el => el.addEventListener('click', (e) => {
+            methods.splice(e.target.dataset.idx, 1);
+            renderMethodsUI();
+            generateData();
+        }));
+    }
+
+    addMethodBtn.addEventListener('click', () => {
+        if (methods.length < 5) {
+            methods.push({ dwh: 0, pe: 0 });
+            renderMethodsUI();
+            generateData();
+        }
+    });
+
+    ellSlider.addEventListener('change', generateData);
+    logXAxis.addEventListener('change', generateData);
+    logErrorAxis.addEventListener('change', generateData);
+
+    const ctx = document.getElementById('polarPatternChart').getContext('2d');
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets: [] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 200 },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top', labels: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "#ccc" : "#444" } },
+                tooltip: {
+                    callbacks: {
+                        title: (ctx) => `x = ${Number(ctx[0].parsed.x).toPrecision(4)}`,
+                        label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.parsed.y).toPrecision(5)}`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    title: { display: true, text: 'Input Singular Value x' },
+                    min: 0, max: 1.1,
+                    grid: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" },
+                    ticks: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "#aaa" : "#555" }
+                },
+                y: {
+                    type: 'linear',
+                    title: { display: true, text: 'Mapped Value f(x)' },
+                    min: 0, max: 1.1,
+                    grid: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" },
+                    ticks: { color: document.documentElement.getAttribute("data-mode") === "dark" ? "#aaa" : "#555" }
+                }
+            }
+        }
+    });
+
+    function generateData() {
+        const ell0 = Math.pow(10, parseFloat(ellSlider.value));
+        const isLogX = logXAxis.checked;
+        const isLogError = logErrorAxis.checked;
+
+        chart.options.scales.x.type = isLogX ? 'logarithmic' : 'linear';
+        chart.options.scales.x.min = isLogX ? Math.max(ell0 / 2, 1e-6) : 0;
+        chart.options.scales.x.max = 1.1;
+
+        chart.options.scales.y.type = isLogError ? 'logarithmic' : 'linear';
+        chart.options.scales.y.title.text = isLogError ? 'Absolute Error |1 - f(x)|' : 'Mapped Value f(x)';
+        chart.options.scales.y.min = isLogError ? 1e-16 : -0.1;
+        chart.options.scales.y.max = isLogError ? 2 : 1.1;
+
+        let xs = [];
+        if (isLogX) {
+            let start = Math.log10(chart.options.scales.x.min);
+            let end = Math.log10(1.0);
+            for (let i = 0; i <= 500; i++) {
+                xs.push(Math.pow(10, start + i * (end - start) / 500));
+            }
+        } else {
+            for (let i = 0; i <= 1000; i++) {
+                xs.push(i / 1000);
+            }
+        }
+        
+        if (!xs.includes(1.0)) xs.push(1.0);
+        if (!xs.includes(ell0)) xs.push(ell0);
+        
+        // Add out-of-bounds evaluation to 1.1 explicitly
+        for (let i = 1; i <= 20; i++) {
+            xs.push(1.0 + i * 0.005);
+        }
+        xs.sort((a, b) => a - b);
+
+        let datasets = [];
+
+        // Add start floor indicator
+        datasets.push({
+            label: 'Floor Line',
+            data: [{x: ell0, y: isLogError ? 1e-16 : -0.1}, {x: ell0, y: isLogError ? 2 : 1.1}],
+            borderColor: '#e91e63',
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
+            tension: 0
+        });
+
+        methods.forEach((m, mIdx) => {
+            let numDWH = m.dwh;
+            let numPE = m.pe;
+            let current_ell = ell0;
+            
+            let dwh_coeffs_cache = [];
+            for (let i=0; i<numDWH; i++) {
+                let c = dwh_coeffs(current_ell);
+                dwh_coeffs_cache.push(c);
+                current_ell = dwh_map(current_ell, c);
+            }
+            
+            let pe_coeffs_cache = [];
+            for (let i=0; i<numPE; i++) {
+                let c = analytic_pe_coeffs(current_ell);
+                pe_coeffs_cache.push(c);
+                current_ell = pe_map(current_ell, c);
+            }
+            
+            let finalData = xs.map(x_init => {
+                let evalY = x_init;
+                
+                for (let i=0; i<numDWH; i++) evalY = dwh_map(evalY, dwh_coeffs_cache[i]);
+                for (let i=0; i<numPE; i++) evalY = pe_map(evalY, pe_coeffs_cache[i]);
+                
+                let y = evalY;
+                if (isLogError) {
+                    y = Math.abs(1 - y);
+                    if (y < 1e-16) y = 1e-16;
+                }
+                
+                // Allow plot slightly above and below bounds based on scale
+                return {x: x_init, y: isLogError ? Math.min(y, 2) : Math.max(-0.5, Math.min(y, 1.2))};
+            });
+
+            let titleStr = '';
+            if (numDWH > 0 && numPE > 0) titleStr = `(${numDWH} DWH + ${numPE} PE)`;
+            else if (numDWH > 0) titleStr = `(${numDWH} DWH)`;
+            else if (numPE > 0) titleStr = `(${numPE} PE)`;
+            else titleStr = '(Identity)';
+            
+            let cObj = methodColors[mIdx % methodColors.length];
+
+            datasets.push({
+                label: `Method ${mIdx + 1} ${titleStr}`,
+                data: finalData,
+                borderColor: cObj.border,
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false,
+                tension: 0.1
+            });
+        });
+
+        chart.data.datasets = datasets;
+        chart.update();
+    }
+
+    // Theme integration observer
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === "data-mode") {
+                const mode = document.documentElement.getAttribute("data-mode");
+                chart.options.scales.x.grid.color = mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
+                chart.options.scales.y.grid.color = mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
+                chart.options.scales.x.ticks.color = mode === "dark" ? "#aaa" : "#555";
+                chart.options.scales.y.ticks.color = mode === "dark" ? "#aaa" : "#555";
+                renderMethodsUI();
+                chart.update();
+            }
+        });
+    });
+    observer.observe(document.documentElement, { attributes: true });
+
+    renderMethodsUI();
+    generateData();
+});
+</script>

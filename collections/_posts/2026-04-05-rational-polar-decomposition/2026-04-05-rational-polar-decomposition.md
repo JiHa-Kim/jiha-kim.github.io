@@ -85,6 +85,8 @@ $$
 [0.995160,1].
 $$
 
+{% include polar_widget.html %}
+
 ---
 
 ## 2. Theoretical Components
@@ -112,8 +114,16 @@ We use the degree-5 odd polynomial $p(x) = x(a + bx^2 + cx^4)$. To keep the top 
 > Then the minimax coefficients are:
 > $$c = \frac{2}{D},\qquad b = -\frac{5c}{3}\,S,\qquad a = 5cP.$$
 
-> [!remark] Root Isolation
-> The degree-9 polynomial $F$ typically has a unique valid root in $(\ell, 1)$ that yields $E < 1$. It is easily isolated via bisection in FP64.
+> [!remark] Isolation of the Minimax Root
+> The degree-9 equation $F(q_0; \ell) = 0$ is obtained by eliminating other variables and thus contains extraneous branches that do not correspond to the minimax solution.
+> 
+> Let $V = \operatorname{span}\{x, x^3, x^5\}$ and $e(x) = 1 - p(x)$ on $[\ell, 1]$. Since $V$ is a 3-dimensional Haar (Chebyshev) space on the positive interval, the best uniform approximant $p^* \in V$ is uniquely characterized by the existence of $4$ points $\ell \le x_0 < x_1 < x_2 < x_3 \le 1$ such that $e^*(x_j) = \pm E$ with alternating signs.
+> 
+> In our parametrization, the error $e(x)$ has critical points precisely at $q_0$ and $r$. A real root $q_0$ of $F(q_0;\ell) = 0$ is therefore the **unique** valid minimax solution if and only if it produces an ordering:
+> $$ \ell < q_0 < r < 1 $$
+> and alternating error signs:
+> $$ e(\ell) > 0, \quad e(q_0) < 0, \quad e(r) > 0, \quad e(1) < 0 $$
+> Since $e(x) = 1 - p(x)$, we isolate the root by rigorously verifying that $p(\ell)$ and $p(r)$ dip strictly underneath $1$ (yielding $E > 0$), whereas $p(q_0)$ and $p(1)$ push strictly above $1$ (yielding $-E < 0$). Extraneous roots will natively fail this geometric alternation condition!
 
 ---
 
@@ -285,8 +295,23 @@ where:
 >             r2 = (2*q0**3 + 4*q0**2 + 6*q0 + 3) / (5 * (2*q0 + 1))
 >             S, P = q0**2 + r2, q0**2 * r2
 >             D = (1 - 5/3*S + 5*P) + ell*(ell**4 - 5/3*S*ell**2 + 5*P)
->             c, b, a = 2/D, -5*c/3*S, 5*c*P
->             if 1 - ell*(a + b*ell**2 + c*ell**4) < 1: return a, b, c
+>             c = 2/D
+>             b = -5*c/3*S
+>             a = 5*c*P
+>             
+>             # Chebyshev alternation check to reject extraneous branches
+>             p_r = np.sqrt(r2) * (a + b*r2 + c*r2**2)
+>             p_l = ell * (a + b*ell**2 + c*ell**4)
+>             p_q0 = q0 * (a + b*q0**2 + c*q0**4)
+>             p_1 = a + b + c
+>             
+>             r = np.sqrt(r2)
+>             if r2 > 0 and ell < q0 < r < 1:
+>                 E_ell, E_r = 1 - p_l, 1 - p_r
+>                 E_q0, E_1 = p_q0 - 1, p_1 - 1
+>                 errs = [E_ell, E_r, E_q0, E_1]
+>                 if all(e > 0 for e in errs) and max(errs) - min(errs) < 1e-4:
+>                     return a, b, c
 >     return None
 >
 >
