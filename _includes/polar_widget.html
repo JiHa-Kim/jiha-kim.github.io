@@ -1,6 +1,11 @@
 <div class="polar-widget" id="polarWidget">
     <div class="pw-controls">
-        <h4 style="margin-top: 0;">Interactive Map Simulator</h4>
+        <div class="pw-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+            <h4 style="margin-top: 0; margin-bottom: 0;">Interactive Map Simulator</h4>
+            <button id="fullscreenBtn" class="pw-icon-btn" title="Toggle Fullscreen">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            </button>
+        </div>
         
         <div class="pw-control-group" style="padding-bottom: 10px; border-bottom: 1px solid var(--card-border, rgba(100,100,100,0.2));">
             <label>Initial $\log_{10}(\ell_0)$:</label>
@@ -16,7 +21,10 @@
             <!-- Methods will be injected here -->
         </div>
         
-        <button id="addMethodBtn" style="margin-top: 10px; padding: 8px 12px; border-radius: 6px; border: 1px solid #8e24aa; background: rgba(142, 36, 170, 0.1); color: var(--text-color, inherit); cursor: pointer; font-weight: bold;">+ Add Method Comparison</button>
+        <button id="addMethodBtn" style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border, rgba(100,100,100,0.3)); background: transparent; color: var(--text-color, inherit); cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Method Comparison
+        </button>
     </div>
     <div class="pw-graph">
         <canvas id="polarPatternChart"></canvas>
@@ -24,9 +32,27 @@
 </div>
 
 <style>
+.pw-icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-color, #666);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+.pw-icon-btn:hover {
+    background: var(--tag-hover, rgba(120, 120, 120, 0.1));
+    color: var(--link-color, #8e24aa);
+}
+
 .polar-widget {
     display: flex;
     flex-wrap: wrap;
+    align-items: stretch;
     gap: 30px;
     background: var(--card-bg, rgba(120, 120, 120, 0.05));
     border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
@@ -34,13 +60,43 @@
     padding: 24px;
     margin: 2.5rem 0;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+    color: var(--text-color, inherit);
+    font-family: inherit;
+}
+@media (min-width: 769px) {
+    .polar-widget {
+        height: 600px;
+        flex-wrap: nowrap;
+    }
 }
 .pw-controls {
-    flex: 1;
-    min-width: 250px;
+    flex: 0 0 320px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    overflow-y: auto;
+    padding-right: 12px;
+}
+@media (max-width: 768px) {
+    .pw-controls {
+        flex: 1 1 100%;
+        max-height: 400px;
+    }
+}
+
+/* Custom Scrollbar */
+.pw-controls::-webkit-scrollbar {
+    width: 6px;
+}
+.pw-controls::-webkit-scrollbar-track {
+    background: transparent;
+}
+.pw-controls::-webkit-scrollbar-thumb {
+    background: var(--card-border, rgba(100, 100, 100, 0.4));
+    border-radius: 3px;
+}
+.pw-controls::-webkit-scrollbar-thumb:hover {
+    background: var(--card-border, rgba(100, 100, 100, 0.7));
 }
 .pw-control-group {
     display: flex;
@@ -50,6 +106,8 @@
 .pw-control-group label {
     font-size: 0.9em;
     font-weight: 600;
+    color: var(--text-color, inherit);
+    opacity: 0.8;
 }
 .pw-control-group input[type=number] {
     width: 100px;
@@ -63,10 +121,11 @@
     transition: all 0.2s;
 }
 .pw-control-group input[type=number]:focus {
-    border-color: #8e24aa;
+    border-color: var(--link-color, #8e24aa);
 }
 .pw-control-group-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
     font-size: 0.85em;
     user-select: none;
@@ -78,22 +137,138 @@
     gap: 4px;
 }
 .pw-graph {
-    flex: 2;
+    flex: 1;
     min-width: 300px;
     position: relative;
-    background: #fff; /* Enforce white background for the chart to make colors pop, or adapt to dark mode */
-    border-radius: 8px;
-    padding: 10px;
-    border: 1px solid rgba(0,0,0,0.05);
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    height: 100%;
 }
 [data-mode="dark"] .pw-graph {
-    background: #23222b;
-    border-color: rgba(255,255,255,0.1);
+    background: #1b1b1e;
+    border-color: rgba(255,255,255,0.05);
+}
+.pw-method-card {
+    background: var(--card-bg, rgba(120, 120, 120, 0.05));
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+    border: 1px solid var(--card-border, transparent);
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.pw-method-card:hover {
+    background: var(--card-bg, rgba(120, 120, 120, 0.08));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.pw-metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+    padding: 6px 0;
+    border-bottom: 1px dotted var(--card-border, rgba(100, 100, 100, 0.2));
+}
+.pw-metric-label {
+    font-size: 0.7em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--m-color, #8e24aa);
+    text-transform: uppercase;
+}
+.pw-metric-value {
+    font-family: var(--font-family-monospace, monospace);
+    font-size: 0.85em;
+    color: var(--text-color, inherit);
+    font-weight: normal;
+}
+.pw-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--card-border, #ddd);
+    outline: none;
+    margin: 15px 0 5px 0;
+}
+.pw-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--m-color, #8e24aa);
+    cursor: pointer;
+    border: 2px solid var(--main-bg, #fff);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+    transition: transform 0.1s;
+}
+.pw-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+#addMethodBtn:hover {
+    background: var(--tag-hover, rgba(120, 120, 120, 0.1)) !important;
+    border-color: var(--link-color, #8e24aa) !important;
+    color: var(--link-color, #8e24aa) !important;
 }
 .pw-metrics {
     margin-top: auto;
     padding-top: 15px;
     border-top: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+}
+
+/* Fullscreen implementation */
+.polar-widget.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1050;
+    margin: 0;
+    border-radius: 0;
+    background: var(--main-bg, #fff);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+    padding: 40px;
+}
+
+[data-mode="dark"] .polar-widget.fullscreen {
+    background: var(--main-bg, #1b1b1e);
+}
+
+.polar-widget.fullscreen .pw-controls {
+    flex: 0 0 320px;
+    max-height: 100%;
+    overflow-y: auto;
+    padding-right: 20px;
+    border-right: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+}
+
+.polar-widget.fullscreen .pw-graph {
+    flex: 1;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .polar-widget.fullscreen {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+    .polar-widget.fullscreen .pw-controls {
+        flex: 0 0 auto;
+        border-right: none;
+        border-bottom: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+        padding-right: 0;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
 }
 </style>
 
@@ -189,15 +364,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Colors for multiple methods
     const methodColors = [
-        { border: '#8e24aa', bg: 'rgba(142, 36, 170, 0.1)' },
-        { border: '#00acc1', bg: 'rgba(0, 172, 193, 0.1)' },
-        { border: '#fb8c00', bg: 'rgba(251, 140, 0, 0.1)' },
-        { border: '#43a047', bg: 'rgba(67, 160, 71, 0.1)' },
-        { border: '#e53935', bg: 'rgba(229, 57, 53, 0.1)' }
+        { border: '#8e24aa', rgb: '142, 36, 170' },
+        { border: '#00acc1', rgb: '0, 172, 193' },
+        { border: '#fb8c00', rgb: '251, 140, 0' },
+        { border: '#43a047', rgb: '67, 160, 71' },
+        { border: '#e53935', rgb: '229, 57, 53' }
     ];
-
+    
     let methods = [
-        { dwh: 1, pe: 2 }
+        { dwh: 1, pe: 2, opacity: 1.0, maxErr: 0 }
     ];
 
     // UI Elements
@@ -206,30 +381,68 @@ document.addEventListener("DOMContentLoaded", function() {
     const logErrorAxis = document.getElementById('logErrorAxis');
     const methodsContainer = document.getElementById('methodsContainer');
     const addMethodBtn = document.getElementById('addMethodBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const polarWidget = document.getElementById('polarWidget');
+
+    if (fullscreenBtn && polarWidget) {
+        fullscreenBtn.addEventListener('click', () => {
+            polarWidget.classList.toggle('fullscreen');
+            const isFullscreen = polarWidget.classList.contains('fullscreen');
+            
+            if (isFullscreen) {
+                fullscreenBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg>';
+                document.body.style.overflow = 'hidden';
+            } else {
+                fullscreenBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
+                document.body.style.overflow = '';
+            }
+            
+            setTimeout(() => {
+                chart.resize();
+            }, 50);
+        });
+    }
     
     function renderMethodsUI() {
         methodsContainer.innerHTML = '';
+        const isDark = document.documentElement.getAttribute("data-mode") === "dark";
+        
         methods.forEach((m, idx) => {
             let colorObj = methodColors[idx % methodColors.length];
             let div = document.createElement('div');
+            div.className = 'pw-method-card';
             div.style.borderLeft = `4px solid ${colorObj.border}`;
-            div.style.paddingLeft = '10px';
-            div.style.position = 'relative';
+            div.style.setProperty('--m-color', colorObj.border);
             
             div.innerHTML = `
-                <div style="font-weight: bold; font-size: 0.85em; margin-bottom: 5px; color: ${document.documentElement.getAttribute("data-mode") === "dark" ? "#ddd" : "#444"};">
-                    Method ${idx + 1}
-                    ${methods.length > 1 ? `<button class="remove-btn" data-idx="${idx}" style="position: absolute; right: 0; top: 0; background: transparent; border: none; color: #e53935; cursor: pointer;">✕</button>` : ''}
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                    <div style="font-weight: bold; font-size: 0.95em; color: var(--heading-color, inherit);">Method ${idx + 1}</div>
+                    ${methods.length > 1 ? `<button class="remove-btn pw-icon-btn" data-idx="${idx}" style="color: #e53935; padding: 2px; margin-top: -4px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>` : ''}
                 </div>
-                <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                
+                <div class="pw-metric-row">
+                    <span class="pw-metric-label">Max Error</span>
+                    <span class="pw-metric-value">${m.maxErr > 0 ? m.maxErr.toExponential(2) : '-'}</span>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin: 15px 0 12px 0;">
                     <div class="pw-control-group">
-                        <label style="font-size: 0.8em;">DWH Steps:</label>
-                        <input type="number" class="m-dwh" data-idx="${idx}" min="0" max="6" step="1" value="${m.dwh}" style="width: 60px; padding: 4px;" />
+                        <label style="font-size: 0.75em;">DWH Steps</label>
+                        <input type="number" class="m-dwh" data-idx="${idx}" min="0" max="6" step="1" value="${m.dwh}" style="width: 50px; padding: 4px; font-size: 0.85em;" />
                     </div>
                     <div class="pw-control-group">
-                        <label style="font-size: 0.8em;">PE Steps:</label>
-                        <input type="number" class="m-pe" data-idx="${idx}" min="0" max="6" step="1" value="${m.pe}" style="width: 60px; padding: 4px;" />
+                        <label style="font-size: 0.75em;">PE Steps</label>
+                        <input type="number" class="m-pe" data-idx="${idx}" min="0" max="6" step="1" value="${m.pe}" style="width: 50px; padding: 4px; font-size: 0.85em;" />
                     </div>
+                </div>
+                <div class="pw-control-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="font-size: 0.75em;">Opacity</label>
+                        <span style="font-size: 0.7em; opacity: 0.6;">${Math.round(m.opacity * 100)}%</span>
+                    </div>
+                    <input type="range" class="m-opacity pw-slider" data-idx="${idx}" min="0" max="1" step="0.05" value="${m.opacity}" />
                 </div>
             `;
             methodsContainer.appendChild(div);
@@ -243,6 +456,21 @@ document.addEventListener("DOMContentLoaded", function() {
             methods[e.target.dataset.idx].pe = parseInt(e.target.value);
             generateData();
         }));
+        document.querySelectorAll('.m-opacity').forEach(el => el.addEventListener('input', (e) => {
+            const idx = e.target.dataset.idx;
+            const m = methods[idx];
+            m.opacity = parseFloat(e.target.value);
+            e.target.previousElementSibling.querySelector('span').textContent = Math.round(m.opacity * 100) + '%';
+            
+            // Fast visual-only update: dataset index is idx + 1 (0 is Floor Line)
+            const dsIdx = parseInt(idx) + 1;
+            if (chart.data.datasets[dsIdx]) {
+                const cObj = methodColors[idx % methodColors.length];
+                chart.data.datasets[dsIdx].borderColor = `rgba(${cObj.rgb}, ${m.opacity})`;
+                chart.data.datasets[dsIdx].backgroundColor = `rgba(${cObj.rgb}, ${m.opacity * 0.1})`;
+                chart.update('none');
+            }
+        }));
         document.querySelectorAll('.remove-btn').forEach(el => el.addEventListener('click', (e) => {
             methods.splice(e.target.dataset.idx, 1);
             renderMethodsUI();
@@ -252,7 +480,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     addMethodBtn.addEventListener('click', () => {
         if (methods.length < 5) {
-            methods.push({ dwh: 0, pe: 0 });
+            methods.push({ dwh: 0, pe: 0, opacity: 0.8, maxErr: 0 });
             renderMethodsUI();
             generateData();
         }
@@ -367,11 +595,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 current_ell = pe_map(current_ell, c);
             }
             
+            let maxErrVal = 0;
             let finalData = xs.map(x_init => {
                 let evalY = x_init;
                 
                 for (let i=0; i<numDWH; i++) evalY = dwh_map(evalY, dwh_coeffs_cache[i]);
                 for (let i=0; i<numPE; i++) evalY = pe_map(evalY, pe_coeffs_cache[i]);
+                
+                if (x_init >= ell0 && x_init <= 1.0001) {
+                    maxErrVal = Math.max(maxErrVal, Math.abs(1 - evalY));
+                }
                 
                 let y = evalY;
                 if (isLogError) {
@@ -382,6 +615,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 // Allow plot slightly above and below bounds based on scale
                 return {x: x_init, y: isLogError ? Math.min(y, 2) : Math.max(-0.5, Math.min(y, 1.2))};
             });
+            
+            m.maxErr = maxErrVal;
 
             let titleStr = '';
             if (numDWH > 0 && numPE > 0) titleStr = `(${numDWH} DWH + ${numPE} PE)`;
@@ -394,12 +629,21 @@ document.addEventListener("DOMContentLoaded", function() {
             datasets.push({
                 label: `Method ${mIdx + 1} ${titleStr}`,
                 data: finalData,
-                borderColor: cObj.border,
+                borderColor: `rgba(${cObj.rgb}, ${m.opacity})`,
+                backgroundColor: `rgba(${cObj.rgb}, ${m.opacity * 0.1})`,
                 borderWidth: 2,
                 pointRadius: 0,
                 fill: false,
                 tension: 0.1
             });
+        });
+
+        // Update UI metrics without a full re-render
+        document.querySelectorAll('.pw-method-card').forEach((card, idx) => {
+            if (methods[idx]) {
+                const valEl = card.querySelector('.pw-metric-value');
+                if (valEl) valEl.textContent = methods[idx].maxErr.toExponential(2);
+            }
         });
 
         chart.data.datasets = datasets;
