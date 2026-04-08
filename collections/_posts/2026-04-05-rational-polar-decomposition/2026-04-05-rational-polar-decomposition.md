@@ -98,9 +98,9 @@ $$
 
 In the Gram-space iteration ($B = A^\top A$), we use the **"apply-friendly" reparametrization**:
 $$
-\alpha = \frac{b}{c},\qquad \delta = \frac{a - \alpha}{c},\qquad \gamma = \frac{1}{c}.
+\alpha = \frac{b}{c},\qquad \beta = \frac{a - \alpha}{c},\qquad \gamma = \frac{1}{c}.
 $$
-This lets us write the update as $R = \alpha I + \delta (\gamma I + B)^{-1}$, completely removing the need for division or scalar divisions on the fly. Importantly, the constants $(\alpha, \delta, \gamma)$ are pre-computed entirely offline in FP64 and injected directly into the ML kernel as raw floats, guaranteeing consistency and avoiding numerical jitter at runtime.
+This lets us write the update as $R = \alpha I + \beta (\gamma I + B)^{-1}$, completely removing the need for division or scalar divisions on the fly. Importantly, the constants $(\alpha, \beta, \gamma)$ are pre-computed entirely offline in FP64 and injected directly into the ML kernel as raw floats, guaranteeing consistency and avoiding numerical jitter at runtime.
 
 ### 2.2 Polar Express Cleanup (Polynomial)
 
@@ -192,7 +192,7 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
 
     \STATE \COMMENT{--- Step 1: DWH ($\ell_0 = 10^{-3}$) ---}
     \STATE $H \leftarrow \mathrm{SafeSolveSPD}(\gamma_0 I + B)$
-    \STATE $R_0 \leftarrow \alpha_0 I + \delta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
+    \STATE $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
 
     \STATE \COMMENT{--- Steps 2-3: Normalized PE Cleanup ---}
     \FOR{$i=1, 2$}
@@ -214,7 +214,7 @@ Fixed constants for implementation, computed offline in FP64:
 
 | Step | Parameters | Values |
 |:---|:---|:---|
-| **DWH** | $\alpha_0, \delta_0, \gamma_0$ | $0.984313, 0.015688, 0.000062$ |
+| **DWH** | $\alpha_0, \beta_0, \gamma_0$ | $0.984313, 0.015688, 0.000062$ |
 | **PE 1** | $\hat{a}_1, \hat{b}_1, \hat{c}_1$ | $3.306253, -6.208058, 3.901804$ |
 | **PE 2** | $\hat{a}_2, \hat{b}_2, \hat{c}_2$ | $2.194121, -1.974869, 0.780748$ |
 
