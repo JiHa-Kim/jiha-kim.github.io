@@ -100,7 +100,7 @@ In the Gram-space iteration ($B = A^\top A$), we use the **"apply-friendly" repa
 $$
 \alpha = \frac{b}{c},\qquad \beta = a - \alpha.
 $$
-This lets us write the update as $R = \alpha I + \beta (I + cB)^{-1}$, avoiding the formation of large intermediate matrices and requiring only one SPD solve.
+This lets us write the update as $R = \alpha I + \frac{\beta}{c} (\frac{1}{c}I + B)^{-1}$, avoiding large scalar multiplications and improving numerical precision for the SPD solve.
 
 ### 2.2 Polar Express Cleanup (Polynomial)
 
@@ -127,7 +127,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
     $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
     where $\eta$ is a safety margin. This bound is tighter than scaling the full $u$ because it only adds a small multiple of the mean eigenvalue.
-3.  **Safe SPD Solve**: For $(I + cB)$, we use Cholesky with adaptive jitter. If it fails, we add diagonal shift $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$ and retry.
+3.  **Safe SPD Solve**: For $(\frac{1}{c}I + B)$, we use Cholesky with adaptive jitter. If it fails, we add diagonal shift $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$ and retry.
 
 ### 3.2 The Full Algorithm
 
@@ -186,8 +186,8 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
     \STATE $B \leftarrow G/u, \quad Y \leftarrow Y/\sqrt{u}, \quad K \leftarrow I$
 
     \STATE \COMMENT{--- Step 1: DWH ($\ell_0 = 10^{-3}$) ---}
-    \STATE $H \leftarrow \mathrm{SafeSolveSPD}(I + c_0 B)$
-    \STATE $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
+    \STATE $H \leftarrow \mathrm{SafeSolveSPD}(\frac{1}{c_0} I + B)$
+    \STATE $R_0 \leftarrow \alpha_0 I + \frac{\beta_0}{c_0} H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
 
     \STATE \COMMENT{--- Steps 2-3: Normalized PE Cleanup ---}
     \FOR{$i=1, 2$}
