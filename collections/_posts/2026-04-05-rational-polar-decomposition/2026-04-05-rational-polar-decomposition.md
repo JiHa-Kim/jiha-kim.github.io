@@ -154,7 +154,7 @@ The following algorithm utilizes exactly two tall rectangular GEMMs.
 ```pseudo
 def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # 1. Tall orientation check
-    if $M < N$: return @HybridPolar($X^\top$)$^\top$
+    if $M < N$: return @HybridPolar($X^\top$) $^\top$
 
     dtype = fp32 # Precision for Cholesky/TRSM
 
