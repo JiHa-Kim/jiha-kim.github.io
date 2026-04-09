@@ -237,7 +237,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
     $S \leftarrow \gamma_0 u \Delta + \tilde{G}$
     $(L, \tau) \leftarrow$ @SafeCholesky($S, dtype, K_{\max}$)
-    $W \leftarrow \mathrm{solve}(L, D)$
+    $W \leftarrow \mathrm{solve_triangular}(L, D)$
     $H \leftarrow \beta_0 u W^\top W$ # via SYRK
     $R \leftarrow \alpha_0 B + B H$
     $B \leftarrow$ @Sym($\alpha_0 R + H R$), $\quad K \leftarrow \alpha_0 K + K H$
