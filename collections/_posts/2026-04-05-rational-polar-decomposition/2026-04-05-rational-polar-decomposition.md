@@ -126,9 +126,25 @@ $$
 
 The hybrid polar decomposition targets speed and stability under low-precision (BF16/FP16) arithmetic.
 
-### 3.1 The Main Hybrid Algorithm
+### 3.1 Auxiliary Functions
 
-The following algorithm utilizes exactly two tall rectangular GEMMs and leverages several architectural tricks—including in-place scaling, Cholesky-inverse solves, and defect-form cleanup—to minimize memory footprint and FLOPs.
+```pseudo
+def Sym($A$): return $\frac{1}{2}(A + A^\top)$
+
+def SafeCholesky($S, dtype, K_{\max}=6$):
+    # Pivot-informed jittered Cholesky with monotone doubling backoff
+    $S \leftarrow \text{Sym}(S), \tau \leftarrow 0$
+    $\tau_{\min} \leftarrow \epsilon_{\text{mach}}(dtype) \max(\text{tr}(S)/N, \max_i S_{ii}, 1)$
+    for $t=1, \dots, K_{\max}$:
+        try $L \leftarrow \text{Cholesky}(S + \tau I)$ while tracking $\pi_{\min}$
+        if success: return ($L$, $\tau$)
+        $\tau \leftarrow \max(\tau + \max(0, -\pi_{\min}) + \tau_{\min}, 2\tau, \tau_{\min})$
+    fail
+```
+
+### 3.2 The Main Hybrid Algorithm
+
+The following algorithm utilizes exactly two tall rectangular GEMMs.
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Optimized Hybrid Polar: 1 DWH + 2 PE</div>
