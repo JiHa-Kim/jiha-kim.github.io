@@ -376,6 +376,8 @@ module Jekyll
     end
 
     def highlight_pythonic_code(code)
+      code, buckets = protect_algo_math(code)
+
       code = code.gsub(/\b(def)\s+([A-Za-z_]\w*)/) do
         "<span class=\"algo-kw\">#{$1}</span> <span class=\"algo-func\">#{$2}</span>"
       end
@@ -385,7 +387,9 @@ module Jekyll
       end
 
       code = highlight_algo_literals(code)
-      code.gsub(/:/, "<span class=\"algo-punct\">:</span>")
+      code = code.gsub(/:/, "<span class=\"algo-punct\">:</span>")
+
+      restore_algo_math(code, buckets)
     end
 
     def highlight_algo_literals(line)
@@ -405,6 +409,22 @@ module Jekyll
       end
 
       line
+    end
+
+    def protect_algo_math(text)
+      buckets = []
+      protected = text.gsub(/\$\$.*?\$\$|\$[^$\n]+\$/m) do |match|
+        buckets << match
+        "@@ALGOMATH#{buckets.length - 1}@@"
+      end
+      [protected, buckets]
+    end
+
+    def restore_algo_math(text, buckets)
+      buckets.each_with_index do |payload, i|
+        text = text.gsub("@@ALGOMATH#{i}@@", payload)
+      end
+      text
     end
   end
 end
