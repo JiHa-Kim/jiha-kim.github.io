@@ -178,10 +178,14 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $S \leftarrow \gamma_{0} u \Delta + \tilde{G}$
     $(L, \tau) \leftarrow$ @SafeCholesky($S$)
     $S_{\text{inv}} \leftarrow$ @cholesky_inverse($L$) # potri: 3x faster than solve+SYRK
-    $H_{0} \leftarrow \gamma_{0} u D S_{\text{inv}} D$ # Bounded resolvent
-    $H_{sq} \leftarrow$ @Sym($H_{0}^{2}$) # Half-FLOP SYRK
-    $B \leftarrow c_{I} I + c_{B} B + c_{H} H_{0} + c_{H2} H_{sq}$ # Zero-GEMM step
-    $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + \tilde{\beta}_{0} H_{0})$
+    
+    if $\frac{1}{u \operatorname{tr}(S_{\text{inv}})} - \gamma_{0} > 0.15$:
+        $K \leftarrow \frac{1}{\sqrt{u}} I$ # Fast-path: completely bypass DWH
+    else:
+        $H_{0} \leftarrow \gamma_{0} u D S_{\text{inv}} D$ # Bounded resolvent
+        $H_{sq} \leftarrow$ @Sym($H_{0}^{2}$) # Half-FLOP SYRK
+        $B \leftarrow c_{I} I + c_{B} B + c_{H} H_{0} + c_{H2} H_{sq}$ # Zero-GEMM step
+        $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + \tilde{\beta}_{0} H_{0})$
 
     # 5. Step 2: PE Cleanup 1 (Pure Defect Pipeline)
     $E \leftarrow I - B$ # Shift to defect space
@@ -228,6 +232,7 @@ Fixed constants for implementation, computed offline in FP64:
   3. The dead-code branch in Step 3 cleanly eliminates all subsequent $B$ updates from the critical path entirely.
   4. The vectorized Frobenius norm calculation $\|G\|_F^2 = d^\top \tilde{G}^{\circ 2} d$ replaces an $O(N^2)$ summation with a single tensor-friendly quadratic form.
 - **Zero-Allocation $X$-Scaling**: Large scale activation accumulations often peak hard sequentially. The in-place mutation of the initial system variables prevents tensor duplication overhead scaling at $O(MN)$ without skewing parameter recovery constraints by exactly reverting projection targets at $N \times N$ factor scaling complexity.
+- **Dynamic Fast-Path Bypassing**: Because the explicitly materialized inverse $S_{\text{inv}} \approx (u(\gamma_{0} I + B))^{-1}$ contains strict spectral volume, its trace structurally enforces a computationally free lower bound: $\lambda_{\min} \ge \frac{1}{u \operatorname{tr}(S_{\text{inv}})} - \gamma_{0}$. If this dynamically verifiable trace bound exceeds the polynomial safety threshold (e.g. $0.15$), the kernel safely aborts the remaining DWH sequence and jumps strictly into the PE defect sequence immediately.
 - **Balanced Latency**: While pre-scaling adds one element-wise pass over the tall matrix $X$, the cost is offset by the reduction in small-side complexity compared to pure rational iterations. The algorithm still performs exactly two tall rectangular GEMMs.
 - **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
 
