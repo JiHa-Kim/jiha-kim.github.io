@@ -129,7 +129,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 ### 3.1 Stability Primitives
 
 1.  **Robust Gram Accumulation (ColNorm)**: To alleviate precision errors and reduce dynamic range instability in low-precision (FP16/BF16) arithmetic, we temporarily normalize the columns of $X$ before forming the Gram matrix. This gives a safer accumulation path and also a better-conditioned matrix for the initial DWH solve, but the overall iteration must still target the original polar factor.
-    - We compute column sums-of-squares in one pass, lower-clip them as $d_j = \max(\sum_i X_{ij}^2, \epsilon)$, and form $D = \text{diag}(\text{rsqrt}(d))$, then accumulate the scaled Gram:
+    - We compute column sums-of-squares in one pass, lower-clip them as $d_j = \max(\sum_i X_{ij}^2, \epsilon)$, and form $D = \mathrm{diag}(\mathrm{rsqrt}(d)) = \mathrm{diag}(d_j^{-1/2})$, then accumulate the scaled Gram:
       $$
       \tilde{G} = (X D)^\top (X D).
       $$
