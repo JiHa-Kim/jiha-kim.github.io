@@ -95,8 +95,26 @@ module Jekyll
         content.gsub!("@@PROTECT#{i}@@", payload)
       end
 
-      # 6. High-Performance Refactoring (Ported from Liquid)
-      # These operate on HTML and have been moved to a :post_convert hook below.
+      # 6. Preserve spaces between tokens at risk of being stripped by compress_html
+      content = preserve_semantic_spaces(content)
+
+      content
+    end
+
+    def preserve_semantic_spaces(content)
+      return content unless content.include?('</span>') || content.include?('$')
+
+      # Identify spaces between adjacent elements that should not be stripped
+      # 1. Between two math spans
+      content = content.gsub(/<\/span>\s+<span class="math-inline"/, '</span>&nbsp;<span class="math-inline"')
+      # 2. Between math and algo spans
+      content = content.gsub(/<\/span>\s+(?=<span class="algo-)/, '</span>&nbsp;')
+      content = content.gsub(/(?<=<\/span>)\s+<span class="math-inline"/, '&nbsp;<span class="math-inline"')
+      # 3. Between math symbols and spans
+      content = content.gsub(/<\/span>\s+(?=\$)/, '</span>&nbsp;')
+      content = content.gsub(/(?<=\$)\s+<span/, '&nbsp;<span')
+      # 4. Between adjacent math symbols
+      content = content.gsub(/(?<=\$)\s+(?=\$)/, '&nbsp;')
 
       content
     end
@@ -372,8 +390,8 @@ module Jekyll
     def process_pythonic_algo_line(line)
       code, comment = line.split(/(?<!\\)#/, 2)
       code = highlight_pythonic_code(code.rstrip)
-      comment_html = comment ? "<span class=\"algo-comment\"># #{comment.strip}</span>" : ""
-      [code, comment_html].reject(&:empty?).join(" ")
+      comment_html = comment ? "<span class=\"algo-comment\">&nbsp;# #{comment.strip}</span>" : ""
+      [code, comment_html].reject(&:empty?).join("")
     end
 
     def highlight_pythonic_code(code)
@@ -385,7 +403,7 @@ module Jekyll
       end
 
       code = code.gsub(/\b(def)\s+([A-Za-z_]\w+)(?:\s*\((.*?)\))?/) do
-        "<span class=\"algo-kw\">#{$1}</span> " + format_algo_func($2, $3, buckets)
+        "<span class=\"algo-kw\">#{$1}</span>&nbsp;" + format_algo_func($2, $3, buckets)
       end
 
       %w[if elif else for while return break continue try except finally with pass yield until in].each do |kw|
@@ -394,6 +412,9 @@ module Jekyll
 
       code = highlight_algo_literals(code)
       code = code.gsub(/:/, "<span class=\"algo-punct\">:</span>")
+
+      # Protect remaining spaces within the code (outside of tags)
+      code = code.gsub(/(?<!<[^>])\s+(?![^>]*>)/, '&nbsp;')
 
       restore_algo_math(code, buckets)
     end
