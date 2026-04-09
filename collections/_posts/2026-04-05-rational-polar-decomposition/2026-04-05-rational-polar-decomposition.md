@@ -192,8 +192,8 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $E \leftarrow I - B$ # Shift to defect space
     $E_{sq} \leftarrow$ @Sym($E^{2}$)
     $W \leftarrow \delta_{1} E - \hat{c}_{1} E_{sq}$
-    $M \leftarrow$ @Sym($W^{2}$) - 2W
-    $E \leftarrow M + E - \text{@Sym}(E M)$ # In-place exact defect update
+    $M \leftarrow$ @Sym($W^{2}$) $-$ $2W$
+    $E \leftarrow M + E$ $-$ @Sym($E M$) # In-place exact defect update
     $K \leftarrow K - K W$
 
     # 6. Step 3: PE Cleanup 2
@@ -215,12 +215,12 @@ Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use sym
 
 Fixed constants for implementation, computed offline in FP64:
 
-| Step     | Parameters                        | Values                                                |
-| :------- | :-------------------------------- | :---------------------------------------------------- |
-| **DWH**  | $c_I, c_B, c_H, c_{H2}$           | $0.030883, 0.968872, 3.906857, -3.937741$             |
-|          | $\alpha_0, \tilde{\beta}_0$       | $0.984313, 251.007809$                                |
-| **PE 1** | $\delta_1, \hat{c}_1$             | $1.595551, 3.901804$                                  |
-| **PE 2** | $u_2, v_2$                        | $0.413373, 0.780748$                                  |
+| Step     | Parameters                  | Values                                    |
+| :------- | :-------------------------- | :---------------------------------------- |
+| **DWH**  | $c_I, c_B, c_H, c_{H2}$     | $0.030883, 0.968872, 3.906857, -3.937741$ |
+|          | $\alpha_0, \tilde{\beta}_0$ | $0.984313, 251.007809$                    |
+| **PE 1** | $\delta_1, \hat{c}_1$       | $1.595551, 3.901804$                      |
+| **PE 2** | $u_2, v_2$                  | $0.413373, 0.780748$                      |
 
 ---
 
