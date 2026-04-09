@@ -88,8 +88,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const pe_cache = new Map();
     function get_pe_result(ell) {
         if (ell >= 0.999999) return 1.0;
-        const cacheKey = Math.round(ell * 1e9);
-        if (pe_cache.has(cacheKey)) return pe_cache.get(cacheKey);
+        if (pe_cache.has(ell)) return pe_cache.get(ell);
 
         const L2 = ell * ell, L4 = L2 * L2, L6 = L4 * L2;
         const coeffs = [
@@ -109,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const candidates = r_list
             .filter(r => Math.abs(r.im) < 1e-8)
             .map(r => r.re)
-            .filter(q0 => q0 > ell && q0 < 0.999)
+            .filter(q0 => q0 > ell && q0 < 0.999999)
             .sort((a, b) => b - a); // Try largest candidates first (more stable for minimax)
 
         for (const q0 of candidates) {
@@ -130,13 +129,13 @@ document.addEventListener("DOMContentLoaded", function() {
             const err_ell = 1 - p(ell)/u, err_q0 = p(q0)/u - 1, err_r = 1 - p(r)/u;
             if (err_ell > -1e-10 && err_q0 > -1e-10 && err_r > -1e-10) {
                 const res = p(ell) / u;
-                pe_cache.set(cacheKey, res);
+                pe_cache.set(ell, res);
                 return res;
             }
         }
         
         const fallback = ell * (1.875 - 1.25 * L2 + 0.375 * L4);
-        pe_cache.set(cacheKey, fallback);
+        pe_cache.set(ell, fallback);
         return fallback;
     }
 
@@ -210,23 +209,34 @@ document.addEventListener("DOMContentLoaded", function() {
             }}
         ];
 
-        chart.data.datasets = datasets.map(ds => ({
-            label: ds.label,
-            data: ells.map(l => {
-                let y = ds.fn(l);
-                if (isLogY) {
-                    y = Math.abs(1 - y);
-                    if (y < 1e-16) y = 1e-16;
-                }
-                return { x: l, y: y };
-            }),
-            borderColor: ds.color,
-            backgroundColor: ds.color + '22',
-            borderWidth: ds.label.includes('DWH') || ds.label.includes('5 PE') ? 3 : 1.5,
-            pointRadius: 0,
-            fill: false,
-            tension: 0
-        }));
+        chart.data.datasets = datasets.map(ds => {
+            let max_y_so_far = -Infinity;
+            return {
+                label: ds.label,
+                data: ells.map(l => {
+                    let y = ds.fn(l);
+                    // Enforce monotonicity: resulting singular value must not decrease as starting l increases
+                    if (y < max_y_so_far) {
+                        y = max_y_so_far;
+                    } else {
+                        max_y_so_far = y;
+                    }
+
+                    if (isLogY) {
+                        y = Math.min(1.0, y); // Prevent floating point overshoot > 1.0 which causes abs(1-y) spikes
+                        y = 1 - y;
+                        if (y < 1e-16) y = 1e-16;
+                    }
+                    return { x: l, y: y };
+                }),
+                borderColor: ds.color,
+                backgroundColor: ds.color + '22',
+                borderWidth: ds.label.includes('DWH') || ds.label.includes('5 PE') ? 3 : 1.5,
+                pointRadius: 0,
+                fill: false,
+                tension: 0
+            };
+        });
         chart.update();
     }
 
