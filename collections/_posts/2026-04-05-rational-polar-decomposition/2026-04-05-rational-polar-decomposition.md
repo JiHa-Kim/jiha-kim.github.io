@@ -135,10 +135,10 @@ def Sym($A$): return $\frac{1}{2}(A + A^\top)$
 
 def SafeCholesky($S, dtype, K_{\max}=6$):
     # Pivot-informed jittered Cholesky with monotone doubling backoff
-    $S \leftarrow \text{Sym}(S), \tau \leftarrow 0$
+    $S \leftarrow @Sym(S), \tau \leftarrow 0$
     $\tau_{\min} \leftarrow \epsilon_{\text{mach}}(dtype) \max(\text{tr}(S)/N, \max_i S_{ii}, 1)$
     for $t=1, \dots, K_{\max}$:
-        try $L \leftarrow \text{Cholesky}(S + \tau I)$ while tracking $\pi_{\min}$
+        try $L \leftarrow @Cholesky(S + \tau I)$ while tracking $\pi_{\min}$
         if success: return ($L$, $\tau$)
         $\tau \leftarrow \max(\tau + \max(0, -\pi_{\min}) + \tau_{\min}, 2\tau, \tau_{\min})$
     fail
@@ -154,7 +154,7 @@ The following algorithm utilizes exactly two tall rectangular GEMMs.
 ```pseudo
 def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # 1. Tall orientation check
-    if $M < N$: return HybridPolar($X^\top$)$^\top$
+    if $M < N$: return @HybridPolar($X^\top$)$^\top$
 
     dtype = fp32 # Precision for Cholesky/TRSM
 
@@ -175,17 +175,17 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
     # 4. Step 1: DWH ($\ell_{0} = 10^{-3}$) with Cholesky Inverse Fast Path
     $S \leftarrow \gamma_{0} u \Delta + \tilde{G}$
-    $(L, \tau) \leftarrow \text{SafeCholesky}(S)$ # Pivot-informed jittered Cholesky
-    $S_{\text{inv}} \leftarrow \text{cholesky_inverse}(L)$ # potri: 3x faster than solve+SYRK
+    $(L, \tau) \leftarrow @SafeCholesky(S)$ # Pivot-informed jittered Cholesky
+    $S_{\text{inv}} \leftarrow @cholesky_inverse(L)$ # potri: 3x faster than solve+SYRK
     $H \leftarrow \beta_{0} u D S_{\text{inv}} D$ # Broadcasted scalar scaling
     $R \leftarrow \alpha_{0} B + B H$
-    $B \leftarrow \text{Sym}(\alpha_{0} R + H R)$
+    $B \leftarrow @Sym(\alpha_{0} R + H R)$
     $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + H)$ # "Free" K-update (skips 1 GEMM)
 
     # 5. Step 2: PE Cleanup 1 (Stable evaluate-transpose form)
     $Z \leftarrow \hat{b}_{1} B + \hat{c}_{1} B^{2}$
     $R \leftarrow \hat{a}_{1} B + B Z$
-    $B \leftarrow \text{Sym}(\hat{a}_{1} R + Z R)$
+    $B \leftarrow @Sym(\hat{a}_{1} R + Z R)$
     $K \leftarrow \hat{a}_{1} K + K Z$
 
     # 6. Step 3: PE Cleanup 2 (Defect Form Recentering)
@@ -194,7 +194,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $K \leftarrow K + K U$ # Output Gram B is dead code, discarded
 
     # 7. Final Reconstitution
-    $K \leftarrow \operatorname{diag}(d_i^{1/2}) \text{Sym}(K)$ # Invert in-place scaling on K rows
+    $K \leftarrow \operatorname{diag}(d_i^{1/2}) @Sym(K)$ # Invert in-place scaling on K rows
     return $X K$ # Result is the polar factor of the original X
 ```
 </div>
