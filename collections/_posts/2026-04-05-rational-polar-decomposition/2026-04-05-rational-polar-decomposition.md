@@ -259,6 +259,37 @@ This update is applied to the orientation factor via $K \leftarrow K(I + U_i)$. 
 
 The degree-9 equation $F(q_0; \ell) = 0$ contains extraneous branches. We isolate the **unique** valid root by verifying that it produces the required ordering $\ell < q_0 < r < 1$ and the correct Chebyshev alternation cycle.
 
+### 5.4 The Limits of Composition (Polynomials vs. Zolotarev)
+
+A natural question is whether we can construct high-degree optimal polynomials by simply composing lower-degree optimal ones. While this works for rational functions (Zolotarev rationals), it notably fails for polynomials.
+
+#### 1) Structural Restriction: Composition is a Strict Subclass
+Take the simplest nontrivial case: composing two odd cubics $p_1(x) = ax + bx^3$ and $p_2(x) = cx + dx^3$. The composition $P(x) = p_2(p_1(x))$ is an odd degree-9 polynomial:
+$$
+P(x) = A_1 x + A_3 x^3 + A_5 x^5 + A_7 x^7 + A_9 x^9
+$$
+However, its coefficients are not free. Expanding and eliminating $a, b, c, d$ from $A_5, A_7, A_9$ yields the strict identity:
+$$
+A_7^2 = 3 A_5 A_9
+$$
+Odd degree-9 polynomials that are compositions of two cubics live on a 4-parameter algebraic subset of the full 5-parameter space of odd degree-9 polynomials. The unique global minimax polynomial is generally not in this subset.
+
+#### 2) Concrete Counterexample
+Consider the approximation interval $[0.2, 1]$. We compare the **global optimal** degree-9 polynomial $p_9^{\ast}$ against a **greedy two-step composition** $P(x) = p_2(p_1(x))$ where each $p_t$ is the optimal degree-3 cubic for the current interval updated by $\ell_{t+1} \leftarrow p_t(\ell_t)$.
+
+*   **Greedy Two-Step (Two Cubics):**
+    $$ P(x) \approx 5.236x - 21.440x^3 + 41.654x^5 - 33.592x^7 + 9.030x^9 $$
+    Maximum Error: $\approx 0.1114$
+*   **Best Odd Degree-9 Polynomial:**
+    $$ p_9^{\ast}(x) \approx 5.643x - 28.940x^3 + 74.524x^5 - 83.540x^7 + 33.393x^9 $$
+    Maximum Error: $\approx 0.0801$
+
+The global minimax polynomial is significantly better ($\approx 28\%$ lower error). The composed polynomial satisfies the $A_7^2 = 3 A_5 A_9$ constraint almost exactly, while the global optimal deviates by about $7\%$.
+
+> [!info] Why Zolotarev is different
+> Nakatsukasa and Freund {% cite nakatsukasaOptimizingHalleyIteration2010 %} highlight that for the sign function, high-degree Zolotarev minimax rationals can be obtained by appropriately composing low-degree ones. This "closure" under composition is a special property of the Zolotarev solution that does **not** carry over to polynomials.
+> 
+> This is exactly why Polar Express {% cite polarExpress2025 %} proves optimality specifically for their *composition-constrained* problem, and why we compute our high-degree coefficients directly via $F(q_0; \ell)$ rather than via composition.
 
 <details class="box-proof" markdown="1">
 <summary>Theory: Sketch of the Minimax Proof</summary>
