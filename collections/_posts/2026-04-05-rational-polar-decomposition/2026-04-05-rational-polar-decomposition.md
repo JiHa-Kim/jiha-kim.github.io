@@ -100,11 +100,15 @@ $$
 \zeta = \left(\frac{4(1 - \ell^2)}{\ell^4}\right)^{1/3},\quad r = \sqrt{1 + \zeta},\quad a = r + \frac{1}{2}\sqrt{8 - 4\zeta + \frac{8(2 - \ell^2)}{\ell^2 r}}, \quad b = \frac{(a-1)^2}{4}, \quad c = a+b-1.
 $$
 
-In the Gram-space iteration ($B = A^\top A$), we use the **"apply-friendly" reparametrization**:
+In the Gram-space iteration ($B = A^\top A$), we use a **numerically stable reparametrization** that prevents precision loss in the early, ill-conditioned regime. Using the DWH coefficients $a,b,c$, we define:
 $$
-\alpha = \frac{b}{c},\qquad \beta = \frac{a - \alpha}{c},\qquad \gamma = \frac{1}{c}.
+\alpha = b/c, \quad \beta = (a - \alpha)/c, \quad \gamma = 1/c.
 $$
-This lets us write the update as $R = \alpha I + \beta (\gamma I + B)^{-1}$, completely removing the need for division or scalar divisions on the fly. Importantly, the constants $(\alpha, \beta, \gamma)$ are pre-computed entirely offline in FP64 and injected directly into the ML kernel as raw floats, guaranteeing consistency and avoiding numerical jitter at runtime.
+This allows us to identify the bounded resolvent $H_0 = (I + cB)^{-1} = \gamma(\gamma I + B)^{-1}$, where $0 \le H_0 \le 1$. By applying the identity $B H_0 = (I - H_0)/c$, the DWH update $B \leftarrow B (\alpha I + \beta H_0 / \gamma)^2$ is computed using a single GEMM on bounded operands:
+$$
+tmp = \alpha B + \beta(I - H_0), \quad B \leftarrow \operatorname{Sym}\left(\alpha \cdot tmp + \frac{\beta}{\gamma}(tmp \cdot H_0)\right).
+$$
+Importantly, the constants $(\alpha, \beta, \gamma)$ are pre-computed entirely offline in FP64 and injected directly into the ML kernel as raw floats, guaranteeing consistency and avoiding numerical jitter at runtime.
 
 ### 2.2 Polar Express Cleanup (Polynomial)
 
@@ -176,10 +180,11 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $S \leftarrow \gamma_{0} u \Delta + \tilde{G}$
     $(L, \tau) \leftarrow$ @SafeCholesky($S$)
     $S_{\text{inv}} \leftarrow$ @cholesky_inverse($L$) # potri: 3x faster than solve+SYRK
-    $H \leftarrow \beta_{0} u D S_{\text{inv}} D$ # Broadcasted scalar scaling
-    $R \leftarrow \alpha_{0} B + B H$
-    $B \leftarrow$ @Sym($\alpha_{0} R + H R$)
-    $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + H)$
+    # Bounded resolvent $H_{0} = (I + c B)^{-1} = \gamma (\gamma I + B)^{-1}$
+    $H_{0} \leftarrow \gamma_{0} u D S_{\text{inv}} D$ 
+    $tmp \leftarrow \alpha_{0} B + \beta_{0} (I - H_{0})$
+    $B \leftarrow \operatorname{Sym}(\alpha_{0} tmp + \frac{\beta_{0}}{\gamma_{0}} (tmp H_{0}))$
+    $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + \frac{\beta_{0}}{\gamma_{0}} H_{0})$
 
     # 5. Step 2: PE Cleanup 1 (Stable evaluate-transpose form)
     $Z \leftarrow \hat{b}_{1} B + \hat{c}_{1} B^{2}$
