@@ -129,7 +129,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 ### 3.1 Stability Primitives
 
 1.  **Robust Gram Accumulation (ColNorm)**: To alleviate precision errors and reduce dynamic range instability in low-precision (FP16/BF16) arithmetic, we temporarily normalize the columns of $X$ before forming the Gram matrix. This gives a safer accumulation path and also a better-conditioned matrix for the initial DWH solve, but the overall iteration must still target the original polar factor.
-    - We compute column sums-of-squares in one pass, lower-clip them as $d_j = \max(\sum_i X_{ij}^2, \epsilon)$, and form $D = \mathrm{diag}(\mathrm{rsqrt}(d)) = \mathrm{diag}(d_j^{-1/2})$, then accumulate the scaled Gram:
+    - We compute column sums-of-squares in one pass, lower-clip them as $d_j = \max(\sum_i X_{ij}^2, \epsilon)$, and form $D = \operatorname{diag}(d^{-1/2})$, then accumulate the scaled Gram:
       $$
       \tilde{G} = (X D)^\top (X D).
       $$
@@ -137,7 +137,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
       $$
       G = D^{-1} \tilde{G} D^{-1}.
       $$
-      Writing $\Delta = D^2 = \operatorname{diag}(1/d)$, the moment-bound statistics can be evaluated directly from the scaled Gram:
+      Writing $\Delta = D^2 = \operatorname{diag}(1/d_j)$, the moment-bound statistics can be evaluated directly from the scaled Gram:
       $$
       \operatorname{tr}(G) = \sum_i d_i \tilde{G}_{ii}, \qquad \|G\|_F^2 = \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2.
       $$
@@ -222,9 +222,9 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
         transposed = true
 
     # --- ColNorm for safe accumulation and the first rational solve ---
-    $d \leftarrow \max(\operatorname{colNorms}(X)^2, \epsilon)$
-    $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}(d))$
-    $\Delta \leftarrow \operatorname{diag}(1/d)$
+    $d_j \leftarrow \max(\sum_i X_{ij}^2, \epsilon)$
+    $D \leftarrow \operatorname{diag}(d_j^{-1/2})$
+    $\Delta \leftarrow \operatorname{diag}(d_j^{-1})$
     $\tilde{G} \leftarrow$ @Sym($(X D)^\top (X D)$)
     $u \leftarrow$ @ScaledMomentUpperBound($\tilde{G}, d$)
     $G \leftarrow$ @Sym($D^{-1} \tilde{G} D^{-1}$)
@@ -258,9 +258,9 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
 Fixed constants for implementation, computed offline in FP64:
 
-| Step     | Parameters                        | Values                                        |
-| :------- | :-------------------------------- | :-------------------------------------------- |
-| **DWH**  | $\alpha_0, \beta_0, \gamma_0$     | $0.984313239819, 0.015687740588, 0.000062499018$ |
+| Step     | Parameters                        | Values                                            |
+| :------- | :-------------------------------- | :------------------------------------------------ |
+| **DWH**  | $\alpha_0, \beta_0, \gamma_0$     | $0.984313239819, 0.015687740588, 0.000062499018$  |
 | **PE 1** | $\hat{a}_1, \hat{b}_1, \hat{c}_1$ | $3.306253466518, -6.208057722422, 3.901804255904$ |
 | **PE 2** | $\hat{a}_2, \hat{b}_2, \hat{c}_2$ | $2.194120920624, -1.974868730017, 0.780747809393$ |
 
