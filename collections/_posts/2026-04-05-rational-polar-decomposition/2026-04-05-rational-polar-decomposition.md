@@ -160,32 +160,23 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 The following support procedures handle symmetrization, robust eigenvalue upper-bounding, and safe SPD inversions in the presence of floating-point drift.
 
 <div class="algorithm-container">
-<pre class="pseudocode">
-\begin{algorithmic}
-\PROCEDURE{Sym}{A}
-    \RETURN $\frac{1}{2}(A + A^\top)$
-\ENDPROCEDURE
+```pseudo
+def Sym(A):
+    return $\frac{1}{2}(A + A^\top)$
 
+def MomentUpperBound(G):
+    $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
+    return $u_M$
 
-\PROCEDURE{MomentUpperBound}{G}
-    \STATE $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
-    \RETURN $u_M$
-\ENDPROCEDURE
-
-
-\PROCEDURE{SafeSolveSPD}{S}
-    \STATE $\tau \leftarrow 0$
-    \WHILE{true}
-        \STATE \textbf{try} $L \leftarrow \mathrm{Cholesky}(S + \tau I)$
-        \IF{success}
-            \RETURN $\mathrm{solve}(L L^\top, I)$
-        \ELSE
-            \STATE $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$
-        \ENDIF
-    \ENDWHILE
-\ENDPROCEDURE
-\end{algorithmic}
-</pre>
+def SafeSolveSPD(S):
+    $\tau \leftarrow 0$
+    while true:
+        try $L \leftarrow \mathrm{Cholesky}(S + \tau I)$
+        if success:
+            return $\mathrm{solve}(L L^\top, I)$
+        else:
+            $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$
+```
 </div>
 
 ### 3.3 The Main Hybrid Algorithm
@@ -194,35 +185,30 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Stable Hybrid Polar: 1 DWH + 2 PE</div>
-<pre class="pseudocode">
-\begin{algorithmic}
-\PROCEDURE{HybridPolar}{$X \in \mathbb{R}^{M \times N}$}
-    \IF{$M < N$}
-        \STATE $X \leftarrow X^\top$
-    \ENDIF
+```pseudo
+def HybridPolar($X \in \mathbb{R}^{M \times N}$):
+    if $M < N$:
+        $X \leftarrow X^\top$
 
-    \STATE \COMMENT{--- Preconditioning (ColNorm) & Form Gram ---}
-    \STATE $d \leftarrow \max(\operatorname{colNorms}(X)^2, \epsilon)$
-    \STATE $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}(d))$
-    \STATE $X \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(X^\top X)$
+    # --- Preconditioning (ColNorm) & Form Gram ---
+    $d \leftarrow \max(\operatorname{colNorms}(X)^2, \epsilon)$
+    $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}(d))$
+    $X \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(X^\top X)$
 
-    \STATE \COMMENT{--- Normalize Gram ---}
-    \STATE $u \leftarrow \mathrm{MomentUpperBound}(G)$
-    \STATE $B \leftarrow G/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
+    # --- Normalize Gram ---
+    $u \leftarrow \mathrm{MomentUpperBound}(G)$
+    $B \leftarrow G/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
 
-    \STATE \COMMENT{--- Step 1: DWH ($\ell_0 = 10^{-3}$) ---}
-    \STATE $H \leftarrow \mathrm{SafeSolveSPD}(\gamma_0 I + B)$
-    \STATE $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
+    # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
+    $H \leftarrow \mathrm{SafeSolveSPD}(\gamma_0 I + B)$
+    $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
 
-    \STATE \COMMENT{--- Steps 2-3: Normalized PE Cleanup ---}
-    \FOR{$i=1, 2$}
-        \STATE $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow \mathrm{Sym}(Q_i B Q_i)$
-    \ENDFOR
+    # --- Steps 2-3: Normalized PE Cleanup ---
+    for $i=1, 2$:
+        $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow \mathrm{Sym}(Q_i B Q_i)$
 
-    \RETURN $Q = X K$ \COMMENT{Final rectangular GEMM}
-\ENDPROCEDURE
-\end{algorithmic}
-</pre>
+    return $Q = X K$ # Final rectangular GEMM
+```
 </div>
 
 

@@ -1,4 +1,11 @@
 .algorithm-container {
+  --algo-kw-color: #0f766e;
+  --algo-func-color: #1d4ed8;
+  --algo-literal-color: #b45309;
+  --algo-builtin-color: #7c3aed;
+  --algo-comment-color: #6b7280;
+  --algo-punct-color: #9a3412;
+
   /* Use theme-integrated rules (thick top/bottom, thin middle) */
   border-top: 1.5px solid var(--text-color);
   border-bottom: 1.5px solid var(--text-color);
@@ -67,21 +74,72 @@
     }
 
     .algo-kw {
-      font-weight: bold !important;
-      color: var(--text-color);
+      font-weight: 650 !important;
+      color: var(--algo-kw-color);
     }
 
     .algo-func {
       font-weight: 600;
       font-style: italic;
-      color: var(--text-color);
+      color: var(--algo-func-color);
+    }
+
+    .algo-literal {
+      color: var(--algo-literal-color);
+      font-weight: 600;
+    }
+
+    .algo-builtin {
+      color: var(--algo-builtin-color);
+      font-weight: 600;
+    }
+
+    .algo-punct {
+      color: var(--algo-punct-color);
+      font-weight: 700;
     }
 
     .algo-comment {
-      color: var(--text-muted-color, #777);
+      color: var(--algo-comment-color);
       font-style: italic;
       font-family: var(--main-font);
       font-size: 0.95em;
     }
+
+    strong {
+      color: var(--algo-builtin-color);
+      font-weight: 650;
+    }
+
+    em {
+      color: var(--algo-func-color);
+    }
+
+    code {
+      color: var(--algo-func-color);
+      background: color-mix(in srgb, var(--algo-func-color) 10%, transparent);
+      border-radius: 0.2rem;
+      padding: 0.05rem 0.25rem;
+    }
   }
+}
+
+@media (prefers-color-scheme: dark) {
+  .algorithm-container {
+    --algo-kw-color: #5eead4;
+    --algo-func-color: #93c5fd;
+    --algo-literal-color: #fdba74;
+    --algo-builtin-color: #c4b5fd;
+    --algo-comment-color: #9ca3af;
+    --algo-punct-color: #fca5a5;
+  }
+}
+
+[data-mode="dark"] .algorithm-container {
+  --algo-kw-color: #5eead4;
+  --algo-func-color: #93c5fd;
+  --algo-literal-color: #fdba74;
+  --algo-builtin-color: #c4b5fd;
+  --algo-comment-color: #9ca3af;
+  --algo-punct-color: #fca5a5;
 }

@@ -54,7 +54,8 @@ module Jekyll
 
       # Optimization: Skip if no Obsidian-style elements exist
       # This saves significant regex work on simple pages.
-      return unless doc.content.include?('>') || doc.content.include?('$') || doc.content.include?('<pre class="pseudocode">')
+      has_algorithm = doc.content.match?(/^\s*```(?:pseudo|pseudocode|algorithm)\b/m)
+      return unless doc.content.include?('>') || doc.content.include?('$') || has_algorithm
 
       # Use Jekyll's persistent cache (stored in .jekyll-cache/)
       @cache ||= Jekyll::Cache.new("ObsidianPreprocess")
@@ -336,99 +337,74 @@ module Jekyll
       text
     end
     def convert_algorithms(md)
-      # Match <pre class="pseudocode">...</pre>
-      md.gsub(/<pre class="pseudocode">(.*?)<\/pre>/m) do
-        inner = $1
-        html = parse_pseudocode(inner)
-        "<div class=\"custom-algo\" markdown=\"0\">\n#{html}\n</div>"
+      md.gsub(/^```(?:pseudo|pseudocode|algorithm)\b[^\n]*\n(.*?)^```$\n?/m) do
+        render_algorithm_block(parse_pythonic_pseudocode($1))
       end
     end
 
-    def parse_pseudocode(text)
-      lines = text.split("\n")
+    def render_algorithm_block(html)
+      "<div class=\"custom-algo\" markdown=\"0\">\n#{html}\n</div>"
+    end
+
+    def parse_pythonic_pseudocode(text)
       output = []
       line_num = 1
-      indent_level = 0
-      
-      lines.each do |line|
-        line = line.strip
-        next if line.empty?
-        next if line.include?("\\begin{algorithmic}") || line.include?("\\end{algorithmic}")
 
-        # Determine if this line opens or closes a block
-        is_opener = (line =~ /\\(IF|WHILE|PROCEDURE|FOR|REPEAT|ELSE)(?![A-Z])/) && !(line =~ /\\END/)
-        is_closer = (line =~ /\\(ENDIF|ENDWHILE|ENDPROCEDURE|ENDFOR|UNTIL|ELSE)(?![A-Z])/)
+      text.split("\n").each do |line|
+        raw = line.rstrip
+        next if raw.strip.empty?
 
-        # Decrement indentation BEFORE rendering if it's a closer
-        indent_level -= 1 if is_closer && indent_level > 0
+        indent = raw[/\A[ \t]*/].to_s.gsub("\t", "    ").length / 4
+        processed_line = process_pythonic_algo_line(raw.strip)
 
-        # Process the command and text for display (DO NOT modify the original line used for logic)
-        processed_line = process_algo_line(line.dup)
-        
-        output << "<div class=\"algo-line\" style=\"--indent: #{indent_level};\">"
+        output << "<div class=\"algo-line\" style=\"--indent: #{indent};\">"
         output << "  <span class=\"algo-linenum\">#{line_num}:</span>"
         output << "  <span class=\"algo-content\">#{processed_line}</span>"
         output << "</div>"
 
-        # Increment indentation AFTER rendering if it's an opener
-        indent_level += 1 if is_opener
-        
         line_num += 1
       end
-      
+
       output.join("\n")
     end
 
-    def process_algo_line(line)
-      # 1. State marker (hide)
-      line = line.gsub("\\STATE", "")
+    def process_pythonic_algo_line(line)
+      code, comment = line.split(/(?<!\\)#/, 2)
+      code = highlight_pythonic_code(code.rstrip)
+      comment_html = comment ? "<span class=\"algo-comment\"># #{comment.strip}</span>" : ""
+      [code, comment_html].reject(&:empty?).join(" ")
+    end
 
-      # 2. Block starters with 1 arg: \IF{cond}, \WHILE{cond}, etc.
-      # We use (?<braces>...) to define a named group for balanced braces and \g<braces> to recurse.
-      line = line.gsub(/\\IF(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<span class=\"algo-kw\">if </span>#{$~[:braces][1..-2]} <span class=\"algo-kw\">then</span>" }
-      line = line.gsub(/\\WHILE(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<span class=\"algo-kw\">while </span>#{$~[:braces][1..-2]} <span class=\"algo-kw\">do</span>" }
-      line = line.gsub(/\\FOR(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<span class=\"algo-kw\">for </span>#{$~[:braces][1..-2]} <span class=\"algo-kw\">do</span>" }
-      line = line.gsub(/\\UNTIL(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<span class=\"algo-kw\">until </span>#{$~[:braces][1..-2]}" }
-
-      # 3. Procedure with 2 args: \PROCEDURE{Name}{Args}
-      # Re-use the named group 'braces' by calling it again with \g<braces>
-      line = line.gsub(/\\PROCEDURE(?<name>\{(?:[^{}]++|\g<name>)*\})(?<args>\{(?:[^{}]++|\g<args>)*\})/) do
-        n = $~[:name][1..-2]
-        a = $~[:args][1..-2]
-        "<span class=\"algo-kw\">procedure </span> <span class=\"algo-func\">#{n}</span>(#{a})"
+    def highlight_pythonic_code(code)
+      code = code.gsub(/\b(def)\s+([A-Za-z_]\w*)/) do
+        "<span class=\"algo-kw\">#{$1}</span> <span class=\"algo-func\">#{$2}</span>"
       end
 
-      # 4. Simple keywords (no args)
-      simple_kw = {
-        "\\REPEAT" => "repeat",
-        "\\ELSE" => "else",
-        "\\BREAK" => "break",
-        "\\RETURN" => "return",
-        "\\CONTINUE" => "continue",
-        "\\ENDIF" => "end if",
-        "\\ENDWHILE" => "end while",
-        "\\ENDFOR" => "end for",
-        "\\ENDPROCEDURE" => "end procedure"
+      %w[if elif else for while return break continue try except finally with pass yield until in].each do |kw|
+        code = code.gsub(/\b#{Regexp.escape(kw)}\b/, "<span class=\"algo-kw\">#{kw}</span>")
+      end
+
+      code = highlight_algo_literals(code)
+      code.gsub(/:/, "<span class=\"algo-punct\">:</span>")
+    end
+
+    def highlight_algo_literals(line)
+      token_map = {
+        "true" => "algo-literal",
+        "false" => "algo-literal",
+        "none" => "algo-literal",
+        "success" => "algo-literal",
+        "failure" => "algo-literal",
+        "try" => "algo-builtin"
       }
-      simple_kw.each do |latex, plain|
-         # Use Regexp.new to match the literal backslash but not escape the whole thing into a literal string search
-         line = line.gsub(Regexp.new(Regexp.escape(latex)), "<span class=\"algo-kw\">#{plain}</span>")
+
+      token_map.each do |word, css_class|
+        line = line.gsub(/\b#{Regexp.escape(word)}\b/i) do
+          "<span class=\"#{css_class}\">#{$&}</span>"
+        end
       end
 
-      # 5. Comments: \COMMENT{text}
-      line = line.gsub(/\\COMMENT(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) do
-        "<span class=\"algo-comment\">&nbsp;&nbsp;// #{$~[:braces][1..-2]}</span>"
-      end
-
-      # 6. Standard LaTeX Text Formatting (within the algo block)
-      line = line.gsub(/\\textbf(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<strong>#{$~[:braces][1..-2]}</strong>" }
-      line = line.gsub(/\\textit(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<em>#{$~[:braces][1..-2]}</em>" }
-      line = line.gsub(/\\texttt(?<braces>\{(?:[^{}]++|\g<braces>)*\})/) { "<code>#{$~[:braces][1..-2]}</code>" }
-
-      # 7. Cleanup backslashed braces
-      line = line.gsub("\\{", "{").gsub("\\}", "}")
-      
-      line.strip
+      line
     end
   end
 end
