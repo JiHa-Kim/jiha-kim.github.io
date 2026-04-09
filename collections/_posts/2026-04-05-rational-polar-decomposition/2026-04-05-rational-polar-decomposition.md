@@ -64,6 +64,8 @@ The following table reports the final lower endpoint for different starting floo
 | $10^{-4}$          | 0.000426 | 0.116562 | 0.001811 | 0.133854    |
 | $10^{-6}$          | 0.000004 | 0.025194 | 0.000018 | 0.001398    |
 
+{% include comparison_widget.html %}
+
 At the standard design floor of $\ell_0 = 10^{-3}$: **2 PE steps from scratch are useless**, and even 5 PE steps leave significant error. However, a single DWH step lifts the floor to $\approx 0.25$—exactly where polynomial iterations enter their "sweet spot."
 
 ### 1.3 The Hybrid Sweet Spot
