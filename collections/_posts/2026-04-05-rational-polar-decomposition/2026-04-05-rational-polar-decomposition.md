@@ -187,9 +187,13 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
     $$
     where $U = u_2 E + v_2 E^2$ is a small correction matrix, using precomputed scalars $u_2 = -(b_2+2c_2)$ and $v_2 = c_2$. We can then perfectly match the numerically stable fused update parametrization from above by setting the overall scalar $a=1$:
     $$
+    $$
     R_U = B + B U, \quad B \leftarrow R_U + U R_U, \quad K \leftarrow K + K U
     $$
     Because $U$ tracks only the small defect explicitly and we avoid materializing the inflated diagonal $I+U$, this bypasses severe catastrophic cancellation and enables low precision like BF16/FP16 to behave much better near convergence.
+6.  **The "Free" Initial K-Update**: In Step 1, $K$ is initialized as $K_0 = \frac{1}{\sqrt{u}} I$, which is just a scaled identity. The standard update step $K \leftarrow \alpha_0 K_0 + K_0 H$ simplifies exactly to an element-wise combination $K_1 \leftarrow \frac{1}{\sqrt{u}} (\alpha_0 I + H)$. By substituting this directly into the first step, you skip a full GEMM with absolutely no mathematical change.
+7.  **The Cholesky Inverse Fast Path**: The standard DWH step involves solving $W \leftarrow \text{solve\_triangular}(L, D)$ over $N$ right-hand sides, then performing a SYRK to get $H \leftarrow \beta_0 u W^\top W$. Because $D$ is purely diagonal, mathematically $W^\top W \equiv D(LL^\top)^{-1}D$. By swapping the TRSM-SYRK pair for a direct Cholesky inverse (e.g. LAPACK `potri`, standard in deep learning frameworks as `cholesky_inverse`), you drop from $\approx 2 N^3$ FLOPs down to $\approx \frac{2}{3} N^3$. The product $H \leftarrow \beta_0 u D S_{\text{inv}} D$ then becomes a blazing fast broadcasted scalar scaling.
+8.  **Dead-Code Elimination in the Terminal Step**: Step 3 is the final step of the computation. Once it executes, the updated Gram matrix $B$ is never read again. We only require the cumulative $K$. Therefore, the two expensive SYMM operations computing the subsequent $B$ matrix ($R \leftarrow B + BU$ and $B \leftarrow \text{Sym}(R + UR)$) are dead code and can simply be deleted from the execution path.
 
 ### 3.2 Stability and Utility Primitives
 
@@ -241,15 +245,15 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $D \leftarrow \operatorname{diag}(d_j^{-1/2}), \quad \Delta \leftarrow \operatorname{diag}(d_j^{-1})$
     $\tilde{G} \leftarrow (X D)^\top (X D)$ # (compute via SYRK)
     $u \leftarrow$ @MomentBound($\tilde{G}, d, \eta$)
-    $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
+    $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
     $S \leftarrow \gamma_0 u \Delta + \tilde{G}$
     $(L, \tau) \leftarrow$ @SafeCholesky($S, dtype, K_{\max}$)
-    $W \leftarrow \mathrm{solve_triangular}(L, D)$
-    $H \leftarrow \beta_0 u W^\top W$ # via SYRK
+    $S_{\text{inv}} \leftarrow \mathrm{cholesky\_inverse}(L)$
+    $H \leftarrow \beta_0 u D S_{\text{inv}} D$ # Broadcasted row/col scaling
     $R \leftarrow \alpha_0 B + B H$
-    $B \leftarrow$ @Sym($\alpha_0 R + H R$), $\quad K \leftarrow \alpha_0 K + K H$
+    $B \leftarrow$ @Sym($\alpha_0 R + H R$), $\quad K \leftarrow \frac{1}{\sqrt{u}}(\alpha_0 I + H)$ # Free K-update
 
     # --- Step 2: Normalized PE Cleanup 1 (Stable Form) ---
     $Z \leftarrow \hat{b}_1 B + \hat{c}_1 B^2$
@@ -260,9 +264,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # --- Step 3: Normalized PE Cleanup 2 (Defect Form) ---
     $E \leftarrow I - B$
     $U \leftarrow u_2 E + v_2 E^2$
-    $R \leftarrow B + B U$
-    $B \leftarrow$ @Sym($R + U R$)
-    $K \leftarrow K + K U$
+    $K \leftarrow K + K U$ # Terminal step: output B is safely discarded
 
     $K \leftarrow$ @Sym($K$)
 
@@ -293,6 +295,10 @@ Fixed constants for implementation, computed offline in FP64:
 ### 5. Discussion
 
 - **Numerical Robustness**: By performing column-wise normalization (ColNorm) for the Gram accumulation and carrying that scaling through the first Cholesky solve, we shield the algorithm from dynamic range overflows and precision loss in low-precision (BF16/FP16) arithmetic without changing the target polar factor.
+- **Architectural FLOP Avoidance**: At three distinct moments, the mathematical constraints of the problem allow us to safely bypass dense matmuls. 
+  1. The DWH $W^\top W$ inversion is fully replaced by a Cholesky inverse via `potri` and scalar broadcast, cutting the factorization time by 3x. 
+  2. The initial iteration avoids initializing a separate dense identity matrix, converting $K_1$ updates into an element-wise addition over the existing $H$ matrix. 
+  3. The dead-code branch in Step 3 cleanly eliminates all subsequent $B$ updates from the critical path entirely.
 - **Balanced Latency**: While pre-scaling adds one element-wise pass over the tall matrix $X$, the cost is offset by the reduction in small-side complexity compared to pure rational iterations. The algorithm still performs exactly two tall rectangular GEMMs.
 - **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
 
