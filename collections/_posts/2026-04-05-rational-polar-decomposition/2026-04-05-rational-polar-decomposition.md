@@ -147,7 +147,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $U \leftarrow u_{1} E + v_{1} E^{2}$ # ($E^{2}$ via SYRK)
     $K \leftarrow K + K U$
     $M \leftarrow -2 U - U^{2}$ # Gram root-finding step
-    $E \leftarrow E + M - \text{@Sym}(E M)$
+    $E \leftarrow E + M - \,$@Sym($E M$)
 
     # 6. Step 3: PE Cleanup 2
     $U \leftarrow u_{2} E + v_{2} E^{2}$
