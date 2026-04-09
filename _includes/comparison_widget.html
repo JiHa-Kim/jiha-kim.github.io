@@ -28,23 +28,33 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    // Warm start for Durand-Kerner polynomial solver
+    let dk_warm_roots = null;
+
     // Robust iterative all-roots finder (Durand-Kerner algorithm)
     // This is a "proper" numerical solver that is extremely stable for deg-9.
-    function solvePolynomial(coeffs) {
+    function solvePolynomial(coeffs, initialRoots = null) {
         const n = coeffs.length - 1;
         const a = coeffs.map(c => c / coeffs[0]);
         let roots = [];
-        // Initial guesses using Aberth's radius or simple unit circle
-        for (let i = 0; i < n; i++) {
-            const ang = (2 * Math.PI * i) / n + 0.1;
-            roots.push({ re: Math.cos(ang), im: Math.sin(ang) });
+
+        if (initialRoots) {
+            for (let i = 0; i < n; i++) roots.push({ re: initialRoots[i].re, im: initialRoots[i].im });
+        } else {
+            // Initial guesses using unit circle with slight shift
+            for (let i = 0; i < n; i++) {
+                const ang = (2 * Math.PI * i) / n + 0.1;
+                roots.push({ re: Math.cos(ang), im: Math.sin(ang) });
+            }
         }
-        for (let iter = 0; iter < 100; iter++) {
+
+        // Extremely fast convergence with warm starts
+        const maxIter = initialRoots ? 10 : 100;
+        for (let iter = 0; iter < maxIter; iter++) {
             let maxDelta = 0;
             for (let i = 0; i < n; i++) {
-                let valRe = 1, valIm = 0; // P(x) = x^n + ...
+                let valRe = 1, valIm = 0;
                 for (let j = 1; j <= n; j++) {
-                    // (valRe + i*valIm) * (roots[i].re + i*roots[i].im) + a[j]
                     let nextRe = valRe * roots[i].re - valIm * roots[i].im + a[j];
                     let nextIm = valRe * roots[i].im + valIm * roots[i].re;
                     valRe = nextRe; valIm = nextIm;
@@ -58,12 +68,12 @@ document.addEventListener("DOMContentLoaded", function() {
                     let nextIm = denomRe * dy + denomIm * dx;
                     denomRe = nextRe; denomIm = nextIm;
                 }
-                const dMag2 = denomRe * denomRe + denomIm * denomIm;
+                const dMag2 = denomRe * denomRe + denomIm * denomIm || 1e-20;
                 const deltaRe = (valRe * denomRe + valIm * denomIm) / dMag2;
                 const deltaIm = (valIm * denomRe - valRe * denomIm) / dMag2;
                 roots[i].re -= deltaRe;
                 roots[i].im -= deltaIm;
-                maxDelta = Math.max(maxDelta, Math.sqrt(deltaRe * deltaRe + deltaIm * deltaIm));
+                maxDelta = Math.max(maxDelta, Math.abs(deltaRe) + Math.abs(deltaIm));
             }
             if (maxDelta < 1e-12) break;
         }
@@ -73,20 +83,21 @@ document.addEventListener("DOMContentLoaded", function() {
     // Math Core
     function dwh_result(ell) {
         if (ell >= 1) return 1;
-        let gamma_inner = Math.pow(4 * (1 - ell * ell) / Math.pow(ell, 4), 1.0 / 3.0);
+        let l2 = ell * ell;
+        let gamma_inner = Math.pow(4 * (1 - l2) / (l2 * l2), 1.0 / 3.0);
         let r = Math.sqrt(1 + gamma_inner);
-        let innerSqrt = 8 - 4 * gamma_inner + 8 * (2 - ell * ell) / (ell * ell * r);
+        let innerSqrt = 8 - 4 * gamma_inner + 8 * (2 - l2) / (l2 * r);
         let a = r + 0.5 * Math.sqrt(Math.max(0, innerSqrt));
-        let b = Math.pow(a - 1, 2) / 4;
+        let b = (a - 1) * (a - 1) / 4;
         let c = a + b - 1;
         let alpha = b / c;
         let beta = (a - alpha) / c;
         let gamma = 1 / c;
-        return alpha * ell + beta * ell / (gamma + ell * ell);
+        return ell * (alpha + beta / (gamma + l2));
     }
 
     const pe_cache = new Map();
-    function get_pe_result(ell) {
+    function get_pe_result(ell, useWarmStart = false) {
         if (ell >= 0.999999) return 1.0;
         if (pe_cache.has(ell)) return pe_cache.get(ell);
 
@@ -104,44 +115,46 @@ document.addEventListener("DOMContentLoaded", function() {
             -12 - 40 * L2 - 100 * L4 + 125 * L6       // 1
         ];
 
-        const r_list = solvePolynomial(coeffs);
+        const r_list = solvePolynomial(coeffs, useWarmStart ? dk_warm_roots : null);
+        if (useWarmStart) dk_warm_roots = r_list;
+
         const candidates = r_list
-            .filter(r => Math.abs(r.im) < 1e-8)
+            .filter(r => Math.abs(r.im) < 1e-7)
             .map(r => r.re)
             .filter(q0 => q0 > ell && q0 < 0.999999)
-            .sort((a, b) => b - a); // Try largest candidates first (more stable for minimax)
+            .sort((a, b) => b - a);
 
         for (const q0 of candidates) {
-            const r2 = (2 * Math.pow(q0, 3) + 4 * q0 * q0 + 6 * q0 + 3) / (5 * (2 * q0 + 1));
+            const q0_2 = q0 * q0;
+            const r2 = (2 * q0 * q0_2 + 4 * q0_2 + 6 * q0 + 3) / (5 * (2 * q0 + 1));
             const r = Math.sqrt(r2);
             if (r2 <= 0 || !(q0 < r && r < 1)) continue;
-            
-            const S = q0 * q0 + r2, P = q0 * q0 * r2;
+
+            const S = q0_2 + r2, P = q0_2 * r2;
             const D = (1 - 5 / 3 * S + 5 * P) + ell * (L4 - 5 / 3 * S * L2 + 5 * P);
             if (Math.abs(D) < 1e-12) continue;
-            
+
             const c_pe = 2 / D, b_pe = -5 * c_pe / 3 * S, a_pe = 5 * c_pe * P;
             const u = a_pe + b_pe + c_pe;
-            const p = (x) => x * (a_pe + b_pe * x * x + c_pe * Math.pow(x, 4));
-            
-            // Explicit Equioscillation Check (Appendix B)
-            // Error pattern: e(ell) > 0, e(q0) < 0, e(r) > 0
+
+            // Equioscillation Check
+            const p = (x) => {
+                const x2 = x * x;
+                return x * (a_pe + x2 * (b_pe + x2 * c_pe));
+            };
+
             const err_ell = 1 - p(ell)/u, err_q0 = p(q0)/u - 1, err_r = 1 - p(r)/u;
-            if (err_ell > -1e-10 && err_q0 > -1e-10 && err_r > -1e-10) {
+            if (err_ell > -1e-9 && err_q0 > -1e-9 && err_r > -1e-9) {
                 const res = p(ell) / u;
                 pe_cache.set(ell, res);
                 return res;
             }
         }
-        
-        const fallback = ell * (1.875 - 1.25 * L2 + 0.375 * L4);
+
+        const fallback = ell * (1.875 + L2 * (-1.25 + 0.375 * L2));
         pe_cache.set(ell, fallback);
         return fallback;
     }
-
-
-
-
 
     const ctx = document.getElementById('comparisonChart').getContext('2d');
     const cwLogX = document.getElementById('cwLogX');
@@ -156,6 +169,11 @@ document.addEventListener("DOMContentLoaded", function() {
         pe5: '#1a5276'
     };
 
+    Chart.Tooltip.positioners.cursor = function(elements, eventPosition) {
+        if (!eventPosition) return false;
+        return { x: eventPosition.x, y: eventPosition.y };
+    };
+
     let chart = new Chart(ctx, {
         type: 'line',
         data: { datasets: [] },
@@ -165,6 +183,7 @@ document.addEventListener("DOMContentLoaded", function() {
             interaction: { mode: 'index', intersect: false },
             plugins: {
                 tooltip: {
+                    position: 'cursor',
                     callbacks: {
                         title: (items) => `Start ell: ${Number(items[0].parsed.x).toExponential(2)}`,
                         label: (item) => `${item.dataset.label}: ${Number(item.parsed.y).toFixed(5)}`
@@ -195,35 +214,32 @@ document.addEventListener("DOMContentLoaded", function() {
         chart.options.scales.y.max = isLogY ? 2 : 1.05;
 
         const ells = [];
-        const start = -6, end = 0, pts = 800;
+        const start = -6, end = 0, pts = 1200; // Denser sweep enabled by optimization
         for(let i=0; i<=pts; i++) ells.push(Math.pow(10, start + i*(end-start)/pts));
 
+        dk_warm_roots = null; // Clear warm start for new sweep
         const datasets = [
             { label: '1 DWH', color: colors.dwh, fn: (l) => dwh_result(l) },
-            { label: '1 PE', color: colors.pe1, fn: (l) => get_pe_result(l) },
-            { label: '2 PE', color: colors.pe2, fn: (l) => get_pe_result(get_pe_result(l)) },
-            { label: '3 PE', color: colors.pe3, fn: (l) => get_pe_result(get_pe_result(get_pe_result(l))) },
-            { label: '4 PE', color: colors.pe4, fn: (l) => get_pe_result(get_pe_result(get_pe_result(get_pe_result(l)))) },
-            { label: '5 PE', color: colors.pe5, fn: (l) => {
-                let r = l; for(let i=0; i<5; i++) r = get_pe_result(r); return r;
+            { label: '1 PE', color: colors.pe1, fn: (l, w) => get_pe_result(l, w) },
+            { label: '2 PE', color: colors.pe2, fn: (l, w) => get_pe_result(get_pe_result(l, w), w) },
+            { label: '3 PE', color: colors.pe3, fn: (l, w) => get_pe_result(get_pe_result(get_pe_result(l, w), w), w) },
+            { label: '4 PE', color: colors.pe4, fn: (l, w) => get_pe_result(get_pe_result(get_pe_result(get_pe_result(l, w), w), w), w) },
+            { label: '5 PE', color: colors.pe5, fn: (l, w) => {
+                let r = l; for(let i=0; i<5; i++) r = get_pe_result(r, w); return r;
             }}
         ];
 
         chart.data.datasets = datasets.map(ds => {
             let max_y_so_far = -Infinity;
+            // Warm start only works if we sweep monotonically
+            dk_warm_roots = null; 
             return {
                 label: ds.label,
                 data: ells.map(l => {
-                    let y = ds.fn(l);
-                    // Enforce monotonicity: resulting singular value must not decrease as starting l increases
-                    if (y < max_y_so_far) {
-                        y = max_y_so_far;
-                    } else {
-                        max_y_so_far = y;
-                    }
-
+                    let y = ds.fn(l, true); // useWarmStart = true
+                    if (y < max_y_so_far) y = max_y_so_far; else max_y_so_far = y;
                     if (isLogY) {
-                        y = Math.min(1.0, y); // Prevent floating point overshoot > 1.0 which causes abs(1-y) spikes
+                        y = Math.min(1.0, y);
                         y = 1 - y;
                         if (y < 1e-16) y = 1e-16;
                     }
@@ -239,6 +255,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         chart.update();
     }
+
 
     cwLogX.addEventListener('change', updateGraph);
     cwLogY.addEventListener('change', updateGraph);
