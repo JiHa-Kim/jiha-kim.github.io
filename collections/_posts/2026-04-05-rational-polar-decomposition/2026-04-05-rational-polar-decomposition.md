@@ -172,14 +172,14 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $u \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
-    # 4. Step 1: DWH ($\ell_{0} = 10^{-3}$) with Cholesky Inverse Fast Path
+    # 4. Step 1: DWH ($\ell_{0} = 10^{-3}$)
     $S \leftarrow \gamma_{0} u \Delta + \tilde{G}$
-    $(L, \tau) \leftarrow$ @SafeCholesky($S$) # Pivot-informed jittered Cholesky
+    $(L, \tau) \leftarrow$ @SafeCholesky($S$)
     $S_{\text{inv}} \leftarrow$ @cholesky_inverse($L$) # potri: 3x faster than solve+SYRK
     $H \leftarrow \beta_{0} u D S_{\text{inv}} D$ # Broadcasted scalar scaling
     $R \leftarrow \alpha_{0} B + B H$
     $B \leftarrow$ @Sym($\alpha_{0} R + H R$)
-    $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + H)$ # "Free" K-update (skips 1 GEMM)
+    $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + H)$
 
     # 5. Step 2: PE Cleanup 1 (Stable evaluate-transpose form)
     $Z \leftarrow \hat{b}_{1} B + \hat{c}_{1} B^{2}$
@@ -190,7 +190,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # 6. Step 3: PE Cleanup 2 (Defect Form Recentering)
     $E \leftarrow I - B$ # Explicitly small defect
     $U \leftarrow u_{2} E + v_{2} E^{2}$
-    $K \leftarrow K + K U$ # Output Gram B is dead code, discarded
+    $K \leftarrow K + K U$
 
     # 7. Final Reconstitution
     $K \leftarrow \operatorname{diag}(d_i^{1/2})$ @Sym($K$) # Invert in-place scaling on K rows
