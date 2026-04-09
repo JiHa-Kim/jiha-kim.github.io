@@ -187,13 +187,12 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
     $$
     where $U = u_2 E + v_2 E^2$ is a small correction matrix, using precomputed scalars $u_2 = -(b_2+2c_2)$ and $v_2 = c_2$. We can then perfectly match the numerically stable fused update parametrization from above by setting the overall scalar $a=1$:
     $$
-    $$
     R_U = B + B U, \quad B \leftarrow R_U + U R_U, \quad K \leftarrow K + K U
     $$
     Because $U$ tracks only the small defect explicitly and we avoid materializing the inflated diagonal $I+U$, this bypasses severe catastrophic cancellation and enables low precision like BF16/FP16 to behave much better near convergence.
 6.  **The "Free" Initial K-Update**: In Step 1, $K$ is initialized as $K_0 = \frac{1}{\sqrt{u}} I$, which is just a scaled identity. The standard update step $K \leftarrow \alpha_0 K_0 + K_0 H$ simplifies exactly to an element-wise combination $K_1 \leftarrow \frac{1}{\sqrt{u}} (\alpha_0 I + H)$. By substituting this directly into the first step, you skip a full GEMM with absolutely no mathematical change.
-7.  **The Cholesky Inverse Fast Path**: The standard DWH step involves solving $W \leftarrow \text{solve\_triangular}(L, D)$ over $N$ right-hand sides, then performing a SYRK to get $H \leftarrow \beta_0 u W^\top W$. Because $D$ is purely diagonal, mathematically $W^\top W \equiv D(LL^\top)^{-1}D$. By swapping the TRSM-SYRK pair for a direct Cholesky inverse (e.g. LAPACK `potri`, standard in deep learning frameworks as `cholesky_inverse`), you drop from $\approx 2 N^3$ FLOPs down to $\approx \frac{2}{3} N^3$. The product $H \leftarrow \beta_0 u D S_{\text{inv}} D$ then becomes a blazing fast broadcasted scalar scaling.
-8.  **Dead-Code Elimination in the Terminal Step**: Step 3 is the final step of the computation. Once it executes, the updated Gram matrix $B$ is never read again. We only require the cumulative $K$. Therefore, the two expensive SYMM operations computing the subsequent $B$ matrix ($R \leftarrow B + BU$ and $B \leftarrow \text{Sym}(R + UR)$) are dead code and can simply be deleted from the execution path.
+7.  **The Cholesky Inverse Fast Path**: The standard DWH step involves solving $W \leftarrow \text{solve\_triangular}(L, D)$ over $N$ right-hand sides, then performing a SYRK to get $H \leftarrow \beta_0 u W^{\top} W$. Because $D$ is purely diagonal, mathematically $W^{\top} W \equiv D(L L^{\top})^{-1} D$. By swapping the TRSM-SYRK pair for a direct Cholesky inverse (e.g. LAPACK `potri`, standard in deep learning frameworks as `cholesky_inverse`), you drop from $\approx 2 N^{3}$ FLOPs down to $\approx \frac{2}{3} N^{3}$. The product $H \leftarrow \beta_0 u D S_{\text{inv}} D$ then becomes a blazing fast broadcasted scalar scaling.
+8.  **Dead-Code Elimination in the Terminal Step**: Step 3 is the final step of the computation. Once it executes, the updated Gram matrix $B$ is never read again. We only require the cumulative $K$. Therefore, the two expensive SYMM operations computing the subsequent $B$ matrix ($R \leftarrow B + B U$ and $B \leftarrow \text{Sym}(R + U R)$) are dead code and can simply be deleted from the execution path.
 
 ### 3.2 Stability and Utility Primitives
 
@@ -247,23 +246,23 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $u \leftarrow$ @MomentBound($\tilde{G}, d, \eta$)
     $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
-    # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
-    $S \leftarrow \gamma_0 u \Delta + \tilde{G}$
+    # --- Step 1: DWH ($\ell_{0} = 10^{-3}$) ---
+    $S \leftarrow \gamma_{0} u \Delta + \tilde{G}$
     $(L, \tau) \leftarrow$ @SafeCholesky($S, dtype, K_{\max}$)
     $S_{\text{inv}} \leftarrow \mathrm{cholesky\_inverse}(L)$
-    $H \leftarrow \beta_0 u D S_{\text{inv}} D$ # Broadcasted row/col scaling
-    $R \leftarrow \alpha_0 B + B H$
-    $B \leftarrow$ @Sym($\alpha_0 R + H R$), $\quad K \leftarrow \frac{1}{\sqrt{u}}(\alpha_0 I + H)$ # Free K-update
+    $H \leftarrow \beta_{0} u D S_{\text{inv}} D$ # Broadcasted row/col scaling
+    $R \leftarrow \alpha_{0} B + B H$
+    $B \leftarrow$ @Sym($\alpha_{0} R + H R$), $\quad K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + H)$ # Free K-update
 
     # --- Step 2: Normalized PE Cleanup 1 (Stable Form) ---
-    $Z \leftarrow \hat{b}_1 B + \hat{c}_1 B^2$
-    $R \leftarrow \hat{a}_1 B + B Z$
-    $B \leftarrow$ @Sym($\hat{a}_1 R + Z R$)
-    $K \leftarrow \hat{a}_1 K + K Z$
+    $Z \leftarrow \hat{b}_{1} B + \hat{c}_{1} B^{2}$
+    $R \leftarrow \hat{a}_{1} B + B Z$
+    $B \leftarrow$ @Sym($\hat{a}_{1} R + Z R$)
+    $K \leftarrow \hat{a}_{1} K + K Z$
 
     # --- Step 3: Normalized PE Cleanup 2 (Defect Form) ---
     $E \leftarrow I - B$
-    $U \leftarrow u_2 E + v_2 E^2$
+    $U \leftarrow u_{2} E + v_{2} E^{2}$
     $K \leftarrow K + K U$ # Terminal step: output B is safely discarded
 
     $K \leftarrow$ @Sym($K$)
