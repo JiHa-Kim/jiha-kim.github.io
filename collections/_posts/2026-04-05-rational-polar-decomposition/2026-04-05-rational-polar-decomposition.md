@@ -137,6 +137,10 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
       $$
       G = D^{-1} \tilde{G} D^{-1}.
       $$
+      Writing $\Delta = D^2 = \operatorname{diag}(1/d)$, the moment-bound statistics can be evaluated directly from the scaled Gram:
+      $$
+      \operatorname{tr}(G) = \sum_i d_i \tilde{G}_{ii}, \qquad \|G\|_F^2 = \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2.
+      $$
       For the DWH front-end, we should not discard the scaling before Cholesky. Instead, if
       $$
       B = G/u,
@@ -145,9 +149,9 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
       $$
       (\gamma_0 I + B)^{-1}
       = u(\gamma_0 u I + G)^{-1}
-      = u D (\gamma_0 u D^2 + \tilde{G})^{-1} D.
+      = u D (\gamma_0 u \Delta + \tilde{G})^{-1} D.
       $$
-      So the Cholesky should be applied to the scaled SPD matrix $\gamma_0 u D^2 + \tilde{G}$, and only then mapped back to the original coordinates.
+      So the Cholesky should be applied to the scaled SPD matrix $\gamma_0 u \Delta + \tilde{G}$, and only then mapped back to the original coordinates.
     This adds an element-wise pass over $X$, but it prevents the intermediate Gram accumulation from overflowing or losing critical precision bits while still preserving the original polar factor of $X$.
 2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
     $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
@@ -182,8 +186,10 @@ The following support procedures handle symmetrization, robust eigenvalue upper-
 def Sym(A):
     return $\frac{1}{2}(A + A^\top)$
 
-def MomentUpperBound(G):
-    $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
+def ScaledMomentUpperBound($\tilde{G}, d$):
+    $\operatorname{tr}_G \leftarrow \sum_i d_i \tilde{G}_{ii}$
+    $\operatorname{fro2}_G \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
+    $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}_G + \sqrt{(N-1)\max(0, N\operatorname{fro2}_G - \operatorname{tr}_G^2)}}{N}$
     return $u_M$
 
 def SafeSolveSPD(S):
@@ -213,15 +219,16 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # --- ColNorm for safe accumulation and the first rational solve ---
     $d \leftarrow \max(\operatorname{colNorms}(X)^2, \epsilon)$
     $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}(d))$
+    $\Delta \leftarrow \operatorname{diag}(1/d)$
     $\tilde{G} \leftarrow$ @Sym($(X D)^\top (X D)$)
+    $u \leftarrow$ @ScaledMomentUpperBound($\tilde{G}, d$)
     $G \leftarrow$ @Sym($D^{-1} \tilde{G} D^{-1}$)
 
     # --- Normalize original Gram ---
-    $u \leftarrow$ @MomentUpperBound($G$)
     $B \leftarrow G/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
 
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
-    $H \leftarrow u D$ @SafeSolveSPD($\gamma_0 u D^2 + \tilde{G}$) $D$
+    $H \leftarrow u D$ @SafeSolveSPD($\gamma_0 u \Delta + \tilde{G}$) $D$
     $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow$ @Sym($R_0 B R_0$)
 
     # --- Steps 2-3: Normalized PE Cleanup ---
