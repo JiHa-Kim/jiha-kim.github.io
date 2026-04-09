@@ -155,7 +155,7 @@ The following algorithm utilizes exactly two tall rectangular GEMMs.
 ```pseudo
 def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # 1. Tall orientation check
-    if $M < N$: return @HybridPolar($X^\top$) $^\top$
+    if $M < N$: return @HybridPolar($X^\top$)$^\top$
 
     dtype = fp32 # Precision for Cholesky/TRSM
     $\ell_{\text{fast}} = 0.15$ # Threshold for fast-path bypassing DWH
@@ -212,12 +212,12 @@ Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use sym
 
 Fixed constants for implementation, computed offline in FP64:
 
-| Step     | Parameters                       | Values                                                                        |
-| :------- | :------------------------------- | :---------------------------------------------------------------------------- |
-| **DWH**  | $g_I, g_B, g_H, g_{H^2}$         | 0.030883301527615, 0.968872554082809, 3.906861822017413, -3.937745123545028   |
-|          | $\gamma_0, \alpha_0, \beta_0$     | 0.000062499017684, 0.984313239818915, 251.007791810856                        |
-| **PE 1** | $u_1, v_1$                       | -1.595552602479211, 3.901806628246143                                         |
-| **PE 2** | $u_2, v_2$                       | 0.413372883404030, 0.780748444540736                                          |
+| Step     | Parameters                    | Values                                                                      |
+| :------- | :---------------------------- | :-------------------------------------------------------------------------- |
+| **DWH**  | $g_I, g_B, g_H, g_{H^2}$      | 0.030883301527615, 0.968872554082809, 3.906861822017413, -3.937745123545028 |
+|          | $\gamma_0, \alpha_0, \beta_0$ | 0.000062499017684, 0.984313239818915, 251.007791810856                      |
+| **PE 1** | $u_1, v_1$                    | -1.595552602479211, 3.901806628246143                                       |
+| **PE 2** | $u_2, v_2$                    | 0.413372883404030, 0.780748444540736                                        |
 
 ---
 

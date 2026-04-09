@@ -7,7 +7,7 @@ require 'digest'
 module Jekyll
   class ObsidianPreprocess < Jekyll::Generator
     priority :high
-    CACHE_VERSION = "2026-04-09-algo-render-v2".freeze
+    CACHE_VERSION = "2026-04-09-production-ready-v1".freeze
 
     # Map Obsidian callout types -> Chirpy box classes
     TYPE_MAP = {
@@ -92,7 +92,7 @@ module Jekyll
 
       # 5. Restore Regions
       buckets.each_with_index do |payload, i|
-        content.gsub!("@@PROTECT#{i}@@", payload)
+        content.gsub!("@@PROTECT#{i}@@") { payload }
       end
 
       # 6. Preserve spaces between tokens at risk of being stripped by compress_html
@@ -329,20 +329,15 @@ module Jekyll
         has_env = SKIP_FORMATTING_ENVS.any? { |env| math_content.include?("\\begin{#{env}}") }
         math_content = cleanup_latex_syntax(math_content) unless has_env
         
-        # Double backslashes to protect them from Kramdown unescaping
-        math_content = math_content.strip.gsub('\\', '\\\\\\\\')
-        
-        "\n#{indent}<div class=\"math-block\" markdown=\"0\">\n\\[\n#{math_content}\n\\]\n#{indent}</div>\n"
+        "\n#{indent}<div class=\"math-block\" markdown=\"0\">\n\\[\n#{math_content.strip}\n\\]\n#{indent}</div>\n"
       end
     end
 
     def convert_inline_math(content)
-      content.gsub(/(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)(?<!\$)\$(?!\$)|\\\(([\s\S]+?)\\\)/) do
+      content.gsub(/(?<!\\)\$(?!\$)([^$\n]+?)(?<!\\)\$|\\\(([\s\S]+?)\\\)/) do
         math_content = $1 || $2
         math_content = cleanup_latex_syntax(math_content)
-        # Double backslashes to protect them from Kramdown unescaping
-        math_content = math_content.gsub('\\', '\\\\\\\\')
-        "<span class=\"math-inline\" markdown=\"0\">\\(#{math_content}\\)</span>"
+        "<span class=\"math-inline\" markdown=\"0\">\\(#{math_content.strip}\\)</span>"
       end
     end
 
@@ -357,7 +352,8 @@ module Jekyll
     end
     def convert_algorithms(md)
       md.gsub(/^```(?:pseudo|pseudocode|algorithm)\b[^\n]*\n(.*?)^```$\n?/m) do
-        render_algorithm_block(parse_pythonic_pseudocode($1))
+        html = parse_pythonic_pseudocode($1)
+        render_algorithm_block(html)
       end
     end
 
@@ -398,11 +394,12 @@ module Jekyll
       code, buckets = protect_algo_math(code)
 
       # Improved to handle @Func(...) and def Func(...) including parentheses and LaTeX scaling
-      code = code.gsub(/@([A-Za-z_]\w+)(?:\s*\((.*?)\))?/) do
+      # Uses a recursive regex for balanced parentheses: (\((?>[^()]+|\g<2>)*\))
+      code = code.gsub(/@([A-Za-z_]\w+)(?:\s*(\((?>[^()]+|\g<2>)*\)))?/) do
         format_algo_func($1, $2, buckets)
       end
 
-      code = code.gsub(/\b(def)\s+([A-Za-z_]\w+)(?:\s*\((.*?)\))?/) do
+      code = code.gsub(/\b(def)\s+([A-Za-z_]\w+)(?:\s*(\((?>[^()]+|\g<3>)*\)))?/) do
         "<span class=\"algo-kw\">#{$1}</span>&nbsp;" + format_algo_func($2, $3, buckets)
       end
 
@@ -413,14 +410,21 @@ module Jekyll
       code = highlight_algo_literals(code)
       code = code.gsub(/:/, "<span class=\"algo-punct\">:</span>")
 
-      # Protect remaining spaces within the code (outside of tags)
-      code = code.gsub(/(?<!<[^>])\s+(?![^>]*>)/, '&nbsp;')
+      code = restore_algo_math(code, buckets)
 
-      restore_algo_math(code, buckets)
+      # FIX: Join adjacent math blocks (e.g., $A$$B$ -> $AB$) 
+      # This fixes both MathJax superscript context and the site-wide block-math misinterpretation bug.
+      # We do it after restoration but before returning to the global pipeline.
+      code = code.gsub(/\$\$/, '')
+
+      code
     end
 
     def format_algo_func(name, args, buckets)
       if args
+        # Strip potential wrapping parentheses from the recursive regex match
+        args = args[1..-2] if args.start_with?("(") && args.end_with?(")")
+
         # If args is a single math block, move parentheses inside and use \left/\right
         if args.strip =~ /^(__ALGOMATH_(\d+)__)$/
           idx = $2.to_i
@@ -467,7 +471,7 @@ module Jekyll
 
     def restore_algo_math(text, buckets)
       buckets.each_with_index do |payload, i|
-        text = text.gsub("__ALGOMATH_#{i}__", payload)
+        text = text.gsub("__ALGOMATH_#{i}__") { payload }
       end
       text
     end
