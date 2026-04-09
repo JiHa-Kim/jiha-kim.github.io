@@ -175,14 +175,14 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
     # 4. Step 1: DWH ($\ell_{0} = 10^{-3}$)
-    $S \leftarrow \gamma_{0} u \Delta + \tilde{G}$
+    $S \leftarrow g_{0} u \Delta + \tilde{G}$
     $(L, \tau) \leftarrow$ @SafeCholesky($S$)
     $S_{\text{inv}} \leftarrow$ @cholesky_inverse($L$)
     
-    if $\frac{1}{u \operatorname{tr}(S_{\text{inv}})} - \gamma_{0} > \ell_{\text{fast}}$:
+    if $\frac{1}{u \operatorname{tr}(S_{\text{inv}})} - g_{0} > \ell_{\text{fast}}$:
         $K \leftarrow \frac{1}{\sqrt{u}} I$ # Fast-path: bypass DWH
     else:
-        $H_{0} \leftarrow \gamma_{0} u D S_{\text{inv}} D$ # Bounded resolvent
+        $H_{0} \leftarrow g_{0} u D S_{\text{inv}} D$ # Bounded resolvent
         $H_{sq} \leftarrow$ @Sym($H_{0}^{2}$) # Half-FLOP SYRK
         $B \leftarrow g_{1} I + g_{2} B + g_{3} H_{0} + g_{4} H_{sq}$ # Zero-GEMM step
         $K \leftarrow \frac{1}{\sqrt{u}}(u_{0} I + v_{0} H_{0})$
@@ -212,12 +212,12 @@ Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use sym
 
 Fixed constants for implementation, computed offline in FP64:
 
-| Step     | Parameters                  | Values                                                        |
-| :------- | :-------------------------- | :------------------------------------------------------------ |
-| **DWH**  | $g_1, g_2, g_3, g_4$     | $0.030883301527615, 0.968872554082809, 3.906861822017413, -3.937745123545028$ |
-|          | $u_{0}, v_{0}$ | $0.984313239818915, 251.007791810856$                         |
-| **PE 1** | $u_1, v_1$       | $-1.595552602479211, 3.901806628246143$                         |
-| **PE 2** | $u_2, v_2$                  | $0.413372883404030, 0.780748444540736$                         |
+| Step     | Parameters           | Values                                                                        |
+| :------- | :------------------- | :---------------------------------------------------------------------------- |
+| **DWH**  | $g_1, g_2, g_3, g_4$ | $0.030883301527615, 0.968872554082809, 3.906861822017413, -3.937745123545028$ |
+|          | $g_0, u_{0}, v_{0}$  | $0.000062499017684, 0.984313239818915, 251.007791810856$                      |
+| **PE 1** | $u_1, v_1$           | $-1.595552602479211, 3.901806628246143$                                       |
+| **PE 2** | $u_2, v_2$           | $0.413372883404030, 0.780748444540736$                                        |
 
 ---
 
