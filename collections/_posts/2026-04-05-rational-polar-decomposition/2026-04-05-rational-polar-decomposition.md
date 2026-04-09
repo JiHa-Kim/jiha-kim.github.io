@@ -122,165 +122,65 @@ $$
 
 ---
 
-## 3. Hardware-Aware Implementation
+## 3. Implementation and Performance
 
-In ML applications, the polar decomposition must be stable under FP16/BF16 arithmetic. We work in the tall orientation $X \in \mathbb{R}^{M \times N}, M \ge N$.
+The hybrid polar decomposition targets speed and stability under low-precision (BF16/FP16) arithmetic.
 
-### 3.1 Stability Primitives
+### 3.1 The Main Hybrid Algorithm
 
-1.  **Robust Gram Accumulation (ColNorm)**: To alleviate precision errors and reduce dynamic range instability in low-precision (FP16/BF16) arithmetic, we temporarily normalize the columns of $X$ before forming the Gram matrix. This gives a safer accumulation path and also a better-conditioned matrix for the initial DWH solve, but the overall iteration must still target the original polar factor.
-    - We compute column sums-of-squares in one pass with FP64 accumulation, then clamp them with a **scale-aware** floor $d_j = \max(\sum_i X_{ij}^2, \epsilon_{\text{col}})$ where $\epsilon_{\text{col}} = \varepsilon_{\text{mach}}(\text{dtype}) \max(\|X\|_F^2/N, 1)$, and form $D = \operatorname{diag}(d^{-1/2})$, then accumulate the scaled Gram:
-      $$
-      \tilde{G} = (X D)^\top (X D).
-      $$
-    - Because $\tilde{G} = D X^\top X D$, the original Gram is
-      $$
-      G = D^{-1} \tilde{G} D^{-1}.
-      $$
-      Writing $\Delta = D^2 = \operatorname{diag}(1/d_j)$, the moment-bound statistics can be evaluated directly from the scaled Gram:
-      $$
-      \operatorname{tr}(G) = \sum_i d_i \tilde{G}_{ii}, \qquad \|G\|_F^2 = \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2.
-      $$
-      For the DWH front-end, we should not discard the scaling before Cholesky. Instead, if
-      $$
-      B = G/u,
-      $$
-      then
-      $$
-      (\gamma_0 I + B)^{-1}
-      = u(\gamma_0 u I + G)^{-1}
-      = u D (\gamma_0 u \Delta + \tilde{G})^{-1} D.
-      $$
-      So the Cholesky should be applied to the scaled SPD matrix $\gamma_0 u \Delta + \tilde{G}$, and only then mapped back to the original coordinates.
-    This adds an element-wise pass over $X$, but it prevents the intermediate Gram accumulation from overflowing or losing critical precision bits while still preserving the original polar factor of $X$.
-2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
-    $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
-    where $\eta$ is a safety margin. This gives a cheap closed-form upper bound for $\lambda_{\max}(G)$ without needing a power iteration.
-
-> [!proof]- Proof of the Moment Bound
-> Assume the eigenvalues are ordered $\lambda_1 \ge \lambda_2 \ge \dots \ge \lambda_N$. Let $\mu = \frac{1}{N} \operatorname{tr}(G)$ be the mean and $V = \sum (\lambda_k - \mu)^2$ be the total variance. Since $\sum (\lambda_k - \mu) = 0$, we have:
-> $$
-> \lambda_1 - \mu = \sum_{k=2}^N (\mu - \lambda_k)
-> $$
-> Squaring both sides and applying Cauchy-Schwarz:
-> $$
-> (\lambda_1 - \mu)^2 = \left( \sum_{k=2}^N 1 \cdot (\mu - \lambda_k) \right)^2 \le (N-1) \sum_{k=2}^N (\lambda_k - \mu)^2
-> $$
-> Substituting $\sum_{k=2}^N (\lambda_k - \mu)^2 = V - (\lambda_1 - \mu)^2$ gives:
-> $$
-> (\lambda_1 - \mu)^2 \le (N-1) \left( V - (\lambda_1 - \mu)^2 \right) \implies N(\lambda_1 - \mu)^2 \le (N-1)V
-> $$
-> Finally, substituting $V = \|G\|_F^2 - N\mu^2$ and taking the square root:
-> $$
-> \lambda_1 \le \mu + \sqrt{\frac{N-1}{N} V} = \frac{\operatorname{tr}(G) + \sqrt{(N-1)(N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}
-> $$
-
-3.  **Safe SPD Cholesky (Pivot-Informed Jitter)**: For the Gram-side SPD matrix we factor (e.g. $S = \gamma_0 u \Delta + \tilde{G}$), we use Cholesky with a pivot-informed diagonal shift. On failure, we pick jitter from the smallest encountered pivot and retry with monotone doubling backoff. Downstream we keep the Cholesky factor and use triangular solves and symmetric rank-k updates rather than forming an explicit inverse.
-4.  **Stable Fused Updates for Gram Iterations**: Matrix iterations compute spectral updates via an intermediate factor $Q$. For example, DWH computes $R_0 = \alpha_0 I + \beta_0 H$, and PE computes $Q = a I + b B + c B^2$, both followed by $B \leftarrow Q B Q$ and $K \leftarrow K Q$. However, in low precision (BF16/FP16), adding a large $O(1)$ constant to the diagonal of a matrix can squash the precision of its small off-diagonal elements. We avoid this by defining the strictly-matrix part $Z$ (where $Z_0 = \beta_0 H$ for DWH and $Z_i = \hat{b}_i B + \hat{c}_i B^2$ for PE). We then apply a "fused" update without ever materializing the inflated diagonal:
-    $$
-    R_Z = a B + B Z, \quad B \leftarrow a R_Z + Z R_Z
-    $$
-    and apply the distributed update $K \leftarrow a K + K Z$ to the factor $K$. This preserves numerical dynamic range in the off-diagonals.
-5.  **Defect Form (Recentering) for the Final Step**: For the final polar iteration step, the factor $B$ is already very close to the identity matrix. Applying the direct evaluation loses bits because it subtracts large nearly equal $O(1)$ terms. Instead, we re-center the iteration around the identity by writing the explicitly small defect $E = I - B$. Since the normalized PE coefficients satisfy $a+b+c = 1$, the update $Q = aI + bB + cB^2$ becomes:
-    $$
-    Q = (a+b+c)I - (b+2c)E + cE^2 = I + U
-    $$
-    where $U = u_2 E + v_2 E^2$ is a small correction matrix, using precomputed scalars $u_2 = -(b_2+2c_2)$ and $v_2 = c_2$. We can then perfectly match the numerically stable fused update parametrization from above by setting the overall scalar $a=1$:
-    $$
-    R_U = B + B U, \quad B \leftarrow R_U + U R_U, \quad K \leftarrow K + K U
-    $$
-    Because $U$ tracks only the small defect explicitly and we avoid materializing the inflated diagonal $I+U$, this bypasses severe catastrophic cancellation and enables low precision like BF16/FP16 to behave much better near convergence.
-6.  **The "Free" Initial K-Update**: In Step 1, $K$ is initialized as $K_0 = \frac{1}{\sqrt{u}} I$, which is just a scaled identity. The standard update step $K \leftarrow \alpha_0 K_0 + K_0 H$ simplifies exactly to an element-wise combination $K_1 \leftarrow \frac{1}{\sqrt{u}} (\alpha_0 I + H)$. By substituting this directly into the first step, you skip a full GEMM with absolutely no mathematical change.
-7.  **The Cholesky Inverse Fast Path**: The standard DWH step involves solving $W \leftarrow \text{solve\_triangular}(L, D)$ over $N$ right-hand sides, then performing a SYRK to get $H \leftarrow \beta_0 u W^{\top} W$. Because $D$ is purely diagonal, mathematically $W^{\top} W \equiv D(L L^{\top})^{-1} D$. By swapping the TRSM-SYRK pair for a direct Cholesky inverse (e.g. LAPACK `potri`, standard in deep learning frameworks as `cholesky_inverse`), you drop from $\approx 2 N^{3}$ FLOPs down to $\approx \frac{2}{3} N^{3}$. The product $H \leftarrow \beta_0 u D S_{\text{inv}} D$ then becomes a blazing fast broadcasted scalar scaling.
-8.  **Dead-Code Elimination in the Terminal Step**: Step 3 is the final step of the computation. Once it executes, the updated Gram matrix $B$ is never read again. We only require the cumulative $K$. Therefore, the two expensive SYMM operations computing the subsequent $B$ matrix ($R \leftarrow B + B U$ and $B \leftarrow \text{Sym}(R + U R)$) are dead code and can simply be deleted from the execution path.
-9.  **In-Place Gram Scaling (Avoids $O(MN)$ Memory Spikes)**: When normalizing columns, scaling $X$ out-of-place produces a new $M \times N$ tensor, temporarily doubling your system memory. Instead, multiply the activation inplace (`X.mul_(D)`), and perform your Gram iteration precisely on the unit-norm output $X_{\text{scaled}}$. The algorithm reconstructs the true polar projection $Q = X_{\text{orig}} K$ rigorously through the identity $X_{\text{scaled}} (D^{-1} K)$. Because $D^{-1}$ is purely diagonal, you cleanly restore identical mathematical output by just pre-scaling the rows of $K$ instantly, preventing all heavy intermediate matrix memory allocations during step closures.
-10. **The Exact Trace Shortcut**: Inside the standard moment bound, we historically compute the trace via $\sum d_i \tilde{G}_{ii}$. But mathematically, $\tilde{G} = (X D)^{\top} (X D)$ forces exactly $\tilde{G}_{ii} = 1$ under ideal constraint. The cumulative trace formally evaluates exactly to the un-scaled Frobenius norm $\|X\|_F^{2}$ which we already accumulate natively! We pass $\|X\|_F^{2}$ implicitly to skip the trace loop.
-
-### 3.2 Stability and Utility Primitives
+The following algorithm utilizes exactly two tall rectangular GEMMs and leverages several architectural tricks—including in-place scaling, Cholesky-inverse solves, and defect-form cleanup—to minimize memory footprint and FLOPs.
 
 <div class="algorithm-container">
-```pseudo
-def Sym($A$):
-    return $\frac{1}{2}(A + A^\top)$
-
-def ColNorm($X, dtype$):
-    # fp64 (or wider) accumulation
-    $d_j \leftarrow \sum_i X_{ij}^2, \quad \|X\|_F^2 \leftarrow \sum_j d_j$
-    $\epsilon_{\text{col}} \leftarrow \epsilon_{\text{mach}}(dtype) \max(\|X\|_F^2/N, 1)$
-    return $\max(d_j, \epsilon_{\text{col}})$
-
-def MomentBound($\tilde{G}, d, \|X\|_F^2, \eta$):
-    $\operatorname{tr}(G) \leftarrow \|X\|_F^2, \quad \|G\|_F^2 \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
-    return $\dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
-
-def SafeCholesky($S, dtype, K_{\max}=6$):
-    $S \leftarrow$ @Sym($S$), $\quad \tau \leftarrow 0$
-    $\tau_{\min} \leftarrow \epsilon_{\text{mach}}(dtype) \max(\operatorname{tr}(S)/N, \max_i S_{ii}, 1)$
-    for $t=1, \dots, K_{\max}$:
-        try $L \leftarrow \mathrm{Cholesky}(S + \tau I)$ while tracking $\pi_{\min}$
-        if success: return ($L$, $\tau$)
-        $\tau \leftarrow \max(\tau + \max(0, -\pi_{\min}) + \tau_{\min}, 2\tau, \tau_{\min})$
-    fail
-```
-</div>
-
-### 3.3 The Main Hybrid Algorithm
-
-With the primitives defined, the full hybrid polar decomposition is expressed as a three-step spectral update entirely in the small-side Gram space of the **original** matrix.
-
-<div class="algorithm-container">
-<div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Stable Hybrid Polar: 1 DWH + 2 PE</div>
+<div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Optimized Hybrid Polar: 1 DWH + 2 PE</div>
 ```pseudo
 def HybridPolar($X \in \mathbb{R}^{M \times N}$):
-    transposed = false
-    if $M < N$:
-        $X \leftarrow X^\top$
-        transposed = true
+    # 1. Tall orientation check
+    if $M < N$: return HybridPolar($X^\top$)$^\top$
 
-    # dtype is the Cholesky/TRSM precision (fp32 or fp64)
-    dtype = fp32 # or fp64
-    $K_{\max} \leftarrow 6$
+    dtype = fp32 # Precision for Cholesky/TRSM
 
-    # --- ColNorm for safe accumulation and the first rational solve ---
-    $d, \|X\|_F^2 \leftarrow$ @ColNorm($X, dtype$)
+    # 2. Robust ColNorm & In-place Scaling (Saves O(MN) memory)
+    # Accumulate col sums $d_j$ and total $\|X\|_F^2$ in FP64
+    $d, \|X\|_F^2 \leftarrow \sum_i X_{ij}^2, \sum_j d_j$
+    $\epsilon_{\text{col}} \leftarrow \epsilon_{\text{mach}}(dtype) \max(\|X\|_F^2/N, 1)$
+    $d \leftarrow \max(d, \epsilon_{\text{col}})$
     $D \leftarrow \operatorname{diag}(d_j^{-1/2}), \quad \Delta \leftarrow \operatorname{diag}(d_j^{-1})$
-    $X \leftarrow X D$ # In-place scaling, saves O(MN) memory
-    $\tilde{G} \leftarrow X^\top X$ # (compute via SYRK)
-    $u \leftarrow$ @MomentBound($\tilde{G}, d, \|X\|_F^2, \eta$)
+    $X.mul\_(D)$ # Scale X in-place to avoid duplication
+
+    # 3. Gram Accumulation & Moment Bound
+    $\tilde{G} \leftarrow X^\top X$ # (via SYRK)
+    # Closed-form trace/Frobenius bound for $\lambda_{max}$ to avoid power iteration
+    $\operatorname{tr}(G) \leftarrow \|X\|_F^2, \quad \|G\|_F^2 \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
+    $u \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
-    # --- Step 1: DWH ($\ell_{0} = 10^{-3}$) ---
+    # 4. Step 1: DWH ($\ell_{0} = 10^{-3}$) with Cholesky Inverse Fast Path
     $S \leftarrow \gamma_{0} u \Delta + \tilde{G}$
-    $(L, \tau) \leftarrow$ @SafeCholesky($S, dtype, K_{\max}$)
-    $S_{\text{inv}} \leftarrow \mathrm{cholesky\_inverse}(L)$
-    $H \leftarrow \beta_{0} u D S_{\text{inv}} D$ # Broadcasted row/col scaling
+    $(L, \tau) \leftarrow \text{SafeCholesky}(S)$ # Pivot-informed jittered Cholesky
+    $S_{\text{inv}} \leftarrow \text{cholesky_inverse}(L)$ # potri: 3x faster than solve+SYRK
+    $H \leftarrow \beta_{0} u D S_{\text{inv}} D$ # Broadcasted scalar scaling
     $R \leftarrow \alpha_{0} B + B H$
-    $B \leftarrow$ @Sym($\alpha_{0} R + H R$), $\quad K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + H)$ # Free K-update
+    $B \leftarrow \text{Sym}(\alpha_{0} R + H R)$
+    $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + H)$ # "Free" K-update (skips 1 GEMM)
 
-    # --- Step 2: Normalized PE Cleanup 1 (Stable Form) ---
+    # 5. Step 2: PE Cleanup 1 (Stable evaluate-transpose form)
     $Z \leftarrow \hat{b}_{1} B + \hat{c}_{1} B^{2}$
     $R \leftarrow \hat{a}_{1} B + B Z$
-    $B \leftarrow$ @Sym($\hat{a}_{1} R + Z R$)
+    $B \leftarrow \text{Sym}(\hat{a}_{1} R + Z R)$
     $K \leftarrow \hat{a}_{1} K + K Z$
 
-    # --- Step 3: Normalized PE Cleanup 2 (Defect Form) ---
-    $E \leftarrow I - B$
+    # 6. Step 3: PE Cleanup 2 (Defect Form Recentering)
+    $E \leftarrow I - B$ # Explicitly small defect
     $U \leftarrow u_{2} E + v_{2} E^{2}$
-    $K \leftarrow K + K U$ # Terminal step: output B is safely discarded
+    $K \leftarrow K + K U$ # Output Gram B is dead code, discarded
 
-    $K \leftarrow$ @Sym($K$)
-    
-    # --- Final exact reconstitution using pre-scaled K rows ---
-    $K \leftarrow \operatorname{diag}(d_i^{1/2}) K$
-    $Q \leftarrow X K$ # X is still the in-place scaled tensor
-    if transposed:
-        return $Q^\top$
-    return $Q$ # Polar factor of the original matrix
+    # 7. Final Reconstitution
+    $K \leftarrow \operatorname{diag}(d_i^{1/2}) \text{Sym}(K)$ # Invert in-place scaling on K rows
+    return $X K$ # Result is the polar factor of the original X
 ```
 </div>
 
 Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use symmetric kernels conceptually (SYRK/SYMM/SYR2K). Only apply `@Sym(·)` at choke points (right before factorization, and optionally right before the final $Q \leftarrow X K$ matmul).
-
 
 ---
 
