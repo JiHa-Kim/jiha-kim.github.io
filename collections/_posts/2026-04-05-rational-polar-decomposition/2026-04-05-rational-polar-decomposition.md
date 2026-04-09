@@ -233,7 +233,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $B \leftarrow G/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
 
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
-    $H \leftarrow u D$ @SafeSolveSPD($\gamma_0 u \Delta + \tilde{G}$) $D$
+    $\widehat{S^{-1}} \leftarrow$ @SafeSolveSPD($\gamma_0 u \Delta + \tilde{G}$), $\quad H \leftarrow u D \widehat{S^{-1}} D$
     $Z_0 \leftarrow \beta_0 H, \quad R_{Z_0} \leftarrow \alpha_0 B + B Z_0$
     $B \leftarrow$ @Sym($\alpha_0 R_{Z_0} + Z_0 R_{Z_0}$), $\quad K \leftarrow \alpha_0 K + K Z_0$
 
