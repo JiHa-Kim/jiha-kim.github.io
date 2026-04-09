@@ -168,8 +168,8 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
     # 3. Gram Accumulation & Moment Bound
     $\tilde{G} \leftarrow X^\top X$ # (via SYRK)
-    # Closed-form trace/Frobenius bound for $\lambda_{max}$ to avoid power iteration
-    $\operatorname{tr}(G) \leftarrow \|X\|_F^2, \quad \|G\|_F^2 \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
+    # Vectorized $\|G\|_F^2 = d^\top \tilde{G}^{\circ 2} d$ avoids double summation loop
+    $\operatorname{tr}(G) \leftarrow \|X\|_F^2, \quad \|G\|_F^2 \leftarrow d^\top \tilde{G}^{\circ 2} d$
     $u \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
@@ -222,6 +222,7 @@ Fixed constants for implementation, computed offline in FP64:
   1. The DWH $W^{\top} W$ inversion is fully replaced by a Cholesky inverse via `potri` and scalar broadcast, cutting the factorization time by 3x. 
   2. The initial iteration avoids initializing a separate dense identity matrix, converting $K_1$ updates into an element-wise addition over the existing $H$ matrix. 
   3. The dead-code branch in Step 3 cleanly eliminates all subsequent $B$ updates from the critical path entirely.
+  4. The vectorized Frobenius norm calculation $\|G\|_F^2 = d^\top \tilde{G}^{\circ 2} d$ replaces an $O(N^2)$ summation with a single tensor-friendly quadratic form.
 - **Zero-Allocation $X$-Scaling**: Large scale activation accumulations often peak hard sequentially. The in-place mutation of the initial system variables prevents tensor duplication overhead scaling at $O(MN)$ without skewing parameter recovery constraints by exactly reverting projection targets at $N \times N$ factor scaling complexity.
 - **Balanced Latency**: While pre-scaling adds one element-wise pass over the tall matrix $X$, the cost is offset by the reduction in small-side complexity compared to pure rational iterations. The algorithm still performs exactly two tall rectangular GEMMs.
 - **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
