@@ -125,10 +125,27 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 
 ### 3.1 Stability Primitives
 
-1.  **Robust Pre-conditioning (ColNorm)**: To alleviate precision errors and reduce dynamic range instability in low-precision (FP16/BF16) arithmetic, we normalize the columns of $X$ before forming the Gram matrix. This is mathematically equivalent to Jacobi scaling the Gram matrix but remains robust even when the raw inputs $X$ vary by orders of magnitude.
-    - We compute column sums-of-squares in one pass and apply the scaling directly to $X$: $X \leftarrow X D$, where $D = \text{diag}(\text{rsqrt}(\sum_i X_{ij}^2 + \epsilon))$.
-    - The normalized Gram matrix is then $G = X^\top X$, which now has a unit diagonal and bounded eigenvalues.
-    While this adds an element-wise pass over $X$, it prevents the intermediate $X^\top X$ from overflowing or losing critical precision bits during accumulation.
+1.  **Robust Gram Accumulation (ColNorm)**: To alleviate precision errors and reduce dynamic range instability in low-precision (FP16/BF16) arithmetic, we temporarily normalize the columns of $X$ before forming the Gram matrix. This gives a safer accumulation path and also a better-conditioned matrix for the initial DWH solve, but the overall iteration must still target the original polar factor.
+    - We compute column sums-of-squares in one pass and form $D = \text{diag}(\text{rsqrt}(\sum_i X_{ij}^2 + \epsilon))$, then accumulate the scaled Gram:
+      $$
+      \tilde{G} = (X D)^\top (X D).
+      $$
+    - Because $\tilde{G} = D X^\top X D$, the original Gram is
+      $$
+      G = D^{-1} \tilde{G} D^{-1}.
+      $$
+      For the DWH front-end, we should not discard the scaling before Cholesky. Instead, if
+      $$
+      B = G/u,
+      $$
+      then
+      $$
+      (\gamma_0 I + B)^{-1}
+      = u(\gamma_0 u I + G)^{-1}
+      = u D (\gamma_0 u D^2 + \tilde{G})^{-1} D.
+      $$
+      So the Cholesky should be applied to the scaled SPD matrix $\gamma_0 u D^2 + \tilde{G}$, and only then mapped back to the original coordinates.
+    This adds an element-wise pass over $X$, but it prevents the intermediate Gram accumulation from overflowing or losing critical precision bits while still preserving the original polar factor of $X$.
 2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
     $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
     where $\eta$ is a safety margin. This bound is tighter than scaling the full $u$ because it only adds a small multiple of the mean eigenvalue.
@@ -181,7 +198,7 @@ def SafeSolveSPD(S):
 
 ### 3.3 The Main Hybrid Algorithm
 
-With the primitives defined, the full hybrid polar decomposition is expressed as a three-step spectral update entirely in the small-side Gram space.
+With the primitives defined, the full hybrid polar decomposition is expressed as a three-step spectral update entirely in the small-side Gram space of the **original** matrix.
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Stable Hybrid Polar: 1 DWH + 2 PE</div>
@@ -190,24 +207,25 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     if $M < N$:
         $X \leftarrow X^\top$
 
-    # --- Preconditioning (ColNorm) & Form Gram ---
+    # --- ColNorm for safe accumulation and the first rational solve ---
     $d \leftarrow \max(\operatorname{colNorms}(X)^2, \epsilon)$
     $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}(d))$
-    $X \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(X^\top X)$
+    $\tilde{G} \leftarrow \mathrm{Sym}((X D)^\top (X D))$
+    $G \leftarrow \mathrm{Sym}(D^{-1} \tilde{G} D^{-1})$
 
-    # --- Normalize Gram ---
+    # --- Normalize original Gram ---
     $u \leftarrow \mathrm{MomentUpperBound}(G)$
     $B \leftarrow G/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
 
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
-    $H \leftarrow \mathrm{SafeSolveSPD}(\gamma_0 I + B)$
+    $H \leftarrow u D \, \mathrm{SafeSolveSPD}(\gamma_0 u D^2 + \tilde{G}) \, D$
     $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
 
     # --- Steps 2-3: Normalized PE Cleanup ---
     for $i=1, 2$:
         $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow \mathrm{Sym}(Q_i B Q_i)$
 
-    return $Q = X K$ # Final rectangular GEMM
+    return $Q = X K$ # Polar factor of the original matrix
 ```
 </div>
 
@@ -228,7 +246,7 @@ Fixed constants for implementation, computed offline in FP64:
 
 ### 5. Discussion
 
-- **Numerical Robustness**: By performing column-wise normalization (ColNorm) on $X$ before accumulating the Gram matrix, we shield the algorithm from dynamic range overflows and precision loss in low-precision (BF16/FP16) arithmetic.
+- **Numerical Robustness**: By performing column-wise normalization (ColNorm) for the Gram accumulation and carrying that scaling through the first Cholesky solve, we shield the algorithm from dynamic range overflows and precision loss in low-precision (BF16/FP16) arithmetic without changing the target polar factor.
 - **Balanced Latency**: While pre-scaling adds one element-wise pass over the tall matrix $X$, the cost is offset by the reduction in small-side complexity compared to pure rational iterations. The algorithm still performs exactly two tall rectangular GEMMs.
 - **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
 
