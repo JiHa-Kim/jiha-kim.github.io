@@ -180,7 +180,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
     $$
     Z = b B + c B^2, \quad R_Z = a B + B Z, \quad B \leftarrow a R_Z + Z R_Z
     $$
-    and applies $Q = a I + Z$ to the factor $K$. This avoids the most sensitive cancellations in the Gram space.
+    and applies the distributed update $K \leftarrow a K + K Z$ to the factor $K$. This avoids the most sensitive cancellations in the Gram space.
 
 ### 3.2 Stability and Utility Primitives
 
@@ -241,7 +241,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
         $Z \leftarrow \hat{b}_i B + \hat{c}_i B^2$
         $R_Z \leftarrow \hat{a}_i B + B Z$
         $B \leftarrow$ @Sym($\hat{a}_i R_Z + Z R_Z$)
-        $K \leftarrow K (\hat{a}_i I + Z)$
+        $K \leftarrow \hat{a}_i K + K Z$
 
     $Q \leftarrow X K$
     if transposed:
