@@ -1,4 +1,6 @@
 .algorithm-container {
+  --algo-indent-size: 2.4em;
+  --algo-indent-guide-offset: 1.2em;
   --algo-kw-color: #0f766e;
   --algo-func-color: #1d4ed8;
   --algo-literal-color: #b45309;
@@ -55,22 +57,22 @@
     .algo-content {
       flex: 1;
       white-space: pre-wrap;
-      padding-left: calc(var(--indent, 0) * 1.6em);
+      padding-left: calc(var(--indent, 0) * var(--algo-indent-size));
       
       /* Multi-level indentation guides */
-      /* Each bar is at the center (0.8em) of each 1.6em indentation block */
+      /* Each bar is centered within the indentation block */
       background-image: repeating-linear-gradient(
         to right,
         transparent,
-        transparent 0.8em,
-        var(--main-border-color, #444) 0.8em,
-        var(--main-border-color, #444) calc(0.8em + 1px),
-        transparent calc(0.8em + 1px),
-        transparent 1.6em
+        transparent var(--algo-indent-guide-offset),
+        var(--main-border-color, #444) var(--algo-indent-guide-offset),
+        var(--main-border-color, #444) calc(var(--algo-indent-guide-offset) + 1px),
+        transparent calc(var(--algo-indent-guide-offset) + 1px),
+        transparent var(--algo-indent-size)
       );
       background-repeat: no-repeat;
       /* Only show bars for the number of indents (up to current) */
-      background-size: calc(var(--indent, 0) * 1.6em) 100%;
+      background-size: calc(var(--indent, 0) * var(--algo-indent-size)) 100%;
     }
 
     .algo-kw {

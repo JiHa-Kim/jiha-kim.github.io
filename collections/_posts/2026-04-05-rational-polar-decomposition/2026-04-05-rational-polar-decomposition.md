@@ -213,20 +213,20 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # --- ColNorm for safe accumulation and the first rational solve ---
     $d \leftarrow \max(\operatorname{colNorms}(X)^2, \epsilon)$
     $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}(d))$
-    $\tilde{G} \leftarrow \mathrm{Sym}((X D)^\top (X D))$
-    $G \leftarrow \mathrm{Sym}(D^{-1} \tilde{G} D^{-1})$
+    $\tilde{G} \leftarrow$ @Sym($(X D)^\top (X D)$)
+    $G \leftarrow$ @Sym($D^{-1} \tilde{G} D^{-1}$)
 
     # --- Normalize original Gram ---
-    $u \leftarrow \mathrm{MomentUpperBound}(G)$
+    $u \leftarrow$ @MomentUpperBound($G$)
     $B \leftarrow G/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
 
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
-    $H \leftarrow u D \, \mathrm{SafeSolveSPD}(\gamma_0 u D^2 + \tilde{G}) \, D$
-    $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow \mathrm{Sym}(R_0 B R_0)$
+    $H \leftarrow u D$ @SafeSolveSPD($\gamma_0 u D^2 + \tilde{G}$) $D$
+    $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow$ @Sym($R_0 B R_0$)
 
     # --- Steps 2-3: Normalized PE Cleanup ---
     for $i=1, 2$:
-        $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow \mathrm{Sym}(Q_i B Q_i)$
+        $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow$ @Sym($Q_i B Q_i$)
 
     $Q \leftarrow X K$
     if transposed:

@@ -378,6 +378,10 @@ module Jekyll
     def highlight_pythonic_code(code)
       code, buckets = protect_algo_math(code)
 
+      code = code.gsub(/@([A-Za-z_]\w*)/) do
+        "<span class=\"algo-func\">#{$1}</span>"
+      end
+
       code = code.gsub(/\b(def)\s+([A-Za-z_]\w*)/) do
         "<span class=\"algo-kw\">#{$1}</span> <span class=\"algo-func\">#{$2}</span>"
       end
