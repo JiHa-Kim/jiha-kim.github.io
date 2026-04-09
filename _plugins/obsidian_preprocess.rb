@@ -7,7 +7,7 @@ require 'digest'
 module Jekyll
   class ObsidianPreprocess < Jekyll::Generator
     priority :high
-    CACHE_VERSION = "2026-04-09-production-ready-v1".freeze
+    CACHE_VERSION = "2026-04-09-production-ready-v4".freeze
 
     # Map Obsidian callout types -> Chirpy box classes
     TYPE_MAP = {
@@ -104,6 +104,13 @@ module Jekyll
     def preserve_semantic_spaces(content)
       return content unless content.include?('</span>') || content.include?('$')
 
+      # Protect custom-algo blocks from space injection (avoids flex-token justification)
+      algo_buckets = []
+      content = content.gsub(/<div class="custom-algo".*?<\/div>/m) do |match|
+        algo_buckets << match
+        "__ALGO_BLOCK_#{algo_buckets.length - 1}__"
+      end
+
       # Identify spaces between adjacent elements that should not be stripped
       # 1. Between two math spans
       content = content.gsub(/<\/span>\s+<span class="math-inline"/, '</span>&nbsp;<span class="math-inline"')
@@ -115,6 +122,10 @@ module Jekyll
       content = content.gsub(/(?<=\$)\s+<span/, '&nbsp;<span')
       # 4. Between adjacent math symbols
       content = content.gsub(/(?<=\$)\s+(?=\$)/, '&nbsp;')
+
+      algo_buckets.each_with_index do |payload, i|
+        content.gsub!("__ALGO_BLOCK_#{i}__") { payload }
+      end
 
       content
     end
