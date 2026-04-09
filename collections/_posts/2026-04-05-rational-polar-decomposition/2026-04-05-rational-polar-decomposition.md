@@ -193,6 +193,8 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 6.  **The "Free" Initial K-Update**: In Step 1, $K$ is initialized as $K_0 = \frac{1}{\sqrt{u}} I$, which is just a scaled identity. The standard update step $K \leftarrow \alpha_0 K_0 + K_0 H$ simplifies exactly to an element-wise combination $K_1 \leftarrow \frac{1}{\sqrt{u}} (\alpha_0 I + H)$. By substituting this directly into the first step, you skip a full GEMM with absolutely no mathematical change.
 7.  **The Cholesky Inverse Fast Path**: The standard DWH step involves solving $W \leftarrow \text{solve\_triangular}(L, D)$ over $N$ right-hand sides, then performing a SYRK to get $H \leftarrow \beta_0 u W^{\top} W$. Because $D$ is purely diagonal, mathematically $W^{\top} W \equiv D(L L^{\top})^{-1} D$. By swapping the TRSM-SYRK pair for a direct Cholesky inverse (e.g. LAPACK `potri`, standard in deep learning frameworks as `cholesky_inverse`), you drop from $\approx 2 N^{3}$ FLOPs down to $\approx \frac{2}{3} N^{3}$. The product $H \leftarrow \beta_0 u D S_{\text{inv}} D$ then becomes a blazing fast broadcasted scalar scaling.
 8.  **Dead-Code Elimination in the Terminal Step**: Step 3 is the final step of the computation. Once it executes, the updated Gram matrix $B$ is never read again. We only require the cumulative $K$. Therefore, the two expensive SYMM operations computing the subsequent $B$ matrix ($R \leftarrow B + B U$ and $B \leftarrow \text{Sym}(R + U R)$) are dead code and can simply be deleted from the execution path.
+9.  **In-Place Gram Scaling (Avoids $O(MN)$ Memory Spikes)**: When normalizing columns, scaling $X$ out-of-place produces a new $M \times N$ tensor, temporarily doubling your system memory. Instead, multiply the activation inplace (`X.mul_(D)`), and perform your Gram iteration precisely on the unit-norm output $X_{\text{scaled}}$. The algorithm reconstructs the true polar projection $Q = X_{\text{orig}} K$ rigorously through the identity $X_{\text{scaled}} (D^{-1} K)$. Because $D^{-1}$ is purely diagonal, you cleanly restore identical mathematical output by just pre-scaling the rows of $K$ instantly, preventing all heavy intermediate matrix memory allocations during step closures.
+10. **The Exact Trace Shortcut**: Inside the standard moment bound, we historically compute the trace via $\sum d_i \tilde{G}_{ii}$. But mathematically, $\tilde{G} = (X D)^{\top} (X D)$ forces exactly $\tilde{G}_{ii} = 1$ under ideal constraint. The cumulative trace formally evaluates exactly to the un-scaled Frobenius norm $\|X\|_F^{2}$ which we already accumulate natively! We pass $\|X\|_F^{2}$ implicitly to skip the trace loop.
 
 ### 3.2 Stability and Utility Primitives
 
@@ -207,8 +209,8 @@ def ColNorm($X, dtype$):
     $\epsilon_{\text{col}} \leftarrow \epsilon_{\text{mach}}(dtype) \max(\|X\|_F^2/N, 1)$
     return $\max(d_j, \epsilon_{\text{col}})$
 
-def MomentBound($\tilde{G}, d, \eta$):
-    $\operatorname{tr}(G) \leftarrow \sum_i d_i \tilde{G}_{ii}, \quad \|G\|_F^2 \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
+def MomentBound($\tilde{G}, d, \|X\|_F^2, \eta$):
+    $\operatorname{tr}(G) \leftarrow \|X\|_F^2, \quad \|G\|_F^2 \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
     return $\dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
 
 def SafeCholesky($S, dtype, K_{\max}=6$):
@@ -240,10 +242,11 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $K_{\max} \leftarrow 6$
 
     # --- ColNorm for safe accumulation and the first rational solve ---
-    $d \leftarrow$ @ColNorm($X, dtype$)
+    $d, \|X\|_F^2 \leftarrow$ @ColNorm($X, dtype$)
     $D \leftarrow \operatorname{diag}(d_j^{-1/2}), \quad \Delta \leftarrow \operatorname{diag}(d_j^{-1})$
-    $\tilde{G} \leftarrow (X D)^\top (X D)$ # (compute via SYRK)
-    $u \leftarrow$ @MomentBound($\tilde{G}, d, \eta$)
+    $X \leftarrow X D$ # In-place scaling, saves O(MN) memory
+    $\tilde{G} \leftarrow X^\top X$ # (compute via SYRK)
+    $u \leftarrow$ @MomentBound($\tilde{G}, d, \|X\|_F^2, \eta$)
     $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
     # --- Step 1: DWH ($\ell_{0} = 10^{-3}$) ---
@@ -266,8 +269,10 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $K \leftarrow K + K U$ # Terminal step: output B is safely discarded
 
     $K \leftarrow$ @Sym($K$)
-
-    $Q \leftarrow X K$
+    
+    # --- Final exact reconstitution using pre-scaled K rows ---
+    $K \leftarrow \operatorname{diag}(d_i^{1/2}) K$
+    $Q \leftarrow X K$ # X is still the in-place scaled tensor
     if transposed:
         return $Q^\top$
     return $Q$ # Polar factor of the original matrix
@@ -295,9 +300,10 @@ Fixed constants for implementation, computed offline in FP64:
 
 - **Numerical Robustness**: By performing column-wise normalization (ColNorm) for the Gram accumulation and carrying that scaling through the first Cholesky solve, we shield the algorithm from dynamic range overflows and precision loss in low-precision (BF16/FP16) arithmetic without changing the target polar factor.
 - **Architectural FLOP Avoidance**: At three distinct moments, the mathematical constraints of the problem allow us to safely bypass dense matmuls. 
-  1. The DWH $W^\top W$ inversion is fully replaced by a Cholesky inverse via `potri` and scalar broadcast, cutting the factorization time by 3x. 
+  1. The DWH $W^{\top} W$ inversion is fully replaced by a Cholesky inverse via `potri` and scalar broadcast, cutting the factorization time by 3x. 
   2. The initial iteration avoids initializing a separate dense identity matrix, converting $K_1$ updates into an element-wise addition over the existing $H$ matrix. 
   3. The dead-code branch in Step 3 cleanly eliminates all subsequent $B$ updates from the critical path entirely.
+- **Zero-Allocation $X$-Scaling**: Large scale activation accumulations often peak hard sequentially. The in-place mutation of the initial system variables prevents tensor duplication overhead scaling at $O(MN)$ without skewing parameter recovery constraints by exactly reverting projection targets at $N \times N$ factor scaling complexity.
 - **Balanced Latency**: While pre-scaling adds one element-wise pass over the tall matrix $X$, the cost is offset by the reduction in small-side complexity compared to pure rational iterations. The algorithm still performs exactly two tall rectangular GEMMs.
 - **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
 
