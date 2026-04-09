@@ -181,6 +181,15 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
     R_Z = a B + B Z, \quad B \leftarrow a R_Z + Z R_Z
     $$
     and apply the distributed update $K \leftarrow a K + K Z$ to the factor $K$. This preserves numerical dynamic range in the off-diagonals.
+5.  **Defect Form (Recentering) for the Final Step**: For the final polar iteration step, the factor $B$ is already very close to the identity matrix. Applying the direct evaluation loses bits because it subtracts large nearly equal $O(1)$ terms. Instead, we re-center the iteration around the identity by writing the explicitly small defect $E = I - B$. Since the normalized PE coefficients satisfy $a+b+c = 1$, the update $Q = aI + bB + cB^2$ becomes:
+    $$
+    Q = (a+b+c)I - (b+2c)E + cE^2 = I + U
+    $$
+    where $U = -(b+2c)E + cE^2$ is a small correction matrix. We can then perfectly match the numerically stable fused update parametrization from above by setting the scalar $a=1$:
+    $$
+    R_U = B + B U, \quad B \leftarrow R_U + U R_U, \quad K \leftarrow K + K U
+    $$
+    Because $U$ tracks only the small defect explicitly and we avoid materializing the inflated diagonal $I+U$, this bypasses severe catastrophic cancellation and enables low precision like BF16/FP16 to behave much better near convergence.
 
 ### 3.2 Stability and Utility Primitives
 
@@ -242,12 +251,18 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $R \leftarrow \alpha_0 B + B H$
     $B \leftarrow$ @Sym($\alpha_0 R + H R$), $\quad K \leftarrow \alpha_0 K + K H$
 
-    # --- Steps 2-3: Normalized PE Cleanup (Stable Form) ---
-    for $i=1, 2$:
-        $Z \leftarrow \hat{b}_i B + \hat{c}_i B^2$
-        $R \leftarrow \hat{a}_i B + B Z$
-        $B \leftarrow$ @Sym($\hat{a}_i R + Z R$)
-        $K \leftarrow \hat{a}_i K + K Z$
+    # --- Step 2: Normalized PE Cleanup 1 (Stable Form) ---
+    $Z \leftarrow \hat{b}_1 B + \hat{c}_1 B^2$
+    $R \leftarrow \hat{a}_1 B + B Z$
+    $B \leftarrow$ @Sym($\hat{a}_1 R + Z R$)
+    $K \leftarrow \hat{a}_1 K + K Z$
+
+    # --- Step 3: Normalized PE Cleanup 2 (Defect Form) ---
+    $E \leftarrow I - B$
+    $U \leftarrow -(\hat{b}_2 + 2\hat{c}_2) E + \hat{c}_2 E^2$
+    $R \leftarrow B + B U$
+    $B \leftarrow$ @Sym($R + U R$)
+    $K \leftarrow K + K U$
 
     $K \leftarrow$ @Sym($K$)
 
