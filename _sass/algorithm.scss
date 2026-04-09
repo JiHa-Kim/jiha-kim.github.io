@@ -84,6 +84,11 @@
       font-weight: 600;
       font-style: italic;
       color: var(--algo-func-color);
+
+      &.paren {
+        font-style: normal;
+        font-weight: 400; /* Regular weight often looks better for parens */
+      }
     }
 
     .algo-literal {

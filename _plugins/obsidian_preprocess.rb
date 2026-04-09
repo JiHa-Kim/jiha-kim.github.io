@@ -379,12 +379,13 @@ module Jekyll
     def highlight_pythonic_code(code)
       code, buckets = protect_algo_math(code)
 
-      code = code.gsub(/@([A-Za-z_]\w*)/) do
-        "<span class=\"algo-func\">#{$1}</span>"
+      # Improved to handle @Func(...) and def Func(...) including parentheses and LaTeX scaling
+      code = code.gsub(/@([A-Za-z_]\w+)(?:\s*\((.*?)\))?/) do
+        format_algo_func($1, $2, buckets)
       end
 
-      code = code.gsub(/\b(def)\s+([A-Za-z_]\w*)/) do
-        "<span class=\"algo-kw\">#{$1}</span> <span class=\"algo-func\">#{$2}</span>"
+      code = code.gsub(/\b(def)\s+([A-Za-z_]\w+)(?:\s*\((.*?)\))?/) do
+        "<span class=\"algo-kw\">#{$1}</span> " + format_algo_func($2, $3, buckets)
       end
 
       %w[if elif else for while return break continue try except finally with pass yield until in].each do |kw|
@@ -395,6 +396,25 @@ module Jekyll
       code = code.gsub(/:/, "<span class=\"algo-punct\">:</span>")
 
       restore_algo_math(code, buckets)
+    end
+
+    def format_algo_func(name, args, buckets)
+      if args
+        # If args is a single math block, move parentheses inside and use \left/\right
+        if args.strip =~ /^(__ALGOMATH_(\d+)__)$/
+          idx = $2.to_i
+          math_content = buckets[idx]
+          if math_content =~ /^\$(.*)\$$/
+            inner = $1.strip
+            buckets[idx] = "$\\left( #{inner} \\right)$"
+            return "<span class=\"algo-func\">#{name}</span>#{args}"
+          end
+        end
+        # Fallback for mixed/other content or non-math
+        "<span class=\"algo-func\">#{name}</span><span class=\"algo-func paren\">(</span>#{args}<span class=\"algo-func paren\">)</span>"
+      else
+        "<span class=\"algo-func\">#{name}</span>"
+      end
     end
 
     def highlight_algo_literals(line)
