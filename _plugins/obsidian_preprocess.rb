@@ -7,6 +7,7 @@ require 'digest'
 module Jekyll
   class ObsidianPreprocess < Jekyll::Generator
     priority :high
+    CACHE_VERSION = "2026-04-09-algo-render-v2".freeze
 
     # Map Obsidian callout types -> Chirpy box classes
     TYPE_MAP = {
@@ -61,7 +62,7 @@ module Jekyll
       @cache ||= Jekyll::Cache.new("ObsidianPreprocess")
       
       # The cache key includes the content and layout/media_subpath which affect the transformation
-      cache_key = Digest::MD5.hexdigest("#{doc.content}#{doc.data['layout']}#{doc.data['media_subpath']}")
+      cache_key = Digest::MD5.hexdigest("#{CACHE_VERSION}#{doc.content}#{doc.data['layout']}#{doc.data['media_subpath']}")
       
       doc.content = @cache.getset(cache_key) do
         # Log only when actually transforming (cache miss)
@@ -402,8 +403,7 @@ module Jekyll
         "false" => "algo-literal",
         "none" => "algo-literal",
         "success" => "algo-literal",
-        "failure" => "algo-literal",
-        "try" => "algo-builtin"
+        "failure" => "algo-literal"
       }
 
       token_map.each do |word, css_class|
@@ -419,14 +419,14 @@ module Jekyll
       buckets = []
       protected = text.gsub(/\$\$.*?\$\$|\$[^$\n]+\$/m) do |match|
         buckets << match
-        "@@ALGOMATH#{buckets.length - 1}@@"
+        "__ALGOMATH_#{buckets.length - 1}__"
       end
       [protected, buckets]
     end
 
     def restore_algo_math(text, buckets)
       buckets.each_with_index do |payload, i|
-        text = text.gsub("@@ALGOMATH#{i}@@", payload)
+        text = text.gsub("__ALGOMATH_#{i}__", payload)
       end
       text
     end
