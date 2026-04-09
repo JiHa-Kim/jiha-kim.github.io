@@ -176,11 +176,11 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 > $$
 
 3.  **Safe SPD Solve**: For $(\gamma_0 I + B)$, we use Cholesky with adaptive jitter. If it fails, we add diagonal shift $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$ and retry.
-4.  **Stable Quintic Polynomial Update**: The degree-5 Polar Express map $p(x) = ax + bx^3 + cx^5$ is algebraically equivalent to a Gram update $B \leftarrow Q B Q$ where $Q = aI + bB + cB^2$. However, in low precision, $Q$ can suffer from significant cancellation when coefficients have large alternating signs. We use a "fused" form that avoids forming $Q$ explicitly for the $B$ update:
+4.  **Stable Fused Updates for Gram Iterations**: Matrix iterations compute spectral updates via an intermediate factor $Q$. For example, DWH computes $R_0 = \alpha_0 I + \beta_0 H$, and PE computes $Q = a I + b B + c B^2$, both followed by $B \leftarrow Q B Q$ and $K \leftarrow K Q$. However, in low precision (BF16/FP16), adding a large $O(1)$ constant to the diagonal of a matrix can squash the precision of its small off-diagonal elements. We avoid this by defining the strictly-matrix part $Z$ (where $Z_0 = \beta_0 H$ for DWH and $Z_i = \hat{b}_i B + \hat{c}_i B^2$ for PE). We then apply a "fused" update without ever materializing the inflated diagonal:
     $$
-    Z = b B + c B^2, \quad R_Z = a B + B Z, \quad B \leftarrow a R_Z + Z R_Z
+    R_Z = a B + B Z, \quad B \leftarrow a R_Z + Z R_Z
     $$
-    and applies the distributed update $K \leftarrow a K + K Z$ to the factor $K$. This avoids the most sensitive cancellations in the Gram space.
+    and apply the distributed update $K \leftarrow a K + K Z$ to the factor $K$. This preserves numerical dynamic range in the off-diagonals.
 
 ### 3.2 Stability and Utility Primitives
 
@@ -234,7 +234,8 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
     $H \leftarrow u D$ @SafeSolveSPD($\gamma_0 u \Delta + \tilde{G}$) $D$
-    $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow$ @Sym($R_0 B R_0$)
+    $Z_0 \leftarrow \beta_0 H, \quad R_{Z_0} \leftarrow \alpha_0 B + B Z_0$
+    $B \leftarrow$ @Sym($\alpha_0 R_{Z_0} + Z_0 R_{Z_0}$), $\quad K \leftarrow \alpha_0 K + K Z_0$
 
     # --- Steps 2-3: Normalized PE Cleanup (Stable Form) ---
     for $i=1, 2$:
