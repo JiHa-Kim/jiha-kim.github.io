@@ -176,6 +176,11 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 > $$
 
 3.  **Safe SPD Solve**: For $(\gamma_0 I + B)$, we use Cholesky with adaptive jitter. If it fails, we add diagonal shift $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$ and retry.
+4.  **Stable Quintic Polynomial Update**: The degree-5 Polar Express map $p(x) = ax + bx^3 + cx^5$ is algebraically equivalent to a Gram update $B \leftarrow Q B Q$ where $Q = aI + bB + cB^2$. However, in low precision, $Q$ can suffer from significant cancellation when coefficients have large alternating signs. We use a "fused" form that avoids forming $Q$ explicitly for the $B$ update:
+    $$
+    Z = b B + c B^2, \quad R_Z = a B + B Z, \quad B \leftarrow a R_Z + Z R_Z
+    $$
+    and applies $Q = a I + Z$ to the factor $K$. This avoids the most sensitive cancellations in the Gram space.
 
 ### 3.2 Stability and Utility Primitives
 
@@ -231,9 +236,12 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $H \leftarrow u D$ @SafeSolveSPD($\gamma_0 u \Delta + \tilde{G}$) $D$
     $R_0 \leftarrow \alpha_0 I + \beta_0 H, \quad K \leftarrow K R_0, \quad B \leftarrow$ @Sym($R_0 B R_0$)
 
-    # --- Steps 2-3: Normalized PE Cleanup ---
+    # --- Steps 2-3: Normalized PE Cleanup (Stable Form) ---
     for $i=1, 2$:
-        $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow$ @Sym($Q_i B Q_i$)
+        $Z \leftarrow \hat{b}_i B + \hat{c}_i B^2$
+        $R_Z \leftarrow \hat{a}_i B + B Z$
+        $B \leftarrow$ @Sym($\hat{a}_i R_Z + Z R_Z$)
+        $K \leftarrow K (\hat{a}_i I + Z)$
 
     $Q \leftarrow X K$
     if transposed:
