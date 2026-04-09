@@ -202,7 +202,7 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
     \ENDIF
 
     \STATE \COMMENT{--- Preconditioning (ColNorm) & Form Gram ---}
-    \STATE $d \leftarrow \operatorname{colNorms}(X)^2 + \epsilon$
+    \STATE $d \leftarrow \max(\operatorname{colNorms}(X)^2, \epsilon)$
     \STATE $D \leftarrow \operatorname{diag}(\mathrm{rsqrt}(d))$
     \STATE $X \leftarrow X D, \quad G \leftarrow \mathrm{Sym}(X^\top X)$
 
