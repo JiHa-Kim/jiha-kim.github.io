@@ -231,18 +231,18 @@ This update is applied to the orientation factor via $K \leftarrow K(I + U_i)$. 
 The degree-9 equation $F(q_0; \ell) = 0$ contains extraneous branches. We isolate the **unique** valid root by verifying that it produces the required ordering $\ell < q_0 < r < 1$ and the correct Chebyshev alternation cycle.
 
 
-> [!proof]- Theory: Sketch of the Minimax Proof
-> The minimax odd polynomial $p(x) = ax + bx^3 + cx^5$ minimizes $\max_{x \in [\ell, 1]} |1 - p(x)|$. By the **Chebyshev Equioscillation Theorem**, since the basis $\{x, x^3, x^5\}$ has dimension 3, there exist 4 points $\ell \le x_0 < x_1 < x_2 < x_3 \le 1$ where the error $e(x) = 1 - p(x)$ attains its maximum magnitude $E$ with alternating signs.
->
-> For the optimal solution, these points must be $\ell, q_0, r, 1$, where $q_0$ and $r$ are internal critical points such that $p'(q_0) = 0$ and $p'(r) = 0$. The equioscillation conditions are:
-> 1. $p(\ell) = 1 - E, \quad p(r) = 1 - E \implies p(\ell) = p(r)$
-> 2. $p(q_0) = 1 + E, \quad p(1) = 1 + E \implies p(q_0) = p(1)$
->
-> Using the fact that $q_0, r$ are roots of $p'(x) = 5c x^4 + 3b x^2 + a = 0$, we substitute $a = 5cq_0^2 r^2$ and $b = -\frac{5c}{3}(q_0^2 + r^2)$. The condition $p(q_0) = p(1)$ yields $r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)}$. Substituting this back into $p(\ell) = p(r)$ yields the polynomial $F(q_0; \ell) = 0$.
+<details class="box-proof" markdown="1">
+<summary>Theory: Sketch of the Minimax Proof</summary>
 
-### 5.3 Symbolic Verification (SymPy Checker)
+The minimax odd polynomial $p(x) = ax + bx^3 + cx^5$ minimizes $\max_{x \in [\ell, 1]} |1 - p(x)|$. By the **Chebyshev Equioscillation Theorem**, since the basis $\{x, x^3, x^5\}$ has dimension 3, there exist 4 points $\ell \le x_0 < x_1 < x_2 < x_3 \le 1$ where the error $e(x) = 1 - p(x)$ attains its maximum magnitude $E$ with alternating signs.
 
-You can verify the algebraic derivation above using the following Python script. Use [uv](https://docs.astral.sh/uv/) to run it without manual dependency management:
+For the optimal solution, these points must be $\ell, q_0, r, 1$, where $q_0$ and $r$ are internal critical points such that $p'(q_0) = 0$ and $p'(r) = 0$. The equioscillation conditions are:
+1. $p(\ell) = 1 - E, \quad p(r) = 1 - E \implies p(\ell) = p(r)$
+2. $p(q_0) = 1 + E, \quad p(1) = 1 + E \implies p(q_0) = p(1)$
+
+Using the fact that $q_0, r$ are roots of $p'(x) = 5c x^4 + 3b x^2 + a = 0$, we substitute $a = 5cq_0^2 r^2$ and $b = -\frac{5c}{3}(q_0^2 + r^2)$. The condition $p(q_0) = p(1)$ yields $r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)}$. Substituting this back into $p(\ell) = p(r)$ yields the polynomial $F(q_0; \ell) = 0$.
+
+You can verify this entire derivation using the following symbolic checker:
 
 ```python
 # /// script
@@ -271,10 +271,8 @@ def verify_full_pe_derivation():
     # Verified target from §5.2
     target_r2 = (2*q0**3 + 4*q0**2 + 6*q0 + 3) / (10*q0 + 5)
     assert sympy.simplify(r2_sol - target_r2) == 0
-    print("Step 1/3: r^2 formula verified.")
     
     # 3. Equioscillation Condition B: p(ell) = p(r)
-    # Since r is a critical point, we use p(ell)^2 = p(r)^2 to clear sqrt(r)
     expr_ell = p_opt.subs(x, ell) / c
     expr_r = p_opt.subs(x, r) / c
     final_eq = sympy.simplify((expr_ell**2 - expr_r**2).subs(r**2, r2_sol))
@@ -287,24 +285,19 @@ def verify_full_pe_derivation():
     F3 = 125*(2*q0 + 1)**3
     F_target = F0 + ell**2*F1 - ell**4*F2 + ell**6*F3
     
-    # num should be zero whenever F_target is zero
     assert sympy.simplify(num % F_target) == 0
-    print("Step 2/3: Root-finding polynomial F(q0, ell) verified.")
     
-    # 4. Normalization: p(1) + p(ell) = 2 (implies p(1) = 1+E, p(ell) = 1-E)
+    # 4. Normalization: p(1) + p(ell) = 2
     D_post = (1 - sympy.Rational(5,3)*(q0**2 + r2_sol) + 5*(q0**2 * r2_sol)) + \
              ell*(ell**4 - sympy.Rational(5,3)*(q0**2 + r2_sol)*ell**2 + 5*(q0**2 * r2_sol))
     D_calc = (p_opt.subs(x, 1) + p_opt.subs(x, ell)).subs(r**2, r2_sol) / c
     assert sympy.simplify(D_calc - D_post) == 0
-    print("Step 3/3: Normalizing constant D verified.")
-    print("\nALL COMPONENTS VERIFIED SUCCESSFULLY!")
+    print("All PE algebraic components verified successfully!")
 
 if __name__ == "__main__":
     verify_full_pe_derivation()
 ```
-
-To execute, save as `check.py` and run:
-`uv run check.py`
+</details>
 
 ## Appendix: Verification Code
 
