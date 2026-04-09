@@ -187,9 +187,9 @@ def Sym(A):
     return $\frac{1}{2}(A + A^\top)$
 
 def ScaledMomentUpperBound($\tilde{G}, d$):
-    $\operatorname{tr}_G \leftarrow \sum_i d_i \tilde{G}_{ii}$
-    $\operatorname{fro2}_G \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
-    $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}_G + \sqrt{(N-1)\max(0, N\operatorname{fro2}_G - \operatorname{tr}_G^2)}}{N}$
+    $\operatorname{tr}(G) \leftarrow \sum_i d_i \tilde{G}_{ii}$
+    $\|G\|_F^2 \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
+    $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     return $u_M$
 
 def SafeSolveSPD(S):
