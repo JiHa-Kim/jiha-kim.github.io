@@ -185,7 +185,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
     $$
     Q = (a+b+c)I - (b+2c)E + cE^2 = I + U
     $$
-    where $U = -(b+2c)E + cE^2$ is a small correction matrix. We can then perfectly match the numerically stable fused update parametrization from above by setting the scalar $a=1$:
+    where $U = u_2 E + v_2 E^2$ is a small correction matrix, using precomputed scalars $u_2 = -(b_2+2c_2)$ and $v_2 = c_2$. We can then perfectly match the numerically stable fused update parametrization from above by setting the overall scalar $a=1$:
     $$
     R_U = B + B U, \quad B \leftarrow R_U + U R_U, \quad K \leftarrow K + K U
     $$
@@ -259,7 +259,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
     # --- Step 3: Normalized PE Cleanup 2 (Defect Form) ---
     $E \leftarrow I - B$
-    $U \leftarrow -(\hat{b}_2 + 2\hat{c}_2) E + \hat{c}_2 E^2$
+    $U \leftarrow u_2 E + v_2 E^2$
     $R \leftarrow B + B U$
     $B \leftarrow$ @Sym($R + U R$)
     $K \leftarrow K + K U$
@@ -286,7 +286,7 @@ Fixed constants for implementation, computed offline in FP64:
 | :------- | :-------------------------------- | :------------------------------------------------ |
 | **DWH**  | $\alpha_0, \beta_0, \gamma_0$     | $0.984313239819, 0.015687740588, 0.000062499018$  |
 | **PE 1** | $\hat{a}_1, \hat{b}_1, \hat{c}_1$ | $3.306253466518, -6.208057722422, 3.901804255904$ |
-| **PE 2** | $\hat{a}_2, \hat{b}_2, \hat{c}_2$ | $2.194120920624, -1.974868730017, 0.780747809393$ |
+| **PE 2** | $u_2, v_2$                        | $0.413373111231, 0.780747809393$                  |
 
 ---
 
