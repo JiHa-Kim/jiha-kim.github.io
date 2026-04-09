@@ -97,7 +97,7 @@ $$
 
 Given a design floor $\ell \in (0, 1]$, the DWH coefficients $a, b, c$ are computed as:
 $$
-\gamma = \left(\frac{4(1 - \ell^2)}{\ell^4}\right)^{1/3},\quad r = \sqrt{1 + \gamma},\quad a = r + \frac{1}{2}\sqrt{8 - 4\gamma + \frac{8(2 - \ell^2)}{\ell^2 r}}, \quad b = \frac{(a-1)^2}{4}, \quad c = a+b-1.
+\zeta = \left(\frac{4(1 - \ell^2)}{\ell^4}\right)^{1/3},\quad r = \sqrt{1 + \zeta},\quad a = r + \frac{1}{2}\sqrt{8 - 4\zeta + \frac{8(2 - \ell^2)}{\ell^2 r}}, \quad b = \frac{(a-1)^2}{4}, \quad c = a+b-1.
 $$
 
 In the Gram-space iteration ($B = A^\top A$), we use the **"apply-friendly" reparametrization**:
