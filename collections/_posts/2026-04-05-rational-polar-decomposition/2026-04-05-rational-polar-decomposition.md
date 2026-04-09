@@ -168,8 +168,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
     # 3. Gram Accumulation & Moment Bound
     $\tilde{G} \leftarrow X^\top X$ # (via SYRK)
-    # Vectorized $\|G\|_F^2 = d^\top \tilde{G}^{\circ 2} d$ avoids double summation loop
-    $\operatorname{tr}(G) \leftarrow \|X\|_F^2, \quad \|G\|_F^2 \leftarrow d^\top \tilde{G}^{\circ 2} d$
+    $\operatorname{tr}(G) \leftarrow \|X\|_F^2, \quad \|G\|_F^2 \leftarrow d^\top \tilde{G}^{\circ 2} d$ # Vectorized
     $u \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
