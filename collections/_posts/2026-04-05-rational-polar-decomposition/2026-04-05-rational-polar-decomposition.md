@@ -215,32 +215,96 @@ $$
 This update is applied to the orientation factor via $K \leftarrow K(I + U_i)$. By operating strictly on the defect $E$, we guarantee robust error resolution in FP16/BF16 without relative truncation bounds against the identity.
 
 > [!theorem] Closed-Form PE Coefficients (Gram-Quadratic)
-> Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of $F(q_0; \ell) = 0$ (see below) that yields equioscillation with minimax error $E < 1$. Define:
-> $$r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)},\quad S = q_0^2 + r^2,\quad P = q_0^2 r^2,\quad D = \left(1 - \frac{5}{3}S + 5P\right) + \ell\left(\ell^4 - \frac{5}{3}S\ell^2 + 5P\right).$$
-> Then the minimax coefficients are:
+> Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of the following polynomial that yields equioscillation with minimax error $E < 1$:
+> $$ F(q_0; \ell) = F_0(q_0) + \ell^2 F_1(q_0) - \ell^4 F_2(q_0) + \ell^6 F_3(q_0) $$
+> where:
+> - $F_0(q_0) = -2048q_0^9 - 5888q_0^8 - 9608q_0^7 - 7728q_0^6 - 1288q_0^5 + 1748q_0^4 + 888q_0^3 + 8q_0^2 - 72q_0 - 12$
+> - $F_1(q_0) = 4520q_0^7 + 9340q_0^6 + 10990q_0^5 + 8525q_0^4 + 3200q_0^3 + 80q_0^2 - 240q_0 - 40$
+> - $F_2(q_0) = 3600q_0^5 + 5800q_0^4 + 3900q_0^3 + 1750q_0^2 + 600q_0 + 100$
+> - $F_3(q_0) = 125(2q_0 + 1)^3$
+>
+> Define geometric moments $S = q_0^2 + r^2, P = q_0^2 r^2,$ and $D$ via:
+> $$r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)}, \quad D = \left(1 - \frac{5}{3}S + 5P\right) + \ell\left(\ell^4 - \frac{5}{3}S\ell^2 + 5P\right)$$
+> The minimax coefficients for $p(x) = ax + bx^3 + cx^5$ are then:
 > $$c = \frac{2}{D},\qquad b = -\frac{5c}{3}\,S,\qquad a = 5cP.$$
 
-### 5.3 PE Coefficient Polynomial
+The degree-9 equation $F(q_0; \ell) = 0$ contains extraneous branches. We isolate the **unique** valid root by verifying that it produces the required ordering $\ell < q_0 < r < 1$ and the correct Chebyshev alternation cycle.
 
-The degree-9 polynomial $F(q_0; \ell)$ from §5.2:
-$$
-F(q_0; \ell) = F_0(q_0) + \ell^2 F_1(q_0) - \ell^4 F_2(q_0) + \ell^6 F_3(q_0),
-$$
-where:
-- $F_0(q_0) = -2048q_0^9 - 5888q_0^8 - 9608q_0^7 - 7728q_0^6 - 1288q_0^5 + 1748q_0^4 + 888q_0^3 + 8q_0^2 - 72q_0 - 12$
-- $F_1(q_0) = 4520q_0^7 + 9340q_0^6 + 10990q_0^5 + 8525q_0^4 + 3200q_0^3 + 80q_0^2 - 240q_0 - 40$
-- $F_2(q_0) = 3600q_0^5 + 5800q_0^4 + 3900q_0^3 + 1750q_0^2 + 600q_0 + 100$
-- $F_3(q_0) = 125(2q_0 + 1)^3$
 
-The degree-9 equation $F(q_0; \ell) = 0$ is obtained by eliminating other variables and thus contains extraneous branches that do not correspond to the minimax solution.
+> [!proof]- Theory: Sketch of the Minimax Proof
+> The minimax odd polynomial $p(x) = ax + bx^3 + cx^5$ minimizes $\max_{x \in [\ell, 1]} |1 - p(x)|$. By the **Chebyshev Equioscillation Theorem**, since the basis $\{x, x^3, x^5\}$ has dimension 3, there exist 4 points $\ell \le x_0 < x_1 < x_2 < x_3 \le 1$ where the error $e(x) = 1 - p(x)$ attains its maximum magnitude $E$ with alternating signs.
+>
+> For the optimal solution, these points must be $\ell, q_0, r, 1$, where $q_0$ and $r$ are internal critical points such that $p'(q_0) = 0$ and $p'(r) = 0$. The equioscillation conditions are:
+> 1. $p(\ell) = 1 - E, \quad p(r) = 1 - E \implies p(\ell) = p(r)$
+> 2. $p(q_0) = 1 + E, \quad p(1) = 1 + E \implies p(q_0) = p(1)$
+>
+> Using the fact that $q_0, r$ are roots of $p'(x) = 5c x^4 + 3b x^2 + a = 0$, we substitute $a = 5cq_0^2 r^2$ and $b = -\frac{5c}{3}(q_0^2 + r^2)$. The condition $p(q_0) = p(1)$ yields $r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)}$. Substituting this back into $p(\ell) = p(r)$ yields the polynomial $F(q_0; \ell) = 0$.
 
-Let $V = \operatorname{span}\{x, x^3, x^5\}$ and $e(x) = 1 - p(x)$ on $[\ell, 1]$. Since $V$ is a 3-dimensional Haar (Chebyshev) space on the positive interval, the best uniform approximant $p^* \in V$ is uniquely characterized by the existence of $4$ points $\ell \le x_0 < x_1 < x_2 < x_3 \le 1$ such that $e^*(x_j) = \pm E$ with alternating signs.
+### 5.3 Symbolic Verification (SymPy Checker)
 
-In our parametrization, the error $e(x)$ has critical points precisely at $q_0$ and $r$. A real root $q_0$ of $F(q_0;\ell) = 0$ is therefore the **unique** valid minimax solution if and only if it produces an ordering:
-$$ \ell < q_0 < r < 1 $$
-and alternating error signs:
-$$ e(\ell) > 0, \quad e(q_0) < 0, \quad e(r) > 0, \quad e(1) < 0 $$
-Since $e(x) = 1 - p(x)$, we isolate the root by rigorously verifying that $p(\ell)$ and $p(r)$ dip strictly underneath $1$ (yielding $E > 0$), whereas $p(q_0)$ and $p(1)$ push strictly above $1$ (yielding $-E < 0$). Extraneous roots will natively fail this geometric alternation condition!
+You can verify the algebraic derivation above using the following Python script. Use [uv](https://docs.astral.sh/uv/) to run it without manual dependency management:
+
+```python
+# /// script
+# dependencies = ["sympy"]
+# ///
+import sympy
+
+def verify_full_pe_derivation():
+    # Define symbols
+    a, b, c, ell, q0, r = sympy.symbols('a b c ell q0 r', real=True, positive=True)
+    x = sympy.symbols('x')
+    
+    # Odd polynomial p(x) = ax + bx^3 + cx^5
+    p = a*x + b*x**3 + c*x**5
+    
+    # 1. First-order optimality: p'(x) ~ 5c(x^2 - q0^2)(x^2 - r^2)
+    a_expr = 5 * c * (q0**2 * r**2)
+    b_expr = -sympy.Rational(5, 3) * c * (q0**2 + r**2)
+    p_opt = p.subs({a: a_expr, b: b_expr})
+    
+    # 2. Equioscillation Condition A: p(q0) = p(1)
+    eq_rsq = sympy.simplify(p_opt.subs(x, q0) - p_opt.subs(x, 1))
+    r_sq = sympy.symbols('r_sq')
+    r2_sol = sympy.solve(eq_rsq.subs(r**2, r_sq), r_sq)[0]
+    
+    # Verified target from §5.2
+    target_r2 = (2*q0**3 + 4*q0**2 + 6*q0 + 3) / (10*q0 + 5)
+    assert sympy.simplify(r2_sol - target_r2) == 0
+    print("Step 1/3: r^2 formula verified.")
+    
+    # 3. Equioscillation Condition B: p(ell) = p(r)
+    # Since r is a critical point, we use p(ell)^2 = p(r)^2 to clear sqrt(r)
+    expr_ell = p_opt.subs(x, ell) / c
+    expr_r = p_opt.subs(x, r) / c
+    final_eq = sympy.simplify((expr_ell**2 - expr_r**2).subs(r**2, r2_sol))
+    num, _ = sympy.fraction(final_eq)
+    
+    # Target polynomial F(q0, ell) from §5.2
+    F0 = -2048*q0**9 - 5888*q0**8 - 9608*q0**7 - 7728*q0**6 - 1288*q0**5 + 1748*q0**4 + 888*q0**3 + 8*q0**2 - 72*q0 - 12
+    F1 = 4520*q0**7 + 9340*q0**6 + 10990*q0**5 + 8525*q0**4 + 3200*q0**3 + 80*q0**2 - 240*q0 - 40
+    F2 = 3600*q0**5 + 5800*q0**4 + 3900*q0**3 + 1750*q0**2 + 600*q0 + 100
+    F3 = 125*(2*q0 + 1)**3
+    F_target = F0 + ell**2*F1 - ell**4*F2 + ell**6*F3
+    
+    # num should be zero whenever F_target is zero
+    assert sympy.simplify(num % F_target) == 0
+    print("Step 2/3: Root-finding polynomial F(q0, ell) verified.")
+    
+    # 4. Normalization: p(1) + p(ell) = 2 (implies p(1) = 1+E, p(ell) = 1-E)
+    D_post = (1 - sympy.Rational(5,3)*(q0**2 + r2_sol) + 5*(q0**2 * r2_sol)) + \
+             ell*(ell**4 - sympy.Rational(5,3)*(q0**2 + r2_sol)*ell**2 + 5*(q0**2 * r2_sol))
+    D_calc = (p_opt.subs(x, 1) + p_opt.subs(x, ell)).subs(r**2, r2_sol) / c
+    assert sympy.simplify(D_calc - D_post) == 0
+    print("Step 3/3: Normalizing constant D verified.")
+    print("\nALL COMPONENTS VERIFIED SUCCESSFULLY!")
+
+if __name__ == "__main__":
+    verify_full_pe_derivation()
+```
+
+To execute, save as `check.py` and run:
+`uv run check.py`
 
 ## Appendix: Verification Code
 
