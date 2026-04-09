@@ -188,7 +188,7 @@ The following support procedures handle symmetrization, robust eigenvalue upper-
 
 <div class="algorithm-container">
 ```pseudo
-def Sym(A):
+def Sym($A$):
     return $\frac{1}{2}(A + A^\top)$
 
 def ScaledMomentUpperBound($\tilde{G}, d$):
@@ -197,7 +197,7 @@ def ScaledMomentUpperBound($\tilde{G}, d$):
     $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     return $u_M$
 
-def SafeSolveSPD(S):
+def SafeSolveSPD($S$):
     $\tau \leftarrow 0$
     while true:
         try $L \leftarrow \mathrm{Cholesky}(S + \tau I)$
