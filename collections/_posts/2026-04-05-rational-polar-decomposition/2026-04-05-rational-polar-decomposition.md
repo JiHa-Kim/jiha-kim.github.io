@@ -129,7 +129,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 ### 3.1 Stability Primitives
 
 1.  **Robust Gram Accumulation (ColNorm)**: To alleviate precision errors and reduce dynamic range instability in low-precision (FP16/BF16) arithmetic, we temporarily normalize the columns of $X$ before forming the Gram matrix. This gives a safer accumulation path and also a better-conditioned matrix for the initial DWH solve, but the overall iteration must still target the original polar factor.
-    - We compute column sums-of-squares in one pass with FP64 accumulation, then clamp them with a **scale-aware** floor $d_j = \max(\sum_i X_{ij}^2, \epsilon_{\text{col}})$ where $\epsilon_{\text{col}} = \varepsilon_{\text{mach}}(\text{dtype}) \max(\|X\|_F^2/N, 1)$, and form $D = \operatorname{diag}(d^{-1/2})$, then accumulate the scaled Gram:
+    - We compute column sums-of-squares in one pass with FP64 accumulation, then clamp them with a **scale-aware** floor $d_j = \max(\sum_i X_{ij}^2, \epsilon_{\text{col}})$ where $\epsilon_{\text{col}} = \varepsilon_{\text{mach}}(\text{dtype}) * \max(\|X\|_F^2/N, 1)$, and form $D = \operatorname{diag}(d^{-1/2})$, then accumulate the scaled Gram:
       $$
       \tilde{G} = (X D)^\top (X D).
       $$
@@ -197,9 +197,9 @@ def ColNormStats($X$):
     $d_{\max} \leftarrow \max_j d_j$
     return $(d, \|X\|_F^2, d_{\max})$
 
-def RobustColClamp($d, \|X\|_F^2$):
+def RobustColClamp($d, \|X\|_F^2, dtype$):
     # scale-aware epsilon for column norms; eps matches your compute dtype (fp32/fp64)
-    $\epsilon_{\text{col}} \leftarrow \epsilon_{\text{mach}}(\text{dtype}) \max(\|X\|_F^2/N, 1)$
+    $\epsilon_{\text{col}} \leftarrow \epsilon_{\text{mach}}(dtype) * \max(\|X\|_F^2/N, 1)$
     $d_j \leftarrow \max(d_j, \epsilon_{\text{col}})$
     return $d$
 
@@ -212,6 +212,7 @@ def ScaledMomentUpperBound($\tilde{G}, d$):
 
 def TryCholeskyMinPivot($S$):
     # Unblocked Cholesky that tracks the minimum pivot encountered.
+    # Track pivots in fp64 (or wider), even if the factorization runs in fp32.
     # Returns: (ok, L, pi_min).
     try $L \leftarrow \mathrm{Cholesky}(S)$ while tracking $\pi_{\min}$
     if success:
@@ -219,17 +220,20 @@ def TryCholeskyMinPivot($S$):
     else:
         return (false, null, $\pi_{\min}$)
 
-def SafeCholeskySPD($S$):
+def SafeCholeskySPD($S, dtype, K_{\max}=6$):
     # pivot-informed jitter with monotone doubling backoff (no Gershgorin).
     $S \leftarrow$ @Sym($S$)
     $\tau \leftarrow 0$
-    $\tau_{\min} \leftarrow \epsilon_{\text{mach}}(\text{dtype}) * \max(\operatorname{tr}(S)/N, 1)$
+    $s_{\max} \leftarrow \max_i S_{ii}$
+    $\tau_{\min} \leftarrow \epsilon_{\text{mach}}(dtype) * \max(\operatorname{tr}(S)/N, s_{\max}, 1)$
     for $t=1, \dots, K_{\max}$:
         ok, $L$, $\pi_{\min} \leftarrow$ @TryCholeskyMinPivot($S + \tau I$)
         if ok:
             return ($L$, $\tau$)
         $\delta \leftarrow \max(0, -\pi_{\min}) + \tau_{\min}$
         $\tau \leftarrow \max(\tau + \delta, \max(2\tau, \tau_{\min}))$
+    # Optional hard fallback (rare): use pivoted $LDL^\top$, or take one "big shift"
+    # (e.g. $\tau \leftarrow \max(\tau, \|S\|_F)$) and retry once.
     fail
 
 def BuildHFromCholesky($L, D, u$):
@@ -252,9 +256,13 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
         $X \leftarrow X^\top$
         transposed = true
 
+    # dtype is the Cholesky/TRSM precision (fp32 or fp64)
+    dtype = fp32 # or fp64
+    $K_{\max} \leftarrow 6$
+
     # --- ColNorm for safe accumulation and the first rational solve ---
     $(d, \|X\|_F^2, d_{\max}) \leftarrow$ @ColNormStats($X$)
-    $d \leftarrow$ @RobustColClamp($d, \|X\|_F^2$)
+    $d \leftarrow$ @RobustColClamp($d, \|X\|_F^2, dtype$)
     $D \leftarrow \operatorname{diag}(d_j^{-1/2})$
     $\Delta \leftarrow \operatorname{diag}(d_j^{-1})$
 
@@ -265,17 +273,21 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
     $S \leftarrow \gamma_0 u \Delta + \tilde{G}$
-    $(L, \tau) \leftarrow$ @SafeCholeskySPD($S$)
+    $(L, \tau) \leftarrow$ @SafeCholeskySPD($S, dtype, K_{\max}$)
     $H \leftarrow$ @BuildHFromCholesky($L, D, u$) # $H = u D (S+\tau I)^{-1} D$
     $Z_0 \leftarrow \beta_0 H, \quad R_{Z_0} \leftarrow \alpha_0 B + B Z_0$
     $B \leftarrow$ @Sym($\alpha_0 R_{Z_0} + Z_0 R_{Z_0}$), $\quad K \leftarrow \alpha_0 K + K Z_0$
 
     # --- Steps 2-3: Normalized PE Cleanup (Stable Form) ---
     for $i=1, 2$:
-        $Z \leftarrow \hat{b}_i B + \hat{c}_i B^2$
+        $B_2 \leftarrow B^2$
+        $Z \leftarrow \hat{b}_i B + \hat{c}_i B_2$
         $R_Z \leftarrow \hat{a}_i B + B Z$
         $B \leftarrow$ @Sym($\hat{a}_i R_Z + Z R_Z$)
         $K \leftarrow \hat{a}_i K + K Z$
+
+    # Optional choke point: in exact arithmetic, $K$ is a (commuting) function of $B$ and symmetric.
+    $K \leftarrow$ @Sym($K$)
 
     $Q \leftarrow X K$
     if transposed:
@@ -283,6 +295,8 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     return $Q$ # Polar factor of the original matrix
 ```
 </div>
+
+Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use symmetric kernels conceptually (SYRK/SYMM/SYR2K). Only apply `@Sym(·)` at choke points (right before factorization, and optionally right before the final $Q \leftarrow X K$ matmul).
 
 
 ---
