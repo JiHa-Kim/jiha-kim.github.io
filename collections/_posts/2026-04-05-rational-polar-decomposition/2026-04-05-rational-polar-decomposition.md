@@ -128,6 +128,8 @@ The hybrid polar decomposition targets speed and stability under low-precision (
 
 ### 3.1 Auxiliary Functions
 
+<div class="algorithm-container">
+<div class="algorithm-header"><span class="algorithm-kw">Helpers</span> Stability and Symmetry Primitives</div>
 ```pseudo
 def Sym($A$): return $\frac{1}{2}(A + A^\top)$
 
@@ -141,6 +143,7 @@ def SafeCholesky($S, dtype, K_{\max}=6$):
         $\tau \leftarrow \max(\tau + \max(0, -\pi_{\min}) + \tau_{\min}, 2\tau, \tau_{\min})$
     fail
 ```
+</div>
 
 ### 3.2 The Main Hybrid Algorithm
 
