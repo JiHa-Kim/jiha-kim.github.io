@@ -129,7 +129,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 ### 3.1 Stability Primitives
 
 1.  **Robust Gram Accumulation (ColNorm)**: To alleviate precision errors and reduce dynamic range instability in low-precision (FP16/BF16) arithmetic, we temporarily normalize the columns of $X$ before forming the Gram matrix. This gives a safer accumulation path and also a better-conditioned matrix for the initial DWH solve, but the overall iteration must still target the original polar factor.
-    - We compute column sums-of-squares in one pass, lower-clip them as $d_j = \max(\sum_i X_{ij}^2, \epsilon)$, and form $D = \operatorname{diag}(d^{-1/2})$, then accumulate the scaled Gram:
+    - We compute column sums-of-squares in one pass with FP64 accumulation, then clamp them with a **scale-aware** floor $d_j = \max(\sum_i X_{ij}^2, \epsilon_{\text{col}})$ where $\epsilon_{\text{col}} = \varepsilon_{\text{mach}}(\text{dtype}) \max(\|X\|_F^2/N, 1)$, and form $D = \operatorname{diag}(d^{-1/2})$, then accumulate the scaled Gram:
       $$
       \tilde{G} = (X D)^\top (X D).
       $$
@@ -175,7 +175,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 > \lambda_1 \le \mu + \sqrt{\frac{N-1}{N} V} = \frac{\operatorname{tr}(G) + \sqrt{(N-1)(N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}
 > $$
 
-3.  **Safe SPD Solve**: For $(\gamma_0 I + B)$, we use Cholesky with adaptive jitter. If it fails, we add diagonal shift $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$ and retry.
+3.  **Safe SPD Cholesky (Pivot-Informed Jitter)**: For the Gram-side SPD matrix we factor (e.g. $S = \gamma_0 u \Delta + \tilde{G}$), we use Cholesky with a pivot-informed diagonal shift. On failure, we pick jitter from the smallest encountered pivot and retry with monotone doubling backoff. Downstream we keep the Cholesky factor and use triangular solves and symmetric rank-k updates rather than forming an explicit inverse.
 4.  **Stable Fused Updates for Gram Iterations**: Matrix iterations compute spectral updates via an intermediate factor $Q$. For example, DWH computes $R_0 = \alpha_0 I + \beta_0 H$, and PE computes $Q = a I + b B + c B^2$, both followed by $B \leftarrow Q B Q$ and $K \leftarrow K Q$. However, in low precision (BF16/FP16), adding a large $O(1)$ constant to the diagonal of a matrix can squash the precision of its small off-diagonal elements. We avoid this by defining the strictly-matrix part $Z$ (where $Z_0 = \beta_0 H$ for DWH and $Z_i = \hat{b}_i B + \hat{c}_i B^2$ for PE). We then apply a "fused" update without ever materializing the inflated diagonal:
     $$
     R_Z = a B + B Z, \quad B \leftarrow a R_Z + Z R_Z
@@ -184,27 +184,58 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 
 ### 3.2 Stability and Utility Primitives
 
-The following support procedures handle symmetrization, robust eigenvalue upper-bounding, and safe SPD inversions in the presence of floating-point drift.
-
 <div class="algorithm-container">
 ```pseudo
 def Sym($A$):
+    # If you store only the upper triangle of a SymMat, this can be a no-op.
     return $\frac{1}{2}(A + A^\top)$
 
+def ColNormStats($X$):
+    # fp64 (or wider) accumulation
+    $d_j \leftarrow \sum_i X_{ij}^2$
+    $\|X\|_F^2 \leftarrow \sum_j d_j$
+    $d_{\max} \leftarrow \max_j d_j$
+    return $(d, \|X\|_F^2, d_{\max})$
+
+def RobustColClamp($d, \|X\|_F^2$):
+    # scale-aware epsilon for column norms; eps matches your compute dtype (fp32/fp64)
+    $\epsilon_{\text{col}} \leftarrow \epsilon_{\text{mach}}(\text{dtype}) \max(\|X\|_F^2/N, 1)$
+    $d_j \leftarrow \max(d_j, \epsilon_{\text{col}})$
+    return $d$
+
 def ScaledMomentUpperBound($\tilde{G}, d$):
+    # fp64 (or wider) accumulation
     $\operatorname{tr}(G) \leftarrow \sum_i d_i \tilde{G}_{ii}$
     $\|G\|_F^2 \leftarrow \sum_{i,j} d_i d_j \vert \tilde{G}_{ij} \vert^2$
     $u_M \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     return $u_M$
 
-def SafeSolveSPD($S$):
+def TryCholeskyMinPivot($S$):
+    # Unblocked Cholesky that tracks the minimum pivot encountered.
+    # Returns: (ok, L, pi_min).
+    try $L \leftarrow \mathrm{Cholesky}(S)$ while tracking $\pi_{\min}$
+    if success:
+        return (true, $L$, $\pi_{\min}$)
+    else:
+        return (false, null, $\pi_{\min}$)
+
+def SafeCholeskySPD($S$):
+    # pivot-informed jitter with monotone doubling backoff (no Gershgorin).
+    $S \leftarrow$ @Sym($S$)
     $\tau \leftarrow 0$
-    while true:
-        try $L \leftarrow \mathrm{Cholesky}(S + \tau I)$
-        if success:
-            return $\mathrm{solve}(L L^\top, I)$
-        else:
-            $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$
+    $\tau_{\min} \leftarrow \epsilon_{\text{mach}}(\text{dtype}) * \max(\operatorname{tr}(S)/N, 1)$
+    for $t=1, \dots, K_{\max}$:
+        ok, $L$, $\pi_{\min} \leftarrow$ @TryCholeskyMinPivot($S + \tau I$)
+        if ok:
+            return ($L$, $\tau$)
+        $\delta \leftarrow \max(0, -\pi_{\min}) + \tau_{\min}$
+        $\tau \leftarrow \max(\tau + \delta, \max(2\tau, \tau_{\min}))$
+    fail
+
+def BuildHFromCholesky($L, D, u$):
+    # No explicit inverses: use triangular solves and a symmetric rank-k product (SYRK).
+    $W \leftarrow \mathrm{solve}(L, D)$
+    return $u W^\top W$
 ```
 </div>
 
@@ -222,18 +253,20 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
         transposed = true
 
     # --- ColNorm for safe accumulation and the first rational solve ---
-    $d_j \leftarrow \max(\sum_i X_{ij}^2, \epsilon)$
+    $(d, \|X\|_F^2, d_{\max}) \leftarrow$ @ColNormStats($X$)
+    $d \leftarrow$ @RobustColClamp($d, \|X\|_F^2$)
     $D \leftarrow \operatorname{diag}(d_j^{-1/2})$
     $\Delta \leftarrow \operatorname{diag}(d_j^{-1})$
-    $\tilde{G} \leftarrow$ @Sym($(X D)^\top (X D)$)
-    $u \leftarrow$ @ScaledMomentUpperBound($\tilde{G}, d$)
-    $G \leftarrow$ @Sym($D^{-1} \tilde{G} D^{-1}$)
 
-    # --- Normalize original Gram ---
-    $B \leftarrow G/u, \quad K \leftarrow \frac{1}{\sqrt{u}} I$
+    # Symmetric Gram in scaled coordinates (compute as SymMat via SYRK)
+    $\tilde{G} \leftarrow (X D)^\top (X D)$
+    $u \leftarrow$ @ScaledMomentUpperBound($\tilde{G}, d$)
+    $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u,\quad K \leftarrow \frac{1}{\sqrt{u}} I$
 
     # --- Step 1: DWH ($\ell_0 = 10^{-3}$) ---
-    $\widehat{S^{-1}} \leftarrow$ @SafeSolveSPD($\gamma_0 u \Delta + \tilde{G}$), $\quad H \leftarrow u D \widehat{S^{-1}} D$
+    $S \leftarrow \gamma_0 u \Delta + \tilde{G}$
+    $(L, \tau) \leftarrow$ @SafeCholeskySPD($S$)
+    $H \leftarrow$ @BuildHFromCholesky($L, D, u$) # $H = u D (S+\tau I)^{-1} D$
     $Z_0 \leftarrow \beta_0 H, \quad R_{Z_0} \leftarrow \alpha_0 B + B Z_0$
     $B \leftarrow$ @Sym($\alpha_0 R_{Z_0} + Z_0 R_{Z_0}$), $\quad K \leftarrow \alpha_0 K + K Z_0$
 
