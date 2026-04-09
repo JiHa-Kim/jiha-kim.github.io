@@ -2,7 +2,7 @@
 layout: post
 title: "Fast Polar Decomposition with Rational and Polynomial Iterations"
 date: 2026-04-05 00:00 +0000
-description: "A hardware-aware hybrid polar decomposition for ML: one Dynamic Weighted Halley (rational) step to handle the hard early regime, then two Polar Express (polynomial) cleanup steps once the spectrum is easy. The result is exactly two rectangular GEMMs, no eigenvalues, and robust convergence from condition numbers up to 1000."
+description: "A hardware-aware hybrid polar decomposition for ML: one Dynamic Weighted Halley (rational) step to handle the hard early regime, then two Polar Express (polynomial) cleanup steps once the spectrum is easy. The result is exactly two rectangular GEMMs, no eigendecomposition or power iteration, and robust convergence from condition numbers up to 1000."
 categories:
   - Numerical Linear Algebra
   - Mathematical Optimization
@@ -21,7 +21,7 @@ scholar:
 > [!info] Overview
 > The Muon optimizer {% cite jordanMuonOptimizer2024 %} projects update directions onto the Stiefel manifold via the matrix polar decomposition. The Newton-Schulz iteration is the standard hardware-aware choice, but it is a polynomial map that can be slow or unstable for ill-conditioned matrices. The Polar Express {% cite polarExpress2025 %} optimizes the polynomial basin, and the Dynamic Weighted Halley (DWH) {% cite nakatsukasaOptimizingHalleyIteration2010 %} iteration uses a rational map with much faster early convergence.
 >
-> In this post we show that **neither pure rational nor pure polynomial is optimal**. Instead, a simple hybrid—**one DWH step followed by two degree-5 Polar Express steps**—is the sweet spot. The rational step crushes the hard high-condition-number regime; the polynomial steps finish the job where they are most efficient. The algorithm uses exactly two rectangular GEMMs, no eigenvalue estimates, and is stable under FP16/BF16 arithmetic.
+> In this post we show that **neither pure rational nor pure polynomial is optimal**. Instead, a simple hybrid—**one DWH step followed by two degree-5 Polar Express steps**—is the sweet spot. The rational step crushes the hard high-condition-number regime; the polynomial steps finish the job where they are most efficient. The algorithm uses exactly two rectangular GEMMs, no eigendecomposition or power iteration, and is stable under FP16/BF16 arithmetic.
 
 ---
 
@@ -108,7 +108,10 @@ This lets us write the update as $R = \alpha I + \beta (\gamma I + B)^{-1}$, com
 
 ### 2.2 Polar Express Cleanup (Polynomial)
 
-We use the degree-5 odd polynomial $p(x) = x(a + bx^2 + cx^4)$. To keep the top endpoint fixed, we normalize by $p(1)$: $\hat{p}(x) = p(x)/(a+b+c)$.
+We use the degree-5 odd polynomial $p(x) = x(a + bx^2 + cx^4)$. The closed-form coefficients below are for the unnormalized minimax polynomial $p$. In the actual iteration we keep the top endpoint fixed by normalizing with $p(1)$:
+$$
+\hat{p}(x) = \frac{p(x)}{p(1)} = \frac{p(x)}{a+b+c}.
+$$
 
 > [!theorem] Closed-Form PE Coefficients (Gram-Quadratic)
 > Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of $F(q_0; \ell) = 0$ (see Appendix A and B) that yields equioscillation with minimax error $E < 1$. Define:
@@ -148,7 +151,7 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
     This adds an element-wise pass over $X$, but it prevents the intermediate Gram accumulation from overflowing or losing critical precision bits while still preserving the original polar factor of $X$.
 2.  **Moment-Based Upper Bound**: We avoid power iteration for $\lambda_{\max}$ by using a trace/Frobenius moment bound:
     $$u = \frac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max\bigl(0,\; N\|G\|_F^2 - \operatorname{tr}(G)^2\bigr)}}{N}$$
-    where $\eta$ is a safety margin. This bound is tighter than scaling the full $u$ because it only adds a small multiple of the mean eigenvalue.
+    where $\eta$ is a safety margin. This gives a cheap closed-form upper bound for $\lambda_{\max}(G)$ without needing a power iteration.
 
 > [!proof]- Proof of the Moment Bound
 > Assume the eigenvalues are ordered $\lambda_1 \ge \lambda_2 \ge \dots \ge \lambda_N$. Let $\mu = \frac{1}{N} \operatorname{tr}(G)$ be the mean and $V = \sum (\lambda_k - \mu)^2$ be the total variance. Since $\sum (\lambda_k - \mu) = 0$, we have:
@@ -169,8 +172,6 @@ In ML applications, the polar decomposition must be stable under FP16/BF16 arith
 > $$
 
 3.  **Safe SPD Solve**: For $(\gamma_0 I + B)$, we use Cholesky with adaptive jitter. If it fails, we add diagonal shift $\tau \leftarrow \max(\tau_{\min}, 10\tau + \tau_{\min})$ and retry.
-
-### 3.2 The Full Algorithm
 
 ### 3.2 Stability and Utility Primitives
 
@@ -204,8 +205,10 @@ With the primitives defined, the full hybrid polar decomposition is expressed as
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Stable Hybrid Polar: 1 DWH + 2 PE</div>
 ```pseudo
 def HybridPolar($X \in \mathbb{R}^{M \times N}$):
+    transposed = false
     if $M < N$:
         $X \leftarrow X^\top$
+        transposed = true
 
     # --- ColNorm for safe accumulation and the first rational solve ---
     $d \leftarrow \max(\operatorname{colNorms}(X)^2, \epsilon)$
@@ -225,7 +228,10 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     for $i=1, 2$:
         $Q_i \leftarrow \hat{a}_i I + \hat{b}_i B + \hat{c}_i B^2, \quad K \leftarrow K Q_i, \quad B \leftarrow \mathrm{Sym}(Q_i B Q_i)$
 
-    return $Q = X K$ # Polar factor of the original matrix
+    $Q \leftarrow X K$
+    if transposed:
+        return $Q^\top$
+    return $Q$ # Polar factor of the original matrix
 ```
 </div>
 
@@ -250,7 +256,7 @@ Fixed constants for implementation, computed offline in FP64:
 - **Balanced Latency**: While pre-scaling adds one element-wise pass over the tall matrix $X$, the cost is offset by the reduction in small-side complexity compared to pure rational iterations. The algorithm still performs exactly two tall rectangular GEMMs.
 - **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
 
-Combining rational robustess with polynomial speed results in a polar decomposition that is both fast enough for inner-loop training and robust enough for real-world ML spectral distributions.
+Combining rational robustness with polynomial speed results in a polar decomposition that is both fast enough for inner-loop training and robust enough for real-world ML spectral distributions.
 
 ---
 
