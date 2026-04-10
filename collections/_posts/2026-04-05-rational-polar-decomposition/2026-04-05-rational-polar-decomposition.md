@@ -370,17 +370,19 @@ By using this algebraic flattening, we compute the DWH update using only one sym
 
 ### 6.3 Monotonicity and the Endpoint Barrier
 
-**The core structural difference between DWH and Polar Express is that the former relies on a reduction to endpoint constraints that fails for non-monotone functions.**
+**The core difference between DWH and Polar Express is that the former relies on a "reduction to endpoints" that is formally ill-posed for non-monotone functions.**
 
-For any odd map $f$ on $[\ell, 1]$, the "Endpoint Reduction" problem—maximizing $f(\ell)$ subject to $f(1) = 1$—is only equivalent to minimizing the global error if $f$ is monotone.
+For any odd map $f$ on $[\ell, 1]$, the proxy problem—maximizing $f(\ell)$ subject to $f(1) = 1$—is only valid if $f$ is monotone. For polynomials, which can oscillate, this reduction fails completely.
 
-*   **Rationals (DWH)**: Because the optimal rationals are strictly increasing, the maximum is always at the endpoint ($f(1)=1$). Minimizing the error at the boundaries automatically minimizes the error globally.
-*   **Polynomials (PE)**: Optimal polynomials for the sign function are **not** monotone; they equioscillate. Consequently, $p(1)=1$ does not control the global error.
+*   **Rationals (DWH)**: Because the optimal rationals are strictly increasing, the maximum is always at the endpoint ($x=1$). The constraint $f(1)=1$ effectively "caps" the entire function, making the endpoint solution globally useful.
+*   **Polynomials (PE)**: Optimal polynomials for the sign function are **not** monotone; they equioscillate. Without monotonicity, the endpoint problem is **formally unbounded**.
 
-> [!caution] Counterexample: The Endpoint Trap
-> Consider an odd polynomial $p(x)$ that maximizes $p(\ell)$ subject to $p(1)=1$. Without monotonicity, the optimizer is free to "cheat" the global constraints by creating a large interior peak. A polynomial that satisfies $p(1)=1$ and $p(\ell)=0.8$ might swing up to $p(0.9)=1.5$ in the interior, resulting in a global error of $0.5$ despite looking "correct" at the endpoints.
+> [!caution] Disproof: The Endpoint Trap
+> Consider the family of odd cubics $p_k(x) = (1+k)x - kx^3$. For any $k > 0$, these satisfy the normalization $p_k(1) = 1$. However:
+> 1.  **Unbounded Lower Boundary**: At any $\ell \in (0, 1)$, we have $p_k(\ell) = \ell + k(\ell - \ell^3)$. As $k \to \infty$, the value at $\ell$ grows to infinity.
+> 2.  **Infinite Interior Peak**: The function reaches an interior maximum at $x = \sqrt{(1+k)/3k} \approx 1/\sqrt{3}$ with $p_k(x) \approx \frac{2}{3\sqrt{3}} k$. This also grows to infinity.
 > 
-> To obtain a useful polar factor, Polar Express must solve the **Global Minimax Problem** directly, resulting in an equioscillating image where the maximum value $(1+E)$ is achieved at an interior critical point, not at $x=1$.
+> Thus, the "optimal" polynomial in the endpoint sense is a disaster: it achieves a "perfect" lower boundary by oscillating wildly in the interior. To obtain a stable iteration, Polar Express must solve the **Global Minimax Problem** directly, ensuring that the function stays within $[1-E, 1+E]$ across the entire interval $[\ell, 1]$.
 
 > [!theorem] Closed-Form Centered PE Coefficients
 > Fix $0 < \ell < 1$. The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ on $[\ell, 1]$ are uniquely determined by the interior equioscillation root $q_0 \in (\ell, 1)$ of the degree-9 polynomial:
