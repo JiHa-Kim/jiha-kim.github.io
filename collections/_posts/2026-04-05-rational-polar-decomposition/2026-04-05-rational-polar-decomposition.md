@@ -329,17 +329,28 @@ So the state is really the normalized interval parameter $\lambda$, not the two 
 
 ### 6.2 The Monotone Rational Reduction
 
-The transition from a global minimax problem to the one-sided DWH update follows directly from the mapping properties of the degree-$(3, 2)$ rational maps.
+The transition from a global minimax problem to the one-sided DWH update relies on the monotonicity of the degree-$(3, 2)$ rational maps.
 
-> [!lemma] Monotone Rational Reduction
-> Let $f(x) = x\frac{a+bx^2}{1+cx^2}$ be an odd rational function with $a,b,c > 0$. If $f$ is strictly increasing on $\mathbb{R}^+$ (guaranteed by $ac \le 9b$), then the two-sided minimax problem on $S_{\ell} = [-1, -\ell] \cup [\ell, 1]$ is equivalent to maximizing the lower endpoint $f(\ell)$ subject to $f(1) = 1$ and the stability constraint $f(x) \le 1$ for all $x \in [0, 1]$.
+> [!lemma] Rational Monotonicity Condition
+> Let $f(x) = x \frac{a+bx^2}{1+cx^2}$ with $a, b, c > 0$. The derivative $f'(x)$ is non-negative for all $x \ge 0$ if and only if
+> $$ ac \le 9b $$
 
 > [!proof]-
-> 1.  **Monotonicity Condition**: Differentiating $f(x)$ using the quotient rule yields the numerator $Q(t) = bct^2 + (3b-ac)t + a$ where $t=x^2$. Analysis of this quadratic shows that $f'(x) > 0$ for all $x \ge 0$ if and only if $ac \le 9b$. Under this condition, $f$ maps the interval $[\ell, 1]$ strictly to $[f(\ell), f(1)]$. 
-> 
-> 2.  **Symmetry and Scale**: Because $f$ is odd, the approximation error $E(x) = |\operatorname{sign}(x) - f(x)|$ is even. Thus, the global error is determined entirely by the positive interval: $\max_{x \in S_{\ell}} E(x) = \max_{x \in [\ell, 1]} |1 - f(x)|$.
-> 
-> 3.  **One-Sided Equivalence**: On $[\ell, 1]$, the function $f$ is bounded by $[f(\ell), f(1)]$. The minimax choice scales $f$ such that it is centered around the identity: $f(1) = 1+E$ and $f(\ell) = 1-E$. Normalizing so that $f(1)=1$ yields the new lower endpoint $f(\ell) = (1-E)/(1+E)$. Since this expression is strictly decreasing in $E$, maximizing the "lift" $f(\ell)$ is mathematically equivalent to minimizing the global minimax error $E$.
+> Differentiate $f(x) = \frac{ax + bx^3}{1+cx^2}$ using the quotient rule:
+> $$ f'(x) = \frac{(a+3bx^2)(1+cx^2) - 2cx(ax+bx^3)}{(1+cx^2)^2} = \frac{a + (3b-ac)x^2 + bcx^4}{(1+cx^2)^2} $$
+> Let $Q(t) = bc t^2 + (3b-ac)t + a$ with $t = x^2 \ge 0$. Monotonicity requires $Q(t) \ge 0$ for all $t \ge 0$. If $3b-ac < 0$ (i.e., $ac > 3b$), the minimum of $Q(t)$ occurs at $t_0 = \frac{ac-3b}{2bc} > 0$. The condition $Q(t_0) \ge 0$ requires the discriminant $D = (3b-ac)^2 - 4abc \le 0$. Expanding and factoring yields:
+> $$ a^2c^2 - 10abc + 9b^2 = (ac-9b)(ac-b) \le 0 $$
+> Since $ac > 3b > b$, the factor $(ac-b)$ is positive. Thus, we must have $ac \le 9b$.
+
+> [!proposition] Global Monotonicity of the Rational map
+> If $ac \le 9b$, then $f(x) = x\frac{a+bx^2}{1+cx^2}$ is strictly increasing on $\mathbb{R}^+$. Consequently, $f$ maps the interval $[\ell, 1]$ strictly to $[f(\ell), f(1)]$.
+
+> [!corollary] Monotone Rational Reduction
+> Let $f$ satisfy the monotonicity condition. The global minimax problem on $S_{\ell} = [-1, -\ell] \cup [\ell, 1]$ is exactly equivalent to the one-sided constrained maximization:
+> $$ \text{Maximize } f(\ell) \quad \text{subject to } f(1) = 1 $$
+
+> [!proof]-
+> For monotone $f$, the minimax error is $E = \sup_{x \in [\ell, 1]} |1 - f(x)|$. Optimality requires equioscillation at the endpoints: $f(1)-1 = 1-f(\ell) = E$. After normalizing to $f(1)=1$, the lower endpoint becomes $(1-E)/(1+E)$. Since $1 - \frac{1-E}{1+E} = \frac{2E}{1+E}$ is strictly increasing in $E$, maximizing the lower endpoint $f(\ell)$ is equivalent to minimizing the global error.
 
 > [!theorem] Optimal DWH Coefficients
 > For a design floor $\ell \in (0, 1]$, the DWH coefficients $a, b, c$ that minimize the minimax error are:
@@ -361,19 +372,12 @@ By using this algebraic flattening, we compute the DWH update using only one sym
 
 For Polar Express, we utilize the degree-5 odd polynomial $p(x) = ax + bx^3 + cx^5$. Unlike the rational case, the optimal polynomial for the matrix sign function is not monotone on its tracked interval; it equioscillates. This structural difference prevents the use of a simple one-sided reduction.
 
-> [!lemma] Suboptimality of One-Sided Polynomial Constraints
-> Let $p(x)$ be the optimal degree-$d$ odd polynomial minimizing the centered minimax error $E$ on $[\ell, 1]$. Any rescaled polynomial $\hat{p}(x) = p(x)/(1+E)$ that satisfies the one-sided constraint $\hat{p}(1) \le 1$ incurs a strictly larger minimax error on $[\ell, 1]$ than the original polynomial.
-
-> [!proof]-
+> [!caution] The Polynomial Penalty
+> Unlike the rational case, enforcing a one-sided "no-overshoot" constraint $\hat{p}(1) \le 1$ on an equioscillating polynomial strictly degrades the approximation quality.
+> 
 > Let the centered image of $p$ on $[\ell, 1]$ be $[1-E, 1+E]$. If we normalize such that the upper bound is exactly $1$, we must divide by $1+E$:
 > $$ \hat{p}(x) = \frac{p(x)}{1+E} \implies \hat{p}(1) = 1. $$
-> The new lower endpoint becomes $\hat{p}(\ell) = \frac{1-E}{1+E}$. The resulting minimax error for the one-sided problem is:
-> $$ 1 - \hat{p}(\ell) = 1 - \frac{1-E}{1+E} = \frac{2E}{1+E}. $$
-> Since $E > 0$, we have $\frac{2}{1+E} > 1$, which implies $\frac{2E}{1+E} > E$. Thus, forcing a no-overshoot constraint on an equioscillating polynomial strictly degrades the approximation quality.
-
-This necessitates formulating Polar Express as a **Centered Minimax Problem**:
-$$ \min_{a,b,c} \max_{x \in [\ell, 1]} \vert 1 - p(x) \vert = E $$
-The optimal polynomial oscillates between $1-E$ and $1+E$. In the full recurrence, we maintain this centering by tracking both boundaries $[\ell_t, u_t]$ and absorbing the scale $u_t$ into the coefficients: $p_t(x) = q_t(x/u_t)$.
+> The new lower endpoint becomes $\hat{p}(\ell) = \frac{1-E}{1+E}$. The resulting minimax error for the one-sided problem is $1 - \hat{p}(\ell) = \frac{2E}{1+E}$. Since $E > 0$, we have $\frac{2E}{1+E} > E$, meaning the one-sided penalty is strictly worse. This structural barrier necessitates formulating Polar Express directly as a **Centered Minimax Problem** minimized over the error range $[1-E, 1+E]$.
 
 > [!theorem] Closed-Form Centered PE Coefficients
 > Fix $0 < \ell < 1$. The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ on $[\ell, 1]$ are uniquely determined by the interior equioscillation root $q_0 \in (\ell, 1)$ of the degree-9 polynomial:
@@ -446,7 +450,7 @@ A natural question is whether high-degree optimal polynomials can be constructed
 > $$ A_7^2 = 3 A_5 A_9 $$
 > Consequently, a generic minimax polynomial of degree-9 will not be representable as a composition of cubics.
 
-> [!proof]-
+> [!proof]
 > Let $p_1(x) = ax + bx^3$ and $p_2(x) = cx + dx^3$. Expanding their composition yields:
 > $$ P(x) = c(ax + bx^3) + d(ax + bx^3)^3 = (ca)x + (cb + da^3)x^3 + (3da^2b)x^5 + (3dab^2)x^7 + (db^3)x^9 $$
 > Let $A_5 = 3da^2b, A_7 = 3dab^2,$ and $A_9 = db^3$. Then:
@@ -456,10 +460,10 @@ A natural question is whether high-degree optimal polynomials can be constructed
 
 This is not just a structural curiosity; it has material impact on approximation quality. On the interval $[0.2, 1]$, the "greedy" composition of two cubics is significantly worse than the true degree-9 minimax solution.
 
-| Method                          | Maximum Error | Leading Coefficients ($A_5, A_7, A_9$) |
-| :------------------------------ | :------------ | :------------------------------------- |
-| **Greedy Composition (Cubic)**  | $\approx 0.1114$ | $41.654, -33.592, 9.030$               |
-| **Best Odd Degree-9**           | $\approx 0.0801$ | $74.524, -83.540, 33.393$              |
+| Method                         | Maximum Error    | Leading Coefficients ($A_5, A_7, A_9$) |
+| :----------------------------- | :--------------- | :------------------------------------- |
+| **Greedy Composition (Cubic)** | $\approx 0.1114$ | $41.654, -33.592, 9.030$               |
+| **Best Odd Degree-9**          | $\approx 0.0801$ | $74.524, -83.540, 33.393$              |
 
 > [!info] Zolotarev Closure
 > As noted in {% cite nakatsukasaOptimizingHalleyIteration2010 %}, high-degree Zolotarev minimax rationals for the sign function **can** be obtained by composing low-degree ones. This unique "closure" under composition is what allows DWH to be so efficient with simple rational steps, whereas Polar Express must recompute high-degree coefficients directly via $F(q_0; \ell)$.
