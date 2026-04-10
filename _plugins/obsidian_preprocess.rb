@@ -32,7 +32,7 @@ module Jekyll
     LABELED_TYPES = %w[
       definition lemma proposition theorem example corollary remark proof
       principle axiom postulate conjecture claim notation algorithm problem
-      exercise solution assumption convention fact
+      exercise solution assumption convention fact caution
     ].freeze
 
     DEFAULT_OPEN_TYPES = %w[question help faq].freeze

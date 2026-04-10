@@ -218,6 +218,13 @@ $box-configs: (
     label: 'Fact',
     border-style: dotted,
     dark: (color: #e5e7eb, border: #5f5f5f)
+  ),
+  "caution": (
+    icon: '\f071',
+    color: #d97706,
+    bg: rgba(#d97706, 0.08),
+    label: 'Caution',
+    dark: (color: #fbbf24, border: #a16207)
   )
 );
 
@@ -299,7 +306,7 @@ $box-configs: (
 
 .box-note { @extend .box-info; }
 .box-hint, .box-important { @extend .box-tip; }
-.box-caution, .box-attention { @extend .box-warning; }
+.box-attention { @extend .box-warning; }
 .box-failure, .box-fail, .box-missing, .box-error { @extend .box-danger; }
 .box-summary, .box-tldr { @extend .box-abstract; }
 .box-check, .box-done { @extend .box-success; }
