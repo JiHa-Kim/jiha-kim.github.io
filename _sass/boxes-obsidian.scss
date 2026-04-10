@@ -266,6 +266,7 @@ $box-configs: (
         font-style: italic;
         > *:first-child::before { font-style: normal; font-weight: 700; }
       }
+      &:not(:has(> .title))::after { font-style: italic; }
     }
     @if $italic-body { .title > * { font-style: italic; } }
   }
@@ -274,11 +275,17 @@ $box-configs: (
     @include bx.details-box($color, $color, $bg, $icon, $icon, $fa-style);
     border-left-style: $border-style;
 
+    @if $italic-title {
+      > summary { font-style: italic; }
+    }
+
     @if $label {
       > summary > *:first-child::before {
         content: '#{$label}. ';
         margin-right: 0.35em;
         opacity: 0.95;
+        font-weight: 700;
+        @if $italic-title { font-style: normal; }
       }
     }
   }

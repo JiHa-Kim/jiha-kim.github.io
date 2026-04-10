@@ -86,21 +86,23 @@
     /* Case B: User provided NO Title (e.g. > [!proof]). Simulate header with absolute positioning. */
     /* SAFETY: We strictly exclude 'details' tags here to prevent the glitch. */
     &:not(:has(> .title)):not(details) {
-      padding-top: 2rem;
+      padding-top: 2.1rem;
 
       &::before {
         content: $icon;
         font: var(--fa-font-#{$fa-style});
         position: absolute;
-        top: 0.7rem; left: 1rem;
+        top: 0.75rem; left: 1rem;
         color: $accent;
+        line-height: 1;
       }
       &::after {
         content: $label;
-        font-weight: 600;
+        font-weight: 700;
         position: absolute;
-        top: 0.7rem; left: 2.5rem;
+        top: 0.68rem; left: 2.5rem;
         color: $accent;
+        line-height: 1;
       }
     }
   }
@@ -132,6 +134,7 @@
     &::before {
       content: $icon-closed;
       font: var(--fa-font-#{$fa-style});
+      line-height: 1;
       flex-shrink: 0;
       margin-right: 0.75rem;
     }
@@ -145,7 +148,7 @@
       transition: transform 0.2s ease;
     }
 
-    > p { margin: 0; display: inline; }
+    > p { margin: 0; display: block; }
   }
 
   &[open] > summary {
