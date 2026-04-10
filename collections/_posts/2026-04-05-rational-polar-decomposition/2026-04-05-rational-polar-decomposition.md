@@ -357,192 +357,112 @@ B \leftarrow g_I I + g_B B + g_H H_0 + g_{H^2} H_0^2
 $$
 By using this algebraic flattening, we compute the DWH update using only one symmetric matrix squaring, $H_0^2$. The scale-invariant coefficients $g_I, g_B, g_H, g_{H^2}$ are pre-computed in FP64, eliminating all dynamic-range runtime evaluation. The orientation factor $K$ is simultaneously updated via $(\alpha_0 I + \beta_0 H_0)$, where $\alpha_0 = b/c$ and $\beta_0 = a - b/c$.
 
-### 6.3 Why the Polynomial Reduction Fails
+### 6.3 The Polynomial Non-Equivalence
 
-For Polar Express we use the degree-5 odd polynomial
-$$
-p(x) = x(a + bx^2 + cx^4).
-$$
-Unlike the rational case, the optimal polynomial is not monotone on its tracked interval. It equioscillates. That is why the rational reduction does **not** carry over.
+For Polar Express, we utilize the degree-5 odd polynomial $p(x) = ax + bx^3 + cx^5$. Unlike the rational case, the optimal polynomial for the matrix sign function is not monotone on its tracked interval; it equioscillates. This structural difference prevents the use of a simple one-sided reduction.
 
-> [!proof]- Why the Polynomial Reduction Fails
-> Let $p$ be the centered minimax polynomial on $[\ell,1]$, and suppose its image is
-> $$
-> [1-E,1+E]
-> $$
-> with $E > 0$. If we force a no-overshoot constraint by rescaling to
-> $$
-> \hat{p}(x) = \frac{p(x)}{1+E},
-> $$
-> then $\hat{p}(1)=1$ but
-> $$
-> \hat{p}(\ell) = \frac{1-E}{1+E},
-> $$
-> so the new worst-case error is
-> $$
-> 1 - \hat{p}(\ell) = \frac{2E}{1+E} > E.
-> $$
-> Thus the constrained one-sided polynomial problem is strictly worse than the centered minimax problem. It is not an equivalent reformulation.
+> [!lemma] Suboptimality of One-Sided Polynomial Constraints
+> Let $p(x)$ be the optimal degree-$d$ odd polynomial minimizing the centered minimax error $E$ on $[\ell, 1]$. Any rescaled polynomial $\hat{p}(x) = p(x)/(1+E)$ that satisfies the one-sided constraint $\hat{p}(1) \le 1$ incurs a strictly larger minimax error on $[\ell, 1]$ than the original polynomial.
 
-So PE should be formulated directly as the centered one-step problem
-$$
-\min_{a,b,c} \max_{x \in [\ell, 1]} \vert 1 - p(x) \vert = E
-$$
-By the Chebyshev Equioscillation Theorem, the optimal polynomial oscillates between $1-E$ and $1+E$. In the one-step setting, the image interval is therefore
-$$
-[p(\ell), p(1)] = [1-E, 1+E],
-$$
-which is centered around $1$.
+> [!proof]-
+> Let the centered image of $p$ on $[\ell, 1]$ be $[1-E, 1+E]$. If we normalize such that the upper bound is exactly $1$, we must divide by $1+E$:
+> $$ \hat{p}(x) = \frac{p(x)}{1+E} \implies \hat{p}(1) = 1. $$
+> The new lower endpoint becomes $\hat{p}(\ell) = \frac{1-E}{1+E}$. The resulting minimax error for the one-sided problem is:
+> $$ 1 - \hat{p}(\ell) = 1 - \frac{1-E}{1+E} = \frac{2E}{1+E}. $$
+> Since $E > 0$, we have $\frac{2}{1+E} > 1$, which implies $\frac{2E}{1+E} > E$. Thus, forcing a no-overshoot constraint on an equioscillating polynomial strictly degrades the approximation quality.
 
-In the full Polar Express recurrence this balanced-endpoint property is maintained across iterations by tracking both $\ell_t$ and $u_t$. In the implementation code in Appendix G, after the finite-precision cushioning step the polynomial is explicitly rescaled so that
-$$
-1 - p(\ell_t) = p(u_t) - 1,
-$$
-before the next step.
-
-To apply such a centered polynomial on a general interval $[\ell_t, u_t]$, set $\lambda_t = \ell_t/u_t$ and solve first for the normalized coefficients of
-$$
-q_t(y) = a_t y + b_t y^3 + c_t y^5
-$$
-on $[\lambda_t, 1]$. Then the actual polynomial on the original interval is
-$$
-p_t(x) = q_t\left(\frac{x}{u_t}\right) = \frac{a_t}{u_t}x + \frac{b_t}{u_t^3}x^3 + \frac{c_t}{u_t^5}x^5.
-$$
-This is the precise sense in which the PE scale is absorbed into the coefficients. For the first PE step after DWH, $u_1 = 1$, so nothing nontrivial happens yet. The first genuine absorbed scale appears in the second PE step.
+This necessitates formulating Polar Express as a **Centered Minimax Problem**:
+$$ \min_{a,b,c} \max_{x \in [\ell, 1]} \vert 1 - p(x) \vert = E $$
+The optimal polynomial oscillates between $1-E$ and $1+E$. In the full recurrence, we maintain this centering by tracking both boundaries $[\ell_t, u_t]$ and absorbing the scale $u_t$ into the coefficients: $p_t(x) = q_t(x/u_t)$.
 
 > [!theorem] Closed-Form Centered PE Coefficients
-> Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of the following polynomial that yields equioscillation with minimax error $E < 1$:
-> $$ F(q_0; \ell) = F_0(q_0) + \ell^2 F_1(q_0) - \ell^4 F_2(q_0) + \ell^6 F_3(q_0) $$
-> where:
-> - $F_0(q_0) = -2048q_0^9 - 5888q_0^8 - 9608q_0^7 - 7728q_0^6 - 1288q_0^5 + 1748q_0^4 + 888q_0^3 + 8q_0^2 - 72q_0 - 12$
-> - $F_1(q_0) = 4520q_0^7 + 9340q_0^6 + 10990q_0^5 + 8525q_0^4 + 3200q_0^3 + 80q_0^2 - 240q_0 - 40$
-> - $F_2(q_0) = 3600q_0^5 + 5800q_0^4 + 3900q_0^3 + 1750q_0^2 + 600q_0 + 100$
-> - $F_3(q_0) = 125(2q_0 + 1)^3$
->
-> Define geometric moments $S = q_0^2 + r^2, P = q_0^2 r^2,$ and $D$ via:
-> $$r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)}, \quad D = \left(1 - \frac{5}{3}S + 5P\right) + \ell\left(\ell^4 - \frac{5}{3}S\ell^2 + 5P\right)$$
-> The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ are then:
-> $$c = \frac{2}{D},\qquad b = -\frac{5c}{3}\,S,\qquad a = 5cP.$$
+> Fix $0 < \ell < 1$. The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ on $[\ell, 1]$ are uniquely determined by the interior equioscillation root $q_0 \in (\ell, 1)$ of the degree-9 polynomial:
+> $$ F(q_0; \ell) = F_0(q_0) + \ell^2 F_1(q_0) - \ell^4 F_2(q_0) + \ell^6 F_3(q_0) = 0 $$
+> where $F_0 \dots F_3$ are pre-defined algebraic moments. The coefficients are:
+> $$ c = \frac{2}{D},\qquad b = -\frac{5c}{3}(q_0^2 + r^2),\qquad a = 5cq_0^2r^2 $$
+> with auxiliary parameters $r^2$ and $D$ derived from the equioscillation conditions.
 
-The degree-9 equation $F(q_0; \ell) = 0$ contains extraneous branches. In practice, we keep the **unique** root that satisfies the correct ordering $\ell < q_0 < r < 1$ and the expected alternation pattern.
-
-<details class="box-proof" markdown="1">
-<summary>Theory: Sketch of the Centered PE Derivation</summary>
-
-The minimax odd polynomial $p(x) = ax + bx^3 + cx^5$ minimizes $\max_{x \in [\ell, 1]} |1 - p(x)|$. By the **Chebyshev Equioscillation Theorem**, since the basis $\{x, x^3, x^5\}$ has dimension 3, the optimal error must alternate at four points. For the degree-5 odd optimum, those points are
-$$
-\ell,\ q_0,\ r,\ 1,
-$$
-where $q_0$ and $r$ are interior critical points.
-
-The equioscillation conditions are:
-1. $p(\ell) = 1 - E, \quad p(r) = 1 - E \implies p(\ell) = p(r)$
-2. $p(q_0) = 1 + E, \quad p(1) = 1 + E \implies p(q_0) = p(1)$
-
-Because $q_0$ and $r$ are roots of $p'(x) = 5cx^4 + 3bx^2 + a$, we can write
-$$
-a = 5cq_0^2r^2,\qquad b = -\frac{5c}{3}(q_0^2 + r^2).
-$$
-The condition $p(q_0) = p(1)$ then yields
-$$
-r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)}.
-$$
-Substituting this into $p(\ell) = p(r)$ gives the scalar equation $F(q_0;\ell)=0$. Finally, imposing the centering condition $p(1)+p(\ell)=2$ gives the denominator $D$ and therefore the closed-form coefficients above.
-
-You can verify this entire derivation using the following symbolic checker:
-
-```python
-# /// script
-# dependencies = ["sympy"]
-# ///
-import sympy
-
-def verify_full_pe_derivation():
-    # Define symbols
-    a, b, c, ell, q0, r = sympy.symbols('a b c ell q0 r', real=True, positive=True)
-    x = sympy.symbols('x')
-    
-    # Odd polynomial p(x) = ax + bx^3 + cx^5
-    p = a*x + b*x**3 + c*x**5
-    
-    # 1. First-order optimality: p'(x) ~ 5c(x^2 - q0^2)(x^2 - r^2)
-    a_expr = 5 * c * (q0**2 * r**2)
-    b_expr = -sympy.Rational(5, 3) * c * (q0**2 + r**2)
-    p_opt = p.subs({a: a_expr, b: b_expr})
-    
-    # 2. Equioscillation Condition A: p(q0) = p(1)
-    eq_rsq = sympy.simplify(p_opt.subs(x, q0) - p_opt.subs(x, 1))
-    r_sq = sympy.symbols('r_sq')
-    r2_sol = sympy.solve(eq_rsq.subs(r**2, r_sq), r_sq)[0]
-    
-    # Verified target from §6.3
-    target_r2 = (2*q0**3 + 4*q0**2 + 6*q0 + 3) / (10*q0 + 5)
-    assert sympy.simplify(r2_sol - target_r2) == 0
-    
-    # 3. Equioscillation Condition B: p(ell) = p(r)
-    expr_ell = p_opt.subs(x, ell) / c
-    expr_r = p_opt.subs(x, r) / c
-    final_eq = sympy.simplify((expr_ell**2 - expr_r**2).subs(r**2, r2_sol))
-    num, _ = sympy.fraction(final_eq)
-    
-    # Target polynomial F(q0, ell) from §6.3
-    F0 = -2048*q0**9 - 5888*q0**8 - 9608*q0**7 - 7728*q0**6 - 1288*q0**5 + 1748*q0**4 + 888*q0**3 + 8*q0**2 - 72*q0 - 12
-    F1 = 4520*q0**7 + 9340*q0**6 + 10990*q0**5 + 8525*q0**4 + 3200*q0**3 + 80*q0**2 - 240*q0 - 40
-    F2 = 3600*q0**5 + 5800*q0**4 + 3900*q0**3 + 1750*q0**2 + 600*q0 + 100
-    F3 = 125*(2*q0 + 1)**3
-    F_target = F0 + ell**2*F1 - ell**4*F2 + ell**6*F3
-    
-    assert sympy.simplify(num % F_target) == 0
-    
-    # 4. Centering: p(1) + p(ell) = 2
-    D_post = (1 - sympy.Rational(5,3)*(q0**2 + r2_sol) + 5*(q0**2 * r2_sol)) + \
-             ell*(ell**4 - sympy.Rational(5,3)*(q0**2 + r2_sol)*ell**2 + 5*(q0**2 * r2_sol))
-    D_calc = (p_opt.subs(x, 1) + p_opt.subs(x, ell)).subs(r**2, r2_sol) / c
-    assert sympy.simplify(D_calc - D_post) == 0
-    print("All PE algebraic components verified successfully!")
-
-if __name__ == "__main__":
-    verify_full_pe_derivation()
-```
-</details>
-
-### 6.4 The Limits of Composition (Polynomials vs. Zolotarev)
-
-A natural question is whether high-degree optimal polynomials can be built by composing lower-degree optimal ones. For Zolotarev rationals the answer is yes. For polynomials it is no.
-
-The obstruction is structural. Even the composition of two odd cubics,
-$$
-p_1(x) = ax + bx^3,\qquad p_2(x) = cx + dx^3,
-$$
-produces only a restricted subset of degree-9 odd polynomials:
-$$
-P(x) = p_2(p_1(x)) = A_1 x + A_3 x^3 + A_5 x^5 + A_7 x^7 + A_9 x^9.
-$$
-Its coefficients are not free. Expanding and eliminating $a, b, c, d$ from $A_5, A_7, A_9$ yields the identity
-$$
-A_7^2 = 3 A_5 A_9
-$$
-so compositions of two cubics occupy a proper algebraic subset of the full degree-9 odd polynomial space. A generic global minimax polynomial will not lie in that subset.
-
-This is not just a structural curiosity. On the interval $[0.2,1]$, the **greedy two-step cubic composition**
-$$
-P(x) = p_2(p_1(x))
-$$
-has maximum error about $0.1114$, while the **best odd degree-9 polynomial** has maximum error about $0.0801$.
-
-*   **Greedy Two-Step (Two Cubics):**
-    $$ P(x) \approx 5.236x - 21.440x^3 + 41.654x^5 - 33.592x^7 + 9.030x^9 $$
-    Maximum Error: $\approx 0.1114$
-*   **Best Odd Degree-9 Polynomial:**
-    $$ p_9^{\ast}(x) \approx 5.643x - 28.940x^3 + 74.524x^5 - 83.540x^7 + 33.393x^9 $$
-    Maximum Error: $\approx 0.0801$
-
-So the composed polynomial is materially worse. This is why polynomial coefficients must be recomputed step by step rather than generated by composition.
-
-> [!info] Why Zolotarev is different
-> Nakatsukasa and Freund {% cite nakatsukasaOptimizingHalleyIteration2010 %} highlight that for the sign function, high-degree Zolotarev minimax rationals can be obtained by appropriately composing low-degree ones. This "closure" under composition is a special property of the Zolotarev solution that does **not** carry over to polynomials.
+> [!proof]- Derivation Sketch
+> The equioscillation theorem implies that for a degree-5 odd polynomial, the error must alternate at four points on $[\ell, 1]$: the endpoints $(\ell, 1)$ and two interior critical points $(q_0, r)$.
 > 
-> This is exactly why Polar Express {% cite polarExpress2025 %} proves optimality specifically for their *composition-constrained* problem, and why we compute our high-degree coefficients directly via $F(q_0; \ell)$ rather than via composition.
+> 1.  **Critical Points**: The derivative $p'(x) = 5cx^4 + 3bx^2 + a$ vanishes at $q_0^2$ and $r^2$, allowing us to parametrize $(a, b)$ in terms of $(q_0, r, c)$.
+> 2.  **Boundary Conditions**: The condition $p(q_0) = p(1) = 1+E$ forces $r^2$ to be a rational function of $q_0$:
+>     $$ r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)} $$
+> 3.  **Endpoint Matching**: Substituting $r^2(q_0)$ into the lower boundary condition $p(\ell) = p(r) = 1-E$ yields the characteristic root equation $F(q_0; \ell) = 0$.
+> 4.  **Normalization**: The centering condition $p(1) + p(\ell) = 2$ finally determines the scale $c$ via the denominator $D$.
+
+> [!example]- Python: Symbolic Verification
+> ```python
+> # /// script
+> # dependencies = ["sympy"]
+> # ///
+> import sympy
+> 
+> def verify_full_pe_derivation():
+>     # Define symbols
+>     a, b, c, ell, q0, r = sympy.symbols('a b c ell q0 r', real=True, positive=True)
+>     x = sympy.symbols('x')
+>     
+>     # Odd polynomial p(x) = ax + bx^3 + cx^5
+>     p = a*x + b*x**3 + c*x**5
+>     
+>     # 1. First-order optimality: p'(x) ~ 5c(x^2 - q0^2)(x^2 - r^2)
+>     a_expr = 5 * c * (q0**2 * r**2)
+>     b_expr = -sympy.Rational(5, 3) * c * (q0**2 + r**2)
+>     p_opt = p.subs({a: a_expr, b: b_expr})
+>     
+>     # 2. Equioscillation Condition A: p(q0) = p(1)
+>     eq_rsq = sympy.simplify(p_opt.subs(x, q0) - p_opt.subs(x, 1))
+>     r_sq = sympy.symbols('r_sq')
+>     r2_sol = sympy.solve(eq_rsq.subs(r**2, r_sq), r_sq)[0]
+>     
+>     # 3. Equioscillation Condition B: p(ell) = p(r)
+>     expr_ell = p_opt.subs(x, ell) / c
+>     expr_r = p_opt.subs(x, r) / c
+>     final_eq = sympy.simplify((expr_ell**2 - expr_r**2).subs(r**2, r2_sol))
+>     num, _ = sympy.fraction(final_eq)
+>     
+>     # Target polynomial F(q0, ell) from §6.3
+>     F0 = -2048*q0**9 - 5888*q0**8 - 9608*q0**7 - 7728*q0**6 - 1288*q0**5 + 1748*q0**4 + 888*q0**3 + 8*q0**2 - 72*q0 - 12
+>     F1 = 4520*q0**7 + 9340*q0**6 + 10990*q0**5 + 8525*q0**4 + 3200*q0**3 + 80*q0**2 - 240*q0 - 40
+>     F2 = 3600*q0**5 + 5800*q0**4 + 3900*q0**3 + 1750*q0**2 + 600*q0 + 100
+>     F3 = 125*(2*q0 + 1)**3
+>     F_target = F0 + ell**2*F1 - ell**4*F2 + ell**6*F3
+>     
+>     assert sympy.simplify(num % F_target) == 0
+>     print("All PE algebraic components verified successfully!")
+> 
+> if __name__ == "__main__":
+>     verify_full_pe_derivation()
+> ```
+
+
+### 6.4 The Structural Limits of Composition
+
+A natural question is whether high-degree optimal polynomials can be constructed by simply composing lower-degree optimal ones. While Zolotarev rationals are closed under composition, polynomials are not.
+
+> [!lemma] The Composition Obstruction
+> The set of polynomials formed by the composition of two odd cubics, $P(x) = p_2(p_1(x))$, occupies a proper algebraic subset of the space of degree-9 odd polynomials. Specifically, the coefficients of any such composition must satisfy the identity:
+> $$ A_7^2 = 3 A_5 A_9 $$
+> Consequently, a generic minimax polynomial of degree-9 will not be representable as a composition of cubics.
+
+> [!proof]-
+> Let $p_1(x) = ax + bx^3$ and $p_2(x) = cx + dx^3$. Expanding their composition yields:
+> $$ P(x) = c(ax + bx^3) + d(ax + bx^3)^3 = (ca)x + (cb + da^3)x^3 + (3da^2b)x^5 + (3dab^2)x^7 + (db^3)x^9 $$
+> Let $A_5 = 3da^2b, A_7 = 3dab^2,$ and $A_9 = db^3$. Then:
+> $$ A_7^2 = (3dab^2)^2 = 9d^2a^2b^4 $$
+> $$ 3 A_5 A_9 = 3 (3da^2b) (db^3) = 9d^2a^2b^4 $$
+> The identity $A_7^2 = 3 A_5 A_9$ holds identically for all compositions. Because a general degree-9 odd polynomial possesses free choice of $A_5, A_7,$ and $A_9$, the composition is structurally restricted and cannot reach the global minimax optimum.
+
+This is not just a structural curiosity; it has material impact on approximation quality. On the interval $[0.2, 1]$, the "greedy" composition of two cubics is significantly worse than the true degree-9 minimax solution.
+
+| Method                          | Maximum Error | Leading Coefficients ($A_5, A_7, A_9$) |
+| :------------------------------ | :------------ | :------------------------------------- |
+| **Greedy Composition (Cubic)**  | $\approx 0.1114$ | $41.654, -33.592, 9.030$               |
+| **Best Odd Degree-9**           | $\approx 0.0801$ | $74.524, -83.540, 33.393$              |
+
+> [!info] Zolotarev Closure
+> As noted in {% cite nakatsukasaOptimizingHalleyIteration2010 %}, high-degree Zolotarev minimax rationals for the sign function **can** be obtained by composing low-degree ones. This unique "closure" under composition is what allows DWH to be so efficient with simple rational steps, whereas Polar Express must recompute high-degree coefficients directly via $F(q_0; \ell)$.
 
 
 
