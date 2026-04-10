@@ -334,22 +334,22 @@ We restrict to the degree-$(3,2)$ odd rational family
 $$
 f(x)=x\frac{a+bx^2}{1+cx^2},\qquad a,b,c>0.
 $$
-Because $f$ is odd, the two-sided sign-approximation error reduces to the positive side. 
+Because $f$ is odd, the two-sided sign-approximation error reduces to the positive side:
+$$
+\sup_{x\in S_\ell}\left|\operatorname{sign}(x)-f(x)\right| = \sup_{x\in[\ell,1]}|1-f(x)|.
+$$
 
-As noted in the **Zolo-pd** algorithm {% cite nakatsukasaComputingFundamentalMatrix2016 %}, the one-sided "max-min" problem is equivalent to the traditional "min-max" problem up to a scaling factor. This equivalence holds for any class of odd approximants $\mathcal{F}$ closed under positive scaling (e.g. odd polynomials or rationals of a fixed type).
+The key design feature of the DWH step is not monotonicity, but boundedness: we enforce a "no-overshoot" constraint on the tracked interval,
+$$
+0<f(x)\le 1\qquad\text{for all }x\in[0,1],
+$$
+together with the normalization
+$$
+f(1)=1.
+$$
+(With this family, $f(1)=1$ is equivalent to $c=a+b-1$.)
 
-> [!lemma] Equivalence of Minimax and Max-Min
-> Let $E_*$ be the optimal two-sided minimax error on $S_\ell = [-1, -\ell] \cup [\ell, 1]$, and let $m_*$ be the optimal "floor" for the one-sided max-min problem under the global no-overshoot constraint $0 \le f(x) \le 1$ on $[0, 1]$. Then:
-> $$ m_* = \frac{1-E_*}{1+E_*} \iff E_* = \frac{1-m_*}{1+m_*}. $$
-
-> [!proof]- Proof (Two Scaling Maps)
-> 1. **From Minimax to Max-Min**: If $R \in \mathcal{F}$ has minimax error $E$, then on $[\ell, 1]$ we have $1-E \le R(x) \le 1+E$. Define $S(x) = R(x) / (1+E)$. Then $S(x) \le 1$ on $[0,1]$ and $\min_{x\in[\ell,1]} S(x) \ge (1-E)/(1+E)$. Thus $m_* \ge (1-E_*)/(1+E_*)$.
->
-> 2. **From Max-Min to Minimax**: Let $S \in \mathcal{F}$ satisfy $\max_{[0,1]} S = 1$ and $m = \min_{[\ell, 1]} S$. Define $R(x) = \alpha S(x)$ with $\alpha = 2/(1+m)$. On $[\ell, 1]$, $R(x)$ ranges in $[\alpha m, \alpha]$. This scaling makes the deviations from 1 symmetric: $\alpha - 1 = 1 - \alpha m = (1-m)/(1+m)$. Thus $E_* \le (1-m_*)/(1+m_*)$.
->
-> Combining both yields the exact equality.
-
-The key design feature of the DWH step is this boundedness: we enforce a "no-overshoot" constraint $0 < f(x) \le 1$ on the tracked interval together with the normalization $f(1)=1$. (With this family, $f(1)=1$ is equivalent to $c=a+b-1$.)
+As noted in the **Zolo-pd** algorithm {% cite nakatsukasaComputingFundamentalMatrix2016 %}, this one-sided constrained "max-min" problem is equivalent up to scaling to the classical two-sided minimax problem (see $\S 6.2$ for the scaling proof).
 
 > [!lemma] One-sided reduction under no-overshoot
 > Assume $f(1)=1$ and $0<f(x)\le 1$ for all $x\in[\ell,1]$. Let
@@ -394,19 +394,14 @@ By using this algebraic flattening, we compute the DWH update using only one sym
 
 ### 6.3 Normalization and the Composition Barrier
 
-For Polar Express, we utilize the degree-5 odd polynomial $p(x)=ax+bx^3+cx^5$. While the max-min framework described in $\S 6.2$ applies to both rationals and polynomials, their standard presentation varies by implementation need.
-
-*   **Rationals (DWH)**: The "no-overshoot" form is natural for the **resolvent basis** ($H_0 = (I+cB)^{-1}$), where the coefficients are tuned to map exactly to $[m, 1]$.
-*   **Polynomials (PE)**: The centered equioscillating form is natural for standard polynomial evaluation on hardware, where dynamic range is manageable when centered around 1.
-
-The apparent "overshoot" issue is not a fundamental capability gap, but merely a choice of **normalization**. Rescaling between a floor-maximized $p(x)$ and an equioscillating $\hat{p}(x)$ is a mechanical change of variables. The **fundamental distinction** lies instead in **composition optimality**.
+For Polar Express, we utilize the degree-5 odd polynomial $p(x)=ax+bx^3+cx^5$. In contrast to the DWH rational step, where we impose a global no-overshoot constraint $p(x)\le 1$ and optimize the minimum value on $[\ell,1]$, the polynomial minimax solution is naturally a centered equioscillating approximation.
 
 > [!caution] Disproof: The Endpoint Trap
-> Consider the family of odd cubics $p_k(x) = (1+k)x - kx^3$. For any $k > 0$, these satisfy the endpoint constraint $p_k(1) \le 1$. However:
+> Consider the family of odd cubics $p_k(x) = (1+k)x - kx^3$. For any $k > 0$, these satisfy the endpoint normalization $p_k(1) = 1$. However:
 > 1.  **Unbounded Lower Boundary**: At any $\ell \in (0, 1)$, we have $p_k(\ell) = \ell + k(\ell - \ell^3)$. As $k \to \infty$, the value at $\ell$ grows to infinity.
 > 2.  **Infinite Interior Peak**: The function reaches an interior maximum at $x = \sqrt{(1+k)/3k} \approx 1/\sqrt{3}$ with $p_k(x) \approx \frac{2}{3\sqrt{3}} k$. This also grows to infinity.
 > 
-> Thus, the "optimal" polynomial in the endpoint sense is a disaster: it achieves a "perfect" lower boundary by oscillating wildly in the interior. To obtain a stable iteration, Polar Express must solve the **Global Minimax Problem** directly, ensuring that the function satisfies the global constraint $\sup_{x\in[\ell,1]} p(x) \le 1+E$.
+> Thus, the "optimal" polynomial in the endpoint sense is a disaster: it achieves a "perfect" lower boundary by oscillating wildly in the interior. To obtain a stable iteration, Polar Express must solve the **Global Minimax Problem** directly, ensuring that the function satisfies the global constraint $\sup_{x\in[\ell,1]} \hat p(x) \le 1$.
 
 > [!theorem] Closed-Form Centered PE Coefficients
 > Fix $0 < \ell < 1$. The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ on $[\ell, 1]$ are uniquely determined by the interior equioscillation root $q_0 \in (\ell, 1)$ of the degree-9 polynomial:
