@@ -29,6 +29,12 @@ module Jekyll
       "fail" => "box-fail", "missing" => "box-missing", "quote" => "box-quote", "cite" => "box-cite"
     }.freeze
 
+    LABELED_TYPES = %w[
+      definition lemma proposition theorem example corollary remark proof
+      principle axiom postulate conjecture claim notation algorithm problem
+      exercise solution assumption convention fact
+    ].freeze
+
     DEFAULT_OPEN_TYPES = %w[question help faq].freeze
 
     SKIP_FORMATTING_ENVS = %w[
@@ -314,7 +320,7 @@ module Jekyll
 
       if is_collapsible
         open_attr = is_open ? " open" : ""
-        summary_text = !title.empty? ? title : ctype.capitalize
+        summary_text = !title.empty? ? title : (LABELED_TYPES.include?(ctype) ? "&nbsp;" : ctype.capitalize)
         html = <<~HTML
           <details class="#{box_class}"#{open_attr} markdown="1">
           <summary markdown="1">
