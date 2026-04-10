@@ -1,0 +1,45 @@
+/*
+ * Table styling favoring natural width, centering, and responsive wrapping.
+ */
+
+.content {
+  .table-wrapper {
+    text-align: center; /* Center the inline-table */
+    margin: 1.5rem 0;
+    overflow-x: auto; /* Fallback scroll for extremely wide content (e.g. math) */
+
+    table {
+      display: inline-table; /* Natural width + honor text-align: center */
+      margin: 0 auto;
+      border-collapse: collapse;
+      max-width: 100%;
+      width: auto;
+      table-layout: auto; 
+      text-align: left; /* Reset alignment for cell content */
+    }
+
+    th, td {
+      /* Favor wrapping if content reaches max-width */
+      overflow-wrap: break-word;
+      white-space: normal;
+
+      /* Ensure MathJax expressions don't break internally */
+      mjx-container {
+        word-break: normal;
+        overflow-wrap: normal;
+        white-space: nowrap;
+        display: inline-grid;
+      }
+    }
+  }
+
+  /* Table-specific box styling */
+  .box-table {
+    .table-wrapper {
+      margin: 0.5rem 0;
+    }
+    table {
+      box-shadow: none; /* Let the box handle the shadow/border */
+    }
+  }
+}

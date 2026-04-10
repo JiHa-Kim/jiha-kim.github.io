@@ -25,14 +25,14 @@ module Jekyll
       "important" => "box-important", "success" => "box-success", "check" => "box-check", "done" => "box-done",
       "question" => "box-question", "help" => "box-help", "faq" => "box-faq",
       "warning" => "box-warning", "caution" => "box-caution", "attention" => "box-attention",
-      "danger" => "box-danger", "error" => "box-error", "bug" => "box-bug", "failure" => "box-failure",
-      "fail" => "box-fail", "missing" => "box-missing", "quote" => "box-quote", "cite" => "box-cite"
+      "fail" => "box-fail", "missing" => "box-missing", "quote" => "box-quote", "cite" => "box-cite",
+      "table" => "box-table"
     }.freeze
 
     LABELED_TYPES = %w[
       definition lemma proposition theorem example corollary remark proof
       principle axiom postulate conjecture claim notation algorithm problem
-      exercise solution assumption convention fact caution
+      exercise solution assumption convention fact caution table
     ].freeze
 
     DEFAULT_OPEN_TYPES = %w[question help faq].freeze

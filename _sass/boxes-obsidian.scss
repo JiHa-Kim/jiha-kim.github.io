@@ -225,6 +225,13 @@ $box-configs: (
     bg: rgba(#d97706, 0.08),
     label: 'Caution',
     dark: (color: #fbbf24, border: #a16207)
+  ),
+  "table": (
+    icon: '\f0ce', // fa-table
+    color: #6d6d6d,
+    bg: rgba(#6d6d6d, 0.04),
+    label: 'Table',
+    dark: (color: #d1d5db, border: #4b4b4b)
   )
 );
 
