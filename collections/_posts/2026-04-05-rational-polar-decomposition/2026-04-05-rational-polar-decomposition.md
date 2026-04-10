@@ -265,12 +265,13 @@ Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use sym
 
 For the design floor $\ell_0 = 10^{-3}$, the implementation constants are precomputed offline in FP64. In the dynamic path, if $\ell_{\text{est}} > \ell_0$, the algorithm fetches a set of precomputed coefficients from a **densely sweeped cache** (a lookup table indexed by $\ell$). This allows the DWH and PE steps to be significantly more aggressive, leading to tighter final error bounds or potentially fewer iterations for easy matrices.
 
-| Step     | Parameters                    | Values                                                                      |
-| :------- | :---------------------------- | :-------------------------------------------------------------------------- |
-| **DWH**  | $g_I, g_B, g_H, g_{H^2}$      | 0.030883301527615, 0.968872554082809, 3.906861822017413, -3.937745123545028 |
-|          | $\gamma_0, \alpha_0, \beta_0$ | 0.000062499017684, 0.984313239818915, 251.007791810856                      |
-| **PE 1** | $a_1, b_1, c_1$               | 3.824452920237891, -7.181066039236940, 4.513346248799179                    |
-| **PE 2** | $a_2, b_2, c_2$               | 1.901427287944732, -1.279060386064908, 0.377917707130065                    |
+> [!table] Design Constants for $\ell_0 = 10^{-3}$
+> | Step     | Parameters                    | Values                                                                      |
+> | :------- | :---------------------------- | :-------------------------------------------------------------------------- |
+> | **DWH**  | $g_I, g_B, g_H, g_{H^2}$      | 0.030883301527615, 0.968872554082809, 3.906861822017413, -3.937745123545028 |
+> |          | $\gamma_0, \alpha_0, \beta_0$ | 0.000062499017684, 0.984313239818915, 251.007791810856                      |
+> | **PE 1** | $a_1, b_1, c_1$               | 3.824452920237891, -7.181066039236940, 4.513346248799179                    |
+> | **PE 2** | $a_2, b_2, c_2$               | 1.901427287944732, -1.279060386064908, 0.377917707130065                    |
 
 These are the actual PE coefficients used by the implementation. The normalized centered coefficients and the absorbed-scaling relation are derived in Section 6.3.
 
