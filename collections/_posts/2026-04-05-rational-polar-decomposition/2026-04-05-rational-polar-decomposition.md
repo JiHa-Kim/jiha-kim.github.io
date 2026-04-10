@@ -328,40 +328,63 @@ So the state is really the normalized interval parameter $\lambda$, not the two 
 > 
 > 5. **Conclusion**: Since $f(E) = \frac{1-E}{1+E}$ is decreasing in $E$, the ratio $\lambda_{\text{next}}$ is maximized precisely when the one-step error $E$ is minimized. Therefore, the greedy move is globally optimal.
 
-### 6.2 The Monotone Rational Reduction
+### 6.2 The Bounded Rational Reduction
 
-The transition from a global minimax problem to the one-sided DWH update relies on the monotonicity of the degree-$(3, 2)$ rational maps.
+We restrict to the degree-$(3,2)$ odd rational family
+$$
+f(x)=x\frac{a+bx^2}{1+cx^2},\qquad a,b,c>0.
+$$
+Because $f$ is odd, the two-sided sign-approximation error reduces to the positive side. 
 
-> [!lemma] Rational Monotonicity Condition
-> Let $f(x) = x \frac{a+bx^2}{1+cx^2}$ with $a, b, c > 0$. The derivative $f'(x)$ is non-negative for all $x \ge 0$ if and only if
-> $$ ac \le 9b $$
+As noted in the **Zolo-pd** algorithm {% cite nakatsukasaComputingFundamentalMatrix2016 %}, the one-sided "max-min" problem is equivalent to the traditional "min-max" problem up to a scaling factor. This equivalence holds for any class of odd approximants $\mathcal{F}$ closed under positive scaling (e.g. odd polynomials or rationals of a fixed type).
+
+> [!lemma] Equivalence of Minimax and Max-Min
+> Let $E_*$ be the optimal two-sided minimax error on $S_\ell = [-1, -\ell] \cup [\ell, 1]$, and let $m_*$ be the optimal "floor" for the one-sided max-min problem under the global no-overshoot constraint $0 \le f(x) \le 1$ on $[0, 1]$. Then:
+> $$ m_* = \frac{1-E_*}{1+E_*} \iff E_* = \frac{1-m_*}{1+m_*}. $$
+
+> [!proof]- Proof (Two Scaling Maps)
+> 1. **From Minimax to Max-Min**: If $R \in \mathcal{F}$ has minimax error $E$, then on $[\ell, 1]$ we have $1-E \le R(x) \le 1+E$. Define $S(x) = R(x) / (1+E)$. Then $S(x) \le 1$ on $[0,1]$ and $\min_{x\in[\ell,1]} S(x) \ge (1-E)/(1+E)$. Thus $m_* \ge (1-E_*)/(1+E_*)$.
+>
+> 2. **From Max-Min to Minimax**: Let $S \in \mathcal{F}$ satisfy $\max_{[0,1]} S = 1$ and $m = \min_{[\ell, 1]} S$. Define $R(x) = \alpha S(x)$ with $\alpha = 2/(1+m)$. On $[\ell, 1]$, $R(x)$ ranges in $[\alpha m, \alpha]$. This scaling makes the deviations from 1 symmetric: $\alpha - 1 = 1 - \alpha m = (1-m)/(1+m)$. Thus $E_* \le (1-m_*)/(1+m_*)$.
+>
+> Combining both yields the exact equality.
+
+The key design feature of the DWH step is this boundedness: we enforce a "no-overshoot" constraint $0 < f(x) \le 1$ on the tracked interval together with the normalization $f(1)=1$. (With this family, $f(1)=1$ is equivalent to $c=a+b-1$.)
+
+> [!lemma] One-sided reduction under no-overshoot
+> Assume $f(1)=1$ and $0<f(x)\le 1$ for all $x\in[\ell,1]$. Let
+> $$ m(f)=\min_{x\in[\ell,1]} f(x). $$
+> Then the uniform error satisfies
+> $$ \sup_{x\in[\ell,1]}|1-f(x)| = 1-m(f). $$
+> Consequently, minimizing the minimax error over such $f$ is equivalent to maximizing the "floor" $m(f)$.
 
 > [!proof]-
-> Differentiate $f(x) = \frac{ax + bx^3}{1+cx^2}$ using the quotient rule:
-> $$ f'(x) = \frac{(a+3bx^2)(1+cx^2) - 2cx(ax+bx^3)}{(1+cx^2)^2} = \frac{a + (3b-ac)x^2 + bcx^4}{(1+cx^2)^2} $$
-> Let $Q(t) = bc t^2 + (3b-ac)t + a$ with $t = x^2 \ge 0$. Monotonicity requires $Q(t) \ge 0$ for all $t \ge 0$. If $3b-ac < 0$ (i.e., $ac > 3b$), the minimum of $Q(t)$ occurs at $t_0 = \frac{ac-3b}{2bc} > 0$. The condition $Q(t_0) \ge 0$ requires the discriminant $D = (3b-ac)^2 - 4abc \le 0$. Expanding and factoring yields:
-> $$ a^2c^2 - 10abc + 9b^2 = (ac-9b)(ac-b) \le 0 $$
-> Since $ac > 3b > b$, the factor $(ac-b)$ is positive. Thus, we must have $ac \le 9b$.
+> Under the constraint $f(x)\le 1$ on $[\ell,1]$ and $f(1)=1$, we have $1-f(x)\ge 0$ and the maximum of $|1-f(x)|$ occurs where $f$ is minimal:
+> $$
+> \begin{aligned}
+> \sup_{x\in[\ell,1]}|1-f(x)| &= \sup_{x\in[\ell,1]}(1-f(x)) \\
+> &= 1-\inf_{x\in[\ell,1]}f(x) \\
+> &= 1-m(f).
+> \end{aligned}
+> $$
+> Since $1-m(f)$ decreases as $m(f)$ increases, minimizing the error is equivalent to maximizing $m(f)$.
 
-> [!proposition] Global Monotonicity of the Rational map
-> If $ac \le 9b$, then $f(x) = x\frac{a+bx^2}{1+cx^2}$ is strictly increasing on $\mathbb{R}^+$. Consequently, $f$ maps the interval $[\ell, 1]$ strictly to $[f(\ell), f(1)]$.
+> [!proposition] Reducing the floor to finitely many candidates
+> For any continuous $f$, the minimum $m(f)$ is attained either at an endpoint $x=\ell$ or at an interior critical point $x\in(\ell,1)$ where $f'(x)=0$. Therefore
+> $$ m(f)=\min\Bigl\{f(\ell),\ \min_{x\in(\ell,1): f'(x)=0} f(x)\Bigr\}. $$
+> In particular, for the DWH family (with its one-parameter optimal boundary), the floor is controlled by $f(\ell)$ and at most one interior local minimum $f(x_M)$.
 
-> [!corollary] Monotone Rational Reduction
-> Let $f$ satisfy the monotonicity condition. The global minimax problem on $S_{\ell} = [-1, -\ell] \cup [\ell, 1]$ is exactly equivalent to the one-sided constrained maximization:
-> $$ \text{Maximize } f(\ell) \quad \text{subject to } f(1) = 1 $$
-
-> [!proof]-
-> For monotone $f$, the minimax error is $E = \sup_{x \in [\ell, 1]} |1 - f(x)|$. Optimality requires equioscillation at the endpoints: $f(1)-1 = 1-f(\ell) = E$. After normalizing to $f(1)=1$, the lower endpoint becomes $(1-E)/(1+E)$. Since $1 - \frac{1-E}{1+E} = \frac{2E}{1+E}$ is strictly increasing in $E$, maximizing the lower endpoint $f(\ell)$ is equivalent to minimizing the global error.
+> [!corollary] One-sided constrained maximization (DWH step)
+> Under the constraints
+> $$ f(1)=1,\qquad 0<f(x)\le 1\ \ \forall x\in[0,1], $$
+> the one-step design problem is
+> $$ \text{maximize}\quad m(f)=\min_{x\in[\ell,1]} f(x), $$
+> which is equivalent to minimizing the original two-sided minimax error on $S_\ell$.
 
 > [!theorem] Optimal DWH Coefficients
-> For a design floor $\ell \in (0, 1]$, the DWH coefficients $a, b, c$ that minimize the minimax error are:
-> $$
-> \zeta = \left(\frac{4(1 - \ell^2)}{\ell^4}\right)^{1/3},\quad r = \sqrt{1 + \zeta}
-> $$
-> 
-> $$
-> a = r + \frac{1}{2}\sqrt{8 - 4\zeta + \frac{8(2 - \ell^2)}{\ell^2 r}}, \quad b = \frac{(a-1)^2}{4}, \quad c = a+b-1.
-> $$
+> For a design floor $\ell\in(0,1]$, the DWH coefficients $(a,b,c)$ that minimize the minimax error are:
+> $$ \zeta=\left(\frac{4(1-\ell^2)}{\ell^4}\right)^{1/3},\quad r=\sqrt{1+\zeta}, $$
+> $$ a = r + \frac{1}{2}\sqrt{8 - 4\zeta + \frac{8(2 - \ell^2)}{\ell^2 r}}, \quad b = \frac{(a-1)^2}{4}, \quad c = a+b-1. $$
 
 In the Gram-space iteration ($B = A^\top A$), we use a **Resolvent-Basis Expansion** that guarantees exact stability while cutting the matrix multiplication FLOPs in half. Because the algebra generated by $B$ and the bounded resolvent $H_0 = (I + cB)^{-1} = \gamma(\gamma I + B)^{-1}$ closes linearly under the identity $B H_0 = (I - H_0)/c$, we can analytically expand the DWH update into a linear combination that avoids matrix cross-multiplications entirely:
 $$
@@ -369,21 +392,21 @@ B \leftarrow g_I I + g_B B + g_H H_0 + g_{H^2} H_0^2
 $$
 By using this algebraic flattening, we compute the DWH update using only one symmetric matrix squaring, $H_0^2$. The scale-invariant coefficients $g_I, g_B, g_H, g_{H^2}$ are pre-computed in FP64, eliminating all dynamic-range runtime evaluation. The orientation factor $K$ is simultaneously updated via $(\alpha_0 I + \beta_0 H_0)$, where $\alpha_0 = b/c$ and $\beta_0 = a - b/c$.
 
-### 6.3 Monotonicity and the Endpoint Barrier
+### 6.3 Normalization and the Composition Barrier
 
-**The core difference between DWH and Polar Express is that the former relies on a "reduction to endpoints" that is formally ill-posed for non-monotone functions.**
+For Polar Express, we utilize the degree-5 odd polynomial $p(x)=ax+bx^3+cx^5$. While the max-min framework described in $\S 6.2$ applies to both rationals and polynomials, their standard presentation varies by implementation need.
 
-For any odd map $f$ on $[\ell, 1]$, the proxy problem—maximizing $f(\ell)$ subject to $f(1) = 1$—is only valid if $f$ is monotone. For polynomials, which can oscillate, this reduction fails completely.
+*   **Rationals (DWH)**: The "no-overshoot" form is natural for the **resolvent basis** ($H_0 = (I+cB)^{-1}$), where the coefficients are tuned to map exactly to $[m, 1]$.
+*   **Polynomials (PE)**: The centered equioscillating form is natural for standard polynomial evaluation on hardware, where dynamic range is manageable when centered around 1.
 
-*   **Rationals (DWH)**: Because the optimal rationals are strictly increasing, the maximum is always at the endpoint ($x=1$). The constraint $f(1)=1$ effectively "caps" the entire function, making the endpoint solution globally useful.
-*   **Polynomials (PE)**: Optimal polynomials for the sign function are **not** monotone; they equioscillate. Without monotonicity, the endpoint problem is **formally unbounded**.
+The apparent "overshoot" issue is not a fundamental capability gap, but merely a choice of **normalization**. Rescaling between a floor-maximized $p(x)$ and an equioscillating $\hat{p}(x)$ is a mechanical change of variables. The **fundamental distinction** lies instead in **composition optimality**.
 
 > [!caution] Disproof: The Endpoint Trap
-> Consider the family of odd cubics $p_k(x) = (1+k)x - kx^3$. For any $k > 0$, these satisfy the normalization $p_k(1) = 1$. However:
+> Consider the family of odd cubics $p_k(x) = (1+k)x - kx^3$. For any $k > 0$, these satisfy the endpoint constraint $p_k(1) \le 1$. However:
 > 1.  **Unbounded Lower Boundary**: At any $\ell \in (0, 1)$, we have $p_k(\ell) = \ell + k(\ell - \ell^3)$. As $k \to \infty$, the value at $\ell$ grows to infinity.
 > 2.  **Infinite Interior Peak**: The function reaches an interior maximum at $x = \sqrt{(1+k)/3k} \approx 1/\sqrt{3}$ with $p_k(x) \approx \frac{2}{3\sqrt{3}} k$. This also grows to infinity.
 > 
-> Thus, the "optimal" polynomial in the endpoint sense is a disaster: it achieves a "perfect" lower boundary by oscillating wildly in the interior. To obtain a stable iteration, Polar Express must solve the **Global Minimax Problem** directly, ensuring that the function stays within $[1-E, 1+E]$ across the entire interval $[\ell, 1]$.
+> Thus, the "optimal" polynomial in the endpoint sense is a disaster: it achieves a "perfect" lower boundary by oscillating wildly in the interior. To obtain a stable iteration, Polar Express must solve the **Global Minimax Problem** directly, ensuring that the function satisfies the global constraint $\sup_{x\in[\ell,1]} p(x) \le 1+E$.
 
 > [!theorem] Closed-Form Centered PE Coefficients
 > Fix $0 < \ell < 1$. The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ on $[\ell, 1]$ are uniquely determined by the interior equioscillation root $q_0 \in (\ell, 1)$ of the degree-9 polynomial:
@@ -478,13 +501,14 @@ This is not just a structural curiosity; it has material impact on approximation
 
 ### 6.5 Summary Table
 
-| Aspect                                  | Rational: DWH / Zolotarev                        | Polynomial: PE                                                         |
-| :-------------------------------------- | :----------------------------------------------- | :--------------------------------------------------------------------- |
-| Optimal shape                           | Monotone on $[\ell,1]$                           | Equioscillating on the tracked interval                                |
-| Reduction to one-sided constrained form | Exact up to scaling                              | Not exact                                                              |
-| Composition of optima                   | Optimal class is closed under composition        | Optimal class is not closed under composition                          |
-| Global scale                            | Usually written with upper endpoint fixed at $1$ | Any non-unit upper endpoint can be absorbed into the next coefficients |
-| Offline design                          | Closed-form rational formulas                    | Interval-dependent equioscillation and root-finding                    |
+| Aspect                                  | Rational: DWH / Zolotarev                              | Polynomial: PE                                                         |
+| :-------------------------------------- | :----------------------------------------------------- | :--------------------------------------------------------------------- |
+| Optimal shape                           | Floor-maximized or Equioscillating                     | Floor-maximized or Equioscillating                                     |
+| Scale-invariant reduction               | Exact ($\S 6.2$)                                       | Exact ($\S 6.2$)                                                       |
+| Composition of optima                   | **Optimal class is closed** under composition          | Optimal class is **not** closed under composition                      |
+| Basis and Evaluation                    | Resolvent-basis ($H_0^2$)                              | Standard or Identity-centered monomial                                 |
+| Global scale                            | Usually written with floor maximized ($f \le 1$)       | Usually centered ($p \in [1-E, 1+E]$)                                  |
+| Offline design                          | Closed-form rational formulas                          | Interval-dependent equioscillation and root-finding                    |
 
 ## Appendix: Verification Code
 
