@@ -370,21 +370,17 @@ By using this algebraic flattening, we compute the DWH update using only one sym
 
 ### 6.3 Monotonicity and the Endpoint Barrier
 
-To understand why we treat Rational (DWH) and Polynomial (PE) families differently, we must distinguish between two optimization problems on the interval $[\ell, 1]$:
+**The core structural difference between DWH and Polar Express is that the former relies on a reduction to endpoint constraints that fails for non-monotone functions.**
 
-1.  **Global Minimax**: $E_* = \inf_{p \in \mathcal{F}} \|1 - p\|_{\infty, [\ell, 1]}$. This is the standard formulation where the error equioscillates between $1-E_*$ and $1+E_*$.
-2.  **Endpoint Reduction**: Maximize $f(\ell)$ subject to $f(1) = 1$. This is a proxy problem that only considers the interval boundaries.
+For any odd map $f$ on $[\ell, 1]$, the "Endpoint Reduction" problem—maximizing $f(\ell)$ subject to $f(1) = 1$—is only equivalent to minimizing the global error if $f$ is monotone.
 
-#### The Monotonicity Alignment
-For functions that are **monotone** on $[\ell, 1]$ (like the DWH rationals), these two problems are essentially equivalent. In a monotone minimax solution, the extrema are achieved exactly at the endpoints: $f(1) = 1+E_*$ and $f(\ell) = 1-E_*$. By simply scaling the function such that $f(1)=1$, one obtains an optimizer for the endpoint problem with $f(\ell) = (1-E_*)/(1+E_*)$. Thus, for rationals, we can bypass the full minimax machinery and solve the simpler endpoint problem.
+*   **Rationals (DWH)**: Because the optimal rationals are strictly increasing, the maximum is always at the endpoint ($f(1)=1$). Minimizing the error at the boundaries automatically minimizes the error globally.
+*   **Polynomials (PE)**: Optimal polynomials for the sign function are **not** monotone; they equioscillate. Consequently, $p(1)=1$ does not control the global error.
 
-#### The Polynomial Divergence
-For polynomials, this reduction fails. Because optimal polynomials for the sign function are not monotone, their maximum value on $[\ell, 1]$ is generally **not** achieved at the endpoint $x=1$; it occurs in the interior. 
-
-Consequently, forcing $p(1)=1$ does not control the global overshoot. A polynomial that maximizes $p(\ell)$ subject to $p(1)=1$ might have a massive interior peak, making it a poor approximation of the sign function. To get a useful polar factor, we must solve the **Global Minimax Problem** directly, which results in the equioscillating Polar Express coefficients $[1-E, 1+E]$.
-
-> [!important] Summary
-> The DWH rational steps are designed via endpoint reduction (valid due to monotonicity), whereas Polar Express polynomial steps must be designed via global minimax (due to interior extrema).
+> [!caution] Counterexample: The Endpoint Trap
+> Consider an odd polynomial $p(x)$ that maximizes $p(\ell)$ subject to $p(1)=1$. Without monotonicity, the optimizer is free to "cheat" the global constraints by creating a large interior peak. A polynomial that satisfies $p(1)=1$ and $p(\ell)=0.8$ might swing up to $p(0.9)=1.5$ in the interior, resulting in a global error of $0.5$ despite looking "correct" at the endpoints.
+> 
+> To obtain a useful polar factor, Polar Express must solve the **Global Minimax Problem** directly, resulting in an equioscillating image where the maximum value $(1+E)$ is achieved at an interior critical point, not at $x=1$.
 
 > [!theorem] Closed-Form Centered PE Coefficients
 > Fix $0 < \ell < 1$. The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ on $[\ell, 1]$ are uniquely determined by the interior equioscillation root $q_0 \in (\ell, 1)$ of the degree-9 polynomial:
