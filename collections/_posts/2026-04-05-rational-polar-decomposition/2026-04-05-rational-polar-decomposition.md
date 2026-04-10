@@ -162,7 +162,7 @@ def SafeCholesky($S, dtype, K_{\max}=6$):
 
 ### 3.2 The Main Hybrid Algorithm
 
-The implementation uses one DWH step followed by two PE steps and exactly two tall rectangular GEMMs.
+The implementation uses one DWH step followed by two PE steps and exactly two tall rectangular GEMMs. To optimize performance on well-conditioned matrices, we estimate the actual lower bound $\ell_{\text{est}}$ online and fetch specialized coefficients from a densely sweeped cache if the matrix is "easy" enough to warrant a more aggressive update.
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Optimized Hybrid Polar: 1 DWH + 2 PE</div>
@@ -188,19 +188,26 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     $u \leftarrow \dfrac{(1+\eta)\operatorname{tr}(G) + \sqrt{(N-1)\max(0, N\|G\|_F^2 - \operatorname{tr}(G)^2)}}{N}$
     $B \leftarrow (D^{-1} \tilde{G} D^{-1})/u$
 
-    # 4. Step 1: DWH ($\ell_{0} = 10^{-3}$)
+    # 4. Step 1: DWH (Initial floor $\ell_{0} = 10^{-3}$)
     $S \leftarrow \gamma_{0} u \Delta + \tilde{G}$
     $(L, \tau) \leftarrow$ @SafeCholesky($S$)
     $S_{\text{inv}} \leftarrow$ @cholesky_inverse($L$)
     
-    if $\frac{1}{u \operatorname{tr}(S_{\text{inv}})} - \gamma_{0} > \ell_{\text{fast}}$:
+    # Estimate actual lower bound and fetch specialized coefficients
+    $\ell_{\text{est}}^2 \leftarrow \max(\ell_0^2, \frac{1}{u \operatorname{tr}(S_{\text{inv}})} - \gamma_{0})$
+    
+    if $\ell_{\text{est}}^2 > \ell_{\text{fast}}^2$:
         $K \leftarrow \frac{1}{\sqrt{u}} I$ # Fast-path: bypass DWH
     else:
+        if $\ell_{\text{est}}^2 > \ell_0^2$:
+            # Non-trivial improvement detected: fetch from densely sweeped cache
+            $(g_I, g_B, g_H, g_{H^2}, \alpha_0, \beta_0) \leftarrow$ @FetchCachedCoeffs($\sqrt{\ell_{\text{est}}^2}$)
+
         $H_{0} \leftarrow \gamma_{0} u D S_{\text{inv}} D$ # Bounded resolvent
         $H_{sq} \leftarrow$ @Sym($H_{0}^{2}$) # Half-FLOP SYRK
         $B \leftarrow g_{I} I + g_{B} B + g_{H} H_{0} + g_{H^2} H_{sq}$ # Zero-GEMM step
         $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + \beta_{0} H_{0})$
-    $(\ell_1, u_1) \leftarrow$ scalar image interval after the DWH step # For the design floor, [0.248039, 1]
+    $(\ell_1, u_1) \leftarrow$ scalar image interval after the DWH step
 
     # 5. Step 2: Centered PE Cleanup 1
     $\lambda_1 \leftarrow \ell_1 / u_1$
@@ -234,9 +241,11 @@ Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use sym
 > $$
 > That terminal normalization is a certification step, not part of the intermediate PE iteration.
 
+---
+
 ## 4. Design Constants ($\ell_0 = 10^{-3}$)
 
-For the design floor $\ell_0 = 10^{-3}$, the implementation constants are precomputed offline in FP64:
+For the design floor $\ell_0 = 10^{-3}$, the implementation constants are precomputed offline in FP64. In the dynamic path, if $\ell_{\text{est}} > \ell_0$, the algorithm fetches a set of precomputed coefficients from a **densely sweeped cache** (a lookup table indexed by $\ell$). This allows the DWH and PE steps to be significantly more aggressive, leading to tighter final error bounds or potentially fewer iterations for easy matrices.
 
 | Step     | Parameters                    | Values                                                                      |
 | :------- | :---------------------------- | :-------------------------------------------------------------------------- |
