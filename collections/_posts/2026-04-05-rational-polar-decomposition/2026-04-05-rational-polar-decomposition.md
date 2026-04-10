@@ -327,14 +327,19 @@ So the state is really the normalized interval parameter $\lambda$, not the two 
 > 
 > 5. **Conclusion**: Since $f(E) = \frac{1-E}{1+E}$ is decreasing in $E$, the ratio $\lambda_{\text{next}}$ is maximized precisely when the one-step error $E$ is minimized. Therefore, the greedy move is globally optimal.
 
-### 6.2 Why the Rational Reduction Works
+### 6.2 The Monotone Rational Reduction
 
-The Dynamic Weighted Halley (DWH) iteration uses a degree-$(3, 2)$ rational map. Because this map is monotonically increasing on $[\ell, 1]$, its minimum occurs at $f(\ell)$ and its maximum at $f(1)$. This is why the rational problem can be reduced to a one-sided constrained problem without losing optimality.
+The transition from a global minimax problem to the one-sided DWH update follows directly from the mapping properties of the degree-$(3, 2)$ rational maps.
 
-> [!proof]- Why the Rational Reduction Is Valid
-> For odd maps, the two-sided sign-approximation error mirrors across the origin, so only the positive interval matters. After normalizing so that the top endpoint satisfies $f(1)=1$, a monotone rational step is judged entirely by how far it lifts the lower endpoint while keeping the image inside $[0,1]$.
->
-> Nakatsukasa and Freund {% cite nakatsukasaOptimizingHalleyIteration2010 %} show that, for the Zolotarev rational family, this one-sided constrained problem is equivalent up to scaling to the original two-sided sign-approximation problem. So in the rational case we can impose the no-overshoot constraint without giving up optimality.
+> [!lemma] Monotone Rational Reduction
+> Let $f(x) = x\frac{a+bx^2}{1+cx^2}$ be an odd rational function with $a,b,c > 0$. If $f$ is strictly increasing on $\mathbb{R}^+$ (guaranteed by $ac \le 9b$), then the two-sided minimax problem on $S_{\ell} = [-1, -\ell] \cup [\ell, 1]$ is equivalent to maximizing the lower endpoint $f(\ell)$ subject to $f(1) = 1$ and the stability constraint $f(x) \le 1$ for all $x \in [0, 1]$.
+
+> [!proof]-
+> 1.  **Monotonicity Condition**: Differentiating $f(x)$ using the quotient rule yields the numerator $Q(t) = bct^2 + (3b-ac)t + a$ where $t=x^2$. Analysis of this quadratic shows that $f'(x) > 0$ for all $x \ge 0$ if and only if $ac \le 9b$. Under this condition, $f$ maps the interval $[\ell, 1]$ strictly to $[f(\ell), f(1)]$. 
+> 
+> 2.  **Symmetry and Scale**: Because $f$ is odd, the approximation error $E(x) = |\operatorname{sign}(x) - f(x)|$ is even. Thus, the global error is determined entirely by the positive interval: $\max_{x \in S_{\ell}} E(x) = \max_{x \in [\ell, 1]} |1 - f(x)|$.
+> 
+> 3.  **One-Sided Equivalence**: On $[\ell, 1]$, the function $f$ is bounded by $[f(\ell), f(1)]$. The minimax choice scales $f$ such that it is centered around the identity: $f(1) = 1+E$ and $f(\ell) = 1-E$. Normalizing so that $f(1)=1$ yields the new lower endpoint $f(\ell) = (1-E)/(1+E)$. Since this expression is strictly decreasing in $E$, maximizing the "lift" $f(\ell)$ is mathematically equivalent to minimizing the global minimax error $E$.
 
 > [!theorem] Optimal DWH Coefficients
 > For a design floor $\ell \in (0, 1]$, the DWH coefficients $a, b, c$ that minimize the minimax error are:
