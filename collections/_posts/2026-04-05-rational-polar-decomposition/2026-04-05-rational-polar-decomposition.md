@@ -19,17 +19,61 @@ scholar:
 ---
 
 > [!info] Overview
-> The Muon optimizer {% cite jordanMuonOptimizer2024 %} projects update directions onto the Stiefel manifold via the matrix polar decomposition. The Newton-Schulz iteration is the standard hardware-aware choice, but it is a polynomial map that can be slow or unstable for ill-conditioned matrices. The Polar Express {% cite polarExpress2025 %} optimizes the polynomial basin, and the Dynamic Weighted Halley (DWH) {% cite nakatsukasaOptimizingHalleyIteration2010 %} iteration uses a rational map with much faster early convergence.
->
-> In this post we show that **neither pure rational nor pure polynomial is optimal**. Instead, a simple hybrid—**one DWH step followed by two degree-5 Polar Express steps**—is the sweet spot. The rational step crushes the hard high-condition-number regime; the polynomial steps finish the job where they are most efficient. The algorithm uses exactly two rectangular GEMMs, no eigendecomposition or power iteration, and is stable under FP16/BF16 arithmetic.
+> We introduce an optimized hybrid algorithm for the matrix polar decomposition, tailored for machine learning optimizers like Muon. By combining the rapid early convergence of **Dynamic Weighted Halley (rational)** steps with the hardware efficiency of **Polar Express (polynomial)** cleanup, we achieve a robust, high-performance polar factor.
 
 ---
 
-## 1. Why a Hybrid?
+## 1. Background and Motivation
+
+### 1.1 The Geometry of Gradients
+
+In deep learning, gradients often exhibit **extreme anisotropy**—they are much larger in some directions than others. This ill-conditioning forces standard optimizers to use small learning rates or complex preconditioning to avoid instability.
+
+Recently, the **Muon optimizer** {% cite jordanMuonOptimizer2024 %} has gained popularity by taking an aggressive stance: it completely discards the "stretch" (the magnitude of the gradient in different directions) and preserves only the "direction". By projecting the update onto the Stiefel manifold, Muon ensures that the update is purely orthogonal, which has shown remarkable empirical success in training large transformers.
+
+### 1.2 Defining the Polar Decomposition
+
+To formalize this "direction vs. stretch" split, we use the **polar decomposition**. Any matrix $A \in \mathbb{R}^{m \times n}$ (with $m \ge n$) can be factored as:
+$$
+A = QP
+$$
+where:
+- $Q$ is the **direction** matrix (column-orthonormal, $Q^\top Q = I$).
+- $P$ is a **positive semi-definite (non-negative definite)** stretch matrix (the "modulus").
+
+This is intimately related to the **Thin SVD**. If $A = U \Sigma V^\top$ ($U \in \mathbb{R}^{m \times r}, \Sigma \in \mathbb{R}^{r \times r}, V \in \mathbb{R}^{n \times r}$ for $r = \operatorname{rank}(A)$) is the thin SVD, then its corresponding polar factor $Q$ is:
+$$
+Q = U V^\top
+$$
+while $P = V \Sigma V^\top$. Equivalently,
+
+$$
+Q = A (A^\top A)^{+/2} = (A A^\top)^{+/2} A, \quad P = (A^\top A)^{1/2}.
+$$
+
+where $(A^\top A)^{+/2}$ is the Moore-Penrose pseudoinverse of the modulus. 
+
+The polar factor $Q$ is the "closest" orthonormal matrix to $A$ in the Frobenius norm, capturing the pure orientation of the transformation.
+
+$$
+Q = \underset{X^\top X = I}{\operatorname{argmin}} \|A - X\|_F
+$$
+
+### 1.3 Spectral Mapping
+
+While the SVD provides a direct way to compute $Q$, it is globally synchronous and expensive on modern hardware. Instead, we can use the **Spectral Mapping Theorem**. Any matrix function $f(A)$ defined via its Taylor series (or rational form) acts directly on the singular values of $A$:
+$$
+A = U \operatorname{diag}(\sigma_i) V^\top \implies f(A) = U \operatorname{diag}(f(\sigma_i)) V^\top
+$$
+The crucial trick is to design a function $f(x)$ such that $f(\sigma_i) \approx 1$ for all $\sigma_i \in (0, 1]$. If we can find such a function, then $f(A) \approx U (I) V^\top = Q$, giving us the polar factor without ever computing an explicit eigendecomposition.
+
+---
+
+## 2. Why a Hybrid?
 
 Iterative methods for the polar factor work by applying a scalar iteration $f(x)$ to the singular values $\sigma_i$ of $A$. After normalization so that $\sigma_{\max} = 1$, the goal is to drive the lower endpoint of the singular value interval $\ell \to 1$.
 
-### 1.1 The Two Scalar Maps
+### 2.1 The Two Scalar Maps
 
 - **DWH (rational)**: the Dynamic Weighted Halley map {% cite nakatsukasaOptimizingHalleyIteration2010 %} applies the rational function:
 
@@ -49,13 +93,13 @@ where $(a, b, c)$ solve the minimax problem $\min_{a,b,c}\max_{x \in [\ell,1]} |
 
 The key empirical fact: **Rational wins in the hard regime** (high condition number), while **Polynomial wins once the interval is easy**.
 
-### 1.2 Motivation: Crossing the Crossover
+### 2.2 Motivation: Crossing the Crossover
 
 The following widget plots the final lower endpoint for different starting floors $\ell$. Larger values closer to $1$ are better (equivalently, smaller error $1-\ell$ is better). (Both polynomial and rational steps are normalized so $\hat{p}(1)=1$).
 
 {% include comparison_widget.html %}
 
-### 1.3 The Hybrid Sweet Spot
+### 2.3 The Hybrid Sweet Spot
 
 For $\ell_0 = 10^{-3}$, the best pattern is not "all rational" or "all polynomial." It is the synergy of both:
 
@@ -78,11 +122,11 @@ $$
 
 ---
 
-## 2. Implementation and Performance
+## 3. Implementation and Performance
 
 The hybrid polar decomposition targets speed and stability under low-precision (BF16/FP16) arithmetic.
 
-### 2.1 Auxiliary Functions
+### 3.1 Auxiliary Functions
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Helpers</span> Stability and Symmetry Primitives</div>
@@ -101,7 +145,7 @@ def SafeCholesky($S, dtype, K_{\max}=6$):
 ```
 </div>
 
-### 2.2 The Main Hybrid Algorithm
+### 3.2 The Main Hybrid Algorithm
 
 The following algorithm utilizes exactly two tall rectangular GEMMs.
 
@@ -144,14 +188,14 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
     # 5. Step 2: PE Cleanup 1 (Pure Defect Pipeline)
     $E \leftarrow I - B$ # Shift to defect space
-    $U \leftarrow u_{1} E + v_{1} E^{2}$ # ($E^{2}$ via SYRK)
-    $K \leftarrow K + K U$
-    $M \leftarrow -2 U - U^{2}$ # Gram root-finding step
+    $Z \leftarrow u_{1} E + v_{1} E^{2}$ # ($E^{2}$ via SYRK)
+    $K \leftarrow K + K Z$
+    $M \leftarrow -2 Z - Z^{2}$ # Gram root-finding step
     $E \leftarrow E + M - \,$@Sym($E M$)
 
     # 6. Step 3: PE Cleanup 2
-    $U \leftarrow u_{2} E + v_{2} E^{2}$
-    $K \leftarrow K + K U$
+    $Z \leftarrow u_{2} E + v_{2} E^{2}$
+    $K \leftarrow K + K Z$
 
     # 7. Final Reconstitution
     $K \leftarrow \operatorname{diag}(d_i^{1/2})$ @Sym($K$) # Invert in-place scaling on K rows
@@ -161,7 +205,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 
 Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use symmetric kernels conceptually (SYRK/SYMM/SYR2K). Only apply `@Sym(·)` at choke points (right before factorization, and optionally right before the final $Q \leftarrow X K$ matmul).
 
-## 3. Design Constants ($\ell_0 = 10^{-3}$)
+## 4. Design Constants ($\ell_0 = 10^{-3}$)
 
 Fixed constants for implementation, computed offline in FP64:
 
@@ -174,7 +218,7 @@ Fixed constants for implementation, computed offline in FP64:
 
 ---
 
-## 4. Discussion
+## 5. Discussion
 
 - **Numerical Robustness**: By performing column-wise normalization (ColNorm) for the Gram accumulation and carrying that scaling through the first Cholesky solve, we shield the algorithm from dynamic range overflows and precision loss in low-precision (BF16/FP16) arithmetic without changing the target polar factor.
 - **Architectural FLOP Avoidance**: At three distinct moments, the mathematical constraints of the problem allow us to safely bypass dense matmuls. 
@@ -191,9 +235,9 @@ Combining rational robustness with polynomial speed results in a polar decomposi
 
 ---
 
-## 5. Technical Derivations
+## 6. Technical Derivations
 
-### 5.1 The Constrained Max-Min Problem
+### 6.1 The Constrained Max-Min Problem
 
 Both the DWH and Polar Express steps approximate the **matrix sign function**. Given an interval of singular values (normalized to a spectral radius of 1), the goal is to approximate $\operatorname{sign}(x)$ on the domain $D = [-1, -\ell] \cup [\ell, 1]$ for a floor $\ell \in (0, 1]$.
 
@@ -205,7 +249,7 @@ $$
 $$
 where $\mathcal{F}_{\text{odd}}$ is the space of candidate odd functions (rational or polynomial). 
 
-### 5.2 Optimality for Rational Iterations (DWH)
+### 6.2 Optimality for Rational Iterations (DWH)
 
 The Dynamic Weighted Halley (DWH) iteration utilizes a degree-$(3, 2)$ rational map. Because this specific rational form is chosen to be monotonically increasing on $[\ell, 1]$, its minimum strictly occurs at $f(\ell)$ and its maximum at $f(1)$. 
 
@@ -227,7 +271,7 @@ B \leftarrow g_I I + g_B B + g_H H_0 + g_{H^2} H_0^2
 $$
 By using this algebraic flattening, we compute the DWH update using only one symmetric matrix squaring, $H_0^2$. The scale-invariant coefficients $g_I, g_B, g_H, g_{H^2}$ are pre-computed in FP64, eliminating all dynamic-range runtime evaluation. The orientation factor $K$ is simultaneously updated via $(\alpha_0 I + \beta_0 H_0)$, where $\alpha_0 = b/c$ and $\beta_0 = a - b/c$.
 
-### 5.3 Optimality for Polynomial Iterations (Polar Express)
+### 6.3 Optimality for Polynomial Iterations (Polar Express)
 
 We use the degree-5 odd polynomial $p(x) = x(a + bx^2 + cx^4)$. Unlike the monotonic DWH rational map, the optimal polynomial map *equioscillates*. 
 
@@ -239,9 +283,9 @@ By the Chebyshev Equioscillation Theorem, the optimal unconstrained $p(x)$ oscil
 
 By explicitly normalizing by $p(1)$, the top endpoint is fixed to 1, allowing us to operate in a **Pure Defect Pipeline**. By analytically mapping the Gram system to its defect form $E = I - B$, the entire PE sequence executes as a root-finding iteration purely on the $E$ tensor:
 $$
-U_i = u_i E + v_i E^2, \quad E \leftarrow 1 - (1-E)(1+U_i)^2
+Z_i = u_i E + v_i E^2, \quad E \leftarrow 1 - (1-E)(1+Z_i)^2
 $$
-This update is applied to the orientation factor via $K \leftarrow K(I + U_i)$. By operating strictly on the defect $E$, we guarantee robust error resolution in FP16/BF16 without relative truncation bounds against the identity.
+This update is applied to the orientation factor via $K \leftarrow K(I + Z_i)$. By operating strictly on the defect $E$, we guarantee robust error resolution in FP16/BF16 without relative truncation bounds against the identity.
 
 > [!theorem] Closed-Form Unconstrained PE Coefficients (Gram-Quadratic)
 > Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of the following polynomial that yields equioscillation with minimax error $E < 1$:
@@ -296,7 +340,7 @@ def verify_full_pe_derivation():
     r_sq = sympy.symbols('r_sq')
     r2_sol = sympy.solve(eq_rsq.subs(r**2, r_sq), r_sq)[0]
     
-    # Verified target from §5.3
+    # Verified target from §6.3
     target_r2 = (2*q0**3 + 4*q0**2 + 6*q0 + 3) / (10*q0 + 5)
     assert sympy.simplify(r2_sol - target_r2) == 0
     
@@ -306,7 +350,7 @@ def verify_full_pe_derivation():
     final_eq = sympy.simplify((expr_ell**2 - expr_r**2).subs(r**2, r2_sol))
     num, _ = sympy.fraction(final_eq)
     
-    # Target polynomial F(q0, ell) from §5.3
+    # Target polynomial F(q0, ell) from §6.3
     F0 = -2048*q0**9 - 5888*q0**8 - 9608*q0**7 - 7728*q0**6 - 1288*q0**5 + 1748*q0**4 + 888*q0**3 + 8*q0**2 - 72*q0 - 12
     F1 = 4520*q0**7 + 9340*q0**6 + 10990*q0**5 + 8525*q0**4 + 3200*q0**3 + 80*q0**2 - 240*q0 - 40
     F2 = 3600*q0**5 + 5800*q0**4 + 3900*q0**3 + 1750*q0**2 + 600*q0 + 100
@@ -327,7 +371,7 @@ if __name__ == "__main__":
 ```
 </details>
 
-### 5.4 The Limits of Composition (Polynomials vs. Zolotarev)
+### 6.4 The Limits of Composition (Polynomials vs. Zolotarev)
 
 A natural question is whether we can construct high-degree optimal polynomials by simply composing lower-degree optimal ones. While this works for rational functions (Zolotarev rationals), it notably fails for polynomials.
 
