@@ -45,23 +45,19 @@ where:
 - $Q$ is the **direction** matrix (column-orthonormal, $Q^\top Q = I$).
 - $P$ is a **positive semi-definite (non-negative definite)** stretch matrix (the "modulus").
 
-This is intimately related to the **Thin SVD**. If $A = U \Sigma V^\top$ ($U \in \mathbb{R}^{m \times r}, \Sigma \in \mathbb{R}^{r \times r}, V \in \mathbb{R}^{n \times r}$ for $r = \operatorname{rank}(A)$) is the thin SVD, then its corresponding polar factor $Q$ is:
+This is intimately related to the **Thin SVD**. If $A = U \Sigma V^\top$ ($U \in \mathbb{R}^{m \times r}, \Sigma \in \mathbb{R}^{r \times r}, V \in \mathbb{R}^{n \times r}$ for $r = \operatorname{rank}(A)$) is the thin SVD, then its corresponding polar factor $Q$ is the "closest" orthonormal matrix to $A$ in the Frobenius norm, capturing the pure orientation of the transformation.
+
 $$
-Q = U V^\top
+Q = U V^\top \in \underset{X^\top X = I}{\operatorname{argmin}} \|A - X\|_F,
 $$
+
 while $P = V \Sigma V^\top$. Equivalently,
 
 $$
-Q = A (A^\top A)^{+/2} = (A A^\top)^{+/2} A, \quad P = (A^\top A)^{1/2}.
+P = (A^\top A)^{1/2}, \quad Q = A (A^\top A)^{+/2} = (A A^\top)^{+/2} A
 $$
 
 where $(A^\top A)^{+/2}$ is the Moore-Penrose pseudoinverse of the modulus. 
-
-The polar factor $Q$ is the "closest" orthonormal matrix to $A$ in the Frobenius norm, capturing the pure orientation of the transformation.
-
-$$
-Q = \underset{X^\top X = I}{\operatorname{argmin}} \|A - X\|_F
-$$
 
 ### 1.3 Spectral Mapping
 
