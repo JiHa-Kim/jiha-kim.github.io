@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Fast Polar Decomposition with Rational and Polynomial Iterations"
+title: "Fast Polar Decomposition for Muon Optimizer with Rational and Polynomial Iterations"
 date: 2026-04-05 00:00 +0000
 description: "A hardware-aware hybrid polar decomposition for ML: one Dynamic Weighted Halley (rational) step to handle the hard early regime, then two Polar Express (polynomial) cleanup steps once the spectrum is easy. The result is exactly two rectangular GEMMs, no eigendecomposition or power iteration, and robust convergence from condition numbers up to 1000."
 categories:
@@ -9,9 +9,13 @@ categories:
 tags:
   - Polar Decomposition
   - Muon
+  - Orthogonalization
   - Matrix Iterations
   - Rational Functions
   - Polynomial Iterations
+  - Newton-Schulz
+  - Dynamic Weighted Halley
+  - Polar Express
   - Numerical Stability
 math: true
 scholar:
