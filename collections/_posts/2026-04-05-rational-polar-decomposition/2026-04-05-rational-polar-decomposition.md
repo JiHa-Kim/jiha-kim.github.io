@@ -162,7 +162,7 @@ def SafeCholesky($S, dtype, K_{\max}=6$):
 
 ### 3.2 The Main Hybrid Algorithm
 
-The implementation uses one DWH step followed by two PE steps and exactly two tall rectangular GEMMs. For clarity, `@CenteredPECoeffs($\lambda, u$)` denotes the **actual** PE coefficients on $[\ell, u]$; Section 6.3 explains how they are obtained from the normalized centered problem.
+The implementation uses one DWH step followed by two PE steps and exactly two tall rectangular GEMMs.
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Optimized Hybrid Polar: 1 DWH + 2 PE</div>
