@@ -235,7 +235,7 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
 ```
 </div>
 
-### 3.3 Numerical Stability in Low Precision
+### 3.3 Numerical Stability in Low Precision {#numerical-stability-in-low-precision}
 
 To ensure robust convergence in BF16/FP16, we adopt several stability "tricks" that prevent catastrophic cancellation and maintain the PSD property of the Gram objects.
 
