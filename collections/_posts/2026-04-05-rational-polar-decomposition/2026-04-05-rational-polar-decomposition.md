@@ -235,16 +235,32 @@ Combining rational robustness with polynomial speed results in a polar decomposi
 
 ## 6. Technical Derivations {#section-6}
 
-We now derive the weighting coefficients for the DWH and Polar Express iterations. Our goal is to connect the global "greedy" optimization strategy to the local minimax problems for rational and polynomial spectral maps.
+We now derive the weighting coefficients for the DWH and Polar Express iterations.
 
-### 6.1 The Global Strategy: Greedy Optimality
-
-We first show that the best multi-step iteration can be constructed by simply choosing the best possible map at each individual step.
+### Problem Formulation
 
 Fix a one-step family $\mathcal F$ of **odd** scalar maps (polynomial or rational) that is closed under positive scaling (if $\phi \in \mathcal F$ and $\alpha > 0$, then $\alpha\phi \in \mathcal F$). With $T$ remaining steps, the scalar sign-approximation problem on $[\ell, 1]$ for $\ell > 0$ is:
 $$
 \min_{\phi_1, \dots, \phi_T \in \mathcal F} \max_{x \in [\ell, 1]} \left| 1 - (\phi_T \circ \cdots \circ \phi_1)(x) \right|.
 $$
+
+Here, we consider the following two families of maps:
+
+Dynamic Weighted Halley (DWH):
+
+$$
+f(x) = x\frac{a+bx^2}{1+cx^2}
+$$
+
+Polar Express (PE):
+
+$$
+f(x) = x(a+bx^2+cx^4)
+$$
+
+### 6.1 The Global Strategy: Greedy Optimality
+
+We first show that the best multi-step iteration can be constructed by simply choosing the best possible map at each individual step.
 
 **Range gauge and the state transition.** For a candidate step $\phi \in \mathcal F$, define:
 $$
@@ -290,6 +306,7 @@ In this section, we connect the standard centered minimax error to the one-sided
 > $$
 
 We henceforth work in this bounded gauge ($\max=1$) and focus on maximizing the floor.
+
 ---
 
 ### 6.3 DWH Coefficients: Optimal Type (3,2) Bounded Step
