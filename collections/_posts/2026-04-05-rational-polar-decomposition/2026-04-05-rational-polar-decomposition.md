@@ -430,7 +430,7 @@ A natural question is whether high-degree optimal polynomials can be constructed
 > $$ A_7^2 = 3 A_5 A_9 $$
 > Consequently, a generic minimax polynomial of degree-9 will not be representable as a composition of cubics.
 
-> [!proof]
+> [!proof]-
 > Let $p_1(x) = ax + bx^3$ and $p_2(x) = cx + dx^3$. Expanding their composition yields:
 > $$ P(x) = c(ax + bx^3) + d(ax + bx^3)^3 = (ca)x + (cb + da^3)x^3 + (3da^2b)x^5 + (3dab^2)x^7 + (db^3)x^9 $$
 > Let $A_5 = 3da^2b, A_7 = 3dab^2,$ and $A_9 = db^3$. Then:
@@ -450,14 +450,10 @@ This is not just a structural curiosity; it has material impact on approximation
 
 ### 6.5 Summary Table
 
-| Aspect                                  | Rational: DWH / Zolotarev                              | Polynomial: PE                                                         |
-| :-------------------------------------- | :----------------------------------------------------- | :--------------------------------------------------------------------- |
-| Optimal shape                           | Floor-maximized or Equioscillating                     | Floor-maximized or Equioscillating                                     |
-| Scale-invariant reduction               | **General Equivalent** ($\S 6.2$)                      | **General Equivalent** ($\S 6.2$)                                      |
-| Composition of optima                   | **Optimal class is closed** under composition          | Optimal class is **not** closed under composition                      |
-| Basis and Evaluation                    | Resolvent-basis ($H_0^2$)                              | Standard or Identity-centered monomial                                 |
-| Global scale                            | Usually written with floor maximized ($f \le 1$)       | Usually centered ($p \in [1-E, 1+E]$)                                  |
-| Offline design                          | Closed-form rational formulas                          | Interval-dependent equioscillation and root-finding                    |
+| Aspect                | Rational: DWH / Zolotarev                     | Polynomial: PE                                      |
+| :-------------------- | :-------------------------------------------- | :-------------------------------------------------- |
+| Composition of optima | **Optimal class is closed** under composition | Optimal class is **not** closed under composition   |
+| Offline design        | Closed-form rational formulas                 | Interval-dependent equioscillation and root-finding |
 
 ## Appendix: Verification Code
 
