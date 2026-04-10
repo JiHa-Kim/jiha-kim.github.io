@@ -235,267 +235,194 @@ Combining rational robustness with polynomial speed results in a polar decomposi
 
 ## 6. Technical Derivations {#section-6}
 
-### 6.1 Problem Statement and Greedy Optimality
+We now derive the weighting coefficients for the DWH and Polar Express iterations. Our goal is to connect the global "greedy" optimization strategy to the local minimax problems for rational and polynomial spectral maps.
 
-Fix a one-step family $\mathcal F$ of **odd** scalar maps (polynomial or rational) that is closed under positive scaling: if $\phi\in\mathcal F$ and $\alpha>0$, then $\alpha\phi\in\mathcal F$.
+### 6.1 The Global Strategy: Greedy Optimality
 
-With $T$ remaining steps, the scalar sign-approximation problem on $[\ell,1]$, $\ell>0$ is
-$$
-\min_{\phi_1,\dots,\phi_T\in\mathcal F}\ \max_{x\in[1,u]}
-\left|1-(\phi_T\circ\cdots\circ\phi_1)(x)\right|.
-$$
+We first show that the best multi-step iteration can be constructed by simply choosing the best possible map at each individual step.
 
-**Range gauge and the state transition.** For a candidate step $\phi\in\mathcal F$, define
+Fix a one-step family $\mathcal F$ of **odd** scalar maps (polynomial or rational) that is closed under positive scaling (if $\phi \in \mathcal F$ and $\alpha > 0$, then $\alpha\phi \in \mathcal F$). With $T$ remaining steps, the scalar sign-approximation problem on $[\ell, 1]$ for $\ell > 0$ is:
 $$
-m(\phi;\ell)=\min_{y\in[\ell,1]}\phi(y),\qquad
-M(\phi;\ell)=\max_{y\in[\ell,1]}\phi(y).
-$$
-Because $\mathcal F$ is scale-closed, we may rescale $\phi$ by $1/M(\phi;\ell)$ and assume $M(\phi;\ell)=1$ (the "top normalized" gauge). In that gauge, the next normalized interval is $[\ell_+,1]$ with
-$$
-\ell_+(\phi;\ell)=\frac{m(\phi;\ell)}{M(\phi;\ell)}.
+\min_{\phi_1, \dots, \phi_T \in \mathcal F} \max_{x \in [\ell, 1]} \left| 1 - (\phi_T \circ \cdots \circ \phi_1)(x) \right|.
 $$
 
-Define $W_t(\ell)$ as the best achievable floor after $t$ steps:
+**Range gauge and the state transition.** For a candidate step $\phi \in \mathcal F$, define:
 $$
-W_t(\ell)=\sup\{\ell_t:\exists\ \phi_1,\dots,\phi_t\in\mathcal F\ \text{with}\ \ell_{k+1}=\ell_+(\phi_{k+1};\ell_k),\ \ell_0=\ell\}.
+m(\phi; \ell) = \min_{y \in [\ell, 1]} \phi(y), \qquad M(\phi; \ell) = \max_{y \in [\ell, 1]} \phi(y).
+$$
+Because $\mathcal F$ is scale-closed, we can rescale $\phi$ by $1/M(\phi; \ell)$ to ensure the maximum is $1$. In this "top-normalized" gauge, the interval $[\ell, 1]$ is mapped to $[\ell_+, 1]$ where:
+$$
+\ell_+(\phi; \ell) = \frac{m(\phi; \ell)}{M(\phi; \ell)}.
 $$
 
-> [!theorem] Greedy is optimal
-> For any horizon $T$, an optimal first step is any $\phi\in\mathcal F$ maximizing $\ell_+(\phi;\ell)$ on the current state. Repeating this rule at each state is globally optimal.
+> [!theorem] Optimality of the Greedy Policy
+> For any horizon $T$, an optimal first step $\phi_1$ is any map in $\mathcal F$ that maximizes the new floor $\ell_+(\phi; \ell)$. Repeating this rule at each state is globally optimal.
 
-> [!proof]- Greedy is optimal
-> The value function $W_t(\ell)$ is nondecreasing in $\ell$ because a tighter starting interval $[\ell,1]$ cannot reduce the best achievable floor after any fixed number of steps.
->
-> The Bellman recursion is
+> [!proof]-
+> Let $W_t(\ell)$ be the best achievable floor after $t$ steps starting from $\ell$:
 > $$
-> W_{t+1}(\ell)=\sup_{\phi\in\mathcal F} W_t\!\left(\ell_+(\phi;\ell)\right).
+> W_t(\ell) = \sup \{ \ell_t : \exists \phi_1, \dots, \phi_t \in \mathcal F \text{ with } \ell_{k+1} = \ell_+(\phi_{k+1}; \ell_k), \ell_0 = \ell \}.
 > $$
-> Since $W_t$ is nondecreasing, the maximizer is any $\phi$ maximizing $\ell_+(\phi;\ell)$. Induction over $t$ yields the greedy policy.
+> The value function $W_t(\ell)$ is non-decreasing in $\ell$, since a tighter starting interval cannot yield a worse result. The Bellman recursion is:
+> $$
+> W_{t+1}(\ell) = \sup_{\phi \in \mathcal F} W_t(\ell_+(\phi; \ell)).
+> $$
+> Since $W_t$ is monotonic, the supremum is achieved by any $\phi$ that maximizes $\ell_+(\phi; \ell)$. Induction on $t$ confirms the greedy policy.
 
-Section 6.2 connects this floor-maximization objective to the usual minimax error.
+### 6.2 The Local Objective: Gauge Fixing
+
+In this section, we connect the standard centered minimax error to the one-sided bounded maximization used in our derivations.
+
+> [!lemma] Equivalence of Minimax and Floor Maximization
+> Fix $\ell \in (0, 1]$. The centered minimax error $E_*$ and the top-normalized floor $m_*$ satisfy:
+> $$
+> m_* = \frac{1 - E_*}{1 + E_*} \quad \Longleftrightarrow \quad E_* = \frac{1 - m_*}{1 + m_*}.
+> $$
+
+> [!proof]-
+> 1. Suppose $\max_{[\ell, 1]} |1-R| \le E$. Then $1-E \le R \le 1+E$ on $[\ell, 1]$. Scaling $S = R/(1+E)$ gives $S \le 1$ and $\min_{[\ell, 1]} S \ge (1-E)/(1+E)$, so $m_* \ge (1-E_*)/(1+E_*)$.
+> 2. Conversely, let $S$ be feasible with $m = \min_{[\ell, 1]} S$ and $\max_{[0, 1]} S = 1$. Let $\alpha = 2/(1+m)$ and $R = \alpha S$. Then on $[\ell, 1]$, $R \in [\alpha m, \alpha]$ and $\alpha - 1 = 1 - \alpha m = (1-m)/(1+m)$. This implies $E_* \le (1-m_*)/(1+m_*)$.
+
+> [!corollary] One-Sided Reduction
+> Designing the best one-step contraction is equivalent to solving the bounded max-min problem:
+> $$
+> \max_{\phi \in \mathcal F} \min_{x \in [\ell, 1]} \phi(x) \quad \text{s.t.} \quad 0 \le \phi(x) \le 1 \text{ for } x \in [0, 1].
+> $$
+
+We henceforth work in this bounded gauge ($\max=1$) and focus on maximizing the floor.
+---
+
+### 6.3 DWH Coefficients: Optimal Type (3,2) Bounded Step
+
+The Dynamic Weighted Halley (DWH) step uses the odd type-$(3,2)$ rational family:
+$$
+f(x) = x \frac{a + bx^2}{1 + cx^2}, \quad a,b,c > 0.
+$$
+Enforcing the top-normalization constraint $f(1) = 1$ implies $c = a + b - 1$ (where $a+b > 1$). Substituting this, we define our objective function as:
+$$
+g(x; a, b) = x \frac{a + bx^2}{1 + (a + b - 1)x^2}.
+$$
+The goal is to find $(a, b)$ that maximize the floor on $[\ell, 1]$ while keeping $g \le 1$.
+
+**Step 1: Boundary Reduction (Tangency)**
+
+At the optimum, the constraint $g \le 1$ must be active at the global maximum. If the maximum occurs in the interior, feasibility requires a tangency condition.
+
+> [!lemma] Tangency Condition
+> If $g$ achieves its maximum value of $1$ at some interior point $x_m \in (\ell, 1)$, then at that point:
+> $$
+> g(x_m) = 1, \quad g'(x_m) = 0.
+> $$
+> This is equivalent to the constraint $a = 2\sqrt{b} + 1$, or $b = \frac{(a-1)^2}{4}$ for $a \ge 3$.
+
+> [!proof]-
+> Solving $g(x_m) = 1$ and $g'(x_m) = 0$ for $(a, b)$ in terms of $x_m$ and eliminating $x_m$ yields the relation $a = 2\sqrt{b} + 1$. The condition $a \ge 3$ ensures the maximizer $x_m$ is truly in the interior.
+
+**Step 2: Identifying Floor Candidates**
+
+Restricting to the curve $b = (a-1)^2/4$, we let $g_a(x)$ denote the resulting function.
+
+> [!lemma] Stationary Points and Candidate Minima
+> On this curve, $g_a'(x) = 0$ has two relevant positive roots:
+> $$
+> x_m^2 = \frac{4}{(a-1)^2}, \quad x_M^2 = \frac{4a}{(a+3)(a-1)}.
+> $$
+> Here $x_m$ is the interior global maximum ($g_a(x_m)=1$) and $x_M$ is an interior local minimum. The floor on $[\ell, 1]$ is thus:
+> $$
+> \min_{\ell \le x \le 1} g_a(x) = \min \{ s_1(a), s_2(a) \},
+> $$
+> where $s_1(a) = g_a(\ell)$ (the endpoint) and $s_2(a) = g_a(x_M)$ (the interior dip).
+
+> [!proof]-
+> Differentiating $g_a$ and factoring the numerator gives the stationary points $x_m$ and $x_M$. Substituting these into $g_a$ yields the stated candidate values. Since $g_a(1)=1$, the minimum must be either at the left boundary $\ell$ or at the interior minimum $x_M$.
+
+**Step 3: Equalization and Closed Form**
+
+The optimal parameter $a$ is found by equalizing these two potential minima.
+
+> [!theorem] Optimal DWH Coefficients
+> Defining $\zeta = \left( \frac{4(1-\ell^2)}{\ell^4} \right)^{1/3}$ and $r = \sqrt{1 + \zeta}$, the unique optimizer is:
+> $$
+> a = r + \frac{1}{2} \sqrt{8 - 4\zeta + \frac{8(2-\ell^2)}{\ell^2 r}}, \quad b = \frac{(a-1)^2}{4}, \quad c = a + b - 1.
+> $$
+
+> [!proof]-
+> Because $s_1(a)$ is increasing and $s_2(a)$ is decreasing, the floor is maximized at the unique solution to $s_1(a) = s_2(a)$. Solving this scalar equation analytically yields the closed form above.
 
 ---
 
-### 6.2 Gauge Fixing: Centered Minimax $\Leftrightarrow$ One-Sided Bounded Max-Min
+### 6.4 Polar Express: Normalized Quintic Coefficients
 
-Fix $\ell\in(0,1]$ and an odd, scale-closed family $\mathcal F$.
-
-**Centered minimax (positive side):**
+Polar Express (PE) uses an odd quintic polynomial in the same top-normalized gauge ($\hat{p}(1) = 1$):
 $$
-E_*=\min_{R\in\mathcal F}\ \max_{x\in[\ell,1]}|1-R(x)|.
+\hat{p}(x) = \hat{a}x + \hat{b}x^3 + \hat{c}x^5.
 $$
+At the minimax optimum, the error alternates at four points: the endpoints $\{\ell, 1\}$ and two interior critical points $\ell < q_0 < r < 1$ where $\hat{p}'(q_0) = \hat{p}'(r) = 0$. The optimality conditions are:
+1.  **Upper Matching**: $\hat{p}(q_0) = \hat{p}(1) = 1$.
+2.  **Lower Matching**: $\hat{p}(\ell) = \hat{p}(r) = m_*$.
 
-**Bounded max-min (top-normalized gauge):**
-$$
-m_*=\max_{S\in\mathcal F}\ \min_{x\in[\ell,1]}S(x)
-\quad\text{s.t.}\quad 0\le S(x)\le 1\ \ \forall x\in[0,1].
-$$
-(At an optimum the upper constraint is tight: $\max_{[0,1]}S=1$, otherwise scale up.)
+**Step 1: Parameterization by Critical Points**
 
-> [!lemma] Scaling equivalence
-> The optimal values satisfy
+We can express the coefficients in terms of the squared locations of the critical points $S = q_0^2 + r^2$ and $P = q_0^2 r^2$.
+
+> [!lemma] Coefficient Parameterization
+> The coefficients satisfy:
 > $$
-> m_*=\frac{1-E_*}{1+E_*}
-> \qquad\Longleftrightarrow\qquad
-> E_*=\frac{1-m_*}{1+m_*}.
+> \hat{a} = 5\hat{c}P, \qquad \hat{b} = -\frac{5\hat{c}}{3}S.
 > $$
 
-> [!proof]- Scaling equivalence
-> If $\max_{[\ell,1]}|1-R|\le E$, then $1-E\le R\le 1+E$ on $[\ell,1]$. Scaling $S=R/(1+E)$ gives $S\le 1$ and $\min_{[\ell,1]}S\ge(1-E)/(1+E)$, hence $m_*\ge(1-E_*)/(1+E_*)$.
->
-> Conversely, let $S$ be feasible with $m=\min_{[\ell,1]}S$ and $\max_{[0,1]}S=1$. Let $\alpha=2/(1+m)$ and set $R=\alpha S$. Then on $[\ell,1]$, $R\in[\alpha m,\alpha]$ and
+> [!proof]-
+> Write the derivative as $\hat{p}'(x) = 5\hat{c}(x^2 - q_0^2)(x^2 - r^2) = 5\hat{c}(x^4 - Sx^2 + P)$. Matching this with $\hat{p}'(x) = 5\hat{c}x^4 + 3\hat{b}x^2 + \hat{a}$ gives the stated relations.
+
+**Step 2: Solving for the Critical points**
+
+The condition that the interior maximum equals the boundary maximum allows us to express $r$ as a function of $q_0$.
+
+> [!lemma] Upper Peak Equalization
+> The condition $\hat{p}(q_0) = \hat{p}(1)$ implies:
 > $$
-> \alpha-1 = 1-\alpha m = \frac{1-m}{1+m},
-> $$
-> so $\max_{[\ell,1]}|1-R|\le (1-m)/(1+m)$ and $E_*\le(1-m_*)/(1+m_*)$. Combine.
-
-> [!corollary] One-sided reduction
-> Designing the best one-step contraction in the top-normalized gauge is exactly the bounded max-min problem above. The induced condition-number update is $\kappa_+=1/m_*$.
-
-From here on, we work directly in the bounded gauge ($\max=1$) and maximize the floor.
-
----
-
-### 6.3 DWH Coefficients (Optimal Type $(3,2)$ Bounded Step)
-
-DWH uses the odd type-$(3,2)$ rational family
-$$
-f(x)=x\frac{a+bx^2}{1+cx^2},\qquad a,b,c>0,
-$$
-with the top-normalization constraint $f(1)=1$, i.e.
-$$
-c=a+b-1,\qquad a+b>1.
-$$
-Write
-$$
-g(x;a,b)=x\frac{a+bx^2}{1+(a+b-1)x^2}.
-$$
-
-The one-step bounded design problem on $[\ell,1]$ is
-$$
-\max_{a,b}\ \min_{\ell\le x\le 1} g(x;a,b)
-\quad\text{s.t.}\quad 0<g(x;a,b)\le 1\ \ \forall x\in[\ell,1].
-$$
-
-#### 6.3.1 Boundary reduction
-
-At an optimum, the constraint $g\le 1$ is active at the global maximum; otherwise we could scale up and strictly increase the floor. When the active maximum occurs in the interior, feasibility at the boundary is by tangency.
-
-> [!lemma] Tangency boundary
-> If $g$ is feasible and achieves its maximum $1$ at some interior point $x_m\in(\ell,1)$, then at the boundary
-> $$
-> g(x_m)=1,\qquad g'(x_m)=0,
-> $$
-> which is equivalent to
-> $$
-> a=2\sqrt{b}+1
-> \qquad\Longleftrightarrow\qquad
-> b=\frac{(a-1)^2}{4},\quad a\ge 3.
+> r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)}.
 > $$
 
-> [!proof]- Tangency boundary
-> Solve $g(x_m)=1$ and $g'(x_m)=0$ for $(a,b)$ in terms of $x_m$ and eliminate $x_m$. The resulting relation is $a=2\sqrt{b}+1$, which reparameterizes as $b=(a-1)^2/4$. The regime $a\ge 3$ corresponds to a genuine interior maximizer.
+> [!proof]-
+> Substituting the parameterization into $\hat{p}(q_0) - \hat{p}(1) = 0$ and canceling the common scale $\hat{c}$ gives a scale-free equation in $q_0$ and $r$. Solving for $r^2$ yields the expression.
 
-Thus the optimum lies on the one-parameter curve $b=(a-1)^2/4$.
+**Step 3: Finding $q_0$ and Normalization**
 
-#### 6.3.2 Floor candidates and equalization
+Substituting $r^2(q_0)$ into the lower matching condition $\hat{p}(\ell) = \hat{p}(r)$ yields a single scalar equation for the remaining unknown $q_0$.
 
-Restrict to $b=(a-1)^2/4$ and denote $g_a(x)=g(x;a,(a-1)^2/4)$.
-
-> [!lemma] Stationary points and the two candidate minima
-> On this curve, $g_a'(x)=0$ has two relevant positive roots:
+> [!theorem] Normalized PE Coefficients
+> Let $q_0$ be the root of the "matching polynomial" on $[\ell, 1]$. Define $S, P$ as before, and let $A = 1 - \frac{5}{3}S + 5P$. Then:
 > $$
-> x_m^2=\frac{4}{(a-1)^2},\qquad x_M^2=\frac{4a}{(a+3)(a-1)}.
-> $$
-> Here $x_m$ is an interior local maximum with $g_a(x_m)=1$, and $x_M$ is an interior local minimum. Therefore
-> $$
-> \min_{\ell\le x\le 1}g_a(x)=\min\{s_1(a),s_2(a)\},
-> $$
-> where
-> $$
-> s_1(a)=g_a(\ell)=\frac{\ell\left(4a+(a-1)^2\ell^2\right)}{4+(a+3)(a-1)\ell^2},
-> \qquad
-> s_2(a)=g_a(x_M)=\frac{4a^{3/2}}{(a+3)^{3/2}\sqrt{a-1}}.
+> \hat{c} = \frac{1}{A}, \qquad \hat{b} = -\frac{5S}{3A}, \qquad \hat{a} = \frac{5P}{A}.
 > $$
 
-> [!proof]- Stationary points and candidates
-> Differentiate $g_a$ and factor the derivative numerator to obtain $x_m$ and $x_M$. Substituting gives $g_a(x_m)=1$ and the stated expression for $g_a(x_M)$. Since also $g_a(1)=1$, the minimum on $[\ell,1]$ is the smaller of the endpoint value $g_a(\ell)$ and the interior local minimum $g_a(x_M)$.
+> [!proof]-
+> The sum of coefficients is $\hat{p}(1) = \hat{a} + \hat{b} + \hat{c} = \hat{c}(5P - \frac{5}{3}S + 1) = \hat{c} A$. Since we require $\hat{p}(1) = 1$, we must have $\hat{c} = 1/A$. The other coefficients then follow from the Step 1 parameterization.
 
-The optimal $a$ equalizes the active minima.
+### 6.5 Structural Remark: The Limits of Composition
 
-> [!lemma] Equalization
-> On the feasible range, $s_1(a)$ is increasing and $s_2(a)$ is decreasing, hence $\min\{s_1(a),s_2(a)\}$ is maximized at the unique solution of $s_1(a)=s_2(a)$.
+A natural question is whether we can simply compose the same map repeatedly to achieve the desired floor. While **Zolotarev minimax rationals** are closed under composition (composing type-$(2r+1, 2r)$ Zolotarev maps yields a higher-order Zolotarev map), minimax polynomials do not share this property.
 
-> [!proof]- Equalization
-> Differentiate $s_1$ and $s_2$ directly to verify $\partial_a s_1\ge 0$ and $\partial_a s_2\le 0$ on the admissible set. Then the maximum of the pointwise minimum occurs at the unique intersection.
-
-#### 6.3.3 Closed form
-
-Define
-$$
-\zeta=\left(\frac{4(1-\ell^2)}{\ell^4}\right)^{1/3},\qquad r=\sqrt{1+\zeta}.
-$$
-
-> [!theorem] Optimal DWH coefficients
-> The unique optimizer is
+> [!lemma] Polynomial Composition Obstruction
+> Composing low-degree minimax polynomials produces a proper algebraic subset of the full coefficient space, which is generally sub-optimal compared to a single higher-degree minimax polynomial. For instance, if $p_1(x) = ax + bx^3$ and $p_2(x) = cx + dx^3$, their composition $P(x) = p_2(p_1(x))$ is a degree-9 polynomial whose coefficients satisfy the restrictive constraint:
 > $$
-> a = r + \frac{1}{2}\sqrt{8-4\zeta+\frac{8(2-\ell^2)}{\ell^2 r}},
-> \qquad
-> b=\frac{(a-1)^2}{4},
-> \qquad
-> c=a+b-1.
+> A_7^2 = 3 A_5 A_9.
 > $$
 
-> [!proof]- Optimal coefficients
-> By the boundary and equalization lemmas, the optimizer is the unique $a$ solving $s_1(a)=s_2(a)$. Solving that scalar equation yields the closed form above; uniqueness follows from monotonicity of $s_1$ and $s_2$.
-
----
-
-### 6.4 Polar Express Coefficients in Normalized Form ($\hat p(1)=1$)
-
-Polar Express uses an odd quintic on $[\ell,1]$ in the same top-normalized gauge:
-$$
-\hat p(x)=\hat a x+\hat b x^3+\hat c x^5,\qquad \hat p(1)=1.
-$$
-At the minimax optimum, the error alternates at four points: the endpoints $\ell,1$ and two interior critical points $\ell<q_0<r<1$ where $\hat p'(q_0)=\hat p'(r)=0$, with
-$$
-\hat p(q_0)=\hat p(1)\quad\text{(upper)},\qquad
-\hat p(\ell)=\hat p(r)\quad\text{(lower)}.
-$$
-
-#### 6.4.1 Parameterization by critical points
-
-> [!lemma] Critical-point parameterization
-> With $S=q_0^2+r^2$ and $P=q_0^2r^2$,
+> [!proof]-
+> Expanding the composition:
 > $$
-> \hat a=5\hat c P,\qquad \hat b=-\frac{5\hat c}{3}S.
+> P(x) = (ca)x + (cb + da^3)x^3 + (3da^2b)x^5 + (3dab^2)x^7 + (db^3)x^9.
 > $$
-
-> [!proof]- Parameterization
-> Write $\hat p'(x)=5\hat c(x^2-q_0^2)(x^2-r^2)$ and match coefficients with $\hat p'(x)=\hat a+3\hat b x^2+5\hat c x^4$.
-
-#### 6.4.2 Equal upper peaks determine $r^2(q_0)$
-
-> [!lemma] Equal upper peaks
-> The condition $\hat p(q_0)=\hat p(1)$ implies
+> Identifying coefficients, we see $A_5 = 3da^2b$, $A_7 = 3dab^2$, and $A_9 = db^3$. Then:
 > $$
-> r^2=\frac{2q_0^3+4q_0^2+6q_0+3}{5(2q_0+1)}.
+> A_7^2 = (3dab^2)^2 = 9d^2 a^2 b^4 = 3(3da^2b)(db^3) = 3 A_5 A_9.
 > $$
+> Since a general degree-9 minimax polynomial's coefficients do not satisfy this relation, composition is structurally limited.
 
-> [!proof]- Equal upper peaks
-> Substitute the parameterization into $\hat p(q_0)-\hat p(1)=0$ and cancel the common scale $\hat c$ to obtain a scale-free relation between $q_0$ and $r$. Solving for $r^2$ gives the stated expression.
+This motivates our **hybrid approach**: we use the rational DWH step for its robust global contraction and then switch to hardware-efficient polynomial steps for the final cleanup.
 
-#### 6.4.3 Lower matching gives $q_0$, normalization gives coefficients
-
-With $r^2=r^2(q_0)$ substituted, the lower matching condition $\hat p(\ell)=\hat p(r)$ reduces to a single scalar equation
-$$
-F(q_0;\ell)=F_0(q_0)+\ell^2 F_1(q_0)-\ell^4 F_2(q_0)+\ell^6 F_3(q_0)=0,
-$$
-where $F_0,\dots,F_3$ are the pre-defined moment polynomials used in the implementation. Choose the root $q_0\in(\ell,1)$ that yields $\ell<q_0<r<1$.
-
-Define
-$$
-r^2=\frac{2q_0^3+4q_0^2+6q_0+3}{5(2q_0+1)},\qquad
-S=q_0^2+r^2,\qquad P=q_0^2r^2,\qquad
-A=1-\frac{5}{3}S+5P.
-$$
-
-> [!theorem] Normalized PE coefficients
-> The coefficients in the gauge $\hat p(1)=1$ are
-> $$
-> \hat c=\frac{1}{A},\qquad
-> \hat b=-\frac{5S}{3A},\qquad
-> \hat a=\frac{5P}{A}.
-> $$
-
-> [!proof]- Normalized coefficients
-> The parameterization gives $\hat p(1)=\hat a+\hat b+\hat c=\hat c(1-\frac{5}{3}S+5P)=\hat c A$. Enforcing $\hat p(1)=1$ yields $\hat c=1/A$, and then $\hat a,\hat b$ follow from $\hat a=5\hat c P$ and $\hat b=-(5\hat c/3)S$.
-
----
-
-### 6.5 Remark: Composition Closure (Zolotarev yes, polynomials no)
-
-Zolotarev minimax rationals are closed under composition: composing suitably scaled type-$(2r+1,2r)$ Zolotarev maps yields (up to scaling) a higher-type Zolotarev minimax map. This is the structural engine behind Zolo-pd style acceleration.
-
-Minimax polynomials do not enjoy comparable closure. Even composing low-degree odd polynomials produces a proper algebraic subset of the full coefficient space.
-
-> [!lemma] A simple polynomial composition obstruction
-> If $p_1(x)=ax+bx^3$ and $p_2(x)=cx+dx^3$, then $P(x)=p_2(p_1(x))$ is a degree-9 odd polynomial whose coefficients satisfy
-> $$
-> A_7^2 = 3A_5A_9.
-> $$
-
-> [!proof]- Composition obstruction
-> Expanding,
-> $$
-> P(x)=(ca)x+(cb+da^3)x^3+(3da^2b)x^5+(3dab^2)x^7+(db^3)x^9.
-> $$
-> Thus $A_5=3da^2b$, $A_7=3dab^2$, $A_9=db^3$, and
-> $$
-> A_7^2=(3dab^2)^2=9d^2a^2b^4=3(3da^2b)(db^3)=3A_5A_9.
-> $$
-
----
 
 ## References
 
