@@ -212,25 +212,43 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
     # 5. Step 2: Centered PE Cleanup 1
     $\lambda_1 \leftarrow \ell_1 / u_1$
     $(a_1, b_1, c_1) \leftarrow$ @CenteredPECoeffs($\lambda_1, u_1$)
-    $P_1(B) \leftarrow a_1 I + b_1 B + c_1 B^2$
-    $K \leftarrow K P_1(B)$
-    $B \leftarrow$ @Sym($B P_1(B)^2$)
-    # $p_t(x) = x(a_t + b_t x^2 + c_t x^4)$
+    
+    $B_{sq} \leftarrow$ @Sym($B^2$)
+    $Z \leftarrow b_1 B + c_1 B_{sq}$         # Stable "non-identity" part
+    $K \leftarrow @Sym(K Z + a_1 K)$          # Split evaluation for $K$
+    $B \leftarrow @Sym(a_1^2 B + 2a_1 B Z + B Z^2)$ # Split evaluation for $B$
+    
     $(\ell_2, u_2) \leftarrow (p_1(\ell_1), p_1(u_1))$
 
     # 6. Step 3: Centered PE Cleanup 2
     $\lambda_2 \leftarrow \ell_2 / u_2$
     $(a_2, b_2, c_2) \leftarrow$ @CenteredPECoeffs($\lambda_2, u_2$)
-    $P_2(B) \leftarrow a_2 I + b_2 B + c_2 B^2$
-    $K \leftarrow K P_2(B)$
-    $B \leftarrow$ @Sym($B P_2(B)^2$)
-    $(\ell_3, u_3) \leftarrow (p_2(\ell_2), p_2(u_2))$
+    
+    $B_{sq} \leftarrow$ @Sym($B^2$)
+    $Z \leftarrow b_2 B + c_2 B_{sq}$         # Uniform stable split default
+    $K \leftarrow @Sym(K Z + a_2 K)$
+    # Note: B is not needed after the terminal step unless tracking final error
 
     # 7. Final Reconstitution
     $K \leftarrow \operatorname{diag}(d_i^{1/2})$ @Sym($K$) # Invert in-place scaling on K rows
     return $X K$ # Optional: divide once more by u_3 if a bounded final operator is required
 ```
 </div>
+
+### 3.3 Numerical Stability in Low Precision
+
+To ensure robust convergence in BF16/FP16, we adopt several stability "tricks" that prevent catastrophic cancellation and maintain the PSD property of the Gram objects.
+
+> [!tip] Low-Precision Best Practices
+> 
+> 1. **Stable Gram Newton-Schulz Form**: Avoid explicitly adding a large identity to a half-precision matrix ($aI + Z$). Instead, compute the non-identity part $Z$ first and fold $a K$ into the accumulate path: $K \leftarrow K Z + a K$.
+> 2. **Restart (Rebuild the Gram)**: Periodically reconstruct $B \leftarrow XX^\top$ (or $B \leftarrow K^\top (X^\top X) K$) to clear accumulated rounding errors and spurious negative eigenvalues.
+> 3. **Deliberate Symmetry Enforcement**: Rounding error in SYMM/GEMM creates small asymmetries. We apply `@Sym(B) = 1/2(B+B^T)` at every sensitive choke point.
+> 4. **Identity-Centered Evaluation**: When $B \approx I$, one can *optionally* evaluate in the basis $E = B - I$. This is primarily a late-stage micro-optimization for when the spectrum is in a tight band $[1-\delta, 1+\delta]$ and the accumulator path is in FP32. For $P(B) = aI + bB + cB^2$, this is:
+>    $$ P(B) = (a+b+c)I + (b+2c)E + cE^2. $$
+>    **Caution**: To avoid the cancellation trap, form $E$ and $E^2 = EE$ "honestly" in FP32; do not use the identity $E^2 = B^2 - 2B + I$ in half precision.
+> 5. **Absorbing Scaling**: Absorbing the current upper endpoint $u_t$ into the next step's coefficients keeps the effective spectrum bounded and avoids nasty dynamic-range issues.
+> 6. **Bounded-Resolvent Basis**: For the hard early regime, using $(I+cB)^{-1}$ prevents the large cross-multiplications that plague standard polynomial expansions. 
 
 Implementation note: treat $\tilde{G}, S, H, B$ as symmetric objects and use symmetric kernels conceptually (SYRK/SYMM/SYR2K). Only apply `@Sym(·)` at choke points (right before factorization, and optionally right before the final $Q \leftarrow X K$ matmul).
 
@@ -263,7 +281,7 @@ These are the actual PE coefficients used by the implementation. The normalized 
 The design has three practical advantages.
 
 - **Right tool for each regime**: DWH is used only where rational lifting matters, namely the hard early regime. Once the interval is already tight, PE gives cheaper cleanup on the small side.
-- **Low-precision robustness**: Column normalization, bounded resolvents, and symmetric kernels keep the Gram-side computation numerically controlled in BF16/FP16-style settings without changing the target polar factor.
+- **Low-precision robustness**: Column normalization, bounded resolvents, and symmetric kernels keep the Gram-side computation numerically controlled. The use of **stable split evaluation** and **identity-centering** (see [Section 3.3](#numerical-stability-in-low-precision)) specifically targets the failure modes of BF16/FP16.
 - **Clean certification boundary**: If the returned update must satisfy a spectral-norm or Lipschitz bound, that normalization happens once at the end. The iteration itself remains centered and aggressive until the last step.
 
 This gives a method that is both practical for inner-loop training and faithful to the underlying scalar approximation problems.
