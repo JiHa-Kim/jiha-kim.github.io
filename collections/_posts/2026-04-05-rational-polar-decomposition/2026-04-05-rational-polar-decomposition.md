@@ -328,28 +328,27 @@ So the state is really the normalized interval parameter $\lambda$, not the two 
 > 
 > 5. **Conclusion**: Since $f(E) = \frac{1-E}{1+E}$ is decreasing in $E$, the ratio $\lambda_{\text{next}}$ is maximized precisely when the one-step error $E$ is minimized. Therefore, the greedy move is globally optimal.
 
-### 6.2 The Bounded Rational Reduction
+### 6.2 The Bounded Max-Min Framework
 
 We restrict to the degree-$(3,2)$ odd rational family
 $$
 f(x)=x\frac{a+bx^2}{1+cx^2},\qquad a,b,c>0.
 $$
-Because $f$ is odd, the two-sided sign-approximation error reduces to the positive side:
-$$
-\sup_{x\in S_\ell}\left|\operatorname{sign}(x)-f(x)\right| = \sup_{x\in[\ell,1]}|1-f(x)|.
-$$
+As noted in the **Zolo-pd** algorithm {% cite nakatsukasaComputingFundamentalMatrix2016 %}, the one-sided constrained "max-min" problem (optimizing the floor while staying below 1) is equivalent up to a scalar scaling to the classical two-sided minimax problem. 
 
-The key design feature of the DWH step is not monotonicity, but boundedness: we enforce a "no-overshoot" constraint on the tracked interval,
-$$
-0<f(x)\le 1\qquad\text{for all }x\in[0,1],
-$$
-together with the normalization
-$$
-f(1)=1.
-$$
-(With this family, $f(1)=1$ is equivalent to $c=a+b-1$.)
+This equivalence is a general property of any class $\mathcal{F}$ of odd approximants closed under positive scaling. This includes both odd polynomials and Zolotarev rationals.
 
-As noted in the **Zolo-pd** algorithm {% cite nakatsukasaComputingFundamentalMatrix2016 %}, this one-sided constrained "max-min" problem is equivalent up to scaling to the classical two-sided minimax problem (see $\S 6.2$ for the scaling proof).
+> [!lemma] Scaling Equivalence: Minimax vs. Max-Min
+> Let $E_*$ be the optimal two-sided minimax error, and let $m_*$ be the optimal "floor" of the one-sided bounded problem:
+> $$ \max_{S \in \mathcal{F}} \min_{x\in[\ell,1]} S(x) \quad \text{s.t.} \quad 0 \le S(x) \le 1 \ \forall x\in [0,1]. $$
+> These quantities are related via a simple monotone change of variables:
+> $$ m_* = \frac{1-E_*}{1+E_*} \iff E_* = \frac{1-m_*}{1+m_*}. $$
+
+> [!proof]- Proof (Two Scaling Maps)
+> 1. **From Minimax to Max-Min**: If $R \in \mathcal{F}$ has minimax error $E$, then $1-E \le R(x) \le 1+E$ on $[\ell, 1]$. Scale by $1/(1+E)$: $S(x) = R(x)/(1+E)$. Then $S(x) \le 1$ on $[0,1]$ and $\min_{[\ell, 1]} S \ge (1-E)/(1+E)$.
+> 2. **From Max-Min to Minimax**: Let $S \in \mathcal{F}$ be feasible with $m = \min_{[\ell, 1]} S$ and $\max S = 1$. Scale by $\alpha = 2/(1+m)$: $R(x) = \alpha S(x)$. On $[\ell, 1]$, $R$ ranges in $[\alpha m, \alpha]$. This scaling centers the error symmetrically around 1: $\alpha - 1 = 1 - \alpha m = (1-m)/(1+m)$.
+
+Consequently, the interval contraction (and thus the condition number update $\kappa_+ = 1/m_*$) is identical whether one solves the centered minimax problem or the one-sided bounded problem. The DWH/QDWH iteration {% cite nakatsukasaOptimizingHalleyIteration2010 %} explicitly uses this global bounded max-min framework to derive its coefficients.
 
 > [!lemma] One-sided reduction under no-overshoot
 > Assume $f(1)=1$ and $0<f(x)\le 1$ for all $x\in[\ell,1]$. Let
@@ -392,9 +391,19 @@ B \leftarrow g_I I + g_B B + g_H H_0 + g_{H^2} H_0^2
 $$
 By using this algebraic flattening, we compute the DWH update using only one symmetric matrix squaring, $H_0^2$. The scale-invariant coefficients $g_I, g_B, g_H, g_{H^2}$ are pre-computed in FP64, eliminating all dynamic-range runtime evaluation. The orientation factor $K$ is simultaneously updated via $(\alpha_0 I + \beta_0 H_0)$, where $\alpha_0 = b/c$ and $\beta_0 = a - b/c$.
 
-### 6.3 Normalization and the Composition Barrier
+### 6.3 Composition and the Zolotarev Advantage
 
-For Polar Express, we utilize the degree-5 odd polynomial $p(x)=ax+bx^3+cx^5$. In contrast to the DWH rational step, where we impose a global no-overshoot constraint $p(x)\le 1$ and optimize the minimum value on $[\ell,1]$, the polynomial minimax solution is naturally a centered equioscillating approximation.
+For Polar Express, we utilize the degree-5 odd polynomial $p(x)=ax+bx^3+cx^5$. While the max-min and minimax frameworks are equivalent for both rationals and polynomials, their standard presentation varies by implementation preference.
+
+*   **Rationals (DWH)**: The "no-overshoot" one-sided form is natural for the **resolvent basis** ($H_0 = (I+cB)^{-1}$), where the coefficients map directly to $[m, 1]$.
+*   **Polynomials (PE)**: The centered equioscillating form is natural for standard monomial evaluation on hardware.
+
+The Apparent "overshoot" issue is not a fundamental capability gap, but merely a choice of **normalization**. Rescaling between a floor-maximized $p(x)$ and an equioscillating $\hat{p}(x)$ is a mechanical change of variables. The **fundamental distinction** between rational and polynomial iterations is **composition optimality**.
+
+> [!info] Zolotarev Composition Reduction
+> As demonstrated in **Zolo-pd** {% cite nakatsukasaComputingFundamentalMatrix2016 %}, Zolotarev rationals possess a "remakable special property": the optimal rational approximant of high type can be expressed exactly as a composition of lower-type Zolotarev maps. Specifically, a type- $((2r+1)^k, (2r+1)^k-1)$ best approximant can be written as a composition of $k$ functions of type-$(2r+1, 2r)$.
+>
+> This structural closure allows Zolotarev methods to reach extremely high effective degrees in very few iterations. In contrast, **polynomials are not closed under composition**—the minimax polynomial of degree $N$ is not generally representable as a composition of smaller-degree minimax polynomials.
 
 > [!caution] Disproof: The Endpoint Trap
 > Consider the family of odd cubics $p_k(x) = (1+k)x - kx^3$. For any $k > 0$, these satisfy the endpoint normalization $p_k(1) = 1$. However:
@@ -499,7 +508,7 @@ This is not just a structural curiosity; it has material impact on approximation
 | Aspect                                  | Rational: DWH / Zolotarev                              | Polynomial: PE                                                         |
 | :-------------------------------------- | :----------------------------------------------------- | :--------------------------------------------------------------------- |
 | Optimal shape                           | Floor-maximized or Equioscillating                     | Floor-maximized or Equioscillating                                     |
-| Scale-invariant reduction               | Exact ($\S 6.2$)                                       | Exact ($\S 6.2$)                                                       |
+| Scale-invariant reduction               | **General Equivalent** ($\S 6.2$)                      | **General Equivalent** ($\S 6.2$)                                      |
 | Composition of optima                   | **Optimal class is closed** under composition          | Optimal class is **not** closed under composition                      |
 | Basis and Evaluation                    | Resolvent-basis ($H_0^2$)                              | Standard or Identity-centered monomial                                 |
 | Global scale                            | Usually written with floor maximized ($f \le 1$)       | Usually centered ($p \in [1-E, 1+E]$)                                  |
