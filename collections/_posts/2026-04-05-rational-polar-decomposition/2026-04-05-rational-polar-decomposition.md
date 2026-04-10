@@ -310,49 +310,22 @@ So the state is really the normalized interval parameter $\lambda$, not the two 
 > [!theorem] Greedy Is Optimal
 > Fix a degree $d$ and a number of remaining steps. Then the globally optimal first move is the one-step minimax polynomial on the current normalized interval $[\lambda,1]$. Repeating the same rule after each update is globally optimal.
 
-> [!proof]-
-> Define the tail value function
-> $$
-> V_t(\lambda) := \inf_{q}\ \max_{x \in [\lambda,1]} \vert q(x) - 1 \vert,
-> $$
-> where the infimum is over all $t$-step compositions of degree-$d$ odd polynomials. This is the best possible worst-case error achievable in $t$ more steps from the normalized interval $[\lambda,1]$.
->
-> Now fix a first step $p$ on $[\lambda,1]$. Since $p$ is continuous, its image is again an interval, say
-> $$
-> p([\lambda,1]) = [\ell',u'].
-> $$
-> For any tail composition $r$,
-> $$
-> \max_{x \in [\lambda,1]} \vert r(p(x)) - 1 \vert
-> =
-> \max_{y \in [\ell',u']} \vert r(y) - 1 \vert.
-> $$
-> So once the first step is chosen, the tail only sees the image interval. After renormalizing that interval by its upper endpoint, the next state is
-> $$
-> \lambda_{\mathrm{next}}(p) = \frac{\ell'}{u'}.
-> $$
-> Because odd polynomials are closed under input-rescaling, the best possible tail performance depends only on this normalized next state. Therefore
-> $$
-> V_{t+1}(\lambda) = \inf_{p \in \mathcal P_d^{\mathrm{odd}}} V_t\big(\lambda_{\mathrm{next}}(p)\big).
-> $$
->
-> Next, $V_t$ is monotone: if $\lambda_1 \ge \lambda_2$, then $[\lambda_1,1] \subseteq [\lambda_2,1]$, so
-> $$
-> V_t(\lambda_1) \le V_t(\lambda_2).
-> $$
-> In other words, a tighter next interval is always better for the tail.
->
-> So the optimal first move is the polynomial that makes $\lambda_{\mathrm{next}}(p)$ as large as possible. For the one-step minimax polynomial, if the optimal worst-case error is $E$, then by equioscillation its image is exactly
-> $$
-> [1-E,1+E].
-> $$
-> After renormalization, the next state is
-> $$
-> \lambda_{\mathrm{next}} = \frac{1-E}{1+E},
-> $$
-> which is largest precisely when $E$ is smallest.
->
-> Therefore the Bellman recursion forces the optimal first move to be the one-step minimax optimizer. Applying the same argument after each update gives greedy optimality.
+> [!proof]- Greedy is Optimal
+> We prove that the $T$-step minimax problem decomposes into $T$ independent one-step minimax problems.
+> 
+> 1. **State Space**: The state of the system is the normalized condition $\lambda = \ell/u \in (0, 1]$. Since the target (the sign function) and the approximants (odd polynomials) are scale-invariant, any map $p$ on $[\ell, u]$ with image $[\ell', u']$ is equivalent to a map on $[\lambda, 1]$ with normalized image $\lambda_{\text{next}} = \ell'/u'$.
+> 
+> 2. **Value Function**: Let $V_t(\lambda)$ be the minimum possible worst-case error achievable in $t$ remaining steps starting from $[\lambda, 1]$. By definition, $V_t(\lambda)$ is monotonically decreasing in $\lambda$; a tighter starting interval $(\lambda \to 1)$ always yields a smaller final error.
+> 
+> 3. **Bellman Optimality**: The optimal $(t+1)$-step error satisfies:
+>    $$ V_{t+1}(\lambda) = \inf_{p} V_t\left( \lambda_{\text{next}}(p) \right) $$
+>    where $\lambda_{\text{next}}(p) = \frac{\min p([\lambda, 1])}{\max p([\lambda, 1])}$. To minimize the tail error $V_t$, we must choose the first step $p$ to **maximize** $\lambda_{\text{next}}(p)$.
+> 
+> 4. **One-Step Optimizer**: For any odd polynomial $p$ with minimax error $E = \sup_{x \in [\lambda, 1]} |1 - p(x)|$, its image is contained in $[1-E, 1+E]$ by equioscillation. Thus:
+>    $$ \lambda_{\text{next}}(p) \le \frac{1-E}{1+E} $$
+>    Equality is achieved if and only if $p$ is the one-step minimax polynomial (which oscillates between $1-E$ and $1+E$).
+> 
+> 5. **Conclusion**: Since $f(E) = \frac{1-E}{1+E}$ is decreasing in $E$, the ratio $\lambda_{\text{next}}$ is maximized precisely when the one-step error $E$ is minimized. Therefore, the greedy move is globally optimal.
 
 ### 6.2 Why the Rational Reduction Works
 
