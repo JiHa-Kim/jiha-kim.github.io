@@ -45,7 +45,7 @@ module Jekyll
       flalign* eqnarray
     ].freeze
 
-    PROTECT_RE = /((?:^\s*```.*?$)(?:.*?)(?:^\s*```$)|(?i:<pre[^>]*>.*?<\/pre>)|(?i:<div class="math-block"[^>]*>.*?<\/div>)|(?i:<span class="math-inline"[^>]*>.*?<\/span>)|(?:`[^`\n]*`))/m
+    PROTECT_RE = /((?:^\s*```.*?$)(?:.*?)(?:^\s*```$)|(?i:<pre[^>]*>.*?<\/pre>)|(?i:<div class="math-block"[^>]*>.*?<\/div>)|(?i:<span class="math-inline"[^>]*>.*?<\/span>)|(?:(?<!`)`[^`\n]+`(?!`)))/m
 
     def generate(site)
       site.posts.docs.each { |doc| process_doc(doc) }
@@ -289,6 +289,7 @@ module Jekyll
         joined_body << line << "\n"
         in_code = !in_code if line.lstrip.start_with?("```")
         in_math = !in_math if line.strip == "$$" && !in_code
+        # puts "DEBUG: line='#{line}', in_code=#{in_code}"
         
         next_line = content_lines[idx+1]
         if next_line && !in_code && !in_math && !line.strip.empty? && !next_line.strip.empty?
