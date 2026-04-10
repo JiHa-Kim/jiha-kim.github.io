@@ -368,16 +368,23 @@ B \leftarrow g_I I + g_B B + g_H H_0 + g_{H^2} H_0^2
 $$
 By using this algebraic flattening, we compute the DWH update using only one symmetric matrix squaring, $H_0^2$. The scale-invariant coefficients $g_I, g_B, g_H, g_{H^2}$ are pre-computed in FP64, eliminating all dynamic-range runtime evaluation. The orientation factor $K$ is simultaneously updated via $(\alpha_0 I + \beta_0 H_0)$, where $\alpha_0 = b/c$ and $\beta_0 = a - b/c$.
 
-### 6.3 The Polynomial Non-Equivalence
+### 6.3 Monotonicity and the Endpoint Barrier
 
-For Polar Express, we utilize the degree-5 odd polynomial $p(x) = ax + bx^3 + cx^5$. Unlike the rational case, the optimal polynomial for the matrix sign function is not monotone on its tracked interval; it equioscillates. This structural difference prevents the use of a simple one-sided reduction.
+To understand why we treat Rational (DWH) and Polynomial (PE) families differently, we must distinguish between two optimization problems on the interval $[\ell, 1]$:
 
-> [!caution] The Polynomial Penalty
-> Unlike the rational case, enforcing a one-sided "no-overshoot" constraint $\hat{p}(1) \le 1$ on an equioscillating polynomial strictly degrades the approximation quality.
-> 
-> Let the centered image of $p$ on $[\ell, 1]$ be $[1-E, 1+E]$. If we normalize such that the upper bound is exactly $1$, we must divide by $1+E$:
-> $$ \hat{p}(x) = \frac{p(x)}{1+E} \implies \hat{p}(1) = 1. $$
-> The new lower endpoint becomes $\hat{p}(\ell) = \frac{1-E}{1+E}$. The resulting minimax error for the one-sided problem is $1 - \hat{p}(\ell) = \frac{2E}{1+E}$. Since $E > 0$, we have $\frac{2E}{1+E} > E$, meaning the one-sided penalty is strictly worse. This structural barrier necessitates formulating Polar Express directly as a **Centered Minimax Problem** minimized over the error range $[1-E, 1+E]$.
+1.  **Global Minimax**: $E_* = \inf_{p \in \mathcal{F}} \|1 - p\|_{\infty, [\ell, 1]}$. This is the standard formulation where the error equioscillates between $1-E_*$ and $1+E_*$.
+2.  **Endpoint Reduction**: Maximize $f(\ell)$ subject to $f(1) = 1$. This is a proxy problem that only considers the interval boundaries.
+
+#### The Monotonicity Alignment
+For functions that are **monotone** on $[\ell, 1]$ (like the DWH rationals), these two problems are essentially equivalent. In a monotone minimax solution, the extrema are achieved exactly at the endpoints: $f(1) = 1+E_*$ and $f(\ell) = 1-E_*$. By simply scaling the function such that $f(1)=1$, one obtains an optimizer for the endpoint problem with $f(\ell) = (1-E_*)/(1+E_*)$. Thus, for rationals, we can bypass the full minimax machinery and solve the simpler endpoint problem.
+
+#### The Polynomial Divergence
+For polynomials, this reduction fails. Because optimal polynomials for the sign function are not monotone, their maximum value on $[\ell, 1]$ is generally **not** achieved at the endpoint $x=1$; it occurs in the interior. 
+
+Consequently, forcing $p(1)=1$ does not control the global overshoot. A polynomial that maximizes $p(\ell)$ subject to $p(1)=1$ might have a massive interior peak, making it a poor approximation of the sign function. To get a useful polar factor, we must solve the **Global Minimax Problem** directly, which results in the equioscillating Polar Express coefficients $[1-E, 1+E]$.
+
+> [!important] Summary
+> The DWH rational steps are designed via endpoint reduction (valid due to monotonicity), whereas Polar Express polynomial steps must be designed via global minimax (due to interior extrema).
 
 > [!theorem] Closed-Form Centered PE Coefficients
 > Fix $0 < \ell < 1$. The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ on $[\ell, 1]$ are uniquely determined by the interior equioscillation root $q_0 \in (\ell, 1)$ of the degree-9 polynomial:
