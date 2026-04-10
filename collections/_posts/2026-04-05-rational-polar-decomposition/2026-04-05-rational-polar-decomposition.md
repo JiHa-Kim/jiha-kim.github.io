@@ -75,7 +75,12 @@ The crucial trick is to design a function $f(x)$ such that $f(\sigma_i) \approx 
 
 ## 2. Why a Hybrid?
 
-Iterative methods for the polar factor work by applying a scalar iteration $f(x)$ to the singular values $\sigma_i$ of $A$. After normalization so that $\sigma_{\max} = 1$, the goal is to drive the lower endpoint of the singular value interval $\ell \to 1$.
+Iterative methods for the polar factor work by applying a scalar iteration $f(x)$ to the singular values $\sigma_i$ of $A$. In this post we track the actual interval of singular values, not just its ratio. The hybrid uses two distinct scalar regimes:
+
+- DWH keeps the image inside $[\ell_{t+1}, 1]$.
+- PE uses centered minimax maps whose image interval is $[1-E_t, 1+E_t]$.
+
+If a final contractive or explicitly 1-Lipschitz output is desired, we can divide once at the very end by the final upper endpoint. That terminal normalization is optional and is **not** part of the intermediate PE iteration.
 
 ### 2.1 The Two Scalar Maps
 
@@ -93,13 +98,23 @@ $$
 p(x) = x(a + bx^2 + cx^4) = ax + bx^3 + cx^5
 $$
 
-where $(a, b, c)$ solve the minimax problem $\min_{a,b,c}\max_{x \in [\ell,1]} |1 - p(x)|$. Polynomials are cheaper per step (no solve) but struggle once $\ell$ is very small.
+where $(a, b, c)$ solve the Polar Express minimax problem on the current tracked interval $[\ell_t, u_t]$. The key PE invariant is that the image interval is re-centered around $1$: after any finite-precision cushioning adjustment, the polynomial is rescaled so
+$$
+1 - p_t(\ell_t) = p_t(u_t) - 1,
+$$
+equivalently $p_t(\ell_t) + p_t(u_t) = 2$.
+
+More generally, any non-unit upper endpoint can be absorbed directly into the next PE coefficients. If $q(y) = ay + by^3 + cy^5$ is designed on the normalized interval $[\lambda_t, 1]$ with $\lambda_t = \ell_t/u_t$, then the actual polynomial on $[\ell_t, u_t]$ is simply
+$$
+p_t(x) = q\left(\frac{x}{u_t}\right) = \frac{a}{u_t}x + \frac{b}{u_t^3}x^3 + \frac{c}{u_t^5}x^5.
+$$
+So there is no separate "recenter the matrix, then run PE" step in the final presentation. The scale is folded into the coefficients. In particular, the **first** PE step after DWH is already on $[\ell_1, 1]$, so there is no extra nontrivial scale factor there; the absorption matters starting with later PE steps once $u_t \neq 1$.
 
 The key empirical fact: **Rational wins in the hard regime** (high condition number), while **Polynomial wins once the interval is easy**.
 
 ### 2.2 Motivation: Crossing the Crossover
 
-The following widget plots the final lower endpoint for different starting floors $\ell$. Larger values closer to $1$ are better (equivalently, smaller error $1-\ell$ is better). (Both polynomial and rational steps are normalized so $\hat{p}(1)=1$).
+The following widget plots the resulting **lower endpoint** after one or more scalar steps. For PE, the full image interval is centered around $1$; the chart shows only its lower edge. Larger values closer to $1$ are better (equivalently, smaller worst-case error on the lower side).
 
 {% include comparison_widget.html %}
 
@@ -108,7 +123,7 @@ The following widget plots the final lower endpoint for different starting floor
 For $\ell_0 = 10^{-3}$, the best pattern is not "all rational" or "all polynomial." It is the synergy of both:
 
 $$
-\boxed{\text{1 DWH step} \;\to\; \text{2 normalized PE quintic steps}.}
+\boxed{\text{1 DWH step} \;\to\; \text{2 PE quintic steps}.}
 $$
 
 The progression at $\ell_0 = 10^{-3}$ demonstrates the efficiency:
@@ -117,10 +132,16 @@ $$
 \;\xrightarrow{\;\text{1 DWH}\;}
 [0.248039,1]
 \;\xrightarrow{\;\text{PE}_1\;}
-[0.729007,1]
+[0.843267,1.156733]
 \;\xrightarrow{\;\text{PE}_2\;}
-[0.995160,1].
+[0.997574,1.002426].
 $$
+
+If we want a final bounded operator, we normalize only once at the end:
+$$
+\frac{1}{1.002426}[0.997574,1.002426] = [0.995160,1].
+$$
+That terminal normalization is the right place to enforce a spectral-norm or Lipschitz certificate. Doing it at every PE step would change the polynomial optimization problem and make the iteration less aggressive.
 
 {% include polar_widget.html %}
 
@@ -151,7 +172,7 @@ def SafeCholesky($S, dtype, K_{\max}=6$):
 
 ### 3.2 The Main Hybrid Algorithm
 
-The following algorithm utilizes exactly two tall rectangular GEMMs.
+The following algorithm utilizes exactly two tall rectangular GEMMs. The DWH phase is the usual constrained rational step. The PE phase is expressed directly in absolute coordinates, with any non-unit PE upper endpoint absorbed into the next PE coefficients rather than handled by a separate rescaling kernel.
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 1</span> Optimized Hybrid Polar: 1 DWH + 2 PE</div>
@@ -189,21 +210,29 @@ def HybridPolar($X \in \mathbb{R}^{M \times N}$):
         $H_{sq} \leftarrow$ @Sym($H_{0}^{2}$) # Half-FLOP SYRK
         $B \leftarrow g_{I} I + g_{B} B + g_{H} H_{0} + g_{H^2} H_{sq}$ # Zero-GEMM step
         $K \leftarrow \frac{1}{\sqrt{u}}(\alpha_{0} I + \beta_{0} H_{0})$
+    $(\ell_1, u_1) \leftarrow$ scalar image interval after the DWH step # For the design floor, [0.248039, 1]
 
-    # 5. Step 2: PE Cleanup 1 (Pure Defect Pipeline)
-    $E \leftarrow I - B$ # Shift to defect space
-    $Z \leftarrow u_{1} E + v_{1} E^{2}$ # ($E^{2}$ via SYRK)
-    $K \leftarrow K + K Z$
-    $M \leftarrow -2 Z - Z^{2}$ # Gram root-finding step
-    $E \leftarrow E + M - \,$@Sym($E M$)
+    # 5. Step 2: Centered PE Cleanup 1
+    # Here u_1 = 1, so the "absorbed scale" is trivial in the first PE step.
+    $\lambda_1 \leftarrow \ell_1 / u_1$
+    $(a_1, b_1, c_1) \leftarrow$ @CenteredPECoeffs($\lambda_1$)
+    $P_1(B) \leftarrow \frac{a_1}{u_1} I + \frac{b_1}{u_1^3} B + \frac{c_1}{u_1^5} B^2$
+    $K \leftarrow K P_1(B)$
+    $B \leftarrow$ @Sym($B P_1(B)^2$)
+    $(\ell_2, u_2) \leftarrow (p_1(\ell_1), p_1(u_1))$
 
-    # 6. Step 3: PE Cleanup 2
-    $Z \leftarrow u_{2} E + v_{2} E^{2}$
-    $K \leftarrow K + K Z$
+    # 6. Step 3: Centered PE Cleanup 2
+    # Now u_2 > 1 in general, and that scale is folded into P_2(B).
+    $\lambda_2 \leftarrow \ell_2 / u_2$
+    $(a_2, b_2, c_2) \leftarrow$ @CenteredPECoeffs($\lambda_2$)
+    $P_2(B) \leftarrow \frac{a_2}{u_2} I + \frac{b_2}{u_2^3} B + \frac{c_2}{u_2^5} B^2$
+    $K \leftarrow K P_2(B)$
+    $B \leftarrow$ @Sym($B P_2(B)^2$)
+    $(\ell_3, u_3) \leftarrow (p_2(\ell_2), p_2(u_2))$
 
     # 7. Final Reconstitution
     $K \leftarrow \operatorname{diag}(d_i^{1/2})$ @Sym($K$) # Invert in-place scaling on K rows
-    return $X K$ # Result is the polar factor of the original X
+    return $X K$ # Optional: divide once more by u_3 if a bounded final operator is required
 ```
 </div>
 
@@ -217,23 +246,23 @@ Fixed constants for implementation, computed offline in FP64:
 | :------- | :---------------------------- | :-------------------------------------------------------------------------- |
 | **DWH**  | $g_I, g_B, g_H, g_{H^2}$      | 0.030883301527615, 0.968872554082809, 3.906861822017413, -3.937745123545028 |
 |          | $\gamma_0, \alpha_0, \beta_0$ | 0.000062499017684, 0.984313239818915, 251.007791810856                      |
-| **PE 1** | $u_1, v_1$                    | -1.595552602479211, 3.901806628246143                                       |
-| **PE 2** | $u_2, v_2$                    | 0.413372883404030, 0.780748444540736                                        |
+| **PE 1** | $A_1, B_1, C_1$               | 3.824452920237891, -7.181066039236940, 4.513346248799179                    |
+| **PE 2** | $A_2, B_2, C_2$               | 1.901427287944732, -1.279060386064908, 0.377917707130065                    |
+
+Here $p_t(x) = A_t x + B_t x^3 + C_t x^5$ is the **actual** centered PE polynomial used on the current absolute interval. For PE 1, this agrees with the normalized centered coefficients because $u_1 = 1$. For PE 2, the non-unit upper endpoint $u_2 = 1.156733\ldots$ from the previous PE step has already been absorbed into $(A_2, B_2, C_2)$.
 
 ---
 
 ## 5. Discussion
 
 - **Numerical Robustness**: By performing column-wise normalization (ColNorm) for the Gram accumulation and carrying that scaling through the first Cholesky solve, we shield the algorithm from dynamic range overflows and precision loss in low-precision (BF16/FP16) arithmetic without changing the target polar factor.
-- **Architectural FLOP Avoidance**: At three distinct moments, the mathematical constraints of the problem allow us to safely bypass dense matmuls. 
-  1. The DWH $W^{\top} W$ inversion is fully replaced by a Cholesky inverse via `potri` and scalar broadcast, cutting the factorization time by 3x. 
-  2. The initial iteration avoids initializing a separate dense identity matrix, converting $K_1$ updates into an element-wise addition over the existing $H$ matrix. 
-  3. The dead-code branch in Step 3 cleanly eliminates all subsequent $B$ updates from the critical path entirely.
-  4. The vectorized Frobenius norm calculation $\|G\|_F^2 = d^\top \tilde{G}^{\circ 2} d$ replaces an $O(N^2)$ summation with a single tensor-friendly quadratic form.
-- **Zero-Allocation $X$-Scaling**: Large scale activation accumulations often peak hard sequentially. The in-place mutation of the initial system variables prevents tensor duplication overhead scaling at $O(MN)$ without skewing parameter recovery constraints by exactly reverting projection targets at $N \times N$ factor scaling complexity.
-- **Dynamic Fast-Path Bypassing**: Because the explicitly materialized inverse $S_{\text{inv}} \approx (u(\gamma_{0} I + B))^{-1}$ contains strict spectral volume, its trace structurally enforces a computationally free lower bound: $\lambda_{\min} \ge \frac{1}{u \operatorname{tr}(S_{\text{inv}})} - \gamma_{0}$. If this dynamically verifiable trace bound exceeds the polynomial safety threshold $\ell_{\text{fast}}$, the kernel safely aborts the remaining DWH sequence and jumps strictly into the PE defect sequence immediately.
+- **Architectural FLOP Avoidance**: The DWH $W^{\top} W$ inversion is fully replaced by a Cholesky inverse via `potri` and scalar broadcast, while the vectorized Frobenius norm calculation $\|G\|_F^2 = d^\top \tilde{G}^{\circ 2} d$ replaces an $O(N^2)$ summation with a single tensor-friendly quadratic form. The PE phase then works entirely on the small $N \times N$ side.
+- **Zero-Allocation $X$-Scaling**: The initial column normalization is applied in place on the tall matrix $X$, avoiding an extra $O(MN)$ buffer. The original scaling is restored later through the small-side factor $K$, so the memory savings do not change the target polar factor.
+- **Dynamic Fast-Path Bypassing**: Because the explicitly materialized inverse $S_{\text{inv}} \approx (u(\gamma_{0} I + B))^{-1}$ contains strict spectral volume, its trace structurally enforces a computationally free lower bound: $\lambda_{\min} \ge \frac{1}{u \operatorname{tr}(S_{\text{inv}})} - \gamma_{0}$. If this dynamically verifiable trace bound exceeds the polynomial safety threshold $\ell_{\text{fast}}$, the kernel can safely skip the rational correction and move straight into the PE cleanup.
 - **Balanced Latency**: While pre-scaling adds one element-wise pass over the tall matrix $X$, the cost is offset by the reduction in small-side complexity compared to pure rational iterations. The algorithm still performs exactly two tall rectangular GEMMs.
-- **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$), while normalization by $\hat{p}(1) = 1$ prevents the dynamic range instability often seen in pure Newton-Schulz methods.
+- **Dynamic Stability**: The DWH step immediately exits the ill-conditioned regime ($10^{-3} \to 0.25$). Each subsequent PE step balances its image interval around $1$, which is the right minimax geometry for the polynomial cleanup phase.
+- **Absorbed PE Scaling**: Once a PE step produces an interval $[\ell_t, u_t]$ with $u_t \neq 1$, the next centered polynomial is applied as $q_t(x/u_t)$, so the scale is folded directly into the next PE coefficients. For the first PE step after DWH, this is trivial because $u_1 = 1$.
+- **Final Certification**: If the returned update must satisfy a spectral-norm or Lipschitz bound, normalize once at the end by the final upper endpoint. That keeps the intermediate PE steps maximally aggressive while still providing the desired certificate.
 
 Combining rational robustness with polynomial speed results in a polar decomposition that is both fast enough for inner-loop training and robust enough for real-world ML spectral distributions.
 
@@ -241,23 +270,38 @@ Combining rational robustness with polynomial speed results in a polar decomposi
 
 ## 6. Technical Derivations
 
-### 6.1 The Constrained Max-Min Problem
+### 6.1 The Minimax Problem on a Tracked Interval
 
-Both the DWH and Polar Express steps approximate the **matrix sign function**. Given an interval of singular values (normalized to a spectral radius of 1), the goal is to approximate $\operatorname{sign}(x)$ on the domain $D = [-1, -\ell] \cup [\ell, 1]$ for a floor $\ell \in (0, 1]$.
+Both the DWH and Polar Express steps approximate the **matrix sign function**, but they solve different scalar optimization problems.
 
-To maintain spectral stability, the mapped singular values must never inflate beyond 1, imposing the strict constraint $\vert f(x) \vert \le 1$ for all $x \in [-1, 1]$. Under this constraint, minimizing the maximum approximation error is equivalent to pulling the smallest singular values as close to 1 as possible. 
+- In the **DWH/QDWH** phase, the rational map is constrained to remain in $[0,1]$ on the positive interval.
+- In the **PE** phase, the polynomial map solves the unconstrained minimax problem on the current positive interval $[\ell_t, u_t]$ and therefore centers the image around $1$.
 
-Because $f(x)$ and $\operatorname{sign}(x)$ are odd, the maximal error on the negative side identically mirrors the positive side. On the positive interval $[\ell, 1]$, the target value is 1. Since $f(x) \le 1$, the error is simply $1 - f(x)$, and the overarching optimality problem for both iterations becomes the constrained max-min problem:
+This difference is exactly why rational and polynomial steps play different roles in the hybrid.
+
+On the positive interval, the target value is $1$, so the scalar optimization problem is
 $$
-\max_{f \in \mathcal{F}_{\text{odd}}} \left( \min_{x \in [\ell, 1]} f(x) \right) \quad \text{s.t.} \quad \max_{x \in [0, 1]} f(x) \le 1
+\min_{f \in \mathcal{F}_{\text{odd}}} \max_{x \in [\ell_t, u_t]} \vert 1 - f(x) \vert,
 $$
-where $\mathcal{F}_{\text{odd}}$ is the space of candidate odd functions (rational or polynomial). 
+where $\mathcal{F}_{\text{odd}}$ is the space of candidate odd functions (rational or polynomial).
+
+Because $f(x)$ and $\operatorname{sign}(x)$ are odd, the maximal error on the negative side mirrors the positive side. For a PE-style minimax optimum, the endpoint errors are balanced. In the simplest case on $[\ell, 1]$, this means
+$$
+1 - f(\ell) = f(1) - 1,
+$$
+so the image interval is centered around $1$. Equivalently, if $\ell_{t+1} = f(\ell_t)$ and $u_{t+1} = f(u_t)$, then the PE recurrence tracks intervals with $\ell_{t+1} + u_{t+1} = 2$. This is the sense in which the intermediate iterations are "centered around $1$."
+
+If one instead solves a polynomial problem with an explicit no-overshoot constraint $f(x) \le 1$ from the outset, that defines a genuinely different constrained problem. That is **not** the primary Polar Express objective.
+
+There is also an independent **input scaling** freedom: if an iterate has positive singular values in $[\ell_t, u_t]$, then multiplying the whole iterate by any scalar $\alpha > 0$ changes the interval to $[\alpha \ell_t, \alpha u_t]$ without changing the polar factor. Under the variable change $y = x/\alpha$, the polynomial optimization problem on $[\alpha \ell_t, \alpha u_t]$ is equivalent to the one on $[\ell_t, u_t]$. This is why any non-unit upper endpoint $u_t$ can be absorbed directly into the next PE coefficients instead of being handled by a separate explicit rescaling step. For the first PE step after DWH this absorption is trivial, because the DWH output already has upper endpoint $u_1 = 1$.
 
 ### 6.2 Optimality for Rational Iterations (DWH)
 
-The Dynamic Weighted Halley (DWH) iteration utilizes a degree-$(3, 2)$ rational map. Because this specific rational form is chosen to be monotonically increasing on $[\ell, 1]$, its minimum strictly occurs at $f(\ell)$ and its maximum at $f(1)$. 
+The Dynamic Weighted Halley (DWH) iteration utilizes a degree-$(3, 2)$ rational map. Because this specific rational form is chosen to be monotonically increasing on $[\ell, 1]$, its minimum strictly occurs at $f(\ell)$ and its maximum at $f(1)$.
 
-Therefore, for DWH, the constrained max-min problem simplifies directly to maximizing the lower endpoint $f(\ell)$ subject to $f(1) = 1$.
+For the DWH/QDWH problem, the no-overshoot constraint is active at the level of the applied map: the positive image is kept inside $[0,1]$, so the update quality is governed by how far it lifts the lower endpoint while keeping the top endpoint fixed at $f(1)=1$.
+
+At the same time, this does **not** mean the rational phase is solving a weaker approximation problem than the two-sided sign approximation. In the Zolotarev/QDWH theory {% cite nakatsukasaOptimizingHalleyIteration2010 %}, the constrained positive-interval problem and the best rational approximation of $\operatorname{sign}(x)$ on $[-1,-\ell] \cup [\ell,1]$ are equivalent up to scaling. The type-$(3,2)$ DWH/QDWH step is exactly the corresponding scaled Zolotarev rational. So the rational phase is constrained per step, but it is still optimal within its rational family.
 
 > [!theorem] Optimal DWH Coefficients
 > For a design floor $\ell \in (0, 1]$, the DWH coefficients $a, b, c$ that minimize the minimax error are:
@@ -277,21 +321,31 @@ By using this algebraic flattening, we compute the DWH update using only one sym
 
 ### 6.3 Optimality for Polynomial Iterations (Polar Express)
 
-We use the degree-5 odd polynomial $p(x) = x(a + bx^2 + cx^4)$. Unlike the monotonic DWH rational map, the optimal polynomial map *equioscillates*. 
+We use the degree-5 odd polynomial $p(x) = x(a + bx^2 + cx^4)$. Unlike the monotonic DWH rational map, the PE optimal polynomial *equioscillates* on its tracked interval.
 
-To solve the constrained max-min problem over polynomials, we first solve the **unconstrained minimax problem**:
+For exposition, we first describe the centered one-step problem on $[\ell, 1]$:
 $$
 \min_{a,b,c} \max_{x \in [\ell, 1]} \vert 1 - p(x) \vert = E
 $$
-By the Chebyshev Equioscillation Theorem, the optimal unconstrained $p(x)$ oscillates between $1-E$ and $1+E$. Because its maximum reaches $1+E > 1$, it strictly violates the stability constraint. This is resolved by normalizing the unconstrained polynomial by its maximum value $p(1) = 1+E$, producing the optimal constrained polynomial $\hat{p}(x) = p(x)/p(1)$.
-
-By explicitly normalizing by $p(1)$, the top endpoint is fixed to 1, allowing us to operate in a **Pure Defect Pipeline**. By analytically mapping the Gram system to its defect form $E = I - B$, the entire PE sequence executes as a root-finding iteration purely on the $E$ tensor:
+By the Chebyshev Equioscillation Theorem, the optimal $p(x)$ oscillates between $1-E$ and $1+E$. So in the absolute one-step setting, the image interval becomes
 $$
-Z_i = u_i E + v_i E^2, \quad E \leftarrow 1 - (1-E)(1+Z_i)^2
+[p(\ell), p(1)] = [1-E, 1+E],
 $$
-This update is applied to the orientation factor via $K \leftarrow K(I + Z_i)$. By operating strictly on the defect $E$, we guarantee robust error resolution in FP16/BF16 without relative truncation bounds against the identity.
+which is centered around $1$ and has width $2E$.
 
-> [!theorem] Closed-Form Unconstrained PE Coefficients (Gram-Quadratic)
+In the full Polar Express recurrence, this balanced-endpoint property is maintained across iterations by tracking both $\ell_t$ and $u_t$. In the implementation code in Appendix G, after the finite-precision cushioning step the authors explicitly rescale the polynomial so that $1 - p(\ell_t) = p(u_t) - 1$, i.e. the image interval is re-centered around $1$ before the next step.
+
+To apply such a centered polynomial on a general interval $[\ell_t, u_t]$, set $\lambda_t = \ell_t/u_t$ and solve for the normalized coefficients of
+$$
+q_t(y) = a_t y + b_t y^3 + c_t y^5
+$$
+on $[\lambda_t, 1]$. The corresponding polynomial on the original singular-value variable is
+$$
+p_t(x) = q_t\left(\frac{x}{u_t}\right) = \frac{a_t}{u_t}x + \frac{b_t}{u_t^3}x^3 + \frac{c_t}{u_t^5}x^5.
+$$
+This is the precise sense in which the DWH-to-PE recentering is "absorbed into the coefficients." For the first PE step after DWH, $u_1 = 1$, so this formula reduces to $p_1(x) = q_1(x)$; the nontrivial absorbed scaling starts with the second PE step.
+
+> [!theorem] Closed-Form Centered PE Coefficients
 > Fix $0 < \ell < 1$. Let $q_0 \in (\ell, 1)$ be the root of the following polynomial that yields equioscillation with minimax error $E < 1$:
 > $$ F(q_0; \ell) = F_0(q_0) + \ell^2 F_1(q_0) - \ell^4 F_2(q_0) + \ell^6 F_3(q_0) $$
 > where:
@@ -302,7 +356,7 @@ This update is applied to the orientation factor via $K \leftarrow K(I + Z_i)$. 
 >
 > Define geometric moments $S = q_0^2 + r^2, P = q_0^2 r^2,$ and $D$ via:
 > $$r^2 = \frac{2q_0^3 + 4q_0^2 + 6q_0 + 3}{5(2q_0 + 1)}, \quad D = \left(1 - \frac{5}{3}S + 5P\right) + \ell\left(\ell^4 - \frac{5}{3}S\ell^2 + 5P\right)$$
-> The minimax coefficients for $p(x) = ax + bx^3 + cx^5$ are then:
+> The centered minimax coefficients for $p(x) = ax + bx^3 + cx^5$ are then:
 > $$c = \frac{2}{D},\qquad b = -\frac{5c}{3}\,S,\qquad a = 5cP.$$
 
 The degree-9 equation $F(q_0; \ell) = 0$ contains extraneous branches. We isolate the **unique** valid root by verifying that it produces the required ordering $\ell < q_0 < r < 1$ and the correct Chebyshev alternation cycle.
@@ -363,7 +417,7 @@ def verify_full_pe_derivation():
     
     assert sympy.simplify(num % F_target) == 0
     
-    # 4. Normalization: p(1) + p(ell) = 2
+    # 4. Centering: p(1) + p(ell) = 2
     D_post = (1 - sympy.Rational(5,3)*(q0**2 + r2_sol) + 5*(q0**2 * r2_sol)) + \
              ell*(ell**4 - sympy.Rational(5,3)*(q0**2 + r2_sol)*ell**2 + 5*(q0**2 * r2_sol))
     D_calc = (p_opt.subs(x, 1) + p_opt.subs(x, ell)).subs(r**2, r2_sol) / c
@@ -411,7 +465,7 @@ The global minimax polynomial is significantly better ($\approx 28\%$ lower erro
 
 ## Appendix: Verification Code
 
-> [!example]- Python: Scalar Iteration and Analytic PE Coefficients
+> [!example]- Python: Scalar Iteration and Centered PE
 > ```python
 > import numpy as np
 >
@@ -432,14 +486,14 @@ The global minimax polynomial is significantly better ($\approx 28\%$ lower erro
 >     return alpha * x + beta * x / (gamma + x**2)
 >
 >
-> def analytic_pe_coeffs(ell):
->     L2, L4, L6 = ell**2, ell**4, ell**6
+> def centered_pe_coeffs(lam):
+>     L2, L4, L6 = lam**2, lam**4, lam**6
 >     def F(q):
 >         return (-2048*q**9 - 5888*q**8 - 9608*q**7 - 7728*q**6 - 1288*q**5 + 1748*q**4 + 888*q**3 + 8*q**2 - 72*q - 12
 >                 + L2 * (4520*q**7 + 9340*q**6 + 10990*q**5 + 8525*q**4 + 3200*q**3 + 80*q**2 - 240*q - 40)
 >                 - L4 * (3600*q**5 + 5800*q**4 + 3900*q**3 + 1750*q**2 + 600*q + 100)
 >                 + L6 * (1000*q**3 + 1500*q**2 + 750*q + 125))
->     qs = np.linspace(ell + 1e-12, 1 - 1e-12, 100000)
+>     qs = np.linspace(lam + 1e-12, 1 - 1e-12, 100000)
 >     Fvals = np.array([F(q) for q in qs])
 >     for i in range(len(Fvals) - 1):
 >         if Fvals[i] * Fvals[i + 1] <= 0:
@@ -451,40 +505,53 @@ The global minimax polynomial is significantly better ($\approx 28\%$ lower erro
 >             q0 = (lo + hi) / 2
 >             r2 = (2*q0**3 + 4*q0**2 + 6*q0 + 3) / (5 * (2*q0 + 1))
 >             S, P = q0**2 + r2, q0**2 * r2
->             D = (1 - 5/3*S + 5*P) + ell*(ell**4 - 5/3*S*ell**2 + 5*P)
+>             D = (1 - 5/3*S + 5*P) + lam*(lam**4 - 5/3*S*lam**2 + 5*P)
 >             c = 2/D
 >             b = -5*c/3*S
 >             a = 5*c*P
 >             
 >             # Chebyshev alternation check to reject extraneous branches
 >             p_r = np.sqrt(r2) * (a + b*r2 + c*r2**2)
->             p_l = ell * (a + b*ell**2 + c*ell**4)
+>             p_l = lam * (a + b*lam**2 + c*lam**4)
 >             p_q0 = q0 * (a + b*q0**2 + c*q0**4)
 >             p_1 = a + b + c
 >             
 >             r = np.sqrt(r2)
->             if r2 > 0 and ell < q0 < r < 1:
+>             if r2 > 0 and lam < q0 < r < 1:
 >                 E_ell, E_r = 1 - p_l, 1 - p_r
 >                 E_q0, E_1 = p_q0 - 1, p_1 - 1
 >                 errs = [E_ell, E_r, E_q0, E_1]
 >                 if all(e > 0 for e in errs) and max(errs) - min(errs) < 1e-4:
->                     return a, b, c
+>                     return a, b, c, p_1
 >     return None
 >
 >
-> # Reproduce progression
+> # Reproduce the hybrid progression in absolute coordinates
 > ell_0 = 1e-3
 > alpha, beta, gamma = dwh_coeffs(ell_0)
 > ell_1 = dwh_map(ell_0, alpha, beta, gamma)
-> print(f"DWH: [{ell_1:.4f}, 1]")
-> a1, b1, c1 = analytic_pe_coeffs(ell_1)
-> u1 = a1 + b1 + c1
-> ell_2 = ell_1*(a1 + b1*ell_1**2 + c1*ell_1**4)/u1
-> print(f"PE1: [{ell_2:.4f}, 1]")
-> a2, b2, c2 = analytic_pe_coeffs(ell_2)
-> u2 = a2 + b2 + c2
-> ell_3 = ell_2*(a2 + b2*ell_2**2 + c2*ell_2**4)/u2
-> print(f"PE2: [{ell_3:.4f}, 1]")
+> u_1 = 1.0
+> print(f"DWH: [{ell_1:.6f}, {u_1:.6f}]")
+>
+> # First centered PE step: u_1 = 1, so the absorbed scale is trivial
+> a1, b1, c1, pe1_upper = centered_pe_coeffs(ell_1 / u_1)
+> A1, B1, C1 = a1 / u_1, b1 / u_1**3, c1 / u_1**5
+> ell_2 = A1*ell_1 + B1*ell_1**3 + C1*ell_1**5
+> u_2 = A1*u_1 + B1*u_1**3 + C1*u_1**5
+> assert abs(u_2 - pe1_upper) < 1e-12
+> print(f"PE1 absolute: [{ell_2:.6f}, {u_2:.6f}]")
+> print(f"PE1 actual coeffs: {A1:.15f}, {B1:.15f}, {C1:.15f}")
+>
+> # Second centered PE step: absorb the non-unit upper endpoint u_2 into the coefficients
+> lambda_2 = ell_2 / u_2
+> a2, b2, c2, pe2_upper = centered_pe_coeffs(lambda_2)
+> A2, B2, C2 = a2 / u_2, b2 / u_2**3, c2 / u_2**5
+> ell_3 = A2*ell_2 + B2*ell_2**3 + C2*ell_2**5
+> u_3 = A2*u_2 + B2*u_2**3 + C2*u_2**5
+> assert abs(u_3 - pe2_upper) < 1e-12
+> print(f"PE2 absolute: [{ell_3:.6f}, {u_3:.6f}]")
+> print(f"PE2 actual coeffs: {A2:.15f}, {B2:.15f}, {C2:.15f}")
+> print(f"Optional final normalization: [{ell_3/u_3:.6f}, 1.000000]")
 > ```
 
 
