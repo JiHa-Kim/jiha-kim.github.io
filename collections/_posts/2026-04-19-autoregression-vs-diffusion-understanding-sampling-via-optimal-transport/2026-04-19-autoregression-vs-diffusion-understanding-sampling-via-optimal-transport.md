@@ -62,9 +62,9 @@ Generative modeling is fundamentally an exercise in statistical estimation.
 > Let $\mathcal{D} = \{x_1, \dots, x_N\}$ be an empirical dataset drawn i.i.d. from a data distribution $x \sim P_{\text{data}}(x)$ defined over a high-dimensional space $\mathcal{X}$. We want to generate new approximate samples from $P_{\text{data}}(x)$.
 
 > [!goal] The Transport Objective
-> We introduce a tractable base distribution $z \sim P_{\text{noise}}(z)$ (like standard Gaussian noise) that is easy to sample from. The goal is then to find a transformation $T_\theta: \mathcal{Z} \to \mathcal{X}$ such that the transformed output $x = T_\theta(z)$ matches the statistics of $P_{\text{data}}(x)$.
+> We introduce a tractable base distribution $z \sim P_{\text{noise}}(z)$ (like standard Gaussian noise) that is easy to sample from. The goal is then to convert this simple randomness into samples that match the statistics of $P_{\text{data}}(x)$.
 
-While **Autoregression** and **Diffusion** are frequently presented as fundamentally distinct, viewing them through the lens of **Optimal Transport** reveals that they are tackling the exact same mathematical problem: learning this transport map $T_\theta$. They differ primarily in how they traverse and factorize the coordinate space.
+Autoregressive models and diffusion models are often presented as very different generative strategies. At a high level, however, both convert simple randomness into samples from the data distribution. The difference is in how they parameterize that conversion: autoregression does it through a sequence of conditional transports, while diffusion does it through a time-dependent denoising dynamics. Optimal transport is therefore a useful geometric lens for comparing them, even when the underlying training objectives are not literally the same.
 
 ## Background: Optimal Transport
 
@@ -73,8 +73,9 @@ To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransp
 At its core, Optimal Transport provides a framework for measuring the distance between probability distributions. It asks: how do we transport a probability mass from a source distribution to a target distribution while minimizing a specified transportation cost? 
 
 > [!note] Generative Optimal Transport
-> In the generative setting, our source is the noise prior $P_{\text{noise}}$, and our target is the true data distribution $P_{\text{data}}$. We want to establish a continuous transport map $T$ satisfying the exact condition:
-> $$ T_\sharp P_{\text{noise}} = P_{\text{data}} $$
+> In the generative setting, our source is the noise prior $P_{\text{noise}}$, and our target is the true data distribution $P_{\text{data}}$. We would like a transport map $T$ satisfying
+> $$ T_\sharp P_{\text{noise}} = P_{\text{data}}, $$
+> or at least approximate this relation within a parameterized model family.
 
 > [!definition] Pushforward Measure ($T_\sharp$)
 > The sharp notation ($\sharp$) denotes the **pushforward** of a probability measure. The function $T: \mathcal{Z} \to \mathcal{X}$ "pushes" points from the starting domain into the target domain.
@@ -89,8 +90,12 @@ At its core, Optimal Transport provides a framework for measuring the distance b
 > $$ P(T(Z) \in A) = P(Z \in T^{-1}(A)) = \int_{T^{-1}(A)} p_{\text{noise}}(z) dz $$
 
 > [!problem] The Monge Problem
-> Let $c(x, y)$ be a cost function penalizing transport from $x$ to $y$ (for ML, our model's generalization loss). We want to find a transport mapping $T$ that minimizes the expected cost:
-> $$ \min_T \underset{z \,\sim\, P_{\text{noise}}}{\mathbb{E}} [c(z, T(z))] \quad \text{s.t.} \quad T_\sharp P_{\text{noise}} = P_{\text{data}}. $$
+> Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost on source-target pairs. The Monge problem seeks a transport map $T$ minimizing
+> $$ \min_T \underset{z \,\sim\, P_{\text{noise}}}{\mathbb{E}}[c(z, T(z))] \quad \text{s.t.} \quad T_\sharp P_{\text{noise}} = P_{\text{data}}. $$
+> In this post, OT is used mainly as a conceptual lens for distribution matching. The ground cost $c$ specifies which admissible transport is preferred, and should not be confused with the model's training or generalization loss. The cost $c$ is easiest to interpret when source and target live in a common ambient space, but the key idea is the pushforward relation.
+
+> [!remark] Geometric Efficiency is Inference Efficiency
+> While the transport cost $c$ is distinct from the training objective, they are intimately connected in practice. In traditional physics or economics, we minimize OT cost to save physical energy or fuel. In generative AI, we favor optimal geometric paths (like the straight lines in Rectified Flows) because simpler, uncrossed trajectories are significantly easier for a neural network to approximate. Consequently, this minimal-energy geometry directly yields computational efficiency at inference time, allowing discretised solvers to take much larger, faster steps without compounding errors.
 
 ## The 1D Case: Inverse Transform Sampling
 
@@ -111,17 +116,7 @@ We can reinterpret this as a 1D optimal transport problem. To gain intuition, le
 > $$ \sum_{i=1}^n \left| x_i - y_{\sigma(i)} \right| $$
 
 > [!tip] Intuition: The Monge Property
-> A cost function satisfies the **Monge property** if uncrossing paths strictly reduces the total cost. We can verify this for the absolute distance $c(x,y) = |x-y|$.
-> 
-> Given two pairs $x_1 < x_2$ and $y_1 < y_2$, let $g(x) = |x - y_2| - |x - y_1|$ denote the cost change of mapping to $y_2$ instead of $y_1$.
-> 
-> Since $y_1 < y_2$, analyzing $g(x)$ reveals its slope is everywhere either $0$ or $-2$. Because this slope is never positive, $g(x)$ is monotonically non-increasing. 
-> 
-> Thus, since $x_1 < x_2$, we immediately have $g(x_1) \ge g(x_2)$:
-> $$ |x_1 - y_2| - |x_1 - y_1| \ge |x_2 - y_2| - |x_2 - y_1| $$
-> Rearranging this proves the Monge property holds:
-> $$ |x_1 - y_2| + |x_2 - y_1| \ge |x_1 - y_1| + |x_2 - y_2| $$
-> This guarantees $\text{Crossed Cost} \ge \text{Uncrossed Cost}$. Because iteratively uncrossing any crossed pairs systematically minimizes our total cost, we logically arrive at the global optimum: perfectly sorted arrays.
+> A cost function satisfies the **Monge property** if uncrossing paths strictly reduces the total cost. For distance metrics like $c(x,y) = |x-y|$, matching crossed pairs (where $x_1 < x_2$ maps to $y_1 > y_2$) always costs at least as much as matching uncrossed pairs. Iteratively uncrossing any paths systematically minimizes the total cost, arriving at the global optimum: perfectly sorted arrays.
 
 > [!solution] Discrete Monotone Matching
 > The optimal assignment for the 1D discrete matching problem is simply a **monotone matching**: sorting both arrays and pairing the $k$-th smallest $x$ to the $k$-th smallest $y$.
@@ -150,27 +145,11 @@ We can reinterpret this as a 1D optimal transport problem. To gain intuition, le
 > [!example] Uniform to Arbitrary Mapping
 > *Placeholder: Insert Visualization showing a Uniform [0,1] distribution mapped via an inverse CDF curve onto a complex 1D target.*
 
+In one dimension, transport is easy because cumulative mass can be matched by quantiles. In higher dimensions, autoregression recovers this simplicity by ordering coordinates and transporting one conditional distribution at a time. This produces a triangular transport known, in the continuous case, as the **Knothe-Rosenblatt rearrangement**.
+
 ### The Choice of Base Distribution
 
-Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? These distributions natively maximize differential entropy, yielding the most unbiased statistical start given underlying space constraints.
-
-> [!proposition] Uniform Maximum Entropy
-> For a strictly bounded interval $[a, b]$, the maximum entropy distribution is the Uniform distribution $\mathcal{U}[a, b]$.
-
-> [!proof]-
-> We maximize entropy $\mathbb{E}[-\ln p(x)]$ subject to $\int_a^b p(x) dx = 1$. 
-> Setting the functional derivative of the Lagrangian to zero gives:
-> $$ \frac{\delta}{\delta p} \left( -\int_a^b p(x)\ln p(x)dx + \lambda_0 \left(\int_a^b p(x) dx - 1\right) \right) = 0 $$
-> $$ -\ln p(x) - 1 + \lambda_0 = 0 \implies p(x) = e^{\lambda_0 - 1} $$
-> Since $p(x)$ is constant, it must precisely be $\frac{1}{b-a}$ to integrate to 1.
-
-> [!proposition] Gaussian Maximum Entropy
-> For an unbounded domain space like $\mathbb{R}$, a uniform probability distribution cannot exist (it would require infinite mass), and the maximum possible differential entropy is unbounded ($+\infty$). To get a meaningful maximum entropy base, we constrain the variance $\mathbb{E}[(X - \mathbb{E}[X])^2] \le \sigma^2$. This geometrically yields the Gaussian distribution. {% cite NormalDistribution2026 %}
-
-> [!proof]-
-> We maximize $\mathbb{E}[-\ln p(x)]$ subject to $\int p(x) dx = 1$ and bounded variance $\int x^2 p(x) dx = \sigma^2$ (assuming zero mean). The Lagrangian functional derivative yields:
-> $$ -\ln p(x) - 1 + \lambda_0 + \lambda_1 x^2 = 0 \implies p(x) = e^{\lambda_0 - 1 + \lambda_1 x^2} $$
-> For this to be a valid integrable probability density, we require $\lambda_1 < 0$. Setting $\lambda_1 = -c$ directly recovers the canonical Gaussian form $p(x) \propto e^{-cx^2}$.
+Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? While they do possess strong theoretical properties like maximizing differential entropy, practitioners favor them primarily for practical reasons: they are trivially easy to sample from, isotropic, stable under perturbation, and highly compatible with the noising processes used in generative models.
 
 ## Defining Autoregression
 
@@ -187,25 +166,44 @@ Instead of solving the intractable global map $T: \mathbb{R}^D \to \mathbb{R}^D$
 ## Autoregression as Iterative 1D Transport
 
 > [!theorem] Autoregression as Triangular Transport
-> Autoregression corresponds to a cascaded sequence of 1D optimal transport mappings $z_i = T_i(x_i \vert x_{<i})$. Because each mapping relies only on past variables, the global continuous Jacobian matrix $\frac{\partial z}{\partial x}$ is strictly lower-triangular.
+> For continuous variables, autoregressive sampling can be written as a triangular transport. If
+> $$ u_i \sim \mathcal{U}(0,1), $$
+> then each coordinate may be generated conditionally by querying its inverse CDF:
+> $$ x_i = F^{-1}_{X_i \vert X_{<i}=x_{<i}}(u_i). $$
+> This yields a lower-triangular map from $u$ to $x$, which is the precise sense in which autoregression behaves like a sequence of 1D conditional transports.
 
-> [!proof]-
-> The map $z_i = T_i(x_i \vert x_{<i})$ does not depend on future variables $x_{>i}$, meaning $\frac{\partial z_i}{\partial x_j} = 0$ for $j > i$.
-> A lower-triangular Jacobian implies its global spatial determinant simplifies perfectly into the product of its diagonals:
-> $$ \left| \det \frac{\partial z}{\partial x} \right| = \prod_{i=1}^D \left| \frac{\partial z_i}{\partial x_i} \right| $$
-> This allows closed-form, exact likelihood evaluation:
-> $$ P_{\text{data}}(x) = P_{\text{noise}}(z) \prod_{i=1}^D \left| \frac{\partial z_i}{\partial x_i} \right| $$
+> [!proof]- Change of Variables
+> The map from data $x$ back to noise $u$ (the inverse transport $u_i = F_{X_i \vert X_{<i}=x_{<i}}(x_i)$) depends only on current and past variables $x_{\le i}$. Thus, the Jacobian matrix $\frac{\partial u}{\partial x}$ is lower-triangular, meaning $\frac{\partial u_i}{\partial x_j} = 0$ for $j > i$.
+> A lower-triangular Jacobian implies its global determinant simplifies perfectly into the product of its diagonal entries:
+> $$ \left| \det \frac{\partial u}{\partial x} \right| = \prod_{i=1}^D \left| \frac{\partial u_i}{\partial x_i} \right| $$
+> This yields closed-form, exact likelihood evaluation under the change-of-variables formula:
+> $$ P_{\text{data}}(x) = P_{\text{noise}}(u) \prod_{i=1}^D \left| \frac{\partial u_i}{\partial x_i} \right| $$
 
-By conditioning sequentially, the model elegantly fractures the joint transport task, directly leveraging 1D deterministic matching without evaluating full density bounds simultaneously.
+By building the sample via this sequence of conditionals, the model leverages 1D deterministic matching iteratively.
+
+### Example: LLMs via Classification
+
+Large Language Models (LLMs) provide the most prominent real-world application of this framework. They generate text autoregressively by predicting the next token from a discrete vocabulary $\mathcal{V}$, fundamentally trained as a massive classification task.
+
+> [!example] Categorical Inverse Transform Sampling
+> At each step $i$, the LLM outputs a discrete categorical probability distribution over the vocabulary:
+> $$ P(x_i = v_k \vert x_{<i}) = p_k $$
+> By defining an arbitrary strict ordering over the tokens (for example, $v_k = k$ for $k \in \{1, \dots, |\mathcal{V}|\}$), we can construct a discrete step-wise Cumulative Distribution Function (CDF):
+> $$ F(v_k) = \sum_{j=1}^k p_j $$
+> The standard categorical sampling algorithm directly draws a uniform scalar random variable $u \sim \mathcal{U}(0, 1)$ and queries the inverse CDF:
+> $$ x_i = \min \{ v_k \in \mathcal{V} \vert F(v_k) \ge u \} $$
+
+This demonstrates a beautiful analogy: training an LLM as a next-token classifier essentially estimates the discrete conditional 1D CDF. While discrete token autoregression is not literally a continuous Jacobian-based flow, through the lens of optimal transport, we can conceptually view text generation as an analogous sequential cascade of 1D inverse transform sampling steps.
+
 ## Diffusion: Continuous Global Mapping
 
 If autoregression fractures high-dimensional densities sequentially, how does diffusion contrast with this?
 
-> [!definition] Diffusion as Direct Transport
-> Diffusion models operate without sequence factorization. They model a continuous time-dependent vector field (the score function $\nabla_{\mathbf{x}} \log p_t(\mathbf{x})$) to define a global flow over $t \in [0,1]$ that smoothly transports the pure prior $P_{\text{noise}}$ seamlessly into the data manifold $P_{\text{data}}$. {% cite lai2025principles %}
+> [!definition] Diffusion as Transport Through Time
+> A diffusion model starts from a simple noise distribution and learns reverse-time dynamics that move samples back toward the data distribution. Depending on the formulation, these dynamics may be written as a reverse SDE, a score-based update rule, or an equivalent probability-flow ODE. This makes diffusion a form of transport through time, although not necessarily the Monge-optimal transport map. {% cite lai2025principles %}
 
-> [!note] Global vs. Iterative
-> While an autoregressive sampler restricts transport conditionally dimension by dimension, a diffusion process projects a simultaneous continuous map pushing equivalent probability mass globally over time $t$.
+> [!note] Global Dynamics vs. Iterative Factoring
+> While an autoregressive sampler constructs the sample iteratively dimension by dimension, a diffusion process acts over the entire coordinate space simultaneously over time $t$.
 
 ### Map Models vs. Flow Models
 
@@ -234,9 +232,11 @@ To rigorously understand diffusion's geometry, we mathematically distinguish Map
 ## Conclusion
 
 > [!summary] 
-> Autoregression and diffusion optimize equivalent optimal transport frameworks spanning spatial data differently:
-> * **Autoregression** factorizes the generalized probability into sequences of bounded 1D conditionals. This safely yields closed-form simplicity, making it exceptional for discrete sequential domains like NLP.
-> * **Diffusion** models continuous global velocity flows directly. By mapping simultaneous ODE/SDE projections, transport vectors push full geometry explicitly without chaining bottlenecks, uniquely fitting dense spatial domains like continuous images.
+> Autoregression and diffusion can both be viewed as driving toward the same broad generative goal, but through different parameterizations that leverage distinct inductive biases:
+> * **Text** is naturally discrete and sequential, making it conceptually straightforward to factorize $p(x_1,\dots,x_D) = \prod_i p(x_i \mid x_{<i})$. Autoregression natively exploits this structure to train with exact likelihoods.
+> * **Images** are high-dimensional continuous signals with strong spatial correlations, so a global denoising process effectively captures this dense geometry simultaneously.
+>
+> Neither is a hard physical law restricting a modality exclusively to one family. Ultimately, viewing both approaches through the lens of Optimal Transport reveals how they master the same fundamental task—turning noise into data—by traversing statistical space in remarkably different ways.
 
 ---
 
