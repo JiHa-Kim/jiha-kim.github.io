@@ -308,7 +308,11 @@ Autoregression constrains the transport map to a specific family (Knothe-Rosenbl
 
 Autoregression wins on tractability (reducing to closed-form 1D problems) and exact likelihoods, but requires $D$ sequential steps for generation. Geometrically, we can visualize this restriction as taking a "taxicab-like" path—moving along one coordinate axis at a time—making the total transport cost strictly less efficient than theoretically possible. Unconstrained transport wins on geometric optimality by allowing direct, straight-line paths, but loses the simple analytic procedure, requiring complex velocity regression to approximate $\nabla\psi$ in practice {% cite vesseronNeuralImplementationBreniers2025 %}.
 
+Two complementary 2D pictures help keep the distinction straight. First, we compare two <strong>exact continuous maps at the population-law level</strong>: same source law, same target law, different map, visualized against ellipse contours of the true target distribution. Then we pass to an <strong>empirical finite-sample discretization of those same underlying laws</strong>: one frozen source cloud, one frozen target cloud, and two couplings on that exact cached point set.
+
 {% include transport_2d_widget.html %}
+
+{% include transport_2d_discrete_widget.html %}
 
 ## Vanilla (Causal Sequence) Autoregression
 
