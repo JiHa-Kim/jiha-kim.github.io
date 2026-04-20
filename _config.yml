@@ -283,6 +283,9 @@ plugins:
 scholar:
   style: apa # or another CSL style (e.g., chicago-fullnote-bibliography)
   locale: en
+  bibtex_filters: [latex, superscript]
+  bibtex_options:
+    strip_braces: true
   backlinks:
     enabled: true
     symbol: "&#8617;&#xfe0e;" # Standard back-arrow

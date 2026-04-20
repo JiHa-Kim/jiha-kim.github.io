@@ -22,7 +22,8 @@ module Jekyll
         if config['separate_links']
           rendered_links = keys.map do |key|
             if bibliography.key?(key)
-              entry = bibliography[key]
+              entry = bibliography[key].dup
+              entry = entry.convert(*bibtex_filters) unless bibtex_filters.empty?
               
               idx = page['scholar_backlinks'][key].length + 1
               backref_id = "cite-#{key}-#{idx}"
@@ -57,7 +58,11 @@ module Jekyll
           primary_id = backref_ids.first
           
           if bibliography.key?(keys[0])
-            items = keys.map { |k| bibliography[k] }.compact
+            items = keys.map { |k| bibliography[k] }.compact.map do |e|
+              e = e.dup
+              e = e.convert(*bibtex_filters) unless bibtex_filters.empty?
+              e
+            end
             cache_key = keys.join(',')
             rendered = (citation_cache[cache_key] ||= render_citation(items))
 
