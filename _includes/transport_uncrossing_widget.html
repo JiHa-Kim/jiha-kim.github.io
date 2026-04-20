@@ -1,0 +1,425 @@
+<div class="otu" id="uncrossingSwapFigure">
+  <div class="otu__intro">
+    <div class="otu__eyebrow">Example</div>
+    <h4>Uncrossed versus crossed on one number line</h4>
+    <p>
+      Drag the points themselves on the number line.
+      The widget keeps the order constraints $x_1 < x_2$ and $y_1 < y_2$.
+      The top row shows the uncrossed matching, and the bottom row shows the crossed matching.
+    </p>
+  </div>
+
+  <div class="otu__stage-card">
+    <div class="otu__stage-note">
+      Orange points are sources and blue points are targets. Within each color, the left point is subscript $1$ and the right point is subscript $2$. Dragging changes the actual 1D distances, so every segment is horizontal.
+    </div>
+
+    <div class="otu__stage" id="otuStage">
+      <canvas class="otu__canvas" aria-hidden="true"></canvas>
+
+      <div class="otu__row-tag otu__row-tag--top">Uncrossed</div>
+      <div class="otu__row-tag otu__row-tag--bottom">Crossed</div>
+
+      <div class="otu__sum otu__sum--top">Total = <span data-bind="uncrossed_stage">4.00</span></div>
+      <div class="otu__sum otu__sum--bottom">Total = <span data-bind="crossed_stage">8.00</span></div>
+
+      <div class="otu__handle otu__handle--source" data-key="x1"><div class="otu__handle-marker"></div></div>
+
+      <div class="otu__handle otu__handle--source" data-key="x2"><div class="otu__handle-marker"></div></div>
+
+      <div class="otu__handle otu__handle--target" data-key="y1"><div class="otu__handle-marker"></div></div>
+
+      <div class="otu__handle otu__handle--target" data-key="y2"><div class="otu__handle-marker"></div></div>
+    </div>
+  </div>
+
+  <div class="otu__footer">
+    The green top total is never larger than the gray bottom total. That is the concrete two-point swap behind the 1D uncrossing argument.
+  </div>
+</div>
+
+<style>
+.otu {
+  margin: 1.35rem 0 2rem 0;
+  padding: 1rem;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.16));
+  border-radius: 14px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+}
+
+.otu__eyebrow {
+  margin-bottom: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+
+.otu__intro h4 {
+  margin: 0;
+  font-size: 1.04rem;
+}
+
+.otu__intro p {
+  margin: 0.45rem 0 0 0;
+  line-height: 1.66;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+
+.otu__stage-card {
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
+  border-radius: 12px;
+  background: var(--main-bg, rgba(255, 255, 255, 0.76));
+}
+
+.otu__stage-card {
+  margin-top: 1rem;
+  padding: 0.9rem;
+}
+
+.otu__stage-note {
+  margin-bottom: 0.7rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+
+.otu__stage {
+  position: relative;
+  height: 300px;
+  border-radius: 12px;
+  border: 1px solid rgba(120, 120, 120, 0.1);
+  background: var(--main-bg, rgba(255, 255, 255, 0.78));
+  overflow: hidden;
+}
+
+.otu__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.otu__row-tag,
+.otu__sum {
+  position: absolute;
+  z-index: 2;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--main-bg, #fff);
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
+}
+
+.otu__row-tag--top {
+  left: 16px;
+  top: 18px;
+  color: var(--prompt-tip-icon, #16a34a);
+}
+
+.otu__row-tag--bottom {
+  left: 16px;
+  bottom: 18px;
+  color: var(--prompt-gray-icon, #9ca3af);
+}
+
+.otu__sum--top {
+  right: 16px;
+  top: 18px;
+  color: var(--prompt-tip-icon, #16a34a);
+}
+
+.otu__sum--bottom {
+  right: 16px;
+  bottom: 18px;
+  color: var(--prompt-gray-icon, #9ca3af);
+}
+
+.otu__handle {
+  position: absolute;
+  z-index: 3;
+  top: 146px;
+  width: 28px;
+  height: 28px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transform: translate(-50%, -50%);
+}
+
+.otu__handle:active {
+  cursor: grabbing;
+}
+
+.otu__handle-marker {
+  position: absolute;
+  inset: 0;
+  width: 18px;
+  height: 18px;
+  margin: auto;
+  border-radius: 999px;
+  border: 2px solid var(--main-bg, #fff);
+  box-shadow: 0 0 0 1px rgba(120, 120, 120, 0.18), 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.otu__handle--source .otu__handle-marker {
+  background: var(--prompt-warning-icon, #d97706);
+}
+
+.otu__handle--target .otu__handle-marker {
+  background: var(--prompt-info-icon, #0ea5e9);
+}
+
+.otu__handle.is-dragging .otu__handle-marker {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 1px rgba(120, 120, 120, 0.18), 0 5px 14px rgba(0, 0, 0, 0.12);
+}
+
+.otu__footer {
+  margin-top: 0.85rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(120, 120, 120, 0.12);
+  line-height: 1.6;
+}
+
+.otu .mjx-container {
+  margin: 0 !important;
+}
+
+@media (max-width: 600px) {
+  .otu {
+    padding: 0.9rem;
+  }
+
+  .otu__stage {
+    height: 320px;
+  }
+
+  .otu__row-tag,
+  .otu__sum {
+    font-size: 0.76rem;
+  }
+
+  .otu__handle {
+    top: 154px;
+  }
+}
+</style>
+
+<script>
+(function() {
+  const root = document.getElementById('uncrossingSwapFigure');
+  if (!root || root.dataset.initialized === 'true') return;
+  root.dataset.initialized = 'true';
+
+  const stage = root.querySelector('#otuStage');
+  const canvas = stage.querySelector('.otu__canvas');
+  const ctx = canvas.getContext('2d');
+  const handles = {
+    x1: stage.querySelector('[data-key="x1"]'),
+    x2: stage.querySelector('[data-key="x2"]'),
+    y1: stage.querySelector('[data-key="y1"]'),
+    y2: stage.querySelector('[data-key="y2"]')
+  };
+
+  const binds = {
+    uncrossedStage: root.querySelector('[data-bind="uncrossed_stage"]'),
+    crossedStage: root.querySelector('[data-bind="crossed_stage"]')
+  };
+
+  const state = { x1: 1.0, x2: 4.0, y1: 2.0, y2: 7.0 };
+  const domain = { min: 0, max: 8 };
+  const minGap = 0.8;
+  const colors = {
+    uncrossed: getComputedStyle(document.documentElement).getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
+    crossed: getComputedStyle(document.documentElement).getPropertyValue('--prompt-gray-icon').trim() || '#9ca3af',
+    muted: getComputedStyle(document.documentElement).getPropertyValue('--text-muted-color').trim() || '#6b7280',
+    border: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || 'rgba(120,120,120,0.16)'
+  };
+
+  let stageRect = null;
+  let dragging = null;
+
+  function alphaColor(hex, alpha) {
+    if (!hex || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) return hex;
+    let value = hex.slice(1);
+    if (value.length === 3) value = value.split('').map((char) => char + char).join('');
+    const r = parseInt(value.slice(0, 2), 16);
+    const g = parseInt(value.slice(2, 4), 16);
+    const b = parseInt(value.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function formatTotal(value) {
+    return value.toFixed(2);
+  }
+
+  function measure() {
+    stageRect = stage.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = stageRect.width * dpr;
+    canvas.height = stageRect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function valueToX(value) {
+    const left = 56;
+    const right = stageRect.width - 56;
+    const t = (value - domain.min) / (domain.max - domain.min);
+    return left + t * (right - left);
+  }
+
+  function xToValue(x) {
+    const left = 56;
+    const right = stageRect.width - 56;
+    const t = (x - left) / (right - left);
+    const raw = domain.min + Math.max(0, Math.min(1, t)) * (domain.max - domain.min);
+    return Math.round(raw * 10) / 10;
+  }
+
+  function clampValue(key, value) {
+    if (key === 'x1') return Math.max(domain.min, Math.min(state.x2 - minGap, value));
+    if (key === 'x2') return Math.max(state.x1 + minGap, Math.min(domain.max, value));
+    if (key === 'y1') return Math.max(domain.min, Math.min(state.y2 - minGap, value));
+    return Math.max(state.y1 + minGap, Math.min(domain.max, value));
+  }
+
+  function drawDistanceRow(y, leftValue, rightValue, color, labelY) {
+    const xLeft = valueToX(Math.min(leftValue, rightValue));
+    const xRight = valueToX(Math.max(leftValue, rightValue));
+
+    ctx.beginPath();
+    ctx.moveTo(xLeft, y);
+    ctx.lineTo(xRight, y);
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = alphaColor(color, 0.18);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(xLeft, y);
+    ctx.lineTo(xRight, y);
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(xLeft, y - 7);
+    ctx.lineTo(xLeft, y + 7);
+    ctx.moveTo(xRight, y - 7);
+    ctx.lineTo(xRight, y + 7);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    const dist = Math.abs(leftValue - rightValue);
+    const midX = (xLeft + xRight) / 2;
+    ctx.fillStyle = color;
+    ctx.font = '700 12px var(--font-family-monospace, monospace)';
+    ctx.textAlign = 'center';
+    ctx.fillText(dist.toFixed(1), midX, labelY);
+  }
+
+  function drawAxis() {
+    const axisY = 146;
+    const left = 56;
+    const right = stageRect.width - 56;
+
+    ctx.strokeStyle = colors.border;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(left, axisY);
+    ctx.lineTo(right, axisY);
+    ctx.stroke();
+
+    for (let tick = domain.min; tick <= domain.max; tick += 1) {
+      const x = valueToX(tick);
+      ctx.beginPath();
+      ctx.moveTo(x, axisY - 7);
+      ctx.lineTo(x, axisY + 7);
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = colors.border;
+      ctx.stroke();
+
+      ctx.fillStyle = colors.muted;
+      ctx.font = '600 12px var(--font-family-monospace, monospace)';
+      ctx.textAlign = 'center';
+      ctx.fillText(String(tick), x, axisY + 23);
+    }
+
+  }
+
+  function updateHandles() {
+    Object.entries(handles).forEach(([key, el]) => {
+      el.style.left = `${valueToX(state[key])}px`;
+    });
+  }
+
+  function updateTotals() {
+    const uncrossed = Math.abs(state.x1 - state.y1) + Math.abs(state.x2 - state.y2);
+    const crossed = Math.abs(state.x1 - state.y2) + Math.abs(state.x2 - state.y1);
+
+    binds.uncrossedStage.textContent = formatTotal(uncrossed);
+    binds.crossedStage.textContent = formatTotal(crossed);
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, stageRect.width, stageRect.height);
+
+    drawDistanceRow(62, state.x1, state.y1, colors.uncrossed, 52);
+    drawDistanceRow(90, state.x2, state.y2, colors.uncrossed, 80);
+    drawDistanceRow(214, state.x1, state.y2, colors.crossed, 204);
+    drawDistanceRow(242, state.x2, state.y1, colors.crossed, 232);
+    drawAxis();
+
+    updateHandles();
+    updateTotals();
+  }
+
+  function onPointerMove(event) {
+    if (!dragging) return;
+    const x = event.clientX - stageRect.left;
+    state[dragging] = clampValue(dragging, xToValue(x));
+    render();
+  }
+
+  function stopDrag() {
+    dragging = null;
+    Object.values(handles).forEach((el) => el.classList.remove('is-dragging'));
+  }
+
+  Object.entries(handles).forEach(([key, el]) => {
+    el.addEventListener('pointerdown', (event) => {
+      dragging = key;
+      el.classList.add('is-dragging');
+      el.setPointerCapture(event.pointerId);
+    });
+  });
+
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', stopDrag);
+  window.addEventListener('pointercancel', stopDrag);
+  window.addEventListener('resize', () => {
+    measure();
+    render();
+  });
+
+  measure();
+  render();
+
+  function requestMathTypeset(attempt = 0) {
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([root]).catch(() => {});
+      return;
+    }
+    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
+  }
+
+  requestMathTypeset();
+})();
+</script>

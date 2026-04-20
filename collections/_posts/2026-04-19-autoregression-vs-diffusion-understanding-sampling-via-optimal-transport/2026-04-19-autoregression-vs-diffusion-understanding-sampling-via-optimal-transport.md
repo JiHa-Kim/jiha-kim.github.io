@@ -135,18 +135,9 @@ Suppose we operate strictly in a 1-dimensional continuous space $\mathbb{R}$, an
 
 We now rewrite the same idea in the discrete setting first.
 
-> [!example] Three Source Points, Three Target Points
-> Suppose the source points are
-> $$ x_1 = 1, \qquad x_2 = 4, \qquad x_3 = 10 $$
-> and the target points are
-> $$ y_1 = 2, \qquad y_2 = 7, \qquad y_3 = 11. $$
-> If we match in sorted order, the total absolute-distance cost is
-> $$ |1-2| + |4-7| + |10-11| = 1 + 3 + 1 = 5. $$
-> A crossed matching such as
-> $$ 1 \mapsto 11, \qquad 4 \mapsto 2, \qquad 10 \mapsto 7 $$
-> has cost
-> $$ |1-11| + |4-2| + |10-7| = 10 + 2 + 3 = 15. $$
-> So in 1D, matching by order is already the natural guess.
+The local swap behind the 1D OT solution is easiest to see in the smallest nontrivial example:
+
+{% include transport_uncrossing_widget.html %}
 
 > [!problem] Discrete 1D OT: Equal-Mass Matching
 > Suppose source points $x_1,\dots,x_n$ and target points $y_1,\dots,y_n$ each carry mass $\frac{1}{n}$, and each source point must be matched to exactly one target point. Then we choose a permutation $\sigma$ and solve
@@ -157,6 +148,16 @@ We now rewrite the same idea in the discrete setting first.
 > $$ c(x_1, y_1) + c(x_2, y_2) \le c(x_1, y_2) + c(x_2, y_1). $$
 > In words: if two matching lines cross, uncrossing them never increases the cost.
 
+> [!proof]-
+> Let $a = x_1-y_2$ and $d = x_2-y_1$. Since $x_1 < x_2$ and $y_1 < y_2$, we have $d-a = (x_2-x_1) + (y_2-y_1) > 0$, so $a < d$. With
+> $$ \lambda = \frac{x_2-x_1}{(x_2-x_1) + (y_2-y_1)} \in (0,1), $$
+> we can write
+> $$ x_1-y_1 = \lambda a + (1-\lambda)d, \qquad x_2-y_2 = (1-\lambda)a + \lambda d. $$
+> Since $h$ is convex,
+> $$ h(x_1-y_1) + h(x_2-y_2) \le h(a) + h(d). $$
+> Substituting back $a = x_1-y_2$ and $d = x_2-y_1$ gives
+> $$ c(x_1, y_1) + c(x_2, y_2) \le c(x_1, y_2) + c(x_2, y_1). $$
+
 > [!solution] Discrete Monotone Matching
 > Sort both sets of points in non-decreasing order: 
 > $$ x^{(1)} \le x^{(2)} \le \dots \le x^{(n)} \quad \text{and} \quad y^{(1)} \le y^{(2)} \le \dots \le y^{(n)}. $$
@@ -164,44 +165,53 @@ We now rewrite the same idea in the discrete setting first.
 > $$ x^{(1)} \leftrightarrow y^{(1)}, \qquad x^{(2)} \leftrightarrow y^{(2)}, \qquad \dots, \qquad x^{(n)} \leftrightarrow y^{(n)}. $$
 > So in 1D, optimal transport is just "sort both sides and pair equal ranks."
 
+> [!proof]-
+> Start from any permutation $\sigma$. If $\sigma$ is not monotone, then some $i<j$ satisfy $\sigma(i)>\sigma(j)$, so the pairs $x^{(i)} \mapsto y^{(\sigma(i))}$ and $x^{(j)} \mapsto y^{(\sigma(j))}$ cross. By the Monge property, swapping those two targets does not increase the cost:
+> $$ c\bigl(x^{(i)}, y^{(\sigma(j))}\bigr) + c\bigl(x^{(j)}, y^{(\sigma(i))}\bigr)
+> \le
+> c\bigl(x^{(i)}, y^{(\sigma(i))}\bigr) + c\bigl(x^{(j)}, y^{(\sigma(j))}\bigr). $$
+> After the swap, the number of inversions of $\sigma$ decreases by at least $1$. Repeating this process finitely many times removes all inversions.
+>
+> A permutation with no inversions is increasing, and the only increasing permutation of $\{1,\dots,n\}$ is the identity. So eventually we reach $\sigma(i)=i$ for every $i$, which is exactly the sorted matching $x^{(i)} \leftrightarrow y^{(i)}$.
+
 > [!example] Equal Quantiles
 > The continuous version says the same thing, but with percentiles instead of sorted lists.
 >
 > For example, if a point $x$ is at the $70\%$ quantile of the source distribution, then it should be sent to the $70\%$ quantile of the target distribution.
 
 > [!problem] Continuous 1D OT
-> Let $F$ and $G$ be the source and target CDFs. We seek a map $T$ that sends the source distribution to the target distribution and, among all such maps, has the smallest transport cost:
+> Let $F$ and $G$ be the source and target CDFs. For the same class of 1D convex costs $c(x,y)=h(x-y)$, we seek a map $T$ that sends the source distribution to the target distribution and, among all such maps, has the smallest transport cost:
 > $$ \min_T \int c(x, T(x))\,dF(x) $$
 > subject to
 > $$ T_\sharp F = G. $$
 > In words: if $X$ has source CDF $F$, then $T(X)$ should have target CDF $G$.
 
 > [!solution] Quantile Matching
-> The formula is
+> For these 1D convex costs, the optimal map is
 > $$ T(x) = G^{-1}(F(x)). $$
 > Read it in two steps:
 > $$ u = F(x), \qquad T(x) = G^{-1}(u). $$
 > First compute the quantile of $x$ in the source distribution. Then send it to the point with the same quantile in the target distribution.
 
 > [!proof]-
-> If $X$ has CDF $F$, then
-> $$ U = F(X) \sim \mathcal{U}(0,1). $$
-> Now define
-> $$ T(X) = G^{-1}(U) = G^{-1}(F(X)). $$
-> Then for any $t$,
-> $$ P(T(X) \le t) = P(G^{-1}(U) \le t) = P(U \le G(t)) = G(t). $$
-> So $T(X)$ has CDF $G$, which means $T$ sends the source distribution to the target distribution.
+> First check that the map has the right output distribution. If $X \sim F$ and $U = F(X)$, then $U \sim \mathcal{U}(0,1)$. Define $Y = G^{-1}(U) = G^{-1}(F(X))$. Then for any $t$,
+> $$ P(Y \le t) = P(G^{-1}(U) \le t) = P(U \le G(t)) = G(t), $$
+> so $Y$ has CDF $G$. Therefore $T_\sharp F = G$.
 >
-> The discrete uncrossing argument explains why matching equal quantiles is also the cost-minimizing choice in 1D. For squared distance this map is unique. For absolute distance it is still optimal, but ties can occur.
+> Now check optimality. For each $m$, take the equally spaced quantile levels $u_k = \frac{k-\frac12}{m}$ and define
+> $$ x_k = F^{-1}(u_k), \qquad y_k = G^{-1}(u_k), \qquad k=1,\dots,m. $$
+> By the discrete monotone matching result, pairing $x_k$ with $y_k$ minimizes
+> $$ \frac1m \sum_{k=1}^m h(x_k - y_{\sigma(k)}) $$
+> over all permutations $\sigma$. As $m \to \infty$, these sums converge to the quantile integral
+> $$ \int_0^1 h\bigl(F^{-1}(u) - G^{-1}(u)\bigr)\,du, $$
+> which is exactly
+> $$ \int h(x - T(x))\,dF(x) \qquad \text{for } T(x)=G^{-1}(F(x)). $$
+> So equal-quantile matching is optimal in the continuous problem as well.
+>
+> If $h$ is strictly convex, such as $h(t)=t^2$, this optimizer is unique up to sets of measure zero. For $h(t)=|t|$, ties can occur.
 
 > [!example] Uniform to Arbitrary Mapping
 > *Placeholder: Insert Visualization showing a Uniform [0,1] distribution mapped via an inverse CDF curve onto a complex 1D target.*
-
-> [!todo] Visualization Placeholder: Discrete Uncrossing
-> Use two side-by-side panels.
-> In the left panel, draw crossed matching segments between sorted source points and target points.
-> In the right panel, draw the uncrossed matching.
-> Annotate the total cost in both panels so the reader can visually see why 1D matching prefers order-preserving assignments.
 
 In higher dimensions, we apply the same quantile-matching step conditionally, one coordinate at a time. This gives the **Knothe-Rosenblatt rearrangement**.
 
@@ -319,8 +329,7 @@ Instead of autoregressing in the original coordinates, we can first change coord
 > [!definition] Change of Variables
 > Let $y = g(x)$ be invertible. Then
 > $$ p_X(x) = p_Y(y)\left| \det J_g(x) \right|, \qquad y = g(x), $$
-> where $J_g(x)$ is the Jacobian matrix of $g$.
-> If
+> where $J_g(x)$ is the Jacobian matrix of $g$. If
 > $$ p_Y(y) = \prod_{i=1}^D p(y_i \mid y_{<i}), $$
 > then
 > $$ p_X(x) = \left[\prod_{i=1}^D p(y_i \mid y_{<i})\right]\left| \det J_g(x) \right|. $$
