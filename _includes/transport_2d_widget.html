@@ -1,0 +1,413 @@
+<div class="otu" id="transport2dFigure">
+  <div class="otu__intro">
+    <div class="otu__eyebrow">Interactive 2D Example</div>
+    <h4>Sequential vs. Direct Transport Paths</h4>
+    <p>
+      Both methods successfully transport standard normal noise into the exact same correlated target distribution. <strong>They do not harm the representation.</strong>
+      <br><br>
+      However, their <strong>paths</strong> differ fundamentally. <strong>Autoregression</strong> generates coordinates sequentially. We can visualize this as a <strong>"taxicab-like"</strong> path (moving horizontally, then vertically), resulting in a less efficient total travel distance. <strong>Optimal Transport (Brenier)</strong> moves mass <strong>directly</strong> along straight lines, minimizing the overall geometric transport cost.
+    </p>
+  </div>
+
+  <div class="otu__stage-card">
+    <div class="t2d__header">
+      <div class="t2d__segmented-control">
+        <button class="t2d__seg-btn active" data-map="ar">Autoregression (Sequential)</button>
+        <button class="t2d__seg-btn" data-map="ot">Optimal Transport (Direct)</button>
+      </div>
+    </div>
+    
+    <div class="otu__stage" id="t2dStage" style="height: 420px; position: relative;">
+      <canvas id="t2dCanvas" style="position: absolute; inset: 0; width: 100%; height: 100%;"></canvas>
+    </div>
+
+    <div class="t2d__footer">
+      <button class="t2d__play-btn" id="t2dPlay">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <input type="range" class="t2d__slider" id="t2dSlider" min="0" max="1" step="0.005" value="0">
+      <div class="t2d__time-val" id="t2dValue">t = 0.00</div>
+    </div>
+  </div>
+</div>
+
+<style>
+.otu {
+  margin: 1.35rem 0 2rem 0;
+  padding: 1rem;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.16));
+  border-radius: 14px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+}
+.otu__eyebrow {
+  margin-bottom: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+.otu__intro h4 {
+  margin: 0;
+  font-size: 1.04rem;
+}
+.otu__intro p {
+  margin: 0.45rem 0 0 0;
+  line-height: 1.66;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+.otu__stage-card {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
+  border-radius: 12px;
+  background: var(--main-bg, rgba(255, 255, 255, 0.76));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.otu__stage {
+  background: var(--main-bg, #fff);
+  border-radius: 8px;
+  border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+[data-mode="dark"] .otu__stage {
+  background: var(--main-bg, #1b1b1e);
+}
+
+/* T2D Specifics */
+.t2d__header {
+  display: flex;
+  justify-content: center;
+}
+.t2d__segmented-control {
+  display: flex;
+  background: rgba(120, 120, 120, 0.1);
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+}
+.t2d__seg-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted-color, #6b7280);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.t2d__seg-btn:hover {
+  color: var(--text-color, #111827);
+}
+.t2d__seg-btn.active {
+  background: var(--main-bg, #fff);
+  color: var(--text-color, #111827);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+[data-mode="dark"] .t2d__seg-btn.active {
+  background: var(--card-bg, #374151);
+  color: #f3f4f6;
+}
+
+.t2d__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 4px;
+}
+.t2d__play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.2));
+  background: var(--main-bg, #fff);
+  color: var(--text-color, #111827);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.t2d__play-btn:hover {
+  background: rgba(120, 120, 120, 0.1);
+}
+.t2d__play-btn:active {
+  transform: scale(0.95);
+}
+[data-mode="dark"] .t2d__play-btn {
+  background: #374151;
+  color: #f3f4f6;
+}
+
+.t2d__slider {
+  flex-grow: 1;
+  cursor: pointer;
+}
+.t2d__time-val {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.85rem;
+  width: 60px;
+  text-align: right;
+  color: var(--text-muted-color, #6b7280);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const root = document.getElementById('transport2dFigure');
+  if (!root || root.dataset.initialized === 'true') return;
+  root.dataset.initialized = 'true';
+
+  const canvas = root.querySelector('#t2dCanvas');
+  const ctx = canvas.getContext('2d');
+  const stage = root.querySelector('#t2dStage');
+  const slider = root.querySelector('#t2dSlider');
+  const playBtn = root.querySelector('#t2dPlay');
+  const timeVal = root.querySelector('#t2dValue');
+  const segBtns = root.querySelectorAll('.t2d__seg-btn');
+
+  let currentMapType = 'ar'; // 'ar' or 'ot'
+  let currentT = 0;
+  let isPlaying = false;
+  let animationFrameId = null;
+  let stageRect = null;
+
+  // Mathematical setup
+  // Source: N(0, I)
+  // Target: Correlated Gaussian N(0, Sigma)
+  // Sigma = [[2.5, 2.2], [2.2, 2.5]]
+  
+  // Autoregression (Cholesky factor L): Lower triangular
+  const L = [
+    [1.5811, 0.0000],
+    [1.3914, 0.7513]
+  ];
+
+  // Optimal Transport (Matrix square root S): Symmetric
+  const S = [
+    [1.3585, 0.8096],
+    [0.8096, 1.3585]
+  ];
+
+  // Scatter points definition
+  const numPoints = 120;
+  const points = [];
+  // seeded random for consistency
+  let m_w = 123456789;
+  let m_z = 987654321;
+  let mask = 0xffffffff;
+  function seedRandom() {
+    m_z = (36969 * (m_z & 65535) + (m_z >> 16)) & mask;
+    m_w = (18000 * (m_w & 65535) + (m_w >> 16)) & mask;
+    let result = ((m_z << 16) + m_w) & mask;
+    result /= 4294967296;
+    return result + 0.5;
+  }
+
+  for(let i=0; i<numPoints; i++) {
+    let u1 = seedRandom();
+    let u2 = seedRandom();
+    let r = Math.sqrt(-2.0 * Math.log(u1));
+    let theta = 2.0 * Math.PI * u2;
+    let zx = r * Math.cos(theta);
+    let zy = r * Math.sin(theta);
+    
+    let xAR = L[0][0] * zx + L[0][1] * zy;
+    let yAR = L[1][0] * zx + L[1][1] * zy;
+
+    let xOT = S[0][0] * zx + S[0][1] * zy;
+    let yOT = S[1][0] * zx + S[1][1] * zy;
+
+    points.push({ zx, zy, xAR, yAR, xOT, yOT });
+  }
+
+  const mapScale = { xMin: -6, xMax: 6, yMin: -6, yMax: 6 };
+
+  function mapToPx(x, y) {
+    const nx = (x - mapScale.xMin) / (mapScale.xMax - mapScale.xMin);
+    const ny = (y - mapScale.yMin) / (mapScale.yMax - mapScale.yMin);
+    return {
+      x: nx * stageRect.width,
+      y: stageRect.height - ny * stageRect.height // invert Y
+    };
+  }
+
+  function measure() {
+    stageRect = stage.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = stageRect.width * dpr;
+    canvas.height = stageRect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  const getThemeColors = () => {
+    const style = getComputedStyle(document.documentElement);
+    const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
+    return {
+      bg: isDark ? '#1b1b1e' : '#ffffff',
+      axes: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
+      pathFaint: isDark ? 'rgba(100, 100, 100, 0.25)' : 'rgba(150, 150, 150, 0.25)',
+      pointZ: isDark ? 'rgba(150, 150, 150, 0.4)' : 'rgba(100, 100, 100, 0.3)',
+      pointTarget: isDark ? 'rgba(14, 165, 233, 0.3)' : 'rgba(14, 165, 233, 0.3)',
+      pointCurrent: isDark ? '#d97706' : '#d97706',
+    };
+  };
+
+  let theme = getThemeColors();
+
+  function draw() {
+    ctx.clearRect(0, 0, stageRect.width, stageRect.height);
+
+    const matrix = currentMapType === 'ar' ? L : S;
+
+    for (const p of points) {
+      const pZ = mapToPx(p.zx, p.zy);
+      const pTarget = currentMapType === 'ar' ? mapToPx(p.xAR, p.yAR) : mapToPx(p.xOT, p.yOT);
+      
+      // Draw Faint Path
+      ctx.strokeStyle = theme.pathFaint;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pZ.x, pZ.y);
+      if (currentMapType === 'ar') {
+        const pMid = mapToPx(p.xAR, p.zy);
+        ctx.lineTo(pMid.x, pMid.y);
+      }
+      ctx.lineTo(pTarget.x, pTarget.y);
+      ctx.stroke();
+      
+      // Draw Target Base Point
+      ctx.fillStyle = theme.pointTarget;
+      ctx.beginPath();
+      ctx.arc(pTarget.x, pTarget.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw Initial Base Point
+      ctx.fillStyle = theme.pointZ;
+      ctx.beginPath();
+      ctx.arc(pZ.x, pZ.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw Current Animating Point
+      let curX, curY;
+      if (currentMapType === 'ar') {
+        if (currentT <= 0.5) {
+          let tNorm = currentT * 2;
+          curX = p.zx + tNorm * (p.xAR - p.zx);
+          curY = p.zy;
+        } else {
+          let tNorm = (currentT - 0.5) * 2;
+          curX = p.xAR;
+          curY = p.zy + tNorm * (p.yAR - p.zy);
+        }
+      } else {
+        curX = p.zx + currentT * (p.xOT - p.zx);
+        curY = p.zy + currentT * (p.yOT - p.zy);
+      }
+
+      let pCur = mapToPx(curX, curY);
+      ctx.fillStyle = theme.pointCurrent;
+      ctx.beginPath();
+      ctx.arc(pCur.x, pCur.y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function updateTime(t) {
+    currentT = Math.max(0, Math.min(1, t));
+    slider.value = currentT;
+    timeVal.innerText = `t = ${currentT.toFixed(2)}`;
+    draw();
+  }
+
+  slider.addEventListener('input', (e) => {
+    isPlaying = false;
+    updatePlayButton();
+    updateTime(parseFloat(e.target.value));
+  });
+
+  segBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      segBtns.forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentMapType = e.target.dataset.map;
+      draw();
+    });
+  });
+
+  function updatePlayButton() {
+    if (isPlaying) {
+      playBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    } else {
+      playBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+    }
+  }
+
+  let lastTime = 0;
+  let direction = 1;
+
+  function animate(timestamp) {
+    if (!isPlaying) return;
+    
+    if (!lastTime) lastTime = timestamp;
+    const dt = timestamp - lastTime;
+    lastTime = timestamp;
+
+    const speed = 0.0006; // units per ms
+    let newT = currentT + direction * speed * dt;
+
+    if (newT >= 1 && direction === 1) {
+      newT = 1;
+      direction = -1; // bounce back
+      isPlaying = false;
+      updatePlayButton();
+    } else if (newT <= 0 && direction === -1) {
+      newT = 0;
+      direction = 1;
+      isPlaying = false;
+      updatePlayButton();
+    }
+
+    updateTime(newT);
+
+    if (isPlaying) {
+      animationFrameId = requestAnimationFrame(animate);
+    }
+  }
+
+  playBtn.addEventListener('click', () => {
+    isPlaying = !isPlaying;
+    updatePlayButton();
+    if (isPlaying) {
+      if (currentT >= 1) direction = -1;
+      else if (currentT <= 0) direction = 1;
+      lastTime = 0;
+      animationFrameId = requestAnimationFrame(animate);
+    } else {
+      cancelAnimationFrame(animationFrameId);
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    measure();
+    draw();
+  });
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === "data-mode") {
+        theme = getThemeColors();
+        draw();
+      }
+    });
+  });
+  observer.observe(document.documentElement, { attributes: true });
+
+  measure();
+  draw();
+});
+</script>
