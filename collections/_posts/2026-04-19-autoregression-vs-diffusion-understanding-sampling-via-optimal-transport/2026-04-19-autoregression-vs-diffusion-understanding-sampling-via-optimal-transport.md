@@ -90,6 +90,8 @@ Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}
 > $$ -\ln p(x) - 1 + \lambda_0 + \lambda_1 x^2 = 0 \implies p(x) = e^{\lambda_0 - 1 + \lambda_1 x^2} $$
 > For this to be a valid integrable probability density, we require $\lambda_1 < 0$. Setting $\lambda_1 = -c$ directly recovers the canonical Gaussian form $p(x) \propto e^{-cx^2}$.
 
+{% include max_entropy_widget.html %}
+
 ## Background: Optimal Transport
 
 To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 thorpeIntroductionOptimalTransport %}
