@@ -1,17 +1,15 @@
 <div class="otm" id="wholeBagTransportFigure">
   <div class="otm__intro">
-    <div class="otm__text">
-      <div class="otm__eyebrow">Example</div>
-      <h4>Two sealed $1\text{ kg}$ dirt bags</h4>
+    <div class="otm__copy">
+      <div class="otm__eyebrow">Discrete Example</div>
+      <h4>Whole-Bag Transport Without Splitting</h4>
       <p>
-        Source $A$ and source $B$ each have one sealed $1\text{ kg}$
-        bag of dirt. Destination $C$ and destination $D$ each need
-        $1\text{ kg}$. Since a bag cannot be torn open, each bag must go whole to exactly one destination.
+        Source $A$ and source $B$ each carry one sealed $1\text{ kg}$ bag, while destinations $C$ and $D$ each need $1\text{ kg}$. Because the bags cannot be torn open, the only feasible plans are the two possible assignments of whole bags to destinations.
       </p>
     </div>
 
-    <div class="otm__matrix-wrap">
-      <div class="otm__matrix-title">Shipping Cost per Bag</div>
+    <div class="otm__matrix-card">
+      <div class="otm__panel-title">Shipping Cost per Bag</div>
       <div class="otm__matrix">
         <div class="otm__matrix-dir">
           <span>From</span>
@@ -30,12 +28,17 @@
     </div>
   </div>
 
+  <div class="otm__stage-note">
+    Indivisibility collapses the problem to a tiny discrete search: compare the uncrossed assignment with the crossed assignment and pick the cheaper permutation.
+  </div>
+
   <div class="otm__cases">
     <figure class="otm__case otm__case--best">
       <figcaption class="otm__caption">
         <div>
+          <div class="otm__plan-kicker">Optimal Plan</div>
           <div class="otm__caption-title">Plan $1$</div>
-          <div class="otm__caption-subtitle">$A \to C$, $B \to D$</div>
+          <div class="otm__caption-subtitle">$A \to C$ and $B \to D$</div>
         </div>
         <div class="otm__total otm__total--best">$3$</div>
       </figcaption>
@@ -44,21 +47,25 @@
         <div class="otm__node otm__node--source otm__node--a">
           <div class="otm__badge"><i class="fas fa-box fa-fw"></i></div>
           <div class="otm__name">$A$</div>
+          <div class="otm__meta">1 kg bag</div>
         </div>
 
         <div class="otm__node otm__node--source otm__node--b">
           <div class="otm__badge"><i class="fas fa-box fa-fw"></i></div>
           <div class="otm__name">$B$</div>
+          <div class="otm__meta">1 kg bag</div>
         </div>
 
         <div class="otm__node otm__node--target otm__node--c">
           <div class="otm__badge"><i class="fas fa-warehouse fa-fw"></i></div>
           <div class="otm__name">$C$</div>
+          <div class="otm__meta">needs 1 kg</div>
         </div>
 
         <div class="otm__node otm__node--target otm__node--d">
           <div class="otm__badge"><i class="fas fa-warehouse fa-fw"></i></div>
           <div class="otm__name">$D$</div>
+          <div class="otm__meta">needs 1 kg</div>
         </div>
 
         <svg class="otm__svg" aria-hidden="true" preserveAspectRatio="none">
@@ -68,23 +75,26 @@
             </marker>
           </defs>
           <g class="otm__g--best">
-            <line class="otm__line" x1="0" y1="38" x2="100%" y2="38" marker-end="url(#arrowhead-best)" />
-            <rect class="otm__price-bg" x="50%" y="38" rx="8" ry="8" width="32" height="22" transform="translate(-16, -11)" />
-            <text class="otm__text-price" x="50%" y="38">$1</text>
-            
-            <line class="otm__line" x1="0" y1="156" x2="100%" y2="156" marker-end="url(#arrowhead-best)" />
-            <rect class="otm__price-bg" x="50%" y="156" rx="8" ry="8" width="32" height="22" transform="translate(-16, -11)" />
-            <text class="otm__text-price" x="50%" y="156">$2</text>
+            <line class="otm__line" x1="0" y1="48" x2="100%" y2="48" marker-end="url(#arrowhead-best)" />
+            <rect class="otm__price-bg" x="50%" y="48" rx="10" ry="10" width="36" height="24" transform="translate(-18, -12)" />
+            <text class="otm__text-price" x="50%" y="48">$1</text>
+
+            <line class="otm__line" x1="0" y1="174" x2="100%" y2="174" marker-end="url(#arrowhead-best)" />
+            <rect class="otm__price-bg" x="50%" y="174" rx="10" ry="10" width="36" height="24" transform="translate(-18, -12)" />
+            <text class="otm__text-price" x="50%" y="174">$2</text>
           </g>
         </svg>
       </div>
+
+      <div class="otm__case-footer">Cost decomposition: $\$1 + \$2 = \$3$</div>
     </figure>
 
-    <figure class="otm__case">
+    <figure class="otm__case otm__case--alt">
       <figcaption class="otm__caption">
         <div>
+          <div class="otm__plan-kicker otm__plan-kicker--muted">Crossed Plan</div>
           <div class="otm__caption-title">Plan $2$</div>
-          <div class="otm__caption-subtitle">$A \to D$, $B \to C$</div>
+          <div class="otm__caption-subtitle">$A \to D$ and $B \to C$</div>
         </div>
         <div class="otm__total">$7$</div>
       </figcaption>
@@ -93,21 +103,25 @@
         <div class="otm__node otm__node--source otm__node--a">
           <div class="otm__badge"><i class="fas fa-box fa-fw"></i></div>
           <div class="otm__name">$A$</div>
+          <div class="otm__meta">1 kg bag</div>
         </div>
 
         <div class="otm__node otm__node--source otm__node--b">
           <div class="otm__badge"><i class="fas fa-box fa-fw"></i></div>
           <div class="otm__name">$B$</div>
+          <div class="otm__meta">1 kg bag</div>
         </div>
 
         <div class="otm__node otm__node--target otm__node--c">
           <div class="otm__badge"><i class="fas fa-warehouse fa-fw"></i></div>
           <div class="otm__name">$C$</div>
+          <div class="otm__meta">needs 1 kg</div>
         </div>
 
         <div class="otm__node otm__node--target otm__node--d">
           <div class="otm__badge"><i class="fas fa-warehouse fa-fw"></i></div>
           <div class="otm__name">$D$</div>
+          <div class="otm__meta">needs 1 kg</div>
         </div>
 
         <svg class="otm__svg" aria-hidden="true" preserveAspectRatio="none">
@@ -117,44 +131,45 @@
             </marker>
           </defs>
           <g class="otm__g--alt">
-            <line class="otm__line" x1="0" y1="38" x2="100%" y2="156" marker-end="url(#arrowhead-alt)" />
-            <rect class="otm__price-bg" x="25%" y="67.5" rx="8" ry="8" width="32" height="22" transform="translate(-16, -11)" />
-            <text class="otm__text-price" x="25%" y="67.5">$4</text>
-            
-            <line class="otm__line" x1="0" y1="156" x2="100%" y2="38" marker-end="url(#arrowhead-alt)" />
-            <rect class="otm__price-bg" x="25%" y="126.5" rx="8" ry="8" width="32" height="22" transform="translate(-16, -11)" />
-            <text class="otm__text-price" x="25%" y="126.5">$3</text>
+            <line class="otm__line" x1="0" y1="48" x2="100%" y2="174" marker-end="url(#arrowhead-alt)" />
+            <rect class="otm__price-bg" x="27%" y="79.5" rx="10" ry="10" width="36" height="24" transform="translate(-18, -12)" />
+            <text class="otm__text-price" x="27%" y="79.5">$4</text>
+
+            <line class="otm__line" x1="0" y1="174" x2="100%" y2="48" marker-end="url(#arrowhead-alt)" />
+            <rect class="otm__price-bg" x="27%" y="142.5" rx="10" ry="10" width="36" height="24" transform="translate(-18, -12)" />
+            <text class="otm__text-price" x="27%" y="142.5">$3</text>
           </g>
         </svg>
       </div>
+
+      <div class="otm__case-footer">Cost decomposition: $\$4 + \$3 = \$7$</div>
     </figure>
   </div>
 
   <div class="otm__footer">
-    There are only two feasible plans. The uncrossed plan costs $\$3$, while the crossed plan
-    costs $\$7$, so Plan $1$ is optimal.
+    There are only two feasible whole-bag assignments, and the uncrossed one is strictly cheaper. This is the smallest discrete picture of why uncrossed structure keeps appearing in optimal transport.
   </div>
 </div>
 
 <style>
 .otm {
-  margin: 1.35rem 0 2rem 0;
-  padding: 1rem;
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.16));
-  border-radius: 14px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+  --otm-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
+  --otm-ui-bg: var(--main-bg, #fff);
+  --otm-ui-muted: var(--text-muted-color, var(--text-color, inherit));
+  --otm-ui-text: var(--text-color, inherit);
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--otm-ui-border);
+  border-radius: 18px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.05));
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
 }
 
 .otm__intro {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(210px, 250px);
-  gap: 0.95rem;
+  grid-template-columns: minmax(0, 1.45fr) minmax(220px, 270px);
+  gap: 1rem;
   align-items: start;
-}
-
-.otm__text h4 {
-  margin: 0;
-  font-size: 1.04rem;
 }
 
 .otm__eyebrow {
@@ -163,49 +178,56 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-muted-color, var(--text-color, inherit));
+  color: var(--otm-ui-muted);
 }
 
-.otm__text p {
+.otm__copy h4 {
+  margin: 0 0 0.45rem 0;
+  font-size: 1.04rem;
+  color: var(--heading-color, var(--otm-ui-text));
+}
+
+.otm__copy p {
   margin: 0.45rem 0 0 0;
+  font-size: 1rem;
   line-height: 1.66;
-  color: var(--text-muted-color, var(--text-color, inherit));
+  color: var(--otm-ui-muted);
 }
 
-.otm__matrix-wrap,
+.otm__matrix-card,
 .otm__case {
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
-  border-radius: 12px;
-  background: var(--main-bg, rgba(255, 255, 255, 0.76));
+  border: 1px solid var(--otm-ui-border);
+  border-radius: 14px;
+  background: var(--otm-ui-bg);
 }
 
-.otm__matrix-wrap {
-  padding: 0.8rem;
+.otm__matrix-card {
+  padding: 0.9rem;
 }
 
-.otm__matrix-title {
-  margin-bottom: 0.55rem;
+.otm__panel-title {
+  margin-bottom: 0.6rem;
   font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--text-muted-color, var(--text-color, inherit));
+  color: var(--otm-ui-muted);
 }
 
 .otm__matrix {
   display: grid;
-  grid-template-columns: 78px repeat(2, minmax(58px, 1fr));
+  grid-template-columns: 82px repeat(2, minmax(58px, 1fr));
   overflow: hidden;
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
-  border-radius: 10px;
+  border: 1px solid var(--otm-ui-border);
+  border-radius: 12px;
 }
 
 .otm__matrix > div {
-  padding: 0.46rem 0.5rem;
+  padding: 0.52rem 0.56rem;
   text-align: center;
-  border-right: 1px solid var(--card-border, rgba(120, 120, 120, 0.12));
-  border-bottom: 1px solid var(--card-border, rgba(120, 120, 120, 0.12));
-  background: var(--main-bg, rgba(255, 255, 255, 0.78));
+  border-right: 1px solid var(--otm-ui-border);
+  border-bottom: 1px solid var(--otm-ui-border);
+  background: var(--otm-ui-bg);
 }
 
 .otm__matrix > div:nth-child(3n) {
@@ -220,39 +242,46 @@
 .otm__matrix > div:nth-child(3n + 1) {
   font-weight: 700;
   font-size: 0.82rem;
-  background: rgba(120, 120, 120, 0.04);
+  background: var(--card-bg, rgba(120, 120, 120, 0.05));
 }
 
 .otm__matrix-dir {
   display: flex;
   flex-direction: column;
   line-height: 1.1;
-  padding: 0.25rem !important;
+  padding: 0.28rem !important;
   font-size: 0.68rem !important;
-  color: var(--text-muted-color, inherit);
+  color: var(--otm-ui-muted);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 
 .otm__matrix-dir span:nth-child(2) {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   line-height: 1;
+}
+
+.otm__stage-note {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--otm-ui-muted);
 }
 
 .otm__cases {
   display: grid;
   grid-template-columns: repeat(2, minmax(300px, 1fr));
-  gap: 0.95rem;
+  gap: 1rem;
   margin-top: 1rem;
 }
 
 .otm__case {
-  padding: 0.9rem;
+  padding: 0.95rem;
 }
 
 .otm__case--best {
-  border-color: var(--prompt-tip-icon, rgba(22, 163, 74, 0.3));
-  background: var(--prompt-tip-bg, rgba(22, 163, 74, 0.03));
+  border-color: color-mix(in srgb, var(--prompt-tip-icon, #16a34a) 38%, var(--otm-ui-border));
+  background: color-mix(in srgb, var(--prompt-tip-bg, rgba(22, 163, 74, 0.08)) 78%, var(--otm-ui-bg));
 }
 
 .otm__caption {
@@ -262,57 +291,73 @@
   gap: 0.75rem;
 }
 
+.otm__plan-kicker {
+  margin-bottom: 0.15rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--prompt-tip-icon, #16a34a);
+}
+
+.otm__plan-kicker--muted {
+  color: var(--prompt-gray-icon, #9ca3af);
+}
+
 .otm__caption-title {
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--otm-ui-text);
 }
 
 .otm__caption-subtitle {
   margin-top: 0.14rem;
   font-size: 0.84rem;
-  color: var(--text-muted-color, var(--text-color, inherit));
+  color: var(--otm-ui-muted);
 }
 
 .otm__total {
   flex: 0 0 auto;
-  padding: 0.18rem 0.52rem;
+  padding: 0.22rem 0.58rem;
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  background: var(--prompt-gray-bg, rgba(156, 163, 175, 0.1));
+  font-size: 0.82rem;
+  font-weight: 800;
+  background: var(--prompt-gray-bg, rgba(156, 163, 175, 0.12));
   color: var(--prompt-gray-icon, #9ca3af);
 }
 
 .otm__total--best {
-  background: var(--prompt-tip-bg, rgba(22, 163, 74, 0.1));
+  background: var(--prompt-tip-bg, rgba(22, 163, 74, 0.12));
   color: var(--prompt-tip-icon, #16a34a);
 }
 
 .otm__canvas {
   position: relative;
-  height: 222px;
-  margin-top: 0.7rem;
-  border-radius: 12px;
-  border: 1px solid rgba(120, 120, 120, 0.1);
-  background: var(--main-bg, rgba(255, 255, 255, 0.78));
+  height: 248px;
+  margin-top: 0.8rem;
+  border-radius: 14px;
+  border: 1px solid var(--otm-ui-border);
+  background: var(--otm-ui-bg);
   overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .otm__node {
   position: absolute;
-  width: 84px;
+  width: 100px;
   text-align: center;
   z-index: 3;
-  color: var(--text-color, inherit);
+  color: var(--otm-ui-text);
 }
 
 .otm__node--a,
 .otm__node--c {
-  top: 12px;
+  top: 18px;
 }
 
 .otm__node--b,
 .otm__node--d {
-  top: 130px;
+  top: 142px;
 }
 
 .otm__node--a,
@@ -326,50 +371,50 @@
 }
 
 .otm__badge {
-  width: 3.3rem;
-  height: 3.3rem;
+  width: 3.5rem;
+  height: 3.5rem;
   margin: 0 auto;
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(120, 120, 120, 0.2);
-  background: var(--main-bg, #fff);
-  font-size: 1.6rem;
+  border: 1px solid var(--otm-ui-border);
+  background: var(--otm-ui-bg);
+  font-size: 1.55rem;
 }
 
 .otm__node--source .otm__badge {
   color: var(--prompt-warning-icon, #d97706);
-  background: var(--prompt-warning-bg, rgba(217, 119, 6, 0.15));
+  background: var(--prompt-warning-bg, rgba(217, 119, 6, 0.14));
 }
 
 .otm__node--target .otm__badge {
   color: var(--prompt-info-icon, #0ea5e9);
-  background: var(--prompt-info-bg, rgba(14, 165, 233, 0.15));
+  background: var(--prompt-info-bg, rgba(14, 165, 233, 0.14));
 }
 
 .otm__name {
-  margin-top: 0.42rem;
-  font-size: 1.08rem;
+  margin-top: 0.44rem;
+  font-size: 1.05rem;
   font-weight: 800;
   line-height: 1;
 }
 
 .otm__meta {
-  margin-top: 0.2rem;
+  margin-top: 0.22rem;
   font-size: 0.75rem;
-  line-height: 1.18;
+  line-height: 1.2;
   white-space: nowrap;
-  color: var(--text-muted-color, var(--text-color, inherit));
+  color: var(--otm-ui-muted);
 }
 
 .otm__svg {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 90px;
-  right: 90px;
-  width: calc(100% - 180px);
+  left: 108px;
+  right: 108px;
+  width: calc(100% - 216px);
   height: 100%;
   pointer-events: none;
   z-index: 1;
@@ -391,8 +436,8 @@
 }
 
 .otm__price-bg {
-  fill: var(--main-bg, #fff);
-  stroke: var(--card-border, rgba(120, 120, 120, 0.2));
+  fill: var(--otm-ui-bg);
+  stroke: var(--otm-ui-border);
   stroke-width: 1px;
 }
 
@@ -401,7 +446,7 @@
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: central;
-  fill: var(--text-color, #111);
+  fill: var(--otm-ui-text);
 }
 
 .otm__g--best .otm__text-price {
@@ -412,11 +457,23 @@
   fill: var(--prompt-gray-icon, #9ca3af);
 }
 
+.otm__case-footer {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--otm-ui-muted);
+}
+
 .otm__footer {
-  margin-top: 0.85rem;
-  padding-top: 0.8rem;
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
   border-top: 1px solid rgba(120, 120, 120, 0.12);
-  line-height: 1.6;
+  line-height: 1.65;
+  color: var(--otm-ui-muted);
+}
+
+.otm .mjx-container {
+  margin: 0 !important;
 }
 
 @media (max-width: 920px) {
@@ -426,9 +483,9 @@
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 560px) {
   .otm {
-    padding: 0.9rem;
+    padding: 1rem;
   }
 
   .otm__caption {
@@ -437,34 +494,17 @@
   }
 
   .otm__canvas {
-    height: 220px;
+    height: 228px;
   }
 
   .otm__node {
-    width: 72px;
+    width: 78px;
   }
 
   .otm__svg {
-    left: 48px;
-    right: 48px;
-    width: calc(100% - 96px);
-  }
-
-  .otm__line {
-    stroke-width: 3px;
-  }
-
-  .otm__price--ac,
-  .otm__price--bd {
-    left: 118px;
-  }
-
-  .otm__price--ad {
-    left: 176px;
-  }
-
-  .otm__price--bc {
     left: 70px;
+    right: 70px;
+    width: calc(100% - 140px);
   }
 }
 </style>

@@ -1,425 +1,844 @@
-<div class="otu" id="uncrossingSwapFigure">
-  <div class="otu__intro">
-    <div class="otu__eyebrow">Example</div>
-    <h4>Uncrossed versus crossed on one number line</h4>
-    <p>
-      Drag the points themselves on the number line.
-      The widget keeps the order constraints $x_1 < x_2$ and $y_1 < y_2$.
-      The top row shows the uncrossed matching, and the bottom row shows the crossed matching.
-    </p>
-  </div>
-
-  <div class="otu__stage-card">
-    <div class="otu__stage-note">
-      Orange points are sources and blue points are targets. Within each color, the left point is subscript $1$ and the right point is subscript $2$. Dragging changes the actual 1D distances, so every segment is horizontal.
+<div class="otuc" id="transportUncrossingWidget">
+  <div class="otuc__intro">
+    <div class="otuc__copy">
+      <div class="otuc__eyebrow">Interactive 1D Example</div>
+      <h4>Uncrossed Versus Crossed on One Number Line</h4>
+      <p>
+        Drag the ordered source points $x_1 &lt; x_2$ and target points $y_1 &lt; y_2$. The same number line drives both comparisons: the upper row keeps ranks aligned, while the lower row swaps targets and pays the crossed cost.
+      </p>
     </div>
 
-    <div class="otu__stage" id="otuStage">
-      <canvas class="otu__canvas" aria-hidden="true"></canvas>
-
-      <div class="otu__row-tag otu__row-tag--top">Uncrossed</div>
-      <div class="otu__row-tag otu__row-tag--bottom">Crossed</div>
-
-      <div class="otu__sum otu__sum--top">Total = <span data-bind="uncrossed_stage">4.00</span></div>
-      <div class="otu__sum otu__sum--bottom">Total = <span data-bind="crossed_stage">8.00</span></div>
-
-      <div class="otu__handle otu__handle--source" data-key="x1"><div class="otu__handle-marker"></div></div>
-
-      <div class="otu__handle otu__handle--source" data-key="x2"><div class="otu__handle-marker"></div></div>
-
-      <div class="otu__handle otu__handle--target" data-key="y1"><div class="otu__handle-marker"></div></div>
-
-      <div class="otu__handle otu__handle--target" data-key="y2"><div class="otu__handle-marker"></div></div>
+    <div class="otuc__summary-card">
+      <div class="otuc__panel-title">Current Lesson</div>
+      <div class="otuc__summary-value">
+        For $c(x,y) = \lvert x-y \rvert$, the uncrossed pairing is never worse.
+      </div>
+      <div class="otuc__summary-meta">
+        Current reduction after uncrossing:
+        <span class="otuc__summary-number" data-bind="gap_value">0.00</span>
+      </div>
     </div>
   </div>
 
-  <div class="otu__footer">
-    The green top total is never larger than the gray bottom total. That is the concrete two-point swap behind the 1D uncrossing argument.
+  <div class="otuc__point-strip">
+    <div class="otuc__point-pill">
+      <span class="otuc__point-label">$x_1$</span>
+      <strong class="otuc__point-value" data-bind="x1_value">1.00</strong>
+    </div>
+    <div class="otuc__point-pill">
+      <span class="otuc__point-label">$x_2$</span>
+      <strong class="otuc__point-value" data-bind="x2_value">3.40</strong>
+    </div>
+    <div class="otuc__point-pill">
+      <span class="otuc__point-label">$y_1$</span>
+      <strong class="otuc__point-value" data-bind="y1_value">2.20</strong>
+    </div>
+    <div class="otuc__point-pill">
+      <span class="otuc__point-label">$y_2$</span>
+      <strong class="otuc__point-value" data-bind="y2_value">6.00</strong>
+    </div>
+  </div>
+
+  <div class="otuc__stage-card">
+    <div class="otuc__toolbar">
+      <div class="otuc__legend">
+        <div class="otuc__legend-pill otuc__legend-pill--uncrossed">
+          Uncrossed: $x_1 \leftrightarrow y_1$ and $x_2 \leftrightarrow y_2$
+        </div>
+        <div class="otuc__legend-pill otuc__legend-pill--crossed">
+          Crossed: $x_1 \leftrightarrow y_2$ and $x_2 \leftrightarrow y_1$
+        </div>
+      </div>
+
+      <div class="otuc__drag-hint">Drag the labeled points while keeping each pair ordered.</div>
+    </div>
+
+    <div class="otuc__stage-note">
+      The central axis is the shared 1D geometry. Each colored bar is a straight interval on that line, so its width is exactly the cost term being added.
+    </div>
+
+    <div class="otuc__stage" id="otucStage">
+      <canvas id="otucChart"></canvas>
+
+      <div class="otuc__overlay">
+        <button type="button" class="otuc__handle otuc__handle--source" data-key="x1" aria-label="Move x1">
+          <span>\(x_1\)</span>
+        </button>
+        <button type="button" class="otuc__handle otuc__handle--source" data-key="x2" aria-label="Move x2">
+          <span>\(x_2\)</span>
+        </button>
+        <button type="button" class="otuc__handle otuc__handle--target" data-key="y1" aria-label="Move y1">
+          <span>\(y_1\)</span>
+        </button>
+        <button type="button" class="otuc__handle otuc__handle--target" data-key="y2" aria-label="Move y2">
+          <span>\(y_2\)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="otuc__metrics">
+    <div class="otuc__metric-card otuc__metric-card--uncrossed">
+      <div class="otuc__metric-label">$\lvert x_1-y_1 \rvert + \lvert x_2-y_2 \rvert$</div>
+      <div class="otuc__metric-value" data-bind="uncrossed_total">3.80</div>
+    </div>
+
+    <div class="otuc__metric-card otuc__metric-card--crossed">
+      <div class="otuc__metric-label">$\lvert x_1-y_2 \rvert + \lvert x_2-y_1 \rvert$</div>
+      <div class="otuc__metric-value" data-bind="crossed_total">6.20</div>
+    </div>
+
+    <div class="otuc__metric-card">
+      <div class="otuc__metric-label">Crossed minus uncrossed</div>
+      <div class="otuc__metric-value otuc__metric-value--delta" data-bind="delta_total">2.40</div>
+    </div>
   </div>
 </div>
 
 <style>
-.otu {
-  margin: 1.35rem 0 2rem 0;
-  padding: 1rem;
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.16));
-  border-radius: 14px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+.otuc {
+  --otuc-source-color: var(--prompt-warning-icon, #d97706);
+  --otuc-target-color: var(--prompt-info-icon, #0ea5e9);
+  --otuc-uncrossed-color: var(--prompt-tip-icon, #16a34a);
+  --otuc-crossed-color: var(--prompt-danger-icon, #dc2626);
+  --otuc-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
+  --otuc-ui-bg: var(--main-bg, #fff);
+  --otuc-ui-muted: var(--text-muted-color, var(--text-color, inherit));
+  --otuc-ui-text: var(--text-color, inherit);
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--otuc-ui-border);
+  border-radius: 18px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.05));
 }
 
-.otu__eyebrow {
+.otuc__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 300px);
+  gap: 1rem;
+  align-items: start;
+}
+
+.otuc__eyebrow {
   margin-bottom: 0.28rem;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-muted-color, var(--text-color, inherit));
+  color: var(--otuc-ui-muted);
 }
 
-.otu__intro h4 {
-  margin: 0;
+.otuc__copy h4 {
+  margin: 0 0 0.45rem 0;
   font-size: 1.04rem;
+  color: var(--heading-color, var(--otuc-ui-text));
 }
 
-.otu__intro p {
+.otuc__copy p {
   margin: 0.45rem 0 0 0;
+  font-size: 1rem;
   line-height: 1.66;
-  color: var(--text-muted-color, var(--text-color, inherit));
+  color: var(--otuc-ui-muted);
 }
 
-.otu__stage-card {
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
-  border-radius: 12px;
-  background: var(--main-bg, rgba(255, 255, 255, 0.76));
+.otuc__summary-card,
+.otuc__stage-card,
+.otuc__metric-card,
+.otuc__point-pill {
+  border: 1px solid var(--otuc-ui-border);
+  border-radius: 14px;
+  background: var(--otuc-ui-bg);
 }
 
-.otu__stage-card {
-  margin-top: 1rem;
-  padding: 0.9rem;
+.otuc__summary-card {
+  padding: 0.95rem;
 }
 
-.otu__stage-note {
-  margin-bottom: 0.7rem;
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--text-muted-color, var(--text-color, inherit));
-}
-
-.otu__stage {
-  position: relative;
-  height: 300px;
-  border-radius: 12px;
-  border: 1px solid rgba(120, 120, 120, 0.1);
-  background: var(--main-bg, rgba(255, 255, 255, 0.78));
-  overflow: hidden;
-}
-
-.otu__canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-.otu__row-tag,
-.otu__sum {
-  position: absolute;
-  z-index: 2;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
+.otuc__panel-title {
+  margin-bottom: 0.55rem;
   font-size: 0.82rem;
   font-weight: 700;
-  line-height: 1;
-  background: var(--main-bg, #fff);
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--otuc-ui-muted);
 }
 
-.otu__row-tag--top {
-  left: 16px;
-  top: 18px;
-  color: var(--prompt-tip-icon, #16a34a);
+.otuc__summary-value {
+  font-size: 0.98rem;
+  line-height: 1.55;
+  font-weight: 700;
+  color: var(--otuc-ui-text);
 }
 
-.otu__row-tag--bottom {
-  left: 16px;
-  bottom: 18px;
-  color: var(--prompt-gray-icon, #9ca3af);
+.otuc__summary-meta {
+  margin-top: 0.55rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--otuc-ui-muted);
 }
 
-.otu__sum--top {
-  right: 16px;
-  top: 18px;
-  color: var(--prompt-tip-icon, #16a34a);
+.otuc__summary-number {
+  margin-left: 0.25rem;
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: var(--otuc-uncrossed-color);
 }
 
-.otu__sum--bottom {
-  right: 16px;
-  bottom: 18px;
-  color: var(--prompt-gray-icon, #9ca3af);
+.otuc__point-strip,
+.otuc__metrics {
+  display: grid;
+  gap: 0.85rem;
 }
 
-.otu__handle {
-  position: absolute;
-  z-index: 3;
-  top: 146px;
-  width: 28px;
-  height: 28px;
-  cursor: grab;
+.otuc__point-strip {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.otuc__point-pill {
+  padding: 0.8rem 0.9rem;
+}
+
+.otuc__point-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--otuc-ui-muted);
+}
+
+.otuc__point-value {
+  display: block;
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--otuc-ui-text);
+}
+
+.otuc__stage-card {
+  margin-top: 1rem;
+  padding: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.otuc__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.otuc__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.otuc__legend-pill {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--otuc-ui-border);
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--otuc-ui-text);
+}
+
+.otuc__legend-pill--uncrossed {
+  border-color: color-mix(in srgb, var(--otuc-uncrossed-color) 38%, var(--otuc-ui-border));
+  background: color-mix(in srgb, var(--prompt-tip-bg, rgba(22, 163, 74, 0.1)) 78%, var(--otuc-ui-bg));
+}
+
+.otuc__legend-pill--crossed {
+  border-color: color-mix(in srgb, var(--otuc-crossed-color) 32%, var(--otuc-ui-border));
+  background: color-mix(in srgb, var(--prompt-danger-bg, rgba(220, 38, 38, 0.08)) 74%, var(--otuc-ui-bg));
+}
+
+.otuc__drag-hint,
+.otuc__stage-note {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--otuc-ui-muted);
+}
+
+.otuc__stage {
+  position: relative;
+  height: 390px;
+  border: 1px solid var(--otuc-ui-border);
+  border-radius: 14px;
+  background: var(--otuc-ui-bg);
+  overflow: hidden;
   user-select: none;
   touch-action: none;
-  transform: translate(-50%, -50%);
 }
 
-.otu__handle:active {
+.otuc__stage canvas,
+.otuc__overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.otuc__overlay {
+  pointer-events: none;
+}
+
+.otuc__handle {
+  position: absolute;
+  z-index: 3;
+  min-width: 56px;
+  padding: 0.38rem 0.62rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--otuc-ui-border);
+  background: var(--otuc-ui-bg);
+  color: var(--otuc-ui-text);
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.otuc__handle--source {
+  border-color: color-mix(in srgb, var(--otuc-source-color) 55%, var(--otuc-ui-border));
+}
+
+.otuc__handle--target {
+  border-color: color-mix(in srgb, var(--otuc-target-color) 55%, var(--otuc-ui-border));
+}
+
+.otuc__handle:hover,
+.otuc__handle.is-dragging {
+  background: color-mix(in srgb, var(--card-bg, rgba(120, 120, 120, 0.08)) 76%, var(--otuc-ui-bg));
+}
+
+.otuc__handle.is-dragging {
   cursor: grabbing;
 }
 
-.otu__handle-marker {
-  position: absolute;
-  inset: 0;
-  width: 18px;
-  height: 18px;
-  margin: auto;
-  border-radius: 999px;
-  border: 2px solid var(--main-bg, #fff);
-  box-shadow: 0 0 0 1px rgba(120, 120, 120, 0.18), 0 3px 10px rgba(0, 0, 0, 0.08);
+.otuc__handle:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--otuc-target-color) 38%, transparent);
+  outline-offset: 2px;
 }
 
-.otu__handle--source .otu__handle-marker {
-  background: var(--prompt-warning-icon, #d97706);
+.otuc__metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1rem;
 }
 
-.otu__handle--target .otu__handle-marker {
-  background: var(--prompt-info-icon, #0ea5e9);
+.otuc__metric-card {
+  padding: 0.9rem;
 }
 
-.otu__handle.is-dragging .otu__handle-marker {
-  transform: scale(1.08);
-  box-shadow: 0 0 0 1px rgba(120, 120, 120, 0.18), 0 5px 14px rgba(0, 0, 0, 0.12);
+.otuc__metric-card--uncrossed {
+  border-color: color-mix(in srgb, var(--otuc-uncrossed-color) 30%, var(--otuc-ui-border));
 }
 
-.otu__footer {
-  margin-top: 0.85rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid rgba(120, 120, 120, 0.12);
-  line-height: 1.6;
+.otuc__metric-card--crossed {
+  border-color: color-mix(in srgb, var(--otuc-crossed-color) 28%, var(--otuc-ui-border));
 }
 
-.otu .mjx-container {
+.otuc__metric-label {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--otuc-ui-muted);
+}
+
+.otuc__metric-value {
+  margin-top: 0.45rem;
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: var(--otuc-ui-text);
+}
+
+.otuc__metric-value--delta {
+  color: var(--otuc-uncrossed-color);
+}
+
+.otuc .mjx-container {
   margin: 0 !important;
 }
 
-@media (max-width: 600px) {
-  .otu {
-    padding: 0.9rem;
+@media (max-width: 980px) {
+  .otuc__intro,
+  .otuc__metrics {
+    grid-template-columns: 1fr;
   }
 
-  .otu__stage {
-    height: 320px;
+  .otuc__point-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .otuc {
+    padding: 1rem;
   }
 
-  .otu__row-tag,
-  .otu__sum {
-    font-size: 0.76rem;
+  .otuc__stage {
+    height: 420px;
   }
 
-  .otu__handle {
-    top: 154px;
+  .otuc__handle {
+    min-width: 52px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .otuc__point-strip,
+  .otuc__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .otuc__legend-pill {
+    font-size: 0.84rem;
   }
 }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-(function() {
-  const root = document.getElementById('uncrossingSwapFigure');
+document.addEventListener('DOMContentLoaded', function() {
+  const root = document.getElementById('transportUncrossingWidget');
   if (!root || root.dataset.initialized === 'true') return;
   root.dataset.initialized = 'true';
 
-  const stage = root.querySelector('#otuStage');
-  const canvas = stage.querySelector('.otu__canvas');
-  const ctx = canvas.getContext('2d');
-  const handles = {
-    x1: stage.querySelector('[data-key="x1"]'),
-    x2: stage.querySelector('[data-key="x2"]'),
-    y1: stage.querySelector('[data-key="y1"]'),
-    y2: stage.querySelector('[data-key="y2"]')
-  };
-
-  const binds = {
-    uncrossedStage: root.querySelector('[data-bind="uncrossed_stage"]'),
-    crossedStage: root.querySelector('[data-bind="crossed_stage"]')
-  };
-
-  const state = { x1: 1.0, x2: 4.0, y1: 2.0, y2: 7.0 };
-  const domain = { min: 0, max: 8 };
-  const minGap = 0.8;
-  const colors = {
-    uncrossed: getComputedStyle(document.documentElement).getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
-    crossed: getComputedStyle(document.documentElement).getPropertyValue('--prompt-gray-icon').trim() || '#9ca3af',
-    muted: getComputedStyle(document.documentElement).getPropertyValue('--text-muted-color').trim() || '#6b7280',
-    border: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || 'rgba(120,120,120,0.16)'
-  };
-
-  let stageRect = null;
-  let dragging = null;
-
-  function alphaColor(hex, alpha) {
-    if (!hex || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) return hex;
-    let value = hex.slice(1);
-    if (value.length === 3) value = value.split('').map((char) => char + char).join('');
-    const r = parseInt(value.slice(0, 2), 16);
-    const g = parseInt(value.slice(2, 4), 16);
-    const b = parseInt(value.slice(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  function formatTotal(value) {
-    return value.toFixed(2);
-  }
-
-  function measure() {
-    stageRect = stage.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = stageRect.width * dpr;
-    canvas.height = stageRect.height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  function valueToX(value) {
-    const left = 56;
-    const right = stageRect.width - 56;
-    const t = (value - domain.min) / (domain.max - domain.min);
-    return left + t * (right - left);
-  }
-
-  function xToValue(x) {
-    const left = 56;
-    const right = stageRect.width - 56;
-    const t = (x - left) / (right - left);
-    const raw = domain.min + Math.max(0, Math.min(1, t)) * (domain.max - domain.min);
-    return Math.round(raw * 10) / 10;
-  }
-
-  function clampValue(key, value) {
-    if (key === 'x1') return Math.max(domain.min, Math.min(state.x2 - minGap, value));
-    if (key === 'x2') return Math.max(state.x1 + minGap, Math.min(domain.max, value));
-    if (key === 'y1') return Math.max(domain.min, Math.min(state.y2 - minGap, value));
-    return Math.max(state.y1 + minGap, Math.min(domain.max, value));
-  }
-
-  function drawDistanceRow(y, leftValue, rightValue, color, labelY) {
-    const xLeft = valueToX(Math.min(leftValue, rightValue));
-    const xRight = valueToX(Math.max(leftValue, rightValue));
-
-    ctx.beginPath();
-    ctx.moveTo(xLeft, y);
-    ctx.lineTo(xRight, y);
-    ctx.lineWidth = 8;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = alphaColor(color, 0.18);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(xLeft, y);
-    ctx.lineTo(xRight, y);
-    ctx.lineWidth = 4;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = color;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(xLeft, y - 7);
-    ctx.lineTo(xLeft, y + 7);
-    ctx.moveTo(xRight, y - 7);
-    ctx.lineTo(xRight, y + 7);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = color;
-    ctx.stroke();
-
-    const dist = Math.abs(leftValue - rightValue);
-    const midX = (xLeft + xRight) / 2;
-    ctx.fillStyle = color;
-    ctx.font = '700 12px var(--font-family-monospace, monospace)';
-    ctx.textAlign = 'center';
-    ctx.fillText(dist.toFixed(1), midX, labelY);
-  }
-
-  function drawAxis() {
-    const axisY = 146;
-    const left = 56;
-    const right = stageRect.width - 56;
-
-    ctx.strokeStyle = colors.border;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(left, axisY);
-    ctx.lineTo(right, axisY);
-    ctx.stroke();
-
-    for (let tick = domain.min; tick <= domain.max; tick += 1) {
-      const x = valueToX(tick);
-      ctx.beginPath();
-      ctx.moveTo(x, axisY - 7);
-      ctx.lineTo(x, axisY + 7);
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = colors.border;
-      ctx.stroke();
-
-      ctx.fillStyle = colors.muted;
-      ctx.font = '600 12px var(--font-family-monospace, monospace)';
-      ctx.textAlign = 'center';
-      ctx.fillText(String(tick), x, axisY + 23);
-    }
-
-  }
-
-  function updateHandles() {
-    Object.entries(handles).forEach(([key, el]) => {
-      el.style.left = `${valueToX(state[key])}px`;
-    });
-  }
-
-  function updateTotals() {
-    const uncrossed = Math.abs(state.x1 - state.y1) + Math.abs(state.x2 - state.y2);
-    const crossed = Math.abs(state.x1 - state.y2) + Math.abs(state.x2 - state.y1);
-
-    binds.uncrossedStage.textContent = formatTotal(uncrossed);
-    binds.crossedStage.textContent = formatTotal(crossed);
-  }
-
-  function render() {
-    ctx.clearRect(0, 0, stageRect.width, stageRect.height);
-
-    drawDistanceRow(62, state.x1, state.y1, colors.uncrossed, 52);
-    drawDistanceRow(90, state.x2, state.y2, colors.uncrossed, 80);
-    drawDistanceRow(214, state.x1, state.y2, colors.crossed, 204);
-    drawDistanceRow(242, state.x2, state.y1, colors.crossed, 232);
-    drawAxis();
-
-    updateHandles();
-    updateTotals();
-  }
-
-  function onPointerMove(event) {
-    if (!dragging) return;
-    const x = event.clientX - stageRect.left;
-    state[dragging] = clampValue(dragging, xToValue(x));
-    render();
-  }
-
-  function stopDrag() {
-    dragging = null;
-    Object.values(handles).forEach((el) => el.classList.remove('is-dragging'));
-  }
-
-  Object.entries(handles).forEach(([key, el]) => {
-    el.addEventListener('pointerdown', (event) => {
-      dragging = key;
-      el.classList.add('is-dragging');
-      el.setPointerCapture(event.pointerId);
-    });
-  });
-
-  window.addEventListener('pointermove', onPointerMove);
-  window.addEventListener('pointerup', stopDrag);
-  window.addEventListener('pointercancel', stopDrag);
-  window.addEventListener('resize', () => {
-    measure();
-    render();
-  });
-
-  measure();
-  render();
-
-  function requestMathTypeset(attempt = 0) {
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      window.MathJax.typesetPromise([root]).catch(() => {});
+  function initWidget(attempt = 0) {
+    if (typeof Chart === 'undefined') {
+      if (attempt < 20) window.setTimeout(function() { initWidget(attempt + 1); }, 250);
       return;
     }
-    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
+
+    const canvas = root.querySelector('#otucChart');
+    const handles = {
+      x1: root.querySelector('[data-key="x1"]'),
+      x2: root.querySelector('[data-key="x2"]'),
+      y1: root.querySelector('[data-key="y1"]'),
+      y2: root.querySelector('[data-key="y2"]')
+    };
+    const binds = {
+      x1Value: root.querySelector('[data-bind="x1_value"]'),
+      x2Value: root.querySelector('[data-bind="x2_value"]'),
+      y1Value: root.querySelector('[data-bind="y1_value"]'),
+      y2Value: root.querySelector('[data-bind="y2_value"]'),
+      uncrossedTotal: root.querySelector('[data-bind="uncrossed_total"]'),
+      crossedTotal: root.querySelector('[data-bind="crossed_total"]'),
+      deltaTotal: root.querySelector('[data-bind="delta_total"]'),
+      gapValue: root.querySelector('[data-bind="gap_value"]')
+    };
+
+    const DOMAIN_MIN = 0;
+    const DOMAIN_MAX = 8;
+    const MIN_GAP = 0.8;
+    const VALUE_STEP = 0.05;
+
+    const state = {
+      x1: 1.0,
+      x2: 3.4,
+      y1: 2.2,
+      y2: 6.0
+    };
+
+    let theme = getThemeColors();
+    let activeKey = null;
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function roundStep(value) {
+      return Math.round(value / VALUE_STEP) * VALUE_STEP;
+    }
+
+    function formatNumber(value) {
+      return value.toFixed(2);
+    }
+
+    function getThemeColors() {
+      const style = getComputedStyle(document.documentElement);
+      const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
+      return {
+        text: style.getPropertyValue('--text-color').trim() || (isDark ? '#e5e7eb' : '#1f2937'),
+        muted: style.getPropertyValue('--text-muted-color').trim() || (isDark ? '#9ca3af' : '#6b7280'),
+        border: style.getPropertyValue('--card-border').trim() || (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'),
+        source: style.getPropertyValue('--prompt-warning-icon').trim() || '#d97706',
+        target: style.getPropertyValue('--prompt-info-icon').trim() || '#0ea5e9',
+        uncrossed: style.getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
+        crossed: style.getPropertyValue('--prompt-danger-icon').trim() || '#dc2626',
+        surface: style.getPropertyValue('--main-bg').trim() || (isDark ? '#111827' : '#ffffff')
+      };
+    }
+
+    function alphaColor(color, alpha) {
+      if (!color) return 'rgba(0, 0, 0, ' + alpha + ')';
+      if (color.startsWith('#')) {
+        let hex = color.slice(1);
+        if (hex.length === 3) {
+          hex = hex.split('').map(function(char) { return char + char; }).join('');
+        }
+        const value = parseInt(hex, 16);
+        const r = (value >> 16) & 255;
+        const g = (value >> 8) & 255;
+        const b = value & 255;
+        return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+      }
+      if (color.startsWith('rgb')) {
+        const values = color.match(/[\d.]+/g) || [];
+        const r = values[0] || 0;
+        const g = values[1] || 0;
+        const b = values[2] || 0;
+        return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+      }
+      return color;
+    }
+
+    function getMetrics() {
+      const uncrossed = Math.abs(state.x1 - state.y1) + Math.abs(state.x2 - state.y2);
+      const crossed = Math.abs(state.x1 - state.y2) + Math.abs(state.x2 - state.y1);
+      const delta = crossed - uncrossed;
+      return { uncrossed: uncrossed, crossed: crossed, delta: delta };
+    }
+
+    function syncText() {
+      const metrics = getMetrics();
+      binds.x1Value.textContent = formatNumber(state.x1);
+      binds.x2Value.textContent = formatNumber(state.x2);
+      binds.y1Value.textContent = formatNumber(state.y1);
+      binds.y2Value.textContent = formatNumber(state.y2);
+      binds.uncrossedTotal.textContent = formatNumber(metrics.uncrossed);
+      binds.crossedTotal.textContent = formatNumber(metrics.crossed);
+      binds.deltaTotal.textContent = formatNumber(metrics.delta);
+      binds.gapValue.textContent = formatNumber(metrics.delta);
+    }
+
+    function clampValueForKey(key, nextValue) {
+      const rounded = roundStep(nextValue);
+      if (key === 'x1') return clamp(rounded, DOMAIN_MIN, state.x2 - MIN_GAP);
+      if (key === 'x2') return clamp(rounded, state.x1 + MIN_GAP, DOMAIN_MAX);
+      if (key === 'y1') return clamp(rounded, DOMAIN_MIN, state.y2 - MIN_GAP);
+      return clamp(rounded, state.y1 + MIN_GAP, DOMAIN_MAX);
+    }
+
+    function chartLayout(chart) {
+      const chartArea = chart.chartArea;
+      return {
+        chartArea: chartArea,
+        topRowY: chartArea.top + 82,
+        axisY: chartArea.top + (chartArea.bottom - chartArea.top) * 0.54,
+        bottomRowY: chartArea.bottom - 92
+      };
+    }
+
+    function positionOverlay(chart) {
+      const xScale = chart.scales.x;
+      const layout = chartLayout(chart);
+
+      Object.keys(handles).forEach(function(key) {
+        handles[key].style.left = xScale.getPixelForValue(state[key]) + 'px';
+        handles[key].style.top = layout.axisY + 'px';
+      });
+    }
+
+    function drawGuideLine(ctx, chartArea, y, color) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash([5, 7]);
+      ctx.moveTo(chartArea.left, y);
+      ctx.lineTo(chartArea.right, y);
+      ctx.strokeStyle = alphaColor(color, 0.24);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawDistanceSegment(ctx, startX, endX, axisY, laneY, color) {
+      const leftX = Math.min(startX, endX);
+      const rightX = Math.max(startX, endX);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(leftX, axisY);
+      ctx.lineTo(leftX, laneY);
+      ctx.moveTo(rightX, axisY);
+      ctx.lineTo(rightX, laneY);
+      ctx.strokeStyle = alphaColor(color, 0.22);
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(leftX, laneY);
+      ctx.lineTo(rightX, laneY);
+      ctx.strokeStyle = alphaColor(color, 0.18);
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(leftX, laneY);
+      ctx.lineTo(rightX, laneY);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(leftX, laneY - 7);
+      ctx.lineTo(leftX, laneY + 7);
+      ctx.moveTo(rightX, laneY - 7);
+      ctx.lineTo(rightX, laneY + 7);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawNumberLine(ctx, chart, layout) {
+      const xScale = chart.scales.x;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(chart.chartArea.left, layout.axisY);
+      ctx.lineTo(chart.chartArea.right, layout.axisY);
+      ctx.strokeStyle = theme.text;
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      ctx.font = '600 13px var(--font-family-base, system-ui)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      for (let tick = DOMAIN_MIN; tick <= DOMAIN_MAX; tick += 1) {
+        const px = xScale.getPixelForValue(tick);
+        ctx.beginPath();
+        ctx.moveTo(px, layout.axisY - 7);
+        ctx.lineTo(px, layout.axisY + 7);
+        ctx.strokeStyle = theme.border;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+        ctx.fillStyle = theme.muted;
+        ctx.fillText(String(tick), px, layout.axisY + 12);
+      }
+      ctx.restore();
+    }
+
+    function drawProjectionLines(ctx, chart, layout) {
+      const xScale = chart.scales.x;
+      ['x1', 'x2', 'y1', 'y2'].forEach(function(key) {
+        const px = xScale.getPixelForValue(state[key]);
+        const color = key.startsWith('x') ? theme.source : theme.target;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(px, chart.chartArea.top + 18);
+        ctx.lineTo(px, chart.chartArea.bottom - 18);
+        ctx.strokeStyle = alphaColor(color, 0.16);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+      });
+    }
+
+    function drawAxisMarkers(ctx, chart, layout) {
+      const xScale = chart.scales.x;
+      ['x1', 'x2', 'y1', 'y2'].forEach(function(key) {
+        const px = xScale.getPixelForValue(state[key]);
+        const color = key.startsWith('x') ? theme.source : theme.target;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(px, layout.axisY, 5, 0, Math.PI * 2);
+        ctx.fillStyle = theme.surface;
+        ctx.fill();
+        ctx.lineWidth = 2.4;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+        ctx.restore();
+      });
+    }
+
+    const uncrossingPlugin = {
+      id: 'otucIntervals',
+      afterDraw: function(chart) {
+        const ctx = chart.ctx;
+        const xScale = chart.scales.x;
+        const layout = chartLayout(chart);
+
+        positionOverlay(chart);
+        drawGuideLine(ctx, chart.chartArea, layout.topRowY, theme.uncrossed);
+        drawGuideLine(ctx, chart.chartArea, layout.bottomRowY, theme.crossed);
+        drawProjectionLines(ctx, chart, layout);
+
+        drawDistanceSegment(
+          ctx,
+          xScale.getPixelForValue(state.x1),
+          xScale.getPixelForValue(state.y1),
+          layout.axisY,
+          layout.topRowY - 14,
+          theme.uncrossed
+        );
+        drawDistanceSegment(
+          ctx,
+          xScale.getPixelForValue(state.x2),
+          xScale.getPixelForValue(state.y2),
+          layout.axisY,
+          layout.topRowY + 14,
+          theme.uncrossed
+        );
+        drawDistanceSegment(
+          ctx,
+          xScale.getPixelForValue(state.x1),
+          xScale.getPixelForValue(state.y2),
+          layout.axisY,
+          layout.bottomRowY - 14,
+          theme.crossed
+        );
+        drawDistanceSegment(
+          ctx,
+          xScale.getPixelForValue(state.x2),
+          xScale.getPixelForValue(state.y1),
+          layout.axisY,
+          layout.bottomRowY + 14,
+          theme.crossed
+        );
+
+        drawNumberLine(ctx, chart, layout);
+        drawAxisMarkers(ctx, chart, layout);
+      }
+    };
+
+    const chart = new Chart(canvas.getContext('2d'), {
+      type: 'scatter',
+      plugins: [uncrossingPlugin],
+      data: {
+        datasets: [
+          {
+            data: [],
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        events: [],
+        layout: {
+          padding: {
+            top: 28,
+            right: 20,
+            bottom: 46,
+            left: 20
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: DOMAIN_MIN,
+            max: DOMAIN_MAX,
+            display: false
+          },
+          y: {
+            min: 0,
+            max: 1,
+            display: false
+          }
+        }
+      }
+    });
+
+    function updateChart() {
+      syncText();
+      chart.draw();
+    }
+
+    function valueFromClientX(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      const px = clientX - rect.left;
+      return chart.scales.x.getValueForPixel(px);
+    }
+
+    function setValue(key, value) {
+      state[key] = clampValueForKey(key, value);
+      updateChart();
+    }
+
+    function stopDragging() {
+      if (!activeKey) return;
+      handles[activeKey].classList.remove('is-dragging');
+      activeKey = null;
+    }
+
+    function onPointerMove(event) {
+      if (!activeKey) return;
+      event.preventDefault();
+      setValue(activeKey, valueFromClientX(event.clientX));
+    }
+
+    function onPointerUp() {
+      stopDragging();
+    }
+
+    Object.keys(handles).forEach(function(key) {
+      const handle = handles[key];
+      handle.addEventListener('pointerdown', function(event) {
+        event.preventDefault();
+        activeKey = key;
+        handle.classList.add('is-dragging');
+      });
+
+      handle.addEventListener('keydown', function(event) {
+        const step = event.shiftKey ? 0.25 : 0.1;
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+          event.preventDefault();
+          setValue(key, state[key] - step);
+        }
+        if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          setValue(key, state[key] + step);
+        }
+      });
+    });
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('resize', function() {
+      chart.resize();
+      chart.draw();
+    });
+
+    const themeObserver = new MutationObserver(function() {
+      theme = getThemeColors();
+      chart.update('none');
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-mode']
+    });
+
+    function requestMathTypeset(attempt = 0) {
+      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+        window.MathJax.typesetPromise([root]).catch(function() {});
+        return;
+      }
+      if (attempt < 20) {
+        window.setTimeout(function() { requestMathTypeset(attempt + 1); }, 250);
+      }
+    }
+
+    syncText();
+    chart.draw();
+    requestMathTypeset();
   }
 
-  requestMathTypeset();
-})();
+  initWidget();
+});
 </script>

@@ -1,12 +1,10 @@
 <div class="otx" id="transportSplitWidget">
   <div class="otx__intro">
     <div class="otx__copy">
-      <div class="otx__eyebrow">Example</div>
+      <div class="otx__eyebrow">Interactive Mass-Splitting Example</div>
       <h4>Split-mass transport with two sources</h4>
       <p>
-        Source $A$ has $2\text{ kg}$ of loose dirt, and source $B$ has $1\text{ kg}$. Hole $C$ needs $1\text{ kg}$,
-        and hole $D$ needs $2\text{ kg}$. We choose how many kilograms to send from $A$ to $C$,
-        and conservation of mass forces the other three entries of the plan.
+        Source $A$ has $2\text{ kg}$ of loose dirt, and source $B$ has $1\text{ kg}$. Hole $C$ needs $1\text{ kg}$, while hole $D$ needs $2\text{ kg}$. Once you choose how much mass to send from $A$ to $C$, conservation determines the other three entries of the transport plan automatically.
       </p>
     </div>
 
@@ -30,9 +28,24 @@
     </div>
   </div>
 
+  <div class="otx__summary-strip">
+    <div class="otx__summary-pill">
+      <span class="otx__summary-label">Atomic Unit</span>
+      <strong class="otx__summary-value">0.25 kg per pebble</strong>
+    </div>
+    <div class="otx__summary-pill">
+      <span class="otx__summary-label">Free Variable</span>
+      <strong class="otx__summary-value">$x = \pi_{AC}$</strong>
+    </div>
+    <div class="otx__summary-pill">
+      <span class="otx__summary-label">Cheapest Choice</span>
+      <strong class="otx__summary-value">$x = 1$</strong>
+    </div>
+  </div>
+
   <div class="otx__stage-card">
     <div class="otx__stage-note">
-      Each pebble is 0.25 kg. While dragging, the picture updates immediately. When you release the slider, the pebbles replay from the source piles.
+      Drag the free variable to change the plan in real time. While dragging, the geometry updates immediately; when you release the slider, the pebbles replay from the source trays so the mass balance is easy to read.
     </div>
 
     <div class="otx__stage" id="otxStage">
@@ -115,8 +128,8 @@
       </div>
 
       <div class="otx__actions">
-        <button id="otxReplayBtn" class="btn w-100 otx__btn otx__btn--replay">Replay Current Plan</button>
-        <button id="otxBestBtn" class="btn w-100 otx__btn otx__btn--best">Replay Cheapest Plan</button>
+        <button id="otxReplayBtn" class="btn btn-outline-secondary w-100 otx__btn">Replay Current Plan</button>
+        <button id="otxBestBtn" class="btn btn-outline-primary w-100 otx__btn">Replay Cheapest Plan</button>
       </div>
     </div>
 
@@ -161,7 +174,6 @@
   border: 1px solid var(--otx-ui-border);
   border-radius: 18px;
   background: var(--card-bg, rgba(120, 120, 120, 0.05));
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
 }
 
 .otx__intro {
@@ -191,6 +203,37 @@
   font-size: 1rem;
   line-height: 1.66;
   color: var(--otx-ui-muted);
+}
+
+.otx__summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 0 0;
+}
+
+.otx__summary-pill {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--otx-ui-border);
+  border-radius: 14px;
+  background: var(--otx-ui-bg);
+}
+
+.otx__summary-label {
+  display: block;
+  margin-bottom: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--otx-ui-muted);
+}
+
+.otx__summary-value {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--otx-ui-text);
 }
 
 .otx__cost-card,
@@ -362,27 +405,26 @@
 
 .otx__tray--target {
   background: var(--card-bg, rgba(120, 120, 120, 0.04));
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.035);
 }
 
 .otx__node--a .otx__tray,
 .otx__node--a .otx__node-badge {
-  border-color: var(--otx-source-color);
-  background-color: var(--otx-source-bg);
+  border-color: var(--otx-ui-border);
+  background-color: color-mix(in srgb, var(--otx-source-bg) 88%, var(--otx-ui-bg));
 }
 
 .otx__node--b .otx__tray,
 .otx__node--b .otx__node-badge {
-  border-color: var(--otx-source-alt-color);
-  background-color: var(--otx-source-alt-bg);
+  border-color: var(--otx-ui-border);
+  background-color: color-mix(in srgb, var(--otx-source-alt-bg) 88%, var(--otx-ui-bg));
 }
 
 .otx__node--c .otx__tray,
 .otx__node--c .otx__node-badge,
 .otx__node--d .otx__tray,
 .otx__node--d .otx__node-badge {
-  border-color: var(--otx-target-color);
-  background-color: var(--otx-target-bg);
+  border-color: var(--otx-ui-border);
+  background-color: color-mix(in srgb, var(--otx-target-bg) 88%, var(--otx-ui-bg));
 }
 
 .otx__slots {
@@ -421,8 +463,7 @@
   padding: 0.28rem 0.62rem;
   border: 1px solid var(--otx-ui-border);
   border-radius: 999px;
-  background: var(--otx-ui-bg);
-  backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--card-bg, rgba(120, 120, 120, 0.06)) 82%, var(--otx-ui-bg));
   font-size: 0.88rem;
   font-weight: 700;
   line-height: 1.2;
@@ -430,11 +471,6 @@
   transform: translate(-50%, -50%);
   pointer-events: none;
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-}
-
-[data-mode="dark"] .otx__route-tag {
-  background: var(--otx-ui-bg);
 }
 
 .otx__particle {
@@ -443,7 +479,8 @@
   height: 15px;
   border-radius: 999px;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 2px var(--main-bg, #fff), 0 3px 10px rgba(0, 0, 0, 0.12);
+  border: none;
+  box-shadow: none;
 }
 
 .otx__bottom {
@@ -568,48 +605,16 @@
 }
 
 .otx__btn {
-  padding: 0.7rem 1rem;
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 12px;
+  min-height: 42px;
+  padding: 0.68rem 1rem;
   font-size: 0.95rem;
   font-weight: 700;
   line-height: 1.2;
-  background: var(--otx-ui-bg);
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.otx__btn:hover {
-  transform: translateY(-1px);
 }
 
 .otx__btn:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--otx-target-color) 38%, transparent);
   outline-offset: 2px;
-}
-
-.otx__btn--replay {
-  border-color: color-mix(in srgb, var(--otx-target-color) 55%, var(--otx-ui-border));
-  color: var(--otx-target-color);
-  background: color-mix(in srgb, var(--otx-target-bg) 72%, var(--otx-ui-bg));
-}
-
-.otx__btn--replay:hover {
-  border-color: var(--otx-target-color);
-  background: color-mix(in srgb, var(--otx-target-bg) 92%, var(--otx-ui-bg));
-  color: var(--otx-target-color);
-}
-
-.otx__btn--best {
-  border-color: color-mix(in srgb, var(--otx-source-alt-color) 55%, var(--otx-ui-border));
-  color: var(--otx-source-alt-color);
-  background: color-mix(in srgb, var(--otx-source-alt-bg) 74%, var(--otx-ui-bg));
-}
-
-.otx__btn--best:hover {
-  border-color: var(--otx-source-alt-color);
-  background: color-mix(in srgb, var(--otx-source-alt-bg) 94%, var(--otx-ui-bg));
-  color: var(--otx-source-alt-color);
 }
 
 .otx__eq-grid {
@@ -650,7 +655,8 @@
 
 @media (max-width: 980px) {
   .otx__intro,
-  .otx__bottom {
+  .otx__bottom,
+  .otx__summary-strip {
     grid-template-columns: 1fr;
   }
 }
@@ -970,22 +976,15 @@
 
       const endpoints = routeEndpoints(route);
       const path = pathForRoute(route, endpoints.start, endpoints.end);
-      const lineWidth = 6 + count * 5;
+      const lineWidth = 4 + count * 4;
 
       ctx.beginPath();
       ctx.moveTo(path.p0.x, path.p0.y);
       ctx.bezierCurveTo(path.p1.x, path.p1.y, path.p2.x, path.p2.y, path.p3.x, path.p3.y);
       ctx.lineWidth = lineWidth;
       ctx.lineCap = 'round';
-      ctx.strokeStyle = alphaColor(ROUTE_COLORS[route], 0.18);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(path.p0.x, path.p0.y);
-      ctx.bezierCurveTo(path.p1.x, path.p1.y, path.p2.x, path.p2.y, path.p3.x, path.p3.y);
-      ctx.lineWidth = Math.max(2, lineWidth - 6);
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = alphaColor(ROUTE_COLORS[route], 0.42);
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = alphaColor(ROUTE_COLORS[route], 0.34);
       ctx.stroke();
 
       const mid = bezierPoint(path, 0.5);
