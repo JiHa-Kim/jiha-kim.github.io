@@ -68,6 +68,28 @@ Think of world generation in a game like Minecraft: instead of trying to randoml
 
 Autoregressive models and diffusion models are often presented as very different generative strategies. At a high level, however, both function as this "procedural generation algorithm," converting simple randomness into complex samples from the data distribution. The difference is in how they parameterize that conversion: autoregression does it through a sequence of conditional transports, while diffusion does it through a time-dependent denoising dynamics. Optimal transport is therefore a useful geometric lens for comparing them, even when the underlying training objectives are not literally the same.
 
+### The Choice of Base Distribution
+
+Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? While practitioners favor them heavily for practical reasons—they are trivially easy to sample from, completely isotropic, stable under perturbation, and highly compatible with stochastic noising processes—they also possess rigorous theoretical elegance by natively maximizing differential entropy. This yields the most unbiased statistical start given underlying space constraints.
+
+> [!proposition] Uniform Maximum Entropy
+> For a strictly bounded interval $[a, b]$, the maximum entropy distribution is the Uniform distribution $\mathcal{U}[a, b]$.
+
+> [!proof]-
+> We maximize entropy $\mathbb{E}[-\ln p(x)]$ subject to $\int_a^b p(x) dx = 1$. 
+> Setting the functional derivative of the Lagrangian to zero gives:
+> $$ \frac{\delta}{\delta p} \left( -\int_a^b p(x)\ln p(x)dx + \lambda_0 \left(\int_a^b p(x) dx - 1\right) \right) = 0 $$
+> $$ -\ln p(x) - 1 + \lambda_0 = 0 \implies p(x) = e^{\lambda_0 - 1} $$
+> Since $p(x)$ is constant, it must precisely be $\frac{1}{b-a}$ to integrate to 1.
+
+> [!proposition] Gaussian Maximum Entropy
+> For an unbounded domain space like $\mathbb{R}$, a uniform probability distribution cannot exist (it would require infinite mass), and the maximum possible differential entropy is unbounded ($+\infty$). To get a meaningful maximum entropy base, we constrain the variance $\mathbb{E}[(X - \mathbb{E}[X])^2] \le \sigma^2$. This geometrically yields the Gaussian distribution. {% cite NormalDistribution2026 %}
+
+> [!proof]-
+> We maximize $\mathbb{E}[-\ln p(x)]$ subject to $\int p(x) dx = 1$ and bounded variance $\int x^2 p(x) dx = \sigma^2$ (assuming zero mean). The Lagrangian functional derivative yields:
+> $$ -\ln p(x) - 1 + \lambda_0 + \lambda_1 x^2 = 0 \implies p(x) = e^{\lambda_0 - 1 + \lambda_1 x^2} $$
+> For this to be a valid integrable probability density, we require $\lambda_1 < 0$. Setting $\lambda_1 = -c$ directly recovers the canonical Gaussian form $p(x) \propto e^{-cx^2}$.
+
 ## Background: Optimal Transport
 
 To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 thorpeIntroductionOptimalTransport %}
@@ -250,27 +272,6 @@ In higher dimensions, we can apply the same quantile-matching step conditionally
 
 > [!remark] Non-Optimality (Greedy Coordinate-wise)
 
-### The Choice of Base Distribution
-
-Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? While practitioners favor them heavily for practical reasons—they are trivially easy to sample from, completely isotropic, stable under perturbation, and highly compatible with stochastic noising processes—they also possess rigorous theoretical elegance by natively maximizing differential entropy. This yields the most unbiased statistical start given underlying space constraints.
-
-> [!proposition] Uniform Maximum Entropy
-> For a strictly bounded interval $[a, b]$, the maximum entropy distribution is the Uniform distribution $\mathcal{U}[a, b]$.
-
-> [!proof]-
-> We maximize entropy $\mathbb{E}[-\ln p(x)]$ subject to $\int_a^b p(x) dx = 1$. 
-> Setting the functional derivative of the Lagrangian to zero gives:
-> $$ \frac{\delta}{\delta p} \left( -\int_a^b p(x)\ln p(x)dx + \lambda_0 \left(\int_a^b p(x) dx - 1\right) \right) = 0 $$
-> $$ -\ln p(x) - 1 + \lambda_0 = 0 \implies p(x) = e^{\lambda_0 - 1} $$
-> Since $p(x)$ is constant, it must precisely be $\frac{1}{b-a}$ to integrate to 1.
-
-> [!proposition] Gaussian Maximum Entropy
-> For an unbounded domain space like $\mathbb{R}$, a uniform probability distribution cannot exist (it would require infinite mass), and the maximum possible differential entropy is unbounded ($+\infty$). To get a meaningful maximum entropy base, we constrain the variance $\mathbb{E}[(X - \mathbb{E}[X])^2] \le \sigma^2$. This geometrically yields the Gaussian distribution. {% cite NormalDistribution2026 %}
-
-> [!proof]-
-> We maximize $\mathbb{E}[-\ln p(x)]$ subject to $\int p(x) dx = 1$ and bounded variance $\int x^2 p(x) dx = \sigma^2$ (assuming zero mean). The Lagrangian functional derivative yields:
-> $$ -\ln p(x) - 1 + \lambda_0 + \lambda_1 x^2 = 0 \implies p(x) = e^{\lambda_0 - 1 + \lambda_1 x^2} $$
-> For this to be a valid integrable probability density, we require $\lambda_1 < 0$. Setting $\lambda_1 = -c$ directly recovers the canonical Gaussian form $p(x) \propto e^{-cx^2}$.
 
 ## Vanilla (Causal Sequence) Autoregression
 
