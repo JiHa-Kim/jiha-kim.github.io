@@ -322,20 +322,22 @@ module Jekyll
       is_collapsible = !state.nil? || DEFAULT_OPEN_TYPES.include?(ctype)
       is_open = (state == "+") || DEFAULT_OPEN_TYPES.include?(ctype)
 
+      effective_title = !title.empty? ? title : (LABELED_TYPES.include?(ctype) ? "&nbsp;" : ctype.capitalize)
+
       if is_collapsible
         open_attr = is_open ? " open" : ""
-        summary_text = !title.empty? ? title : (LABELED_TYPES.include?(ctype) ? "&nbsp;" : ctype.capitalize)
         html = <<~HTML
           <details class="#{box_class}"#{open_attr} markdown="1">
           <summary markdown="1">
-          #{summary_text}
+          #{effective_title}
           </summary>\n\n#{processed_body}</details>
         HTML
       else
-        title_html = !title.empty? ? "<div class=\"title\" markdown=\"1\">\n#{title}\n</div>" : ""
         html = <<~HTML
           <blockquote class="#{box_class}" markdown="1">
-          #{title_html}\n\n#{processed_body}</blockquote>
+          <div class="title" markdown="1">
+          #{effective_title}
+          </div>\n\n#{processed_body}</blockquote>
         HTML
       end
 
