@@ -1,0 +1,453 @@
+<div class="otu" id="inverseTransformFigure">
+  <div class="otu__intro">
+    <div class="otu__eyebrow">Interactive Example</div>
+    <h4>Inverse Transform Sampling</h4>
+    <p>
+      Drag the <strong>\( u \)</strong> slider along the horizontal axis, which represents uniform noise.
+      The solid blue curve is the <strong>Inverse CDF</strong> \( x = F^{-1}(u) \).
+      The shape along the vertical axis shows the target density \( p(x) \). 
+      Notice how the <span style="color: var(--prompt-warning-icon, #d97706); font-weight: bold;">cumulative mass</span> (the filled orange area) visually grows in proportion to your chosen \( u \) input!
+    </p>
+  </div>
+
+  <div class="otu__stage-card">
+    <div class="otu__stage" id="itsStage" style="height: 440px; position: relative;">
+      <canvas id="itsChart"></canvas>
+
+      <!-- Draggable pill on X-axis -->
+      <div class="otu__badge otu__badge--u" id="itsBadgeU">
+        <span class="math-static">\( u \)</span>&nbsp;=&nbsp;<span id="val-u">0.70</span>
+      </div>
+      
+      <!-- Readout pill on Y-axis -->
+      <div class="otu__badge otu__badge--xval" id="itsBadgeX">
+        <span class="math-static">\( x \)</span>&nbsp;=&nbsp;<span id="val-x">4.23</span>
+      </div>
+      
+      <!-- LaTeX Axis Labels -->
+      <div class="otu__axis-title otu__axis-title--y">\( x \sim P_{\text{data}} \)</div>
+      <div class="otu__axis-title otu__axis-title--x">\( u \sim \mathcal{U}(0,1) \)</div>
+    </div>
+  </div>
+</div>
+
+<style>
+.otu {
+  margin: 1.35rem 0 2rem 0;
+  padding: 1rem;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.16));
+  border-radius: 14px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+}
+
+.otu__eyebrow {
+  margin-bottom: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+
+.otu__intro h4 {
+  margin: 0;
+  font-size: 1.04rem;
+}
+
+.otu__intro p {
+  margin: 0.45rem 0 0 0;
+  line-height: 1.66;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+
+.otu__stage-card {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
+  border-radius: 12px;
+  background: var(--main-bg, rgba(255, 255, 255, 0.76));
+}
+
+.otu__stage {
+  position: relative;
+  background: var(--main-bg, #fff);
+  border-radius: 12px;
+  padding: 15px 25px 45px 55px;
+  border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  user-select: none;
+  touch-action: none;
+}
+
+.otu__badge {
+  position: absolute;
+  z-index: 10;
+  padding: 4px 10px;
+  background: var(--main-bg, #fff);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  transition: box-shadow 0.1s, transform 0.1s;
+}
+
+.otu__badge--u {
+  border: 2px solid var(--prompt-warning-icon, #d97706);
+  color: var(--text-color, inherit);
+  cursor: grab;
+  pointer-events: auto; /* U badge is draggable directly */
+}
+
+.otu__badge--u:active, .otu__badge--u.is-dragging {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.otu__badge--xval {
+  border: 2px solid var(--prompt-info-icon, #0ea5e9);
+  color: var(--text-color, inherit);
+  pointer-events: none;
+}
+
+.otu__axis-title {
+  position: absolute;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-color, inherit);
+  pointer-events: none;
+}
+
+.otu__axis-title--y {
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: center;
+}
+
+.otu__axis-title--x {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.otu .mjx-container {
+  margin: 0 !important;
+}
+
+[data-mode="dark"] .otu__stage {
+  background: var(--main-bg, #1b1b1e);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const root = document.getElementById('inverseTransformFigure');
+  if (!root || root.dataset.initialized === 'true') return;
+  root.dataset.initialized = 'true';
+
+  const stage = root.querySelector('#itsStage');
+  const badgeU = root.querySelector('#itsBadgeU');
+  const badgeX = root.querySelector('#itsBadgeX');
+  const valU = root.querySelector('#val-u');
+  const valX = root.querySelector('#val-x');
+
+  let state = { u: 0.5 };
+  let isDragging = false;
+
+  // Math utilities for Gaussian Mixture
+  function erf(x) {
+    const sign = x >= 0 ? 1 : -1;
+    x = Math.abs(x);
+    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+    const t = 1.0 / (1.0 + p * x);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    return sign * y;
+  }
+
+  function cdfNormal(x, mu, sigma) {
+    return 0.5 * (1 + erf((x - mu) / (sigma * Math.SQRT2)));
+  }
+
+  function pdfNormal(x, mu, sigma) {
+    return Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2)) / (sigma * Math.sqrt(2 * Math.PI));
+  }
+
+  const w1 = 0.35, m1 = 3, s1 = 0.6;
+  const w2 = 0.65, m2 = 7, s2 = 1.2;
+
+  function targetCDF(x) {
+    return w1 * cdfNormal(x, m1, s1) + w2 * cdfNormal(x, m2, s2);
+  }
+
+  function targetPDF(x) {
+    return w1 * pdfNormal(x, m1, s1) + w2 * pdfNormal(x, m2, s2);
+  }
+
+  function inverseCDF(u) {
+    let low = -2, high = 12;
+    for(let i=0; i<35; i++) {
+      let mid = (low + high) / 2;
+      if(targetCDF(mid) < u) low = mid;
+      else high = mid;
+    }
+    return (low + high) / 2;
+  }
+
+  // Data Generation for Inverse CDF (X=u, Y=x)
+  const cdfData = [];
+  let maxPdfVal = 0;
+  for (let i = 0; i <= 200; i++) {
+    const x_val = i * (10 / 200);
+    const u_val = targetCDF(x_val);
+    cdfData.push({ x: u_val, y: x_val });
+    maxPdfVal = Math.max(maxPdfVal, targetPDF(x_val));
+  }
+
+  const pdfFilledData = [];
+  const pdfEmptyData = [];
+
+  function updatePdfData() {
+    const xVal = inverseCDF(state.u);
+    pdfFilledData.length = 0;
+    pdfEmptyData.length = 0;
+    
+    for (let i = 0; i <= 200; i++) {
+      const x_val = i * (10 / 200);
+      const pdf = targetPDF(x_val);
+      if (x_val <= xVal) {
+        pdfFilledData.push({ x: pdf, y: x_val });
+      } else {
+        pdfEmptyData.push({ x: pdf, y: x_val });
+      }
+    }
+    // Add the exact intersection point to keep the boundary sharp
+    const exactPdf = targetPDF(xVal);
+    pdfFilledData.push({ x: exactPdf, y: xVal });
+    pdfEmptyData.unshift({ x: exactPdf, y: xVal });
+  }
+
+  updatePdfData();
+
+  const getThemeColors = () => {
+    const style = getComputedStyle(document.documentElement);
+    const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
+    return {
+      text: style.getPropertyValue('--text-color').trim() || (isDark ? '#e5e7eb' : '#374151'),
+      grid: style.getPropertyValue('--card-border').trim() || (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'),
+      ticks: style.getPropertyValue('--text-muted-color').trim() || (isDark ? '#9ca3af' : '#6b7280'),
+      cdf: style.getPropertyValue('--prompt-info-icon').trim() || '#0ea5e9',
+      dash: style.getPropertyValue('--prompt-warning-icon').trim() || '#d97706'
+    };
+  };
+
+  let theme = getThemeColors();
+
+  const ctx = document.getElementById('itsChart').getContext('2d');
+  
+  const transportPlugin = {
+    id: 'transportLines',
+    afterDraw: (chart) => {
+      const { ctx, chartArea, scales: { x, y } } = chart;
+      
+      const xVal = inverseCDF(state.u);
+      const px = x.getPixelForValue(state.u);
+      const py = y.getPixelForValue(xVal);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = theme.dash;
+      
+      // Vertical line (from u on X-axis up to curve)
+      ctx.moveTo(px, chartArea.bottom);
+      ctx.lineTo(px, py);
+      
+      // Horizontal line (from curve to Y-axis)
+      ctx.moveTo(px, py);
+      ctx.lineTo(chartArea.left, py);
+      
+      ctx.stroke();
+
+      // Intersection points
+      ctx.setLineDash([]);
+      ctx.fillStyle = theme.dash;
+      
+      ctx.beginPath();
+      ctx.arc(px, py, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(px, chartArea.bottom, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(chartArea.left, py, 5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+
+      // Update HTML Overlays
+      const stageRect = stage.getBoundingClientRect();
+      const canvasRect = chart.canvas.getBoundingClientRect();
+      const offsetX = canvasRect.left - stageRect.left;
+      const offsetY = canvasRect.top - stageRect.top;
+
+      badgeU.style.left = `${offsetX + px}px`;
+      badgeU.style.top = `${offsetY + chartArea.bottom}px`;
+      valU.innerText = state.u.toFixed(2);
+
+      badgeX.style.left = `${offsetX + chartArea.left}px`;
+      badgeX.style.top = `${offsetY + py}px`;
+      valX.innerText = xVal.toFixed(2);
+    }
+  };
+
+  let chart = new Chart(ctx, {
+    type: 'line',
+    plugins: [transportPlugin],
+    data: {
+      datasets: [
+        {
+          label: 'Inverse CDF',
+          data: cdfData,
+          borderColor: theme.cdf,
+          borderWidth: 3,
+          pointRadius: 0,
+          fill: false,
+          tension: 0.1,
+          xAxisID: 'x',
+          yAxisID: 'y'
+        },
+        {
+          label: 'PDF Filled (Cumulative Mass)',
+          data: pdfFilledData,
+          borderColor: theme.dash,
+          backgroundColor: 'rgba(217, 119, 6, 0.4)', // orange matched to u slider
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: 'start',
+          tension: 0.1,
+          xAxisID: 'xPdf',
+          yAxisID: 'y'
+        },
+        {
+          label: 'PDF Empty',
+          data: pdfEmptyData,
+          borderColor: theme.ticks,
+          backgroundColor: 'rgba(150, 150, 150, 0.1)',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: 'start',
+          tension: 0.1,
+          xAxisID: 'xPdf',
+          yAxisID: 'y'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y', // This is crucial to fill the PDF to the X-axis correctly
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          min: 0,
+          max: 1,
+          position: 'bottom',
+          grid: { color: theme.grid },
+          ticks: { color: theme.ticks, font: { size: 12 } }
+        },
+        xPdf: {
+          type: 'linear',
+          min: 0,
+          max: maxPdfVal * 3.5, // Occupy roughly the left 30% of the graph
+          position: 'top',
+          display: false
+        },
+        y: {
+          type: 'linear',
+          min: 0,
+          max: 10,
+          position: 'left',
+          grid: { color: theme.grid },
+          ticks: { color: theme.ticks, font: { size: 12 } }
+        }
+      }
+    }
+  });
+
+  function getUFromMouseEvent(event) {
+    const canvasRect = chart.canvas.getBoundingClientRect();
+    const xPos = event.clientX - canvasRect.left;
+    let u = chart.scales.x.getValueForPixel(xPos);
+    return Math.max(0.001, Math.min(0.999, u));
+  }
+
+  function onPointerMove(event) {
+    if (!isDragging) return;
+    state.u = getUFromMouseEvent(event);
+    updatePdfData();
+    chart.update('none'); // Update without animation
+  }
+
+  function stopDrag() {
+    isDragging = false;
+    badgeU.classList.remove('is-dragging');
+  }
+
+  badgeU.addEventListener('pointerdown', (event) => {
+    isDragging = true;
+    badgeU.classList.add('is-dragging');
+    badgeU.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+
+  // Also allow clicking on the canvas directly to move the handle
+  chart.canvas.addEventListener('pointerdown', (event) => {
+    state.u = getUFromMouseEvent(event);
+    isDragging = true;
+    badgeU.classList.add('is-dragging');
+    updatePdfData();
+    chart.update('none');
+    event.preventDefault();
+  });
+
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', stopDrag);
+  window.addEventListener('pointercancel', stopDrag);
+
+  // Theme observer
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === "data-mode") {
+        theme = getThemeColors();
+        chart.options.scales.x.grid.color = theme.grid;
+        chart.options.scales.x.ticks.color = theme.ticks;
+        chart.options.scales.y.grid.color = theme.grid;
+        chart.options.scales.y.ticks.color = theme.ticks;
+        chart.update();
+      }
+    });
+  });
+  observer.observe(document.documentElement, { attributes: true });
+
+  // MathJax Typesetting for static labels
+  function requestMathTypeset(attempt = 0) {
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([root]).catch(() => {});
+      return;
+    }
+    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
+  }
+  requestMathTypeset();
+});
+</script>
