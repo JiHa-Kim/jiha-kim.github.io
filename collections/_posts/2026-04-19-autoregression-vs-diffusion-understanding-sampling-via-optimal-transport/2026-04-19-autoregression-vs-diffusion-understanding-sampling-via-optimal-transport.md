@@ -273,6 +273,45 @@ In higher dimensions, we can apply the same quantile-matching step conditionally
 > By factorizing sequentially, it implicitly solves a **greedy** transport problem. It is canonical only because it represents the unique optimal limit for a heavily skewed quadratic cost that strictly prioritizes earlier coordinates:
 > $$ c(x, y) = \sum_{i=1}^D \lambda_i (x_i - y_i)^2, \qquad \lambda_1 \gg \lambda_2 \gg \dots \gg \lambda_D $$
 
+### Global Optimality: Brenier's Theorem
+
+If we abandon the greedy sequence and seek the true globally optimal map for the symmetric squared Euclidean cost, we arrive at Brenier's theorem {% cite brenierPolarFactorizationMonotone1991 %}.
+
+> [!theorem] Brenier's Theorem
+> For the squared Euclidean cost 
+> $$ W_2^2 = \inf_{T_\sharp P = Q} \mathbb{E}[\|x - T(x)\|_2^2], $$
+> the unique optimal transport map $T$ is characterized as the gradient of a convex scalar potential function $\psi: \mathbb{R}^D \to \mathbb{R}$:
+> $$ T(x) = \nabla \psi(x) $$
+
+> [!corollary] Polar Factorization Theorem
+> Any generative map $F: \mathbb{R}^D \to \mathbb{R}^D$ that pushes noise to data ($F_\sharp P_{\text{noise}} = P_{\text{data}}$) can be uniquely factored as:
+> $$ F = \nabla \psi \circ M $$
+> where $\nabla \psi$ is the unique Brenier optimal transport map, and $M$ is a measure-preserving map ($M_\sharp P_{\text{noise}} = P_{\text{noise}}$). 
+> 
+> This is the infinite-dimensional analogue to the polar decomposition of a matrix $A = P U$ (where $P$ is symmetric positive semi-definite and $U$ is orthogonal/unitary). It implies that *any* exact generative model learns the unique optimal transport $\nabla \psi$, composed with some arbitrary internal "shuffling" of the noise $M$ {% cite vesseronNeuralImplementationBreniers2025 %}.
+
+## Constrained vs. Unconstrained Transport
+
+Autoregression constrains the transport map to a specific family (Knothe-Rosenblatt); continuous flows and diffusion do not (approximating Brenier). This single architectural choice introduces a fundamental dichotomy across tractability, optimality, and inference:
+
+> [!summary] Autoregression vs. Diffusion
+>
+> | Feature | Autoregression (Knothe-Rosenblatt) | Flow / Diffusion (Brenier) |
+> | :--- | :--- | :--- |
+> | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | $T(x) = \nabla \psi(x)$, $\psi$ is convex |
+> | **Tractability** | Exact sequential 1D inversions | Learned via velocity regression |
+> | **Structural bias**| Arbitrary coordinate ordering | None (isotropic) |
+> | **Training signal**| Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM / score matching |
+> | **Inference** | $D$ sequential steps | ODE integration (or one-step via Drifting) |
+
+Autoregression wins on tractability (reducing to closed-form 1D problems) and exact likelihoods, but introduces arbitrary structural bias and requires $D$ sequential steps for generation. Unconstrained transport wins on geometric optimality and isotropic generation, but loses the simple analytic procedure, requiring complex velocity regression to approximate $\nabla\psi$ in practice {% cite vesseronNeuralImplementationBreniers2025 %}.
+
+> [!todo] Visualization Placeholder: Triangular vs. Direct Transport
+> Use one 2D toy distribution and show two arrows:
+> 1. a triangular coordinate-wise transport,
+> 2. a direct unconstrained transport.
+> This figure should visually explain the phrase "structural bias."
+
 ## Vanilla (Causal Sequence) Autoregression
 
 Vanilla autoregression fixes an order and applies the same 1D inverse-CDF step sequentially.
@@ -375,35 +414,7 @@ Instead of autoregressing in the original coordinates, we can first change coord
 > then full detail.
 > This should pair naturally with the frequency-space example above.
 
-## Constrained vs. Unconstrained Transport
-
-Autoregression constrains the transport map to a specific family; flows and diffusion do not. This single architectural choice has deep consequences for tractability, optimality, and inference.
-
-In the table below, the left column is the triangular autoregressive map, while the right column is the Brenier map for squared Euclidean cost.
-
-> [!remark] Two Canonical Characterizations of Optimal Transport Maps
->
-> | Feature | Knothe-Rosenblatt (Autoregression) | Brenier (Unconstrained) |
-> | :--- | :--- | :--- |
-> | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | $T(x) = \nabla \psi(x)$, $\psi$ is convex |
-> | **Uniqueness** | Unique given coordinate ordering | Unique (no ordering needed) |
-> | **Constructive?** | Yes — sequential 1D CDF inversions | No — $\psi$ is intractable in high $D$ |
-> | **Structural bias**| Arbitrary coordinate ordering | None |
-> | **Objective** | Likelihood maximization | $W_2^2 \text{ Cost: } \mathbb{E}[ \|x - T(x)\|^2 ]$ |
-
-Here $\nabla \psi$ means the gradient of a convex potential function $\psi$, and
-$$ \mathbb{E}[ \|x - T(x)\|^2 ] $$
-is the expected squared transport distance.
-
-Autoregression wins on tractability: each $T_i$ reduces to a closed-form 1D problem. Brenier wins on geometric optimality but provides no algorithm to compute $\psi$ in practice.
-
-> [!todo] Visualization Placeholder: Triangular vs. Direct Transport
-> Use one 2D toy distribution and show two arrows:
-> 1. a triangular coordinate-wise transport,
-> 2. a direct unconstrained transport.
-> This figure should visually explain the phrase "structural bias."
-
-### The Velocity Paradigm: Continuous Flows
+## Unconstrained Transport: Continuous Flows
 
 We can parameterize a time-dependent velocity field and integrate {% cite laiPrinciplesDiffusionModels2025 %}:
 
@@ -473,17 +484,9 @@ This is efficiently approximated via the **Sinkhorn algorithm**. Uncrossed paths
 ## Conclusion
 
 > [!summary] 
-> Through the lens of Optimal Transport, autoregression and diffusion are two strategies for the same task—transporting $P_{\text{noise}}$ to $P_{\text{data}}$:
+> Through the lens of Optimal Transport, autoregression and diffusion are simply two computational strategies for the exact same geometric task: transporting $P_{\text{noise}}$ to $P_{\text{data}}$. 
 > 
-> | Feature | Autoregression | Flow / Diffusion |
-> | :--- | :--- | :--- |
-> | **Map family** | Lower-triangular (Knothe-Rosenblatt) | Unconstrained (approximating Brenier) |
-> | **Tractability** | Exact sequential 1D inversions | Learned via velocity regression |
-> | **Training signal** | Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM / score matching |
-> | **Inference** | $D$ sequential steps | ODE integration (or one-step via Drifting) |
-> | **Structural bias** | Coordinate ordering | None (isotropic) |
-> 
-> Neither paradigm is a physical law tied to a specific modality. Text uses autoregression and images use diffusion primarily because of inductive biases and computational convenience—not mathematical necessity.
+> Neither paradigm is a physical law tied to a specific modality. Text generation currently relies on autoregression and image generation uses diffusion primarily because of historical inductive biases and computational convenience—not mathematical necessity. As we develop better architectures and transport solvers, the lines between these generative families will continue to blur.
 
 ---
 
