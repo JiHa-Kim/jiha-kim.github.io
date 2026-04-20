@@ -267,8 +267,11 @@ In higher dimensions, we can apply the same quantile-matching step conditionally
 >
 > The key triangular property is: coordinate $i$ depends only on coordinates $1,\dots,i$.
 
-> [!remark] Non-Optimality (Greedy Coordinate-wise)
-
+> [!remark] Non-Optimality (Greedy Sequence)
+> The Knothe-Rosenblatt map guarantees $T_\sharp P_{\text{noise}} = P_{\text{data}}$, but it is **not** globally optimal for the standard squared Euclidean cost $W_2^2 = \mathbb{E}[\|x - y\|_2^2]$ in high dimensions.
+> 
+> By factorizing sequentially, it implicitly solves a **greedy** transport problem. It is canonical only because it represents the unique optimal limit for a heavily skewed quadratic cost that strictly prioritizes earlier coordinates:
+> $$ c(x, y) = \sum_{i=1}^D \lambda_i (x_i - y_i)^2, \qquad \lambda_1 \gg \lambda_2 \gg \dots \gg \lambda_D $$
 
 ## Vanilla (Causal Sequence) Autoregression
 
