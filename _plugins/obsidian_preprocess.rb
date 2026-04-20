@@ -293,8 +293,11 @@ module Jekyll
         
         next_line = content_lines[idx+1]
         if next_line && !in_code && !in_math && !line.strip.empty? && !next_line.strip.empty?
-          # Do not split table rows (lines starting with '|')
-          is_table_row = line.strip.start_with?('|') && next_line.strip.start_with?('|')
+          # Do not split table rows (lines containing '|' with structure)
+          # A line is a table row if it contains a pipe and neighbors also contain pipes
+          # OR if it's a separator line like |--|
+          is_table_row = (line.include?('|') && next_line.include?('|')) || 
+                         (next_line.strip =~ /^\|?[\s\-\:\|]+\|?$/)
           
           unless is_table_row
             # In these technical posts, treat every line break as a paragraph break
@@ -366,6 +369,9 @@ module Jekyll
       text = text.gsub(/(?<!\\)\|/, "\\vert ")
       text = text.gsub("*", "\\ast ")
       text = text.gsub("~", "\\sim ")
+      # Protect brackets from Markdown link detection
+      text = text.gsub("[", "\\lbrack ")
+      text = text.gsub("]", "\\rbrack ")
       text
     end
     def convert_algorithms(md)

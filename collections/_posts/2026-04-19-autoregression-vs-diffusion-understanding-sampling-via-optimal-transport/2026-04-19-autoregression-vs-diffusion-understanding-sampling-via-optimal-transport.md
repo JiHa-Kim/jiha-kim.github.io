@@ -29,8 +29,6 @@ llm-instructions: |
     \frac{d}{dx} e^x = e^x
     $$
   - Automated Replacements: You can use `*` for multiplication, `|` for absolute value, and `...` for ellipses; the pre-processor will automatically convert them to `\ast`, `\vert`, and `\dots`.
-  - Avoid literal `|` for pipes; use `\vert` or `\Vert` if you want to be explicit, but the pre-processor handles simple ones.
-
   ### Callouts (Preferred)
   Use Obsidian-style callouts. They are automatically converted to styled boxes or collapsible details.
   - Standard:
@@ -72,7 +70,7 @@ Autoregressive models and diffusion models are often presented as very different
 
 ## Background: Optimal Transport
 
-To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 %}
+To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 thorpeIntroductionOptimalTransport %}
 
 At its core, Optimal Transport provides a framework for measuring the distance between probability distributions. It asks: how do we transport a probability mass from a source distribution to a target distribution while minimizing a specified transportation cost? 
 
@@ -248,11 +246,11 @@ Autoregression constrains the transport map to a specific family; flows and diff
 >
 > | Feature | Knothe-Rosenblatt (Autoregression) | Brenier (Unconstrained) |
 > | :--- | :--- | :--- |
-> | **Map Form** | $T_i(x_i \mid x_{<i}) = F^{-1}_{Q_i \mid Q_{<i}}(F_{P_i \mid P_{<i}}(x_i))$ | $T(x) = \nabla \psi(x)$, $\psi$ is convex |
+> | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | $T(x) = \nabla \psi(x)$, $\psi$ is convex |
 > | **Uniqueness** | Unique given coordinate ordering | Unique (no ordering needed) |
 > | **Constructive?** | Yes — sequential 1D CDF inversions | No — $\psi$ is intractable in high $D$ |
 > | **Structural bias**| Arbitrary coordinate ordering | None |
-> | **Objective** | Likelihood maximization | $W_2^2 \text{ Cost: } \mathbb{E}[ \Vert x - T(x) \Vert^2 ]$ |
+> | **Objective** | Likelihood maximization | $W_2^2 \text{ Cost: } \mathbb{E}[ \|x - T(x)\|^2 ]$ |
 
 Autoregression wins on tractability: each $T_i$ reduces to a closed-form 1D problem. Brenier wins on geometric optimality but provides no algorithm to compute $\psi$ in practice.
 
@@ -306,7 +304,7 @@ This completes the cycle: **Map** (Brenier, intractable) → **Flow** (tractable
 > | :--- | :--- | :--- |
 > | **Map family** | Lower-triangular (Knothe-Rosenblatt) | Unconstrained (approximating Brenier) |
 > | **Tractability** | Exact sequential 1D inversions | Learned via velocity regression |
-> | **Training signal** | Exact likelihood: $\sum_i \log p(x_i \mid x_{<i})$ | CFM / score matching |
+> | **Training signal** | Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM / score matching |
 > | **Inference** | $D$ sequential steps | ODE integration (or one-step via Drifting) |
 > | **Structural bias** | Coordinate ordering | None (isotropic) |
 > 

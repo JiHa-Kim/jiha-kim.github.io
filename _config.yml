@@ -319,7 +319,6 @@ llm-instructions: &llm-instructions
       \frac{d}{dx} e^x = e^x
       $$
     - Automated Replacements: You can use `*` for multiplication, `|` for absolute value, and `...` for ellipses; the pre-processor will automatically convert them to `\ast`, `\vert`, and `\dots`.
-    - Avoid literal `|` for pipes; use `\vert` or `\Vert` if you want to be explicit, but the pre-processor handles simple ones.
 
     ### Callouts (Preferred)
     Use Obsidian-style callouts. They are automatically converted to styled boxes or collapsible details.
