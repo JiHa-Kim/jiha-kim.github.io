@@ -1,0 +1,524 @@
+<div class="otu" id="maxEntropyFigure">
+  <div class="otu__intro">
+    <div class="otu__eyebrow">Interactive 1D Example</div>
+    <h4>Iterative Entropy Maximization</h4>
+    <p>
+      Geometrically, simulating a diffusion process (heat flow) is equivalent to taking <strong>gradient ascent steps</strong> to maximize differential entropy. 
+      <br><br>
+      Press play or scrub the slider to run the optimization algorithm on an arbitrary starting distribution. Notice how the distribution iteratively smooths out—strictly increasing its entropy \( H \)—until it perfectly converges to the most unbiased theoretical state (Uniform or Gaussian) dictated by its constraints.
+    </p>
+  </div>
+
+  <div class="otu__stage-card">
+    <div class="me__header">
+      <div class="me__segmented-control">
+        <button class="me__seg-btn active" data-constraint="bounded">Bounded Support \([-2, 2]\)</button>
+        <button class="me__seg-btn" data-constraint="variance">Bounded Variance \(\sigma^2=1\)</button>
+      </div>
+    </div>
+    
+    <div class="otu__stage" id="meStage" style="height: 320px; position: relative; padding: 15px 15px 15px 15px;">
+      <canvas id="meChart"></canvas>
+      <div class="me__badge" id="meBadgeH">
+        Entropy \( H \) &approx; <span id="meValH">0.000</span> nats
+      </div>
+    </div>
+
+    <div class="me__footer">
+      <button class="me__play-btn" id="mePlay">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <input type="range" class="me__slider" id="meSlider" min="0" max="100" step="1" value="0">
+      <div class="me__time-val" id="meValue">Iter: 0</div>
+    </div>
+  </div>
+</div>
+
+<style>
+.otu {
+  margin: 1.35rem 0 2rem 0;
+  padding: 1rem;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.16));
+  border-radius: 14px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+}
+.otu__eyebrow {
+  margin-bottom: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+.otu__intro h4 {
+  margin: 0;
+  font-size: 1.04rem;
+}
+.otu__intro p {
+  margin: 0.45rem 0 0 0;
+  line-height: 1.66;
+  color: var(--text-muted-color, var(--text-color, inherit));
+}
+.otu__stage-card {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
+  border-radius: 12px;
+  background: var(--main-bg, rgba(255, 255, 255, 0.76));
+}
+.otu__stage {
+  background: var(--main-bg, #fff);
+  border-radius: 8px;
+  border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+[data-mode="dark"] .otu__stage {
+  background: var(--main-bg, #1b1b1e);
+}
+
+.me__header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.me__segmented-control {
+  display: flex;
+  background: rgba(120, 120, 120, 0.1);
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+}
+.me__seg-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted-color, #6b7280);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.me__seg-btn:hover {
+  color: var(--text-color, #111827);
+}
+.me__seg-btn.active {
+  background: var(--main-bg, #fff);
+  color: var(--text-color, #111827);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+[data-mode="dark"] .me__seg-btn.active {
+  background: var(--card-bg, #374151);
+  color: #f3f4f6;
+}
+
+.me__badge {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  z-index: 10;
+  padding: 6px 12px;
+  background: var(--main-bg, #fff);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  white-space: nowrap;
+  border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
+  color: var(--text-color, #111827);
+  pointer-events: none;
+}
+#meValH {
+  font-family: var(--font-family-monospace, monospace);
+  color: var(--prompt-success-icon, #10b981);
+}
+
+.me__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px 0 4px;
+}
+.me__play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.2));
+  background: var(--main-bg, #fff);
+  color: var(--text-color, #111827);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.me__play-btn:hover {
+  background: rgba(120, 120, 120, 0.1);
+}
+.me__play-btn:active {
+  transform: scale(0.95);
+}
+[data-mode="dark"] .me__play-btn {
+  background: #374151;
+  color: #f3f4f6;
+}
+.me__slider {
+  flex-grow: 1;
+  cursor: pointer;
+}
+.me__time-val {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.85rem;
+  width: 65px;
+  text-align: right;
+  color: var(--text-muted-color, #6b7280);
+}
+.otu .mjx-container {
+  margin: 0 !important;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const root = document.getElementById('maxEntropyFigure');
+  if (!root || root.dataset.initialized === 'true') return;
+  root.dataset.initialized = 'true';
+
+  const canvas = root.querySelector('#meChart');
+  const ctx = canvas.getContext('2d');
+  const slider = root.querySelector('#meSlider');
+  const valH = root.querySelector('#meValH');
+  const timeVal = root.querySelector('#meValue');
+  const playBtn = root.querySelector('#mePlay');
+  const segBtns = root.querySelectorAll('.me__seg-btn');
+
+  let constraint = 'bounded'; // 'bounded' or 'variance'
+  let currentFrame = 0;
+  let isPlaying = false;
+  let animationFrameId = null;
+  
+  let historyP = [];
+  let xValues = [];
+  let dx = 0;
+  let maxY = 1.0;
+
+  function computeHistory() {
+    historyP = [];
+    xValues = [];
+    
+    let xMin, xMax, nPoints;
+    let peaks;
+    if (constraint === 'bounded') {
+      xMin = -2; xMax = 2; nPoints = 200;
+      peaks = [ {m: -1.2, s: 0.15, w: 1}, {m: 0.3, s: 0.08, w: 0.8}, {m: 1.3, s: 0.2, w: 1.5} ];
+    } else {
+      xMin = -5; xMax = 5; nPoints = 400;
+      peaks = [ {m: -2.0, s: 0.3, w: 1}, {m: 0.5, s: 0.2, w: 1.2}, {m: 2.5, s: 0.4, w: 0.8} ];
+    }
+    dx = (xMax - xMin) / nPoints;
+    
+    for(let i=0; i<=nPoints; i++) xValues.push(xMin + i * dx);
+    
+    let currentP = new Array(nPoints+1).fill(0);
+    let sum = 0;
+    for(let i=0; i<=nPoints; i++) {
+      let x = xValues[i];
+      let val = 0;
+      for(let pk of peaks) {
+        val += pk.w * Math.exp(-0.5 * Math.pow((x - pk.m)/pk.s, 2));
+      }
+      currentP[i] = val;
+      sum += val * dx;
+    }
+    for(let i=0; i<=nPoints; i++) currentP[i] /= sum;
+    
+    if (constraint === 'variance') {
+      let v = 0;
+      for(let i=0; i<=nPoints; i++) v += currentP[i] * xValues[i] * xValues[i] * dx;
+      let scale = Math.sqrt(v);
+      let p_scaled = new Array(nPoints+1).fill(0);
+      for(let i=0; i<=nPoints; i++) {
+        let srcX = xValues[i] * scale;
+        let idx = (srcX - xMin) / dx;
+        if (idx >= 0 && idx <= nPoints) {
+           let idx0 = Math.floor(idx);
+           if (idx0 === nPoints) p_scaled[i] = scale * currentP[nPoints];
+           else {
+             let frac = idx - idx0;
+             p_scaled[i] = scale * (currentP[idx0] * (1 - frac) + currentP[idx0+1] * frac);
+           }
+        }
+      }
+      currentP = p_scaled;
+      sum = 0;
+      for(let i=0; i<=nPoints; i++) sum += currentP[i] * dx;
+      for(let i=0; i<=nPoints; i++) currentP[i] /= sum;
+    }
+    
+    historyP.push([...currentP]);
+    maxY = Math.max(...currentP) * 1.1;
+    
+    for(let frame=1; frame<=100; frame++) {
+      let nextP = [...currentP];
+      let subSteps = constraint === 'bounded' ? 20 : 30;
+      for(let sub=0; sub<subSteps; sub++) {
+        let temp = new Array(nPoints+1).fill(0);
+        for(let i=0; i<=nPoints; i++) {
+           let left = i > 0 ? nextP[i-1] : nextP[0];
+           let right = i < nPoints ? nextP[i+1] : nextP[nPoints];
+           temp[i] = 0.3*left + 0.4*nextP[i] + 0.3*right;
+        }
+        nextP = temp;
+      }
+      
+      sum = 0;
+      for(let i=0; i<=nPoints; i++) sum += nextP[i] * dx;
+      for(let i=0; i<=nPoints; i++) nextP[i] /= sum;
+      
+      if (constraint === 'variance') {
+         let v = 0;
+         for(let i=0; i<=nPoints; i++) {
+           v += nextP[i] * xValues[i] * xValues[i] * dx;
+         }
+         let scale = Math.sqrt(v); 
+         let p_scaled = new Array(nPoints+1).fill(0);
+         for(let i=0; i<=nPoints; i++) {
+           let srcX = xValues[i] * scale;
+           let idx = (srcX - xMin) / dx;
+           if (idx >= 0 && idx <= nPoints) {
+             let idx0 = Math.floor(idx);
+             if (idx0 === nPoints) p_scaled[i] = scale * nextP[nPoints];
+             else {
+               let frac = idx - idx0;
+               p_scaled[i] = scale * (nextP[idx0] * (1 - frac) + nextP[idx0+1] * frac);
+             }
+           }
+         }
+         nextP = p_scaled;
+         sum = 0;
+         for(let i=0; i<=nPoints; i++) sum += nextP[i] * dx;
+         for(let i=0; i<=nPoints; i++) nextP[i] /= sum;
+      }
+      currentP = nextP;
+      historyP.push([...currentP]);
+    }
+    
+    // Force target at end for perfect visual convergence
+    let targetP = new Array(nPoints+1).fill(0);
+    for(let i=0; i<=nPoints; i++) {
+      if (constraint === 'bounded') targetP[i] = 1.0 / 4.0;
+      else targetP[i] = Math.exp(-0.5 * xValues[i] * xValues[i]) / Math.sqrt(2 * Math.PI);
+    }
+    
+    // Lerp last 25 frames
+    for(let frame=75; frame<=100; frame++) {
+      let t = (frame - 75) / 25.0;
+      let p = historyP[frame];
+      for(let i=0; i<=nPoints; i++) {
+         p[i] = (1 - t) * p[i] + t * targetP[i];
+      }
+    }
+  }
+
+  function calcEntropy(p) {
+    let h = 0;
+    for(let i=0; i<p.length; i++) {
+      if(p[i] > 1e-9) h += -p[i] * Math.log(p[i]) * dx;
+    }
+    return h;
+  }
+
+  function getPdfData(frame) {
+    const p = historyP[frame];
+    let data = [];
+    for(let i=0; i<p.length; i++) {
+      data.push({x: xValues[i], y: p[i]});
+    }
+    return { data: data, entropy: calcEntropy(p) };
+  }
+
+  const getThemeColors = () => {
+    const style = getComputedStyle(document.documentElement);
+    const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
+    return {
+      text: style.getPropertyValue('--text-color').trim() || (isDark ? '#e5e7eb' : '#374151'),
+      grid: style.getPropertyValue('--card-border').trim() || (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'),
+      ticks: style.getPropertyValue('--text-muted-color').trim() || (isDark ? '#9ca3af' : '#6b7280'),
+      line: style.getPropertyValue('--prompt-success-icon').trim() || '#10b981',
+      fill: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.2)'
+    };
+  };
+
+  let theme = getThemeColors();
+  
+  computeHistory();
+  let initialData = getPdfData(0);
+
+  let chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'PDF',
+          data: initialData.data,
+          borderColor: theme.line,
+          backgroundColor: theme.fill,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          min: -4,
+          max: 4,
+          grid: { color: theme.grid },
+          ticks: { color: theme.ticks, font: { size: 12 } }
+        },
+        y: {
+          type: 'linear',
+          min: 0,
+          max: Math.max(maxY, 0.6),
+          grid: { color: theme.grid },
+          ticks: { color: theme.ticks, font: { size: 12 } }
+        }
+      }
+    }
+  });
+
+  valH.innerText = initialData.entropy.toFixed(3);
+
+  function updateChart() {
+    const { data, entropy } = getPdfData(currentFrame);
+    chart.data.datasets[0].data = data;
+    
+    if (constraint === 'bounded') {
+      chart.options.scales.x.min = -2.5;
+      chart.options.scales.x.max = 2.5;
+    } else {
+      chart.options.scales.x.min = -4;
+      chart.options.scales.x.max = 4;
+    }
+    chart.options.scales.y.max = Math.max(maxY, 0.6);
+    
+    chart.update('none');
+    valH.innerText = entropy.toFixed(3);
+    timeVal.innerText = `Iter: ${currentFrame}`;
+  }
+
+  slider.addEventListener('input', (e) => {
+    isPlaying = false;
+    updatePlayButton();
+    currentFrame = parseInt(e.target.value);
+    updateChart();
+  });
+
+  segBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      segBtns.forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      constraint = e.target.dataset.constraint;
+      currentFrame = 0;
+      slider.value = 0;
+      isPlaying = false;
+      updatePlayButton();
+      computeHistory();
+      updateChart();
+    });
+  });
+
+  function updatePlayButton() {
+    if (isPlaying) {
+      playBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    } else {
+      playBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+    }
+  }
+
+  let lastTime = 0;
+  let direction = 1;
+
+  function animate(timestamp) {
+    if (!isPlaying) return;
+    
+    if (!lastTime) lastTime = timestamp;
+    const dt = timestamp - lastTime;
+    
+    if (dt > 30) { // roughly 30fps updates
+      lastTime = timestamp;
+      let newFrame = currentFrame + direction;
+      
+      if (newFrame >= 100 && direction === 1) {
+        newFrame = 100;
+        direction = -1;
+        isPlaying = false;
+        updatePlayButton();
+      } else if (newFrame <= 0 && direction === -1) {
+        newFrame = 0;
+        direction = 1;
+        isPlaying = false;
+        updatePlayButton();
+      }
+      
+      currentFrame = newFrame;
+      slider.value = currentFrame;
+      updateChart();
+    }
+    
+    if (isPlaying) {
+      animationFrameId = requestAnimationFrame(animate);
+    }
+  }
+
+  playBtn.addEventListener('click', () => {
+    isPlaying = !isPlaying;
+    updatePlayButton();
+    if (isPlaying) {
+      if (currentFrame >= 100) direction = -1;
+      else if (currentFrame <= 0) direction = 1;
+      lastTime = 0;
+      animationFrameId = requestAnimationFrame(animate);
+    } else {
+      cancelAnimationFrame(animationFrameId);
+    }
+  });
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.attributeName === "data-mode") {
+        theme = getThemeColors();
+        chart.data.datasets[0].borderColor = theme.line;
+        chart.data.datasets[0].backgroundColor = theme.fill;
+        chart.options.scales.x.grid.color = theme.grid;
+        chart.options.scales.x.ticks.color = theme.ticks;
+        chart.options.scales.y.grid.color = theme.grid;
+        chart.options.scales.y.ticks.color = theme.ticks;
+        chart.update('none');
+      }
+    });
+  });
+  observer.observe(document.documentElement, { attributes: true });
+
+  function requestMathTypeset(attempt = 0) {
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([root]).catch(() => {});
+      return;
+    }
+    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
+  }
+  requestMathTypeset();
+});
+</script>
