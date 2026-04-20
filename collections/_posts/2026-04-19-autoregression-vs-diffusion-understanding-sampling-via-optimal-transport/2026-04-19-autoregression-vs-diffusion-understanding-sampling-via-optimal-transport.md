@@ -92,7 +92,6 @@ At its core, Optimal Transport provides a framework for measuring the distance b
 > [!problem] The Monge Problem
 > Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost on source-target pairs. The Monge problem seeks a transport map $T$ minimizing
 > $$ \min_T \underset{z \,\sim\, P_{\text{noise}}}{\mathbb{E}}[c(z, T(z))] \quad \text{s.t.} \quad T_\sharp P_{\text{noise}} = P_{\text{data}}. $$
-> In this post, OT is used mainly as a conceptual lens for distribution matching. The ground cost $c$ specifies which admissible transport is preferred, and should not be confused with the model's training or generalization loss. The cost $c$ is easiest to interpret when source and target live in a common ambient space, but the key idea is the pushforward relation.
 
 > [!remark] Geometric Efficiency is Inference Efficiency
 > While the transport cost $c$ is distinct from the training objective, they are intimately connected in practice. In traditional physics or economics, we minimize OT cost to save physical energy or fuel. In generative AI, we favor optimal geometric paths (like the straight lines in Rectified Flows) because simpler, uncrossed trajectories are significantly easier for a neural network to approximate. Consequently, this minimal-energy geometry directly yields computational efficiency at inference time, allowing discretised solvers to take much larger, faster steps without compounding errors.
@@ -147,26 +146,41 @@ We can reinterpret this as a 1D optimal transport problem. To gain intuition, le
 
 In one dimension, transport is easy because cumulative mass can be matched by quantiles. In higher dimensions, autoregression recovers this simplicity by ordering coordinates and transporting one conditional distribution at a time. This produces a triangular transport known, in the continuous case, as the **Knothe-Rosenblatt rearrangement**.
 
+> [!note] Parameterizing Density vs. Cumulative Maps
+> While optimal transport classically frames mappings through cumulative distributions (like the CDF inverse $F^{-1}$), directly regressing these cumulative functional bounds is computationally restrictive. Because a Probability Mass Function (or continuous density) holds mathematically equivalent information to its CDF, practical generative architectures sidestep modeling CDFs entirely. Both modern Autoregression (which predicts discrete token masses via logits) and Diffusion (which predicts continuous score densities via denoising) equivalently parameterize the much easier mass/density representations. The cumulative transport map step is instead functionally recovered dynamically during the inference sampling execution.
+
 ### The Choice of Base Distribution
 
-Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? While they do possess strong theoretical properties like maximizing differential entropy, practitioners favor them primarily for practical reasons: they are trivially easy to sample from, isotropic, stable under perturbation, and highly compatible with the noising processes used in generative models.
+Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? While practitioners favor them heavily for practical reasons—they are trivially easy to sample from, completely isotropic, stable under perturbation, and highly compatible with stochastic noising processes—they also possess rigorous theoretical elegance by natively maximizing differential entropy. This yields the most unbiased statistical start given underlying space constraints.
 
-## Defining Autoregression
+> [!proposition] Uniform Maximum Entropy
+> For a strictly bounded interval $[a, b]$, the maximum entropy distribution is the Uniform distribution $\mathcal{U}[a, b]$.
 
-Instead of solving the intractable global map $T: \mathbb{R}^D \to \mathbb{R}^D$ directly, autoregression factorizes the high-dimensional space into sequential 1D predictions.
+> [!proof]-
+> We maximize entropy $\mathbb{E}[-\ln p(x)]$ subject to $\int_a^b p(x) dx = 1$. 
+> Setting the functional derivative of the Lagrangian to zero gives:
+> $$ \frac{\delta}{\delta p} \left( -\int_a^b p(x)\ln p(x)dx + \lambda_0 \left(\int_a^b p(x) dx - 1\right) \right) = 0 $$
+> $$ -\ln p(x) - 1 + \lambda_0 = 0 \implies p(x) = e^{\lambda_0 - 1} $$
+> Since $p(x)$ is constant, it must precisely be $\frac{1}{b-a}$ to integrate to 1.
+
+> [!proposition] Gaussian Maximum Entropy
+> For an unbounded domain space like $\mathbb{R}$, a uniform probability distribution cannot exist (it would require infinite mass), and the maximum possible differential entropy is unbounded ($+\infty$). To get a meaningful maximum entropy base, we constrain the variance $\mathbb{E}[(X - \mathbb{E}[X])^2] \le \sigma^2$. This geometrically yields the Gaussian distribution. {% cite NormalDistribution2026 %}
+
+> [!proof]-
+> We maximize $\mathbb{E}[-\ln p(x)]$ subject to $\int p(x) dx = 1$ and bounded variance $\int x^2 p(x) dx = \sigma^2$ (assuming zero mean). The Lagrangian functional derivative yields:
+> $$ -\ln p(x) - 1 + \lambda_0 + \lambda_1 x^2 = 0 \implies p(x) = e^{\lambda_0 - 1 + \lambda_1 x^2} $$
+> For this to be a valid integrable probability density, we require $\lambda_1 < 0$. Setting $\lambda_1 = -c$ directly recovers the canonical Gaussian form $p(x) \propto e^{-cx^2}$.
+
+## Vanilla (Causal Sequence) Autoregression
+
+Instead of solving the intractable global map $T: \mathbb{R}^D \to \mathbb{R}^D$ directly, vanilla autoregression factorizes the high-dimensional space into sequential 1D predictions across a fixed causal ordering.
 
 > [!definition] Factorization & Chain Rule
-> By the chain rule of probability, the joint density $P_{\text{data}}(\mathbf{x})$ factorizes as:
-> $$ P_{\text{data}}(\mathbf{x}) = \prod_{i=1}^D P(x_{\sigma(i)} \vert x_{\sigma(<i)}) $$
-> over an arbitrary permutation $\sigma$ of the dimensions.
-
-> [!note] Causality is Arbitrary
-> While practically applied to temporal or spatial orderings (like top-to-bottom raster scans), the mathematics hold exactly for *any* arbitrary permutation $\sigma$.
-
-## Autoregression as Iterative 1D Transport
+> By the chain rule of probability, the joint density $P_{\text{data}}(\mathbf{x})$ factorizes temporally or spatially (e.g., top-to-bottom raster scan):
+> $$ P_{\text{data}}(\mathbf{x}) = \prod_{i=1}^D P(x_i \vert x_{<i}) $$
 
 > [!theorem] Autoregression as Triangular Transport
-> For continuous variables, autoregressive sampling can be written as a triangular transport. If
+> For continuous variables, this causal autoregressive sampling can be written as a triangular transport. If
 > $$ u_i \sim \mathcal{U}(0,1), $$
 > then each coordinate may be generated conditionally by querying its inverse CDF:
 > $$ x_i = F^{-1}_{X_i \vert X_{<i}=x_{<i}}(u_i). $$
@@ -188,12 +202,33 @@ Large Language Models (LLMs) provide the most prominent real-world application o
 > [!example] Categorical Inverse Transform Sampling
 > At each step $i$, the LLM outputs a discrete categorical probability distribution over the vocabulary:
 > $$ P(x_i = v_k \vert x_{<i}) = p_k $$
-> By defining an arbitrary strict ordering over the tokens (for example, $v_k = k$ for $k \in \{1, \dots, |\mathcal{V}|\}$), we can construct a discrete step-wise Cumulative Distribution Function (CDF):
+> By defining an arbitrary strict ordering over the tokens (for example, $v_k = k$ for $k \in \{1, \dots, \vert\mathcal{V}\vert\}$), we can construct a discrete step-wise Cumulative Distribution Function (CDF):
 > $$ F(v_k) = \sum_{j=1}^k p_j $$
 > The standard categorical sampling algorithm directly draws a uniform scalar random variable $u \sim \mathcal{U}(0, 1)$ and queries the inverse CDF:
 > $$ x_i = \min \{ v_k \in \mathcal{V} \vert F(v_k) \ge u \} $$
 
-This demonstrates a beautiful analogy: training an LLM as a next-token classifier essentially estimates the discrete conditional 1D CDF. While discrete token autoregression is not literally a continuous Jacobian-based flow, through the lens of optimal transport, we can conceptually view text generation as an analogous sequential cascade of 1D inverse transform sampling steps.
+This demonstrates a beautiful analogy: while discrete token autoregression is not literally a continuous Jacobian-based flow, through the lens of optimal transport, we can conceptually view text generation as an analogous sequential cascade of 1D inverse transform sampling steps.
+
+## Reparameterized Autoregression via Change of Variables
+
+While causal sequences like text tokens or raster-scans are the default, the rigorous optimal transport perspective exposes that the required sequence factorization is entirely agnostic to the physical data ordering. We can reparameterize autoregression under generalized change-of-variables over transformations of the original space.
+
+### Sequence Order by Permutation
+
+> [!note] Causality is Arbitrary
+> The factorization math holds exactly for *any* arbitrary permutation $\sigma$ of the dimensions:
+> $$ P_{\text{data}}(\mathbf{x}) = \prod_{i=1}^D P(x_{\sigma(i)} \vert x_{\sigma(<i)}) $$
+> Because a permutation is just a reordering matrix $M_{\sigma}$, the determinant of the transformation is precisely $\pm 1$. Thus, the total volume is perfectly preserved ($\vert \det M_{\sigma} \vert = 1$), keeping the mathematically pristine likelihood objective fully intact without any complex scaling factors.
+
+### Frequency Autoregression
+
+Rather than predicting physical pixels $x_i$, recent work introduces autoregression over the spectral domain! Here, the model generates sequences of frequency coefficients from low-frequency structural components up to high-frequency details. This directly integrates continuous tokens with autoregressive learning by modifying the regression direction {% cite yuFrequencyAutoregressiveImage2026 %}. 
+
+> [!example] Spectral Dependency
+> By changing the basis via a continuous transform (like Wavelet or Fourier), the factorization strictly follows the frequency spectrum. This is a linear continuous transform, so unlike permutations, the determinant of the transformation matrix is not simply $1$, altering the strict density scale. However, under the generalized change-of-variables theorem, we can successfully parameterize this spectral layout. This perfectly captures image data's spatial locality natively without the massive modality gap of standard 1D raster-scanning!
+
+> [!info] Side Note: "Diffusion is Spectral Autoregression"
+> Interestingly, this explicit spectral progression mirrors an inherent inductive bias frequently observed in diffusion models. Initial evaluations revealed that diffusion ODEs naturally synthesize low-frequency features before high-frequency details {% cite DiffusionSpectralAutoregression2024 %}. While deeper theoretical analysis proved this is merely an inductive bias rather than a strict mathematical necessity {% cite falck2025spectralauto %}, it remains a beautiful theoretical parallel demonstrating how both explicitly reparameterized autoregression and continuous diffusion flows naturally converge on spectral hierarchies to efficiently master spatial generation.
 
 ## Diffusion: Continuous Global Mapping
 
@@ -220,14 +255,6 @@ To rigorously understand diffusion's geometry, we mathematically distinguish Map
 
 > [!example] Visualizing the Vector Field
 > *Placeholder: Insert Visualization showing a continuous 2D vector field guiding Gaussian noise into a multimodal target cluster.*
-
-### Finding Common Ground: An Inductive Bias?
-
-> [!proposition] "Diffusion is Spectral Autoregression"
-> Initial spectral evaluations revealed that diffusion ODEs frequently track a coarse-to-fine sequence—synthesizing low-frequency features far sooner than high-frequency details. {% cite DiffusionSpectralAutoregression2024 %} This led to the hypothesis that diffusion implicitly performs functional "spectral autoregression."
-
-> [!theorem] Inductive Bias vs Necessity
-> Deeper theoretical analysis proves this spectral hierarchy is merely an *inductive bias* of standard configurations, not a mathematical necessity. {% cite falck2025spectralauto %} "Hierarchy-free" diffusion models, built without forcing frequency orderings, perform equivalently well. Thus, while diffusion can organically reproduce autoregressive patterns, it structurally retains unbroken global mapping flexibility that strict iterative autoregression mathematically lacks.
 
 ## Conclusion
 
