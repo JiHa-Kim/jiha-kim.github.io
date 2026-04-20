@@ -106,14 +106,12 @@ Optimal transport is the continuous, high-dimensional version of this same mass-
 > This simply means: if $Z \sim P_{\text{noise}}$, then $T(Z)$ should follow the data distribution.
 
 > [!definition] Pushforward Measure ($T_\sharp$)
-> The sharp notation ($\sharp$) denotes the **pushforward** of a probability measure. The function $T: \mathcal{Z} \to \mathcal{X}$ "pushes" points from the starting domain into the target domain.
->
-> Mass landing in a target region $A \subset \mathcal{X}$ is exactly the mass that started in its pre-image $T^{-1}(A)$:
+> The sharp notation ($\sharp$) denotes the **pushforward** of a probability measure. The function $T: \mathcal{Z} \to \mathcal{X}$ "pushes" mass from the source to the target domain:
 > $$ P_{\text{data}}(A) = P_{\text{noise}}(T^{-1}(A)) $$
 > 
-> In machine learning applications, we often work directly with probability density functions. If $T$ is a differentiable and invertible, applying the change of variables $x = T(z)$ gives the **pushforward density**:
+> For probability density functions, assuming $T$ is a differentiable bijection, the change of variables formula yields the **pushforward density**:
 > $$ p_{\text{data}}(x) = p_{\text{noise}}(T^{-1}(x)) \left| \det J_{T^{-1}}(x) \right| $$
-> Equivalently, in the forward direction:
+> Or equivalently:
 > $$ p_{\text{data}}(T(z)) = p_{\text{noise}}(z) \left| \det J_T(z) \right|^{-1} $$
 
 > [!proof]- Pushforward Derivation
@@ -219,11 +217,10 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 > In words: if $X$ has source CDF $F$, then $T(X)$ should have target CDF $G$.
 
 > [!solution] Quantile Matching
-> For these 1D convex costs, the optimal map is
-> $$ T(x) = G^{-1}(F(x)). $$
-> Read it in two steps:
-> $$ u = F(x), \qquad T(x) = G^{-1}(u). $$
-> First, compute the quantile $u$ of $x$ in the source distribution. By the probability integral transform, this $u$ is uniformly distributed on $[0, 1]$, effectively **pulling back** the source distribution to a simple uniform base. Then, we **push forward** this uniform noise to the target distribution using the inverse CDF $G^{-1}(u)$.
+> For 1D convex costs, the optimal map factorizes through a uniform base $u \sim \mathcal{U}(0,1)$:
+> $$ u = F(x), \qquad T(x) = G^{-1}(u) $$
+> 1. **Pullback**: Compute $u = F(x)$. By the probability integral transform, this extracts pure uniform noise.
+> 2. **Pushforward**: Sample $T(x) = G^{-1}(u)$. This exactly recovers inverse transform sampling.
 
 > [!proof]-
 > First check that the map has the right output distribution. If $X \sim F$ and $U = F(X)$, then $U \sim \mathcal{U}(0,1)$. Define $Y = G^{-1}(U) = G^{-1}(F(X))$. Then for any $t$,
