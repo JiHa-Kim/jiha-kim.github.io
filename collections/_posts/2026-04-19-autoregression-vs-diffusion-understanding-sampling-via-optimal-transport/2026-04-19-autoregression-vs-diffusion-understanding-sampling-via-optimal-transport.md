@@ -94,7 +94,7 @@ Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}
 
 ## Background: Optimal Transport
 
-To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 thorpeIntroductionOptimalTransport %}
+To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 %} {% cite thorpeIntroductionOptimalTransport %}
 
 {% include transport_widget.html %}
 
