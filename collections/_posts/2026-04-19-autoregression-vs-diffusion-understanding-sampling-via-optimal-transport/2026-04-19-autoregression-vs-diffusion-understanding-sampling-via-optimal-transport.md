@@ -324,38 +324,29 @@ Vanilla autoregression fixes an order and applies the same 1D inverse-CDF step s
 > Here $F^{-1}_{X_i \mid X_{<i}=x_{<i}}$ is the inverse CDF of the conditional distribution of the next coordinate after the previous coordinates have already been generated.
 > So each step is just 1D inverse transform sampling conditioned on the past.
 
-> [!proof]- Why Likelihood Is Tractable
-> The inverse map is
-> $$ u_i = F_{X_i \mid X_{<i}=x_{<i}}(x_i). $$
-> Hence $u_i$ depends only on $x_1,\dots,x_i$, so
-> $$ \frac{\partial u_i}{\partial x_j} = 0 \qquad (j > i). $$
-> Therefore the Jacobian is lower triangular and
-> $$ \left| \det \frac{\partial u}{\partial x} \right| = \prod_{i=1}^D \left| \frac{\partial u_i}{\partial x_i} \right|. $$
-> But
-> $$ \frac{\partial u_i}{\partial x_i} = p(x_i \mid x_{<i}), $$
-> so with uniform base density $p_U(u) = 1$ we recover
-> $$ p(x) = \prod_{i=1}^D p(x_i \mid x_{<i}). $$
-
-> [!todo] Visualization Placeholder: Triangular Jacobian
-> Draw a small $4 \times 4$ lower-triangular matrix.
-> Grey out the entries above the diagonal and highlight the diagonal entries.
-> Add a short caption: determinant = product of the diagonal terms.
-
 ### Example: LLMs as Classification
 
 > [!example] Next-Token Prediction
-> Let the vocabulary be ordered as $v_1,\dots,v_{\vert \mathcal{V} \vert}$. At step $i$, the model outputs
+> Let's look at a concrete example using a tiny 3-word vocabulary: $\mathcal{V} = \{\text{"apple"}, \text{"banana"}, \text{"cherry"}\}$.
+> 
+> At step $i$, the model outputs a probability distribution over the vocabulary:
 > $$ p_k = P(x_i = v_k \mid x_{<i}), \qquad \sum_k p_k = 1. $$
-> For example, if the probabilities are $(p_1, p_2, p_3) = (0.6, 0.3, 0.1)$, then the CDF is $(0.6, 0.9, 1.0)$. So if $u = 0.65$, we pick token $v_2$.
->
-> Training is multiclass classification with negative log-likelihood
+> 
+> Suppose the model predicts the following probabilities for the next word:
+> $$P(\text{"apple"}) = 0.6, \quad P(\text{"banana"}) = 0.3, \quad P(\text{"cherry"}) = 0.1$$
+> 
+> To sample the next token, we construct the discrete CDF by accumulating these probabilities:
+> $$F(\text{"apple"}) = 0.6, \quad F(\text{"banana"}) = 0.6 + 0.3 = 0.9, \quad F(\text{"cherry"}) = 0.9 + 0.1 = 1.0$$
+> 
+> Now, we draw our uniform noise $u \sim \mathcal{U}(0,1)$. Let's say we draw $u = 0.75$.
+> 
+> We apply the inverse-CDF rule: $x_i = \min \{ v_k \in \mathcal{V} \mid F(v_k) \ge u \}$.
+> Since $0.6 < 0.75 \le 0.9$, the generated token is **"banana"**.
+> 
+> Training an LLM with standard cross-entropy loss (negative log-likelihood) is exactly equivalent to learning this sequence of 1D conditional transport maps:
 > $$ \mathcal{L}_{\text{NLL}} = -\sum_{i=1}^D \log P(x_i^{\text{true}} \mid x_{<i}). $$
-> Sampling uses the discrete CDF $F(v_k) = \sum_{j=1}^k p_j$ and the inverse-CDF rule 
-> $$ x_i = \min \{ v_k \in \mathcal{V} \mid F(v_k) \ge u \}, \qquad u \sim \mathcal{U}(0,1). $$
 
-> [!todo] Visualization Placeholder: Logits to Token Sample
-> Show a short horizontal bar chart for token probabilities, then the cumulative bars, then a vertical line at a sampled $u$.
-> The goal is to visually connect "classification output" to "sampling by inverse CDF."
+{% include llm_sampling_widget.html %}
 
 ## Generalizing Autoregression via Change of Variables
 
