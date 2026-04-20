@@ -1,0 +1,511 @@
+<div class="t2dd" id="transport2dDiscreteFigure">
+  <div class="t2dd__intro">
+    <div class="t2dd__copy">
+      <div class="t2dd__eyebrow">Discrete Empirical, Finite-Sample Comparison</div>
+      <h4>One Source Cloud, One Target Cloud, Two Couplings</h4>
+      <p>
+        This panel is the <strong>empirical finite-sample problem</strong>. We freeze one source sample and one target sample, drawn from the same underlying source/target laws as the continuous panel above, and compare two couplings on that exact cached 64-point instance.
+        Here the target is shown only through the sampled blue cloud, and the stage draws the full transported sample while thinning the pairing traces so the coupling structure stays readable.
+      </p>
+    </div>
+
+    <div class="t2dd__summary-card">
+      <div class="t2dd__panel-title">Empirical Discretization</div>
+      <div class="t2dd__summary-value">Only the coupling changes; the source and target samples stay frozen.</div>
+      <div class="t2dd__cost-row">
+        <span class="t2dd__cost-label">Sequential Baseline</span>
+        <strong class="t2dd__cost-value">237.89</strong>
+      </div>
+      <div class="t2dd__cost-row">
+        <span class="t2dd__cost-label">Discrete OT</span>
+        <strong class="t2dd__cost-value t2dd__cost-value--best">114.06</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="t2dd__stage-card">
+    <div class="t2dd__toolbar">
+      <div class="t2dd__segmented-control">
+        <button class="t2dd__seg-btn active" data-map="seq">Sequential Baseline</button>
+        <button class="t2dd__seg-btn" data-map="ot">Discrete OT Assignment</button>
+      </div>
+      <div class="t2dd__legend">Gray = sampled source cloud, blue = sampled target cloud, muted paths = sparse pairing preview, orange = the transported sampled cloud.</div>
+    </div>
+
+    <div class="t2dd__stage" id="t2ddStage">
+      <canvas id="t2ddCanvas"></canvas>
+    </div>
+
+    <div class="t2dd__footer">
+      <button class="t2dd__play-btn" id="t2ddPlay" aria-label="Play discrete transport animation">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <input type="range" class="t2dd__slider" id="t2ddSlider" min="0" max="1" step="0.005" value="0">
+      <div class="t2dd__time-val" id="t2ddValue">t = 0.00</div>
+    </div>
+  </div>
+</div>
+
+<style>
+.t2dd {
+  --t2dd-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
+  --t2dd-ui-bg: var(--main-bg, #fff);
+  --t2dd-ui-muted: var(--text-muted-color, var(--text-color, inherit));
+  --t2dd-ui-text: var(--text-color, inherit);
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--t2dd-ui-border);
+  border-radius: 18px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.05));
+}
+
+.t2dd__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(250px, 320px);
+  gap: 1rem;
+  align-items: start;
+}
+
+.t2dd__eyebrow {
+  margin-bottom: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t2dd-ui-muted);
+}
+
+.t2dd__copy h4 {
+  margin: 0 0 0.45rem 0;
+  font-size: 1.04rem;
+  color: var(--heading-color, var(--t2dd-ui-text));
+}
+
+.t2dd__copy p {
+  margin: 0.45rem 0 0 0;
+  font-size: 1rem;
+  line-height: 1.66;
+  color: var(--t2dd-ui-muted);
+}
+
+.t2dd__summary-card,
+.t2dd__stage-card {
+  border: 1px solid var(--t2dd-ui-border);
+  border-radius: 14px;
+  background: var(--t2dd-ui-bg);
+}
+
+.t2dd__summary-card {
+  padding: 0.95rem;
+}
+
+.t2dd__panel-title {
+  margin-bottom: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--t2dd-ui-muted);
+}
+
+.t2dd__summary-value {
+  font-size: 0.98rem;
+  line-height: 1.55;
+  font-weight: 700;
+  color: var(--t2dd-ui-text);
+}
+
+.t2dd__cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--t2dd-ui-border);
+}
+
+.t2dd__cost-label {
+  font-size: 0.94rem;
+  color: var(--t2dd-ui-text);
+}
+
+.t2dd__cost-value {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--t2dd-ui-text);
+}
+
+.t2dd__cost-value--best {
+  color: var(--prompt-tip-icon, #16a34a);
+}
+
+.t2dd__stage-card {
+  margin-top: 1rem;
+  padding: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.t2dd__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.t2dd__segmented-control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.28rem;
+  border-radius: 12px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.08));
+}
+
+.t2dd__seg-btn {
+  border: none;
+  background: transparent;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--t2dd-ui-muted);
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.t2dd__seg-btn:hover {
+  color: var(--t2dd-ui-text);
+}
+
+.t2dd__seg-btn.active {
+  background: var(--t2dd-ui-bg);
+  color: var(--t2dd-ui-text);
+}
+
+[data-mode="dark"] .t2dd__seg-btn.active {
+  background: var(--card-bg, #374151);
+  color: #f3f4f6;
+}
+
+.t2dd__legend {
+  max-width: 420px;
+  font-size: 0.93rem;
+  line-height: 1.55;
+  color: var(--t2dd-ui-muted);
+}
+
+.t2dd__stage {
+  position: relative;
+  height: 410px;
+  border: 1px solid var(--t2dd-ui-border);
+  border-radius: 14px;
+  background: var(--t2dd-ui-bg);
+  overflow: hidden;
+}
+
+.t2dd__stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.t2dd__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.t2dd__play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid var(--t2dd-ui-border);
+  background: var(--t2dd-ui-bg);
+  color: var(--t2dd-ui-text);
+  cursor: pointer;
+}
+
+.t2dd__play-btn:hover {
+  background: var(--card-bg, rgba(120, 120, 120, 0.08));
+}
+
+.t2dd__play-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--prompt-info-icon, #0ea5e9) 38%, transparent);
+  outline-offset: 2px;
+}
+
+.t2dd__slider {
+  flex: 1 1 auto;
+  min-width: 180px;
+  cursor: pointer;
+  accent-color: var(--prompt-warning-icon, #d97706);
+}
+
+.t2dd__time-val {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--t2dd-ui-muted);
+  min-width: 68px;
+  text-align: right;
+}
+
+@media (max-width: 980px) {
+  .t2dd__intro {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .t2dd {
+    padding: 1rem;
+  }
+
+  .t2dd__stage {
+    height: 380px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const root = document.getElementById('transport2dDiscreteFigure');
+  if (!root || root.dataset.initialized === 'true') return;
+  root.dataset.initialized = 'true';
+
+  const canvas = root.querySelector('#t2ddCanvas');
+  const ctx = canvas.getContext('2d');
+  const stage = root.querySelector('#t2ddStage');
+  const slider = root.querySelector('#t2ddSlider');
+  const playBtn = root.querySelector('#t2ddPlay');
+  const timeVal = root.querySelector('#t2ddValue');
+  const segBtns = root.querySelectorAll('.t2dd__seg-btn');
+
+  const sourcePoints = [[1.1013, 0.3384], [-0.54, -1.2602], [-1.8946, 0.0186], [-0.8106, -0.8722], [-0.222, -0.0518], [-2.2768, 0.9251], [-2.0268, 1.8596], [0.5906, -0.4718], [1.343, 0.0208], [0.6909, 0.1072], [1.0965, 1.0614], [-0.9073, -0.6125], [0.3432, -0.21], [-2.2849, 2.0261], [-2.175, -2.0815], [-1.2761, 0.5649], [1.796, -0.2354], [-0.3911, 0.1739], [-0.3669, 0.0824], [-1.14, 0.4383], [0.3926, -2.4354], [-0.1102, 0.1629], [0.5612, -0.8161], [-1.328, -0.9507], [0.548, -0.8518], [-0.7641, 1.1438], [-0.7862, -0.8986], [-0.0912, 0.1986], [1.0376, -0.8793], [-1.5682, -0.1225], [0.6436, -1.4815], [-0.4873, 0.3062], [0.231, 0.0834], [-0.2569, -0.7993], [-0.9281, 1.1563], [-1.1172, 1.228], [-1.3151, 2.9036], [-1.7381, 1.6043], [-0.8971, -0.1156], [-0.0656, -0.6522], [2.2284, 0.0949], [-1.3211, 0.6466], [0.7124, -1.1475], [0.5356, 0.069], [0.8203, 0.7122], [-0.0084, -0.4083], [0.9104, 0.3132], [-1.4893, -0.5449], [-0.4833, -0.2622], [2.2843, -0.3773], [0.4773, 1.6553], [0.5037, 0.4319], [1.298, 0.1973], [0.186, 0.6887], [0.4121, -0.6804], [-1.1659, -0.1134], [1.398, -0.2264], [1.1484, 0.4126], [-0.3089, -2.6334], [0.2221, -0.2769], [-1.6005, 0.5145], [-0.0254, 0.3751], [-0.6044, 0.202], [-0.4732, 1.0649]];
+  const targetPoints = [[-0.9666, -1.8047], [0.3459, 0.2654], [-1.3691, -1.9982], [0.8471, -0.1361], [1.6157, 0.3848], [0.0078, -0.0346], [2.3455, 3.7135], [0.9985, 2.4079], [0.2843, -0.4394], [2.3864, 2.1588], [0.2166, -1.0395], [0.3572, -0.1397], [-0.2996, -0.2937], [1.3429, 2.1935], [-0.9794, -2.1997], [1.7648, 1.1285], [-1.3002, -2.375], [0.1391, -0.3542], [1.6676, 1.3935], [0.8224, 0.1633], [-1.7008, -0.1649], [0.3034, -0.1088], [-1.4738, -1.6541], [-3.3475, -3.0262], [1.2078, 2.1297], [1.9149, 2.547], [-0.3544, 0.8896], [0.6218, 1.6551], [1.6974, 1.0425], [1.1683, 1.7628], [-2.8321, -3.5826], [2.874, 3.6217], [-2.4062, -1.2504], [-1.8408, -1.3511], [-0.6502, 0.379], [-0.8968, -0.7034], [-0.879, 0.1182], [-0.999, -0.9268], [-1.278, -2.0334], [-1.3333, -2.2066], [-0.4742, -0.4751], [-0.7057, -0.5956], [-0.5027, 0.1479], [-0.3864, -0.6433], [-0.8596, -1.1054], [-0.4269, -0.5289], [-1.1137, 0.7796], [-1.1481, -1.2724], [-1.2833, -2.595], [-0.2925, 0.0941], [-0.308, -0.1276], [-0.9022, -0.8606], [0.0672, 0.1728], [-1.2622, -0.5079], [-0.0971, -0.6], [-0.6839, -0.3052], [2.4601, 2.4187], [-1.5694, -1.4101], [-0.4562, 0.0614], [0.0372, 0.3], [1.8583, 1.2909], [0.8019, 0.7687], [-1.2069, -0.8743], [-0.7905, -0.9439]];
+  const sequentialAssignment = [28, 63, 20, 51, 43, 30, 33, 19, 25, 7, 18, 14, 17, 23, 32, 53, 9, 42, 40, 47, 10, 26, 61, 16, 27, 36, 35, 50, 4, 2, 3, 41, 52, 45, 37, 46, 38, 57, 0, 12, 56, 48, 29, 11, 24, 54, 13, 39, 55, 31, 21, 1, 60, 5, 8, 62, 6, 15, 58, 59, 22, 49, 44, 34];
+  const optimalAssignment = [18, 16, 32, 38, 45, 20, 26, 11, 28, 19, 31, 22, 21, 46, 23, 55, 15, 50, 40, 35, 48, 12, 8, 2, 54, 58, 39, 52, 3, 33, 14, 49, 5, 0, 42, 34, 7, 36, 37, 44, 56, 53, 10, 1, 13, 63, 29, 57, 51, 9, 6, 61, 60, 24, 43, 47, 4, 25, 30, 17, 62, 59, 41, 27];
+  const previewIndices = [0, 5, 9, 14, 18, 24, 31, 37, 44, 52, 60];
+
+  const allPoints = sourcePoints.concat(targetPoints);
+  const allX = allPoints.map(function(point) { return point[0]; });
+  const allY = allPoints.map(function(point) { return point[1]; });
+  const padding = 0.75;
+  const mapScale = {
+    xMin: Math.min.apply(null, allX) - padding,
+    xMax: Math.max.apply(null, allX) + padding,
+    yMin: Math.min.apply(null, allY) - padding,
+    yMax: Math.max.apply(null, allY) + padding
+  };
+
+  let currentMapType = 'seq';
+  let currentT = 0;
+  let isPlaying = false;
+  let animationFrameId = null;
+  let stageRect = null;
+
+  function mapToPx(x, y) {
+    const nx = (x - mapScale.xMin) / (mapScale.xMax - mapScale.xMin);
+    const ny = (y - mapScale.yMin) / (mapScale.yMax - mapScale.yMin);
+    return {
+      x: nx * stageRect.width,
+      y: stageRect.height - ny * stageRect.height
+    };
+  }
+
+  function measure() {
+    stageRect = stage.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = stageRect.width * dpr;
+    canvas.height = stageRect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function getThemeColors() {
+    const style = getComputedStyle(document.documentElement);
+    const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
+    return {
+      path: isDark ? 'rgba(148, 163, 184, 0.3)' : 'rgba(100, 116, 139, 0.28)',
+      source: isDark ? 'rgba(148, 163, 184, 0.42)' : 'rgba(100, 116, 139, 0.34)',
+      target: isDark ? 'rgba(14, 165, 233, 0.28)' : 'rgba(14, 165, 233, 0.24)',
+      current: style.getPropertyValue('--prompt-warning-icon').trim() || '#d97706'
+    };
+  }
+
+  let theme = getThemeColors();
+
+  function drawDot(x, y, radius, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function easeOutQuart(value) {
+    return 1 - Math.pow(1 - value, 4);
+  }
+
+  function getSequentialProgress(value) {
+    if (value <= 0.22) {
+      return { x: easeOutQuart(value / 0.22), y: 0 };
+    }
+    if (value <= 0.4) {
+      return { x: 1, y: 0 };
+    }
+    if (value <= 0.62) {
+      return { x: 1, y: easeOutQuart((value - 0.4) / 0.22) };
+    }
+    return { x: 1, y: 1 };
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, stageRect.width, stageRect.height);
+    const activeAssignment = currentMapType === 'seq' ? sequentialAssignment : optimalAssignment;
+
+    targetPoints.forEach(function(point) {
+      const pTarget = mapToPx(point[0], point[1]);
+      drawDot(pTarget.x, pTarget.y, 2.6, theme.target);
+    });
+
+    previewIndices.forEach(function(index) {
+      const source = sourcePoints[index];
+      const target = targetPoints[activeAssignment[index]];
+      const pSource = mapToPx(source[0], source[1]);
+      const pTarget = mapToPx(target[0], target[1]);
+
+      ctx.strokeStyle = theme.path;
+      ctx.lineWidth = 1.1;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(pSource.x, pSource.y);
+      if (currentMapType === 'seq') {
+        const pMid = mapToPx(target[0], source[1]);
+        ctx.lineTo(pMid.x, pMid.y);
+      }
+      ctx.lineTo(pTarget.x, pTarget.y);
+      ctx.stroke();
+    });
+
+    sourcePoints.forEach(function(point) {
+      const pSource = mapToPx(point[0], point[1]);
+      drawDot(pSource.x, pSource.y, 2.2, theme.source);
+    });
+
+    sourcePoints.forEach(function(source, index) {
+      const target = targetPoints[activeAssignment[index]];
+      let curX;
+      let curY;
+
+      if (currentMapType === 'seq') {
+        const phase = getSequentialProgress(currentT);
+        curX = source[0] + phase.x * (target[0] - source[0]);
+        curY = source[1] + phase.y * (target[1] - source[1]);
+      } else {
+        curX = source[0] + currentT * (target[0] - source[0]);
+        curY = source[1] + currentT * (target[1] - source[1]);
+      }
+
+      const pCur = mapToPx(curX, curY);
+      drawDot(pCur.x, pCur.y, 3.4, theme.current);
+    });
+  }
+
+  function updateTime(value) {
+    currentT = Math.max(0, Math.min(1, value));
+    slider.value = currentT;
+    timeVal.textContent = 't = ' + currentT.toFixed(2);
+    draw();
+  }
+
+  function updatePlayButton() {
+    playBtn.innerHTML = isPlaying
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  }
+
+  let lastTime = 0;
+  let direction = 1;
+
+  function animate(timestamp) {
+    if (!isPlaying) return;
+
+    if (!lastTime) lastTime = timestamp;
+    const dt = timestamp - lastTime;
+    lastTime = timestamp;
+
+    const speed = currentMapType === 'seq' ? 0.00085 : 0.0006;
+    let newT = currentT + direction * speed * dt;
+    if (newT >= 1 && direction === 1) {
+      newT = 1;
+      direction = -1;
+      isPlaying = false;
+      updatePlayButton();
+    } else if (newT <= 0 && direction === -1) {
+      newT = 0;
+      direction = 1;
+      isPlaying = false;
+      updatePlayButton();
+    }
+
+    updateTime(newT);
+    if (isPlaying) animationFrameId = requestAnimationFrame(animate);
+  }
+
+  slider.addEventListener('input', function(event) {
+    isPlaying = false;
+    updatePlayButton();
+    updateTime(parseFloat(event.target.value));
+  });
+
+  segBtns.forEach(function(button) {
+    button.addEventListener('click', function(event) {
+      segBtns.forEach(function(btn) { btn.classList.remove('active'); });
+      event.currentTarget.classList.add('active');
+      currentMapType = event.currentTarget.dataset.map;
+      draw();
+    });
+  });
+
+  playBtn.addEventListener('click', function() {
+    isPlaying = !isPlaying;
+    updatePlayButton();
+    if (isPlaying) {
+      if (currentT >= 1) direction = -1;
+      else if (currentT <= 0) direction = 1;
+      lastTime = 0;
+      animationFrameId = requestAnimationFrame(animate);
+    } else {
+      cancelAnimationFrame(animationFrameId);
+    }
+  });
+
+  window.addEventListener('resize', function() {
+    measure();
+    draw();
+  });
+
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'data-mode') {
+        theme = getThemeColors();
+        draw();
+      }
+    });
+  });
+  observer.observe(document.documentElement, { attributes: true });
+
+  measure();
+  draw();
+});
+</script>
