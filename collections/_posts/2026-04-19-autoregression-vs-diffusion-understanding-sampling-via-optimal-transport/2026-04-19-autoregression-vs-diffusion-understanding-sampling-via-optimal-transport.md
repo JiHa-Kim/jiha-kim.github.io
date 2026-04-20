@@ -304,13 +304,9 @@ Autoregression constrains the transport map to a specific family (Knothe-Rosenbl
 > | **Training signal**| Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM / score matching |
 > | **Inference** | $D$ sequential steps | ODE integration (or one-step via Drifting) |
 
-Autoregression wins on tractability (reducing to closed-form 1D problems) and exact likelihoods, but introduces arbitrary structural bias and requires $D$ sequential steps for generation. Unconstrained transport wins on geometric optimality and isotropic generation, but loses the simple analytic procedure, requiring complex velocity regression to approximate $\nabla\psi$ in practice {% cite vesseronNeuralImplementationBreniers2025 %}.
+Autoregression wins on tractability (reducing to closed-form 1D problems) and exact likelihoods, but requires $D$ sequential steps for generation. Geometrically, we can visualize this restriction as taking a "taxicab-like" path—moving along one coordinate axis at a time—making the total transport cost strictly less efficient than theoretically possible. Unconstrained transport wins on geometric optimality by allowing direct, straight-line paths, but loses the simple analytic procedure, requiring complex velocity regression to approximate $\nabla\psi$ in practice {% cite vesseronNeuralImplementationBreniers2025 %}.
 
-> [!todo] Visualization Placeholder: Triangular vs. Direct Transport
-> Use one 2D toy distribution and show two arrows:
-> 1. a triangular coordinate-wise transport,
-> 2. a direct unconstrained transport.
-> This figure should visually explain the phrase "structural bias."
+{% include transport_2d_widget.html %}
 
 ## Vanilla (Causal Sequence) Autoregression
 
