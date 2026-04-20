@@ -177,6 +177,8 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 > [!example] Equal Quantiles
 > The continuous version says the same thing, but with percentiles instead of sorted lists.
 >
+> The $u$-quantile of a distribution means: the smallest point whose CDF value is $u$. Equivalently, it is the pseudoinverse-CDF value $F^{-1}(u):=\inf\{x:F(x)\ge u\}$.
+>
 > For example, if a point $x$ is at the $70\%$ quantile of the source distribution, then it should be sent to the $70\%$ quantile of the target distribution.
 
 > [!problem] Continuous 1D OT
@@ -248,14 +250,6 @@ In higher dimensions, we apply the same quantile-matching step conditionally, on
 ### The Choice of Base Distribution
 
 Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? While practitioners favor them heavily for practical reasons—they are trivially easy to sample from, completely isotropic, stable under perturbation, and highly compatible with stochastic noising processes—they also possess rigorous theoretical elegance by natively maximizing differential entropy. This yields the most unbiased statistical start given underlying space constraints.
-
-> [!example] Most Spread-Out Distribution
-> On the interval $[0,1]$, the uniform density
-> $$ p(x) = 1 $$
-> treats every subinterval of the same length equally.
->
-> By contrast, a density that piles mass near $0$ is more predictable and therefore has lower entropy.
-> The same principle holds on $\mathbb{R}$ with a variance constraint: among all distributions with the same variance, the Gaussian is the most spread out.
 
 > [!proposition] Uniform Maximum Entropy
 > For a strictly bounded interval $[a, b]$, the maximum entropy distribution is the Uniform distribution $\mathcal{U}[a, b]$.
@@ -381,16 +375,6 @@ Instead of autoregressing in the original coordinates, we can first change coord
 
 Autoregression constrains the transport map to a specific family; flows and diffusion do not. This single architectural choice has deep consequences for tractability, optimality, and inference.
 
-> [!example] Axis-by-Axis vs. Direct Transport
-> Suppose we want to move the point
-> $$ (0,0) \mapsto (1,1). $$
-> An unconstrained map can move directly along the diagonal.
->
-> A triangular autoregressive map instead has the form
-> $$ T(x_1, x_2) = \bigl(T_1(x_1), T_2(x_1, x_2)\bigr), $$
-> so it commits to the first coordinate before choosing the second.
-> This is the structural bias of autoregression.
-
 In the table below, the left column is the triangular autoregressive map, while the right column is the Brenier map for squared Euclidean cost.
 
 > [!remark] Two Canonical Characterizations of Optimal Transport Maps
@@ -419,17 +403,6 @@ Autoregression wins on tractability: each $T_i$ reduces to a closed-form 1D prob
 
 Since we cannot compute Brenier's map directly, we instead parameterize a time-dependent velocity field and integrate {% cite lai2025principles %}:
 
-> [!example] A 1D Flow
-> If a point starts at
-> $$ x(0) = 0 $$
-> and the velocity is constantly
-> $$ \frac{dx}{dt} = 3, $$
-> then
-> $$ x(t) = 3t $$
-> and in particular
-> $$ x(1) = 3. $$
-> A continuous flow model generalizes this idea: every point moves according to a learned velocity field.
-
 > [!definition] Continuous Normalizing Flow (CNF)
 > $$ \frac{dx}{dt} = v_\theta(x, t), \qquad x(0) \sim P_{\text{noise}}, \quad x(1) \sim P_{\text{data}} $$
 > The learned velocity field $v_\theta$ defines a flow map $\phi_t$.
@@ -440,15 +413,6 @@ This sidesteps computing $\nabla\psi$ entirely—but raises a new question: what
 ### Flow Matching & Rectified Flows
 
 **Flow Matching** {% cite lipmanFlowMatchingGenerative2023 %} and the concurrent **Rectified Flows** answer this by constructing an analytic conditional target. For a random pair $(X_0, X_1)$ with $X_0 \sim P_{\text{noise}},\; X_1 \sim P_{\text{data}}$, define the straight-line interpolation and its velocity:
-
-> [!example] Straight-Line Path in 1D
-> If
-> $$ X_0 = 1, \qquad X_1 = 5, $$
-> then the straight-line interpolation is
-> $$ X_t = (1-t) * 1 + t * 5 = 1 + 4t, $$
-> and its velocity is the constant
-> $$ u_t = X_1 - X_0 = 4. $$
-> Flow matching asks the network to predict this target velocity from the point $X_t$ and time $t$.
 
 $$ X_t = (1-t)\,X_0 + t\,X_1, \qquad u_t = X_1 - X_0 $$
 
@@ -470,22 +434,12 @@ $$ X_t = (1-t)\,X_0 + t\,X_1, \qquad u_t = X_1 - X_0 $$
 
 ### Uncrossing Paths: Mini-Batch OT
 
-Random $(X_0, X_1)$ pairing produces wildly crossed trajectories, making $v_\theta$ harder to learn. Solving the discrete assignment problem within each mini-batch uncrosses them:
-
-> [!example] Why Batch Matching Helps
-> Suppose a mini-batch of source points is
-> $$ \{0, 10\} $$
-> and the target points are
-> $$ \{1, 11\}. $$
-> The natural pairing has squared cost
-> $$ (0-1)^2 + (10-11)^2 = 1 + 1 = 2. $$
-> The crossed pairing has squared cost
-> $$ (0-11)^2 + (10-1)^2 = 121 + 81 = 202. $$
-> So uncrossing the batch can make the regression target dramatically simpler.
-
-$$ \pi^* = \arg\min_{\pi \in \Pi(X_0^B,\, X_1^B)} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|^2 $$
-
-Here $X_0^B$ and $X_1^B$ are the two mini-batches, $X_0^{(i)}$ is the $i$-th source point in the batch, $X_1^{(j)}$ is the $j$-th target point, and $\Pi(X_0^B, X_1^B)$ is the set of admissible matchings between them.
+> [!idea] Batch OT
+> Random $(X_0, X_1)$ pairing produces wildly crossed trajectories, making $v_\theta$ harder to learn. Solving the discrete assignment problem within each mini-batch uncrosses them:
+> 
+> $$ \pi^* = \arg\min_{\pi \in \Pi(X_0^B,\, X_1^B)} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|^2 $$
+> 
+> Here $X_0^B$ and $X_1^B$ are the two mini-batches, $X_0^{(i)}$ is the $i$-th source point in the batch, $X_1^{(j)}$ is the $j$-th target point, and $\Pi(X_0^B, X_1^B)$ is the set of admissible matchings between them.
 
 This is efficiently approximated via the **Sinkhorn algorithm**. Uncrossed paths yield a smoother $v_\theta$, better generalization, and fewer ODE integration steps at inference.
 
@@ -497,25 +451,17 @@ This is efficiently approximated via the **Sinkhorn algorithm**. Uncrossed paths
 
 ### One-Step Maps: Generative Drifting
 
-Flow models still require multi-step ODE integration at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} aim to remove that extra solve.
-Instead of learning a velocity field and integrating it at test time, they directly learn a map $f_\theta$ so that if
-$$ z \sim P_{\text{noise}}, $$
-then the generated sample
-$$ x = f_\theta(z) $$
-already follows the data distribution.
-
-> [!example] One-Step Generator
-> If
-> $$ z \sim \mathcal{N}(0,1) $$
-> and we use the map
-> $$ x = 2z + 1, $$
-> then
-> $$ x \sim \mathcal{N}(1,4). $$
-> No ODE solve is needed at inference time: one draw of $z$ and one evaluation of the map are enough.
-
-$$ x = f_\theta(z), \qquad z \sim P_{\text{noise}} $$
-
-This completes the cycle: **Map** (Brenier, intractable) → **Flow** (tractable ODE, multi-step) → **Map** (learned, one-step).
+> [!idea] Generative Drifting
+> Flow models still require multi-step ODE integration at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} aim to remove that extra solve.
+> Instead of learning a velocity field and integrating it at test time, they directly learn a map $f_\theta$ so that if
+> $$ z \sim P_{\text{noise}}, $$
+> then the generated sample
+> $$ x = f_\theta(z) $$
+> already follows the data distribution.
+> 
+> $$ x = f_\theta(z), \qquad z \sim P_{\text{noise}} $$
+> 
+> This completes the cycle: **Map** (Brenier, intractable) → **Flow** (tractable ODE, multi-step) → **Map** (learned, one-step).
 
 > [!example] Visualizing the Vector Field
 > *Placeholder: Insert visualization showing a continuous 2D vector field guiding Gaussian noise into a multimodal target cluster.*
