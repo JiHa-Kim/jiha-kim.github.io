@@ -1,70 +1,18 @@
-@misc{DiffusionSpectralAutoregression2024,
-  title = {Diffusion Is Spectral Autoregression},
-  author = {Sander Dieleman},
-  year = 2024,
-  month = sep,
-  url = {https://sander.ai/2024/09/02/spectral-autoregression.html},
-  urldate = {2026-04-19},
-  abstract = {A deep dive into spectral analysis of diffusion models of images, revealing how they implicitly perform a form of autoregression in the frequency domain.}
-}
-
-@misc{falck2025spectralauto,
-  title = {Diffusion Is Not Necessarily {{Spectral Autoregression}}},
-  author = {Falck, Fabian},
-  year = 2025,
-  url = {https://fabianfalck.com/posts/spectralauto}
-}
-
-@article{InverseTransformSampling2025,
-  title = {Inverse Transform Sampling},
-  journal = {Wikipedia},
-  year = 2025,
-  url = {https://en.wikipedia.org/wiki/Inverse_transform_sampling},
-  urldate = {2026-04-19}
-}
-
-@article{NormalDistribution2026,
-  title = {Normal Distribution},
-  journal = {Wikipedia},
-  year = 2026,
-  url = {https://en.wikipedia.org/wiki/Normal_distribution},
-  urldate = {2026-04-19}
-}
-
-@misc{peyreOptimalTransportMachine2025,
-  title = {Optimal Transport for Machine Learners},
-  author = {Gabriel Peyre},
-  year = 2025,
-  month = may,
-  number = {arXiv:2505.06589},
-  eprint = {2505.06589},
-  archiveprefix = {arXiv},
-  url = {http://arxiv.org/abs/2505.06589},
-  urldate = {2026-04-19}
-}
-
-@article{lai2025principles,
-  title={The principles of diffusion models},
-  author={Lai, Chieh-Hsin and Song, Yang and Kim, Dongjun and Mitsufuji, Yuki and Ermon, Stefano},
-  journal={arXiv preprint arXiv:2510.21890},
-  year={2025}
-}
-
-@misc{yuFrequencyAutoregressiveImage2026,
-  title = {Frequency {{Autoregressive Image Generation}} with {{Continuous Tokens}}},
-  author = {Yu, Hu and Luo, Hao and Yuan, Hangjie and Rong, Yu and Huang, Jie and Zhao, Feng},
-  year = 2026,
-  month = mar,
-  number = {arXiv:2503.05305},
-  eprint = {2503.05305},
-  primaryclass = {cs},
-  publisher = {arXiv},
-  doi = {10.48550/arXiv.2503.05305},
-  url = {http://arxiv.org/abs/2503.05305},
+@article{brenierPolarFactorizationMonotone1991,
+  title = {Polar Factorization and Monotone Rearrangement of Vector-valued Functions},
+  author = {Brenier, Yann},
+  year = 1991,
+  month = jun,
+  journal = {Communications on Pure and Applied Mathematics},
+  volume = {44},
+  number = {4},
+  pages = {375--417},
+  issn = {0010-3640, 1097-0312},
+  doi = {10.1002/cpa.3160440402},
+  url = {https://onlinelibrary.wiley.com/doi/10.1002/cpa.3160440402},
   urldate = {2026-04-20},
-  abstract = {Autoregressive (AR) models for image generation typically adopt a two-stage paradigm of vector quantization and raster-scan ``next-token prediction", inspired by its great success in language modeling. However, due to the huge modality gap, image autoregressive models may require a systematic reevaluation from two perspectives: tokenizer format and regression direction. In this paper, we introduce the frequency progressive autoregressive (\textbackslash textbf\textbraceleft FAR\textbraceright ) paradigm and instantiate FAR with the continuous tokenizer. Specifically, we identify spectral dependency as the desirable regression direction for FAR, wherein higher-frequency components build upon the lower one to progressively construct a complete image. This design seamlessly fits the causality requirement for autoregressive models and preserves the unique spatial locality of image data. Besides, we delve into the integration of FAR and the continuous tokenizer, introducing a series of techniques to address optimization challenges and improve the efficiency of training and inference processes. We demonstrate the efficacy of FAR through comprehensive experiments on the ImageNet dataset and verify its potential on text-to-image generation.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computer Vision and Pattern Recognition}
+  abstract = {Given a probability space ( X , p ) and a bounded domain R in R d equipped with the Lebesgue measure 1 . I (normalized so that 10I = I ), it is shown (under additional technical assumptions on X and Q) that for every vector-valued function u E L p ( X ,p; R d )there is a unique ``polar factorization'' u = V\$.s, where \$ is a convex function defined on R and s is a measure-preservingmapping from ( X , p ) into ( Q , I . I), provided that u is nondegenerate, in the sense that p ( u - ' ( E ) )= 0 for each Lebesgue negligible subset E of Rd.},
+  langid = {english}
 }
 
 @misc{dengGenerativeModelingDrifting2026,
@@ -84,6 +32,37 @@
   keywords = {Computer Science - Computer Vision and Pattern Recognition,Computer Science - Machine Learning}
 }
 
+@misc{DiffusionSpectralAutoregression2024,
+  title = {Diffusion Is Spectral Autoregression},
+  year = 2024,
+  month = sep,
+  journal = {Sander Dieleman},
+  url = {https://sander.ai/2024/09/02/spectral-autoregression.html},
+  urldate = {2026-04-19},
+  abstract = {A deep dive into spectral analysis of diffusion models of images, revealing how they implicitly perform a form of autoregression in the frequency domain.},
+  langid = {english}
+}
+
+@misc{falck2025spectralauto,
+  title = {Diffusion Is Not Necessarily {{Spectral Autoregression}}},
+  author = {Falck, Fabian},
+  year = 2025,
+  url = {https://fabianfalck.com/posts/spectralauto}
+}
+
+@article{InverseTransformSampling2025,
+  title = {Inverse Transform Sampling},
+  year = 2025,
+  month = dec,
+  journal = {Wikipedia},
+  url = {https://en.wikipedia.org/w/index.php?title=Inverse_transform_sampling&oldid=1330078866},
+  urldate = {2026-04-19},
+  abstract = {Inverse transform sampling (also known as inversion sampling, the inverse probability integral transform, the inverse transformation method, or the Smirnov transform) is a basic method for pseudo-random number sampling, i.e., for generating sample numbers at random from any probability distribution given its cumulative distribution function. Inverse transformation sampling takes uniform samples of a number                         u                 \textbraceleft\textbackslash displaystyle u\textbraceright{}     between 0 and 1, interpreted as a probability, and then returns the smallest number                         x         {$\in$}                    R                          \textbraceleft\textbackslash displaystyle x\textbackslash in \textbackslash mathbb \textbraceleft R\textbraceright{} \textbraceright{}     such that                         F         (         x         )         {$\geq$}         u                 \textbraceleft\textbackslash displaystyle F(x)\textbackslash geq u\textbraceright{}     for the cumulative distribution function                         F                 \textbraceleft\textbackslash displaystyle F\textbraceright{}     of a random variable.  For example, imagine that                         F                 \textbraceleft\textbackslash displaystyle F\textbraceright{}     is the standard normal distribution with mean zero and standard deviation one. The table below shows samples taken from the uniform distribution and their representation on the standard normal distribution. We are randomly choosing a proportion of the area under the curve and returning the number in the domain such that exactly this proportion of the area occurs to the left of that number.  Intuitively, we are unlikely to choose a number in the far end of tails because there is very little area in them which would require choosing a number very close to zero or one. Computationally, this method involves computing the quantile function of the distribution --- in other words, computing the cumulative distribution function (CDF) of the distribution (which maps a number in the domain to a probability between 0 and 1) and then inverting that function. This is the source of the term "inverse" or "inversion" in most of the names for this method. Note that for a discrete distribution, computing the CDF is not in general too difficult: we simply add up the individual probabilities for the various points of the distribution. For a continuous distribution, however, we need to integrate the probability density function (PDF) of the distribution, which is impossible to do analytically for most distributions (including the normal distribution). As a result, this method may be computationally inefficient for many distributions and other methods are preferred; however, it is a useful method for building more generally applicable samplers such as those based on rejection sampling. For the normal distribution, the lack of an analytical expression for the corresponding quantile function means that other methods (e.g. the Box--Muller transform) may be preferred computationally. It is often the case that, even for simple distributions, the inverse transform sampling method can be improved on: see, for example, the ziggurat algorithm and rejection sampling. On the other hand, it is possible to approximate the quantile function of the normal distribution extremely accurately using moderate-degree polynomials, and in fact the method of doing this is fast enough that inversion sampling is now the default method for sampling from a normal distribution in the statistical package R.},
+  copyright = {Creative Commons Attribution-ShareAlike License},
+  langid = {english},
+  annotation = {Page Version ID: 1330078866}
+}
+
 @misc{lipmanFlowMatchingGenerative2023,
   title = {Flow {{Matching}} for {{Generative Modeling}}},
   author = {Lipman, Yaron and Chen, Ricky T. Q. and {Ben-Hamu}, Heli and Nickel, Maximilian and Le, Matt},
@@ -101,6 +80,44 @@
   keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Statistics - Machine Learning}
 }
 
+@article{NormalDistribution2026,
+  title = {Normal Distribution},
+  year = 2026,
+  month = apr,
+  journal = {Wikipedia},
+  url = {https://en.wikipedia.org/w/index.php?title=Normal_distribution&oldid=1349034873#Maximum_entropy},
+  urldate = {2026-04-19},
+  abstract = {In probability theory and statistics, a normal distribution or Gaussian distribution is a type of continuous probability distribution for a real-valued random variable. The general form of its probability density function is                        f         (         x         )         =                                 1                            2               {$\pi$}                                {$\sigma$}                                    2                                                                          exp         ⁡                                 (                            -                                                                        (                     x                     -                     {$\mu$}                                            )                                                2                                                                                                       2                                            {$\sigma$}                                                2                                                                                                                         )                                      .                 \textbraceleft\textbackslash displaystyle f(x)=\textbraceleft\textbackslash frac \textbraceleft 1\textbraceright\textbraceleft\textbackslash sqrt \textbraceleft 2\textbackslash pi \textbackslash sigma \textasciicircum\textbraceleft 2\textbraceright\textbraceright\textbraceright\textbraceright\textbackslash exp \textbraceleft\textbackslash left(-\textbraceleft\textbackslash frac \textbraceleft (x-\textbackslash mu )\textasciicircum\textbraceleft 2\textbraceright\textbraceright\textbraceleft 2\textbackslash sigma \textasciicircum\textbraceleft 2\textbraceright\textbraceright\textbraceright\textbackslash right)\textbraceright\textbackslash,.\textbraceright{}    The parameter \nolinebreak{}                        {$\mu$}                 \textbraceleft\textbackslash displaystyle \textbackslash mu \textbraceright{}    \nolinebreak{} is the mean or expectation of the distribution (and also its median and mode), while the parameter                                    {$\sigma$}                        2                                     \textbraceleft\textbackslash textstyle \textbackslash sigma \textasciicircum\textbraceleft 2\textbraceright\textbraceright{}     is the variance. The standard deviation of the distribution is the positive value \nolinebreak{}                        {$\sigma$}                 \textbraceleft\textbackslash displaystyle \textbackslash sigma \textbraceright{}    \nolinebreak{} (sigma). A random variable with a Gaussian distribution is said to be normally distributed and is called a normal deviate. Normal distributions are important in statistics and are often used in the natural and social sciences to represent real-valued random variables whose distributions are not known. Their importance is partly due to the central limit theorem. It states that the average of many statistically independent samples (observations) of a random variable with finite mean and variance is itself a random variable---whose distribution converges to a normal distribution as the number of samples increases. Therefore, physical quantities that are expected to be the sum of many independent processes, such as measurement errors, often have distributions that are nearly normal. Moreover, Gaussian distributions have some unique properties that are valuable in analytic studies. For instance, any linear combination of a fixed collection of independent normal deviates is a normal deviate. Many results and methods, such as propagation of uncertainty and least squares parameter fitting, can be derived analytically in explicit form when the relevant variables are normally distributed. A normal distribution is sometimes informally called a bell curve. However, many other distributions are bell-shaped (such as the Cauchy, Student's t, and logistic distributions). (For other names, see Naming.) The univariate probability distribution is generalized for vectors in the multivariate normal distribution and for matrices in the matrix normal distribution.},
+  copyright = {Creative Commons Attribution-ShareAlike License},
+  langid = {english},
+  annotation = {Page Version ID: 1349034873}
+}
+
+@misc{peyreOptimalTransportMachine2025,
+  title = {Optimal {{Transport}} for {{Machine Learners}}},
+  author = {Peyr{\'e}, Gabriel},
+  year = 2025,
+  month = may,
+  number = {arXiv:2505.06589},
+  eprint = {2505.06589},
+  primaryclass = {stat},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2505.06589},
+  url = {http://arxiv.org/abs/2505.06589},
+  urldate = {2026-04-19},
+  abstract = {Optimal Transport is a foundational mathematical theory that connects optimization, partial differential equations, and probability. It offers a powerful framework for comparing probability distributions and has recently become an important tool in machine learning, especially for designing and evaluating generative models. These course notes cover the fundamental mathematical aspects of OT, including the Monge and Kantorovich formulations, Brenier's theorem, the dual and dynamic formulations, the Bures metric on Gaussian distributions, and gradient flows. It also introduces numerical methods such as linear programming, semi-discrete solvers, and entropic regularization. Applications in machine learning include topics like training neural networks via gradient flows, token dynamics in transformers, and the structure of GANs and diffusion models. These notes focus primarily on mathematical content rather than deep learning techniques.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Mathematics - Optimization and Control,Statistics - Machine Learning}
+}
+
+@misc{PrinciplesDiffusionModels,
+  title = {The {{Principles}} of {{Diffusion Models}}},
+  url = {https://the-principles-of-diffusion-models.github.io/},
+  urldate = {2026-04-19},
+  abstract = {Official website for The Principles of Diffusion Models, serving as the central hub for the book text, supplementary resources, and updates.},
+  langid = {english}
+}
+
 @article{thorpeIntroductionOptimalTransport,
   title = {Introduction to {{Optimal Transport}}},
   author = {Thorpe, Matthew},
@@ -108,4 +125,21 @@
   month = mar,
   publisher = {University of Cambridge},
   langid = {english}
+}
+
+@misc{yuFrequencyAutoregressiveImage2026,
+  title = {Frequency {{Autoregressive Image Generation}} with {{Continuous Tokens}}},
+  author = {Yu, Hu and Luo, Hao and Yuan, Hangjie and Rong, Yu and Huang, Jie and Zhao, Feng},
+  year = 2026,
+  month = mar,
+  number = {arXiv:2503.05305},
+  eprint = {2503.05305},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2503.05305},
+  url = {http://arxiv.org/abs/2503.05305},
+  urldate = {2026-04-20},
+  abstract = {Autoregressive (AR) models for image generation typically adopt a two-stage paradigm of vector quantization and raster-scan ``next-token prediction", inspired by its great success in language modeling. However, due to the huge modality gap, image autoregressive models may require a systematic reevaluation from two perspectives: tokenizer format and regression direction. In this paper, we introduce the frequency progressive autoregressive (\textbackslash textbf\textbraceleft FAR\textbraceright ) paradigm and instantiate FAR with the continuous tokenizer. Specifically, we identify spectral dependency as the desirable regression direction for FAR, wherein higher-frequency components build upon the lower one to progressively construct a complete image. This design seamlessly fits the causality requirement for autoregressive models and preserves the unique spatial locality of image data. Besides, we delve into the integration of FAR and the continuous tokenizer, introducing a series of techniques to address optimization challenges and improve the efficiency of training and inference processes. We demonstrate the efficacy of FAR through comprehensive experiments on the ImageNet dataset and verify its potential on text-to-image generation.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computer Vision and Pattern Recognition}
 }
