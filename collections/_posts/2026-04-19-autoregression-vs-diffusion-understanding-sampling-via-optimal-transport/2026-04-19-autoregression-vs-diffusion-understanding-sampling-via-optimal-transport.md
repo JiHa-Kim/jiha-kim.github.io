@@ -2,7 +2,7 @@
 layout: post
 title: Autoregression vs Diffusion - Understanding Sampling via Optimal Transport
 date: 2026-04-19 16:09 +0000
-description: Why does autoregression work well for text generation, while diffusion models work well for image generation? Perhaps they are not so unrelated - both can be understood as sampling via optimal transport.
+description: Why does autoregression work well for text generation, while diffusion and flow models work well for image generation? Perhaps they are not so unrelated - both can be understood as sampling via optimal transport.
 image: 
 categories:
 - Machine Learning
@@ -56,15 +56,19 @@ llm-instructions: |
 
 # Introduction
 
-Generative modeling is fundamentally an exercise in statistical estimation. 
+Generative modeling is fundamentally an exercise in statistical estimation.
 
-> [!abstract] Problem Setup
+> [!problem] Generative Modeling
 > Let $\mathcal{D} = \{x_1, \dots, x_N\}$ be an empirical dataset drawn i.i.d. from a data distribution $x \sim P_{\text{data}}(x)$ defined over a high-dimensional space $\mathcal{X}$. We want to generate new approximate samples from $P_{\text{data}}(x)$.
+
+Direct sampling from a complex, high-dimensional data distribution is generally intractable. Instead, we reduce the problem from direct sampling to **noise sampling plus procedural generation**. 
+
+Think of world generation in a game like Minecraft: instead of trying to randomly generate a billion individual blocks and hoping they form a coherent landscape, we start from a single random seed—a simple source of randomness—and use it as the starting point for a procedural generation algorithm. In generative AI, we take a similar approach.
 
 > [!goal] The Transport Objective
 > We introduce a tractable base distribution $z \sim P_{\text{noise}}(z)$ (like standard Gaussian noise) that is easy to sample from. The goal is then to convert this simple randomness into samples that match the statistics of $P_{\text{data}}(x)$.
 
-Autoregressive models and diffusion models are often presented as very different generative strategies. At a high level, however, both convert simple randomness into samples from the data distribution. The difference is in how they parameterize that conversion: autoregression does it through a sequence of conditional transports, while diffusion does it through a time-dependent denoising dynamics. Optimal transport is therefore a useful geometric lens for comparing them, even when the underlying training objectives are not literally the same.
+Autoregressive models and diffusion models are often presented as very different generative strategies. At a high level, however, both function as this "procedural generation algorithm," converting simple randomness into complex samples from the data distribution. The difference is in how they parameterize that conversion: autoregression does it through a sequence of conditional transports, while diffusion does it through a time-dependent denoising dynamics. Optimal transport is therefore a useful geometric lens for comparing them, even when the underlying training objectives are not literally the same.
 
 ## Background: Optimal Transport
 
@@ -146,6 +150,14 @@ We can reinterpret this as a 1D optimal transport problem. To gain intuition, le
 
 In one dimension, transport is easy because cumulative mass can be matched by quantiles. In higher dimensions, autoregression recovers this simplicity by ordering coordinates and transporting one conditional distribution at a time. This produces a triangular transport known, in the continuous case, as the **Knothe-Rosenblatt rearrangement**.
 
+> [!definition] Knothe-Rosenblatt Rearrangement
+> Let $P$ and $Q$ be probability measures on $\mathbb{R}^D$ that admit densities. For any strict coordinate ordering $(x_1, \dots, x_D)$, the Knothe-Rosenblatt rearrangement uniquely defines a lower-triangular pushforward map $T: \mathbb{R}^D \to \mathbb{R}^D$ from $P$ to $Q$ constructed by sequentially matching the 1D conditional continuous CDFs:
+> $$ T_1(x_1) = F^{-1}_{Q_1}(F_{P_1}(x_1)) $$
+> $$ T_2(x_2 \vert x_1) = F^{-1}_{Q_2 \vert Q_1}(F_{P_2 \vert P_1}(x_2 \vert x_1)) $$
+> $$ \dots $$
+> $$ T_D(x_D \vert x_{<D}) = F^{-1}_{Q_D \vert Q_{<D}}(F_{P_D \vert P_{<D}}(x_D \vert x_{<D})) $$
+> Geometrically, it is the mathematically exact, unique lower-triangular map pushing $P$ to $Q$ with monotonically increasing diagonal components $\frac{\partial T_i}{\partial x_i} > 0$.
+
 > [!note] Parameterizing Density vs. Cumulative Maps
 > While optimal transport classically frames mappings through cumulative distributions (like the CDF inverse $F^{-1}$), directly regressing these cumulative functional bounds is computationally restrictive. Because a Probability Mass Function (or continuous density) holds mathematically equivalent information to its CDF, practical generative architectures sidestep modeling CDFs entirely. Both modern Autoregression (which predicts discrete token masses via logits) and Diffusion (which predicts continuous score densities via denoising) equivalently parameterize the much easier mass/density representations. The cumulative transport map step is instead functionally recovered dynamically during the inference sampling execution.
 
@@ -207,8 +219,6 @@ Large Language Models (LLMs) provide the most prominent real-world application o
 > The standard categorical sampling algorithm directly draws a uniform scalar random variable $u \sim \mathcal{U}(0, 1)$ and queries the inverse CDF:
 > $$ x_i = \min \{ v_k \in \mathcal{V} \vert F(v_k) \ge u \} $$
 
-This demonstrates a beautiful analogy: while discrete token autoregression is not literally a continuous Jacobian-based flow, through the lens of optimal transport, we can conceptually view text generation as an analogous sequential cascade of 1D inverse transform sampling steps.
-
 ## Reparameterized Autoregression via Change of Variables
 
 While causal sequences like text tokens or raster-scans are the default, the rigorous optimal transport perspective exposes that the required sequence factorization is entirely agnostic to the physical data ordering. We can reparameterize autoregression under generalized change-of-variables over transformations of the original space.
@@ -230,40 +240,77 @@ Rather than predicting physical pixels $x_i$, recent work introduces autoregress
 > [!info] Side Note: "Diffusion is Spectral Autoregression"
 > Interestingly, this explicit spectral progression mirrors an inherent inductive bias frequently observed in diffusion models. Initial evaluations revealed that diffusion ODEs naturally synthesize low-frequency features before high-frequency details {% cite DiffusionSpectralAutoregression2024 %}. While deeper theoretical analysis proved this is merely an inductive bias rather than a strict mathematical necessity {% cite falck2025spectralauto %}, it remains a beautiful theoretical parallel demonstrating how both explicitly reparameterized autoregression and continuous diffusion flows naturally converge on spectral hierarchies to efficiently master spatial generation.
 
-## Diffusion: Continuous Global Mapping
+## Constrained vs. Unconstrained Transport
 
-If autoregression fractures high-dimensional densities sequentially, how does diffusion contrast with this?
+Autoregression constrains the transport map to a specific family; flows and diffusion do not. This single architectural choice has deep consequences for tractability, optimality, and inference.
 
-> [!definition] Diffusion as Transport Through Time
-> A diffusion model starts from a simple noise distribution and learns reverse-time dynamics that move samples back toward the data distribution. Depending on the formulation, these dynamics may be written as a reverse SDE, a score-based update rule, or an equivalent probability-flow ODE. This makes diffusion a form of transport through time, although not necessarily the Monge-optimal transport map. {% cite lai2025principles %}
+> [!remark] Two Canonical Characterizations of Optimal Transport Maps
+>
+> | Feature | Knothe-Rosenblatt (Autoregression) | Brenier (Unconstrained) |
+> | :--- | :--- | :--- |
+> | **Map Form** | $T_i(x_i \mid x_{<i}) = F^{-1}_{Q_i \mid Q_{<i}}(F_{P_i \mid P_{<i}}(x_i))$ | $T(x) = \nabla \psi(x)$, $\psi$ is convex |
+> | **Uniqueness** | Unique given coordinate ordering | Unique (no ordering needed) |
+> | **Constructive?** | Yes — sequential 1D CDF inversions | No — $\psi$ is intractable in high $D$ |
+> | **Structural bias**| Arbitrary coordinate ordering | None |
+> | **Objective** | Likelihood maximization | $W_2^2 \text{ Cost: } \mathbb{E}[ \Vert x - T(x) \Vert^2 ]$ |
 
-> [!note] Global Dynamics vs. Iterative Factoring
-> While an autoregressive sampler constructs the sample iteratively dimension by dimension, a diffusion process acts over the entire coordinate space simultaneously over time $t$.
+Autoregression wins on tractability: each $T_i$ reduces to a closed-form 1D problem. Brenier wins on geometric optimality but provides no algorithm to compute $\psi$ in practice.
 
-### Map Models vs. Flow Models
+### The Velocity Paradigm: Continuous Flows
 
-To rigorously understand diffusion's geometry, we mathematically distinguish Maps and Flows.
+Since we cannot compute Brenier's map directly, we instead parameterize a time-dependent velocity field and integrate {% cite lai2025principles %}:
 
-> [!definition] Maps vs Flows (Position vs Velocity)
-> * **Map Models**: Explicitly learn the terminal *position*. A direct OT map targets the final destination globally: "Translate directly from point A to B."
-> * **Flow Models**: Explicitly learn the *velocity*. They evaluate a continuous vector field $v_t(\mathbf{x})$ that guides trajectory mass step-by-step over $t \in [0,1]$. 
+> [!definition] Continuous Normalizing Flow (CNF)
+> $$ \frac{dx}{dt} = v_\theta(x, t), \qquad x(0) \sim P_{\text{noise}}, \quad x(1) \sim P_{\text{data}} $$
+> The learned velocity field $v_\theta$ defines a flow $\phi_t$ whose pushforward satisfies $[\phi_1]_\sharp P_{\text{noise}} \approx P_{\text{data}}$.
 
-> [!theorem] Flow Matching
-> While classic unconstrained optimal transport exclusively seeks Position Maps, recent advances like **Flow Matching** actively bridge this structural divide. By regularizing velocity vectors $v_t(\mathbf{x})$ to point along perfectly straight lines:
-> $$ X_t = t X_1 + (1-t) X_0 $$
-> these continuous flow algorithms intrinsically recover Optimal Transport path constraints directly inside a velocity-driven ODE framework.
+This sidesteps computing $\nabla\psi$ entirely—but raises a new question: what should $v_\theta$ regress against?
+
+### Flow Matching & Rectified Flows
+
+**Flow Matching** {% cite lipmanFlowMatchingGenerative2023 %} and the concurrent **Rectified Flows** answer this by constructing an analytic conditional target. For a random pair $(X_0, X_1)$ with $X_0 \sim P_{\text{noise}},\; X_1 \sim P_{\text{data}}$, define the straight-line interpolation and its velocity:
+
+$$ X_t = (1-t)\,X_0 + t\,X_1, \qquad u_t = X_1 - X_0 $$
+
+> [!definition] Conditional Flow Matching (CFM) Objective
+> $$ \mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t,\, X_0,\, X_1}\bigl\| v_\theta(X_t,\, t) - (X_1 - X_0) \bigr\|^2 $$
+
+> [!remark] Conditional vs. Marginal Optimality
+> Each *conditional* path $(X_0 \to X_1)$ is a true OT displacement map between the endpoint Gaussians. However, the *marginal* vector field obtained by aggregating over all random pairs is **not** guaranteed to equal the global Brenier-optimal transport map {% cite lipmanFlowMatchingGenerative2023 %}. The straight-line structure nonetheless drastically simplifies the regression target.
+
+### Uncrossing Paths: Mini-Batch OT
+
+Random $(X_0, X_1)$ pairing produces wildly crossed trajectories, making $v_\theta$ harder to learn. Solving the discrete assignment problem within each mini-batch uncrosses them:
+
+$$ \pi^* = \arg\min_{\pi \in \Pi(X_0^B,\, X_1^B)} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|^2 $$
+
+This is efficiently approximated via the **Sinkhorn algorithm**. Uncrossed paths yield a smoother $v_\theta$, better generalization, and fewer ODE integration steps at inference.
+
+### One-Step Maps: Generative Drifting
+
+Flow models still require multi-step ODE integration at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} close this gap by evolving the pushforward distribution $[f_\theta]_\sharp P_{\text{noise}}$ during training itself, reaching equilibrium when it matches $P_{\text{data}}$. The result is a direct one-step generator:
+
+$$ x = f_\theta(z), \qquad z \sim P_{\text{noise}} $$
+
+This completes the cycle: **Map** (Brenier, intractable) → **Flow** (tractable ODE, multi-step) → **Map** (learned, one-step).
 
 > [!example] Visualizing the Vector Field
-> *Placeholder: Insert Visualization showing a continuous 2D vector field guiding Gaussian noise into a multimodal target cluster.*
+> *Placeholder: Insert visualization showing a continuous 2D vector field guiding Gaussian noise into a multimodal target cluster.*
 
 ## Conclusion
 
 > [!summary] 
-> Autoregression and diffusion can both be viewed as driving toward the same broad generative goal, but through different parameterizations that leverage distinct inductive biases:
-> * **Text** is naturally discrete and sequential, making it conceptually straightforward to factorize $p(x_1,\dots,x_D) = \prod_i p(x_i \mid x_{<i})$. Autoregression natively exploits this structure to train with exact likelihoods.
-> * **Images** are high-dimensional continuous signals with strong spatial correlations, so a global denoising process effectively captures this dense geometry simultaneously.
->
-> Neither is a hard physical law restricting a modality exclusively to one family. Ultimately, viewing both approaches through the lens of Optimal Transport reveals how they master the same fundamental task—turning noise into data—by traversing statistical space in remarkably different ways.
+> Through the lens of Optimal Transport, autoregression and diffusion are two strategies for the same task—transporting $P_{\text{noise}}$ to $P_{\text{data}}$:
+> 
+> | Feature | Autoregression | Flow / Diffusion |
+> | :--- | :--- | :--- |
+> | **Map family** | Lower-triangular (Knothe-Rosenblatt) | Unconstrained (approximating Brenier) |
+> | **Tractability** | Exact sequential 1D inversions | Learned via velocity regression |
+> | **Training signal** | Exact likelihood: $\sum_i \log p(x_i \mid x_{<i})$ | CFM / score matching |
+> | **Inference** | $D$ sequential steps | ODE integration (or one-step via Drifting) |
+> | **Structural bias** | Coordinate ordering | None (isotropic) |
+> 
+> Neither paradigm is a physical law tied to a specific modality. Text uses autoregression and images use diffusion primarily because of inductive biases and computational convenience—not mathematical necessity.
 
 ---
 

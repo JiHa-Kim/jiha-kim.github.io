@@ -33,7 +33,7 @@
 
 @misc{peyreOptimalTransportMachine2025,
   title = {Optimal Transport for Machine Learners},
-  author = {Gabriel Peyr{\'e}},
+  author = {Gabriel Peyre},
   year = 2025,
   month = may,
   number = {arXiv:2505.06589},
@@ -65,4 +65,38 @@
   abstract = {Autoregressive (AR) models for image generation typically adopt a two-stage paradigm of vector quantization and raster-scan ``next-token prediction", inspired by its great success in language modeling. However, due to the huge modality gap, image autoregressive models may require a systematic reevaluation from two perspectives: tokenizer format and regression direction. In this paper, we introduce the frequency progressive autoregressive (\textbackslash textbf\textbraceleft FAR\textbraceright ) paradigm and instantiate FAR with the continuous tokenizer. Specifically, we identify spectral dependency as the desirable regression direction for FAR, wherein higher-frequency components build upon the lower one to progressively construct a complete image. This design seamlessly fits the causality requirement for autoregressive models and preserves the unique spatial locality of image data. Besides, we delve into the integration of FAR and the continuous tokenizer, introducing a series of techniques to address optimization challenges and improve the efficiency of training and inference processes. We demonstrate the efficacy of FAR through comprehensive experiments on the ImageNet dataset and verify its potential on text-to-image generation.},
   archiveprefix = {arXiv},
   keywords = {Computer Science - Artificial Intelligence,Computer Science - Computer Vision and Pattern Recognition}
+}
+
+@misc{dengGenerativeModelingDrifting2026,
+  title = {Generative {{Modeling}} via {{Drifting}}},
+  author = {Deng, Mingyang and Li, He and Li, Tianhong and Du, Yilun and He, Kaiming},
+  year = 2026,
+  month = feb,
+  number = {arXiv:2602.04770},
+  eprint = {2602.04770},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2602.04770},
+  url = {http://arxiv.org/abs/2602.04770},
+  urldate = {2026-04-20},
+  abstract = {Generative modeling can be formulated as learning a mapping f such that its pushforward distribution matches the data distribution. The pushforward behavior can be carried out iteratively at inference time, for example in diffusion and flow-based models. In this paper, we propose a new paradigm called Drifting Models, which evolve the pushforward distribution during training and naturally admit one-step inference. We introduce a drifting field that governs the sample movement and achieves equilibrium when the distributions match. This leads to a training objective that allows the neural network optimizer to evolve the distribution. In experiments, our one-step generator achieves state-of-the-art results on ImageNet at 256 x 256 resolution, with an FID of 1.54 in latent space and 1.61 in pixel space. We hope that our work opens up new opportunities for high-quality one-step generation.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Computer Vision and Pattern Recognition,Computer Science - Machine Learning}
+}
+
+@misc{lipmanFlowMatchingGenerative2023,
+  title = {Flow {{Matching}} for {{Generative Modeling}}},
+  author = {Lipman, Yaron and Chen, Ricky T. Q. and {Ben-Hamu}, Heli and Nickel, Maximilian and Le, Matt},
+  year = 2023,
+  month = feb,
+  number = {arXiv:2210.02747},
+  eprint = {2210.02747},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2210.02747},
+  url = {http://arxiv.org/abs/2210.02747},
+  urldate = {2026-04-20},
+  abstract = {We introduce a new paradigm for generative modeling built on Continuous Normalizing Flows (CNFs), allowing us to train CNFs at unprecedented scale. Specifically, we present the notion of Flow Matching (FM), a simulation-free approach for training CNFs based on regressing vector fields of fixed conditional probability paths. Flow Matching is compatible with a general family of Gaussian probability paths for transforming between noise and data samples -- which subsumes existing diffusion paths as specific instances. Interestingly, we find that employing FM with diffusion paths results in a more robust and stable alternative for training diffusion models. Furthermore, Flow Matching opens the door to training CNFs with other, non-diffusion probability paths. An instance of particular interest is using Optimal Transport (OT) displacement interpolation to define the conditional probability paths. These paths are more efficient than diffusion paths, provide faster training and sampling, and result in better generalization. Training CNFs using Flow Matching on ImageNet leads to consistently better performance than alternative diffusion-based methods in terms of both likelihood and sample quality, and allows fast and reliable sample generation using off-the-shelf numerical ODE solvers.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Statistics - Machine Learning}
 }
