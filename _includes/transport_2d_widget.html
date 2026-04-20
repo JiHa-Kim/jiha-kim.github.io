@@ -1,238 +1,366 @@
-<div class="otu" id="transport2dFigure">
-  <div class="otu__intro">
-    <div class="otu__eyebrow">Interactive 2D Example</div>
-    <h4>Sequential vs. Direct Transport Paths</h4>
-    <p>
-      Both methods successfully transport standard normal noise into the exact same correlated target distribution. <strong>They do not harm the representation.</strong>
-      <br><br>
-      However, their <strong>paths</strong> differ fundamentally. <strong>Autoregression</strong> generates coordinates sequentially. We can visualize this as a <strong>"taxicab-like"</strong> path (moving horizontally, then vertically), resulting in a less efficient total travel distance. <strong>Optimal Transport (Brenier)</strong> moves mass <strong>directly</strong> along straight lines, minimizing the overall geometric transport cost.
-    </p>
-  </div>
+<div class="t2c" id="transport2dContinuousFigure">
+  <div class="t2c__intro">
+    <div class="t2c__copy">
+      <div class="t2c__eyebrow">Continuous Exact, Population-Level Comparison</div>
+      <h4>Knothe-Rosenblatt Versus Brenier in 2D</h4>
+      <p>
+        This panel is the <strong>exact continuous problem</strong>. The formulas compare two true maps between probability laws, while the plotted particles are only a visual probe of those maps.
+        Start from one sampled source cloud $z_i \sim \mathcal{N}(0, I)$ and compare two exact maps into the same correlated Gaussian law.
+        The pale blue ellipses are contours of the true target distribution itself, not sampled target points.
+        The sequential map is the triangular Knothe-Rosenblatt transform $T_{\mathrm{KR}}(z)=Lz$, while the direct map is the Brenier transform $T_{\mathrm{OT}}(z)=\Sigma^{1/2}z$.
+        The full sampled source cloud is still transported on screen; only the path traces are thinned to keep the law-level picture readable.
+      </p>
+    </div>
 
-  <div class="otu__stage-card">
-    <div class="t2d__header">
-      <div class="t2d__segmented-control">
-        <button class="t2d__seg-btn active" data-map="ar">Autoregression (Sequential)</button>
-        <button class="t2d__seg-btn" data-map="ot">Optimal Transport (Direct)</button>
+    <div class="t2c__summary-card">
+      <div class="t2c__panel-title">Exact Law-Level Comparison</div>
+      <div class="t2c__summary-value">Both views target the same correlated Gaussian law; only the exact map changes.</div>
+      <div class="t2c__summary-meta">
+        The costs below are empirical totals on the displayed sample cloud, but the KR and Brenier formulas themselves are exact population-level maps:
+      </div>
+      <div class="t2c__cost-row">
+        <span class="t2c__cost-label">Sequential KR</span>
+        <strong class="t2c__cost-value">194.17</strong>
+      </div>
+      <div class="t2c__cost-row">
+        <span class="t2c__cost-label">Direct Brenier</span>
+        <strong class="t2c__cost-value t2c__cost-value--best">92.21</strong>
       </div>
     </div>
-    
-    <div class="otu__stage" id="t2dStage" style="height: 420px; position: relative;">
-      <canvas id="t2dCanvas" style="position: absolute; inset: 0; width: 100%; height: 100%;"></canvas>
+  </div>
+
+  <div class="t2c__stage-card">
+    <div class="t2c__toolbar">
+      <div class="t2c__segmented-control">
+        <button class="t2c__seg-btn active" data-map="kr">Knothe-Rosenblatt (Sequential)</button>
+        <button class="t2c__seg-btn" data-map="ot">Brenier (Direct)</button>
+      </div>
+      <div class="t2c__legend">Gray = sampled source cloud, pale blue ellipses = exact target law contours, muted paths = representative trajectories, orange = the transported sampled cloud.</div>
     </div>
 
-    <div class="t2d__footer">
-      <button class="t2d__play-btn" id="t2dPlay">
+    <div class="t2c__stage" id="t2cStage">
+      <canvas id="t2cCanvas"></canvas>
+    </div>
+
+    <div class="t2c__footer">
+      <button class="t2c__play-btn" id="t2cPlay" aria-label="Play continuous transport animation">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </button>
-      <input type="range" class="t2d__slider" id="t2dSlider" min="0" max="1" step="0.005" value="0">
-      <div class="t2d__time-val" id="t2dValue">t = 0.00</div>
+      <input type="range" class="t2c__slider" id="t2cSlider" min="0" max="1" step="0.005" value="0">
+      <div class="t2c__time-val" id="t2cValue">t = 0.00</div>
     </div>
   </div>
 </div>
 
 <style>
-.otu {
-  margin: 1.35rem 0 2rem 0;
-  padding: 1rem;
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.16));
-  border-radius: 14px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+.t2c {
+  --t2c-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
+  --t2c-ui-bg: var(--main-bg, #fff);
+  --t2c-ui-muted: var(--text-muted-color, var(--text-color, inherit));
+  --t2c-ui-text: var(--text-color, inherit);
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--t2c-ui-border);
+  border-radius: 18px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.05));
 }
-.otu__eyebrow {
+
+.t2c__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(250px, 320px);
+  gap: 1rem;
+  align-items: start;
+}
+
+.t2c__eyebrow {
   margin-bottom: 0.28rem;
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-muted-color, var(--text-color, inherit));
-}
-.otu__intro h4 {
-  margin: 0;
-  font-size: 1.04rem;
-}
-.otu__intro p {
-  margin: 0.45rem 0 0 0;
-  line-height: 1.66;
-  color: var(--text-muted-color, var(--text-color, inherit));
-}
-.otu__stage-card {
-  margin-top: 1rem;
-  padding: 0.9rem;
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
-  border-radius: 12px;
-  background: var(--main-bg, rgba(255, 255, 255, 0.76));
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.otu__stage {
-  background: var(--main-bg, #fff);
-  border-radius: 8px;
-  border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-  overflow: hidden;
-}
-[data-mode="dark"] .otu__stage {
-  background: var(--main-bg, #1b1b1e);
+  color: var(--t2c-ui-muted);
 }
 
-/* T2D Specifics */
-.t2d__header {
-  display: flex;
-  justify-content: center;
+.t2c__copy h4 {
+  margin: 0 0 0.45rem 0;
+  font-size: 1.04rem;
+  color: var(--heading-color, var(--t2c-ui-text));
 }
-.t2d__segmented-control {
-  display: flex;
-  background: rgba(120, 120, 120, 0.1);
-  padding: 4px;
-  border-radius: 8px;
-  gap: 4px;
+
+.t2c__copy p {
+  margin: 0.45rem 0 0 0;
+  font-size: 1rem;
+  line-height: 1.66;
+  color: var(--t2c-ui-muted);
 }
-.t2d__seg-btn {
+
+.t2c__summary-card,
+.t2c__stage-card {
+  border: 1px solid var(--t2c-ui-border);
+  border-radius: 14px;
+  background: var(--t2c-ui-bg);
+}
+
+.t2c__summary-card {
+  padding: 0.95rem;
+}
+
+.t2c__panel-title {
+  margin-bottom: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--t2c-ui-muted);
+}
+
+.t2c__summary-value {
+  font-size: 0.98rem;
+  line-height: 1.55;
+  font-weight: 700;
+  color: var(--t2c-ui-text);
+}
+
+.t2c__summary-meta {
+  margin-top: 0.55rem;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--t2c-ui-muted);
+}
+
+.t2c__cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--t2c-ui-border);
+}
+
+.t2c__cost-label {
+  font-size: 0.94rem;
+  color: var(--t2c-ui-text);
+}
+
+.t2c__cost-value {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--t2c-ui-text);
+}
+
+.t2c__cost-value--best {
+  color: var(--prompt-tip-icon, #16a34a);
+}
+
+.t2c__stage-card {
+  margin-top: 1rem;
+  padding: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.t2c__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.t2c__segmented-control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.28rem;
+  border-radius: 12px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.08));
+}
+
+.t2c__seg-btn {
   border: none;
   background: transparent;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted-color, #6b7280);
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--t2c-ui-muted);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.18s ease, color 0.18s ease;
 }
-.t2d__seg-btn:hover {
-  color: var(--text-color, #111827);
+
+.t2c__seg-btn:hover {
+  color: var(--t2c-ui-text);
 }
-.t2d__seg-btn.active {
-  background: var(--main-bg, #fff);
-  color: var(--text-color, #111827);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+
+.t2c__seg-btn.active {
+  background: var(--t2c-ui-bg);
+  color: var(--t2c-ui-text);
 }
-[data-mode="dark"] .t2d__seg-btn.active {
+
+[data-mode="dark"] .t2c__seg-btn.active {
   background: var(--card-bg, #374151);
   color: #f3f4f6;
 }
 
-.t2d__footer {
+.t2c__legend {
+  max-width: 420px;
+  font-size: 0.93rem;
+  line-height: 1.55;
+  color: var(--t2c-ui-muted);
+}
+
+.t2c__stage {
+  position: relative;
+  height: 410px;
+  border: 1px solid var(--t2c-ui-border);
+  border-radius: 14px;
+  background: var(--t2c-ui-bg);
+  overflow: hidden;
+}
+
+.t2c__stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.t2c__footer {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 4px;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
-.t2d__play-btn {
+
+.t2c__play-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.2));
-  background: var(--main-bg, #fff);
-  color: var(--text-color, #111827);
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid var(--t2c-ui-border);
+  background: var(--t2c-ui-bg);
+  color: var(--t2c-ui-text);
   cursor: pointer;
-  transition: all 0.1s;
-}
-.t2d__play-btn:hover {
-  background: rgba(120, 120, 120, 0.1);
-}
-.t2d__play-btn:active {
-  transform: scale(0.95);
-}
-[data-mode="dark"] .t2d__play-btn {
-  background: #374151;
-  color: #f3f4f6;
 }
 
-.t2d__slider {
-  flex-grow: 1;
-  cursor: pointer;
+.t2c__play-btn:hover {
+  background: var(--card-bg, rgba(120, 120, 120, 0.08));
 }
-.t2d__time-val {
+
+.t2c__play-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--prompt-info-icon, #0ea5e9) 38%, transparent);
+  outline-offset: 2px;
+}
+
+.t2c__slider {
+  flex: 1 1 auto;
+  min-width: 180px;
+  cursor: pointer;
+  accent-color: var(--prompt-warning-icon, #d97706);
+}
+
+.t2c__time-val {
   font-family: var(--font-family-monospace, monospace);
-  font-size: 0.85rem;
-  width: 60px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--t2c-ui-muted);
+  min-width: 68px;
   text-align: right;
-  color: var(--text-muted-color, #6b7280);
+}
+
+.t2c .mjx-container {
+  margin: 0 !important;
+}
+
+@media (max-width: 980px) {
+  .t2c__intro {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .t2c {
+    padding: 1rem;
+  }
+
+  .t2c__stage {
+    height: 380px;
+  }
 }
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const root = document.getElementById('transport2dFigure');
+document.addEventListener('DOMContentLoaded', function() {
+  const root = document.getElementById('transport2dContinuousFigure');
   if (!root || root.dataset.initialized === 'true') return;
   root.dataset.initialized = 'true';
 
-  const canvas = root.querySelector('#t2dCanvas');
+  const canvas = root.querySelector('#t2cCanvas');
   const ctx = canvas.getContext('2d');
-  const stage = root.querySelector('#t2dStage');
-  const slider = root.querySelector('#t2dSlider');
-  const playBtn = root.querySelector('#t2dPlay');
-  const timeVal = root.querySelector('#t2dValue');
-  const segBtns = root.querySelectorAll('.t2d__seg-btn');
+  const stage = root.querySelector('#t2cStage');
+  const slider = root.querySelector('#t2cSlider');
+  const playBtn = root.querySelector('#t2cPlay');
+  const timeVal = root.querySelector('#t2cValue');
+  const segBtns = root.querySelectorAll('.t2c__seg-btn');
 
-  let currentMapType = 'ar'; // 'ar' or 'ot'
+  const sourcePoints = [[1.1013, 0.3384], [-0.54, -1.2602], [-1.8946, 0.0186], [-0.8106, -0.8722], [-0.222, -0.0518], [-2.2768, 0.9251], [-2.0268, 1.8596], [0.5906, -0.4718], [1.343, 0.0208], [0.6909, 0.1072], [1.0965, 1.0614], [-0.9073, -0.6125], [0.3432, -0.21], [-2.2849, 2.0261], [-2.175, -2.0815], [-1.2761, 0.5649], [1.796, -0.2354], [-0.3911, 0.1739], [-0.3669, 0.0824], [-1.14, 0.4383], [0.3926, -2.4354], [-0.1102, 0.1629], [0.5612, -0.8161], [-1.328, -0.9507], [0.548, -0.8518], [-0.7641, 1.1438], [-0.7862, -0.8986], [-0.0912, 0.1986], [1.0376, -0.8793], [-1.5682, -0.1225], [0.6436, -1.4815], [-0.4873, 0.3062], [0.231, 0.0834], [-0.2569, -0.7993], [-0.9281, 1.1563], [-1.1172, 1.228], [-1.3151, 2.9036], [-1.7381, 1.6043], [-0.8971, -0.1156], [-0.0656, -0.6522], [2.2284, 0.0949], [-1.3211, 0.6466], [0.7124, -1.1475], [0.5356, 0.069], [0.8203, 0.7122], [-0.0084, -0.4083], [0.9104, 0.3132], [-1.4893, -0.5449], [-0.4833, -0.2622], [2.2843, -0.3773], [0.4773, 1.6553], [0.5037, 0.4319], [1.298, 0.1973], [0.186, 0.6887], [0.4121, -0.6804], [-1.1659, -0.1134], [1.398, -0.2264], [1.1484, 0.4126], [-0.3089, -2.6334], [0.2221, -0.2769], [-1.6005, 0.5145], [-0.0254, 0.3751], [-0.6044, 0.202], [-0.4732, 1.0649]];
+  const L = [[1.5811, 0.0], [1.3914, 0.7513]];
+  const S = [[1.3585, 0.8096], [0.8096, 1.3585]];
+  const contourRadii = [1.0, 2.0];
+
+  const krTargets = sourcePoints.map(function(point) {
+    return [
+      L[0][0] * point[0] + L[0][1] * point[1],
+      L[1][0] * point[0] + L[1][1] * point[1]
+    ];
+  });
+  const otTargets = sourcePoints.map(function(point) {
+    return [
+      S[0][0] * point[0] + S[0][1] * point[1],
+      S[1][0] * point[0] + S[1][1] * point[1]
+    ];
+  });
+
+  const contourPoints = [];
+  const highlightedIndices = [0, 4, 8, 12, 17, 22, 27, 31, 36, 41, 46, 50, 55, 60];
+  contourRadii.forEach(function(radius) {
+    for (let i = 0; i < 96; i++) {
+      const angle = (i / 96) * Math.PI * 2;
+      contourPoints.push([
+        S[0][0] * radius * Math.cos(angle) + S[0][1] * radius * Math.sin(angle),
+        S[1][0] * radius * Math.cos(angle) + S[1][1] * radius * Math.sin(angle)
+      ]);
+    }
+  });
+
+  const allPoints = sourcePoints.concat(contourPoints, krTargets, otTargets);
+  const allX = allPoints.map(function(point) { return point[0]; });
+  const allY = allPoints.map(function(point) { return point[1]; });
+  const padding = 0.75;
+  const mapScale = {
+    xMin: Math.min.apply(null, allX) - padding,
+    xMax: Math.max.apply(null, allX) + padding,
+    yMin: Math.min.apply(null, allY) - padding,
+    yMax: Math.max.apply(null, allY) + padding
+  };
+
+  let currentMapType = 'kr';
   let currentT = 0;
   let isPlaying = false;
   let animationFrameId = null;
   let stageRect = null;
-
-  // Mathematical setup
-  // Source: N(0, I)
-  // Target: Correlated Gaussian N(0, Sigma)
-  // Sigma = [[2.5, 2.2], [2.2, 2.5]]
-  
-  // Autoregression (Cholesky factor L): Lower triangular
-  const L = [
-    [1.5811, 0.0000],
-    [1.3914, 0.7513]
-  ];
-
-  // Optimal Transport (Matrix square root S): Symmetric
-  const S = [
-    [1.3585, 0.8096],
-    [0.8096, 1.3585]
-  ];
-
-  // Scatter points definition
-  const numPoints = 120;
-  const points = [];
-  // seeded random for consistency
-  let m_w = 123456789;
-  let m_z = 987654321;
-  let mask = 0xffffffff;
-  function seedRandom() {
-    m_z = (36969 * (m_z & 65535) + (m_z >> 16)) & mask;
-    m_w = (18000 * (m_w & 65535) + (m_w >> 16)) & mask;
-    let result = ((m_z << 16) + m_w) & mask;
-    result /= 4294967296;
-    return result + 0.5;
-  }
-
-  for(let i=0; i<numPoints; i++) {
-    let u1 = seedRandom();
-    let u2 = seedRandom();
-    let r = Math.sqrt(-2.0 * Math.log(u1));
-    let theta = 2.0 * Math.PI * u2;
-    let zx = r * Math.cos(theta);
-    let zy = r * Math.sin(theta);
-    
-    let xAR = L[0][0] * zx + L[0][1] * zy;
-    let yAR = L[1][0] * zx + L[1][1] * zy;
-
-    let xOT = S[0][0] * zx + S[0][1] * zy;
-    let yOT = S[1][0] * zx + S[1][1] * zy;
-
-    points.push({ zx, zy, xAR, yAR, xOT, yOT });
-  }
-
-  const mapScale = { xMin: -6, xMax: 6, yMin: -6, yMax: 6 };
 
   function mapToPx(x, y) {
     const nx = (x - mapScale.xMin) / (mapScale.xMax - mapScale.xMin);
     const ny = (y - mapScale.yMin) / (mapScale.yMax - mapScale.yMin);
     return {
       x: nx * stageRect.width,
-      y: stageRect.height - ny * stageRect.height // invert Y
+      y: stageRect.height - ny * stageRect.height
     };
   }
 
@@ -244,107 +372,124 @@ document.addEventListener("DOMContentLoaded", function() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  const getThemeColors = () => {
+  function getThemeColors() {
     const style = getComputedStyle(document.documentElement);
     const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
     return {
-      bg: isDark ? '#1b1b1e' : '#ffffff',
-      axes: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
-      pathFaint: isDark ? 'rgba(100, 100, 100, 0.25)' : 'rgba(150, 150, 150, 0.25)',
-      pointZ: isDark ? 'rgba(150, 150, 150, 0.4)' : 'rgba(100, 100, 100, 0.3)',
-      pointTarget: isDark ? 'rgba(14, 165, 233, 0.3)' : 'rgba(14, 165, 233, 0.3)',
-      pointCurrent: isDark ? '#d97706' : '#d97706',
+      path: isDark ? 'rgba(148, 163, 184, 0.32)' : 'rgba(100, 116, 139, 0.28)',
+      source: isDark ? 'rgba(148, 163, 184, 0.42)' : 'rgba(100, 116, 139, 0.34)',
+      targetLawOuter: isDark ? 'rgba(14, 165, 233, 0.18)' : 'rgba(14, 165, 233, 0.18)',
+      targetLawInner: isDark ? 'rgba(14, 165, 233, 0.32)' : 'rgba(14, 165, 233, 0.28)',
+      current: style.getPropertyValue('--prompt-warning-icon').trim() || '#d97706'
     };
-  };
+  }
 
   let theme = getThemeColors();
 
+  function drawDot(x, y, radius, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawTargetContour(radius, color, lineWidth) {
+    const steps = 120;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      const point = [
+        S[0][0] * radius * Math.cos(angle) + S[0][1] * radius * Math.sin(angle),
+        S[1][0] * radius * Math.cos(angle) + S[1][1] * radius * Math.sin(angle)
+      ];
+      const px = mapToPx(point[0], point[1]);
+      if (i === 0) ctx.moveTo(px.x, px.y);
+      else ctx.lineTo(px.x, px.y);
+    }
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+  }
+
+  function easeOutQuart(value) {
+    return 1 - Math.pow(1 - value, 4);
+  }
+
+  function getSequentialProgress(value) {
+    if (value <= 0.22) {
+      return { x: easeOutQuart(value / 0.22), y: 0 };
+    }
+    if (value <= 0.4) {
+      return { x: 1, y: 0 };
+    }
+    if (value <= 0.62) {
+      return { x: 1, y: easeOutQuart((value - 0.4) / 0.22) };
+    }
+    return { x: 1, y: 1 };
+  }
+
   function draw() {
     ctx.clearRect(0, 0, stageRect.width, stageRect.height);
+    const activeTargets = currentMapType === 'kr' ? krTargets : otTargets;
 
-    const matrix = currentMapType === 'ar' ? L : S;
+    drawTargetContour(2.0, theme.targetLawOuter, 1.1);
+    drawTargetContour(1.0, theme.targetLawInner, 1.5);
 
-    for (const p of points) {
-      const pZ = mapToPx(p.zx, p.zy);
-      const pTarget = currentMapType === 'ar' ? mapToPx(p.xAR, p.yAR) : mapToPx(p.xOT, p.yOT);
-      
-      // Draw Faint Path
-      ctx.strokeStyle = theme.pathFaint;
-      ctx.lineWidth = 1;
+    highlightedIndices.forEach(function(index) {
+      const source = sourcePoints[index];
+      const target = activeTargets[index];
+      const pSource = mapToPx(source[0], source[1]);
+      const pTarget = mapToPx(target[0], target[1]);
+
+      ctx.strokeStyle = theme.path;
+      ctx.lineWidth = 1.1;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       ctx.beginPath();
-      ctx.moveTo(pZ.x, pZ.y);
-      if (currentMapType === 'ar') {
-        const pMid = mapToPx(p.xAR, p.zy);
+      ctx.moveTo(pSource.x, pSource.y);
+      if (currentMapType === 'kr') {
+        const pMid = mapToPx(target[0], source[1]);
         ctx.lineTo(pMid.x, pMid.y);
       }
       ctx.lineTo(pTarget.x, pTarget.y);
       ctx.stroke();
-      
-      // Draw Target Base Point
-      ctx.fillStyle = theme.pointTarget;
-      ctx.beginPath();
-      ctx.arc(pTarget.x, pTarget.y, 2, 0, Math.PI * 2);
-      ctx.fill();
+    });
 
-      // Draw Initial Base Point
-      ctx.fillStyle = theme.pointZ;
-      ctx.beginPath();
-      ctx.arc(pZ.x, pZ.y, 2, 0, Math.PI * 2);
-      ctx.fill();
+    sourcePoints.forEach(function(point) {
+      const pSource = mapToPx(point[0], point[1]);
+      drawDot(pSource.x, pSource.y, 2.1, theme.source);
+    });
 
-      // Draw Current Animating Point
-      let curX, curY;
-      if (currentMapType === 'ar') {
-        if (currentT <= 0.5) {
-          let tNorm = currentT * 2;
-          curX = p.zx + tNorm * (p.xAR - p.zx);
-          curY = p.zy;
-        } else {
-          let tNorm = (currentT - 0.5) * 2;
-          curX = p.xAR;
-          curY = p.zy + tNorm * (p.yAR - p.zy);
-        }
+    sourcePoints.forEach(function(source, index) {
+      const target = activeTargets[index];
+      let curX;
+      let curY;
+
+      if (currentMapType === 'kr') {
+        const phase = getSequentialProgress(currentT);
+        curX = source[0] + phase.x * (target[0] - source[0]);
+        curY = source[1] + phase.y * (target[1] - source[1]);
       } else {
-        curX = p.zx + currentT * (p.xOT - p.zx);
-        curY = p.zy + currentT * (p.yOT - p.zy);
+        curX = source[0] + currentT * (target[0] - source[0]);
+        curY = source[1] + currentT * (target[1] - source[1]);
       }
 
-      let pCur = mapToPx(curX, curY);
-      ctx.fillStyle = theme.pointCurrent;
-      ctx.beginPath();
-      ctx.arc(pCur.x, pCur.y, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
+      const pCur = mapToPx(curX, curY);
+      drawDot(pCur.x, pCur.y, 3.4, theme.current);
+    });
   }
 
-  function updateTime(t) {
-    currentT = Math.max(0, Math.min(1, t));
+  function updateTime(value) {
+    currentT = Math.max(0, Math.min(1, value));
     slider.value = currentT;
-    timeVal.innerText = `t = ${currentT.toFixed(2)}`;
+    timeVal.textContent = 't = ' + currentT.toFixed(2);
     draw();
   }
 
-  slider.addEventListener('input', (e) => {
-    isPlaying = false;
-    updatePlayButton();
-    updateTime(parseFloat(e.target.value));
-  });
-
-  segBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      segBtns.forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      currentMapType = e.target.dataset.map;
-      draw();
-    });
-  });
-
   function updatePlayButton() {
-    if (isPlaying) {
-      playBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-    } else {
-      playBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
-    }
+    playBtn.innerHTML = isPlaying
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
   }
 
   let lastTime = 0;
@@ -352,17 +497,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function animate(timestamp) {
     if (!isPlaying) return;
-    
+
     if (!lastTime) lastTime = timestamp;
     const dt = timestamp - lastTime;
     lastTime = timestamp;
 
-    const speed = 0.0006; // units per ms
+    const speed = currentMapType === 'kr' ? 0.00085 : 0.0006;
     let newT = currentT + direction * speed * dt;
-
     if (newT >= 1 && direction === 1) {
       newT = 1;
-      direction = -1; // bounce back
+      direction = -1;
       isPlaying = false;
       updatePlayButton();
     } else if (newT <= 0 && direction === -1) {
@@ -373,13 +517,25 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     updateTime(newT);
-
-    if (isPlaying) {
-      animationFrameId = requestAnimationFrame(animate);
-    }
+    if (isPlaying) animationFrameId = requestAnimationFrame(animate);
   }
 
-  playBtn.addEventListener('click', () => {
+  slider.addEventListener('input', function(event) {
+    isPlaying = false;
+    updatePlayButton();
+    updateTime(parseFloat(event.target.value));
+  });
+
+  segBtns.forEach(function(button) {
+    button.addEventListener('click', function(event) {
+      segBtns.forEach(function(btn) { btn.classList.remove('active'); });
+      event.currentTarget.classList.add('active');
+      currentMapType = event.currentTarget.dataset.map;
+      draw();
+    });
+  });
+
+  playBtn.addEventListener('click', function() {
     isPlaying = !isPlaying;
     updatePlayButton();
     if (isPlaying) {
@@ -392,14 +548,14 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  window.addEventListener('resize', () => {
+  window.addEventListener('resize', function() {
     measure();
     draw();
   });
 
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === "data-mode") {
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'data-mode') {
         theme = getThemeColors();
         draw();
       }
@@ -407,7 +563,19 @@ document.addEventListener("DOMContentLoaded", function() {
   });
   observer.observe(document.documentElement, { attributes: true });
 
+  function requestMathTypeset(attempt) {
+    const tries = typeof attempt === 'number' ? attempt : 0;
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([root]).catch(function() {});
+      return;
+    }
+    if (tries < 20) {
+      window.setTimeout(function() { requestMathTypeset(tries + 1); }, 250);
+    }
+  }
+
   measure();
   draw();
+  requestMathTypeset();
 });
 </script>
