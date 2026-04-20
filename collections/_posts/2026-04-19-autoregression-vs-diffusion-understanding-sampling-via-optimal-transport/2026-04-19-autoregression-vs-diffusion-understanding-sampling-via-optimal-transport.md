@@ -72,14 +72,9 @@ Autoregressive models and diffusion models are often presented as very different
 
 To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 thorpeIntroductionOptimalTransport %}
 
-> [!example] Shipping Two Piles of Mass
-> Suppose source point $A$ carries mass $1$, source point $B$ carries mass $1$, and the target has two destinations $C$ and $D$, each needing mass $1$.
->
-> If the costs are
-> $$ c(A,C) = 1, \qquad c(A,D) = 4, \qquad c(B,C) = 3, \qquad c(B,D) = 2, $$
-> then the best plan is obvious: send $A$ to $C$ and $B$ to $D$, for total cost
-> $$ 1 + 2 = 3. $$
-> Optimal transport is the continuous, high-dimensional version of this same mass-moving problem.
+{% include transport_widget.html %}
+
+Optimal transport is the continuous, high-dimensional version of this same mass-moving problem.
 
 > [!note] Generative Optimal Transport
 > In the generative setting, our source is the noise prior $P_{\text{noise}}$, and our target is the true data distribution $P_{\text{data}}$. We would like a transport map $T$ satisfying
@@ -104,16 +99,17 @@ To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransp
 > Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost on source-target pairs. The Monge problem seeks a transport map $T$ minimizing
 > $$ \min_T \underset{z \,\sim\, P_{\text{noise}}}{\mathbb{E}}[c(z, T(z))] \quad \text{s.t.} \quad T_\sharp P_{\text{noise}} = P_{\text{data}}. $$
 
-> [!info] Kantorovich Relaxation = Linear Optimization
-> In the discrete case, suppose source point $i$ carries mass $a_i$, target point $j$ needs mass $b_j$, and moving one unit of mass from $i$ to $j$ costs $c_{ij}$.
-> 
-> Let $\pi_{ij}$ be the amount of mass sent from $i$ to $j$. Then the transport problem becomes
+> [!info] Kantorovich Relaxation
+> For generative modeling, Monge is the ideal inference-time object: sample $z \sim P_{\text{noise}}$ and output $x = T(z)$. But with finite datasets or mini-batches, it is often more natural to optimize over a **transport plan** $\pi_{ij}$, which can split mass across several targets.
+>
+> In the discrete case, if source point $i$ carries mass $a_i$, target point $j$ needs mass $b_j$, and moving one unit of mass costs $c_{ij}$, then Kantorovich transport solves
 > $$ \min_{\pi_{ij} \ge 0} \sum_{i,j} c_{ij}\pi_{ij} $$
 > subject to
 > $$ \sum_j \pi_{ij} = a_i, \qquad \sum_i \pi_{ij} = b_j. $$
-> The first equation says source point $i$ sends out all of its mass. The second says target point $j$ receives all of its mass.
->
-> This is a linear optimization problem because both the objective and the constraints are linear in the variables $\pi_{ij}$.
+> This is useful here because it allows mass splitting and turns the discrete problem into a linear optimization problem. Monge is recovered as the special case
+> $$ \pi_{i,T(i)} = a_i, \qquad \pi_{ij} = 0 \text{ for } j \ne T(i). $$
+
+{% include transport_split_widget.html %}
 
 ## The 1D Case: Inverse Transform Sampling
 
@@ -122,35 +118,12 @@ To build intuition, let's start with a simple case: **Inverse Transform Sampling
 Suppose we operate strictly in a 1-dimensional continuous space $\mathbb{R}$, and the target distribution $P_{\text{data}}$ is entirely defined by its Cumulative Distribution Function (CDF) $F(x) = P(X \le x)$. 
 
 > [!problem] The 1D Sampling Problem
-> We assume we know how to sample
+> We assume we know how to sample from the uniform distribution
 > $$ U \sim \mathcal{U}(0,1), $$
-> but we want to generate a random variable $X$ with target CDF $F$.
->
-> So the problem is:
-> find a function $T$ such that
-> $$ X = T(U) $$
-> satisfies
+> but we want to generate a random variable $X$ with target CDF $F$. So the problem is to find a function $T$ such that $X = T(U)$ satisfies
 > $$ P(X \le t) = F(t) \qquad \text{for every } t \in \mathbb{R}. $$
 >
 > In other words, we want to turn easy-to-sample uniform noise into samples from the target distribution.
-
-> [!example] Warm-Up: Uniform on $[2,5]$
-> Suppose the target distribution is uniform on $[2,5]$. Its CDF is
-> $$
-> F(x) =
-> \begin{cases}
-> 0 & x < 2 \\
-> \frac{x-2}{3} & 2 \le x \le 5 \\
-> 1 & x > 5
-> \end{cases}
-> $$
-> so the inverse CDF is
-> $$ F^{-1}(u) = 2 + 3u. $$
-> Therefore, if $U \sim \mathcal{U}(0,1)$, then
-> $$ X = 2 + 3U $$
-> is uniform on $[2,5]$.
->
-> This is already transport: the quantile $u$ in $[0,1]$ is sent to the point with the same quantile in the target distribution.
 
 > [!success] The 1D Closed-Form Solution
 > Draw
@@ -179,20 +152,15 @@ We now rewrite the same idea in the discrete setting first.
 > Suppose source points $x_1,\dots,x_n$ and target points $y_1,\dots,y_n$ each carry mass $\frac{1}{n}$, and each source point must be matched to exactly one target point. Then we choose a permutation $\sigma$ and solve
 > $$ \min_{\sigma \in S_n} \frac{1}{n}\sum_{i=1}^n c(x_i, y_{\sigma(i)}). $$
 
-> [!lemma] 1D Uncrossing
+> [!lemma] Monge Property
 > Assume $x_1 < x_2$, $y_1 < y_2$, and $c(x,y) = h(x-y)$ with $h$ convex. Then
 > $$ c(x_1, y_1) + c(x_2, y_2) \le c(x_1, y_2) + c(x_2, y_1). $$
 > In words: if two matching lines cross, uncrossing them never increases the cost.
 
 > [!solution] Discrete Monotone Matching
-> Let
-> $$ x^{(1)} \le x^{(2)} \le \dots \le x^{(n)} $$
-> be the source points in sorted order, and let
-> $$ y^{(1)} \le y^{(2)} \le \dots \le y^{(n)} $$
-> be the target points in sorted order.
-> Here $x^{(k)}$ means "the $k$-th smallest source point," and similarly for $y^{(k)}$.
->
-> Then an optimal matching is
+> Sort both sets of points in non-decreasing order: 
+> $$ x^{(1)} \le x^{(2)} \le \dots \le x^{(n)} \quad \text{and} \quad y^{(1)} \le y^{(2)} \le \dots \le y^{(n)}. $$
+> Here $x^{(k)}$ means "the $k$-th smallest source point," and similarly for $y^{(k)}$. Then an optimal matching is
 > $$ x^{(1)} \leftrightarrow y^{(1)}, \qquad x^{(2)} \leftrightarrow y^{(2)}, \qquad \dots, \qquad x^{(n)} \leftrightarrow y^{(n)}. $$
 > So in 1D, optimal transport is just "sort both sides and pair equal ranks."
 
@@ -229,6 +197,12 @@ We now rewrite the same idea in the discrete setting first.
 > [!example] Uniform to Arbitrary Mapping
 > *Placeholder: Insert Visualization showing a Uniform [0,1] distribution mapped via an inverse CDF curve onto a complex 1D target.*
 
+> [!todo] Visualization Placeholder: Discrete Uncrossing
+> Use two side-by-side panels.
+> In the left panel, draw crossed matching segments between sorted source points and target points.
+> In the right panel, draw the uncrossed matching.
+> Annotate the total cost in both panels so the reader can visually see why 1D matching prefers order-preserving assignments.
+
 In higher dimensions, we apply the same quantile-matching step conditionally, one coordinate at a time. This gives the **Knothe-Rosenblatt rearrangement**.
 
 > [!definition] Knothe-Rosenblatt Rearrangement
@@ -253,6 +227,13 @@ In higher dimensions, we apply the same quantile-matching step conditionally, on
 > and in the discrete case
 > $$ F(v_k) = \sum_{j \le k} p_j. $$
 > So learning $p$ is enough: the CDF is obtained by integrating or summing, and sampling uses the inverse CDF.
+
+> [!todo] Visualization Placeholder: Density to CDF to Sample
+> Use a 3-panel figure:
+> 1. a density or histogram,
+> 2. the corresponding CDF,
+> 3. a sampled quantile $u$ being mapped back through the inverse CDF.
+> This figure should explain why models can predict probabilities first and still recover the transport rule later.
 
 ### The Choice of Base Distribution
 
@@ -288,19 +269,6 @@ Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}
 
 Vanilla autoregression fixes an order and applies the same 1D inverse-CDF step sequentially.
 
-> [!example] Two-Step Generation
-> Suppose we want to generate a pair $(x_1, x_2)$.
->
-> Let
-> $$ P(x_1 = A) = 0.8, \qquad P(x_1 = B) = 0.2. $$
-> Then let
-> $$ P(x_2 = 1 \mid x_1 = A) = 0.9, \qquad P(x_2 = 1 \mid x_1 = B) = 0.2. $$
-> So
-> $$ P(x_1 = A, x_2 = 1) = 0.8 * 0.9 = 0.72, $$
-> and
-> $$ P(x_1 = B, x_2 = 1) = 0.2 * 0.2 = 0.04. $$
-> This is the whole autoregressive idea: generate the first coordinate, then generate the second conditioned on the first, then continue.
-
 > [!definition] Chain Rule Factorization
 > If $x = (x_1,\dots,x_D)$ and $x_{<i} = (x_1,\dots,x_{i-1})$, then
 > $$ p(x) = \prod_{i=1}^D p(x_i \mid x_{<i}). $$
@@ -323,36 +291,30 @@ Vanilla autoregression fixes an order and applies the same 1D inverse-CDF step s
 > so with uniform base density $p_U(u) = 1$ we recover
 > $$ p(x) = \prod_{i=1}^D p(x_i \mid x_{<i}). $$
 
+> [!todo] Visualization Placeholder: Triangular Jacobian
+> Draw a small $4 \times 4$ lower-triangular matrix.
+> Grey out the entries above the diagonal and highlight the diagonal entries.
+> Add a short caption: determinant = product of the diagonal terms.
+
 ### Example: LLMs as Classification
 
 > [!example] Next-Token Prediction
 > Let the vocabulary be ordered as $v_1,\dots,v_{\vert \mathcal{V} \vert}$. At step $i$, the model outputs
 > $$ p_k = P(x_i = v_k \mid x_{<i}), \qquad \sum_k p_k = 1. $$
-> For example, if the probabilities are
-> $$ (p_1, p_2, p_3) = (0.6, 0.3, 0.1), $$
-> then the CDF is
-> $$ (0.6, 0.9, 1.0). $$
-> So if $u = 0.65$, we pick token $v_2$.
+> For example, if the probabilities are $(p_1, p_2, p_3) = (0.6, 0.3, 0.1)$, then the CDF is $(0.6, 0.9, 1.0)$. So if $u = 0.65$, we pick token $v_2$.
 >
 > Training is multiclass classification with negative log-likelihood
 > $$ \mathcal{L}_{\text{NLL}} = -\sum_{i=1}^D \log P(x_i^{\text{true}} \mid x_{<i}). $$
-> Sampling uses the discrete CDF
-> $$ F(v_k) = \sum_{j=1}^k p_j $$
-> and the inverse-CDF rule
+> Sampling uses the discrete CDF $F(v_k) = \sum_{j=1}^k p_j$ and the inverse-CDF rule 
 > $$ x_i = \min \{ v_k \in \mathcal{V} \mid F(v_k) \ge u \}, \qquad u \sim \mathcal{U}(0,1). $$
+
+> [!todo] Visualization Placeholder: Logits to Token Sample
+> Show a short horizontal bar chart for token probabilities, then the cumulative bars, then a vertical line at a sampled $u$.
+> The goal is to visually connect "classification output" to "sampling by inverse CDF."
 
 ## Generalizing Autoregression via Change of Variables
 
 Instead of autoregressing in the original coordinates, we can first change coordinates and then factorize there.
-
-> [!example] Average First, Detail Second
-> Suppose
-> $$ x = (4, 6). $$
-> Instead of working with the original coordinates, define
-> $$ y_1 = \frac{x_1 + x_2}{2} = 5, \qquad y_2 = \frac{x_1 - x_2}{2} = -1. $$
-> Here $y_1$ is the coarse information (the average), and $y_2$ is the fine information (the difference).
->
-> We can now model $y_1$ first and $y_2$ second. This is still autoregression, but in a better coordinate system.
 
 > [!definition] Change of Variables
 > Let $y = g(x)$ be invertible. Then
@@ -362,6 +324,11 @@ Instead of autoregressing in the original coordinates, we can first change coord
 > $$ p_Y(y) = \prod_{i=1}^D p(y_i \mid y_{<i}), $$
 > then
 > $$ p_X(x) = \left[\prod_{i=1}^D p(y_i \mid y_{<i})\right]\left| \det J_g(x) \right|. $$
+
+> [!todo] Visualization Placeholder: Same Point, New Coordinates
+> Draw one point cloud in the original $(x_1, x_2)$ coordinates and the same cloud after a linear transform into $(y_1, y_2)$.
+> Label one axis pair as "original space" and the other as "transformed space."
+> The figure should make it obvious that autoregression can be done after reparameterization.
 
 ### Example 1: Changing the Ordering
 
@@ -394,6 +361,13 @@ Instead of autoregressing in the original coordinates, we can first change coord
 > [!info] Relation to Diffusion
 > Empirically, diffusion models also tend to form low frequencies before high frequencies {% cite DiffusionSpectralAutoregression2024 %}. This is a useful analogy, but the cited follow-up work argues that it is an observed tendency rather than a theorem {% cite falck2025spectralauto %}.
 
+> [!todo] Visualization Placeholder: Low Frequency First
+> Show a tiny image reconstruction sequence:
+> first only the average or low-frequency component,
+> then medium detail,
+> then full detail.
+> This should pair naturally with the frequency-space example above.
+
 ## Constrained vs. Unconstrained Transport
 
 Autoregression constrains the transport map to a specific family; flows and diffusion do not. This single architectural choice has deep consequences for tractability, optimality, and inference.
@@ -425,6 +399,12 @@ $$ \mathbb{E}[ \|x - T(x)\|^2 ] $$
 is the expected squared transport distance.
 
 Autoregression wins on tractability: each $T_i$ reduces to a closed-form 1D problem. Brenier wins on geometric optimality but provides no algorithm to compute $\psi$ in practice.
+
+> [!todo] Visualization Placeholder: Triangular vs. Direct Transport
+> Use one 2D toy distribution and show two arrows:
+> 1. a triangular coordinate-wise transport,
+> 2. a direct unconstrained transport.
+> This figure should visually explain the phrase "structural bias."
 
 ### The Velocity Paradigm: Continuous Flows
 
@@ -473,6 +453,12 @@ $$ X_t = (1-t)\,X_0 + t\,X_1, \qquad u_t = X_1 - X_0 $$
 > But after averaging over many random pairs, the resulting global vector field is **not** guaranteed to be the true Brenier-optimal transport field {% cite lipmanFlowMatchingGenerative2023 %}.
 > The point of flow matching is not exact global OT; the point is that the straight-line target is much easier to regress.
 
+> [!todo] Visualization Placeholder: Conditional Paths vs. Global Field
+> Use two panels:
+> 1. several straight conditional paths for fixed endpoint pairs,
+> 2. the averaged vector field they induce.
+> The purpose is to clarify the difference between conditional OT and the global learned field.
+
 ### Uncrossing Paths: Mini-Batch OT
 
 Random $(X_0, X_1)$ pairing produces wildly crossed trajectories, making $v_\theta$ harder to learn. Solving the discrete assignment problem within each mini-batch uncrosses them:
@@ -493,6 +479,12 @@ $$ \pi^* = \arg\min_{\pi \in \Pi(X_0^B,\, X_1^B)} \sum_{i,j} \pi_{ij}\, \bigl\|X
 Here $X_0^B$ and $X_1^B$ are the two mini-batches, $X_0^{(i)}$ is the $i$-th source point in the batch, $X_1^{(j)}$ is the $j$-th target point, and $\Pi(X_0^B, X_1^B)$ is the set of admissible matchings between them.
 
 This is efficiently approximated via the **Sinkhorn algorithm**. Uncrossed paths yield a smoother $v_\theta$, better generalization, and fewer ODE integration steps at inference.
+
+> [!todo] Visualization Placeholder: Before/After Batch OT
+> Show the same batch twice:
+> once with random pairings that produce crossing trajectories,
+> once with OT-matched pairings that produce nearly parallel trajectories.
+> This should be one of the highest-priority visuals in the article.
 
 ### One-Step Maps: Generative Drifting
 

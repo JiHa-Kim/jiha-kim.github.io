@@ -1,0 +1,1101 @@
+<div class="otx" id="transportSplitWidget">
+  <div class="otx__intro">
+    <div class="otx__copy">
+      <div class="otx__eyebrow">Example</div>
+      <h4>Split-mass transport with two sources</h4>
+      <p>
+        Source $A$ has $2\text{ kg}$ of loose dirt, and source $B$ has $1\text{ kg}$. Hole $C$ needs $1\text{ kg}$,
+        and hole $D$ needs $2\text{ kg}$. We choose how many kilograms to send from $A$ to $C$,
+        and conservation of mass forces the other three entries of the plan.
+      </p>
+    </div>
+
+    <div class="otx__cost-card">
+      <div class="otx__cost-title">Shipping Cost per kg</div>
+      <div class="otx__cost-grid">
+        <div class="otx__cost-head otx__matrix-dir">
+          <span>From</span>
+          <span>&rarr;</span>
+          <span>To</span>
+        </div>
+        <div class="otx__cost-head">To $C$</div>
+        <div class="otx__cost-head">To $D$</div>
+        <div class="otx__cost-head">From $A$</div>
+        <div>$\$1$</div>
+        <div>$\$3$</div>
+        <div class="otx__cost-head">From $B$</div>
+        <div>$\$4$</div>
+        <div>$\$1$</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="otx__stage-card">
+    <div class="otx__stage-note">
+      Each pebble is 0.25 kg. While dragging, the picture updates immediately. When you release the slider, the pebbles replay from the source piles.
+    </div>
+
+    <div class="otx__stage" id="otxStage">
+      <canvas class="otx__canvas" aria-hidden="true"></canvas>
+
+      <div class="otx__route-tag otx__route-tag--ac" data-route-tag="ac">$A \to C$ $\$1/\mathrm{kg}$</div>
+      <div class="otx__route-tag otx__route-tag--ad" data-route-tag="ad">$A \to D$ $\$3/\mathrm{kg}$</div>
+      <div class="otx__route-tag otx__route-tag--bc" data-route-tag="bc">$B \to C$ $\$4/\mathrm{kg}$</div>
+      <div class="otx__route-tag otx__route-tag--bd" data-route-tag="bd">$B \to D$ $\$1/\mathrm{kg}$</div>
+
+      <div class="otx__node otx__node--source otx__node--a" data-node="a">
+        <div class="otx__node-row">
+          <span class="otx__node-title">Source A</span>
+          <span class="otx__node-badge">2 kg</span>
+        </div>
+        <div class="otx__tray otx__tray--source">
+          <div class="otx__slots otx__slots--8" data-slots="a"></div>
+        </div>
+      </div>
+
+      <div class="otx__node otx__node--source otx__node--b" data-node="b">
+        <div class="otx__node-row">
+          <span class="otx__node-title">Source B</span>
+          <span class="otx__node-badge">1 kg</span>
+        </div>
+        <div class="otx__tray otx__tray--source">
+          <div class="otx__slots otx__slots--4" data-slots="b"></div>
+        </div>
+      </div>
+
+      <div class="otx__node otx__node--target otx__node--c" data-node="c">
+        <div class="otx__node-row">
+          <span class="otx__node-title">Hole C</span>
+          <span class="otx__node-badge">needs 1 kg</span>
+        </div>
+        <div class="otx__tray otx__tray--target">
+          <div class="otx__slots otx__slots--4" data-slots="c"></div>
+        </div>
+      </div>
+
+      <div class="otx__node otx__node--target otx__node--d" data-node="d">
+        <div class="otx__node-row">
+          <span class="otx__node-title">Hole D</span>
+          <span class="otx__node-badge">needs 2 kg</span>
+        </div>
+        <div class="otx__tray otx__tray--target">
+          <div class="otx__slots otx__slots--8" data-slots="d"></div>
+        </div>
+      </div>
+
+      <div class="otx__particle-layer" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div class="otx__bottom">
+    <div class="otx__panel otx__panel--controls">
+      <div class="otx__panel-title">Choose the free variable</div>
+
+      <div class="otx__slider-row">
+        <label class="otx__slider-label" for="otxSlider">$x = \pi_{AC}$</label>
+        <div class="otx__slider-value"><span data-bind="x_value">0.50</span> kg</div>
+      </div>
+
+      <input
+        type="range"
+        id="otxSlider"
+        class="otx__slider"
+        min="0"
+        max="1"
+        step="0.25"
+        value="0.50"
+      >
+
+      <div class="otx__slider-ticks">
+        <span>0</span>
+        <span>0.25</span>
+        <span>0.5</span>
+        <span>0.75</span>
+        <span>1</span>
+      </div>
+
+      <div class="otx__actions">
+        <button id="otxReplayBtn" class="btn w-100 otx__btn otx__btn--replay">Replay Current Plan</button>
+        <button id="otxBestBtn" class="btn w-100 otx__btn otx__btn--best">Replay Cheapest Plan</button>
+      </div>
+    </div>
+
+    <div class="otx__panel otx__panel--math">
+      <div class="otx__panel-title">Mass Conservation and Cost</div>
+
+      <div class="otx__eq-grid">
+        <div class="otx__eq-label">$\pi_{AC}$</div>
+        <div class="otx__eq-value"><span data-bind="pi_ac">0.50</span> kg</div>
+        <div class="otx__eq-label">$\pi_{AD}$</div>
+        <div class="otx__eq-value"><span data-bind="pi_ad">1.50</span> kg</div>
+        <div class="otx__eq-label">$\pi_{BC}$</div>
+        <div class="otx__eq-value"><span data-bind="pi_bc">0.50</span> kg</div>
+        <div class="otx__eq-label">$\pi_{BD}$</div>
+        <div class="otx__eq-value"><span data-bind="pi_bd">0.50</span> kg</div>
+      </div>
+
+      <div class="otx__formula">
+        $\mathrm{Cost}(x) = \pi_{AC} + 3\pi_{AD} + 4\pi_{BC} + \pi_{BD}$
+      </div>
+      <div class="otx__formula otx__formula--compact">
+        $\mathrm{Cost}(x) = 10 - 5x$, so the current total is <span class="otx__total-badge">$ \mathbf{ \$ } $ <span data-bind="cost_value">7.50</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.otx {
+  --otx-source-color: var(--prompt-warning-icon, #d97706);
+  --otx-source-bg: var(--prompt-warning-bg, rgba(217, 119, 6, 0.1));
+  --otx-source-alt-color: var(--prompt-tip-icon, #16a34a);
+  --otx-source-alt-bg: var(--prompt-tip-bg, rgba(22, 163, 74, 0.1));
+  --otx-target-color: var(--prompt-info-icon, #0ea5e9);
+  --otx-target-bg: var(--prompt-info-bg, rgba(14, 165, 233, 0.1));
+  --otx-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
+  --otx-ui-text: var(--text-color, inherit);
+  --otx-ui-muted: var(--text-muted-color, var(--text-color, inherit));
+  --otx-ui-bg: var(--main-bg, #fff);
+  margin: 2rem 0;
+  padding: 1.25rem;
+  border: 1px solid var(--otx-ui-border);
+  border-radius: 18px;
+  background: var(--card-bg, rgba(120, 120, 120, 0.05));
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+}
+
+.otx__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(220px, 260px);
+  gap: 1rem;
+  align-items: start;
+}
+
+.otx__eyebrow {
+  margin-bottom: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--otx-ui-muted);
+}
+
+.otx__copy h4 {
+  margin: 0 0 0.45rem 0;
+  font-size: 1.04rem;
+  color: var(--heading-color, var(--text-color, inherit));
+}
+
+.otx__copy p {
+  margin: 0.45rem 0 0 0;
+  font-size: 1rem;
+  line-height: 1.66;
+  color: var(--otx-ui-muted);
+}
+
+.otx__cost-card,
+.otx__stage-card,
+.otx__panel {
+  border: 1px solid var(--otx-ui-border);
+  border-radius: 14px;
+  background: var(--otx-ui-bg);
+}
+
+.otx__cost-card {
+  padding: 0.85rem;
+}
+
+.otx__cost-title,
+.otx__panel-title {
+  margin-bottom: 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--otx-ui-muted);
+}
+
+.otx__cost-grid {
+  display: grid;
+  grid-template-columns: 84px repeat(2, minmax(52px, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--otx-ui-border);
+  border-radius: 10px;
+  font-size: 0.98rem;
+}
+
+.otx__cost-grid > div {
+  padding: 0.58rem 0.58rem;
+  text-align: center;
+  border-right: 1px solid var(--otx-ui-border);
+  border-bottom: 1px solid var(--otx-ui-border);
+  background: var(--otx-ui-bg);
+}
+
+.otx__cost-grid > div:nth-child(3n) {
+  border-right: none;
+}
+
+.otx__cost-grid > div:nth-last-child(-n + 3) {
+  border-bottom: none;
+}
+
+.otx__matrix-dir {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  padding: 0.25rem !important;
+  font-size: 0.68rem !important;
+  color: var(--otx-ui-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.otx__matrix-dir span:nth-child(2) {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.otx__cost-head {
+  font-weight: 700;
+  color: var(--otx-ui-text);
+  background: var(--card-bg, rgba(120, 120, 120, 0.05)) !important;
+}
+
+.otx__stage-card {
+  margin: 1rem 0;
+  padding: 0.9rem;
+}
+
+.otx__stage-note {
+  margin-bottom: 0.7rem;
+  font-size: 0.96rem;
+  line-height: 1.55;
+  color: var(--otx-ui-muted);
+}
+
+.otx__stage {
+  position: relative;
+  height: 360px;
+  border: 1px solid var(--otx-ui-border);
+  border-radius: 14px;
+  background: var(--otx-ui-bg);
+  overflow: hidden;
+}
+
+.otx__canvas,
+.otx__particle-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.otx__canvas {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.otx__particle-layer {
+  z-index: 4;
+  pointer-events: none;
+}
+
+.otx__node {
+  position: absolute;
+  width: 214px;
+  z-index: 3;
+}
+
+.otx__node--a {
+  left: 18px;
+  top: 18px;
+}
+
+.otx__node--b {
+  left: 18px;
+  bottom: 18px;
+}
+
+.otx__node--c {
+  right: 18px;
+  top: 18px;
+}
+
+.otx__node--d {
+  right: 18px;
+  bottom: 18px;
+}
+
+.otx__node-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.otx__node-title {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--otx-ui-text);
+}
+
+.otx__node-badge {
+  flex: 0 0 auto;
+  padding: 0.18rem 0.52rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--card-bg, rgba(120, 120, 120, 0.08));
+  color: var(--otx-ui-text);
+}
+
+.otx__tray {
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--otx-ui-border);
+}
+
+.otx__tray--source {
+  background: var(--card-bg, rgba(120, 120, 120, 0.05));
+}
+
+.otx__tray--target {
+  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.035);
+}
+
+.otx__node--a .otx__tray,
+.otx__node--a .otx__node-badge {
+  border-color: var(--otx-source-color);
+  background-color: var(--otx-source-bg);
+}
+
+.otx__node--b .otx__tray,
+.otx__node--b .otx__node-badge {
+  border-color: var(--otx-source-alt-color);
+  background-color: var(--otx-source-alt-bg);
+}
+
+.otx__node--c .otx__tray,
+.otx__node--c .otx__node-badge,
+.otx__node--d .otx__tray,
+.otx__node--d .otx__node-badge {
+  border-color: var(--otx-target-color);
+  background-color: var(--otx-target-bg);
+}
+
+.otx__slots {
+  display: grid;
+  gap: 0.45rem;
+  align-items: center;
+  justify-items: center;
+}
+
+.otx__slots--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.otx__slots--8 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.otx__slot {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1.5px solid var(--otx-ui-border);
+  background: var(--card-bg, rgba(120, 120, 120, 0.04));
+}
+
+.otx__node--target .otx__slot {
+  background: var(--otx-target-bg);
+}
+
+.otx__route-tag {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  z-index: 2;
+  padding: 0.28rem 0.62rem;
+  border: 1px solid var(--otx-ui-border);
+  border-radius: 999px;
+  background: var(--otx-ui-bg);
+  backdrop-filter: blur(6px);
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--otx-ui-text);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+[data-mode="dark"] .otx__route-tag {
+  background: var(--otx-ui-bg);
+}
+
+.otx__particle {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 2px var(--main-bg, #fff), 0 3px 10px rgba(0, 0, 0, 0.12);
+}
+
+.otx__bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.otx__panel {
+  padding: 1rem;
+}
+
+.otx__slider-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.otx__slider-label {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.otx__slider-value {
+  padding: 0.18rem 0.52rem;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--card-bg, rgba(120, 120, 120, 0.08));
+  color: var(--otx-ui-text);
+}
+
+.otx__total-badge {
+  display: inline-block;
+  padding: 0.18rem 0.52rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--prompt-gray-bg, rgba(156, 163, 175, 0.1));
+  color: var(--prompt-gray-icon, #9ca3af);
+  margin-left: 0.3rem;
+}
+
+.otx__slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  margin: 0.3rem 0 0.45rem 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--otx-source-color) 0%,
+    color-mix(in srgb, var(--otx-source-color) 24%, var(--otx-ui-bg)) 18%,
+    color-mix(in srgb, var(--otx-target-color) 22%, var(--otx-ui-bg)) 50%,
+    color-mix(in srgb, var(--otx-source-alt-color) 24%, var(--otx-ui-bg)) 82%,
+    var(--otx-source-alt-color) 100%
+  );
+  border: 1px solid var(--otx-ui-border);
+  accent-color: var(--otx-target-color);
+}
+
+.otx__slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 2px solid var(--otx-ui-bg);
+  background: var(--otx-target-color);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--otx-target-color) 55%, var(--otx-ui-border)), 0 4px 14px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+}
+
+.otx__slider::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+}
+
+.otx__slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 2px solid var(--otx-ui-bg);
+  background: var(--otx-target-color);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--otx-target-color) 55%, var(--otx-ui-border)), 0 4px 14px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+}
+
+.otx__slider-ticks {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.25rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--otx-ui-muted);
+}
+
+.otx__slider-ticks span:nth-child(1) {
+  text-align: left;
+}
+
+.otx__slider-ticks span:nth-child(2),
+.otx__slider-ticks span:nth-child(3),
+.otx__slider-ticks span:nth-child(4) {
+  text-align: center;
+}
+
+.otx__slider-ticks span:nth-child(5) {
+  text-align: right;
+}
+
+.otx__actions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.95rem;
+}
+
+.otx__btn {
+  padding: 0.7rem 1rem;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+  background: var(--otx-ui-bg);
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.otx__btn:hover {
+  transform: translateY(-1px);
+}
+
+.otx__btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--otx-target-color) 38%, transparent);
+  outline-offset: 2px;
+}
+
+.otx__btn--replay {
+  border-color: color-mix(in srgb, var(--otx-target-color) 55%, var(--otx-ui-border));
+  color: var(--otx-target-color);
+  background: color-mix(in srgb, var(--otx-target-bg) 72%, var(--otx-ui-bg));
+}
+
+.otx__btn--replay:hover {
+  border-color: var(--otx-target-color);
+  background: color-mix(in srgb, var(--otx-target-bg) 92%, var(--otx-ui-bg));
+  color: var(--otx-target-color);
+}
+
+.otx__btn--best {
+  border-color: color-mix(in srgb, var(--otx-source-alt-color) 55%, var(--otx-ui-border));
+  color: var(--otx-source-alt-color);
+  background: color-mix(in srgb, var(--otx-source-alt-bg) 74%, var(--otx-ui-bg));
+}
+
+.otx__btn--best:hover {
+  border-color: var(--otx-source-alt-color);
+  background: color-mix(in srgb, var(--otx-source-alt-bg) 94%, var(--otx-ui-bg));
+  color: var(--otx-source-alt-color);
+}
+
+.otx__eq-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.45rem 0.85rem;
+  margin-bottom: 0.8rem;
+}
+
+.otx__eq-label {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--otx-ui-text);
+}
+
+.otx__eq-value {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--otx-ui-text);
+}
+
+.otx__formula {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--otx-ui-text);
+}
+
+.otx__formula--compact {
+  margin-top: 0.35rem;
+  color: var(--otx-ui-text);
+}
+
+.otx .mjx-container {
+  margin: 0 !important;
+}
+
+@media (max-width: 980px) {
+  .otx__intro,
+  .otx__bottom {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .otx {
+    padding: 1rem;
+  }
+
+  .otx__stage {
+    height: 420px;
+  }
+
+  .otx__node {
+    width: 168px;
+  }
+
+  .otx__actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .otx__stage {
+    height: 470px;
+  }
+
+  .otx__node {
+    width: 144px;
+  }
+
+  .otx__node--a,
+  .otx__node--b {
+    left: 12px;
+  }
+
+  .otx__node--c,
+  .otx__node--d {
+    right: 12px;
+  }
+
+  .otx__route-tag {
+    font-size: 0.68rem;
+    padding: 0.16rem 0.42rem;
+  }
+}
+</style>
+
+<script>
+(function() {
+  const root = document.getElementById('transportSplitWidget');
+  if (!root || root.dataset.initialized === 'true') return;
+  root.dataset.initialized = 'true';
+
+  const stage = root.querySelector('#otxStage');
+  const canvas = root.querySelector('.otx__canvas');
+  const ctx = canvas.getContext('2d');
+  const particleLayer = root.querySelector('.otx__particle-layer');
+  const slider = root.querySelector('#otxSlider');
+  const replayBtn = root.querySelector('#otxReplayBtn');
+  const bestBtn = root.querySelector('#otxBestBtn');
+
+  const binds = {
+    xValue: root.querySelector('[data-bind="x_value"]'),
+    piAC: root.querySelector('[data-bind="pi_ac"]'),
+    piAD: root.querySelector('[data-bind="pi_ad"]'),
+    piBC: root.querySelector('[data-bind="pi_bc"]'),
+    piBD: root.querySelector('[data-bind="pi_bd"]'),
+    costValue: root.querySelector('[data-bind="cost_value"]')
+  };
+
+  const routeTags = {
+    ac: root.querySelector('[data-route-tag="ac"]'),
+    ad: root.querySelector('[data-route-tag="ad"]'),
+    bc: root.querySelector('[data-route-tag="bc"]'),
+    bd: root.querySelector('[data-route-tag="bd"]')
+  };
+
+  const UNIT_KG = 0.25;
+  const SLOT_COUNTS = { a: 8, b: 4, c: 4, d: 8 };
+  const COLORS = {
+    a: getComputedStyle(document.documentElement).getPropertyValue('--prompt-warning-icon').trim() || '#d97706',
+    b: getComputedStyle(document.documentElement).getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
+    info: getComputedStyle(document.documentElement).getPropertyValue('--prompt-info-icon').trim() || '#0ea5e9',
+    border: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || 'rgba(120,120,120,0.16)',
+    text: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim() || '#111827'
+  };
+  const ROUTE_COLORS = { ac: COLORS.a, ad: COLORS.a, bc: COLORS.b, bd: COLORS.b };
+  const ROUTE_COSTS = { ac: 1, ad: 3, bc: 4, bd: 1 };
+  const ROUTE_OFFSETS = {
+    ac: { x: 0, y: -16 },
+    ad: { x: 16, y: -10 },
+    bc: { x: -16, y: 10 },
+    bd: { x: 0, y: 16 }
+  };
+
+  const slotElements = {};
+  const slotCenters = {};
+  const trayRects = {};
+  const particles = [];
+
+  let width = 0;
+  let height = 0;
+  let animation = null;
+  let currentPlan = null;
+  let frameHandle = null;
+
+  function buildSlots() {
+    Object.entries(SLOT_COUNTS).forEach(([key, count]) => {
+      const slotsHost = root.querySelector(`[data-slots="${key}"]`);
+      slotElements[key] = [];
+      slotsHost.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'otx__slot';
+        slotsHost.appendChild(slot);
+        slotElements[key].push(slot);
+      }
+    });
+  }
+
+  function buildParticles() {
+    particleLayer.innerHTML = '';
+    particles.length = 0;
+
+    for (let i = 0; i < SLOT_COUNTS.a; i++) {
+      const el = document.createElement('div');
+      el.className = 'otx__particle';
+      el.style.background = COLORS.a;
+      particleLayer.appendChild(el);
+      particles.push({ id: `a-${i}`, source: 'a', index: i, el });
+    }
+
+    for (let i = 0; i < SLOT_COUNTS.b; i++) {
+      const el = document.createElement('div');
+      el.className = 'otx__particle';
+      el.style.background = COLORS.b;
+      particleLayer.appendChild(el);
+      particles.push({ id: `b-${i}`, source: 'b', index: i, el });
+    }
+  }
+
+  function measure() {
+    const stageRect = stage.getBoundingClientRect();
+    width = stageRect.width;
+    height = stageRect.height;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    Object.keys(slotElements).forEach((key) => {
+      slotCenters[key] = slotElements[key].map((slot) => {
+        const rect = slot.getBoundingClientRect();
+        return {
+          x: rect.left - stageRect.left + rect.width / 2,
+          y: rect.top - stageRect.top + rect.height / 2
+        };
+      });
+    });
+
+    ['a', 'b', 'c', 'd'].forEach((key) => {
+      const tray = root.querySelector(`.otx__node--${key} .otx__tray`);
+      const rect = tray.getBoundingClientRect();
+      trayRects[key] = {
+        left: rect.left - stageRect.left,
+        right: rect.right - stageRect.left,
+        top: rect.top - stageRect.top,
+        bottom: rect.bottom - stageRect.top,
+        width: rect.width,
+        height: rect.height
+      };
+    });
+  }
+
+  function roundQuarter(value) {
+    return Math.round(value / UNIT_KG) * UNIT_KG;
+  }
+
+  function formatKg(value) {
+    return value.toFixed(2).replace(/\.00$/, '.00');
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function computePlan(xInput) {
+    const x = clamp(roundQuarter(xInput), 0, 1);
+    const unitsAC = Math.round(x / UNIT_KG);
+    const unitsAD = SLOT_COUNTS.a - unitsAC;
+    const unitsBC = SLOT_COUNTS.c - unitsAC;
+    const unitsBD = SLOT_COUNTS.b - unitsBC;
+
+    const assignments = [];
+    const groups = {
+      ac: { start: slotCenters.a.slice(0, unitsAC), end: slotCenters.c.slice(0, unitsAC) },
+      ad: { start: slotCenters.a.slice(unitsAC), end: slotCenters.d.slice(0, unitsAD) },
+      bc: { start: slotCenters.b.slice(0, unitsBC), end: slotCenters.c.slice(unitsAC) },
+      bd: { start: slotCenters.b.slice(unitsBC), end: slotCenters.d.slice(unitsAD) }
+    };
+
+    const particlesA = particles.filter((particle) => particle.source === 'a');
+    const particlesB = particles.filter((particle) => particle.source === 'b');
+
+    particlesA.slice(0, unitsAC).forEach((particle, i) => {
+      assignments.push({ particle, route: 'ac', start: groups.ac.start[i], end: groups.ac.end[i] });
+    });
+    particlesA.slice(unitsAC).forEach((particle, i) => {
+      assignments.push({ particle, route: 'ad', start: groups.ad.start[i], end: groups.ad.end[i] });
+    });
+    particlesB.slice(0, unitsBC).forEach((particle, i) => {
+      assignments.push({ particle, route: 'bc', start: groups.bc.start[i], end: groups.bc.end[i] });
+    });
+    particlesB.slice(unitsBC).forEach((particle, i) => {
+      assignments.push({ particle, route: 'bd', start: groups.bd.start[i], end: groups.bd.end[i] });
+    });
+
+    const kg = {
+      ac: unitsAC * UNIT_KG,
+      ad: unitsAD * UNIT_KG,
+      bc: unitsBC * UNIT_KG,
+      bd: unitsBD * UNIT_KG
+    };
+
+    const cost = kg.ac * ROUTE_COSTS.ac +
+      kg.ad * ROUTE_COSTS.ad +
+      kg.bc * ROUTE_COSTS.bc +
+      kg.bd * ROUTE_COSTS.bd;
+
+    return {
+      x,
+      units: { ac: unitsAC, ad: unitsAD, bc: unitsBC, bd: unitsBD },
+      kg,
+      cost,
+      assignments
+    };
+  }
+
+  function routeEndpoints(route) {
+    const offset = 14;
+    const specs = {
+      ac: { from: 'a', to: 'c', fromY: 0.34, toY: 0.34 },
+      ad: { from: 'a', to: 'd', fromY: 0.70, toY: 0.30 },
+      bc: { from: 'b', to: 'c', fromY: 0.30, toY: 0.70 },
+      bd: { from: 'b', to: 'd', fromY: 0.66, toY: 0.66 }
+    };
+    const spec = specs[route];
+    const from = trayRects[spec.from];
+    const to = trayRects[spec.to];
+
+    return {
+      start: {
+        x: from.right + offset,
+        y: from.top + from.height * spec.fromY
+      },
+      end: {
+        x: to.left - offset,
+        y: to.top + to.height * spec.toY
+      }
+    };
+  }
+
+  function pathForRoute(route, start, end) {
+    const dx = end.x - start.x;
+    const bend = route === 'ac'
+      ? -16
+      : route === 'bd'
+        ? 16
+        : route === 'ad'
+          ? 38
+          : -38;
+
+    return {
+      p0: start,
+      p1: { x: start.x + dx * 0.32, y: start.y + bend },
+      p2: { x: end.x - dx * 0.32, y: end.y + bend },
+      p3: end
+    };
+  }
+
+  function bezierPoint(path, t) {
+    const mt = 1 - t;
+    return {
+      x: mt * mt * mt * path.p0.x + 3 * mt * mt * t * path.p1.x + 3 * mt * t * t * path.p2.x + t * t * t * path.p3.x,
+      y: mt * mt * mt * path.p0.y + 3 * mt * mt * t * path.p1.y + 3 * mt * t * t * path.p2.y + t * t * t * path.p3.y
+    };
+  }
+
+  function alphaColor(hex, alpha) {
+    if (!hex || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) {
+      return hex;
+    }
+
+    let value = hex.slice(1);
+    if (value.length === 3) {
+      value = value.split('').map((char) => char + char).join('');
+    }
+
+    const r = parseInt(value.slice(0, 2), 16);
+    const g = parseInt(value.slice(2, 4), 16);
+    const b = parseInt(value.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function drawFlows(plan) {
+    ctx.clearRect(0, 0, width, height);
+
+    ['ac', 'ad', 'bc', 'bd'].forEach((route) => {
+      const count = plan.units[route];
+      const tag = routeTags[route];
+      if (!count) {
+        tag.style.opacity = '0';
+        return;
+      }
+
+      const endpoints = routeEndpoints(route);
+      const path = pathForRoute(route, endpoints.start, endpoints.end);
+      const lineWidth = 6 + count * 5;
+
+      ctx.beginPath();
+      ctx.moveTo(path.p0.x, path.p0.y);
+      ctx.bezierCurveTo(path.p1.x, path.p1.y, path.p2.x, path.p2.y, path.p3.x, path.p3.y);
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = alphaColor(ROUTE_COLORS[route], 0.18);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(path.p0.x, path.p0.y);
+      ctx.bezierCurveTo(path.p1.x, path.p1.y, path.p2.x, path.p2.y, path.p3.x, path.p3.y);
+      ctx.lineWidth = Math.max(2, lineWidth - 6);
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = alphaColor(ROUTE_COLORS[route], 0.42);
+      ctx.stroke();
+
+      const mid = bezierPoint(path, 0.5);
+      tag.style.left = `${mid.x + ROUTE_OFFSETS[route].x}px`;
+      tag.style.top = `${mid.y + ROUTE_OFFSETS[route].y}px`;
+      tag.style.opacity = '1';
+    });
+  }
+
+  function syncText(plan) {
+    binds.xValue.textContent = formatKg(plan.x);
+    binds.piAC.textContent = formatKg(plan.kg.ac);
+    binds.piAD.textContent = formatKg(plan.kg.ad);
+    binds.piBC.textContent = formatKg(plan.kg.bc);
+    binds.piBD.textContent = formatKg(plan.kg.bd);
+    binds.costValue.textContent = plan.cost.toFixed(2);
+  }
+
+  function easeInOut(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function positionParticles(progress) {
+    currentPlan.assignments.forEach((item) => {
+      const path = pathForRoute(item.route, item.start, item.end);
+      const point = progress >= 1 ? item.end : bezierPoint(path, easeInOut(progress));
+      item.particle.el.style.left = `${point.x}px`;
+      item.particle.el.style.top = `${point.y}px`;
+    });
+  }
+
+  function renderFrame(now) {
+    if (!animation) {
+      positionParticles(1);
+      frameHandle = null;
+      return;
+    }
+
+    const progress = clamp((now - animation.start) / animation.duration, 0, 1);
+    positionParticles(progress);
+
+    if (progress >= 1) {
+      animation = null;
+      frameHandle = null;
+      return;
+    }
+
+    frameHandle = requestAnimationFrame(renderFrame);
+  }
+
+  function cancelAnimation() {
+    if (frameHandle) {
+      cancelAnimationFrame(frameHandle);
+      frameHandle = null;
+    }
+    animation = null;
+  }
+
+  function renderPlan(xValue, replay) {
+    currentPlan = computePlan(xValue);
+    syncText(currentPlan);
+    drawFlows(currentPlan);
+
+    cancelAnimation();
+    if (replay) {
+      animation = { start: performance.now(), duration: 1150 };
+      positionParticles(0);
+      frameHandle = requestAnimationFrame(renderFrame);
+    } else {
+      positionParticles(1);
+    }
+  }
+
+  buildSlots();
+  buildParticles();
+  measure();
+  renderPlan(parseFloat(slider.value), false);
+
+  function requestMathTypeset(attempt = 0) {
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([root]).catch(() => {});
+      return;
+    }
+    if (attempt < 20) {
+      window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
+    }
+  }
+
+  requestMathTypeset();
+
+  slider.addEventListener('input', (event) => {
+    renderPlan(parseFloat(event.target.value), false);
+  });
+
+  slider.addEventListener('change', (event) => {
+    renderPlan(parseFloat(event.target.value), true);
+  });
+
+  replayBtn.addEventListener('click', () => {
+    renderPlan(parseFloat(slider.value), true);
+  });
+
+  bestBtn.addEventListener('click', () => {
+    slider.value = '1.00';
+    renderPlan(1, true);
+  });
+
+  window.addEventListener('resize', () => {
+    measure();
+    renderPlan(parseFloat(slider.value), false);
+  });
+})();
+</script>
