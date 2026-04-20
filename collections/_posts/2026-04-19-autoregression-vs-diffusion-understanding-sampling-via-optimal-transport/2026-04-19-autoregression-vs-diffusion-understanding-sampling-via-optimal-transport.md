@@ -88,6 +88,11 @@ Optimal transport is the continuous, high-dimensional version of this same mass-
 >
 > Mass landing in a target region $A \subset \mathcal{X}$ is exactly the mass that started in its pre-image $T^{-1}(A)$:
 > $$ P_{\text{data}}(A) = P_{\text{noise}}(T^{-1}(A)) $$
+> 
+> In machine learning applications, we often work directly with probability density functions. If $T$ is a differentiable and invertible, applying the change of variables $x = T(z)$ gives the **pushforward density**:
+> $$ p_{\text{data}}(x) = p_{\text{noise}}(T^{-1}(x)) \left| \det J_{T^{-1}}(x) \right| $$
+> Equivalently, in the forward direction:
+> $$ p_{\text{data}}(T(z)) = p_{\text{noise}}(z) \left| \det J_T(z) \right|^{-1} $$
 
 > [!proof]- Pushforward Derivation
 > For any region $A$, the data probability mass is:
@@ -196,7 +201,7 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 > $$ T(x) = G^{-1}(F(x)). $$
 > Read it in two steps:
 > $$ u = F(x), \qquad T(x) = G^{-1}(u). $$
-> First compute the quantile of $x$ in the source distribution. Then send it to the point with the same quantile in the target distribution.
+> First, compute the quantile $u$ of $x$ in the source distribution. By the probability integral transform, this $u$ is uniformly distributed on $[0, 1]$, effectively **pulling back** the source distribution to a simple uniform base. Then, we **push forward** this uniform noise to the target distribution using the inverse CDF $G^{-1}(u)$.
 
 > [!proof]-
 > First check that the map has the right output distribution. If $X \sim F$ and $U = F(X)$, then $U \sim \mathcal{U}(0,1)$. Define $Y = G^{-1}(U) = G^{-1}(F(X))$. Then for any $t$,
@@ -215,10 +220,17 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 >
 > If $h$ is strictly convex, such as $h(t)=t^2$, this optimizer is unique up to sets of measure zero. For $h(t)=|t|$, ties can occur.
 
-> [!example] Uniform to Arbitrary Mapping
-> *Placeholder: Insert Visualization showing a Uniform [0,1] distribution mapped via an inverse CDF curve onto a complex 1D target.*
 
-In higher dimensions, we apply the same quantile-matching step conditionally, one coordinate at a time. This gives the **Knothe-Rosenblatt rearrangement**.
+> [!note] CDFs vs. Densities
+> The transport rule is written using CDFs, but models often predict densities or probabilities:
+> $$ F(x) = \int_{-\infty}^{x} p(t)\,dt, \qquad p(x) = F'(x) $$
+> and in the discrete case
+> $$ F(v_k) = \sum_{j \le k} p_j. $$
+> So learning $p$ is enough: the CDF is obtained by integrating or summing, and sampling uses the inverse CDF.
+
+{% include transport_1d_widget.html %}
+
+In higher dimensions, we can apply the same quantile-matching step conditionally, one coordinate at a time. This gives the **Knothe-Rosenblatt rearrangement**.
 
 > [!definition] Knothe-Rosenblatt Rearrangement
 > Fix an order of the coordinates and write
@@ -236,19 +248,7 @@ In higher dimensions, we apply the same quantile-matching step conditionally, on
 >
 > The key triangular property is: coordinate $i$ depends only on coordinates $1,\dots,i$.
 
-> [!note] CDFs vs. Densities
-> The transport rule is written using CDFs, but models often predict densities or probabilities:
-> $$ F(x) = \int_{-\infty}^{x} p(t)\,dt, \qquad p(x) = F'(x) $$
-> and in the discrete case
-> $$ F(v_k) = \sum_{j \le k} p_j. $$
-> So learning $p$ is enough: the CDF is obtained by integrating or summing, and sampling uses the inverse CDF.
-
-> [!todo] Visualization Placeholder: Density to CDF to Sample
-> Use a 3-panel figure:
-> 1. a density or histogram,
-> 2. the corresponding CDF,
-> 3. a sampled quantile $u$ being mapped back through the inverse CDF.
-> This figure should explain why models can predict probabilities first and still recover the transport rule later.
+> [!remark] Non-Optimality (Greedy Coordinate-wise)
 
 ### The Choice of Base Distribution
 
@@ -404,7 +404,7 @@ Autoregression wins on tractability: each $T_i$ reduces to a closed-form 1D prob
 
 ### The Velocity Paradigm: Continuous Flows
 
-Since we cannot compute Brenier's map directly, we instead parameterize a time-dependent velocity field and integrate {% cite lai2025principles %}:
+We can parameterize a time-dependent velocity field and integrate {% cite laiPrinciplesDiffusionModels2025 %}:
 
 > [!definition] Continuous Normalizing Flow (CNF)
 > $$ \frac{dx}{dt} = v_\theta(x, t), \qquad x(0) \sim P_{\text{noise}}, \quad x(1) \sim P_{\text{data}} $$
