@@ -109,6 +109,9 @@ Optimal transport is the continuous, high-dimensional version of this same mass-
 > This is useful here because it allows mass splitting and turns the discrete problem into a linear optimization problem. Monge is recovered as the special case
 > $$ \pi_{i,T(i)} = a_i, \qquad \pi_{ij} = 0 \text{ for } j \ne T(i). $$
 
+> [!important] Linear Cost Assumption
+> Kantorovich transport assumes the cost is **linear** in the plan $\pi_{ij}$, simplifying the problem to a linear optimization problem. However, exact solvers still scale poorly with dataset size (e.g., $O(N^3 \log N)$), making the problem computationally hard in practice.
+
 {% include transport_split_widget.html %}
 
 ## The 1D Case: Inverse Transform Sampling
@@ -143,7 +146,7 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 > Suppose source points $x_1,\dots,x_n$ and target points $y_1,\dots,y_n$ each carry mass $\frac{1}{n}$, and each source point must be matched to exactly one target point. Then we choose a permutation $\sigma$ and solve
 > $$ \min_{\sigma \in S_n} \frac{1}{n}\sum_{i=1}^n c(x_i, y_{\sigma(i)}). $$
 
-> [!lemma] Monge Property
+> [!lemma] Quadrangle Inequality
 > Assume $x_1 < x_2$, $y_1 < y_2$, and $c(x,y) = h(x-y)$ with $h$ convex. Then
 > $$ c(x_1, y_1) + c(x_2, y_2) \le c(x_1, y_2) + c(x_2, y_1). $$
 > In words: if two matching lines cross, uncrossing them never increases the cost.
