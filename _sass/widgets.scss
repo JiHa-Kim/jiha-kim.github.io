@@ -1,8 +1,13 @@
 /* Interactive Widget Framework (IAW) */
 .iaw {
-  --iaw-primary: var(--prompt-info-icon, #0ea5e9);
-  --iaw-success: var(--prompt-tip-icon, #16a34a);
-  --iaw-warning: var(--prompt-warning-icon, #d97706);
+  /* Identity & Branding Tokens */
+  --iaw-source-a: #ffff00; /* Pure Electric Yellow */
+  --iaw-source-b: #16a34a; /* tip-icon Green */
+  --iaw-target: #06b6d4;   /* Cyan */
+
+  --iaw-primary: var(--iaw-target);
+  --iaw-success: var(--iaw-source-b);
+  --iaw-warning: var(--iaw-source-a);
   --iaw-danger: var(--prompt-danger-icon, #dc2626);
   --iaw-border: var(--card-border, rgba(120, 120, 120, 0.16));
   --iaw-bg: var(--main-bg, #fff);

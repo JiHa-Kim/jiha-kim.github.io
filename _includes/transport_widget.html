@@ -11,34 +11,34 @@
 {% endcapture %}
 
 {% capture visuals %}
-<canvas id="otmCanvas" class="iaw__canvas"></canvas>
+<canvas class="otm-canvas iaw__canvas"></canvas>
 <div class="iaw__node iaw__node--a">
   <div class="iaw__node-row"><div class="iaw__node-title">Source $A$</div><div class="iaw__node-badge">1 kg bag</div></div>
-  <div class="iaw__tray"><div class="otm-box"><i class="fas fa-box"></i></div></div>
+  <div class="iaw__tray"><div class="otm-box otm-box--a"><i class="fas fa-box"></i></div></div>
 </div>
 <div class="iaw__node iaw__node--b">
   <div class="iaw__node-row"><div class="iaw__node-title">Source $B$</div><div class="iaw__node-badge">1 kg bag</div></div>
-  <div class="iaw__tray"><div class="otm-box"><i class="fas fa-box"></i></div></div>
+  <div class="iaw__tray"><div class="otm-box otm-box--b"><i class="fas fa-box"></i></div></div>
 </div>
 <div class="iaw__node iaw__node--c">
   <div class="iaw__node-row"><div class="iaw__node-title">Hole $C$</div><div class="iaw__node-badge">needs 1 kg</div></div>
-  <div class="iaw__tray"><div class="otm-box" style="opacity: 0.3;"><i class="fas fa-warehouse"></i></div></div>
+  <div class="iaw__tray"><div class="otm-box otm-box-target"><i class="fas fa-warehouse"></i></div></div>
 </div>
 <div class="iaw__node iaw__node--d">
   <div class="iaw__node-row"><div class="iaw__node-title">Hole $D$</div><div class="iaw__node-badge">needs 1 kg</div></div>
-  <div class="iaw__tray"><div class="otm-box" style="opacity: 0.3;"><i class="fas fa-warehouse"></i></div></div>
+  <div class="iaw__tray"><div class="otm-box otm-box-target"><i class="fas fa-warehouse"></i></div></div>
 </div>
-<div id="otmRoutes"></div>
+<div class="otm-routes-container"></div>
 {% endcapture %}
 
 {% capture legend %}
 <div class="iaw__legend-item">
-  <span class="iaw__swatch" id="otmPlanSwatch" style="background: var(--iaw-success)"></span>
-  <span id="otmPlanType">Optimal (Uncrossed)</span>
+  <span class="iaw__swatch" style="background: #ffff00"></span>
+  <span>Source $A$</span>
 </div>
 <div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-warning)"></span>
-  <span>Source Bag</span>
+  <span class="iaw__swatch" style="background: var(--iaw-success)"></span>
+  <span>Source $B$</span>
 </div>
 <div class="iaw__legend-item">
   <span>Unit Cost: $\$1/\mathrm{kg}$ to $\$4/\mathrm{kg}$</span>
@@ -49,11 +49,11 @@
 <div class="iaw__status-readout">
   <div class="iaw__status-item">
     <span class="iaw__status-label">Route Decomposition:</span>
-    <strong class="iaw__status-value" id="otmBreakdown">$1 + $2</strong>
+    <strong class="iaw__status-value otm-breakdown">$1 + $2</strong>
   </div>
   <div class="iaw__status-item">
     <span class="iaw__status-label">Total Cost:</span>
-    <strong class="iaw__status-value" id="otmTotalCost" style="font-size: 1.3rem; color: var(--iaw-primary);">$3</strong>
+    <strong class="iaw__status-value otm-total-cost" style="font-size: 1.3rem; color: var(--iaw-primary);">$3</strong>
   </div>
 </div>
 {% endcapture %}
@@ -72,7 +72,21 @@
 
 <style>
 .iaw__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
-.otm-box { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--iaw-border); border-radius: 10px; font-size: 1.6rem; color: var(--iaw-warning); margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.otm-box { 
+  width: 58px; 
+  height: 58px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  background: var(--iaw-bg); 
+  border: 2px solid var(--iaw-border); 
+  border-radius: 999px; 
+  font-size: 1.8rem; 
+  margin: 0 auto; 
+  transition: all 0.25s ease;
+}
+.otm-box--a { color: var(--iaw-source-a); border-color: var(--iaw-source-a); }
+.otm-box--b { color: var(--iaw-source-b); border-color: var(--iaw-source-b); }
 .iaw__node { position: absolute; width: 160px; z-index: 3; }
 .iaw__node--a { left: 40px; top: 50px; }
 .iaw__node--b { left: 40px; bottom: 30px; }
@@ -92,18 +106,17 @@
     if (!root || root.dataset.initialized === 'true') return;
     root.dataset.initialized = 'true';
 
-    const canvas = root.querySelector('#otmCanvas');
+    const canvas = root.querySelector('.otm-canvas');
     const ctx = canvas.getContext('2d');
     const stage = root.querySelector('#otmStage');
     const btns = root.querySelectorAll('.iaw__seg-btn');
-    const routesContainer = root.querySelector('#otmRoutes');
+    const routesContainer = root.querySelector('.otm-routes-container');
     
-    let state = {
-      plan: 1
-    };
+    let state = { plan: 1 };
 
     const COLORS = {
-      success: getComputedStyle(document.documentElement).getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
+      a: getComputedStyle(root).getPropertyValue('--iaw-source-a').trim() || '#ffff00',
+      b: getComputedStyle(root).getPropertyValue('--iaw-source-b').trim() || '#16a34a',
       muted: '#94a3b8'
     };
 
@@ -118,56 +131,70 @@
       ]
     };
 
+    // Pre-create persistent labels for all plans
+    const allLabels = [];
+    [1, 2].forEach(p => {
+      routeData[p].forEach(r => {
+        const el = document.createElement('div');
+        el.className = 'iaw__route-tag';
+        el.innerHTML = `$${r.label}$`;
+        el.style.display = 'none';
+        routesContainer.appendChild(el);
+        r.el = el;
+        allLabels.push(el);
+      });
+    });
+
     function getNodePoint(nodeKey) {
       const node = root.querySelector(`.iaw__node--${nodeKey}`);
       if (!node) return { x:0, y:0 };
       const tray = node.querySelector('.iaw__tray');
       const stageRect = stage.getBoundingClientRect();
-      const nodeRect = node.getBoundingClientRect();
       const trayRect = tray.getBoundingClientRect();
       const isSource = (nodeKey === 'a' || nodeKey === 'b');
       
       return {
-        x: isSource ? (nodeRect.right - stageRect.left) : (nodeRect.left - stageRect.left),
+        x: isSource ? (trayRect.right - stageRect.left) : (trayRect.left - stageRect.left),
         y: trayRect.top - stageRect.top + trayRect.height / 2
       };
     }
 
-    function drawStatic() {
-      if (!stage) return;
+    function drawStatic(planOverride) {
+      const plan = planOverride || state.plan;
+      if (!stage || !canvas) return;
+
       canvas.width = stage.clientWidth;
       canvas.height = stage.clientHeight;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      routesContainer.innerHTML = '';
-      const activeRoutes = routeData[state.plan].map(r => {
+      // Hide all labels
+      allLabels.forEach(el => el.style.display = 'none');
+
+      const activeRoutes = routeData[plan].map(r => {
         const p1 = getNodePoint(r.from);
         const p2 = getNodePoint(r.to);
         
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
-        ctx.strokeStyle = r.best ? COLORS.success : COLORS.muted;
+        ctx.strokeStyle = (r.from === 'a') ? COLORS.a : COLORS.b;
         ctx.lineWidth = 4;
         if (!r.best) ctx.setLineDash([8, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Label
-        const el = document.createElement('div');
-        el.className = 'iaw__route-tag';
-        el.innerHTML = `$${r.label}$`;
-        routesContainer.appendChild(el);
-
-        return { el, x: (p1.x + p2.x)/2, y: (p1.y + p2.y)/2 };
+        r.el.style.display = 'block';
+        return { el: r.el, x: (p1.x + p2.x)/2, y: (p1.y + p2.y)/2 };
       });
 
+      // Synchronous layout first
+      resolveCollisions(activeRoutes);
+
+      // Async polish after MathJax
       if (window.MathJax && window.MathJax.typesetPromise) {
         window.MathJax.typesetPromise([routesContainer]).then(() => {
           resolveCollisions(activeRoutes);
         });
-      } else {
-        resolveCollisions(activeRoutes);
       }
     }
 
@@ -179,16 +206,9 @@
         });
         return;
       }
-
       const labelData = nodes.map(n => ({
-        n,
-        w: n.el.offsetWidth || 100,
-        h: n.el.offsetHeight || 30,
-        x: n.x,
-        y: n.y
+        n, w: n.el.offsetWidth || 100, h: n.el.offsetHeight || 30, x: n.x, y: n.y
       }));
-
-      // Symmetric Cluster Resolver
       const clusters = [];
       const processed = new Set();
       for (let i = 0; i < labelData.length; i++) {
@@ -211,7 +231,6 @@
         }
         clusters.push(cluster);
       }
-
       clusters.forEach(cluster => {
         if (cluster.length <= 1) return;
         cluster.sort((a, b) => a.y - b.y);
@@ -224,21 +243,35 @@
           curY += n.h + gap;
         });
       });
-
       labelData.forEach(l => {
-        l.n.el.style.left = `${l.y ? l.x : 0}px`; // Guard NaN
-        l.n.el.style.top = `${l.y ? l.y : 0}px`;
         l.n.el.style.left = `${l.x}px`;
         l.n.el.style.top = `${l.y}px`;
       });
     }
 
     function updateUI() {
-      root.querySelector('#otmTotalCost').innerText = state.plan === 1 ? '$3' : '$7';
-      root.querySelector('#otmBreakdown').innerText = state.plan === 1 ? '$1 + $2' : '$4 + $3';
-      root.querySelector('#otmPlanType').innerText = state.plan === 1 ? 'Optimal (Uncrossed)' : 'Suboptimal (Crossed)';
-      root.querySelector('#otmPlanSwatch').style.background = state.plan === 1 ? COLORS.success : COLORS.muted;
-      drawStatic();
+      const p = state.plan;
+      root.querySelector('.otm-total-cost').innerText = p === 1 ? '$3' : '$7';
+      root.querySelector('.otm-breakdown').innerText = p === 1 ? '$1 + $2' : '$4 + $3';
+      
+      const holeC = root.querySelector('.iaw__node--c .otm-box-target');
+      const holeD = root.querySelector('.iaw__node--d .otm-box-target');
+
+      if (p === 1) {
+        holeC.style.color = COLORS.a;
+        holeC.style.borderColor = COLORS.a;
+        holeD.style.color = COLORS.b;
+        holeD.style.borderColor = COLORS.b;
+      } else {
+        holeC.style.color = COLORS.b;
+        holeC.style.borderColor = COLORS.b;
+        holeD.style.color = COLORS.a;
+        holeD.style.borderColor = COLORS.a;
+      }
+      holeC.style.opacity = '1';
+      holeD.style.opacity = '1';
+
+      drawStatic(p);
     }
 
     btns.forEach(b => b.addEventListener('click', () => {
@@ -249,12 +282,16 @@
     }));
 
     if (window.ResizeObserver) {
-      const ro = new ResizeObserver(() => drawStatic());
-      ro.observe(stage);
+      new ResizeObserver(() => drawStatic()).observe(stage);
+      // Observe labels for post-render layout
+      const labelRo = new ResizeObserver(() => {
+        if (!state.animating) drawStatic();
+      });
+      allLabels.forEach(l => labelRo.observe(l));
     }
-    window.addEventListener('resize', drawStatic);
+    window.addEventListener('resize', () => drawStatic());
     
     updateUI();
-    setTimeout(drawStatic, 250);
+    setTimeout(() => drawStatic(), 250);
 })();
 </script>

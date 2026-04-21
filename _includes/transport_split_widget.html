@@ -125,10 +125,10 @@
 .iaw__slots { display: grid; gap: 0.35rem; grid-template-columns: repeat(4, 1fr); align-items: center; justify-items: center; }
 .iaw__slot { width: 18px; height: 18px; border-radius: 999px; border: 1.5px solid var(--iaw-border); background: rgba(120, 120, 120, 0.04); }
 
-.iaw__node--a .iaw__tray, .iaw__node--a .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-warning) 8%, var(--iaw-bg)); }
-.iaw__node--b .iaw__tray, .iaw__node--b .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-success) 8%, var(--iaw-bg)); }
+.iaw__node--a .iaw__tray, .iaw__node--a .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-source-a) 8%, var(--iaw-bg)); }
+.iaw__node--b .iaw__tray, .iaw__node--b .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-source-b) 8%, var(--iaw-bg)); }
 .iaw__node--c .iaw__tray, .iaw__node--c .iaw__node-badge,
-.iaw__node--d .iaw__tray, .iaw__node--d .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-primary) 8%, var(--iaw-bg)); }
+.iaw__node--d .iaw__tray, .iaw__node--d .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-target) 8%, var(--iaw-bg)); }
 
 .iaw__particle { position: absolute; width: 14px; height: 14px; border-radius: 999px; transform: translate(-50%, -50%); z-index: 5; }
 
@@ -162,9 +162,9 @@
     
     // Theme colors
     const COLORS = {
-      a: getComputedStyle(document.documentElement).getPropertyValue('--prompt-warning-icon').trim() || '#d97706',
-      b: getComputedStyle(document.documentElement).getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
-      border: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || 'rgba(120,120,120,0.16)'
+      a: getComputedStyle(root).getPropertyValue('--iaw-source-a').trim() || '#ffff00',
+      b: getComputedStyle(root).getPropertyValue('--iaw-source-b').trim() || '#16a34a',
+      border: getComputedStyle(root).getPropertyValue('--iaw-border').trim() || 'rgba(120,120,120,0.16)'
     };
 
     let state = {
