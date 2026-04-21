@@ -3,7 +3,7 @@
   This panel is the <strong>empirical finite-sample problem</strong>. We freeze one source sample and one target sample, drawn from the same underlying source/target laws as the continuous panel above, and compare two couplings on that exact cached 64-point instance.
 </p>
 <p>
-  Here the target is shown through the sampled blue cloud, and the stage draws the full transported sample while thinning the pairing traces so the coupling structure stays readable.
+  Here the target is shown through the sampled blue cloud, while every pairing is drawn as a faint gray trace and the yellow transported sample moves over the full coupling.
 </p>
 {% endcapture %}
 
@@ -75,15 +75,11 @@ IAW.mountFigure('discreteTransportFigure', function(root) {
   const slider = root.querySelector('#t2ddSlider');
   const playBtn = root.querySelector('#t2ddPlay');
   const segBtns = root.querySelectorAll('.iaw__seg-btn');
-  const costKR = root.querySelector('#costKRDisc');
-  const costOT = root.querySelector('#costOTDisc');
 
   const sourcePoints = [[1.1013, 0.3384], [-0.54, -1.2602], [-1.8946, 0.0186], [-0.8106, -0.8722], [-0.222, -0.0518], [-2.2768, 0.9251], [-2.0268, 1.8596], [0.5906, -0.4718], [1.343, 0.0208], [0.6909, 0.1072], [1.0965, 1.0614], [-0.9073, -0.6125], [0.3432, -0.21], [-2.2849, 2.0261], [-2.175, -2.0815], [-1.2761, 0.5649], [1.796, -0.2354], [-0.3911, 0.1739], [-0.3669, 0.0824], [-1.14, 0.4383], [0.3926, -2.4354], [-0.1102, 0.1629], [0.5612, -0.8161], [-1.328, -0.9507], [0.548, -0.8518], [-0.7641, 1.1438], [-0.7862, -0.8986], [-0.0912, 0.1986], [1.0376, -0.8793], [-1.5682, -0.1225], [0.6436, -1.4815], [-0.4873, 0.3062], [0.231, 0.0834], [-0.2569, -0.7993], [-0.9281, 1.1563], [-1.1172, 1.228], [-1.3151, 2.9036], [-1.7381, 1.6043], [-0.8971, -0.1156], [-0.0656, -0.6522], [2.2284, 0.0949], [-1.3211, 0.6466], [0.7124, -1.1475], [0.5356, 0.069], [0.8203, 0.7122], [-0.0084, -0.4083], [0.9104, 0.3132], [-1.4893, -0.5449], [-0.4833, -0.2622], [2.2843, -0.3773], [0.4773, 1.6553], [0.5037, 0.4319], [1.298, 0.1973], [0.186, 0.6887], [0.4121, -0.6804], [-1.1659, -0.1134], [1.398, -0.2264], [1.1484, 0.4126], [-0.3089, -2.6334], [0.2221, -0.2769], [-1.6005, 0.5145], [-0.0254, 0.3751], [-0.6044, 0.202], [-0.4732, 1.0649]];
   const targetPoints = [[-0.9666, -1.8047], [0.3459, 0.2654], [-1.3691, -1.9982], [0.8471, -0.1361], [1.6157, 0.3848], [0.0078, -0.0346], [2.3455, 3.7135], [0.9985, 2.4079], [0.2843, -0.4394], [2.3864, 2.1588], [0.2166, -1.0395], [0.3572, -0.1397], [-0.2996, -0.2937], [1.3429, 2.1935], [-0.9794, -2.1997], [1.7648, 1.1285], [-1.3002, -2.375], [0.1391, -0.3542], [1.6676, 1.3935], [0.8224, 0.1633], [-1.7008, -0.1649], [0.3034, -0.1088], [-1.4738, -1.6541], [-3.3475, -3.0262], [1.2078, 2.1297], [1.9149, 2.547], [-0.3544, 0.8896], [0.6218, 1.6551], [1.6974, 1.0425], [1.1683, 1.7628], [-2.8321, -3.5826], [2.874, 3.6217], [-2.4062, -1.2504], [-1.8408, -1.3511], [-0.6502, 0.379], [-0.8968, -0.7034], [-0.879, 0.1182], [-0.999, -0.9268], [-1.278, -2.0334], [-1.3333, -2.2066], [-0.4742, -0.4751], [-0.7057, -0.5956], [-0.5027, 0.1479], [-0.3864, -0.6433], [-0.8596, -1.1054], [-0.4269, -0.5289], [-1.1137, 0.7796], [-1.1481, -1.2724], [-1.2833, -2.595], [-0.2925, 0.0941], [-0.308, -0.1276], [-0.9022, -0.8606], [0.0672, 0.1728], [-1.2622, -0.5079], [-0.0971, -0.6], [-0.6839, -0.3052], [2.4601, 2.4187], [-1.5694, -1.4101], [-0.4562, 0.0614], [0.0372, 0.3], [1.8583, 1.2909], [0.8019, 0.7687], [-1.2069, -0.8743], [-0.7905, -0.9439]];
   const sequentialAssignment = [28, 63, 20, 51, 43, 30, 33, 19, 25, 7, 18, 14, 17, 23, 32, 53, 9, 42, 40, 47, 10, 26, 61, 16, 27, 36, 35, 50, 4, 2, 3, 41, 52, 45, 37, 46, 38, 57, 0, 12, 56, 48, 29, 11, 24, 54, 13, 39, 55, 31, 21, 1, 60, 5, 8, 62, 6, 15, 58, 59, 22, 49, 44, 34];
   const optimalAssignment = [18, 16, 32, 38, 45, 20, 26, 11, 28, 19, 31, 22, 21, 46, 23, 55, 15, 50, 40, 35, 48, 12, 8, 2, 54, 58, 39, 52, 3, 33, 14, 49, 5, 0, 42, 34, 7, 36, 37, 44, 56, 53, 10, 1, 13, 63, 29, 57, 51, 9, 6, 61, 60, 24, 43, 47, 4, 25, 30, 17, 62, 59, 41, 27];
-  const previewIndices = [0, 5, 9, 14, 18, 24, 31, 37, 44, 52, 60];
-
   const allPoints = sourcePoints.concat(targetPoints);
   const allX = allPoints.map(p => p[0]);
   const allY = allPoints.map(p => p[1]);
@@ -97,75 +93,36 @@ IAW.mountFigure('discreteTransportFigure', function(root) {
 
   let currentMapType = 'seq';
   let currentT = 0;
-  let stageRect = null;
   let theme = IAW.getThemeColors(root);
+  const viewport = IAW.createStageViewport(stage, canvas, ctx, mapScale);
 
-  function mapToPx(x, y) {
-    const nx = (x - mapScale.xMin) / (mapScale.xMax - mapScale.xMin);
-    const ny = (y - mapScale.yMin) / (mapScale.yMax - mapScale.yMin);
-    return {
-      x: nx * stageRect.width,
-      y: stageRect.height - ny * stageRect.height
-    };
-  }
-
-  function measure() {
-    stageRect = stage.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = stageRect.width * dpr;
-    canvas.height = stageRect.height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  function drawDot(x, y, radius, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  function easeOutQuart(v) { return 1 - Math.pow(1 - v, 4); }
-
-  function getSequentialProgress(v) {
-    if (v <= 0.22) return { x: easeOutQuart(v / 0.22), y: 0 };
-    if (v <= 0.4) return { x: 1, y: 0 };
-    if (v <= 0.62) return { x: 1, y: easeOutQuart((v - 0.4) / 0.22) };
-    return { x: 1, y: 1 };
+  function getVizColors() {
+    return IAW.getTransport2DPalette(theme, {
+      pathAlpha: 0.28,
+      targetDotAlpha: 0.72
+    });
   }
 
   function draw() {
+    const stageRect = viewport.getRect();
     ctx.clearRect(0, 0, stageRect.width, stageRect.height);
     const activeAssignment = currentMapType === 'seq' ? sequentialAssignment : optimalAssignment;
+    const colors = getVizColors();
 
     // Targets
     targetPoints.forEach(point => {
-      const pTarget = mapToPx(point[0], point[1]);
-      drawDot(pTarget.x, pTarget.y, 2.6, theme.target);
+      const pTarget = viewport.mapPoint(point[0], point[1]);
+      IAW.drawCircle(ctx, pTarget.x, pTarget.y, 2.6, colors.targetDot);
     });
 
-    // Pairing preview (thinned)
-    previewIndices.forEach(index => {
-      const source = sourcePoints[index];
+    // Draw every pairing path in faint gray.
+    sourcePoints.forEach((source, index) => {
       const target = targetPoints[activeAssignment[index]];
-      const pSource = mapToPx(source[0], source[1]);
-      const pTarget = mapToPx(target[0], target[1]);
-
-      ctx.strokeStyle = theme.path;
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(pSource.x, pSource.y);
-      if (currentMapType === 'seq') {
-        const pMid = mapToPx(target[0], source[1]);
-        ctx.lineTo(pMid.x, pMid.y);
-      }
-      ctx.lineTo(pTarget.x, pTarget.y);
-      ctx.stroke();
-    });
-
-    // Sources
-    sourcePoints.forEach(point => {
-      const pSource = mapToPx(point[0], point[1]);
-      drawDot(pSource.x, pSource.y, 2.2, theme.source);
+      IAW.drawTransportPath(ctx, viewport.mapPoint, source, target, {
+        axisAligned: currentMapType === 'seq',
+        color: colors.path,
+        lineWidth: 0.9
+      });
     });
 
     // Moving particles
@@ -174,7 +131,7 @@ IAW.mountFigure('discreteTransportFigure', function(root) {
       let curX, curY;
 
       if (currentMapType === 'seq') {
-        const phase = getSequentialProgress(currentT);
+        const phase = IAW.getAxisSequentialProgress(currentT);
         curX = source[0] + phase.x * (target[0] - source[0]);
         curY = source[1] + phase.y * (target[1] - source[1]);
       } else {
@@ -182,8 +139,8 @@ IAW.mountFigure('discreteTransportFigure', function(root) {
         curY = source[1] + currentT * (target[1] - source[1]);
       }
 
-      const pCur = mapToPx(curX, curY);
-      drawDot(pCur.x, pCur.y, 3.4, theme.sourceB);
+      const pCur = viewport.mapPoint(curX, curY);
+      IAW.drawCircle(ctx, pCur.x, pCur.y, 3.4, colors.movingDot);
     });
   }
 
@@ -203,11 +160,11 @@ IAW.mountFigure('discreteTransportFigure', function(root) {
   });
 
   window.addEventListener('resize', () => {
-    measure();
+    viewport.measure();
     draw();
   });
 
-  measure();
+  viewport.measure();
   draw();
 
   IAW.createPlaybackController({
@@ -215,7 +172,7 @@ IAW.mountFigure('discreteTransportFigure', function(root) {
     slider: slider,
     maxFrame: 1.0,
     isTimeBased: true,
-    speed: currentMapType === 'seq' ? 0.00085 : 0.0006,
+    speed: () => currentMapType === 'seq' ? 0.00085 : 0.0006,
     onFrameChange: renderFrame
   });
 });

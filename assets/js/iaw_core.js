@@ -153,6 +153,96 @@ window.IAW = (function() {
         }
     };
 
+    core.createStageViewport = function(stage, canvas, ctx, mapScale) {
+        let rect = { width: 0, height: 0 };
+
+        function measure() {
+            rect = stage.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return rect;
+        }
+
+        function mapPoint(x, y) {
+            const nx = (x - mapScale.xMin) / (mapScale.xMax - mapScale.xMin);
+            const ny = (y - mapScale.yMin) / (mapScale.yMax - mapScale.yMin);
+            return {
+                x: nx * rect.width,
+                y: rect.height - ny * rect.height
+            };
+        }
+
+        return {
+            getRect() {
+                return rect;
+            },
+            mapPoint,
+            measure
+        };
+    };
+
+    core.drawCircle = function(ctx, x, y, radius, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+    };
+
+    core.easeOutQuart = function(value) {
+        const t = core.clamp(value);
+        return 1 - Math.pow(1 - t, 4);
+    };
+
+    core.getAxisSequentialProgress = function(value, options = {}) {
+        const firstLegEnd = Number(options.firstLegEnd ?? 0.22);
+        const pauseEnd = Number(options.pauseEnd ?? 0.4);
+        const secondLegEnd = Number(options.secondLegEnd ?? 0.62);
+        const ease = typeof options.ease === 'function' ? options.ease : core.easeOutQuart;
+        const t = core.clamp(Number(value) || 0);
+        const firstLegSpan = Math.max(firstLegEnd, 1e-6);
+        const secondLegSpan = Math.max(secondLegEnd - pauseEnd, 1e-6);
+
+        if (t <= firstLegEnd) return { x: ease(t / firstLegSpan), y: 0 };
+        if (t <= pauseEnd) return { x: 1, y: 0 };
+        if (t <= secondLegEnd) return { x: 1, y: ease((t - pauseEnd) / secondLegSpan) };
+        return { x: 1, y: 1 };
+    };
+
+    core.getTransport2DPalette = function(theme, options = {}) {
+        const neutralBase = theme.border || theme.muted || theme.text || '#9ca3af';
+
+        return {
+            path: core.toAlpha(neutralBase, options.pathAlpha ?? 0.3),
+            movingDot: options.movingDot || theme.sourceA,
+            targetDot: core.toAlpha(theme.target, options.targetDotAlpha ?? 0.88),
+            targetLawOuter: core.toAlpha(theme.target, options.targetLawOuterAlpha ?? 0.18),
+            targetLawInner: core.toAlpha(theme.target, options.targetLawInnerAlpha ?? 0.34)
+        };
+    };
+
+    core.drawTransportPath = function(ctx, mapPoint, source, target, options = {}) {
+        const pSource = mapPoint(source[0], source[1]);
+        const pTarget = mapPoint(target[0], target[1]);
+
+        ctx.strokeStyle = options.color || '#000';
+        ctx.lineWidth = options.lineWidth ?? 1;
+        ctx.beginPath();
+        ctx.moveTo(pSource.x, pSource.y);
+
+        if (options.axisAligned) {
+            const axis = options.axis || 'x';
+            const midPoint = axis === 'y'
+                ? mapPoint(source[0], target[1])
+                : mapPoint(target[0], source[1]);
+            ctx.lineTo(midPoint.x, midPoint.y);
+        }
+
+        ctx.lineTo(pTarget.x, pTarget.y);
+        ctx.stroke();
+    };
+
     core.initFigure = function(rootOrId, options = {}) {
         const root = typeof rootOrId === 'string' ? document.getElementById(rootOrId) : rootOrId;
         if (!root || root.dataset.initialized === 'true') return null;
@@ -228,10 +318,16 @@ window.IAW = (function() {
         const minFrame = Number(options.minFrame ?? 0);
         const maxFrame = Number(options.maxFrame ?? 100);
         const frameDuration = Number(options.frameDuration ?? 20);
+        const isTimeBased = Boolean(options.isTimeBased);
         const button = options.button || null;
         const slider = options.slider || null;
         const onFrameChange = typeof options.onFrameChange === 'function' ? options.onFrameChange : () => {};
         const onPlayStateChange = typeof options.onPlayStateChange === 'function' ? options.onPlayStateChange : () => {};
+        const getSpeed = () => {
+            const raw = typeof options.speed === 'function' ? options.speed() : options.speed;
+            const value = Number(raw ?? 0);
+            return Number.isFinite(value) ? value : 0;
+        };
 
         let currentFrame = Number(options.initialFrame ?? (slider ? slider.value : minFrame));
         if (!Number.isFinite(currentFrame)) currentFrame = minFrame;
@@ -272,9 +368,26 @@ window.IAW = (function() {
 
             if (!lastTimestamp) {
                 lastTimestamp = timestamp;
+                animationFrameId = requestAnimationFrame(step);
+                return;
             }
 
-            if (timestamp - lastTimestamp >= frameDuration) {
+            const elapsed = timestamp - lastTimestamp;
+
+            if (isTimeBased) {
+                lastTimestamp = timestamp;
+                const nextFrame = currentFrame + getSpeed() * elapsed;
+
+                if (nextFrame >= maxFrame) {
+                    currentFrame = maxFrame;
+                    syncFrame(true);
+                    stop();
+                    return;
+                }
+
+                currentFrame = nextFrame;
+                syncFrame(true);
+            } else if (elapsed >= frameDuration) {
                 lastTimestamp = timestamp;
 
                 if (currentFrame >= maxFrame) {

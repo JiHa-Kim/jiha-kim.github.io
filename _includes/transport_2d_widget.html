@@ -6,6 +6,9 @@
 <p>
   The pale blue ellipses are contours of the target distribution. The sequential map is the <strong>Knothe-Rosenblatt transform</strong> $T_{\mathrm{KR}}(z)=Lz$, while the direct map is the <strong>Brenier transform</strong> $T_{\mathrm{OT}}(z)=\Sigma^{1/2}z$.
 </p>
+<p>
+  Every source-to-target path is drawn as a faint gray trace; the yellow sample cloud shows how the transport actually moves along those paths.
+</p>
 {% endcapture %}
 
 {% capture controls %}
@@ -76,8 +79,6 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
   const slider = root.querySelector('#t2cSlider');
   const playBtn = root.querySelector('#t2cPlay');
   const segBtns = root.querySelectorAll('.iaw__seg-btn');
-  const costKR = root.querySelector('#costKR');
-  const costOT = root.querySelector('#costOT');
 
   const sourcePoints = [[1.1013, 0.3384], [-0.54, -1.2602], [-1.8946, 0.0186], [-0.8106, -0.8722], [-0.222, -0.0518], [-2.2768, 0.9251], [-2.0268, 1.8596], [0.5906, -0.4718], [1.343, 0.0208], [0.6909, 0.1072], [1.0965, 1.0614], [-0.9073, -0.6125], [0.3432, -0.21], [-2.2849, 2.0261], [-2.175, -2.0815], [-1.2761, 0.5649], [1.796, -0.2354], [-0.3911, 0.1739], [-0.3669, 0.0824], [-1.14, 0.4383], [0.3926, -2.4354], [-0.1102, 0.1629], [0.5612, -0.8161], [-1.328, -0.9507], [0.548, -0.8518], [-0.7641, 1.1438], [-0.7862, -0.8986], [-0.0912, 0.1986], [1.0376, -0.8793], [-1.5682, -0.1225], [0.6436, -1.4815], [-0.4873, 0.3062], [0.231, 0.0834], [-0.2569, -0.7993], [-0.9281, 1.1563], [-1.1172, 1.228], [-1.3151, 2.9036], [-1.7381, 1.6043], [-0.8971, -0.1156], [-0.0656, -0.6522], [2.2284, 0.0949], [-1.3211, 0.6466], [0.7124, -1.1475], [0.5356, 0.069], [0.8203, 0.7122], [-0.0084, -0.4083], [0.9104, 0.3132], [-1.4893, -0.5449], [-0.4833, -0.2622], [2.2843, -0.3773], [0.4773, 1.6553], [0.5037, 0.4319], [1.298, 0.1973], [0.186, 0.6887], [0.4121, -0.6804], [-1.1659, -0.1134], [1.398, -0.2264], [1.1484, 0.4126], [-0.3089, -2.6334], [0.2221, -0.2769], [-1.6005, 0.5145], [-0.0254, 0.3751], [-0.6044, 0.202], [-0.4732, 1.0649]];
   const L = [[1.5811, 0.0], [1.3914, 0.7513]];
@@ -105,31 +106,11 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
 
   let currentMapType = 'kr';
   let currentT = 0;
-  let stageRect = null;
   let theme = IAW.getThemeColors(root);
+  const viewport = IAW.createStageViewport(stage, canvas, ctx, mapScale);
 
-  function mapToPx(x, y) {
-    const nx = (x - mapScale.xMin) / (mapScale.xMax - mapScale.xMin);
-    const ny = (y - mapScale.yMin) / (mapScale.yMax - mapScale.yMin);
-    return {
-      x: nx * stageRect.width,
-      y: stageRect.height - ny * stageRect.height
-    };
-  }
-
-  function measure() {
-    stageRect = stage.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = stageRect.width * dpr;
-    canvas.height = stageRect.height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  function drawDot(x, y, radius, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
+  function getVizColors() {
+    return IAW.getTransport2DPalette(theme, { pathAlpha: 0.28 });
   }
 
   function drawTargetContour(radius, color, lineWidth) {
@@ -141,7 +122,7 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
         S[0][0] * radius * Math.cos(angle) + S[0][1] * radius * Math.sin(angle),
         S[1][0] * radius * Math.cos(angle) + S[1][1] * radius * Math.sin(angle)
       ];
-      const px = mapToPx(point[0], point[1]);
+      const px = viewport.mapPoint(point[0], point[1]);
       if (i === 0) ctx.moveTo(px.x, px.y);
       else ctx.lineTo(px.x, px.y);
     }
@@ -150,47 +131,24 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
     ctx.stroke();
   }
 
-  function easeOutQuart(v) { return 1 - Math.pow(1 - v, 4); }
-
-  function getSequentialProgress(v) {
-    if (v <= 0.22) return { x: easeOutQuart(v / 0.22), y: 0 };
-    if (v <= 0.4) return { x: 1, y: 0 };
-    if (v <= 0.62) return { x: 1, y: easeOutQuart((v - 0.4) / 0.22) };
-    return { x: 1, y: 1 };
-  }
-
   function draw() {
+    const stageRect = viewport.getRect();
     ctx.clearRect(0, 0, stageRect.width, stageRect.height);
     const activeTargets = currentMapType === 'kr' ? krTargets : otTargets;
+    const colors = getVizColors();
 
     // Target contours
-    drawTargetContour(2.0, theme.targetLawOuter, 1.1);
-    drawTargetContour(1.0, theme.targetLawInner, 1.5);
+    drawTargetContour(2.0, colors.targetLawOuter, 1.1);
+    drawTargetContour(1.0, colors.targetLawInner, 1.5);
 
-    // Paths for sub-sample
-    const highlightedIndices = [0, 4, 8, 12, 17, 22, 27, 31, 36, 41, 46, 50, 55, 60];
-    highlightedIndices.forEach(index => {
-      const source = sourcePoints[index];
+    // Draw every transport path in faint gray.
+    sourcePoints.forEach((source, index) => {
       const target = activeTargets[index];
-      const pSource = mapToPx(source[0], source[1]);
-      const pTarget = mapToPx(target[0], target[1]);
-
-      ctx.strokeStyle = theme.path;
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(pSource.x, pSource.y);
-      if (currentMapType === 'kr') {
-        const pMid = mapToPx(target[0], source[1]);
-        ctx.lineTo(pMid.x, pMid.y);
-      }
-      ctx.lineTo(pTarget.x, pTarget.y);
-      ctx.stroke();
-    });
-
-    // Drawing all sources
-    sourcePoints.forEach(point => {
-      const pSource = mapToPx(point[0], point[1]);
-      drawDot(pSource.x, pSource.y, 2.1, theme.source);
+      IAW.drawTransportPath(ctx, viewport.mapPoint, source, target, {
+        axisAligned: currentMapType === 'kr',
+        color: colors.path,
+        lineWidth: 0.9
+      });
     });
 
     // Moving particles
@@ -199,7 +157,7 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
       let curX, curY;
 
       if (currentMapType === 'kr') {
-        const phase = getSequentialProgress(currentT);
+        const phase = IAW.getAxisSequentialProgress(currentT);
         curX = source[0] + phase.x * (target[0] - source[0]);
         curY = source[1] + phase.y * (target[1] - source[1]);
       } else {
@@ -207,8 +165,8 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
         curY = source[1] + currentT * (target[1] - source[1]);
       }
 
-      const pCur = mapToPx(curX, curY);
-      drawDot(pCur.x, pCur.y, 3.4, theme.sourceB);
+      const pCur = viewport.mapPoint(curX, curY);
+      IAW.drawCircle(ctx, pCur.x, pCur.y, 3.4, colors.movingDot);
     });
   }
 
@@ -228,11 +186,11 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
   });
 
   window.addEventListener('resize', () => {
-    measure();
+    viewport.measure();
     draw();
   });
 
-  measure();
+  viewport.measure();
   draw();
 
   IAW.createPlaybackController({
@@ -240,7 +198,7 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
     slider: slider,
     maxFrame: 1.0,
     isTimeBased: true,
-    speed: currentMapType === 'kr' ? 0.00085 : 0.0006,
+    speed: () => currentMapType === 'kr' ? 0.00085 : 0.0006,
     onFrameChange: renderFrame
   });
 });
