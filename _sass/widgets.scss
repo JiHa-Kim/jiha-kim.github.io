@@ -231,9 +231,12 @@
   color: var(--iaw-muted);
 
   /* Prevent MathJax symbols from being squashed or distorted by uppercase/letter-spacing */
-  .mjx-container {
-    text-transform: none;
-    letter-spacing: normal;
+  mjx-container,
+  .mjx-container,
+  .MathJax {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: normal !important;
   }
 }
 
