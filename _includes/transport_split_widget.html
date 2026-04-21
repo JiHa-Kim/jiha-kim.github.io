@@ -1,6 +1,8 @@
 {% capture describe %}
 <p>
-  Source $A$ carries $2 \text{ kg}$ and source $B$ carries $1 \text{ kg}$. Hole $C$ needs $1 \text{ kg}$ while hole $D$ needs $2 \text{ kg}$. Choosing $\pi_{AC}$ determines the other three entries by conservation of mass.
+  Sources $A$ (2kg) and $B$ (1kg) must fill holes $C$ (1kg) and $D$ (2kg). Let $x = \pi_{AC}$ be the mass moving from $A$ to $C$. Conservation of mass determines the entire plan $\pi$:
+  $\pi_{AC} = x, \pi_{AD} = 2-x, \pi_{BC} = 1-x, \pi_{BD} = x$.
+  In the Monge problem, $x \in \{0, 1\}$, but Kantorovich allows any $x \in [0, 1]$.
 </p>
 {% endcapture %}
 
@@ -11,7 +13,7 @@
   <section class="iaw__node otx__node otx__node--a" data-node="a">
     <div class="otx__node-card otx__node-card--a">
       <div class="otx__node-head">
-        <span class="otx__node-title">Source A</span>
+        <span class="otx__node-title">$A$</span>
         <span class="otx__node-mass">2 kg</span>
       </div>
       <div class="otx__slots" data-slots="a"></div>
@@ -21,7 +23,7 @@
   <section class="iaw__node otx__node otx__node--b" data-node="b">
     <div class="otx__node-card otx__node-card--b">
       <div class="otx__node-head">
-        <span class="otx__node-title">Source B</span>
+        <span class="otx__node-title">$B$</span>
         <span class="otx__node-mass">1 kg</span>
       </div>
       <div class="otx__slots" data-slots="b"></div>
@@ -31,7 +33,7 @@
   <section class="iaw__node otx__node otx__node--c otx__node--target" data-node="c">
     <div class="otx__node-card otx__node-card--target">
       <div class="otx__node-head">
-        <span class="otx__node-title">Hole C</span>
+        <span class="otx__node-title">$C$</span>
         <span class="otx__node-mass">1 kg</span>
       </div>
       <div class="otx__slots" data-slots="c"></div>
@@ -41,7 +43,7 @@
   <section class="iaw__node otx__node otx__node--d otx__node--target" data-node="d">
     <div class="otx__node-card otx__node-card--target">
       <div class="otx__node-head">
-        <span class="otx__node-title">Hole D</span>
+        <span class="otx__node-title">$D$</span>
         <span class="otx__node-mass">2 kg</span>
       </div>
       <div class="otx__slots" data-slots="d"></div>
@@ -57,32 +59,32 @@
 {% endcapture %}
 
 {% capture footer %}
-<div class="iaw__status-grid otx__status-grid tex2jax_ignore mathjax_ignore">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Free Variable</span>
-    <strong class="iaw__status-value" data-bind="free_value">&pi;<sub>AC</sub> = 0.50 kg</strong>
+<div class="otx__summary-compact">
+  <div class="otx__cost-summary">
+    Total Cost: <strong class="otx__mini-value">&#36;<span data-bind="cost_value">7.50</span></strong>
   </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Total Cost</span>
-    <strong class="iaw__status-value otx__cost-value">&#36;<span data-bind="cost_value">7.50</span></strong>
+
+  <div class="otx__plan-summary">
+    <div class="otx__plan-math">
+      <span class="otx__math-symbol">$\pi_{AC}=$</span><span class="otx__math-val" data-bind="pi_ac">0.50</span><span class="otx__math-sep">,</span>
+      <span class="otx__math-symbol">$\pi_{AD}=$</span><span class="otx__math-val" data-bind="pi_ad">1.50</span><span class="otx__math-sep">,</span>
+      <span class="otx__math-symbol">$\pi_{BC}=$</span><span class="otx__math-val" data-bind="pi_bc">0.50</span><span class="otx__math-sep">,</span>
+      <span class="otx__math-symbol">$\pi_{BD}=$</span><span class="otx__math-val" data-bind="pi_bd">0.50</span>
+    </div>
   </div>
 </div>
 
-<div class="otx__slider-row tex2jax_ignore mathjax_ignore">
-  {% assign tsTicks = "More A-D, Balanced, More A-C" | split: ", " %}
+<div class="otx__slider-row">
+  {% assign tsTicks = "$2:0$, Balanced, $1:1$" | split: ", " %}
   {% include iaw_slider.html id="otxSlider" min="0" max="1" step="0.25" value="0.5" ticks=tsTicks variant="parameter" %}
 </div>
 
-<div class="otx__readout tex2jax_ignore mathjax_ignore">
-  <span class="otx__readout-label">Plan</span>
-  <span class="otx__readout-value otx__readout-value--mono" data-bind="plan_value">&pi;<sub>AC</sub>=0.50, &pi;<sub>AD</sub>=1.50, &pi;<sub>BC</sub>=0.50, &pi;<sub>BD</sub>=0.50</span>
-</div>
 {% endcapture %}
 
 {% include iaw_skeleton.html
     id="transportSplitWidget"
     eyebrow="Interactive Example"
-    title="Optimal Transport with Mass Splitting"
+    title="Kantorovich Problem (Split Mass)"
     description=describe
     visuals=visuals
     stage_id="otxStage"
@@ -298,6 +300,59 @@
     max-width: none;
   }
 }
+
+.otx__summary-compact {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid var(--iaw-border);
+}
+
+.otx__cost-summary {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--iaw-muted);
+  flex-shrink: 0;
+}
+
+.otx__mini-value {
+  color: #10b981 !important; /* Vibrant Success Green */
+  font-size: 1.6rem;
+  font-weight: 900;
+  margin-left: 0.4rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.otx__plan-math {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 0 0.4rem;
+  font-size: 1rem;
+  color: var(--iaw-text);
+  flex: 1;
+}
+
+.otx__math-symbol {
+  color: var(--iaw-text);
+}
+
+.otx__math-val {
+  font-family: var(--font-family-monospace, monospace);
+  font-weight: 700;
+  color: var(--iaw-success);
+  margin: 0 0.15rem;
+}
+
+.otx__math-sep {
+  color: var(--iaw-muted);
+  margin-right: 0.4rem;
+}
 </style>
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
@@ -326,15 +381,17 @@
 
     const binds = {
         cost: root.querySelector('[data-bind="cost_value"]'),
-        free: root.querySelector('[data-bind="free_value"]'),
-        plan: root.querySelector('[data-bind="plan_value"]')
+        pi_ac: root.querySelector('[data-bind="pi_ac"]'),
+        pi_ad: root.querySelector('[data-bind="pi_ad"]'),
+        pi_bc: root.querySelector('[data-bind="pi_bc"]'),
+        pi_bd: root.querySelector('[data-bind="pi_bd"]')
     };
 
     const routeConfigs = [
-        { key: "ac", from: "a", to: "c", accent: "a", name: "A → C", cost: 1, curve: -34, t: 0.42 },
-        { key: "ad", from: "a", to: "d", accent: "a", name: "A → D", cost: 3, curve: -10, t: 0.42 },
-        { key: "bc", from: "b", to: "c", accent: "b", name: "B → C", cost: 4, curve: 10, t: 0.58 },
-        { key: "bd", from: "b", to: "d", accent: "b", name: "B → D", cost: 1, curve: 34, t: 0.58 }
+        { key: "ac", from: "a", to: "c", accent: "a", name: "A \\to C", cost: 1, curve: -34, t: 0.42 },
+        { key: "ad", from: "a", to: "d", accent: "a", name: "A \\to D", cost: 3, curve: -10, t: 0.42 },
+        { key: "bc", from: "b", to: "c", accent: "b", name: "B \\to C", cost: 4, curve: 10, t: 0.58 },
+        { key: "bd", from: "b", to: "d", accent: "b", name: "B \\to D", cost: 1, curve: 34, t: 0.58 }
     ];
 
     function schedule(callback, delay) {
@@ -393,7 +450,7 @@
         routeConfigs.forEach((route) => {
             const el = document.createElement("div");
             el.className = `iaw__route-tag otx__route-tag otx__route-tag--${route.accent}`;
-            el.textContent = `${route.name}  $${route.cost}`;
+            el.innerHTML = `$${route.name} \\quad ${route.cost}\\$/\\text{kg}$`;
             routesNode.appendChild(el);
             route.el = el;
         });
@@ -413,14 +470,11 @@
         state.plans = { pi_ac: ac, pi_ad: ad, pi_bc: bc, pi_bd: bd };
         state.cost = routeConfigs.reduce((sum, route) => sum + route.cost * state.plans[`pi_${route.key}`], 0);
 
-        binds.free.innerHTML = `&pi;<sub>AC</sub> = ${ac.toFixed(2)} kg`;
+        binds.pi_ac.innerText = ac.toFixed(2);
+        binds.pi_ad.innerText = ad.toFixed(2);
+        binds.pi_bc.innerText = bc.toFixed(2);
+        binds.pi_bd.innerText = bd.toFixed(2);
         binds.cost.innerText = state.cost.toFixed(2);
-        binds.plan.innerHTML = [
-            formatPlanValue("ac", ac),
-            formatPlanValue("ad", ad),
-            formatPlanValue("bc", bc),
-            formatPlanValue("bd", bd)
-        ].join(", ");
     }
 
     function getNodeAnchor(nodeKey) {
@@ -629,6 +683,18 @@
         sync(0.5);
         draw();
         run();
+
+        // One-time LaTeX typeset for labels
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise([root]).catch(() => {});
+        } else {
+            // Fallback for slower loads
+            window.setTimeout(() => {
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([root]).catch(() => {});
+                }
+            }, 1000);
+        }
     }
 
     slider.addEventListener("input", (event) => {

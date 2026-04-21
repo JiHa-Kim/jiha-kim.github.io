@@ -7,8 +7,8 @@
 {% assign meFrameCount = 180 %}
 
 {% capture controls %}
-<button class="iaw__seg-btn active" data-constraint="bounded">Support [-2, 2]</button>
-<button class="iaw__seg-btn" data-constraint="variance">Mean 0, Var 1</button>
+<button class="iaw__seg-btn active" data-constraint="bounded">Support $[-2, 2]$</button>
+<button class="iaw__seg-btn" data-constraint="variance">$\mu = 0, \sigma^2 = 1$</button>
 {% endcapture %}
 
 {% capture visuals %}
@@ -19,16 +19,16 @@
 {% capture footer %}
 <div class="iaw__status-grid mew__status-grid">
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Constraint</span>
-    <strong class="iaw__status-value" id="meConstraintLabel">Uniform on [-2, 2]</strong>
+    <span class="iaw__status-label">Constraint Type</span>
+    <strong class="iaw__status-value" id="meConstraintLabel">Uniform on $[-2, 2]$</strong>
   </div>
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Entropy</span>
+    <span class="iaw__status-label">Entropy $H(P)$</span>
     <strong class="iaw__status-value mew__entropy-readout"><span id="meValH">0.000</span> <span class="mew__entropy-unit">nats</span></strong>
   </div>
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Moments</span>
-    <strong class="iaw__status-value" id="meMomentSummary">mean 0.000, var 0.000</strong>
+    <span class="iaw__status-label">Moments ($\mu, \sigma^2$)</span>
+    <strong class="iaw__status-value" id="meMomentSummary">0.000, 0.000</strong>
   </div>
 </div>
 
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
       baseStepSize: 0.10,
       floorWeight: 0.015,
       xBounds: { min: -4.5, max: 4.5 },
-      targetLabelText: 'Gaussian shape with mean 0, var 1',
+      targetLabelText: 'Gaussian shape with $\\mu=0, \\sigma^2=1$',
       peaks: [
         { mean: -2.4, scale: 0.42, weight: 0.7 },
         { mean: -0.9, scale: 0.25, weight: 1.1 },

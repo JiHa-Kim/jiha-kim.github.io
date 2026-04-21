@@ -49,15 +49,15 @@
 {% capture footer %}
 <div class="iaw__status-grid">
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Uncrossed Total:</span>
+    <span class="iaw__status-label">Cost (Uncrossed)</span>
     <strong class="iaw__status-value" data-bind="uncrossed_total">0.00</strong>
   </div>
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Crossed Total:</span>
+    <span class="iaw__status-label">Cost (Crossed)</span>
     <strong class="iaw__status-value" data-bind="crossed_total">0.00</strong>
   </div>
   <div class="iaw__status-item" style="grid-column: span 2; border-top: 1px solid var(--iaw-border); padding-top: 0.5rem; margin-top: 0.25rem;">
-    <span class="iaw__status-label">Crossed minus Uncrossed (Reduction):</span>
+    <span class="iaw__status-label">Benefit of Uncrossing ($\Delta$):</span>
     <strong class="iaw__status-value" style="color: var(--iaw-success); font-size: 1.25rem;" data-bind="delta_total">0.00</strong>
   </div>
 </div>
@@ -66,7 +66,7 @@
 {% include iaw_skeleton.html 
     id="transportUncrossingWidget"
     eyebrow="Interactive 1D Example"
-    title="Uncrossed Versus Crossed Matched Comparison"
+    title="Distance Matching and Uncrossing"
     description=describe
     visuals=visuals
     stage_id="otucStage"

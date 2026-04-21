@@ -13,11 +13,11 @@
       <div class="t2dd__panel-title">Empirical Discretization</div>
       <div class="t2dd__summary-value">Only the coupling changes; the source and target samples stay frozen.</div>
       <div class="t2dd__cost-row">
-        <span class="t2dd__cost-label">Sequential Baseline</span>
+        <span class="t2dd__cost-label">Baseline $T_{\mathrm{KR}}$</span>
         <strong class="t2dd__cost-value">237.89</strong>
       </div>
       <div class="t2dd__cost-row">
-        <span class="t2dd__cost-label">Discrete OT</span>
+        <span class="t2dd__cost-label">Discrete $T_{\mathrm{OT}}$ (Sinkhorn)</span>
         <strong class="t2dd__cost-value t2dd__cost-value--best">114.06</strong>
       </div>
     </div>
@@ -26,8 +26,8 @@
   <div class="t2dd__stage-card">
     <div class="t2dd__toolbar">
       <div class="t2dd__segmented-control">
-        <button class="t2dd__seg-btn active" data-map="seq">Sequential Baseline</button>
-        <button class="t2dd__seg-btn" data-map="ot">Discrete OT Assignment</button>
+        <button class="t2dd__seg-btn active" data-map="seq">Baseline ($T_{\mathrm{KR}}$)</button>
+        <button class="t2dd__seg-btn" data-map="ot">Optimal ($T_{\mathrm{OT}}$)</button>
       </div>
       <div class="t2dd__legend">Gray = sampled source cloud, blue = sampled target cloud, muted paths = sparse pairing preview, orange = the transported sampled cloud.</div>
     </div>

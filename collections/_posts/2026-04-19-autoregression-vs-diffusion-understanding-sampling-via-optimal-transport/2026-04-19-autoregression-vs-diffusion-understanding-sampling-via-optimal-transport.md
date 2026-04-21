@@ -99,7 +99,6 @@ Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}
 
 To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 %} {% cite thorpeIntroductionOptimalTransport %}
 
-{% include transport_widget.html %}
 
 Optimal transport is the continuous, high-dimensional version of this same mass-moving problem.
 
@@ -115,6 +114,8 @@ Optimal transport is the continuous, high-dimensional version of this same mass-
 > [!problem] The Monge Problem
 > Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost. Monge seeks a deterministic map $T$ minimizing
 > $$ \min_T \underset{Z \,\sim\, P_{\text{noise}}}{\mathbb{E}}[c(Z, T(Z))] \quad \text{s.t.} \quad T(Z) \sim P_{\text{data}}. $$
+
+{% include transport_widget.html %}
 
 > [!problem] The Kantorovich Problem
 > Monge forces each source point $z$ to choose a single destination $T(z)$. Kantorovich relaxes this by optimizing over any random pair $(Z,X)$ with the correct marginals:
