@@ -59,9 +59,10 @@ Generative modeling is fundamentally an exercise in statistical estimation.
 > [!problem] Generative Modeling
 > Let $\mathcal{D} = \{x_1, \dots, x_N\}$ be an empirical dataset drawn i.i.d. from a data distribution $x \sim P_{\text{data}}(x)$ defined over a high-dimensional space $\mathcal{X}$. We want to generate new approximate samples from $P_{\text{data}}(x)$.
 
-Direct sampling from a complex, high-dimensional data distribution is generally intractable. Instead, we reduce the problem from direct sampling to **noise sampling plus procedural generation**. 
-
-Think of world generation in a game like Minecraft: instead of trying to randomly generate a billion individual blocks and hoping they form a coherent landscape, we start from a single random seed—a simple source of randomness—and use it as the starting point for a procedural generation algorithm. In generative AI, we take a similar approach.
+> [!principle] The Procedural Strategy
+> Direct sampling from a complex, high-dimensional data distribution is generally intractable. Instead, we reduce the generative problem to a two-step procedure: **noise sampling** followed by **procedural generation**. 
+> 
+> Think of world generation in a game like Minecraft: instead of trying to randomly generate a billion individual blocks and hoping they form a coherent landscape, we start from a single random seed—a simple source of randomness—and use it as the starting point for a procedural generation algorithm. In generative AI, we take a similar approach.
 
 > [!goal] The Transport Objective
 > We introduce a tractable base distribution $z \sim P_{\text{noise}}(z)$ (like standard Gaussian noise) that is easy to sample from. The goal is then to convert this simple randomness into samples that match the statistics of $P_{\text{data}}(x)$.
@@ -83,7 +84,9 @@ Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}
 > Since $p(x)$ is constant, it must precisely be $\frac{1}{b-a}$ to integrate to 1.
 
 > [!proposition] Gaussian Maximum Entropy
-> For an unbounded domain space like $\mathbb{R}$, a uniform probability distribution cannot exist (it would require infinite mass), and the maximum possible differential entropy is unbounded ($+\infty$). To get a meaningful maximum entropy base, we constrain the variance $\mathbb{E}[(X - \mathbb{E}[X])^2] \le \sigma^2$. This geometrically yields the Gaussian distribution. {% cite NormalDistribution2026 %}
+> For an unbounded domain space like $\mathbb{R}$, a uniform probability distribution cannot exist (it would require infinite mass), and the maximum possible differential entropy is unbounded ($+\infty$). To get a meaningful maximum entropy base, we constrain the variance $\mathbb{E}[(X - \mathbb{E}[X])^2] \le \sigma^2$.
+> 
+> This geometrically yields the Gaussian distribution $N(\mu, \sigma^2)$. {% cite NormalDistribution2026 %}
 
 > [!proof]-
 > We maximize $\mathbb{E}[-\ln p(x)]$ subject to $\int p(x) dx = 1$ and bounded variance $\int x^2 p(x) dx = \sigma^2$ (assuming zero mean). The Lagrangian functional derivative yields:
@@ -101,26 +104,14 @@ To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransp
 Optimal transport is the continuous, high-dimensional version of this same mass-moving problem.
 
 > [!note] Generative Optimal Transport
-> In the generative setting, our source is the noise prior $P_{\text{noise}}$, and our target is the true data distribution $P_{\text{data}}$. We would like a transport map $T$ satisfying
-> $$ T_\sharp P_{\text{noise}} = P_{\text{data}}, $$
-> or at least approximate this relation within a parameterized model family.
->
-> This simply means: if $Z \sim P_{\text{noise}}$, then $T(Z)$ should follow the data distribution.
+> In the generative setting, the source is the noise prior $P_{\text{noise}}$ and the target is the data distribution $P_{\text{data}}$. We seek a map $T$ with $T_\sharp P_{\text{noise}} = P_{\text{data}}$, meaning that if $Z \sim P_{\text{noise}}$, then $T(Z) \sim P_{\text{data}}$.
 
 > [!definition] Pushforward Measure ($T_\sharp$)
-> The sharp notation ($\sharp$) denotes the **pushforward** of a probability measure. The function $T: \mathcal{Z} \to \mathcal{X}$ "pushes" mass from the source to the target domain:
-> $$ P_{\text{data}}(A) = P_{\text{noise}}(T^{-1}(A)) $$
-> 
-> For probability density functions, assuming $T$ is a differentiable bijection, the change of variables formula yields the **pushforward density**:
-> $$ p_{\text{data}}(x) = p_{\text{noise}}(T^{-1}(x)) \left| \det J_{T^{-1}}(x) \right| $$
-> Or equivalently:
-> $$ p_{\text{data}}(T(z)) = p_{\text{noise}}(z) \left| \det J_T(z) \right|^{-1} $$
+> The pushforward is defined by $(T_\sharp P)(A) = P(T^{-1}(A))$. If $T$ is a differentiable bijection, then
+> $$ p_{\text{data}}(x) = p_{\text{noise}}(T^{-1}(x)) \left| \det J_{T^{-1}}(x) \right| = p_{\text{noise}}(z)\left| \det J_T(z) \right|^{-1}, \qquad x=T(z). $$
 
 > [!proof]- Pushforward Derivation
-> For any region $A$, the data probability mass is:
-> $$ P_{\text{data}}(A) = \int_A p_{\text{data}}(x) dx $$
-> By definition of the pre-image $T^{-1}(A) = \{z \mid T(z) \in A\}$, equivalently $T(z) \in A \iff z \in T^{-1}(A)$:
-> $$ P(T(Z) \in A) = P(Z \in T^{-1}(A)) = \int_{T^{-1}(A)} p_{\text{noise}}(z) dz $$
+> For any measurable set $A$, $P(T(Z)\in A)=P(Z\in T^{-1}(A))$. That identity is exactly the definition of the pushforward.
 
 > [!problem] The Monge Problem
 > Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost on source-target pairs. The Monge problem seeks a transport map $T$ minimizing
@@ -148,20 +139,10 @@ To build intuition, let's start with a simple case: **Inverse Transform Sampling
 Suppose we operate strictly in a 1-dimensional continuous space $\mathbb{R}$, and the target distribution $P_{\text{data}}$ is entirely defined by its Cumulative Distribution Function (CDF) $F(x) = P(X \le x)$. 
 
 > [!problem] The 1D Sampling Problem
-> We assume we know how to sample from the uniform distribution
-> $$ U \sim \mathcal{U}(0,1), $$
-> but we want to generate a random variable $X$ with target CDF $F$. So the problem is to find a function $T$ such that $X = T(U)$ satisfies
-> $$ P(X \le t) = F(t) \qquad \text{for every } t \in \mathbb{R}. $$
->
-> In other words, we want to turn easy-to-sample uniform noise into samples from the target distribution.
+> We can sample $U \sim \mathcal{U}(0,1)$, but we want $X=T(U)$ to have CDF $F$, i.e. $P(X \le t)=F(t)$ for every $t$. In other words, we want to turn uniform noise into samples from the target distribution.
 
 > [!success] The 1D Closed-Form Solution
-> Draw
-> $$ U \sim \mathcal{U}(0,1), \qquad X = F^{-1}(U). $$
-> Here $F^{-1}(u)$ means "the smallest $x$ such that $F(x) \ge u$."
-> Then $X$ has CDF $F$. Indeed, for any $t$,
-> $$ P(X \le t) = P(F^{-1}(U) \le t) = P(U \le F(t)) = F(t). $$
-> So inverse transform sampling is already a transport rule: it sends uniform mass on $[0,1]$ to the target distribution with CDF $F$.
+> Set $X=F^{-1}(U)$, where $F^{-1}(u)$ is the smallest $x$ with $F(x)\ge u$. Then $P(X \le t)=P(U \le F(t))=F(t)$, so inverse transform sampling is already a transport map from uniform noise to the target distribution.
 
 We now rewrite the same idea in the discrete setting first.
 
@@ -204,7 +185,7 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 >
 > A permutation with no inversions is increasing, and the only increasing permutation of $\{1,\dots,n\}$ is the identity. So eventually we reach $\sigma(i)=i$ for every $i$, which is exactly the sorted matching $x^{(i)} \leftrightarrow y^{(i)}$.
 
-> [!example] Equal Quantiles
+> [!tip] Equal Quantiles
 > The continuous version says the same thing, but with percentiles instead of sorted lists.
 >
 > The $u$-quantile of a distribution means: the smallest point whose CDF value is $u$. Equivalently, it is the pseudoinverse-CDF value $F^{-1}(u):=\inf\{x:F(x)\ge u\}$.
@@ -280,17 +261,55 @@ In higher dimensions, we can apply the same quantile-matching step conditionally
 If we abandon the greedy sequence and seek the true globally optimal map for the symmetric squared Euclidean cost, we arrive at Brenier's theorem {% cite brenierPolarFactorizationMonotone1991 %}.
 
 > [!theorem] Brenier's Theorem
-> For the squared Euclidean cost 
-> $$ W_2^2 = \inf_{T_\sharp P = Q} \mathbb{E}[\|x - T(x)\|_2^2], $$
-> the unique optimal transport map $T$ is characterized as the gradient of a convex scalar potential function $\psi: \mathbb{R}^D \to \mathbb{R}$:
-> $$ T(x) = \nabla \psi(x) $$
+> If $P$ is absolutely continuous and $P,Q$ have finite second moments, then the quadratic-cost problem
+> $$ W_2^2(P,Q)=\inf_{T_\sharp P = Q}\mathbb{E}_{X\sim P}\|X-T(X)\|_2^2 $$
+> has a unique optimal map up to $P$-null sets, and it has the form $T=\nabla\psi$ for a convex potential $\psi$.
+
+> [!remark] Why a Convex Gradient?
+> In 1D, optimal transport was monotone: equal quantiles never cross. In higher dimensions, the analogue of that monotonicity is a convex gradient. Indeed, convexity gives $(\nabla\psi(x)-\nabla\psi(y))\cdot(x-y)\ge 0$, so points are not sent in locally contradictory directions. When $D=1$, gradients of convex functions are exactly increasing functions, so Brenier reduces to monotone rearrangement.
+
+> [!note] What the Theorem Says Geometrically
+> Brenier's theorem is stronger than existence: the global $W_2^2$ optimizer is deterministic, unique almost everywhere, and generated by a single scalar potential. So the best quadratic-cost generator is not an arbitrary black box, but a convex-potential gradient.
 
 > [!corollary] Polar Factorization Theorem
-> Any generative map $F: \mathbb{R}^D \to \mathbb{R}^D$ that pushes noise to data ($F_\sharp P_{\text{noise}} = P_{\text{data}}$) can be uniquely factored as:
-> $$ F = \nabla \psi \circ M $$
-> where $\nabla \psi$ is the unique Brenier optimal transport map, and $M$ is a measure-preserving map ($M_\sharp P_{\text{noise}} = P_{\text{noise}}$). 
-> 
-> This is the infinite-dimensional analogue to the polar decomposition of a matrix $A = P U$ (where $P$ is symmetric positive semi-definite and $U$ is orthogonal/unitary). It implies that *any* exact generative model learns the unique optimal transport $\nabla \psi$, composed with some arbitrary internal "shuffling" of the noise $M$ {% cite vesseronNeuralImplementationBreniers2025 %}.
+> Any exact generator $F$ with $F_\sharp P_{\text{noise}} = P_{\text{data}}$ can be written as
+> $$ F=\nabla\psi \circ M, $$
+> where $\nabla\psi$ is the Brenier map and $M$ preserves the source law: $M_\sharp P_{\text{noise}}=P_{\text{noise}}$.
+>
+> This is the infinite-dimensional analogue of matrix polar decomposition. It says every exact generator is the optimal transport, followed by an internal relabeling of latent noise {% cite vesseronNeuralImplementationBreniers2025 %}.
+
+> [!remark] Reading Polar Factorization Backwards
+> Equivalently, $\nabla\psi = F \circ M^{-1}$. So every exact generator differs from the Brenier map only by a latent rearrangement that preserves the source law. The essential geometric part is $\nabla\psi$; $M$ only relabels latent randomness.
+
+### Polar Factorization as a Model-Improvement Procedure
+
+The practical question is whether a trained generator can be made geometrically better without relearning the whole density. Polar factorization says yes.
+
+> [!proposition] Same Density, Different Geometry
+> If $\widetilde{G}=G\circ M$ and $M_\sharp P_{\text{noise}}=P_{\text{noise}}$, then $\widetilde{G}_\sharp P_{\text{noise}}=G_\sharp P_{\text{noise}}$. So rearranging the latent noise leaves the modeled density unchanged; it only changes which latent point is sent to which sample.
+>
+> If $T=\nabla\psi$ is Brenier's map from $P_{\text{noise}}$ to $P_{\text{data}}$, then for any exact generator $\widetilde{G}$ with the same pushforward law,
+> $$ \mathbb{E}\|Z-T(Z)\|_2^2 \le \mathbb{E}\|Z-\widetilde{G}(Z)\|_2^2, \qquad Z\sim P_{\text{noise}}. $$
+
+> [!proof]-
+> Pushforwards compose, so $\widetilde{G}_\sharp P_{\text{noise}}=(G\circ M)_\sharp P_{\text{noise}}=G_\sharp(M_\sharp P_{\text{noise}})=G_\sharp P_{\text{noise}}$. The inequality then follows from Brenier optimality, since both $T$ and $\widetilde{G}$ push the same source law to the same target law.
+
+This is the core insight behind Morel et al.: a trained normalizing flow may already model the right density, yet still move mass inefficiently. They learn a Gaussian-preserving latent rearrangement that lowers transport cost without changing the final density, pushing a pre-trained flow toward its Monge representative {% cite morelTurningNormalizingFlows2023 %}.
+
+### Gaussian-Preserving Rearrangements
+
+For standard normal priors, Morel et al. make this concrete by moving into uniform coordinates, applying a volume-preserving shuffle, and mapping back.
+
+> [!proposition] Gaussian-Preserving Rearrangements via Uniform Coordinates
+> Let $\Phi:\mathbb{R}^D \to (0,1)^D$ be the coordinatewise standard normal CDF and let $\phi:(0,1)^D \to (0,1)^D$ be a smooth volume-preserving diffeomorphism with $|\det J_\phi|=1$. Then
+> $$ M=\Phi^{-1}\circ \phi \circ \Phi $$
+> preserves the standard Gaussian: if $Z\sim \mathcal{N}(0,I)$, then $M(Z)\sim \mathcal{N}(0,I)$.
+
+> [!proof]-
+> If $U=\Phi(Z)$, then $U$ is uniform on $(0,1)^D$. Volume preservation implies $\phi(U)$ is still uniform, and applying $\Phi^{-1}$ coordinatewise sends it back to a standard Gaussian. Hence $M(Z)\sim \mathcal{N}(0,I)$.
+
+> [!remark] Why Divergence-Free ODEs and Euler Regularization Appear
+> Morel et al. parameterize $\phi$ as the endpoint of an ODE $\dot X_t=v_t(X_t)$ on the cube, with $\nabla\cdot v_t=0$ and tangential boundary conditions. Liouville's formula then keeps $\det J_{X_t}$ constant, so each time-$t$ map preserves volume. Euler regularization does not change the endpoint density; it selects a smoother, lower-energy path among these admissible rearrangements {% cite morelTurningNormalizingFlows2023 %}.
 
 ## Constrained vs. Unconstrained Transport
 
@@ -314,40 +333,43 @@ Two complementary 2D pictures help keep the distinction straight. First, we comp
 
 {% include transport_2d_discrete_widget.html %}
 
+## Practical OT: Entropic Regularization
+
+Everything above was about **exact population-level transport**: closed-form 1D maps, exact triangular rearrangements, and Brenier's exact quadratic-cost optimizer. In practice, training uses softened finite-sample approximations instead.
+
+> [!definition] Entropic Optimal Transport
+> Given source and target measures $\mu,\nu$ and a reference coupling $\pi_{\mathrm{ref}}$, entropic OT solves
+> $$ \min_{\pi \in \Pi(\mu,\nu)} \int c(x,y)\,d\pi(x,y) + \varepsilon\, \mathrm{KL}(\pi \Vert \pi_{\mathrm{ref}}). $$
+> The KL term pulls the learned coupling toward the chosen reference plan $\pi_{\mathrm{ref}}$ while keeping the marginals fixed.
+
+> [!remark] Product Reference = Entropy Regularization up to Constants
+> If $\mu,\nu$, and $\pi$ admit densities, then
+> $$ \mathrm{KL}(\pi \Vert \mu \otimes \nu)=H(\pi)-H(\mu)-H(\nu). $$
+> So with product reference $\mu \otimes \nu$, KL regularization and entropy regularization have the same minimizer. This follows by expanding the logarithm and using the fact that $\pi$ has marginals $\mu$ and $\nu$.
+
+> [!remark] Why the Reference Coupling Matters
+> Standard Sinkhorn usually uses the product reference $\mu \otimes \nu$, so the regularizer acts mainly as a generic smoothing term. Freulon et al. show that once the reference itself carries correlations, especially in the Gaussian case, entropic OT is no longer just "OT plus blur": it is biased toward couplings with that prescribed structure {% cite freulonEntropicOptimalTransport2026 %}.
+
+This is the setting in which Sinkhorn is usually introduced: a fast solver for entropically regularized OT, most often with product reference. We will use exactly this viewpoint later for mini-batch OT couplings in continuous flows.
+
 ## Vanilla (Causal Sequence) Autoregression
 
 Vanilla autoregression fixes an order and applies the same 1D inverse-CDF step sequentially.
 
 > [!definition] Chain Rule Factorization
-> If $x = (x_1,\dots,x_D)$ and $x_{<i} = (x_1,\dots,x_{i-1})$, then
-> $$ p(x) = \prod_{i=1}^D p(x_i \mid x_{<i}). $$
+> If $x=(x_1,\dots,x_D)$ and $x_{<i}=(x_1,\dots,x_{i-1})$, then $p(x)=\prod_{i=1}^D p(x_i \mid x_{<i})$.
 
 > [!note] Sampling Rule
-> Draw independent uniforms $u_1,\dots,u_D \sim \mathcal{U}(0,1)$ and set
-> $$ x_i = F^{-1}_{X_i \mid X_{<i}=x_{<i}}(u_i), \qquad i = 1,\dots,D. $$
-> Here $F^{-1}_{X_i \mid X_{<i}=x_{<i}}$ is the inverse CDF of the conditional distribution of the next coordinate after the previous coordinates have already been generated.
-> So each step is just 1D inverse transform sampling conditioned on the past.
+> Draw $u_1,\dots,u_D \sim \mathcal{U}(0,1)$ and set $x_i = F^{-1}_{X_i \mid X_{<i}=x_{<i}}(u_i)$. Each step is just 1D inverse transform sampling conditioned on the past.
 
 ### Example: LLMs as Classification
 
 > [!example] Next-Token Prediction
-> Let's look at a concrete example using a tiny 3-word vocabulary: $\mathcal{V} = \{\text{"apple"}, \text{"banana"}, \text{"cherry"}\}$.
-> 
-> At step $i$, the model outputs a probability distribution over the vocabulary:
-> $$ p_k = P(x_i = v_k \mid x_{<i}), \qquad \sum_k p_k = 1. $$
-> 
-> Suppose the model predicts the following probabilities for the next word:
-> $$P(\text{"apple"}) = 0.6, \quad P(\text{"banana"}) = 0.3, \quad P(\text{"cherry"}) = 0.1$$
-> 
-> To sample the next token, we construct the discrete CDF by accumulating these probabilities:
-> $$F(\text{"apple"}) = 0.6, \quad F(\text{"banana"}) = 0.6 + 0.3 = 0.9, \quad F(\text{"cherry"}) = 0.9 + 0.1 = 1.0$$
-> 
-> Now, we draw our uniform noise $u \sim \mathcal{U}(0,1)$. Let's say we draw $u = 0.75$.
-> 
-> We apply the inverse-CDF rule: $x_i = \min \{ v_k \in \mathcal{V} \mid F(v_k) \ge u \}$.
-> Since $0.6 < 0.75 \le 0.9$, the generated token is **"banana"**.
-> 
-> Training an LLM with standard cross-entropy loss (negative log-likelihood) is exactly equivalent to learning this sequence of 1D conditional transport maps:
+> Take a tiny vocabulary $\mathcal{V}=\{\text{"apple"}, \text{"banana"}, \text{"cherry"}\}$. At step $i$, the model outputs probabilities $p_k=P(x_i=v_k \mid x_{<i})$.
+>
+> Suppose it predicts $(0.6, 0.3, 0.1)$. The discrete CDF is then $(0.6, 0.9, 1.0)$. If we draw $u=0.75$, the inverse-CDF rule picks the first token whose cumulative probability exceeds $u$, namely **"banana"**.
+>
+> So next-token sampling is just conditional inverse transform sampling, and standard cross-entropy training learns these 1D conditional transports:
 > $$ \mathcal{L}_{\text{NLL}} = -\sum_{i=1}^D \log P(x_i^{\text{true}} \mid x_{<i}). $$
 
 {% include llm_sampling_widget.html %}
@@ -357,82 +379,45 @@ Vanilla autoregression fixes an order and applies the same 1D inverse-CDF step s
 Instead of autoregressing in the original coordinates, we can first change coordinates and then factorize there.
 
 > [!definition] Change of Variables
-> Let $y = g(x)$ be invertible. Then
-> $$ p_X(x) = p_Y(y)\left| \det J_g(x) \right|, \qquad y = g(x), $$
-> where $J_g(x)$ is the Jacobian matrix of $g$. If
-> $$ p_Y(y) = \prod_{i=1}^D p(y_i \mid y_{<i}), $$
-> then
-> $$ p_X(x) = \left[\prod_{i=1}^D p(y_i \mid y_{<i})\right]\left| \det J_g(x) \right|. $$
+> If $y=g(x)$ is invertible, then $p_X(x)=p_Y(g(x))|\det J_g(x)|$. So any autoregressive factorization in the $y$-coordinates induces a density in the original $x$-coordinates.
 
-> [!todo] Visualization Placeholder: Same Point, New Coordinates
-> Draw one point cloud in the original $(x_1, x_2)$ coordinates and the same cloud after a linear transform into $(y_1, y_2)$.
-> Label one axis pair as "original space" and the other as "transformed space."
-> The figure should make it obvious that autoregression can be done after reparameterization.
+{% include reparameterization_widget.html %}
 
 ### Example 1: Changing the Ordering
 
 > [!example] Permuting Coordinates
-> Let $y_i = x_{\sigma(i)}$ for a permutation $\sigma$. Then $J_g$ is a permutation matrix, so
-> $$ \left| \det J_g(x) \right| = 1. $$
-> A concrete example is
-> $$ (y_1, y_2, y_3) = (x_2, x_1, x_3). $$
-> We simply changed the order in which the variables are generated.
->
-> Therefore
-> $$ p_X(x) = \prod_{i=1}^D p(x_{\sigma(i)} \mid x_{\sigma(<i)}). $$
-> This is the same autoregressive idea, just with a different coordinate order.
+> If $y_i=x_{\sigma(i)}$ for a permutation $\sigma$, then $J_g$ is a permutation matrix, so $|\det J_g|=1$. For example, $(y_1,y_2,y_3)=(x_2,x_1,x_3)$ simply changes generation order. The model is still autoregressive, just in a different ordering.
 
 ### Example 2: Frequency Space
 
 > [!example] Fourier or Wavelet Coordinates
-> Let $y = Ax$ for a fixed invertible matrix $A$, such as a Fourier or wavelet transform. Then
-> $$ p_X(x) = p_Y(Ax)\left| \det A \right|. $$
-> For a tiny 2-pixel example, one such transform is
-> $$ y_1 = \frac{x_1 + x_2}{2}, \qquad y_2 = \frac{x_1 - x_2}{2}. $$
-> The first coordinate is low frequency (average brightness); the second is high frequency (difference between the two pixels).
->
-> If we autoregress in the transformed coordinates,
-> $$ p_Y(y) = \prod_{i=1}^D p(y_i \mid y_{<i}), $$
-> then
-> $$ p_X(x) = \left[\prod_{i=1}^D p(y_i \mid y_{<i})\right]\left| \det A \right|. $$
-> Ordering the $y_i$ from low frequency to high frequency means the model predicts coarse structure first and fine detail later {% cite yuFrequencyAutoregressiveImage2026 %}.
+> Let $y=Ax$ for a fixed invertible transform such as Fourier or wavelets. In a tiny 2-pixel example, $y_1=(x_1+x_2)/2$ is low frequency and $y_2=(x_1-x_2)/2$ is high frequency. Autoregressing in $y$ therefore lets the model predict coarse structure before fine detail {% cite yuFrequencyAutoregressiveImage2026 %}.
 
 > [!info] Relation to Diffusion
-> Empirically, diffusion models also tend to form low frequencies before high frequencies {% cite DiffusionSpectralAutoregression2024 %}. This is a useful analogy, but the cited follow-up work argues that it is an observed tendency rather than a theorem {% cite falck2025spectralauto %}.
+> For images, diffusion often appears to refine samples from coarse structure toward fine detail. Dieleman interprets DDPM-style denoising as an *approximate* low-to-high spectral ordering that is valid in expectation across many images, rather than as a hard per-sample rule {% cite DiffusionSpectralAutoregression2024 %}. Falck's follow-up accepts that approximate DDPM picture, but argues that this spectral hierarchy is not necessary for good diffusion performance: hierarchy-free diffusion can match DDPM and even improve high-frequency generation {% cite falck2025spectralauto %}.
 
-> [!todo] Visualization Placeholder: Low Frequency First
-> Show a tiny image reconstruction sequence:
-> first only the average or low-frequency component,
-> then medium detail,
-> then full detail.
-> This should pair naturally with the frequency-space example above.
+{% include frequency_reconstruction_widget.html %}
 
 ## Unconstrained Transport: Continuous Flows
 
-We can parameterize a time-dependent velocity field and integrate {% cite laiPrinciplesDiffusionModels2025 %}:
+Instead of restricting the map to a triangular form, we can learn a time-dependent velocity field and integrate it {% cite laiPrinciplesDiffusionModels2025 %}.
 
 > [!definition] Continuous Normalizing Flow (CNF)
 > $$ \frac{dx}{dt} = v_\theta(x, t), \qquad x(0) \sim P_{\text{noise}}, \quad x(1) \sim P_{\text{data}} $$
-> The learned velocity field $v_\theta$ defines a flow map $\phi_t$.
-> If we start from a random point $X \sim P_{\text{noise}}$ and evolve it to time $t=1$, then $\phi_1(X)$ should approximately follow $P_{\text{data}}$.
+> The velocity field defines a flow map $\phi_t$, and we want $\phi_1(X)$ to follow $P_{\text{data}}$ when $X \sim P_{\text{noise}}$.
 
 This sidesteps computing $\nabla\psi$ entirely—but raises a new question: what should $v_\theta$ regress against?
 
 ### Flow Matching & Rectified Flows
 
-**Flow Matching** {% cite lipmanFlowMatchingGenerative2023 %} and the concurrent **Rectified Flows** answer this by constructing an analytic conditional target. For a random pair $(X_0, X_1)$ with $X_0 \sim P_{\text{noise}},\; X_1 \sim P_{\text{data}}$, define the straight-line interpolation and its velocity:
-
-$$ X_t = (1-t)\,X_0 + t\,X_1, \qquad u_t = X_1 - X_0 $$
+**Flow Matching** {% cite lipmanFlowMatchingGenerative2023 %} and concurrent **Rectified Flows** use an analytic conditional target: for a random pair $(X_0, X_1)$ with $X_0 \sim P_{\text{noise}}$ and $X_1 \sim P_{\text{data}}$, take the straight line $X_t=(1-t)X_0+tX_1$ with velocity $u_t=X_1-X_0$.
 
 > [!definition] Conditional Flow Matching (CFM) Objective
 > $$ \mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t,\, X_0,\, X_1}\bigl\| v_\theta(X_t,\, t) - (X_1 - X_0) \bigr\|^2 $$
-> The expectation means: sample a time $t$, sample a source point $X_0$, sample a target point $X_1$, and average the squared error over those random choices.
+> Here we sample a time $t$, a source point $X_0$, and a target point $X_1$, then regress the model toward the straight-line velocity.
 
 > [!remark] Conditional vs. Marginal Optimality
-> For any fixed pair $(X_0, X_1)$, the straight line from $X_0$ to $X_1$ is the optimal path between those two endpoints.
->
-> But after averaging over many random pairs, the resulting global vector field is **not** guaranteed to be the true Brenier-optimal transport field {% cite lipmanFlowMatchingGenerative2023 %}.
-> The point of flow matching is not exact global OT; the point is that the straight-line target is much easier to regress.
+> For a fixed pair $(X_0, X_1)$, the straight line is optimal between those endpoints. But after averaging over random pairs, the learned field is **not** guaranteed to equal the Brenier-optimal field {% cite lipmanFlowMatchingGenerative2023 %}. The advantage is not exact OT, but a simple regression target.
 
 > [!todo] Visualization Placeholder: Conditional Paths vs. Global Field
 > Use two panels:
@@ -443,13 +428,14 @@ $$ X_t = (1-t)\,X_0 + t\,X_1, \qquad u_t = X_1 - X_0 $$
 ### Uncrossing Paths: Mini-Batch OT
 
 > [!idea] Batch OT
-> Random $(X_0, X_1)$ pairing produces wildly crossed trajectories, making $v_\theta$ harder to learn. Solving the discrete assignment problem within each mini-batch uncrosses them:
+> Random pairings produce heavily crossed trajectories, which makes $v_\theta$ harder to learn. A mini-batch OT solve uncrosses them:
 > 
 > $$ \pi^* = \arg\min_{\pi \in \Pi(X_0^B,\, X_1^B)} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|^2 $$
-> 
-> Here $X_0^B$ and $X_1^B$ are the two mini-batches, $X_0^{(i)}$ is the $i$-th source point in the batch, $X_1^{(j)}$ is the $j$-th target point, and $\Pi(X_0^B, X_1^B)$ is the set of admissible matchings between them.
 
-This is efficiently approximated via the **Sinkhorn algorithm**. Uncrossed paths yield a smoother $v_\theta$, better generalization, and fewer ODE integration steps at inference.
+This is efficiently approximated with **Sinkhorn**. With product reference, it is exactly the entropic OT relaxation discussed above. In practice, uncrossed paths usually give a smoother field, better generalization, and fewer ODE steps at inference.
+
+> [!note] Endpoint Matching Is Not Yet a Dynamical Model
+> Mini-batch OT only decides which source points pair with which targets in one batch. If several time marginals must assemble into one stochastic process, then the reference coupling becomes a modeling choice rather than a mere computational trick. Freulon et al. show this explicitly in the Gaussian case: non-product references can encode correlations that persist across time, while product references do not {% cite freulonEntropicOptimalTransport2026 %}.
 
 > [!todo] Visualization Placeholder: Before/After Batch OT
 > Show the same batch twice:
@@ -460,16 +446,9 @@ This is efficiently approximated via the **Sinkhorn algorithm**. Uncrossed paths
 ### One-Step Maps: Generative Drifting
 
 > [!idea] Generative Drifting
-> Flow models still require multi-step ODE integration at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} aim to remove that extra solve.
-> Instead of learning a velocity field and integrating it at test time, they directly learn a map $f_\theta$ so that if
-> $$ z \sim P_{\text{noise}}, $$
-> then the generated sample
-> $$ x = f_\theta(z) $$
-> already follows the data distribution.
-> 
-> $$ x = f_\theta(z), \qquad z \sim P_{\text{noise}} $$
-> 
-> This completes the cycle: **Map** (Brenier, intractable) → **Flow** (tractable ODE, multi-step) → **Map** (learned, one-step).
+> Flow models still require multi-step ODE integration at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} try to remove that solve by learning a direct map $x=f_\theta(z)$ with $z \sim P_{\text{noise}}$.
+>
+> This closes the loop: **Map** (Brenier, intractable) → **Flow** (tractable ODE, multi-step) → **Map** (learned, one-step).
 
 > [!example] Visualizing the Vector Field
 > *Placeholder: Insert visualization showing a continuous 2D vector field guiding Gaussian noise into a multimodal target cluster.*
@@ -477,9 +456,9 @@ This is efficiently approximated via the **Sinkhorn algorithm**. Uncrossed paths
 ## Conclusion
 
 > [!summary] 
-> Through the lens of Optimal Transport, autoregression and diffusion are simply two computational strategies for the exact same geometric task: transporting $P_{\text{noise}}$ to $P_{\text{data}}$. 
-> 
-> Neither paradigm is a physical law tied to a specific modality. Text generation currently relies on autoregression and image generation uses diffusion primarily because of historical inductive biases and computational convenience—not mathematical necessity. As we develop better architectures and transport solvers, the lines between these generative families will continue to blur.
+> Through the lens of optimal transport, autoregression and diffusion are two computational strategies for the same geometric task: transporting $P_{\text{noise}}$ to $P_{\text{data}}$.
+>
+> Neither paradigm is tied to a modality by mathematical necessity. Text uses autoregression and images use diffusion mostly because of inductive bias and computational convenience. Better transport parameterizations and solvers will likely keep blurring that boundary.
 
 ---
 
