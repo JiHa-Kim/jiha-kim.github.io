@@ -10,12 +10,12 @@
 <div class="iaw__node iaw__node--a otm-hub" style="left: 40px; top: 60px;">
   <div class="otm-hub__badge">1kg box</div>
   <div class="otm-hub__circle otm-hub__circle--a"><i class="fas fa-box"></i></div>
-  <div class="otm-hub__label">Source $A_1$</div>
+  <div class="otm-hub__label">Source $A$</div>
 </div>
 <div class="iaw__node iaw__node--b otm-hub" style="left: 40px; bottom: 40px;">
   <div class="otm-hub__badge">1kg box</div>
   <div class="otm-hub__circle otm-hub__circle--b"><i class="fas fa-box"></i></div>
-  <div class="otm-hub__label">Source $A_2$</div>
+  <div class="otm-hub__label">Source $B$</div>
 </div>
 <div class="iaw__node iaw__node--c otm-hub" style="right: 40px; top: 60px;">
   <div class="otm-hub__badge">needs 1kg</div>
@@ -180,8 +180,8 @@
         let renderToken = 0;
 
         const routeData = {
-          1: [{ from: '--a', to: '--c', label: 'A1 \\to C: \\$1/\\mathrm{kg}', best: true, src: 'a' }, { from: '--b', to: '--d', label: 'A2 \\to D: \\$2/\\mathrm{kg}', best: true, src: 'b' }],
-          2: [{ from: '--a', to: '--d', label: 'A1 \\to D: \\$4/\\mathrm{kg}', best: false, src: 'a' }, { from: '--b', to: '--c', label: 'A2 \\to C: \\$3/\\mathrm{kg}', best: false, src: 'b' }]
+          1: [{ from: '--a', to: '--c', label: 'A \\to C: \\$1/\\mathrm{kg}', best: true, src: 'a' }, { from: '--b', to: '--d', label: 'B \\to D: \\$2/\\mathrm{kg}', best: true, src: 'b' }],
+          2: [{ from: '--a', to: '--d', label: 'A \\to D: \\$4/\\mathrm{kg}', best: false, src: 'a' }, { from: '--b', to: '--c', label: 'B \\to C: \\$3/\\mathrm{kg}', best: false, src: 'b' }]
         };
 
         const allLabels = [];
