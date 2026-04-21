@@ -45,12 +45,16 @@
 
 {% capture legend %}
 <div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-warning)"></span>
+  <span class="iaw__swatch" style="background: var(--iaw-source-a)"></span>
   <span>$A \to C$, $A \to D$ (Source A)</span>
 </div>
 <div class="iaw__legend-item">
   <span class="iaw__swatch" style="background: var(--iaw-source-b)"></span>
   <span>$B \to C$, $B \to D$ (Source B)</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-destination)"></span>
+  <span>Destinations (Holes $C, D$)</span>
 </div>
 {% endcapture %}
 
@@ -124,7 +128,7 @@
 .iaw__node--a .iaw__tray, .iaw__node--a .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-source-a) 8%, var(--iaw-bg)); }
 .iaw__node--b .iaw__tray, .iaw__node--b .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-source-b) 8%, var(--iaw-bg)); }
 .iaw__node--c .iaw__tray, .iaw__node--c .iaw__node-badge,
-.iaw__node--d .iaw__tray, .iaw__node--d .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-target) 8%, var(--iaw-bg)); }
+.iaw__node--d .iaw__tray, .iaw__node--d .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-destination) 8%, var(--iaw-bg)); }
 
 .iaw__particle { position: absolute; width: 14px; height: 14px; border-radius: 999px; transform: translate(-50%, -50%); z-index: 5; }
 .iaw__slider { background: var(--slider-bg, var(--iaw-border)) !important; }

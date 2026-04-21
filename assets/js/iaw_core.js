@@ -16,9 +16,10 @@ window.IAW = (function() {
 
         return {
             // Identity Tokens (Calibrated for Matte Aesthetic)
-            sourceA: isDark ? '#d97706' : '#facc15', // Amber (Dark) vs Clear Yellow (Light)
+            sourceA: isDark ? '#eab308' : '#d4a017', // Matte Yellow vs True Mustard
             sourceB: isDark ? '#0284c7' : '#0ea5e9', // Deep Sky vs Bright Sky
-            target:  isDark ? '#0284c7' : '#0ea5e9',
+            target:  isDark ? '#0284c7' : '#0ea5e9', // Aqua for 1D mappings
+            destination: isDark ? '#6366f1' : '#818cf8', // Indigo for Holes
             
             // Semantic Tokens
             success: style.getPropertyValue('--iaw-success').trim() || '#059669',

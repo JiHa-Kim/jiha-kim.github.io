@@ -1,0 +1,38 @@
+<div class="iaw" id="{{ include.id }}">
+  <div class="iaw__header">
+    <div class="iaw__eyebrow">{{ include.eyebrow }}</div>
+    <h4>{{ include.title }}</h4>
+    {{ include.description }}
+  </div>
+
+  <div class="iaw__main">
+    {% if include.controls %}
+    <div class="iaw__toolbar">
+      <div class="iaw__segmented-control">
+        {{ include.controls }}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="iaw__stage-card">
+      <div class="iaw__stage" id="{{ include.stage_id }}" 
+           {% if include.stage_style %}style="{{ include.stage_style }}"{% endif %}>
+        {% if include.legend %}
+        <div class="iaw__viz-legend">
+          {{ include.legend }}
+        </div>
+        {% endif %}
+        
+        <div class="iaw__stage-content {% if include.legend %}iaw__stage-content--guarded{% endif %}">
+          {{ include.visuals }}
+        </div>
+      </div>
+
+      {% if include.footer %}
+      <div class="iaw__footer">
+        {{ include.footer }}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

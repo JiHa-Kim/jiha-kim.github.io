@@ -294,6 +294,7 @@
 }
 </style>
 
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const root = document.getElementById('transport2dContinuousFigure');
@@ -372,19 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
-  function getThemeColors() {
-    const style = getComputedStyle(document.documentElement);
-    const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
-    return {
-      path: isDark ? 'rgba(148, 163, 184, 0.32)' : 'rgba(100, 116, 139, 0.28)',
-      source: isDark ? 'rgba(148, 163, 184, 0.42)' : 'rgba(100, 116, 139, 0.34)',
-      targetLawOuter: isDark ? 'rgba(14, 165, 233, 0.18)' : 'rgba(14, 165, 233, 0.18)',
-      targetLawInner: isDark ? 'rgba(14, 165, 233, 0.32)' : 'rgba(14, 165, 233, 0.28)',
-      current: style.getPropertyValue('--prompt-warning-icon').trim() || '#d97706'
-    };
-  }
-
-  let theme = getThemeColors();
+  let theme = IAW.getThemeColors(root);
 
   function drawDot(x, y, radius, color) {
     ctx.fillStyle = color;
@@ -475,7 +464,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       const pCur = mapToPx(curX, curY);
-      drawDot(pCur.x, pCur.y, 3.4, theme.current);
+      drawDot(pCur.x, pCur.y, 3.4, theme.sourceB);
     });
   }
 
@@ -553,15 +542,11 @@ document.addEventListener('DOMContentLoaded', function() {
     draw();
   });
 
-  const observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-      if (mutation.attributeName === 'data-mode') {
-        theme = getThemeColors();
-        draw();
-      }
-    });
+  // Theme observer
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    draw();
   });
-  observer.observe(document.documentElement, { attributes: true });
 
   function requestMathTypeset(attempt) {
     const tries = typeof attempt === 'number' ? attempt : 0;

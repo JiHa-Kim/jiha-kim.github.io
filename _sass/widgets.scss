@@ -1,9 +1,10 @@
 /* Interactive Widget Framework (IAW) */
 .iaw {
   /* Identity & Branding Tokens */
-  --iaw-source-a: #facc15; /* Clear Matte Yellow */
+  --iaw-source-a: #d4a017; /* True Mustard Yellow */
   --iaw-source-b: #0ea5e9; /* Professional Aqua/Sky Blue */
-  --iaw-target: var(--iaw-source-b);
+  --iaw-target: var(--iaw-source-b); /* Fixed back to Aqua for simple mappings */
+  --iaw-destination: #818cf8; /* Dedicated Indigo for Holes/Sinks */
 
   --iaw-primary: var(--iaw-target);
   --iaw-success: #059669;   /* Solid Emerald */

@@ -142,6 +142,7 @@
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const root = document.getElementById('inverseTransformFigure');
@@ -231,19 +232,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   updatePdfData();
 
-  const getThemeColors = () => {
-    const style = getComputedStyle(document.documentElement);
-    const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
-    return {
-      text: style.getPropertyValue('--text-color').trim() || (isDark ? '#e5e7eb' : '#374151'),
-      grid: style.getPropertyValue('--card-border').trim() || (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'),
-      ticks: style.getPropertyValue('--text-muted-color').trim() || (isDark ? '#9ca3af' : '#6b7280'),
-      cdf: style.getPropertyValue('--prompt-info-icon').trim() || '#0ea5e9',
-      dash: style.getPropertyValue('--prompt-warning-icon').trim() || '#d97706'
-    };
-  };
-
-  let theme = getThemeColors();
+  let theme = IAW.getThemeColors(root);
 
   const ctx = document.getElementById('itsChart').getContext('2d');
   
@@ -260,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function() {
       ctx.beginPath();
       ctx.setLineDash([6, 6]);
       ctx.lineWidth = 2;
-      ctx.strokeStyle = theme.dash;
+      ctx.strokeStyle = theme.sourceA;
       
       // Vertical line (from u on X-axis up to curve)
       ctx.moveTo(px, chartArea.bottom);
@@ -274,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
       // Intersection points
       ctx.setLineDash([]);
-      ctx.fillStyle = theme.dash;
+      ctx.fillStyle = theme.sourceA;
       
       ctx.beginPath();
       ctx.arc(px, py, 5, 0, Math.PI * 2);
@@ -286,6 +275,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
       ctx.beginPath();
       ctx.arc(chartArea.left, py, 5, 0, Math.PI * 2);
+      ctx.fillStyle = theme.sourceB;
       ctx.fill();
       
       ctx.restore();
@@ -314,7 +304,7 @@ document.addEventListener("DOMContentLoaded", function() {
         {
           label: 'Inverse CDF',
           data: cdfData,
-          borderColor: theme.cdf,
+          borderColor: theme.sourceB,
           borderWidth: 3,
           pointRadius: 0,
           fill: false,
@@ -325,8 +315,8 @@ document.addEventListener("DOMContentLoaded", function() {
         {
           label: 'PDF Filled (Cumulative Mass)',
           data: pdfFilledData,
-          borderColor: theme.dash,
-          backgroundColor: 'rgba(217, 119, 6, 0.4)', // orange matched to u slider
+          borderColor: theme.sourceA,
+          backgroundColor: theme.sourceA + '44', // Use hex + alpha for matte feel
           borderWidth: 1.5,
           pointRadius: 0,
           fill: 'start',
@@ -426,19 +416,17 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener('pointercancel', stopDrag);
 
   // Theme observer
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === "data-mode") {
-        theme = getThemeColors();
-        chart.options.scales.x.grid.color = theme.grid;
-        chart.options.scales.x.ticks.color = theme.ticks;
-        chart.options.scales.y.grid.color = theme.grid;
-        chart.options.scales.y.ticks.color = theme.ticks;
-        chart.update();
-      }
-    });
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    chart.options.scales.x.grid.color = theme.grid;
+    chart.options.scales.x.ticks.color = theme.ticks;
+    chart.options.scales.y.grid.color = theme.grid;
+    chart.options.scales.y.ticks.color = theme.ticks;
+    chart.data.datasets[0].borderColor = theme.sourceB;
+    chart.data.datasets[1].borderColor = theme.sourceA;
+    chart.data.datasets[1].backgroundColor = theme.sourceA + '44';
+    chart.update();
   });
-  observer.observe(document.documentElement, { attributes: true });
 
   // MathJax Typesetting for static labels
   function requestMathTypeset(attempt = 0) {

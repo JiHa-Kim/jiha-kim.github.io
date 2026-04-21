@@ -1,0 +1,179 @@
+{% capture describe %}
+<p>
+  A map $y = f(x)$ can be viewed as a reparameterization of space. 
+  In generative modeling, we often seek maps that transform simple noise into complex structure while preserving certain geometric properties like orientation or area.
+</p>
+{% endcapture %}
+
+{% capture controls %}
+<button class="iaw__seg-btn active" data-preset="permute">Permutation</button>
+<button class="iaw__seg-btn" data-preset="pca">PCA-Like Rotation</button>
+<button class="iaw__seg-btn" data-preset="spectral">Low / High Frequency</button>
+<button class="iaw__seg-btn" data-preset="triangular">Nonlinear Triangular</button>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="rpw-panels">
+  <div class="rpw-panel">
+    <div class="rpw-panel-label">Identity Grid $(x_1, x_2)$</div>
+    <div class="rpw-canvas-shell">
+      <canvas id="rpwCanvasIdentity"></canvas>
+    </div>
+  </div>
+  <div class="rpw-panel">
+    <div class="rpw-panel-label">Transformed Grid $(y_1, y_2)$</div>
+    <div class="rpw-canvas-shell">
+      <canvas id="rpwCanvasTransformed"></canvas>
+    </div>
+  </div>
+</div>
+{% endcapture %}
+
+{% capture legend %}
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: #fbbf24; height: 3px;"></span>
+  <span>$x_1$ coordinate lines</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: #38bdf8; height: 3px;"></span>
+  <span>$x_2$ coordinate lines</span>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-readout">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Map Property:</span>
+    <strong class="iaw__status-value" data-bind="mapping_desc">Volume Preserving</strong>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html 
+    id="reparameterizationWidget"
+    eyebrow="Coordinate Transformation"
+    title="Understanding Reparameterization Maps"
+    description=describe
+    controls=controls
+    visuals=visuals
+    stage_id="rpwStage"
+    stage_style="height: auto; min-height: 400px; padding: 1.5rem;"
+    legend=legend
+    footer=footer
+%}
+
+<style>
+.rpw-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; width: 100%; height: 100%; }
+.rpw-panel { display: flex; flex-direction: column; gap: 0.75rem; }
+.rpw-panel-label { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: var(--iaw-muted); text-align: center; }
+.rpw-canvas-shell { flex: 1; border: 1px solid var(--iaw-border); border-radius: 10px; background: var(--iaw-bg); position: relative; min-height: 320px; }
+.rpw-canvas-shell canvas { width: 100%; height: 100%; display: block; }
+@media (max-width: 640px) { .rpw-panels { grid-template-columns: 1fr; } }
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+(function() {
+    const root = document.getElementById('reparameterizationWidget');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+
+    const canvasId = root.querySelector('#rpwCanvasIdentity');
+    const canvasTr = root.querySelector('#rpwCanvasTransformed');
+    let COLORS = IAW.getThemeColors(root);
+    
+    let currentPreset = 'permute';
+
+    function drawGrid(canvas, transform) {
+      const w = canvas.parentElement.clientWidth;
+      const h = canvas.parentElement.clientHeight;
+      canvas.width = w * window.devicePixelRatio;
+      canvas.height = h * window.devicePixelRatio;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      
+      ctx.clearRect(0,0,w,h);
+      const centerX = w/2;
+      const centerY = h/2;
+      const scale = 28;
+
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      for(let i=-6; i<=6; i++) {
+        // x1 lines (varying x2)
+        ctx.strokeStyle = COLORS.sourceA;
+        ctx.beginPath();
+        for(let j=-60; j<=60; j++) {
+           const p = transform(i, j/10);
+           const x = centerX + p.x * scale;
+           const y = centerY - p.y * scale; // Standard Cartesian
+           if (j === -60) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+
+        // x2 lines (varying x1)
+        ctx.strokeStyle = COLORS.sourceB;
+        ctx.beginPath();
+        for(let j=-60; j<=60; j++) {
+           const p = transform(j/10, i);
+           const x = centerX + p.x * scale;
+           const y = centerY - p.y * scale;
+           if (j === -60) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    const transforms = {
+      identity: (x,y) => ({ x, y }),
+      permute: (x,y) => ({ x: y, y: -x }),
+      pca: (x,y) => {
+        const theta = Math.PI / 6;
+        return {
+           x: x*Math.cos(theta) - y*Math.sin(theta),
+           y: x*Math.sin(theta) + y*Math.cos(theta)
+        };
+      },
+      spectral: (x,y) => ({ 
+        x: x + 0.4 * Math.sin(1.2 * y), 
+        y: y + 0.4 * Math.sin(1.2 * x) 
+      }),
+      triangular: (x,y) => ({ 
+        x: x, 
+        y: y + 0.4 * Math.pow(x, 2) 
+      })
+    };
+
+    const properties = {
+      permute: "Discrete Permutation (Linear)",
+      pca: "Orthogonal Rotation (Linear)",
+      spectral: "Nonlinear Deformation",
+      triangular: "Triangular Map (Nonlinear)"
+    };
+
+    function update() {
+      drawGrid(canvasId, transforms.identity);
+      drawGrid(canvasTr, transforms[currentPreset]);
+      root.querySelector('[data-bind="mapping_desc"]').innerText = properties[currentPreset];
+    }
+
+    root.querySelectorAll('.iaw__seg-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        root.querySelectorAll('.iaw__seg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentPreset = btn.dataset.preset;
+        update();
+      });
+    });
+
+    IAW.observeTheme(() => {
+        COLORS = IAW.getThemeColors(root);
+        update();
+    });
+
+    window.addEventListener('resize', update);
+    setTimeout(update, 200);
+})();
+</script>

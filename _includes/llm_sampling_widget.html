@@ -208,6 +208,7 @@
 }
 </style>
 
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const root = document.getElementById('llmSamplingFigure');
@@ -218,10 +219,11 @@ document.addEventListener("DOMContentLoaded", function() {
   const handle = root.querySelector('#llmHandle');
   const uValDisplay = root.querySelector('#llmUVal');
   const outputVal = root.querySelector('#llmOutput');
+  let COLORS = IAW.getThemeColors(root);
   const segments = [
-    { el: root.querySelector('#segApple'),  maxU: 0.6, token: '"apple"',  color: 'var(--prompt-info-icon, #0ea5e9)' },
-    { el: root.querySelector('#segBanana'), maxU: 0.9, token: '"banana"', color: 'var(--prompt-warning-icon, #d97706)' },
-    { el: root.querySelector('#segCherry'), maxU: 1.0, token: '"cherry"', color: 'var(--prompt-success-icon, #10b981)' }
+    { el: root.querySelector('#segApple'),  maxU: 0.6, token: '"apple"',  color: COLORS.sourceB },
+    { el: root.querySelector('#segBanana'), maxU: 0.9, token: '"banana"', color: COLORS.sourceA },
+    { el: root.querySelector('#segCherry'), maxU: 1.0, token: '"cherry"', color: COLORS.success }
   ];
 
   let isDragging = false;
@@ -258,14 +260,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     outputVal.innerText = activeSeg.token;
-    
-    // Resolve CSS variable dynamically for smooth transition
-    const tempEl = document.createElement('div');
-    tempEl.style.color = activeSeg.color;
-    document.body.appendChild(tempEl);
-    const resolvedColor = getComputedStyle(tempEl).color;
-    document.body.removeChild(tempEl);
-    outputVal.style.color = resolvedColor;
+    outputVal.style.color = activeSeg.color;
   }
 
   function measure() {
@@ -294,7 +289,6 @@ document.addEventListener("DOMContentLoaded", function() {
     updateVisuals();
     e.preventDefault();
   });
-
   window.addEventListener('pointermove', (e) => {
     if (!isDragging) return;
     currentU = getUFromEvent(e);
@@ -308,6 +302,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
   window.addEventListener('pointerup', stopDrag);
   window.addEventListener('pointercancel', stopDrag);
+
+  // Theme observer
+  IAW.observeTheme(() => {
+    COLORS = IAW.getThemeColors(root);
+    segments[0].color = COLORS.sourceB;
+    segments[1].color = COLORS.sourceA;
+    segments[2].color = COLORS.success;
+    updateVisuals();
+  });
 
   window.addEventListener('resize', measure);
 

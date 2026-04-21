@@ -264,6 +264,7 @@
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const root = document.getElementById('maxEntropyFigure');
@@ -426,19 +427,7 @@ document.addEventListener("DOMContentLoaded", function() {
     return { data: data, entropy: calcEntropy(p) };
   }
 
-  const getThemeColors = () => {
-    const style = getComputedStyle(document.documentElement);
-    const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
-    return {
-      text: style.getPropertyValue('--text-color').trim() || (isDark ? '#e5e7eb' : '#374151'),
-      grid: style.getPropertyValue('--card-border').trim() || (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'),
-      ticks: style.getPropertyValue('--text-muted-color').trim() || (isDark ? '#9ca3af' : '#6b7280'),
-      line: style.getPropertyValue('--prompt-success-icon').trim() || '#10b981',
-      fill: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(16, 185, 129, 0.2)'
-    };
-  };
-
-  let theme = getThemeColors();
+  let theme = IAW.getThemeColors(root);
 
   function getXBounds() {
     return constraint === 'bounded'
@@ -619,21 +608,17 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === "data-mode") {
-        theme = getThemeColors();
-        chart.data.datasets[0].borderColor = theme.line;
-        chart.data.datasets[0].backgroundColor = theme.fill;
-        chart.options.scales.x.grid.color = theme.grid;
-        chart.options.scales.x.ticks.color = theme.ticks;
-        chart.options.scales.y.grid.color = theme.grid;
-        chart.options.scales.y.ticks.color = theme.ticks;
-        chart.update('none');
-      }
-    });
+  // Theme observer
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    chart.data.datasets[0].borderColor = theme.success;
+    chart.data.datasets[0].backgroundColor = theme.success + '22';
+    chart.options.scales.x.grid.color = theme.grid;
+    chart.options.scales.x.ticks.color = theme.ticks;
+    chart.options.scales.y.grid.color = theme.grid;
+    chart.options.scales.y.ticks.color = theme.ticks;
+    chart.update('none');
   });
-  observer.observe(document.documentElement, { attributes: true });
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && !hasPrimedChart) scheduleChartPrime();

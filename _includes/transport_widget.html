@@ -33,12 +33,16 @@
 
 {% capture legend %}
 <div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-warning)"></span>
+  <span class="iaw__swatch" style="background: var(--iaw-source-a)"></span>
   <span>Source $A$</span>
 </div>
 <div class="iaw__legend-item">
   <span class="iaw__swatch" style="background: var(--iaw-source-b)"></span>
   <span>Source $B$</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-destination)"></span>
+  <span>Destinations (Holes $C, D$)</span>
 </div>
 <div class="iaw__legend-item">
   <span>Unit Cost: $\$1/\mathrm{kg}$ to $\$4/\mathrm{kg}$</span>
@@ -77,8 +81,9 @@
   background: var(--iaw-bg); border: 3px solid var(--iaw-border); border-radius: 999px; 
   font-size: 1.8rem; margin: 0 auto; transition: all 0.25s ease;
 }
-.otm-box--a { color: var(--iaw-warning); border-color: var(--iaw-warning); }
+.otm-box--a { color: var(--iaw-source-a); border-color: var(--iaw-source-a); }
 .otm-box--b { color: var(--iaw-source-b); border-color: var(--iaw-source-b); }
+.otm-box-target { border-color: var(--iaw-destination); color: var(--iaw-destination); }
 .iaw__node { position: absolute; width: 160px; z-index: 3; }
 .iaw__node--a { left: 40px; top: 50px; }
 .iaw__node--b { left: 40px; bottom: 30px; }
