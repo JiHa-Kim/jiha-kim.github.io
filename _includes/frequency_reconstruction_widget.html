@@ -1,231 +1,154 @@
-<div class="frw" id="frequencyReconstructionFigure">
-  <div class="frw__intro">
-    <div class="frw__copy">
-      <div class="frw__eyebrow">Frequency-Ordered Reconstruction</div>
-      <h4>Coarse Structure Before Fine Detail</h4>
-      <p>
-        Read the same tiny image from left to right.
-        The first panel keeps only broad, low-frequency structure; the second adds medium-scale shape; the last restores the highest-frequency texture.
-        This is the visual intuition behind predicting transformed coordinates from low frequency to high frequency.
-      </p>
-    </div>
+{% capture describe %}
+<p>
+  Read the same tiny image from left to right.
+  The first panel keeps only broad, low-frequency structure; the second adds medium-scale shape; the last restores the highest-frequency texture.
+</p>
+<p>
+  This is the visual intuition behind predicting transformed coordinates from low frequency to high frequency.
+</p>
+{% endcapture %}
 
-    <div class="frw__summary-card">
-      <div class="frw__panel-title">Three Reconstruction Stages</div>
-      <div class="frw__summary-value">Each column adds another band of coefficients to the same toy image.</div>
-      <div class="frw__summary-meta">
-        This is an illustrative coarse-to-fine reconstruction built by progressively removing blur, not a literal Fourier inversion trace from a trained model.
+{% capture visuals %}
+<div class="frw__sequence">
+  <div class="frw__image-card">
+    <div class="frw__image-head">
+      <div>
+        <div class="frw__image-kicker">Stage 1</div>
+        <div class="frw__image-title">Low Frequency</div>
+        <div class="frw__image-meta">coarse mass and average intensity</div>
       </div>
+    </div>
+    <div class="frw__canvas-shell">
+      <canvas id="frwCanvasLow"></canvas>
     </div>
   </div>
 
-  <div class="frw__stage-card">
-    <div class="frw__legend">Low = overall brightness and broad blobs, Medium = larger edges and shapes, High = small texture and crisp boundaries.</div>
-    <div class="frw__sequence">
-      <div class="frw__image-card">
-        <div class="frw__image-head">
-          <div>
-            <div class="frw__image-kicker">Stage 1</div>
-            <div class="frw__image-title">Low Frequency Only</div>
-            <div class="frw__image-meta">coarse mass and average intensity</div>
-          </div>
-        </div>
-        <div class="frw__canvas-shell">
-          <canvas id="frwCanvasLow"></canvas>
-        </div>
+  <div class="frw__image-card">
+    <div class="frw__image-head">
+      <div>
+        <div class="frw__image-kicker">Stage 2</div>
+        <div class="frw__image-title">Low + Medium</div>
+        <div class="frw__image-meta">larger edges and shape transitions</div>
       </div>
+    </div>
+    <div class="frw__canvas-shell">
+      <canvas id="frwCanvasMid"></canvas>
+    </div>
+  </div>
 
-      <div class="frw__image-card">
-        <div class="frw__image-head">
-          <div>
-            <div class="frw__image-kicker">Stage 2</div>
-            <div class="frw__image-title">Low + Medium</div>
-            <div class="frw__image-meta">larger edges and shape transitions</div>
-          </div>
-        </div>
-        <div class="frw__canvas-shell">
-          <canvas id="frwCanvasMid"></canvas>
-        </div>
+  <div class="frw__image-card">
+    <div class="frw__image-head">
+      <div>
+        <div class="frw__image-kicker">Stage 3</div>
+        <div class="frw__image-title">Full Detail</div>
+        <div class="frw__image-meta">high-frequency texture and sharp edges</div>
       </div>
-
-      <div class="frw__image-card">
-        <div class="frw__image-head">
-          <div>
-            <div class="frw__image-kicker">Stage 3</div>
-            <div class="frw__image-title">Full Detail</div>
-            <div class="frw__image-meta">high-frequency texture and sharp edges</div>
-          </div>
-        </div>
-        <div class="frw__canvas-shell">
-          <canvas id="frwCanvasFull"></canvas>
-        </div>
-      </div>
+    </div>
+    <div class="frw__canvas-shell">
+      <canvas id="frwCanvasFull"></canvas>
     </div>
   </div>
 </div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid">
+  <div class="iaw__status-item" style="grid-column: 1 / -1;">
+    <span class="iaw__status-label">Reconstruction Logic</span>
+    <strong class="iaw__status-value">Frequency-ordered progressive refinement</strong>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="frequencyReconstructionFigure"
+    eyebrow="Frequency-Ordered Reconstruction"
+    title="Coarse Structure Before Fine Detail"
+    description=describe
+    visuals=visuals
+    stage_id="frwStage"
+    footer=footer
+%}
 
 <style>
-.frw {
-  --frw-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
-  --frw-ui-bg: var(--main-bg, #fff);
-  --frw-ui-muted: var(--text-muted-color, var(--text-color, inherit));
-  --frw-ui-text: var(--text-color, inherit);
-  margin: 2rem 0;
-  padding: 1.25rem;
-  border: 1px solid var(--frw-ui-border);
-  border-radius: 18px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.05));
-}
-
-.frw__intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(250px, 320px);
-  gap: 1rem;
-  align-items: start;
-}
-
-.frw__eyebrow {
-  margin-bottom: 0.28rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--frw-ui-muted);
-}
-
-.frw__copy h4 {
-  margin: 0 0 0.45rem 0;
-  font-size: 1.04rem;
-  color: var(--heading-color, var(--frw-ui-text));
-}
-
-.frw__copy p {
-  margin: 0.45rem 0 0 0;
-  font-size: 1rem;
-  line-height: 1.66;
-  color: var(--frw-ui-muted);
-}
-
-.frw__summary-card,
-.frw__stage-card,
-.frw__image-card,
-.frw__canvas-shell {
-  border: 1px solid var(--frw-ui-border);
-  border-radius: 14px;
-  background: var(--frw-ui-bg);
-}
-
-.frw__summary-card {
-  padding: 0.95rem;
-}
-
-.frw__panel-title {
-  margin-bottom: 0.55rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--frw-ui-muted);
-}
-
-.frw__summary-value {
-  font-size: 0.98rem;
-  line-height: 1.55;
-  font-weight: 700;
-  color: var(--frw-ui-text);
-}
-
-.frw__summary-meta {
-  margin-top: 0.55rem;
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--frw-ui-muted);
-}
-
-.frw__stage-card {
-  margin-top: 1rem;
-  padding: 0.95rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.frw__legend {
-  font-size: 0.93rem;
-  line-height: 1.55;
-  color: var(--frw-ui-muted);
+#frwStage {
+  height: auto;
+  min-height: 380px;
+  background: transparent;
+  border: none;
+  padding: 1rem;
 }
 
 .frw__sequence {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 1rem;
+  width: 100%;
 }
 
 .frw__image-card {
-  padding: 0.9rem;
+  padding: 1.15rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  background: var(--iaw-bg);
+  border: 1px solid var(--iaw-border);
+  border-radius: 16px;
+  box-shadow: var(--iaw-shadow-soft);
 }
 
 .frw__image-head {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+  min-height: 4.5rem;
 }
 
 .frw__image-kicker {
-  margin-bottom: 0.12rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  margin-bottom: 0.2rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--frw-ui-muted);
+  color: var(--iaw-muted);
 }
 
 .frw__image-title {
-  font-size: 0.94rem;
-  font-weight: 700;
-  color: var(--frw-ui-text);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--iaw-text);
+  margin-bottom: 0.2rem;
 }
 
 .frw__image-meta {
-  margin-top: 0.1rem;
-  font-size: 0.87rem;
+  font-size: 0.9rem;
   line-height: 1.45;
-  color: var(--frw-ui-muted);
+  color: var(--iaw-muted);
+  opacity: 0.85;
 }
 
 .frw__canvas-shell {
   position: relative;
   overflow: hidden;
   aspect-ratio: 1 / 1;
-  background: var(--frw-ui-bg);
+  background: var(--iaw-matte-bg);
+  border: 1px solid var(--iaw-border);
+  border-radius: 10px;
 }
 
 .frw__canvas-shell canvas {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-@media (max-width: 980px) {
-  .frw__intro {
-    grid-template-columns: 1fr;
-  }
+  inset: 12px;
+  width: calc(100% - 24px);
+  height: calc(100% - 24px);
 }
 
 @media (max-width: 900px) {
   .frw__sequence {
     grid-template-columns: 1fr;
   }
-}
-
-@media (max-width: 720px) {
-  .frw {
-    padding: 1rem;
+  .frw__image-head {
+    min-height: auto;
   }
 }
 </style>
@@ -233,9 +156,8 @@
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const root = document.getElementById('frequencyReconstructionFigure');
-  if (!root || root.dataset.initialized === 'true') return;
-  root.dataset.initialized = 'true';
+  const root = IAW.initFigure('frequencyReconstructionFigure');
+  if (!root) return;
 
   const canvases = [
     root.querySelector('#frwCanvasLow'),
@@ -245,26 +167,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const size = 12;
 
-  function clamp(value) {
-    return Math.max(0, Math.min(1, value));
-  }
+  function clamp(v) { return Math.max(0, Math.min(1, v)); }
 
   function createFullImage() {
     const image = [];
-    for (let y = 0; y < size; y += 1) {
+    for (let y = 0; y < size; y++) {
       const row = [];
-      for (let x = 0; x < size; x += 1) {
-        const dx1 = x - 3.8;
-        const dy1 = y - 7.1;
-        const dx2 = x - 8.3;
-        const dy2 = y - 4.2;
+      for (let x = 0; x < size; x++) {
+        const dx1 = x - 3.8, dy1 = y - 7.1;
+        const dx2 = x - 8.3, dy2 = y - 4.2;
         const glowA = 0.45 * Math.exp(-(dx1 * dx1 + dy1 * dy1) / 16);
         const glowB = 0.26 * Math.exp(-(dx2 * dx2 + dy2 * dy2) / 8);
         const ridge = 0.16 * Math.max(0, 1 - Math.abs(y - (0.55 * x + 1.9)) / 1.2);
         const checker = 0.05 * (((x + y) % 2 === 0) ? 1 : -1) * Math.exp(-(dx1 * dx1 + dy1 * dy1) / 15);
-        const stripe = 0.03 * Math.sin((x - 1.5) * Math.PI / 1.5) * Math.exp(-Math.pow((y - 8.7) / 2.2, 2));
-        const ramp = 0.05 * (1 - y / (size - 1));
-        row.push(clamp(0.09 + glowA + glowB + ridge + checker + stripe + ramp));
+        row.push(clamp(0.09 + glowA + glowB + ridge + checker));
       }
       image.push(row);
     }
@@ -272,20 +188,18 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function blur(image, passes) {
-    let current = image.map(function(row) { return row.slice(); });
-    for (let pass = 0; pass < passes; pass += 1) {
-      const next = current.map(function(row) { return row.slice(); });
-      for (let y = 0; y < size; y += 1) {
-        for (let x = 0; x < size; x += 1) {
-          let total = 0;
-          let count = 0;
-          for (let dy = -1; dy <= 1; dy += 1) {
-            for (let dx = -1; dx <= 1; dx += 1) {
-              const yy = y + dy;
-              const xx = x + dx;
+    let current = image.map(row => row.slice());
+    for (let pass = 0; pass < passes; pass++) {
+      const next = current.map(row => row.slice());
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          let total = 0, count = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              const yy = y + dy, xx = x + dx;
               if (yy >= 0 && yy < size && xx >= 0 && xx < size) {
                 total += current[yy][xx];
-                count += 1;
+                count++;
               }
             }
           }
@@ -304,61 +218,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let theme = IAW.getThemeColors(root);
 
-  function pixelColor(value) {
-    const lightness = 12 + value * 74;
-    return 'hsl(210, 18%, ' + lightness.toFixed(1) + '%)';
+  function pixelColor(v) {
+    const lightness = 12 + v * 74;
+    return `hsl(210, 18%, ${lightness.toFixed(1)}%)`;
   }
 
   function drawCanvas(canvas, image) {
-    const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
-    const context = canvas.getContext('2d');
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    context.clearRect(0, 0, rect.width, rect.height);
-    context.fillStyle = theme.bg;
-    context.fillRect(0, 0, rect.width, rect.height);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
 
-    const padding = 16;
-    const cellSize = Math.floor(Math.min(
-      (rect.width - padding * 2) / size,
-      (rect.height - padding * 2) / size
-    ));
+    const cellSize = Math.floor(Math.min(rect.width / size, rect.height / size));
     const originX = Math.round((rect.width - cellSize * size) / 2);
     const originY = Math.round((rect.height - cellSize * size) / 2);
 
-    for (let y = 0; y < size; y += 1) {
-      for (let x = 0; x < size; x += 1) {
-        context.fillStyle = pixelColor(image[y][x]);
-        context.fillRect(
-          originX + x * cellSize,
-          originY + y * cellSize,
-          Math.max(1, cellSize - 1),
-          Math.max(1, cellSize - 1)
-        );
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        ctx.fillStyle = pixelColor(image[y][x]);
+        ctx.fillRect(originX + x * cellSize, originY + y * cellSize, Math.max(1, cellSize - 1), Math.max(1, cellSize - 1));
       }
     }
-
-    context.strokeStyle = theme.border;
-    context.lineWidth = 1;
-    context.strokeRect(originX - 0.5, originY - 0.5, size * cellSize, size * cellSize);
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(originX - 0.5, originY - 0.5, size * cellSize, size * cellSize);
   }
 
   function draw() {
-    canvases.forEach(function(canvas, index) {
-      drawCanvas(canvas, images[index]);
-    });
+    canvases.forEach((canvas, index) => drawCanvas(canvas, images[index]));
   }
 
+  IAW.observeTheme(() => { theme = IAW.getThemeColors(root); draw(); });
   window.addEventListener('resize', draw);
-
-  // Theme observer
-  IAW.observeTheme(() => {
-    theme = IAW.getThemeColors(root);
-    draw();
-  });
-
   draw();
 });
 </script>
