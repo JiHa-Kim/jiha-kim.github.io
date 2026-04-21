@@ -1,510 +1,260 @@
-<div class="otm" id="wholeBagTransportFigure">
-  <div class="otm__intro">
-    <div class="otm__copy">
-      <div class="otm__eyebrow">Discrete Example</div>
-      <h4>Whole-Bag Transport Without Splitting</h4>
-      <p>
-        Source $A$ and source $B$ each carry one sealed $1\text{ kg}$ bag, while destinations $C$ and $D$ each need $1\text{ kg}$. Because the bags cannot be torn open, the only feasible plans are the two possible assignments of whole bags to destinations.
-      </p>
-    </div>
+{% capture describe %}
+<p>
+  When sources carry indivisible "whole bags," the problem becomes a discrete search. 
+  By comparing the total shipping costs, we can find the optimal permutation.
+</p>
+{% endcapture %}
 
-    <div class="otm__matrix-card">
-      <div class="otm__panel-title">Shipping Cost per Bag</div>
-      <div class="otm__matrix">
-        <div class="otm__matrix-dir">
-          <span>From</span>
-          <span>&rarr;</span>
-          <span>To</span>
-        </div>
-        <div>To $C$</div>
-        <div>To $D$</div>
-        <div>From $A$</div>
-        <div>$\$1$</div>
-        <div>$\$4$</div>
-        <div>From $B$</div>
-        <div>$\$3$</div>
-        <div>$\$2$</div>
-      </div>
-    </div>
+{% capture controls %}
+<button class="iaw__seg-btn active" data-plan="1">Plan 1 (Optimal)</button>
+<button class="iaw__seg-btn" data-plan="2">Plan 2 (Suboptimal)</button>
+{% endcapture %}
+
+{% capture visuals %}
+<canvas id="otmCanvas" class="iaw__canvas"></canvas>
+<div class="iaw__node iaw__node--a">
+  <div class="iaw__node-row"><div class="iaw__node-title">Source $A$</div><div class="iaw__node-badge">1 kg bag</div></div>
+  <div class="iaw__tray"><div class="otm-box"><i class="fas fa-box"></i></div></div>
+</div>
+<div class="iaw__node iaw__node--b">
+  <div class="iaw__node-row"><div class="iaw__node-title">Source $B$</div><div class="iaw__node-badge">1 kg bag</div></div>
+  <div class="iaw__tray"><div class="otm-box"><i class="fas fa-box"></i></div></div>
+</div>
+<div class="iaw__node iaw__node--c">
+  <div class="iaw__node-row"><div class="iaw__node-title">Hole $C$</div><div class="iaw__node-badge">needs 1 kg</div></div>
+  <div class="iaw__tray"><div class="otm-box" style="opacity: 0.3;"><i class="fas fa-warehouse"></i></div></div>
+</div>
+<div class="iaw__node iaw__node--d">
+  <div class="iaw__node-row"><div class="iaw__node-title">Hole $D$</div><div class="iaw__node-badge">needs 1 kg</div></div>
+  <div class="iaw__tray"><div class="otm-box" style="opacity: 0.3;"><i class="fas fa-warehouse"></i></div></div>
+</div>
+<div id="otmRoutes"></div>
+{% endcapture %}
+
+{% capture legend %}
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" id="otmPlanSwatch" style="background: var(--iaw-success)"></span>
+  <span id="otmPlanType">Optimal (Uncrossed)</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-warning)"></span>
+  <span>Source Bag</span>
+</div>
+<div class="iaw__legend-item">
+  <span>Unit Cost: $\$1/\mathrm{kg}$ to $\$4/\mathrm{kg}$</span>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-readout">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Route Decomposition:</span>
+    <strong class="iaw__status-value" id="otmBreakdown">$1 + $2</strong>
   </div>
-
-  <div class="otm__stage-note">
-    Indivisibility collapses the problem to a tiny discrete search: compare the uncrossed assignment with the crossed assignment and pick the cheaper permutation.
-  </div>
-
-  <div class="otm__cases">
-    <figure class="otm__case otm__case--best">
-      <figcaption class="otm__caption">
-        <div>
-          <div class="otm__plan-kicker">Optimal Plan</div>
-          <div class="otm__caption-title">Plan $1$</div>
-          <div class="otm__caption-subtitle">$A \to C$ and $B \to D$</div>
-        </div>
-        <div class="otm__total otm__total--best">$3$</div>
-      </figcaption>
-
-      <div class="otm__canvas">
-        <div class="otm__node otm__node--source otm__node--a">
-          <div class="otm__badge"><i class="fas fa-box fa-fw"></i></div>
-          <div class="otm__name">$A$</div>
-          <div class="otm__meta">1 kg bag</div>
-        </div>
-
-        <div class="otm__node otm__node--source otm__node--b">
-          <div class="otm__badge"><i class="fas fa-box fa-fw"></i></div>
-          <div class="otm__name">$B$</div>
-          <div class="otm__meta">1 kg bag</div>
-        </div>
-
-        <div class="otm__node otm__node--target otm__node--c">
-          <div class="otm__badge"><i class="fas fa-warehouse fa-fw"></i></div>
-          <div class="otm__name">$C$</div>
-          <div class="otm__meta">needs 1 kg</div>
-        </div>
-
-        <div class="otm__node otm__node--target otm__node--d">
-          <div class="otm__badge"><i class="fas fa-warehouse fa-fw"></i></div>
-          <div class="otm__name">$D$</div>
-          <div class="otm__meta">needs 1 kg</div>
-        </div>
-
-        <svg class="otm__svg" aria-hidden="true" preserveAspectRatio="none">
-          <defs>
-            <marker id="arrowhead-best" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
-              <path d="M0,0 L10,5 L0,10 z" fill="var(--prompt-tip-icon, #16a34a)" />
-            </marker>
-          </defs>
-          <g class="otm__g--best">
-            <line class="otm__line" x1="0" y1="48" x2="100%" y2="48" marker-end="url(#arrowhead-best)" />
-            <rect class="otm__price-bg" x="50%" y="48" rx="10" ry="10" width="36" height="24" transform="translate(-18, -12)" />
-            <text class="otm__text-price" x="50%" y="48">$1</text>
-
-            <line class="otm__line" x1="0" y1="174" x2="100%" y2="174" marker-end="url(#arrowhead-best)" />
-            <rect class="otm__price-bg" x="50%" y="174" rx="10" ry="10" width="36" height="24" transform="translate(-18, -12)" />
-            <text class="otm__text-price" x="50%" y="174">$2</text>
-          </g>
-        </svg>
-      </div>
-
-      <div class="otm__case-footer">Cost decomposition: $\$1 + \$2 = \$3$</div>
-    </figure>
-
-    <figure class="otm__case otm__case--alt">
-      <figcaption class="otm__caption">
-        <div>
-          <div class="otm__plan-kicker otm__plan-kicker--muted">Crossed Plan</div>
-          <div class="otm__caption-title">Plan $2$</div>
-          <div class="otm__caption-subtitle">$A \to D$ and $B \to C$</div>
-        </div>
-        <div class="otm__total">$7$</div>
-      </figcaption>
-
-      <div class="otm__canvas">
-        <div class="otm__node otm__node--source otm__node--a">
-          <div class="otm__badge"><i class="fas fa-box fa-fw"></i></div>
-          <div class="otm__name">$A$</div>
-          <div class="otm__meta">1 kg bag</div>
-        </div>
-
-        <div class="otm__node otm__node--source otm__node--b">
-          <div class="otm__badge"><i class="fas fa-box fa-fw"></i></div>
-          <div class="otm__name">$B$</div>
-          <div class="otm__meta">1 kg bag</div>
-        </div>
-
-        <div class="otm__node otm__node--target otm__node--c">
-          <div class="otm__badge"><i class="fas fa-warehouse fa-fw"></i></div>
-          <div class="otm__name">$C$</div>
-          <div class="otm__meta">needs 1 kg</div>
-        </div>
-
-        <div class="otm__node otm__node--target otm__node--d">
-          <div class="otm__badge"><i class="fas fa-warehouse fa-fw"></i></div>
-          <div class="otm__name">$D$</div>
-          <div class="otm__meta">needs 1 kg</div>
-        </div>
-
-        <svg class="otm__svg" aria-hidden="true" preserveAspectRatio="none">
-          <defs>
-            <marker id="arrowhead-alt" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
-              <path d="M0,0 L10,5 L0,10 z" fill="var(--prompt-gray-icon, #9ca3af)" />
-            </marker>
-          </defs>
-          <g class="otm__g--alt">
-            <line class="otm__line" x1="0" y1="48" x2="100%" y2="174" marker-end="url(#arrowhead-alt)" />
-            <rect class="otm__price-bg" x="27%" y="79.5" rx="10" ry="10" width="36" height="24" transform="translate(-18, -12)" />
-            <text class="otm__text-price" x="27%" y="79.5">$4</text>
-
-            <line class="otm__line" x1="0" y1="174" x2="100%" y2="48" marker-end="url(#arrowhead-alt)" />
-            <rect class="otm__price-bg" x="27%" y="142.5" rx="10" ry="10" width="36" height="24" transform="translate(-18, -12)" />
-            <text class="otm__text-price" x="27%" y="142.5">$3</text>
-          </g>
-        </svg>
-      </div>
-
-      <div class="otm__case-footer">Cost decomposition: $\$4 + \$3 = \$7$</div>
-    </figure>
-  </div>
-
-  <div class="otm__footer">
-    There are only two feasible whole-bag assignments, and the uncrossed one is strictly cheaper. This is the smallest discrete picture of why uncrossed structure keeps appearing in optimal transport.
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Total Cost:</span>
+    <strong class="iaw__status-value" id="otmTotalCost" style="font-size: 1.3rem; color: var(--iaw-primary);">$3</strong>
   </div>
 </div>
+{% endcapture %}
+
+{% include iaw_skeleton.html 
+    id="wholeBagTransportFigure"
+    eyebrow="Discrete Search"
+    title="Atomic Whole-Bag Transport"
+    description=describe
+    controls=controls
+    visuals=visuals
+    stage_id="otmStage"
+    legend=legend
+    footer=footer
+%}
 
 <style>
-.otm {
-  --otm-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
-  --otm-ui-bg: var(--main-bg, #fff);
-  --otm-ui-muted: var(--text-muted-color, var(--text-color, inherit));
-  --otm-ui-text: var(--text-color, inherit);
-  margin: 2rem 0;
-  padding: 1.25rem;
-  border: 1px solid var(--otm-ui-border);
-  border-radius: 18px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.05));
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
-}
+.iaw__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+.otm-box { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--iaw-border); border-radius: 10px; font-size: 1.6rem; color: var(--iaw-warning); margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.iaw__node { position: absolute; width: 160px; z-index: 3; }
+.iaw__node--a { left: 40px; top: 50px; }
+.iaw__node--b { left: 40px; bottom: 30px; }
+.iaw__node--c { right: 40px; top: 50px; }
+.iaw__node--d { right: 40px; bottom: 30px; }
 
-.otm__intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(220px, 270px);
-  gap: 1rem;
-  align-items: start;
-}
-
-.otm__eyebrow {
-  margin-bottom: 0.28rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--otm-ui-muted);
-}
-
-.otm__copy h4 {
-  margin: 0 0 0.45rem 0;
-  font-size: 1.04rem;
-  color: var(--heading-color, var(--otm-ui-text));
-}
-
-.otm__copy p {
-  margin: 0.45rem 0 0 0;
-  font-size: 1rem;
-  line-height: 1.66;
-  color: var(--otm-ui-muted);
-}
-
-.otm__matrix-card,
-.otm__case {
-  border: 1px solid var(--otm-ui-border);
-  border-radius: 14px;
-  background: var(--otm-ui-bg);
-}
-
-.otm__matrix-card {
-  padding: 0.9rem;
-}
-
-.otm__panel-title {
-  margin-bottom: 0.6rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--otm-ui-muted);
-}
-
-.otm__matrix {
-  display: grid;
-  grid-template-columns: 82px repeat(2, minmax(58px, 1fr));
-  overflow: hidden;
-  border: 1px solid var(--otm-ui-border);
-  border-radius: 12px;
-}
-
-.otm__matrix > div {
-  padding: 0.52rem 0.56rem;
-  text-align: center;
-  border-right: 1px solid var(--otm-ui-border);
-  border-bottom: 1px solid var(--otm-ui-border);
-  background: var(--otm-ui-bg);
-}
-
-.otm__matrix > div:nth-child(3n) {
-  border-right: none;
-}
-
-.otm__matrix > div:nth-last-child(-n + 3) {
-  border-bottom: none;
-}
-
-.otm__matrix > div:nth-child(-n + 3),
-.otm__matrix > div:nth-child(3n + 1) {
-  font-weight: 700;
-  font-size: 0.82rem;
-  background: var(--card-bg, rgba(120, 120, 120, 0.05));
-}
-
-.otm__matrix-dir {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-  padding: 0.28rem !important;
-  font-size: 0.68rem !important;
-  color: var(--otm-ui-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.otm__matrix-dir span:nth-child(2) {
-  font-size: 0.92rem;
-  line-height: 1;
-}
-
-.otm__stage-note {
-  margin-top: 1rem;
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--otm-ui-muted);
-}
-
-.otm__cases {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(300px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.otm__case {
-  padding: 0.95rem;
-}
-
-.otm__case--best {
-  border-color: color-mix(in srgb, var(--prompt-tip-icon, #16a34a) 38%, var(--otm-ui-border));
-  background: color-mix(in srgb, var(--prompt-tip-bg, rgba(22, 163, 74, 0.08)) 78%, var(--otm-ui-bg));
-}
-
-.otm__caption {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.otm__plan-kicker {
-  margin-bottom: 0.15rem;
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--prompt-tip-icon, #16a34a);
-}
-
-.otm__plan-kicker--muted {
-  color: var(--prompt-gray-icon, #9ca3af);
-}
-
-.otm__caption-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--otm-ui-text);
-}
-
-.otm__caption-subtitle {
-  margin-top: 0.14rem;
-  font-size: 0.84rem;
-  color: var(--otm-ui-muted);
-}
-
-.otm__total {
-  flex: 0 0 auto;
-  padding: 0.22rem 0.58rem;
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 800;
-  background: var(--prompt-gray-bg, rgba(156, 163, 175, 0.12));
-  color: var(--prompt-gray-icon, #9ca3af);
-}
-
-.otm__total--best {
-  background: var(--prompt-tip-bg, rgba(22, 163, 74, 0.12));
-  color: var(--prompt-tip-icon, #16a34a);
-}
-
-.otm__canvas {
-  position: relative;
-  height: 248px;
-  margin-top: 0.8rem;
-  border-radius: 14px;
-  border: 1px solid var(--otm-ui-border);
-  background: var(--otm-ui-bg);
-  overflow: hidden;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.03);
-}
-
-.otm__node {
-  position: absolute;
-  width: 100px;
-  text-align: center;
-  z-index: 3;
-  color: var(--otm-ui-text);
-}
-
-.otm__node--a,
-.otm__node--c {
-  top: 18px;
-}
-
-.otm__node--b,
-.otm__node--d {
-  top: 142px;
-}
-
-.otm__node--a,
-.otm__node--b {
-  left: 18px;
-}
-
-.otm__node--c,
-.otm__node--d {
-  right: 18px;
-}
-
-.otm__badge {
-  width: 3.5rem;
-  height: 3.5rem;
-  margin: 0 auto;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--otm-ui-border);
-  background: var(--otm-ui-bg);
-  font-size: 1.55rem;
-}
-
-.otm__node--source .otm__badge {
-  color: var(--prompt-warning-icon, #d97706);
-  background: var(--prompt-warning-bg, rgba(217, 119, 6, 0.14));
-}
-
-.otm__node--target .otm__badge {
-  color: var(--prompt-info-icon, #0ea5e9);
-  background: var(--prompt-info-bg, rgba(14, 165, 233, 0.14));
-}
-
-.otm__name {
-  margin-top: 0.44rem;
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.otm__meta {
-  margin-top: 0.22rem;
-  font-size: 0.75rem;
-  line-height: 1.2;
-  white-space: nowrap;
-  color: var(--otm-ui-muted);
-}
-
-.otm__svg {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 108px;
-  right: 108px;
-  width: calc(100% - 216px);
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-  overflow: visible;
-}
-
-.otm__line {
-  stroke-width: 3px;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
-
-.otm__g--best .otm__line {
-  stroke: var(--prompt-tip-icon, #16a34a);
-}
-
-.otm__g--alt .otm__line {
-  stroke: var(--prompt-gray-icon, #9ca3af);
-}
-
-.otm__price-bg {
-  fill: var(--otm-ui-bg);
-  stroke: var(--otm-ui-border);
-  stroke-width: 1px;
-}
-
-.otm__text-price {
-  font-size: 15px;
-  font-weight: 700;
-  text-anchor: middle;
-  dominant-baseline: central;
-  fill: var(--otm-ui-text);
-}
-
-.otm__g--best .otm__text-price {
-  fill: var(--prompt-tip-icon, #16a34a);
-}
-
-.otm__g--alt .otm__text-price {
-  fill: var(--prompt-gray-icon, #9ca3af);
-}
-
-.otm__case-footer {
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: var(--otm-ui-muted);
-}
-
-.otm__footer {
-  margin-top: 0.9rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid rgba(120, 120, 120, 0.12);
-  line-height: 1.65;
-  color: var(--otm-ui-muted);
-}
-
-.otm .mjx-container {
-  margin: 0 !important;
-}
-
-@media (max-width: 920px) {
-  .otm__intro,
-  .otm__cases {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .otm {
-    padding: 1rem;
-  }
-
-  .otm__caption {
-    flex-direction: column;
-    gap: 0.45rem;
-  }
-
-  .otm__canvas {
-    height: 228px;
-  }
-
-  .otm__node {
-    width: 78px;
-  }
-
-  .otm__svg {
-    left: 70px;
-    right: 70px;
-    width: calc(100% - 140px);
-  }
+@media (max-width: 640px) {
+  .iaw__node { width: 120px; }
+  .iaw__node--a, .iaw__node--b { left: 10px; }
+  .iaw__node--c, .iaw__node--d { right: 10px; }
 }
 </style>
+
+<script>
+(function() {
+    const root = document.getElementById('wholeBagTransportFigure');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+
+    const canvas = root.querySelector('#otmCanvas');
+    const ctx = canvas.getContext('2d');
+    const stage = root.querySelector('#otmStage');
+    const btns = root.querySelectorAll('.iaw__seg-btn');
+    const routesContainer = root.querySelector('#otmRoutes');
+    
+    let state = {
+      plan: 1
+    };
+
+    const COLORS = {
+      success: getComputedStyle(document.documentElement).getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
+      muted: '#94a3b8'
+    };
+
+    const routeData = {
+      1: [
+        { from: 'a', to: 'c', label: 'A \\to C: \\$1/\\mathrm{kg}', best: true },
+        { from: 'b', to: 'd', label: 'B \\to D: \\$2/\\mathrm{kg}', best: true }
+      ],
+      2: [
+        { from: 'a', to: 'd', label: 'A \\to D: \\$4/\\mathrm{kg}', best: false },
+        { from: 'b', to: 'c', label: 'B \\to C: \\$3/\\mathrm{kg}', best: false }
+      ]
+    };
+
+    function getNodePoint(nodeKey) {
+      const node = root.querySelector(`.iaw__node--${nodeKey}`);
+      if (!node) return { x:0, y:0 };
+      const tray = node.querySelector('.iaw__tray');
+      const stageRect = stage.getBoundingClientRect();
+      const nodeRect = node.getBoundingClientRect();
+      const trayRect = tray.getBoundingClientRect();
+      const isSource = (nodeKey === 'a' || nodeKey === 'b');
+      
+      return {
+        x: isSource ? (nodeRect.right - stageRect.left) : (nodeRect.left - stageRect.left),
+        y: trayRect.top - stageRect.top + trayRect.height / 2
+      };
+    }
+
+    function drawStatic() {
+      if (!stage) return;
+      canvas.width = stage.clientWidth;
+      canvas.height = stage.clientHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      routesContainer.innerHTML = '';
+      const activeRoutes = routeData[state.plan].map(r => {
+        const p1 = getNodePoint(r.from);
+        const p2 = getNodePoint(r.to);
+        
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = r.best ? COLORS.success : COLORS.muted;
+        ctx.lineWidth = 4;
+        if (!r.best) ctx.setLineDash([8, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Label
+        const el = document.createElement('div');
+        el.className = 'iaw__route-tag';
+        el.innerHTML = `$${r.label}$`;
+        routesContainer.appendChild(el);
+
+        return { el, x: (p1.x + p2.x)/2, y: (p1.y + p2.y)/2 };
+      });
+
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([routesContainer]).then(() => {
+          resolveCollisions(activeRoutes);
+        });
+      } else {
+        resolveCollisions(activeRoutes);
+      }
+    }
+
+    function resolveCollisions(nodes) {
+      if (!nodes || nodes.length <= 1) {
+        nodes.forEach(n => {
+          n.el.style.left = `${n.x}px`;
+          n.el.style.top = `${n.y}px`;
+        });
+        return;
+      }
+
+      const labelData = nodes.map(n => ({
+        n,
+        w: n.el.offsetWidth || 100,
+        h: n.el.offsetHeight || 30,
+        x: n.x,
+        y: n.y
+      }));
+
+      // Symmetric Cluster Resolver
+      const clusters = [];
+      const processed = new Set();
+      for (let i = 0; i < labelData.length; i++) {
+        if (processed.has(i)) continue;
+        let cluster = [labelData[i]];
+        processed.add(i);
+        let changed = true;
+        while (changed) {
+          changed = false;
+          for (let j = 0; j < labelData.length; j++) {
+            if (processed.has(j)) continue;
+            const n2 = labelData[j];
+            const overlaps = cluster.some(n1 => {
+              const dx = Math.abs(n1.x - n2.x);
+              const dy = Math.abs(n1.y - n2.y);
+              return dx < (n1.w + n2.w)/2 + 10 && dy < (n1.h + n2.h)/2 + 6;
+            });
+            if (overlaps) { cluster.push(n2); processed.add(j); changed = true; }
+          }
+        }
+        clusters.push(cluster);
+      }
+
+      clusters.forEach(cluster => {
+        if (cluster.length <= 1) return;
+        cluster.sort((a, b) => a.y - b.y);
+        const gap = 8;
+        const totalH = cluster.reduce((s, n) => s + n.h, 0) + (cluster.length - 1) * gap;
+        const targetY = cluster.reduce((s, n) => s + n.y, 0) / cluster.length;
+        let curY = targetY - totalH / 2;
+        cluster.forEach(n => {
+          n.y = curY + n.h / 2;
+          curY += n.h + gap;
+        });
+      });
+
+      labelData.forEach(l => {
+        l.n.el.style.left = `${l.y ? l.x : 0}px`; // Guard NaN
+        l.n.el.style.top = `${l.y ? l.y : 0}px`;
+        l.n.el.style.left = `${l.x}px`;
+        l.n.el.style.top = `${l.y}px`;
+      });
+    }
+
+    function updateUI() {
+      root.querySelector('#otmTotalCost').innerText = state.plan === 1 ? '$3' : '$7';
+      root.querySelector('#otmBreakdown').innerText = state.plan === 1 ? '$1 + $2' : '$4 + $3';
+      root.querySelector('#otmPlanType').innerText = state.plan === 1 ? 'Optimal (Uncrossed)' : 'Suboptimal (Crossed)';
+      root.querySelector('#otmPlanSwatch').style.background = state.plan === 1 ? COLORS.success : COLORS.muted;
+      drawStatic();
+    }
+
+    btns.forEach(b => b.addEventListener('click', () => {
+      btns.forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      state.plan = parseInt(b.dataset.plan);
+      updateUI();
+    }));
+
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => drawStatic());
+      ro.observe(stage);
+    }
+    window.addEventListener('resize', drawStatic);
+    
+    updateUI();
+    setTimeout(drawStatic, 250);
+})();
+</script>
