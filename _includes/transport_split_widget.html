@@ -1,8 +1,8 @@
 {% capture describe %}
 <p>
-  Sources $A$ (2kg) and $B$ (1kg) must fill holes $C$ (1kg) and $D$ (2kg). Let $x = \pi_{AC}$ be the mass moving from $A$ to $C$. Conservation of mass determines the entire plan $\pi$:
-  $\pi_{AC} = x, \pi_{AD} = 2-x, \pi_{BC} = 1-x, \pi_{BD} = x$.
-  In the Monge problem, $x \in \{0, 1\}$, but Kantorovich allows any $x \in [0, 1]$.
+  Source atoms $z_1$ (2kg) and $z_2$ (1kg) must fill target atoms $x_1$ (1kg) and $x_2$ (2kg). Let $\alpha = \pi_{11}$ be the mass moving from $z_1$ to $x_1$. Conservation of mass determines the entire plan $\pi$:
+  $\pi_{11} = \alpha, \pi_{12} = 2-\alpha, \pi_{21} = 1-\alpha, \pi_{22} = \alpha$.
+  In the Monge problem, $\alpha \in \{0, 1\}$, but Kantorovich allows any $\alpha \in [0, 1]$.
 </p>
 {% endcapture %}
 
@@ -13,7 +13,7 @@
   <section class="iaw__node otx__node otx__node--a" data-node="a">
     <div class="otx__node-card otx__node-card--a">
       <div class="otx__node-head">
-        <span class="otx__node-title">$A$</span>
+        <span class="otx__node-title">$z_1$</span>
         <span class="otx__node-mass">2 kg</span>
       </div>
       <div class="otx__slots" data-slots="a"></div>
@@ -23,7 +23,7 @@
   <section class="iaw__node otx__node otx__node--b" data-node="b">
     <div class="otx__node-card otx__node-card--b">
       <div class="otx__node-head">
-        <span class="otx__node-title">$B$</span>
+        <span class="otx__node-title">$z_2$</span>
         <span class="otx__node-mass">1 kg</span>
       </div>
       <div class="otx__slots" data-slots="b"></div>
@@ -33,7 +33,7 @@
   <section class="iaw__node otx__node otx__node--c otx__node--target" data-node="c">
     <div class="otx__node-card otx__node-card--target">
       <div class="otx__node-head">
-        <span class="otx__node-title">$C$</span>
+        <span class="otx__node-title">$x_1$</span>
         <span class="otx__node-mass">1 kg</span>
       </div>
       <div class="otx__slots" data-slots="c"></div>
@@ -43,7 +43,7 @@
   <section class="iaw__node otx__node otx__node--d otx__node--target" data-node="d">
     <div class="otx__node-card otx__node-card--target">
       <div class="otx__node-head">
-        <span class="otx__node-title">$D$</span>
+        <span class="otx__node-title">$x_2$</span>
         <span class="otx__node-mass">2 kg</span>
       </div>
       <div class="otx__slots" data-slots="d"></div>
@@ -61,21 +61,21 @@
 {% capture footer %}
 <div class="otx__summary-compact">
   <div class="otx__cost-summary">
-    Total Cost: <strong class="otx__mini-value">&#36;<span data-bind="cost_value">7.50</span></strong>
+    Kantorovich Objective: <strong class="otx__mini-value">&#36;<span data-bind="cost_value">7.50</span></strong>
   </div>
 
   <div class="otx__plan-summary">
     <div class="otx__plan-math">
-      <span class="otx__math-symbol">$\pi_{AC}=$</span><span class="otx__math-val" data-bind="pi_ac">0.50</span><span class="otx__math-sep">,</span>
-      <span class="otx__math-symbol">$\pi_{AD}=$</span><span class="otx__math-val" data-bind="pi_ad">1.50</span><span class="otx__math-sep">,</span>
-      <span class="otx__math-symbol">$\pi_{BC}=$</span><span class="otx__math-val" data-bind="pi_bc">0.50</span><span class="otx__math-sep">,</span>
-      <span class="otx__math-symbol">$\pi_{BD}=$</span><span class="otx__math-val" data-bind="pi_bd">0.50</span>
+      <span class="otx__math-symbol">$\pi_{11}=$</span><span class="otx__math-val" data-bind="pi_ac">0.50</span><span class="otx__math-sep">,</span>
+      <span class="otx__math-symbol">$\pi_{12}=$</span><span class="otx__math-val" data-bind="pi_ad">1.50</span><span class="otx__math-sep">,</span>
+      <span class="otx__math-symbol">$\pi_{21}=$</span><span class="otx__math-val" data-bind="pi_bc">0.50</span><span class="otx__math-sep">,</span>
+      <span class="otx__math-symbol">$\pi_{22}=$</span><span class="otx__math-val" data-bind="pi_bd">0.50</span>
     </div>
   </div>
 </div>
 
 <div class="otx__slider-row">
-  {% assign tsTicks = "$2:0$, Balanced, $1:1$" | split: ", " %}
+  {% assign tsTicks = "$\pi_{11}=0$, Balanced, $\pi_{11}=1$" | split: ", " %}
   {% include iaw_slider.html id="otxSlider" min="0" max="1" step="0.25" value="0.5" ticks=tsTicks variant="parameter" %}
 </div>
 
@@ -83,8 +83,8 @@
 
 {% include iaw_skeleton.html
     id="transportSplitWidget"
-    eyebrow="Interactive Example"
-    title="Kantorovich Problem (Split Mass)"
+    eyebrow="Discrete Kantorovich Example"
+    title="Transport Plan $\pi$ with Mass Splitting"
     description=describe
     visuals=visuals
     stage_id="otxStage"
@@ -389,10 +389,10 @@
     };
 
     const routeConfigs = [
-        { key: "ac", from: "a", to: "c", accent: "a", name: "A \\to C", cost: 1, curve: -34, t: 0.42 },
-        { key: "ad", from: "a", to: "d", accent: "a", name: "A \\to D", cost: 3, curve: -10, t: 0.42 },
-        { key: "bc", from: "b", to: "c", accent: "b", name: "B \\to C", cost: 4, curve: 10, t: 0.58 },
-        { key: "bd", from: "b", to: "d", accent: "b", name: "B \\to D", cost: 1, curve: 34, t: 0.58 }
+        { key: "ac", from: "a", to: "c", accent: "a", name: "z_1 \\to x_1", cost: 1, curve: -34, t: 0.42 },
+        { key: "ad", from: "a", to: "d", accent: "a", name: "z_1 \\to x_2", cost: 3, curve: -10, t: 0.42 },
+        { key: "bc", from: "b", to: "c", accent: "b", name: "z_2 \\to x_1", cost: 4, curve: 10, t: 0.58 },
+        { key: "bd", from: "b", to: "d", accent: "b", name: "z_2 \\to x_2", cost: 1, curve: 34, t: 0.58 }
     ];
 
     function schedule(callback, delay) {

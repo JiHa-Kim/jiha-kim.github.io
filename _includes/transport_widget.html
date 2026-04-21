@@ -1,7 +1,7 @@
 {% capture describe %}
 <p>
-  When sources carry indivisible masses (like boxes), the problem becomes a discrete search. 
-  The source must already arrive in the exact mass pieces needed by the destinations.
+  In the discrete Monge problem, each source atom $z_i$ must choose exactly one target atom $x_j$.
+  If the masses are indivisible, a feasible deterministic map $T$ exists only when the source atoms already come in the exact pieces demanded by the targets.
 </p>
 {% endcapture %}
 
@@ -10,48 +10,48 @@
 <div class="iaw__node iaw__node--a otm-hub" style="left: 40px; top: 60px;">
   <div class="otm-hub__badge">1kg box</div>
   <div class="otm-hub__circle otm-hub__circle--a"><i class="fas fa-box"></i></div>
-  <div class="otm-hub__label">Source $A$</div>
+  <div class="otm-hub__label">Source $z_1$</div>
 </div>
 <div class="iaw__node iaw__node--b otm-hub" style="left: 40px; bottom: 40px;">
   <div class="otm-hub__badge">1kg box</div>
   <div class="otm-hub__circle otm-hub__circle--b"><i class="fas fa-box"></i></div>
-  <div class="otm-hub__label">Source $B$</div>
+  <div class="otm-hub__label">Source $z_2$</div>
 </div>
 <div class="iaw__node iaw__node--c otm-hub" style="right: 40px; top: 60px;">
   <div class="otm-hub__badge">needs 1kg</div>
   <div class="otm-hub__circle otm-hub__circle--target"><i class="fas fa-house"></i></div>
-  <div class="otm-hub__label">Target $C$</div>
+  <div class="otm-hub__label">Target $x_1$</div>
 </div>
 <div class="iaw__node iaw__node--d otm-hub" style="right: 40px; bottom: 40px;">
   <div class="otm-hub__badge">needs 1kg</div>
   <div class="otm-hub__circle otm-hub__circle--target"><i class="fas fa-house"></i></div>
-  <div class="otm-hub__label">Target $D$</div>
+  <div class="otm-hub__label">Target $x_2$</div>
 </div>
 <div class="otm-routes-container"></div>
 {% include iaw_canvas_stage.html canvas_id="otmCanvas1" %}
 {% endcapture %}
 
 {% capture controls1 %}
-<button class="iaw__seg-btn active" data-plan="1">Plan 1 (Optimal)</button>
-<button class="iaw__seg-btn" data-plan="2">Plan 2 (Suboptimal)</button>
+<button class="iaw__seg-btn active" data-plan="1">Map $T_1$</button>
+<button class="iaw__seg-btn" data-plan="2">Map $T_2$</button>
 {% endcapture %}
 
 {% capture footer1 %}
 <div class="iaw__status-grid">
   <div class="iaw__status-item">
     <span class="iaw__status-label">Status</span>
-    <strong class="iaw__status-value" style="color: var(--iaw-success);">Feasible</strong>
+    <strong class="iaw__status-value otm-status" style="color: var(--iaw-success);">Feasible, Optimal</strong>
   </div>
   <div class="iaw__status-item">
     <span class="iaw__status-label">Verdict</span>
-    <strong class="iaw__status-value">Mapping exists.</strong>
+    <strong class="iaw__status-value otm-verdict">Cost-minimizing deterministic map.</strong>
   </div>
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Breakdown</span>
-    <strong class="iaw__status-value otm-breakdown">$1 + $2</strong>
+    <span class="iaw__status-label">Active Costs</span>
+    <strong class="iaw__status-value otm-breakdown">$c_{11}+c_{22}$</strong>
   </div>
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Total Cost</span>
+    <span class="iaw__status-label">Monge Objective</span>
     <strong class="iaw__status-value otm-total-cost" style="color: var(--iaw-primary); font-size: 1.25rem;">$3</strong>
   </div>
 </div>
@@ -59,8 +59,8 @@
 
 {% include iaw_skeleton.html 
     id="mongeFeasibleWidget" 
-    eyebrow="Success Case" 
-    title="Permuting Separate 1kg Boxes" 
+    eyebrow="Discrete Monge Example" 
+    title="Two Feasible Deterministic Maps $T$" 
     description=describe
     visuals=visuals1
     controls=controls1
@@ -76,17 +76,17 @@
   <div class="otm-hub__circle otm-hub__circle--a" style="width: 72px; height: 72px; font-size: 1.8rem;">
     <i class="fas fa-box"></i>
   </div>
-  <div class="otm-hub__label">Single Source $A$</div>
+  <div class="otm-hub__label">Single Source $z_1$</div>
 </div>
 <div class="iaw__node iaw__node--c otm-hub" style="right: 40px; top: 60px;">
   <div class="otm-hub__badge">needs 1kg</div>
   <div class="otm-hub__circle otm-hub__circle--target"><i class="fas fa-house"></i></div>
-  <div class="otm-hub__label">Target $C$</div>
+  <div class="otm-hub__label">Target $x_1$</div>
 </div>
 <div class="iaw__node iaw__node--d otm-hub" style="right: 40px; bottom: 40px;">
   <div class="otm-hub__badge">needs 1kg</div>
   <div class="otm-hub__circle otm-hub__circle--target"><i class="fas fa-house"></i></div>
-  <div class="otm-hub__label">Target $D$</div>
+  <div class="otm-hub__label">Target $x_2$</div>
 </div>
 {% include iaw_canvas_stage.html canvas_id="otmCanvas2" %}
 {% endcapture %}
@@ -95,19 +95,19 @@
 <div class="iaw__status-grid">
   <div class="iaw__status-item">
     <span class="iaw__status-label">Status</span>
-    <strong class="iaw__status-value" style="color: var(--iaw-danger);">Not Feasible</strong>
+    <strong class="iaw__status-value" style="color: var(--iaw-danger);">Infeasible</strong>
   </div>
   <div class="iaw__status-item">
     <span class="iaw__status-label">Verdict</span>
-    <strong class="iaw__status-value">Indivisible mass cannot split.</strong>
+    <strong class="iaw__status-value">No deterministic map can match both target masses.</strong>
   </div>
 </div>
 {% endcapture %}
 
 {% include iaw_skeleton.html 
     id="mongeFailureWidget" 
-    eyebrow="Impossibility Case" 
-    title="One Indivisible 2kg Box" 
+    eyebrow="Discrete Monge Failure" 
+    title="No Feasible Deterministic Map $T$" 
     visuals=visuals2
     stage_id="otmStage2"
     stage_style="height: 380px;"
@@ -180,8 +180,8 @@
         let renderToken = 0;
 
         const routeData = {
-          1: [{ from: '--a', to: '--c', label: 'A \\to C: \\$1/\\mathrm{kg}', best: true, src: 'a' }, { from: '--b', to: '--d', label: 'B \\to D: \\$2/\\mathrm{kg}', best: true, src: 'b' }],
-          2: [{ from: '--a', to: '--d', label: 'A \\to D: \\$4/\\mathrm{kg}', best: false, src: 'a' }, { from: '--b', to: '--c', label: 'B \\to C: \\$3/\\mathrm{kg}', best: false, src: 'b' }]
+          1: [{ from: '--a', to: '--c', label: 'c_{11}=1', best: true, src: 'a' }, { from: '--b', to: '--d', label: 'c_{22}=2', best: true, src: 'b' }],
+          2: [{ from: '--a', to: '--d', label: 'c_{12}=4', best: false, src: 'a' }, { from: '--b', to: '--c', label: 'c_{21}=3', best: false, src: 'b' }]
         };
 
         const allLabels = [];
@@ -229,7 +229,18 @@
         function updateUI() {
           const p = state.plan;
           root.querySelector('.otm-total-cost').textContent = p === 1 ? '$3' : '$7';
-          root.querySelector('.otm-breakdown').textContent = p === 1 ? '$1 + $2' : '$4 + $3';
+          root.querySelector('.otm-breakdown').textContent = p === 1 ? '$c_{11}+c_{22}$' : '$c_{12}+c_{21}$';
+          const status = root.querySelector('.otm-status');
+          const verdict = root.querySelector('.otm-verdict');
+          if (p === 1) {
+            status.textContent = 'Feasible, Optimal';
+            status.style.color = COLORS.success;
+            verdict.textContent = 'Cost-minimizing deterministic map.';
+          } else {
+            status.textContent = 'Feasible, Suboptimal';
+            status.style.color = COLORS.sourceA;
+            verdict.textContent = 'Feasible, but not cost-minimizing.';
+          }
           const hC = root.querySelector('.iaw__node--c .otm-hub__circle'), hD = root.querySelector('.iaw__node--d .otm-hub__circle');
           
           if (p === 1) {
