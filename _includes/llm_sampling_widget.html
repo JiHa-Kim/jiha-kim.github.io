@@ -33,14 +33,12 @@
     <div class="llm__tick" style="left: 100%;">1.0</div>
   </div>
 
-  <!-- Handle -->
-  <div class="llm__handle" id="llmHandle" style="left: 75%;">
-    <div class="llm__u-val" id="llmUVal">0.75</div>
-    <div class="llm__handle-head" id="llmHandleHead">
-      <span class="math-static">\( u \)</span>
-    </div>
-    <div class="llm__handle-line"></div>
-  </div>
+  <!-- Standardized Drag Strip and Handle -->
+  <div class="iaw__drag-strip" id="llmDragStrip"></div>
+
+  <button type="button" class="iaw__handle iaw__handle--source" id="llmHandle" style="left: 75%;">
+    <span><small>‹</small>&nbsp;$u$ = <span id="llmUVal">0.75</span>&nbsp;<small>›</small></span>
+  </button>
 </div>
 {% endcapture %}
 
@@ -132,67 +130,6 @@
   color: var(--iaw-muted);
 }
 
-.llm__handle {
-  position: absolute;
-  top: 25px; /* Above the track */
-  height: 80px; /* Spans across track and ticks */
-  width: 32px;
-  transform: translateX(-50%);
-  cursor: grab;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.llm__handle:active, .llm__handle.is-dragging {
-  cursor: grabbing;
-}
-
-.llm__handle-line {
-  position: absolute;
-  top: 25px;
-  bottom: -5px;
-  width: 2px;
-  background: var(--iaw-text);
-  pointer-events: none;
-}
-
-.llm__handle-head {
-  position: relative;
-  width: 28px;
-  height: 28px;
-  background: var(--iaw-text);
-  color: var(--iaw-bg);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: transform 0.1s;
-  z-index: 2;
-}
-
-.llm__handle.is-dragging .llm__handle-head {
-  transform: scale(1.15);
-}
-
-.llm__u-val {
-  position: absolute;
-  top: -24px;
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 0.8rem;
-  font-weight: bold;
-  background: var(--iaw-bg);
-  padding: 2px 6px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 1px solid var(--iaw-border);
-  color: var(--iaw-text);
-  white-space: nowrap;
-}
-
 .otu .mjx-container {
   margin: 0 !important;
 }
@@ -207,6 +144,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   const track = root.querySelector('#llmTrack');
   const handle = root.querySelector('#llmHandle');
+  const dragStrip = root.querySelector('#llmDragStrip');
   const uValDisplay = root.querySelector('#llmUVal');
   const outputVal = root.querySelector('#llmOutput');
   const slider = root.querySelector('#llmSlider');
@@ -226,10 +164,15 @@ document.addEventListener("DOMContentLoaded", function() {
     
     if (trackRect) {
        const px = currentU * trackRect.width;
-       handle.style.left = `calc(20px + ${px}px)`; // 20px is the padding-left of the stage
+       handle.style.left = `calc(20px + ${px}px)`;
+       if (dragStrip) dragStrip.style.left = `calc(20px + ${px}px)`;
     } else {
        handle.style.left = `calc(20px + ${currentU * 100}%)`; 
+       if (dragStrip) dragStrip.style.left = `calc(20px + ${currentU * 100}%)`;
     }
+
+    // Position the handle vertically above the track
+    handle.style.top = `25px`; 
 
     uValDisplay.innerText = currentU.toFixed(2);
     if (slider && slider.value !== currentU.toString()) {
@@ -278,14 +221,28 @@ document.addEventListener("DOMContentLoaded", function() {
 
   handle.addEventListener('pointerdown', (e) => {
     isDragging = true;
-    handle.classList.add('is-dragging');
+    handle.classList.add('active');
+    if (dragStrip) dragStrip.classList.add('active');
     handle.setPointerCapture(e.pointerId);
     e.preventDefault();
   });
 
+  if (dragStrip) {
+    dragStrip.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      handle.classList.add('active');
+      dragStrip.classList.add('active');
+      dragStrip.setPointerCapture(e.pointerId);
+      currentU = getUFromEvent(e);
+      updateVisuals();
+      e.preventDefault();
+    });
+  }
+
   track.addEventListener('pointerdown', (e) => {
     isDragging = true;
-    handle.classList.add('is-dragging');
+    handle.classList.add('active');
+    if (dragStrip) dragStrip.classList.add('active');
     currentU = getUFromEvent(e);
     updateVisuals();
     e.preventDefault();
@@ -298,7 +255,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function stopDrag() {
     isDragging = false;
-    handle.classList.remove('is-dragging');
+    handle.classList.remove('active');
+    if (dragStrip) dragStrip.classList.remove('active');
   }
 
   window.addEventListener('pointerup', stopDrag);
