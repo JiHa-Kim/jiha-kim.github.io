@@ -14,6 +14,36 @@ _config="_config.yml"
 
 _baseurl=""
 _fast="false"
+_test_root=""
+_test_config=""
+
+cleanup() {
+  if [[ -n "${_test_root:-}" && -d "$_test_root" ]]; then
+    rm -rf "$_test_root"
+  fi
+}
+
+prepare_test_root() {
+  _test_root="$(mktemp -d)"
+  trap cleanup EXIT
+
+  git ls-files -co --exclude-standard -z \
+    | rsync -a --from0 --files-from=- ./ "$_test_root/"
+
+  if [[ $_config == *","* ]]; then
+    IFS=","
+    read -ra config_array <<<"$_config"
+    local mapped_configs=()
+
+    for config_path in "${config_array[@]}"; do
+      mapped_configs+=("$_test_root/$config_path")
+    done
+
+    _test_config="$(IFS=,; echo "${mapped_configs[*]}")"
+  else
+    _test_config="$_test_root/$_config"
+  fi
+}
 
 help() {
   echo "Build and test the site content"
@@ -58,12 +88,14 @@ main() {
     JEKYLL_ENV=development bundle exec jekyll b \
       -d "$SITE_DIR$_baseurl" -c "$_config" --incremental
   else
-    # build (incremental for speed, but production env)
+    prepare_test_root
+
+    # build from a clean copy of tracked + non-ignored files
     JEKYLL_ENV=production bundle exec jekyll b \
-      -d "$SITE_DIR$_baseurl" -c "$_config" --incremental
+      -s "$_test_root" -d "$_test_root/$SITE_DIR$_baseurl" -c "$_test_config"
 
     # test
-    bundle exec htmlproofer "$SITE_DIR" \
+    bundle exec htmlproofer "$_test_root/$SITE_DIR" \
       --disable-external \
       --allow-hash-href \
       --ignore-empty-alt \
