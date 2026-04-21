@@ -1,264 +1,148 @@
-<div class="mew" id="maxEntropyFigure">
-  <div class="mew__intro">
-    <div class="mew__copy">
-      <div class="mew__eyebrow">Interactive 1D Example</div>
-      <h4>Iterative Entropy Maximization</h4>
-      <p>
-        Diffusion-style smoothing can be read as repeated entropy ascent under a fixed constraint. Switch the constraint, then scrub the iteration to see an arbitrary starting density relax toward the corresponding maximum-entropy target.
-      </p>
-    </div>
+{% capture describe %}
+<p>
+  Diffusion-style smoothing can be read as repeated entropy ascent under a fixed constraint. 
+  Switch the constraint, then scrub the iteration to see an arbitrary starting density relax toward the corresponding maximum-entropy target.
+</p>
+{% endcapture %}
 
-    <div class="mew__summary-card">
-      <div class="mew__panel-title">Current Constraint</div>
-      <div class="mew__summary-value" id="meConstraintLabel">Uniform on [-2, 2]</div>
-      <div class="mew__summary-meta">
-        Entropy <span class="mew__summary-number" id="meValH">0.000</span> nats
-      </div>
-    </div>
+{% capture controls %}
+<button class="iaw__seg-btn active" data-constraint="bounded">Bounded Support $[-2, 2]$</button>
+<button class="iaw__seg-btn" data-constraint="variance">Bounded Variance $\sigma^2 = 1$</button>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="mew__iter-pill" id="meValue">Iter 0</div>
+<canvas class="iaw__canvas" id="meChart"></canvas>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Constraint</span>
+    <strong class="iaw__status-value" id="meConstraintLabel">Uniform on [-2, 2]</strong>
   </div>
-
-  <div class="mew__stage-card">
-    <div class="mew__toolbar">
-      <div class="mew__segmented-control">
-        <button class="mew__seg-btn active" data-constraint="bounded">Bounded Support \([-2, 2]\)</button>
-        <button class="mew__seg-btn" data-constraint="variance">Bounded Variance \(\sigma^2 = 1\)</button>
-      </div>
-      <div class="mew__iter-pill" id="meValue">Iter 0</div>
-    </div>
-
-    <div class="mew__stage-note">
-      Press play for the full evolution, or drag the slider to inspect how smoothing and renormalization reshape the density step by step.
-    </div>
-
-    <div class="mew__stage" id="meStage">
-      <canvas id="meChart"></canvas>
-    </div>
-
-    <div class="mew__footer">
-      <button class="mew__play-btn" id="mePlay">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-      <input type="range" class="mew__slider" id="meSlider" min="0" max="100" step="1" value="0">
-    </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Entropy</span>
+    <strong class="iaw__status-value"><span id="meValH">0.000</span> nats</strong>
   </div>
 </div>
 
+<div class="mew__controls-row">
+  <button class="mew__play-btn" id="mePlay" aria-label="Play Evolution">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  <div class="iaw__slider-box">
+    <input type="range" class="iaw__slider" id="meSlider" min="0" max="100" step="1" value="0">
+    <div class="iaw__slider-ticks">
+      <span>Start</span>
+      <span>Iteration Progress</span>
+      <span>Target</span>
+    </div>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html 
+    id="maxEntropyFigure"
+    eyebrow="Interactive 1D Example"
+    title="Iterative Entropy Maximization"
+    description=describe
+    visuals=visuals
+    controls=controls
+    stage_id="meStage"
+    footer=footer
+%}
+
 <style>
-.mew {
-  --mew-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
-  --mew-ui-bg: var(--main-bg, #fff);
-  --mew-ui-muted: var(--text-muted-color, var(--text-color, inherit));
-  --mew-ui-text: var(--text-color, inherit);
-  margin: 2rem 0;
-  padding: 1.25rem;
-  border: 1px solid var(--mew-ui-border);
-  border-radius: 18px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.05));
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
-}
-
-.mew__intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(230px, 300px);
-  gap: 1rem;
-  align-items: start;
-}
-
-.mew__eyebrow {
-  margin-bottom: 0.28rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--mew-ui-muted);
-}
-
-.mew__copy h4 {
-  margin: 0 0 0.45rem 0;
-  font-size: 1.04rem;
-  color: var(--heading-color, var(--mew-ui-text));
-}
-
-.mew__copy p {
-  margin: 0.45rem 0 0 0;
-  font-size: 1rem;
-  line-height: 1.66;
-  color: var(--mew-ui-muted);
-}
-
-.mew__summary-card,
-.mew__stage-card {
-  border: 1px solid var(--mew-ui-border);
-  border-radius: 14px;
-  background: var(--mew-ui-bg);
-}
-
-.mew__summary-card {
-  padding: 0.95rem;
-}
-
-.mew__panel-title {
-  margin-bottom: 0.55rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--mew-ui-muted);
-}
-
-.mew__summary-value {
-  font-size: 1.02rem;
-  font-weight: 800;
-  color: var(--mew-ui-text);
-}
-
-.mew__summary-meta {
-  margin-top: 0.55rem;
-  font-size: 0.9rem;
-  color: var(--mew-ui-muted);
-}
-
-.mew__summary-number {
-  font-family: var(--font-family-monospace, monospace);
-  font-weight: 700;
-  color: var(--prompt-success-icon, #10b981);
-}
-
-.mew__stage-card {
-  margin-top: 1rem;
-  padding: 0.95rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.mew__toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.85rem;
-  flex-wrap: wrap;
-}
-
-.mew__segmented-control {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  padding: 0.28rem;
-  border-radius: 12px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.08));
-}
-
-.mew__seg-btn {
-  border: none;
-  background: transparent;
-  padding: 0.55rem 0.9rem;
-  border-radius: 10px;
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: var(--mew-ui-muted);
-  cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.mew__seg-btn:hover {
-  color: var(--mew-ui-text);
-}
-
-.mew__seg-btn.active {
-  background: var(--mew-ui-bg);
-  color: var(--mew-ui-text);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
-
-[data-mode="dark"] .mew__seg-btn.active {
-  background: var(--card-bg, #374151);
-  color: #f3f4f6;
-}
-
 .mew__iter-pill {
-  padding: 0.3rem 0.7rem;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  padding: 0.35rem 0.85rem;
   border-radius: 999px;
   font-family: var(--font-family-monospace, monospace);
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--mew-ui-muted);
-  background: var(--card-bg, rgba(120, 120, 120, 0.08));
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--iaw-text);
+  background: color-mix(in srgb, var(--iaw-bg) 80%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--iaw-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
 }
 
-.mew__stage-note {
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--mew-ui-muted);
-}
-
-.mew__stage {
-  height: 340px;
-  padding: 0.9rem;
-  border: 1px solid var(--mew-ui-border);
-  border-radius: 14px;
-  background: var(--mew-ui-bg);
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.03);
-}
-
-[data-mode="dark"] .mew__stage {
-  background: var(--main-bg, #1b1b1e);
-}
-
-.mew__footer {
+.mew__controls-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.mew__controls-row .iaw__slider-box {
+  flex: 1;
+  width: 100%;
 }
 
 .mew__play-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  border: 1px solid var(--mew-ui-border);
-  background: var(--mew-ui-bg);
-  color: var(--mew-ui-text);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--iaw-border);
+  background: var(--iaw-bg);
+  color: var(--iaw-text);
   cursor: pointer;
-  transition: background-color 0.18s ease, transform 0.18s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .mew__play-btn:hover {
-  background: var(--card-bg, rgba(120, 120, 120, 0.08));
+  background: var(--iaw-surface);
+  transform: scale(1.05);
+  border-color: var(--iaw-primary);
 }
 
 .mew__play-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
-.mew__slider {
-  flex: 1 1 auto;
-  cursor: pointer;
-  min-width: 180px;
-  accent-color: var(--prompt-success-icon, #10b981);
+.iaw__status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
-.mew .mjx-container {
-  margin: 0 !important;
+.iaw__status-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--iaw-muted);
 }
 
-@media (max-width: 920px) {
-  .mew__intro {
-    grid-template-columns: 1fr;
-  }
+.iaw__status-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+}
+
+#meValH {
+  font-family: var(--font-family-monospace, monospace);
+  color: var(--iaw-success);
 }
 
 @media (max-width: 640px) {
-  .mew {
-    padding: 1rem;
+  .mew__controls-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
-
-  .mew__stage {
-    height: 300px;
-    padding: 0.75rem;
+  .mew__play-btn {
+    width: 100%;
+    border-radius: 10px;
   }
 }
 </style>
@@ -278,9 +162,9 @@ document.addEventListener("DOMContentLoaded", function() {
   const timeVal = root.querySelector('#meValue');
   const playBtn = root.querySelector('#mePlay');
   const constraintLabel = root.querySelector('#meConstraintLabel');
-  const segBtns = root.querySelectorAll('.mew__seg-btn');
+  const segBtns = root.querySelectorAll('.iaw__seg-btn');
 
-  let constraint = 'bounded'; // 'bounded' or 'variance'
+  let constraint = 'bounded'; 
   let currentFrame = 0;
   let isPlaying = false;
   let animationFrameId = null;
@@ -393,14 +277,12 @@ document.addEventListener("DOMContentLoaded", function() {
       historyP.push([...currentP]);
     }
     
-    // Force target at end for perfect visual convergence
     let targetP = new Array(nPoints+1).fill(0);
     for(let i=0; i<=nPoints; i++) {
       if (constraint === 'bounded') targetP[i] = 1.0 / 4.0;
       else targetP[i] = Math.exp(-0.5 * xValues[i] * xValues[i]) / Math.sqrt(2 * Math.PI);
     }
     
-    // Lerp last 25 frames
     for(let frame=75; frame<=100; frame++) {
       let t = (frame - 75) / 25.0;
       let p = historyP[frame];
@@ -446,12 +328,12 @@ document.addEventListener("DOMContentLoaded", function() {
         {
           label: 'PDF',
           data: initialData.data,
-          borderColor: theme.line,
-          backgroundColor: theme.fill,
-          borderWidth: 2.5,
+          borderColor: theme.success,
+          backgroundColor: theme.success + '22',
+          borderWidth: 3,
           pointRadius: 0,
           fill: true,
-          tension: 0.1
+          tension: 0.2
         }
       ]
     },
@@ -468,22 +350,24 @@ document.addEventListener("DOMContentLoaded", function() {
           type: 'linear',
           min: initialXBounds.min,
           max: initialXBounds.max,
-          grid: { color: theme.grid },
-          ticks: { color: theme.ticks, font: { size: 12 } }
+          grid: { color: theme.border, display: false },
+          ticks: { color: theme.muted, font: { size: 11, weight: 'bold' } },
+          border: { display: false }
         },
         y: {
           type: 'linear',
           min: 0,
           max: Math.max(maxY, 0.6),
-          grid: { color: theme.grid },
-          ticks: { color: theme.ticks, font: { size: 12 } }
+          grid: { color: theme.border },
+          ticks: { color: theme.muted, font: { size: 11, weight: 'bold' } },
+          border: { display: false }
         }
       }
     }
   });
 
   function updateConstraintLabel() {
-    constraintLabel.textContent = constraint === 'bounded' ? 'Uniform on [-2, 2]' : 'Gaussian with variance 1';
+    constraintLabel.textContent = constraint === 'bounded' ? 'Uniform on [-2, 2]' : 'Gaussian with var 1';
   }
 
   valH.innerText = initialData.entropy.toFixed(3);
@@ -505,22 +389,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function primeChartPaths() {
     if (hasPrimedChart || historyP.length < 2) return;
-
     const savedFrame = currentFrame;
     const warmFrame = Math.min(savedFrame + 1, historyP.length - 1);
-
     chart.data.datasets[0].data = getPdfData(warmFrame).data;
     chart.update('none');
     chart.data.datasets[0].data = getPdfData(savedFrame).data;
     chart.update('none');
-
     hasPrimedChart = true;
   }
 
   function scheduleChartPrime() {
     hasPrimedChart = false;
     if (primeRequestId) cancelAnimationFrame(primeRequestId);
-
     primeRequestId = requestAnimationFrame(() => {
       primeRequestId = requestAnimationFrame(() => {
         primeRequestId = null;
@@ -539,8 +419,9 @@ document.addEventListener("DOMContentLoaded", function() {
   segBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       segBtns.forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      constraint = e.target.dataset.constraint;
+      const target = e.target.closest('.iaw__seg-btn');
+      target.classList.add('active');
+      constraint = target.dataset.constraint;
       currentFrame = 0;
       slider.value = 0;
       isPlaying = false;
@@ -553,9 +434,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function updatePlayButton() {
     if (isPlaying) {
-      playBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+      playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
     } else {
-      playBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+      playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
     }
   }
 
@@ -564,14 +445,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function animate(timestamp) {
     if (!isPlaying) return;
-    
     if (!lastTime) lastTime = timestamp;
     const dt = timestamp - lastTime;
-    
-    if (dt > 30) { // roughly 30fps updates
+    if (dt > 30) { 
       lastTime = timestamp;
       let newFrame = currentFrame + direction;
-      
       if (newFrame >= 100 && direction === 1) {
         newFrame = 100;
         direction = -1;
@@ -583,15 +461,11 @@ document.addEventListener("DOMContentLoaded", function() {
         isPlaying = false;
         updatePlayButton();
       }
-      
       currentFrame = newFrame;
       slider.value = currentFrame;
       updateChart();
     }
-    
-    if (isPlaying) {
-      animationFrameId = requestAnimationFrame(animate);
-    }
+    if (isPlaying) animationFrameId = requestAnimationFrame(animate);
   }
 
   playBtn.addEventListener('click', () => {
@@ -608,15 +482,14 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
-  // Theme observer
   IAW.observeTheme(() => {
     theme = IAW.getThemeColors(root);
     chart.data.datasets[0].borderColor = theme.success;
     chart.data.datasets[0].backgroundColor = theme.success + '22';
-    chart.options.scales.x.grid.color = theme.grid;
-    chart.options.scales.x.ticks.color = theme.ticks;
-    chart.options.scales.y.grid.color = theme.grid;
-    chart.options.scales.y.ticks.color = theme.ticks;
+    chart.options.scales.x.grid.color = theme.border;
+    chart.options.scales.x.ticks.color = theme.muted;
+    chart.options.scales.y.grid.color = theme.border;
+    chart.options.scales.y.ticks.color = theme.muted;
     chart.update('none');
   });
 
@@ -626,9 +499,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function requestMathTypeset(attempt = 0) {
     if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      window.MathJax.typesetPromise([root]).then(() => {
-        scheduleChartPrime();
-      }).catch(() => {});
+      window.MathJax.typesetPromise([root]).then(() => scheduleChartPrime()).catch(() => {});
       return;
     }
     if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
@@ -637,3 +508,4 @@ document.addEventListener("DOMContentLoaded", function() {
   requestMathTypeset();
 });
 </script>
+
