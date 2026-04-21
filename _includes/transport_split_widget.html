@@ -1,273 +1,653 @@
 {% capture describe %}
 <p>
-  Source $A$ has $2\text{ kg}$ of loose dirt, and source $B$ has $1\text{ kg}$. Hole $C$ needs $1\text{ kg}$, while hole $D$ needs $2\text{ kg}$. Once you choose how much mass to send from $A$ to $C$, conservation determines the other three entries of the transport plan automatically.
+  Source $A$ carries $2 \text{ kg}$ and source $B$ carries $1 \text{ kg}$. Hole $C$ needs $1 \text{ kg}$ while hole $D$ needs $2 \text{ kg}$. Choosing $\pi_{AC}$ determines the other three entries by conservation of mass.
 </p>
 {% endcapture %}
 
-{% capture visuals %}
-<canvas id="otxCanvas" class="iaw__canvas"></canvas>
-<div id="otxParticleLayer" class="iaw__particle-layer"></div>
+{% capture otxOverlay %}
+<div class="otx__overlay">
+  <div id="otxParticleLayer" class="otx__particle-layer"></div>
 
-<div class="iaw__node iaw__node--a">
-  <div class="iaw__node-row">
-    <div class="iaw__node-title">Source $A$</div>
-    <div class="iaw__node-badge">2 kg</div>
-  </div>
-  <div class="iaw__tray"><div class="iaw__slots iaw__slots--8" data-slots="a"></div></div>
+  <section class="iaw__node otx__node otx__node--a" data-node="a">
+    <div class="otx__node-card otx__node-card--a">
+      <div class="otx__node-head">
+        <span class="otx__node-title">Source A</span>
+        <span class="otx__node-mass">2 kg</span>
+      </div>
+      <div class="otx__slots" data-slots="a"></div>
+    </div>
+  </section>
+
+  <section class="iaw__node otx__node otx__node--b" data-node="b">
+    <div class="otx__node-card otx__node-card--b">
+      <div class="otx__node-head">
+        <span class="otx__node-title">Source B</span>
+        <span class="otx__node-mass">1 kg</span>
+      </div>
+      <div class="otx__slots" data-slots="b"></div>
+    </div>
+  </section>
+
+  <section class="iaw__node otx__node otx__node--c otx__node--target" data-node="c">
+    <div class="otx__node-card otx__node-card--target">
+      <div class="otx__node-head">
+        <span class="otx__node-title">Hole C</span>
+        <span class="otx__node-mass">1 kg</span>
+      </div>
+      <div class="otx__slots" data-slots="c"></div>
+    </div>
+  </section>
+
+  <section class="iaw__node otx__node otx__node--d otx__node--target" data-node="d">
+    <div class="otx__node-card otx__node-card--target">
+      <div class="otx__node-head">
+        <span class="otx__node-title">Hole D</span>
+        <span class="otx__node-mass">2 kg</span>
+      </div>
+      <div class="otx__slots" data-slots="d"></div>
+    </div>
+  </section>
+
+  <div id="otxRoutes" class="otx__routes"></div>
 </div>
-
-<div class="iaw__node iaw__node--b">
-  <div class="iaw__node-row">
-    <div class="iaw__node-title">Source $B$</div>
-    <div class="iaw__node-badge">1 kg</div>
-  </div>
-  <div class="iaw__tray"><div class="iaw__slots iaw__slots--4" data-slots="b"></div></div>
-</div>
-
-<div class="iaw__node iaw__node--c">
-  <div class="iaw__node-row">
-    <div class="iaw__node-title">Hole $C$</div>
-    <div class="iaw__node-badge">needs 1 kg</div>
-  </div>
-  <div class="iaw__tray"><div class="iaw__slots iaw__slots--4" data-slots="c"></div></div>
-</div>
-
-<div class="iaw__node iaw__node--d">
-  <div class="iaw__node-row">
-    <div class="iaw__node-title">Hole $D$</div>
-    <div class="iaw__node-badge">needs 2 kg</div>
-  </div>
-  <div class="iaw__tray"><div class="iaw__slots iaw__slots--8" data-slots="d"></div></div>
-</div>
-
-<div id="otxRoutes"></div>
 {% endcapture %}
 
-{% capture legend %}
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-source-a)"></span>
-  <span>$A \to C$, $A \to D$ (Source A)</span>
-</div>
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-source-b)"></span>
-  <span>$B \to C$, $B \to D$ (Source B)</span>
-</div>
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-destination)"></span>
-  <span>Destinations (Holes $C, D$)</span>
-</div>
+{% capture visuals %}
+{% include iaw_canvas_stage.html canvas_id="otxCanvas" overlay=otxOverlay %}
 {% endcapture %}
 
 {% capture footer %}
-<div class="iaw__slider-box">
-  <input type="range" id="otxSlider" class="iaw__slider" min="0" max="1" step="0.25" value="0.5">
-  <div class="iaw__slider-ticks">
-    <span>Plan $A \to D$</span>
-    <span>Symmetric</span>
-    <span>Plan $A \to C$</span>
+<div class="iaw__status-grid otx__status-grid tex2jax_ignore mathjax_ignore">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Free Variable</span>
+    <strong class="iaw__status-value" data-bind="free_value">&pi;<sub>AC</sub> = 0.50 kg</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Total Cost</span>
+    <strong class="iaw__status-value otx__cost-value">&#36;<span data-bind="cost_value">7.50</span></strong>
   </div>
 </div>
 
-<div class="iaw__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">$\pi_{AC}$ ($A \to C$):</span>
-    <strong class="iaw__status-value" data-bind="pi_ac">0.50</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">$\pi_{AD}$ ($A \to D$):</span>
-    <strong class="iaw__status-value" data-bind="pi_ad">1.50</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">$\pi_{BC}$ ($B \to C$):</span>
-    <strong class="iaw__status-value" data-bind="pi_bc">0.50</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">$\pi_{BD}$ ($B \to D$):</span>
-    <strong class="iaw__status-value" data-bind="pi_bd">0.50</strong>
-  </div>
+<div class="otx__slider-row tex2jax_ignore mathjax_ignore">
+  {% assign tsTicks = "More A-D, Balanced, More A-C" | split: ", " %}
+  {% include iaw_slider.html id="otxSlider" min="0" max="1" step="0.25" value="0.5" ticks=tsTicks variant="parameter" %}
 </div>
 
-<div class="iaw__actions" style="margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--iaw-border);">
-  <div class="iaw__status-item tex2jax_ignore mathjax_ignore">
-    <span class="iaw__status-label">TOTAL COST:</span>
-    <strong class="iaw__status-value" style="font-size: 1.4rem; color: var(--iaw-primary);">$<span data-bind="cost_value">7.50</span></strong>
-  </div>
-  <div class="iaw__actions-group" style="display: flex; gap: 0.75rem; flex: 1; justify-content: flex-end;">
-    <button id="otxReplayBtn" class="btn btn-outline-secondary iaw__btn" style="flex: none; padding: 0.5rem 1rem;">Replay</button>
-    <button id="otxBestBtn" class="btn btn-outline-primary iaw__btn" style="flex: none; padding: 0.5rem 1.25rem;">Cheapest</button>
-  </div>
+<div class="otx__readout tex2jax_ignore mathjax_ignore">
+  <span class="otx__readout-label">Plan</span>
+  <span class="otx__readout-value otx__readout-value--mono" data-bind="plan_value">&pi;<sub>AC</sub>=0.50, &pi;<sub>AD</sub>=1.50, &pi;<sub>BC</sub>=0.50, &pi;<sub>BD</sub>=0.50</span>
 </div>
 {% endcapture %}
 
-{% include iaw_skeleton.html 
+{% include iaw_skeleton.html
     id="transportSplitWidget"
     eyebrow="Interactive Example"
     title="Optimal Transport with Mass Splitting"
     description=describe
     visuals=visuals
     stage_id="otxStage"
-    legend=legend
+    stage_style="height: 410px;"
     footer=footer
 %}
 
 <style>
-.iaw__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
-.iaw__particle-layer { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
-.iaw__node { position: absolute; width: 214px; z-index: 3; }
-.iaw__node--a { left: 40px; top: 60px; }
-.iaw__node--b { left: 40px; bottom: 30px; }
-.iaw__node--c { right: 40px; top: 60px; }
-.iaw__node--d { right: 40px; bottom: 30px; }
-.iaw__node-row { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.45rem; }
-.iaw__node-title { font-size: 1.02rem; font-weight: 800; }
-.iaw__node-badge { padding: 0.16rem 0.48rem; border-radius: 999px; font-size: 0.76rem; font-weight: 700; border: 1px solid var(--iaw-border); }
-.iaw__tray { padding: 0.75rem; border-radius: 12px; border: 1px solid var(--iaw-border); }
-.iaw__slots { display: grid; gap: 0.35rem; grid-template-columns: repeat(4, 1fr); align-items: center; justify-items: center; }
-.iaw__slot { width: 18px; height: 18px; border-radius: 999px; border: 1.5px solid var(--iaw-border); background: var(--iaw-surface); }
+.otx__overlay,
+.otx__particle-layer,
+.otx__routes {
+  position: absolute;
+  inset: 0;
+}
 
-.iaw__node--a .iaw__tray, .iaw__node--a .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-source-a) 8%, var(--iaw-bg)); }
-.iaw__node--b .iaw__tray, .iaw__node--b .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-source-b) 8%, var(--iaw-bg)); }
-.iaw__node--c .iaw__tray, .iaw__node--c .iaw__node-badge,
-.iaw__node--d .iaw__tray, .iaw__node--d .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-destination) 8%, var(--iaw-bg)); }
+.otx__overlay,
+.otx__particle-layer,
+.otx__routes {
+  pointer-events: none;
+}
 
-.iaw__particle { position: absolute; width: 14px; height: 14px; border-radius: 999px; transform: translate(-50%, -50%); z-index: 5; }
-.iaw__slider { background: var(--slider-bg, var(--iaw-border)) !important; }
+.otx__particle-layer {
+  z-index: 4;
+}
+
+.otx__routes {
+  z-index: 3;
+}
+
+.otx__node {
+  position: absolute;
+  width: clamp(158px, 22vw, 196px);
+  z-index: 2;
+}
+
+.otx__node--a {
+  left: 1.5rem;
+  top: 2rem;
+}
+
+.otx__node--b {
+  left: 1.5rem;
+  bottom: 1.5rem;
+}
+
+.otx__node--c {
+  right: 1.5rem;
+  top: 2rem;
+}
+
+.otx__node--d {
+  right: 1.5rem;
+  bottom: 1.5rem;
+}
+
+.otx__node-card {
+  padding: 0.9rem;
+  border: 1px solid var(--iaw-border);
+  border-radius: 14px;
+  background: var(--iaw-bg);
+}
+
+.otx__node-card--a {
+  border-color: color-mix(in srgb, var(--iaw-source-a) 24%, var(--iaw-border));
+  background: color-mix(in srgb, var(--iaw-source-a) 4%, var(--iaw-bg));
+}
+
+.otx__node-card--b {
+  border-color: color-mix(in srgb, var(--iaw-source-b) 24%, var(--iaw-border));
+  background: color-mix(in srgb, var(--iaw-source-b) 4%, var(--iaw-bg));
+}
+
+.otx__node-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.otx__node-title {
+  color: var(--iaw-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.otx__node-mass {
+  color: var(--iaw-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.otx__slots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.38rem;
+  margin-top: 0.8rem;
+  align-items: center;
+  justify-items: center;
+}
+
+.otx__slot {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--iaw-border);
+  background: var(--iaw-surface);
+}
+
+.otx__route-tag {
+  box-shadow: none;
+  font-size: 0.82rem;
+  padding: 0.2rem 0.45rem;
+}
+
+.otx__route-tag--a {
+  background: color-mix(in srgb, var(--iaw-source-a) 7%, var(--iaw-bg));
+}
+
+.otx__route-tag--b {
+  background: color-mix(in srgb, var(--iaw-source-b) 7%, var(--iaw-bg));
+}
+
+.otx__particle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.otx__status-grid .iaw__status-value {
+  font-size: 1.06rem;
+}
+
+.otx__status-grid .iaw__status-item {
+  align-items: center;
+  text-align: center;
+}
+
+.otx__cost-value {
+  color: var(--iaw-primary);
+  font-size: 1.22rem;
+}
+
+.otx__slider-row {
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.otx__slider-row .iaw__slider-box {
+  width: 100%;
+}
+
+.otx__readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding-top: 0.15rem;
+  text-align: center;
+}
+
+.otx__readout-label {
+  color: var(--iaw-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.otx__readout-value {
+  color: var(--iaw-text);
+  font-size: 0.96rem;
+  line-height: 1.55;
+  max-width: 100%;
+}
+
+.otx__readout-value--mono {
+  font-family: var(--font-family-monospace, monospace);
+}
 
 @media (max-width: 820px) {
-  .iaw__node { width: 180px; }
-  .iaw__stage { height: 460px; }
+  #otxStage {
+    height: 470px !important;
+  }
+
+  .otx__node {
+    width: 152px;
+  }
 }
+
 @media (max-width: 640px) {
-  .iaw__node { width: 150px; }
-  .iaw__stage { height: 540px; }
-  .iaw__node--a, .iaw__node--b { left: 12px; }
-  .iaw__node--c, .iaw__node--d { right: 12px; }
-  .iaw__status-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+  #otxStage {
+    height: 540px !important;
+  }
+
+  .otx__node {
+    width: 140px;
+  }
+
+  .otx__node--a,
+  .otx__node--b {
+    left: 0.9rem;
+  }
+
+  .otx__node--c,
+  .otx__node--d {
+    right: 0.9rem;
+  }
+
+  .otx__slider-row {
+    max-width: none;
+  }
 }
 </style>
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
 (function() {
-    const root = document.getElementById('transportSplitWidget');
-    if (!root || root.dataset.initialized === 'true') return;
-    root.dataset.initialized = 'true';
+    const root = IAW.initFigure("transportSplitWidget");
+    if (!root) return;
 
-    const SLOT_COUNT = { a: 8, b: 4, c: 4, d: 8 }, UNIT = 0.25, DURATION = 3000;
-    
+    const SLOT_COUNT = { a: 8, b: 4, c: 4, d: 8 };
+    const UNIT = 0.25;
+    const DURATION = 1400;
+    const STAGGER = 80;
+
+    const stage = root.querySelector("#otxStage");
+    const canvas = root.querySelector("#otxCanvas");
+    const ctx = canvas.getContext("2d");
+    const partLayer = root.querySelector("#otxParticleLayer");
+    const slider = root.querySelector("#otxSlider");
+    const routesNode = root.querySelector("#otxRoutes");
+
     let COLORS = IAW.getThemeColors(root);
-    let state = { x: 0.5, animating: false, plans: {}, cost: 0 };
+    let state = { x: 0.5, plans: {}, cost: 0 };
+    let pendingTimeouts = [];
+    let activeAnimations = [];
+    let runToken = 0;
 
-    const canvas = root.querySelector('#otxCanvas'), ctx = canvas.getContext('2d');
-    const partLayer = root.querySelector('#otxParticleLayer');
-    const slider = root.querySelector('#otxSlider'), replayBtn = root.querySelector('#otxReplayBtn'), bestBtn = root.querySelector('#otxBestBtn');
-    const routesNode = root.querySelector('#otxRoutes');
     const binds = {
         cost: root.querySelector('[data-bind="cost_value"]'),
-        pi_ac: root.querySelector('[data-bind="pi_ac"]'), pi_ad: root.querySelector('[data-bind="pi_ad"]'),
-        pi_bc: root.querySelector('[data-bind="pi_bc"]'), pi_bd: root.querySelector('[data-bind="pi_bd"]')
+        free: root.querySelector('[data-bind="free_value"]'),
+        plan: root.querySelector('[data-bind="plan_value"]')
     };
 
     const routeConfigs = [
-        { key: 'ac', from: 'a', to: 'c', label: 'A \\to C: \\$1/\\mathrm{kg}', t: 0.5 },
-        { key: 'ad', from: 'a', to: 'd', label: 'A \\to D: \\$3/\\mathrm{kg}', t: 0.5 },
-        { key: 'bc', from: 'b', to: 'c', label: 'B \\to C: \\$4/\\mathrm{kg}', t: 0.5 },
-        { key: 'bd', from: 'b', to: 'd', label: 'B \\to D: \\$1/\\mathrm{kg}', t: 0.5 }
+        { key: "ac", from: "a", to: "c", accent: "a", name: "A → C", cost: 1, curve: -34, t: 0.42 },
+        { key: "ad", from: "a", to: "d", accent: "a", name: "A → D", cost: 3, curve: -10, t: 0.42 },
+        { key: "bc", from: "b", to: "c", accent: "b", name: "B → C", cost: 4, curve: 10, t: 0.58 },
+        { key: "bd", from: "b", to: "d", accent: "b", name: "B → D", cost: 1, curve: 34, t: 0.58 }
     ];
 
-    function init() {
-        Object.entries(SLOT_COUNT).forEach(([k, c]) => {
-            const container = root.querySelector(`[data-slots="${k}"]`); container.innerHTML = '';
-            for(let i=0; i<c; i++) { const s = document.createElement('div'); s.className = 'iaw__slot'; container.appendChild(s); }
-        });
-        fill('sources'); routesNode.innerHTML = '';
-        routeConfigs.forEach(r => {
-            const el = document.createElement('div'); el.className = 'iaw__route-tag'; el.innerHTML = `$${r.label}$`;
-            el.dataset.route = r.key; routesNode.appendChild(el); r.el = el;
-        });
-        if (window.MathJax?.typesetPromise) window.MathJax.typesetPromise([routesNode]).then(() => setTimeout(draw, 100));
-        sync(0.5); draw();
+    function schedule(callback, delay) {
+        const timeoutId = window.setTimeout(() => {
+            pendingTimeouts = pendingTimeouts.filter((id) => id !== timeoutId);
+            callback();
+        }, delay);
+        pendingTimeouts.push(timeoutId);
+        return timeoutId;
     }
 
-    function fill(type) {
-        const keys = type === 'sources' ? ['a', 'b'] : ['c', 'd'];
-        keys.forEach(k => root.querySelectorAll(`[data-slots="${k}"] .iaw__slot`).forEach(s => s.classList.add('iaw__slot--filled')));
+    function initSlots() {
+        Object.entries(SLOT_COUNT).forEach(([key, count]) => {
+            const container = root.querySelector(`[data-slots="${key}"]`);
+            if (!container) return;
+            container.innerHTML = "";
+            for (let i = 0; i < count; i += 1) {
+                const slot = document.createElement("div");
+                slot.className = "otx__slot";
+                container.appendChild(slot);
+            }
+        });
     }
 
-    function clear(type) {
-        const keys = type === 'sources' ? ['a', 'b'] : ['c', 'd'];
-        keys.forEach(k => root.querySelectorAll(`[data-slots="${k}"] .iaw__slot`).forEach(s => { s.classList.remove('iaw__slot--filled','iaw__slot--filled-a','iaw__slot--filled-b'); }));
+    function fill(group) {
+        const keys = group === "sources" ? ["a", "b"] : ["c", "d"];
+        keys.forEach((key) => {
+            root.querySelectorAll(`[data-slots="${key}"] .otx__slot`).forEach((slot) => {
+                slot.classList.add("iaw__slot--filled");
+            });
+        });
+    }
+
+    function clear(group) {
+        const keys = group === "sources" ? ["a", "b"] : ["c", "d"];
+        keys.forEach((key) => {
+            root.querySelectorAll(`[data-slots="${key}"] .otx__slot`).forEach((slot) => {
+                slot.classList.remove("iaw__slot--filled", "iaw__slot--filled-a", "iaw__slot--filled-b");
+            });
+        });
+    }
+
+    function resetVisualState() {
+        pendingTimeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
+        pendingTimeouts = [];
+        activeAnimations.forEach((animation) => animation.cancel());
+        activeAnimations = [];
+        partLayer.innerHTML = "";
+        clear("sources");
+        clear("targets");
+        fill("sources");
+    }
+
+    function buildRouteLabels() {
+        routesNode.innerHTML = "";
+        routeConfigs.forEach((route) => {
+            const el = document.createElement("div");
+            el.className = `iaw__route-tag otx__route-tag otx__route-tag--${route.accent}`;
+            el.textContent = `${route.name}  $${route.cost}`;
+            routesNode.appendChild(el);
+            route.el = el;
+        });
+    }
+
+    function formatPlanValue(key, value) {
+        return `&pi;<sub>${key.toUpperCase()}</sub>=${value.toFixed(2)}`;
     }
 
     function sync(x) {
+        const ac = x;
+        const ad = 2 - x;
+        const bc = 1 - x;
+        const bd = x;
+
         state.x = x;
-        const ac = x, ad = 2-x, bc = 1-x, bd = x;
         state.plans = { pi_ac: ac, pi_ad: ad, pi_bc: bc, pi_bd: bd };
-        state.cost = 1*ac + 3*ad + 4*bc + 1*bd;
+        state.cost = routeConfigs.reduce((sum, route) => sum + route.cost * state.plans[`pi_${route.key}`], 0);
+
+        binds.free.innerHTML = `&pi;<sub>AC</sub> = ${ac.toFixed(2)} kg`;
         binds.cost.innerText = state.cost.toFixed(2);
-        ['ac','ad','bc','bd'].forEach(k => binds[`pi_${k}`].innerText = state.plans[`pi_${k}`].toFixed(2));
-        const mix = Math.round(x * 100);
-        slider.style.setProperty('--slider-bg', `linear-gradient(90deg, ${COLORS.sourceA} ${mix}%, ${COLORS.sourceB} ${mix}%)`);
+        binds.plan.innerHTML = [
+            formatPlanValue("ac", ac),
+            formatPlanValue("ad", ad),
+            formatPlanValue("bc", bc),
+            formatPlanValue("bd", bd)
+        ].join(", ");
     }
 
-    function getPos(nodeKey, isTray, idx=0) {
-        const node = root.querySelector(`.iaw__node--${nodeKey}`);
-        const ref = isTray ? node.querySelector('.iaw__tray') : node.querySelectorAll('.iaw__slot')[idx];
-        const sR = root.querySelector('#otxStage').getBoundingClientRect(), rR = ref.getBoundingClientRect();
-        if (isTray) return { x: (nodeKey === 'a' || nodeKey === 'b') ? (rR.right - sR.left) : (rR.left - sR.left), y: rR.top - sR.top + rR.height / 2 };
-        return { x: rR.left - sR.left + rR.width / 2, y: rR.top - sR.top + rR.height / 2 };
+    function getNodeAnchor(nodeKey) {
+        const card = root.querySelector(`.otx__node--${nodeKey} .otx__node-card`);
+        const stageRect = stage.getBoundingClientRect();
+        const rect = card.getBoundingClientRect();
+        const isSource = nodeKey === "a" || nodeKey === "b";
+
+        return {
+            x: isSource ? rect.right - stageRect.left : rect.left - stageRect.left,
+            y: rect.top - stageRect.top + rect.height / 2
+        };
+    }
+
+    function getSlotPosition(nodeKey, idx) {
+        const slot = root.querySelectorAll(`[data-slots="${nodeKey}"] .otx__slot`)[idx];
+        const stageRect = stage.getBoundingClientRect();
+        const rect = slot.getBoundingClientRect();
+
+        return {
+            x: rect.left - stageRect.left + rect.width / 2,
+            y: rect.top - stageRect.top + rect.height / 2
+        };
+    }
+
+    function getRouteGeometry(route) {
+        const start = getNodeAnchor(route.from);
+        const end = getNodeAnchor(route.to);
+        const control = {
+            x: (start.x + end.x) / 2,
+            y: (start.y + end.y) / 2 + route.curve
+        };
+        return { start, control, end };
+    }
+
+    function getQuadraticPoint(start, control, end, t) {
+        const s = 1 - t;
+        return {
+            x: s * s * start.x + 2 * s * t * control.x + t * t * end.x,
+            y: s * s * start.y + 2 * s * t * control.y + t * t * end.y
+        };
+    }
+
+    function sizeCanvas() {
+        const width = stage.clientWidth;
+        const height = stage.clientHeight;
+        const dpr = window.devicePixelRatio || 1;
+
+        if (!width || !height) return false;
+
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return true;
+    }
+
+    function drawRoutePath(route, geometry, mass) {
+        const color = route.accent === "a" ? COLORS.sourceA : COLORS.sourceB;
+
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        ctx.beginPath();
+        ctx.moveTo(geometry.start.x, geometry.start.y);
+        ctx.quadraticCurveTo(geometry.control.x, geometry.control.y, geometry.end.x, geometry.end.y);
+        ctx.strokeStyle = IAW.toAlpha(COLORS.border, 0.55);
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 6]);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(geometry.start.x, geometry.start.y);
+        ctx.quadraticCurveTo(geometry.control.x, geometry.control.y, geometry.end.x, geometry.end.y);
+        ctx.setLineDash([]);
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = mass > 0 ? 0.9 : 0.22;
+        ctx.lineWidth = 1.8 + mass * 4;
+        ctx.stroke();
+
+        ctx.restore();
     }
 
     function draw() {
-        const stage = root.querySelector('#otxStage'); if (!stage) return;
-        canvas.width = stage.clientWidth; canvas.height = stage.clientHeight; ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const nodes = routeConfigs.map(r => {
-            const p0 = getPos(r.from, true), p3 = getPos(r.to, true);
-            const mass = state.plans[`pi_${r.key}`];
-            ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p3.x, p3.y);
-            ctx.strokeStyle = (r.from === 'a') ? COLORS.sourceA : COLORS.sourceB;
-            ctx.globalAlpha = mass > 0 ? 0.9 : 0.2; ctx.setLineDash(mass > 0 ? [] : [4, 4]);
-            ctx.lineWidth = Math.max(1, mass * 6); ctx.stroke();
-            ctx.setLineDash([]); ctx.globalAlpha = 1.0;
-            return { el: r.el, x: p0.x + (p3.x - p0.x) * r.t, y: p0.y + (p3.y - p0.y) * r.t, w: r.el.offsetWidth || 80, h: r.el.offsetHeight || 28 };
+        if (!sizeCanvas()) return;
+        ctx.clearRect(0, 0, stage.clientWidth, stage.clientHeight);
+
+        const labelNodes = routeConfigs.map((route) => {
+            const mass = state.plans[`pi_${route.key}`];
+            const geometry = getRouteGeometry(route);
+            const labelPoint = getQuadraticPoint(geometry.start, geometry.control, geometry.end, route.t);
+
+            drawRoutePath(route, geometry, mass);
+            route.el.style.opacity = mass > 0 ? "1" : "0.35";
+
+            return {
+                el: route.el,
+                x: labelPoint.x,
+                y: labelPoint.y,
+                w: route.el.offsetWidth || 88,
+                h: route.el.offsetHeight || 24
+            };
         });
-        IAW.resolveCollisions(nodes);
+
+        IAW.resolveCollisions(labelNodes, { gap: 8 });
+    }
+
+    function buildPebbles() {
+        const pebbles = [];
+        routeConfigs.forEach((route) => {
+            const count = Math.round(state.plans[`pi_${route.key}`] / UNIT);
+            for (let i = 0; i < count; i += 1) {
+                pebbles.push(route);
+            }
+        });
+        return pebbles;
+    }
+
+    function createParticleFrames(start, control, end) {
+        const frames = [];
+        for (let t = 0; t <= 1.001; t += 0.05) {
+            const point = getQuadraticPoint(start, control, end, t);
+            frames.push({
+                left: `${point.x}px`,
+                top: `${point.y}px`,
+                transform: "translate(-50%, -50%)",
+                opacity: 1
+            });
+        }
+        return frames;
     }
 
     async function run() {
-        if (state.animating) return; state.animating = true;
-        partLayer.innerHTML = ''; clear('targets'); fill('sources');
-        const pebbles = [];
-        routeConfigs.forEach(r => {
-            const count = Math.round(state.plans[`pi_${r.key}`] / UNIT);
-            for(let i=0; i<count; i++) pebbles.push({ f: r.from, t: r.to });
-        });
-        let counters = { a:0, b:0, c:0, d:0, c_f:0, d_f:0 };
-        const promises = pebbles.map((p, i) => new Promise(res => {
-            setTimeout(() => {
-                const srcSlots = root.querySelectorAll(`[data-slots="${p.f}"] .iaw__slot`);
-                if (srcSlots[counters[p.f]]) srcSlots[counters[p.f]].classList.remove('iaw__slot--filled');
-                const el = document.createElement('div'); el.className = 'iaw__particle';
-                el.style.background = (p.f === 'a') ? COLORS.sourceA : COLORS.sourceB;
-                partLayer.appendChild(el);
-                const s = getPos(p.f, false, counters[p.f]++), e = getPos(p.t, false, counters[p.t]++);
-                const kf = []; for(let t=0; t<=1; t+=0.04) kf.push({ left: `${s.x + (e.x - s.x) * t}px`, top: `${s.y + (e.y - s.y) * t}px`, opacity: 1 });
-                el.animate(kf, { duration: DURATION, easing: 'ease-in-out', fill: 'forwards' }).onfinish = () => {
-                    el.remove(); const tgtSlots = root.querySelectorAll(`[data-slots="${p.t}"] .iaw__slot`);
-                    const slot = tgtSlots[counters[p.t + '_f']++];
-                    if (slot) { slot.classList.add('iaw__slot--filled'); slot.classList.add(`iaw__slot--filled-${p.f}`); }
-                    res();
+        runToken += 1;
+        const token = runToken;
+
+        resetVisualState();
+
+        const counters = { a: 0, b: 0, c: 0, d: 0, c_f: 0, d_f: 0 };
+        const pebbles = buildPebbles();
+
+        const promises = pebbles.map((route, index) => new Promise((resolve) => {
+            schedule(() => {
+                if (token !== runToken) {
+                    resolve();
+                    return;
+                }
+
+                const sourceSlots = root.querySelectorAll(`[data-slots="${route.from}"] .otx__slot`);
+                if (sourceSlots[counters[route.from]]) {
+                    sourceSlots[counters[route.from]].classList.remove("iaw__slot--filled");
+                }
+
+                const geometry = getRouteGeometry(route);
+                const particle = document.createElement("div");
+                particle.className = "otx__particle";
+                particle.style.background = route.accent === "a" ? COLORS.sourceA : COLORS.sourceB;
+                partLayer.appendChild(particle);
+
+                const start = getSlotPosition(route.from, counters[route.from]++);
+                const end = getSlotPosition(route.to, counters[route.to]++);
+                const frames = createParticleFrames(start, geometry.control, end);
+                const animation = particle.animate(frames, {
+                    duration: DURATION,
+                    easing: "cubic-bezier(0.35, 0.05, 0.2, 1)",
+                    fill: "forwards"
+                });
+
+                activeAnimations.push(animation);
+
+                animation.onfinish = () => {
+                    activeAnimations = activeAnimations.filter((entry) => entry !== animation);
+                    if (token !== runToken) {
+                        particle.remove();
+                        resolve();
+                        return;
+                    }
+
+                    particle.remove();
+                    const targetSlots = root.querySelectorAll(`[data-slots="${route.to}"] .otx__slot`);
+                    const slot = targetSlots[counters[`${route.to}_f`]++];
+                    if (slot) {
+                        slot.classList.add("iaw__slot--filled");
+                        slot.classList.add(`iaw__slot--filled-${route.from}`);
+                    }
+                    resolve();
                 };
-            }, i * 150);
+
+                animation.oncancel = () => {
+                    activeAnimations = activeAnimations.filter((entry) => entry !== animation);
+                    particle.remove();
+                    resolve();
+                };
+            }, index * STAGGER);
         }));
+
         await Promise.all(promises);
-        setTimeout(() => { clear('targets'); fill('sources'); state.animating = false; }, 2000);
     }
 
-    slider.addEventListener('input', e => { sync(parseFloat(e.target.value)); draw(); if (!state.animating) run(); });
-    replayBtn.addEventListener('click', run);
-    bestBtn.addEventListener('click', () => { slider.value = 1.0; sync(1.0); draw(); run(); });
-    IAW.observeTheme(() => { COLORS = IAW.getThemeColors(root); sync(state.x); draw(); });
-    init(); window.addEventListener('resize', draw);
+    function init() {
+        initSlots();
+        buildRouteLabels();
+        resetVisualState();
+        sync(0.5);
+        draw();
+        run();
+    }
+
+    slider.addEventListener("input", (event) => {
+        sync(parseFloat(event.target.value));
+        draw();
+        run();
+    });
+
+    IAW.observeTheme(() => {
+        COLORS = IAW.getThemeColors(root);
+        draw();
+    });
+
+    if (window.ResizeObserver) {
+        new ResizeObserver(draw).observe(stage);
+    } else {
+        window.addEventListener("resize", draw);
+    }
+
+    init();
 })();
 </script>
