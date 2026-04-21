@@ -1,321 +1,291 @@
 {% capture describe %}
 <p>
-  Monge transport requires each source atom to go to exactly one destination. If the money already comes in the right physical bills, shipping works. If one indivisible bill would have to split across two addresses, Monge fails.
+  When sources carry indivisible masses (like boxes), the problem becomes a discrete search. 
+  The source must already arrive in the exact mass pieces needed by the destinations.
 </p>
 {% endcapture %}
 
-{% capture visuals %}
-<div class="otm__examples tex2jax_ignore mathjax_ignore">
-  <article class="otm__example">
-    <div class="otm__example-head">
-      <span class="otm__badge otm__badge--success">Success</span>
-      <h5>Shipping Two Separate &#36;1 Bills</h5>
-      <p>Each address needs &#36;1, and the source already comes as two separate bills.</p>
-    </div>
-
-    <div class="otm__diagram">
-      <div class="otm__column">
-        <div class="otm__item otm__item--source">
-          <span class="otm__item-kicker">Bill</span>
-          <strong class="otm__item-title">Bill A</strong>
-          <span class="otm__item-meta">&#36;1, ship intact</span>
-        </div>
-        <div class="otm__item otm__item--source">
-          <span class="otm__item-kicker">Bill</span>
-          <strong class="otm__item-title">Bill B</strong>
-          <span class="otm__item-meta">&#36;1, ship intact</span>
-        </div>
-      </div>
-
-      <div class="otm__middle">
-        <div class="otm__route">A &rarr; C</div>
-        <div class="otm__route">B &rarr; D</div>
-      </div>
-
-      <div class="otm__column">
-        <div class="otm__item otm__item--target">
-          <span class="otm__item-kicker">Address</span>
-          <strong class="otm__item-title">C</strong>
-          <span class="otm__item-meta">needs &#36;1</span>
-        </div>
-        <div class="otm__item otm__item--target">
-          <span class="otm__item-kicker">Address</span>
-          <strong class="otm__item-title">D</strong>
-          <span class="otm__item-meta">needs &#36;1</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="otm__example-note otm__example-note--success">A deterministic one-to-one assignment exists.</div>
-  </article>
-
-  <article class="otm__example">
-    <div class="otm__example-head">
-      <span class="otm__badge otm__badge--failure">Failure</span>
-      <h5>Shipping One Indivisible &#36;2 Bill</h5>
-      <p>Addresses C and D still each need &#36;1, but now the source is one physical bill.</p>
-    </div>
-
-    <div class="otm__diagram">
-      <div class="otm__column otm__column--center">
-        <div class="otm__item otm__item--source">
-          <span class="otm__item-kicker">Bill</span>
-          <strong class="otm__item-title">Bill A</strong>
-          <span class="otm__item-meta">&#36;2, cannot split</span>
-        </div>
-      </div>
-
-      <div class="otm__middle">
-        <div class="otm__decision">
-          <div class="otm__route otm__route--failure">A &rarr; C</div>
-          <div class="otm__decision-note">C gets &#36;2, D gets &#36;0</div>
-        </div>
-        <div class="otm__decision">
-          <div class="otm__route otm__route--failure">A &rarr; D</div>
-          <div class="otm__decision-note">C gets &#36;0, D gets &#36;2</div>
-        </div>
-      </div>
-
-      <div class="otm__column">
-        <div class="otm__item otm__item--target">
-          <span class="otm__item-kicker">Address</span>
-          <strong class="otm__item-title">C</strong>
-          <span class="otm__item-meta">needs &#36;1</span>
-        </div>
-        <div class="otm__item otm__item--target">
-          <span class="otm__item-kicker">Address</span>
-          <strong class="otm__item-title">D</strong>
-          <span class="otm__item-meta">needs &#36;1</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="otm__example-note otm__example-note--failure">No deterministic map can turn one bill into two separate &#36;1 deliveries.</div>
-  </article>
+<!-- Scenario 1: Discrete Cost Optimization (Feasible) -->
+{% capture visuals1 %}
+<div class="iaw__node iaw__node--a otm-hub" style="left: 40px; top: 60px;">
+  <div class="otm-hub__badge">1kg box</div>
+  <div class="otm-hub__circle otm-hub__circle--a"><i class="fas fa-box"></i></div>
+  <div class="otm-hub__label">Source $A_1$</div>
 </div>
+<div class="iaw__node iaw__node--b otm-hub" style="left: 40px; bottom: 40px;">
+  <div class="otm-hub__badge">1kg box</div>
+  <div class="otm-hub__circle otm-hub__circle--b"><i class="fas fa-box"></i></div>
+  <div class="otm-hub__label">Source $A_2$</div>
+</div>
+<div class="iaw__node iaw__node--c otm-hub" style="right: 40px; top: 60px;">
+  <div class="otm-hub__badge">needs 1kg</div>
+  <div class="otm-hub__circle otm-hub__circle--target"><i class="fas fa-house"></i></div>
+  <div class="otm-hub__label">Target $C$</div>
+</div>
+<div class="iaw__node iaw__node--d otm-hub" style="right: 40px; bottom: 40px;">
+  <div class="otm-hub__badge">needs 1kg</div>
+  <div class="otm-hub__circle otm-hub__circle--target"><i class="fas fa-house"></i></div>
+  <div class="otm-hub__label">Target $D$</div>
+</div>
+<div class="otm-routes-container"></div>
+{% include iaw_canvas_stage.html canvas_id="otmCanvas1" %}
 {% endcapture %}
 
-{% capture footer %}
-<div class="iaw__status-grid tex2jax_ignore mathjax_ignore otm__summary-grid">
+{% capture controls1 %}
+<button class="iaw__seg-btn active" data-plan="1">Plan 1 (Optimal)</button>
+<button class="iaw__seg-btn" data-plan="2">Plan 2 (Suboptimal)</button>
+{% endcapture %}
+
+{% capture footer1 %}
+<div class="iaw__status-grid">
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Monge Succeeds When</span>
-    <strong class="iaw__status-value">The money already comes in bills that can be assigned one-to-one to addresses.</strong>
+    <span class="iaw__status-label">Status</span>
+    <strong class="iaw__status-value" style="color: var(--iaw-success);">Feasible</strong>
   </div>
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Monge Fails When</span>
-    <strong class="iaw__status-value">One physical bill would have to be split across multiple addresses.</strong>
+    <span class="iaw__status-label">Verdict</span>
+    <strong class="iaw__status-value">Mapping exists.</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Breakdown</span>
+    <strong class="iaw__status-value otm-breakdown">$1 + $2</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Total Cost</span>
+    <strong class="iaw__status-value otm-total-cost" style="color: var(--iaw-primary); font-size: 1.25rem;">$3</strong>
   </div>
 </div>
 {% endcapture %}
 
-{% include iaw_skeleton.html
-    id="mongeMailFigure"
-    eyebrow="Two Examples"
-    title="Monge Problem (Unsplit Mass)"
+{% include iaw_skeleton.html 
+    id="mongeFeasibleWidget" 
+    eyebrow="Success Case" 
+    title="Permuting Separate 1kg Boxes" 
     description=describe
-    visuals=visuals
-    stage_id="otmStage"
-    stage_style="height: 440px;"
-    footer=footer
+    visuals=visuals1
+    controls=controls1
+    stage_id="otmStage1"
+    stage_style="height: 380px;"
+    footer=footer1
+%}
+
+<!-- Scenario 2: Monge Constraint (Failure) -->
+{% capture visuals2 %}
+<div class="iaw__node iaw__node--a otm-hub" style="left: 40px; top: 50%; transform: translateY(-50%);">
+  <div class="otm-hub__badge">2kg box</div>
+  <div class="otm-hub__circle otm-hub__circle--a" style="width: 72px; height: 72px; font-size: 1.8rem;">
+    <i class="fas fa-box"></i>
+  </div>
+  <div class="otm-hub__label">Single Source $A$</div>
+</div>
+<div class="iaw__node iaw__node--c otm-hub" style="right: 40px; top: 60px;">
+  <div class="otm-hub__badge">needs 1kg</div>
+  <div class="otm-hub__circle otm-hub__circle--target"><i class="fas fa-house"></i></div>
+  <div class="otm-hub__label">Target $C$</div>
+</div>
+<div class="iaw__node iaw__node--d otm-hub" style="right: 40px; bottom: 40px;">
+  <div class="otm-hub__badge">needs 1kg</div>
+  <div class="otm-hub__circle otm-hub__circle--target"><i class="fas fa-house"></i></div>
+  <div class="otm-hub__label">Target $D$</div>
+</div>
+{% include iaw_canvas_stage.html canvas_id="otmCanvas2" %}
+{% endcapture %}
+
+{% capture footer2 %}
+<div class="iaw__status-grid">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Status</span>
+    <strong class="iaw__status-value" style="color: var(--iaw-danger);">Not Feasible</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Verdict</span>
+    <strong class="iaw__status-value">Indivisible mass cannot split.</strong>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html 
+    id="mongeFailureWidget" 
+    eyebrow="Impossibility Case" 
+    title="One Indivisible 2kg Box" 
+    visuals=visuals2
+    stage_id="otmStage2"
+    stage_style="height: 380px;"
+    footer=footer2
 %}
 
 <style>
-.otm__examples {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-  height: 100%;
-  padding: 1rem;
-}
-
-.otm__example {
+.otm-hub {
+  position: absolute;
   display: flex;
   flex-direction: column;
-  gap: 0.95rem;
-  min-width: 0;
-  padding: 1rem;
-  border: 1px solid var(--iaw-border);
-  border-radius: 14px;
-  background: var(--iaw-bg);
-}
-
-.otm__example-head h5 {
-  margin: 0;
-  color: var(--iaw-text);
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.otm__example-head p {
-  margin: 0.3rem 0 0 0;
-  color: var(--iaw-muted);
-  font-size: 0.95rem;
-  line-height: 1.55;
-}
-
-.otm__badge {
-  display: inline-flex;
   align-items: center;
-  padding: 0.18rem 0.52rem;
-  margin-bottom: 0.55rem;
-  border-radius: 999px;
-  border: 1px solid var(--iaw-border);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  gap: 0.6rem;
+  width: 130px;
+  z-index: 5;
 }
-
-.otm__badge--success {
-  border-color: color-mix(in srgb, var(--iaw-success) 28%, var(--iaw-border));
-  color: var(--iaw-success);
-}
-
-.otm__badge--failure {
-  border-color: color-mix(in srgb, var(--iaw-danger) 28%, var(--iaw-border));
-  color: var(--iaw-danger);
-}
-
-.otm__diagram {
-  display: grid;
-  grid-template-columns: minmax(9.5rem, 1fr) minmax(8.75rem, 10rem) minmax(9.5rem, 1fr);
-  gap: 0.85rem;
+.otm-hub__circle {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--iaw-bg);
+  border: 3px solid var(--iaw-border);
+  display: flex;
   align-items: center;
-  flex: 1;
-  min-height: 11.5rem;
-}
-
-.otm__column {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
-.otm__column--center {
   justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: var(--iaw-shadow-soft);
+  transition: border-color 0.4s ease, color 0.4s ease;
 }
+.otm-hub__circle--a { border-color: var(--iaw-source-a); color: var(--iaw-source-a); }
+.otm-hub__circle--b { border-color: var(--iaw-source-b); color: var(--iaw-source-b); }
+.otm-hub__circle--target { border-color: var(--iaw-border); color: var(--iaw-muted); }
 
-.otm__middle {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  align-items: stretch;
-  justify-content: center;
-}
-
-.otm__item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.14rem;
-  min-width: 0;
-  padding: 0.78rem 0.82rem;
-  border: 1px solid var(--iaw-border);
-  border-radius: 12px;
-  background: var(--iaw-bg);
-}
-
-.otm__item--source {
-  border-color: color-mix(in srgb, var(--iaw-source-a) 22%, var(--iaw-border));
-  background: color-mix(in srgb, var(--iaw-source-a) 4%, var(--iaw-bg));
-}
-
-.otm__item-kicker {
-  color: var(--iaw-muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.otm__item-title {
+.otm-hub__label {
+  font-size: 0.85rem;
+  font-weight: 800;
   color: var(--iaw-text);
-  font-size: 0.98rem;
-  font-weight: 700;
-}
-
-.otm__item-meta {
-  color: var(--iaw-muted);
-  font-size: 0.89rem;
-  line-height: 1.45;
-}
-
-.otm__route {
-  padding: 0.36rem 0.6rem;
-  border: 1px solid color-mix(in srgb, var(--iaw-success) 24%, var(--iaw-border));
-  border-radius: 999px;
-  background: var(--iaw-bg);
-  color: var(--iaw-text);
-  font-size: 0.84rem;
-  font-weight: 600;
   text-align: center;
 }
-
-.otm__route--failure {
-  border-color: color-mix(in srgb, var(--iaw-danger) 24%, var(--iaw-border));
-}
-
-.otm__decision {
-  display: flex;
-  flex-direction: column;
-  gap: 0.24rem;
-}
-
-.otm__decision-note {
+.otm-hub__badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.65rem;
+  background: var(--iaw-surface);
+  border: 1px solid var(--iaw-border);
+  border-radius: 999px;
   color: var(--iaw-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
-  text-align: center;
 }
-
-.otm__example-note {
-  color: var(--iaw-text);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.otm__example-note--success {
-  color: var(--iaw-success);
-}
-
-.otm__example-note--failure {
-  color: var(--iaw-danger);
-}
-
-.otm__summary-grid .iaw__status-value {
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-@media (max-width: 900px) {
-  #otmStage {
-    height: 620px !important;
-  }
-
-  .otm__examples {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  #otmStage {
-    height: 700px !important;
-  }
-
-  .otm__examples {
-    padding: 0.8rem;
-  }
-
-  .otm__example {
-    padding: 0.85rem;
-  }
-
-  .otm__diagram {
-    grid-template-columns: 1fr;
-    min-height: 0;
-  }
-
-  .otm__middle {
-    order: 2;
-  }
+.iaw__route-tag {
+  position: absolute;
+  box-shadow: var(--iaw-shadow-soft);
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  background: var(--iaw-bg);
+  font-size: 0.85rem;
 }
 </style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+(function() {
+    function initWidget1() {
+        const root = document.getElementById('mongeFeasibleWidget');
+        if (!root) return;
+        const canvas = root.querySelector('#otmCanvas1'), ctx = canvas.getContext('2d'), stage = root.querySelector('#otmStage1');
+        const btns = root.querySelectorAll('.iaw__seg-btn'), routesContainer = root.querySelector('.otm-routes-container');
+        let state = { plan: 1 }, COLORS = IAW.getThemeColors(root);
+        let renderToken = 0;
+
+        const routeData = {
+          1: [{ from: '--a', to: '--c', label: 'A1 \\to C: \\$1/\\mathrm{kg}', best: true, src: 'a' }, { from: '--b', to: '--d', label: 'A2 \\to D: \\$2/\\mathrm{kg}', best: true, src: 'b' }],
+          2: [{ from: '--a', to: '--d', label: 'A1 \\to D: \\$4/\\mathrm{kg}', best: false, src: 'a' }, { from: '--b', to: '--c', label: 'A2 \\to C: \\$3/\\mathrm{kg}', best: false, src: 'b' }]
+        };
+
+        const allLabels = [];
+        [1, 2].forEach(p => {
+          routeData[p].forEach(r => {
+            const el = document.createElement('div');
+            el.className = 'iaw__route-tag'; el.innerHTML = `$${r.label}$`;
+            el.style.visibility = 'hidden'; el.style.opacity = '0';
+            routesContainer.appendChild(el);
+            r.el = el; allLabels.push(el);
+          });
+        });
+
+        function getNodePoint(selectorPart) {
+          const node = root.querySelector(`.iaw__node${selectorPart}`), circle = node.querySelector('.otm-hub__circle');
+          const sR = stage.getBoundingClientRect(), cR = circle.getBoundingClientRect();
+          const isSrc = selectorPart.includes('--a') || selectorPart.includes('--b');
+          return { x: isSrc ? (cR.right - sR.left) : (cR.left - sR.left), y: cR.top - sR.top + cR.height / 2 };
+        }
+
+        function draw() {
+          const plan = state.plan, token = ++renderToken;
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = stage.clientWidth * dpr; canvas.height = stage.clientHeight * dpr;
+          ctx.scale(dpr, dpr); ctx.clearRect(0, 0, stage.clientWidth, stage.clientHeight);
+          allLabels.forEach(el => { el.style.visibility = 'hidden'; el.style.opacity = '0'; });
+
+          const activeRoutes = routeData[plan].map(r => {
+            const p1 = getNodePoint(r.from), p2 = getNodePoint(r.to);
+            const color = (r.src === 'a') ? COLORS.sourceA : COLORS.sourceB;
+            ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = color; ctx.lineWidth = 4;
+            if (!r.best) { ctx.setLineDash([8, 8]); ctx.globalAlpha = 0.4; } 
+            else { ctx.globalAlpha = 0.85; }
+            ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1.0;
+            r.el.style.visibility = 'visible'; r.el.style.opacity = '1';
+            const cx = (p1.x + p2.x)/2, cy = (p1.y + p2.y)/2;
+            r.el.style.left = `${cx}px`; r.el.style.top = `${cy}px`;
+            return { el: r.el, anchorX: cx, anchorY: cy, x: cx, y: cy, w: 120, h: 30 };
+          });
+          IAW.resolveCollisions(activeRoutes);
+          if (window.MathJax?.typesetPromise) window.MathJax.typesetPromise([routesContainer]);
+        }
+
+        function updateUI() {
+          const p = state.plan;
+          root.querySelector('.otm-total-cost').textContent = p === 1 ? '$3' : '$7';
+          root.querySelector('.otm-breakdown').textContent = p === 1 ? '$1 + $2' : '$4 + $3';
+          const hC = root.querySelector('.iaw__node--c .otm-hub__circle'), hD = root.querySelector('.iaw__node--d .otm-hub__circle');
+          
+          if (p === 1) {
+            hC.style.borderColor = COLORS.sourceA; hC.style.color = COLORS.sourceA;
+            hD.style.borderColor = COLORS.sourceB; hD.style.color = COLORS.sourceB;
+          } else {
+            hD.style.borderColor = COLORS.sourceA; hD.style.color = COLORS.sourceA;
+            hC.style.borderColor = COLORS.sourceB; hC.style.color = COLORS.sourceB;
+          }
+          draw();
+        }
+
+        btns.forEach(b => b.addEventListener('click', () => {
+          btns.forEach(x => x.classList.remove('active')); b.classList.add('active');
+          state.plan = parseInt(b.dataset.plan, 10); updateUI();
+        }));
+
+        IAW.observeTheme(() => { COLORS = IAW.getThemeColors(root); updateUI(); });
+        window.addEventListener('resize', draw);
+        window.setTimeout(updateUI, 100);
+    }
+
+    function initWidget2() {
+        const root = document.getElementById('mongeFailureWidget');
+        if (!root) return;
+        const canvas = root.querySelector('#otmCanvas2'), ctx = canvas.getContext('2d'), stage = root.querySelector('#otmStage2');
+        let COLORS = IAW.getThemeColors(root);
+
+        function getNodePoint(selector) {
+            const node = root.querySelector(selector);
+            const circle = node.querySelector('.otm-hub__circle');
+            const sR = stage.getBoundingClientRect(), cR = circle.getBoundingClientRect();
+            const isSrc = selector.includes('--a');
+            return { x: isSrc ? (cR.right - sR.left) : (cR.left - sR.left), y: cR.top - sR.top + cR.height / 2 };
+        }
+
+        function draw() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = stage.clientWidth * dpr; canvas.height = stage.clientHeight * dpr;
+            ctx.scale(dpr, dpr); ctx.clearRect(0, 0, stage.clientWidth, stage.clientHeight);
+            const a = getNodePoint('.iaw__node--a'), c = getNodePoint('.iaw__node--c'), d = getNodePoint('.iaw__node--d');
+            
+            [c, d].forEach(p => {
+                ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(p.x, p.y);
+                ctx.strokeStyle = COLORS.sourceA; ctx.lineWidth = 4;
+                ctx.setLineDash([8, 8]); ctx.globalAlpha = 0.4;
+                ctx.stroke();
+            });
+        }
+
+        IAW.observeTheme(() => { COLORS = IAW.getThemeColors(root); draw(); });
+        window.addEventListener('resize', draw);
+        window.setTimeout(draw, 100);
+    }
+
+    initWidget1();
+    initWidget2();
+})();
+</script>
