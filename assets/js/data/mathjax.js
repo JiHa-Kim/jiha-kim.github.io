@@ -8,6 +8,8 @@ MathJax = {
   options: {
     lazyMargin: '200px',
     lazyAlwaysTypeset: null,
+    ignoreHtmlClass: 'tex2jax_ignore|mathjax_ignore',
+    processHtmlClass: 'tex2jax_process|mathjax_process',
   },
   tex: {
     inlineMath: [
