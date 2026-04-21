@@ -4,10 +4,19 @@ mjx-container {
   overflow-y: visible !important; /* Force visible to prevent top/bottom truncation */
   overflow-x: visible;           /* Inline math shouldn't scroll */
   min-width: auto !important;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
 
   &[display="true"] {
     overflow-x: auto;            /* Allow horizontal scrolling for long block equations */
     padding-top: 5px;            /* Extra safety padding for tall delimiters */
     padding-bottom: 5px;         /* Extra safety padding for subscripts */
   }
+}
+
+mjx-container,
+mjx-container * {
+  user-select: text;
+  -webkit-user-select: text;
 }
