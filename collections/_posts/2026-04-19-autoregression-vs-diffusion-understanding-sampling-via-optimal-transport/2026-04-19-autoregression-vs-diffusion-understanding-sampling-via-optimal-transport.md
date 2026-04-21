@@ -130,7 +130,7 @@ Optimal transport is the continuous, high-dimensional version of this same mass-
 > $$ \pi_{i,T(i)} = a_i, \qquad \pi_{ij} = 0 \text{ for } j \ne T(i). $$
 
 > [!important] Linear Cost Assumption
-> Kantorovich transport assumes the cost is **linear** in the plan $\pi_{ij}$, simplifying the problem to a linear optimization problem. However, exact solvers still scale poorly with dataset size (e.g., $O(N^3 \log N)$), making the problem computationally hard in practice.
+> Kantorovich transport is **linear** in the plan $\pi_{ij}$, so the discrete problem is a linear optimization problem. We will return to its dual later, once the basic OT picture is in place.
 
 {% include transport_split_widget.html %}
 
@@ -340,7 +340,7 @@ Two complementary 2D pictures help keep the distinction straight. First, we comp
 Everything above was about **exact population-level transport**: closed-form 1D maps, exact triangular rearrangements, and Brenier's exact quadratic-cost optimizer. In practice, training uses softened finite-sample approximations instead.
 
 > [!definition] Entropic Optimal Transport
-> Given source and target measures $\mu,\nu$ and a reference coupling $\pi_{\mathrm{ref}}$, entropic OT solves
+> Given source and target distributions $\mu,\nu$ and a reference coupling $\pi_{\mathrm{ref}}$, entropic OT solves
 > $$ \min_{\pi \in \Pi(\mu,\nu)} \int c(x,y)\,d\pi(x,y) + \varepsilon\, \mathrm{KL}(\pi \Vert \pi_{\mathrm{ref}}). $$
 > The KL term pulls the learned coupling toward the chosen reference plan $\pi_{\mathrm{ref}}$ while keeping the marginals fixed.
 
@@ -352,14 +352,40 @@ Everything above was about **exact population-level transport**: closed-form 1D 
 > [!remark] Why the Reference Coupling Matters
 > Standard Sinkhorn usually uses the product reference $\mu \otimes \nu$, so the regularizer acts mainly as a generic smoothing term. Freulon et al. show that once the reference itself carries correlations, especially in the Gaussian case, entropic OT is no longer just "OT plus blur": it is biased toward couplings with that prescribed structure {% cite freulonEntropicOptimalTransport2026 %}.
 
-This is the setting in which Sinkhorn is usually introduced: a fast solver for entropically regularized OT, most often with product reference. We will use exactly this viewpoint later for mini-batch OT couplings in continuous flows.
+### Dual Potentials
+
+There is another way to look at OT. Instead of directly choosing transport weights, we assign a scalar "price" to each source point and each target point.
+
+> [!problem] Discrete Kantorovich Dual
+> In the discrete case, the dual problem is
+> $$ \max_{f_i,\,g_j} \sum_i a_i f_i + \sum_j b_j g_j \qquad \text{s.t.} \qquad f_i + g_j \le c_{ij}\;\; \text{for all } i,j. $$
+> Here $f_i$ is the price assigned to source point $x_i$ and $g_j$ is the price assigned to target point $y_j$. The constraint says their combined price can never exceed the actual cost of pairing them.
+
+> [!remark] Why This Is Useful
+> Any feasible pair $(f,g)$ gives a guaranteed lower bound on every transport plan:
+> $$ \sum_i a_i f_i + \sum_j b_j g_j = \sum_{i,j}\pi_{ij}(f_i+g_j) \le \sum_{i,j} c_{ij}\pi_{ij}. $$
+> So if we can find large prices that still satisfy the constraints, we certify that the transport cost cannot be any smaller. Duality says the best such lower bound is exactly equal to the true optimum.
+
+> [!tip] Complementary Slackness
+> At optimality, transported pairs typically satisfy $\pi_{ij}>0 \Rightarrow f_i+g_j=c_{ij}$. In words: mass only travels along pairs whose price constraint is tight. So the dual potentials identify the active geometry of the coupling.
+
+> [!problem] Continuous Kantorovich Dual
+> The continuous version is the same idea, but now the prices are functions rather than lists of numbers. Among all $f$ and $g$ satisfying $f(z)+g(x)\le c(z,x)$ for every $z,x$, the best lower bound is
+> $$ \sup_{f,g} \; \mathbb{E}[f(Z)] + \mathbb{E}[g(X)], \qquad Z \sim P_{\text{noise}},\; X \sim P_{\text{data}}. $$
+> Under standard assumptions, this equals the Kantorovich optimum.
+
+> [!note] Why This Matters Here
+> These dual potentials are the continuous analogue of the discrete prices. They are the quantities that reappear in regularized OT, Sinkhorn-style updates, and later potential-based viewpoints on transport geometry.
+
+This is the setting in which Sinkhorn is usually introduced: a fast solver for entropically regularized OT, most often with product reference, implemented through updates on dual potentials. We will use exactly this viewpoint later for mini-batch OT couplings in continuous flows.
 
 ## Vanilla (Causal Sequence) Autoregression
 
 Vanilla autoregression fixes an order and applies the same 1D inverse-CDF step sequentially.
 
 > [!definition] Chain Rule Factorization
-> If $x=(x_1,\dots,x_D)$ and $x_{<i}=(x_1,\dots,x_{i-1})$, then $p(x)=\prod_{i=1}^D p(x_i \mid x_{<i})$.
+> If $x=(x_1,\dots,x_D)$ and $x_{<i}=(x_1,\dots,x_{i-1})$, then 
+> $$p(x)=\prod_{i=1}^D p(x_i \mid x_{<i}).$$
 
 > [!note] Sampling Rule
 > Draw $u_1,\dots,u_D \sim \mathcal{U}(0,1)$ and set $x_i = F^{-1}_{X_i \mid X_{<i}=x_{<i}}(u_i)$. Each step is just 1D inverse transform sampling conditioned on the past.
@@ -381,7 +407,9 @@ Vanilla autoregression fixes an order and applies the same 1D inverse-CDF step s
 Instead of autoregressing in the original coordinates, we can first change coordinates and then factorize there.
 
 > [!definition] Change of Variables
-> If $y=g(x)$ is invertible, then $p_X(x)=p_Y(g(x))|\det J_g(x)|$. So any autoregressive factorization in the $y$-coordinates induces a density in the original $x$-coordinates.
+> If $y=g(x)$ is invertible, then 
+> $$p_X(x)=p_Y(g(x))|\det J_g(x)|$$
+> So any autoregressive factorization in the $y$-coordinates induces a density in the original $x$-coordinates.
 
 {% include reparameterization_widget.html %}
 
