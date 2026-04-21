@@ -1,27 +1,27 @@
 {% capture describe %}
 <p>
-  A map $y = f(x)$ can be viewed as a reparameterization of space. 
-  In generative modeling, we often seek maps that transform simple noise into complex structure while preserving certain geometric properties like orientation or area.
+  A map $y = g(x)$ changes the coordinates before we factorize or sample.
+  Some reparameterizations only change ordering, while others expose more meaningful coordinates such as principal axes or coarse-vs-fine structure.
 </p>
 {% endcapture %}
 
 {% capture controls %}
 <button class="iaw__seg-btn active" data-preset="permute">Permutation</button>
 <button class="iaw__seg-btn" data-preset="pca">PCA-Like Rotation</button>
-<button class="iaw__seg-btn" data-preset="spectral">Low / High Frequency</button>
+<button class="iaw__seg-btn" data-preset="spectral">Low / High (Haar)</button>
 <button class="iaw__seg-btn" data-preset="triangular">Nonlinear Triangular</button>
 {% endcapture %}
 
 {% capture visuals %}
 <div class="rpw-panels">
   <div class="rpw-panel">
-    <div class="rpw-panel-label">Identity Grid $(x_1, x_2)$</div>
+    <div class="rpw-panel-label">Original Coordinates $(x_1, x_2)$</div>
     <div class="rpw-canvas-shell">
       <canvas id="rpwCanvasIdentity"></canvas>
     </div>
   </div>
   <div class="rpw-panel">
-    <div class="rpw-panel-label">Transformed Grid $(y_1, y_2)$</div>
+    <div class="rpw-panel-label">Transformed Coordinates $(y_1, y_2)$</div>
     <div class="rpw-canvas-shell">
       <canvas id="rpwCanvasTransformed"></canvas>
     </div>
@@ -41,10 +41,18 @@
 {% endcapture %}
 
 {% capture footer %}
-<div class="iaw__status-readout">
+<div class="iaw__status-grid">
   <div class="iaw__status-item">
-    <span class="iaw__status-label">Map Property:</span>
-    <strong class="iaw__status-value" data-bind="mapping_desc">Volume Preserving</strong>
+    <span class="iaw__status-label">Map Class</span>
+    <strong class="iaw__status-value" data-bind="mapping_desc">Permutation Matrix</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Coordinate Map</span>
+    <strong class="iaw__status-value" data-bind="mapping_formula">$y_1=x_2,\quad y_2=x_1$</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Interpretation</span>
+    <strong class="iaw__status-value" data-bind="mapping_interp">Changes generation order only.</strong>
   </div>
 </div>
 {% endcapture %}
@@ -80,9 +88,15 @@
 
     const canvasId = root.querySelector('#rpwCanvasIdentity');
     const canvasTr = root.querySelector('#rpwCanvasTransformed');
+    const binds = {
+      desc: root.querySelector('[data-bind="mapping_desc"]'),
+      interp: root.querySelector('[data-bind="mapping_interp"]'),
+      formula: root.querySelector('[data-bind="mapping_formula"]')
+    };
     let COLORS = IAW.getThemeColors(root);
     
     let currentPreset = 'permute';
+    let lastFormula = '';
 
     function drawGrid(canvas, transform) {
       const w = canvas.parentElement.clientWidth;
@@ -128,7 +142,7 @@
 
     const transforms = {
       identity: (x,y) => ({ x, y }),
-      permute: (x,y) => ({ x: y, y: -x }),
+      permute: (x,y) => ({ x: y, y: x }),
       pca: (x,y) => {
         const theta = Math.PI / 6;
         return {
@@ -136,9 +150,9 @@
            y: x*Math.sin(theta) + y*Math.cos(theta)
         };
       },
-      spectral: (x,y) => ({ 
-        x: x + 0.4 * Math.sin(1.2 * y), 
-        y: y + 0.4 * Math.sin(1.2 * x) 
+      spectral: (x,y) => ({
+        x: (x + y) / Math.SQRT2,
+        y: (x - y) / Math.SQRT2
       }),
       triangular: (x,y) => ({ 
         x: x, 
@@ -147,16 +161,40 @@
     };
 
     const properties = {
-      permute: "Discrete Permutation (Linear)",
-      pca: "Orthogonal Rotation (Linear)",
-      spectral: "Nonlinear Deformation",
-      triangular: "Triangular Map (Nonlinear)"
+      permute: {
+        desc: "Permutation Matrix (Linear)",
+        formula: '$y_1=x_2,\\quad y_2=x_1$',
+        interp: "Swaps coordinates, so only the autoregressive ordering changes."
+      },
+      pca: {
+        desc: "Orthogonal Rotation (Linear)",
+        formula: '$y = R_{\\pi/6}x$',
+        interp: "Aligns the coordinates with a new axis system, like a PCA basis."
+      },
+      spectral: {
+        desc: "2-Point Haar Basis (Linear)",
+        formula: '$y_{\\text{low}}=\\frac{x_1+x_2}{\\sqrt{2}},\\quad y_{\\text{high}}=\\frac{x_1-x_2}{\\sqrt{2}}$',
+        interp: "y_low is average intensity; y_high is signed contrast or edge strength."
+      },
+      triangular: {
+        desc: "Triangular Map (Nonlinear)",
+        formula: '$y_1=x_1,\\quad y_2=x_2+0.4x_1^2$',
+        interp: "Later coordinates depend on earlier ones, so the order matters structurally."
+      }
     };
 
     function update() {
       drawGrid(canvasId, transforms.identity);
       drawGrid(canvasTr, transforms[currentPreset]);
-      root.querySelector('[data-bind="mapping_desc"]').innerText = properties[currentPreset];
+      binds.desc.innerText = properties[currentPreset].desc;
+      binds.interp.innerText = properties[currentPreset].interp;
+      if (lastFormula !== properties[currentPreset].formula) {
+        binds.formula.innerHTML = properties[currentPreset].formula;
+        lastFormula = properties[currentPreset].formula;
+        if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+          window.MathJax.typesetPromise([binds.formula]).catch(() => {});
+        }
+      }
     }
 
     root.querySelectorAll('.iaw__seg-btn').forEach(btn => {
@@ -175,5 +213,14 @@
 
     window.addEventListener('resize', update);
     setTimeout(update, 200);
+
+    function requestMathTypeset(attempt = 0) {
+      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+        window.MathJax.typesetPromise([root]).catch(() => {});
+        return;
+      }
+      if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
+    }
+    requestMathTypeset();
 })();
 </script>
