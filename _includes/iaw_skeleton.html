@@ -15,15 +15,15 @@
     {% endif %}
 
     <div class="iaw__stage-card">
+      {% if include.legend %}
+      <div class="iaw__viz-legend">
+        {{ include.legend }}
+      </div>
+      {% endif %}
+      
       <div class="iaw__stage" id="{{ include.stage_id }}" 
            {% if include.stage_style %}style="{{ include.stage_style }}"{% endif %}>
-        {% if include.legend %}
-        <div class="iaw__viz-legend">
-          {{ include.legend }}
-        </div>
-        {% endif %}
-        
-        <div class="iaw__stage-content {% if include.legend %}iaw__stage-content--guarded{% endif %}">
+        <div class="iaw__stage-content">
           {{ include.visuals }}
         </div>
       </div>

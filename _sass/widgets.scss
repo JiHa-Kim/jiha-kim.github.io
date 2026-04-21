@@ -124,24 +124,13 @@
   height: 100%;
 }
 
-.iaw__stage-content--guarded {
-  padding-top: 2.2rem; /* Reserve space for the legend bar */
-}
-
 .iaw__viz-legend {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 0.4rem 1rem;
-  background: color-mix(in srgb, var(--iaw-bg) 85%, transparent);
-  backdrop-filter: blur(4px);
+  padding: 0.8rem 1.25rem;
+  background: var(--card-bg, rgba(120, 120, 120, 0.02));
   border-bottom: 1px solid var(--iaw-border);
   display: flex;
   flex-wrap: wrap;
   gap: 1.25rem;
-  pointer-events: none;
-  z-index: 10;
 }
 
 .iaw__legend-item {
