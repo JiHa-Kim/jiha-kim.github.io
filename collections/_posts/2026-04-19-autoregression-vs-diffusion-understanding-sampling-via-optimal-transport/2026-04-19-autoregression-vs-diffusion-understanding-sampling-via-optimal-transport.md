@@ -302,6 +302,14 @@ One concrete way to see frequency-space autoregression is through the 2-point Ha
 
 {% include frequency_reconstruction_widget.html %}
 
+The same idea appears in the standard practical visualization below: wavelet decomposition into approximation and detail bands, followed by progressive reconstruction.
+
+{% include wavelet_decomposition_widget.html %}
+
+Fourier gives the complementary practical view: the same image is represented by global frequencies, visualized as a centered spectrum together with low-pass and high-pass reconstructions.
+
+{% include fourier_decomposition_widget.html %}
+
 > [!info] Relation to Diffusion
 > For images, diffusion often appears to refine samples from coarse structure toward fine detail. Dieleman interprets DDPM-style denoising as an *approximate* low-to-high spectral ordering that is valid in expectation across many images, rather than as a hard per-sample rule {% cite DiffusionSpectralAutoregression2024 %}. Falck's follow-up accepts that approximate DDPM picture, but argues that this spectral hierarchy is not necessary for good diffusion performance: hierarchy-free diffusion can match DDPM and even improve high-frequency generation {% cite falck2025spectralauto %}.
 

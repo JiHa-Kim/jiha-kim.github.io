@@ -1,0 +1,340 @@
+{% capture describe %}
+<p>
+  The Fourier view is complementary to the Haar view. Instead of localized multiscale bands, it represents the same image with global sinusoidal frequencies:
+  the center of the spectrum is low frequency, and the outer region is high frequency.
+</p>
+{% endcapture %}
+
+{% capture controls %}
+<button class="iaw__seg-btn active" data-preset="smooth">Smooth</button>
+<button class="iaw__seg-btn" data-preset="edge">Vertical Edge</button>
+<button class="iaw__seg-btn" data-preset="checker">Checker Texture</button>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="ffd__grid">
+  <section class="ffd__card">
+    <div class="ffd__card-label">Original</div>
+    <div class="ffd__canvas-shell"><canvas id="ffdOriginal"></canvas></div>
+  </section>
+  <section class="ffd__card">
+    <div class="ffd__card-label">Centered Spectrum</div>
+    <div class="ffd__canvas-shell"><canvas id="ffdSpectrum"></canvas></div>
+  </section>
+  <section class="ffd__card">
+    <div class="ffd__card-label">Low-Pass Only</div>
+    <div class="ffd__canvas-shell"><canvas id="ffdLowPass"></canvas></div>
+  </section>
+  <section class="ffd__card">
+    <div class="ffd__card-label">High-Pass Only</div>
+    <div class="ffd__canvas-shell"><canvas id="ffdHighPass"></canvas></div>
+  </section>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid ffd__status-grid">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Dominant Region</span>
+    <strong class="iaw__status-value" id="ffdDominantRegion">Spectrum Center</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Reading</span>
+    <strong class="iaw__status-value" id="ffdInterpretation">Low frequencies dominate, so the energy stays concentrated near the spectrum center.</strong>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="fourierDecompositionFigure"
+    eyebrow="Practical Fourier View"
+    title="Image-Space Fourier Decomposition"
+    description=describe
+    controls=controls
+    visuals=visuals
+    footer=footer
+    stage_id="ffdStage"
+    stage_style="height: auto; min-height: 240px; border: none; background: transparent;"
+%}
+
+<style>
+.ffd__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.ffd__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  background: var(--iaw-bg);
+  border: 1px solid var(--iaw-border);
+  border-radius: 14px;
+  box-shadow: var(--iaw-shadow-soft);
+}
+
+.ffd__card-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--iaw-muted);
+  text-align: center;
+}
+
+.ffd__canvas-shell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--iaw-surface);
+  border: 1px solid var(--iaw-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ffd__canvas-shell canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ffd__status-grid .iaw__status-value {
+  line-height: 1.38;
+}
+
+@media (max-width: 980px) {
+  .ffd__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .ffd__grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const root = IAW.initFigure('fourierDecompositionFigure');
+  if (!root) return;
+
+  const SIZE = 8;
+  const presets = {
+    smooth: { region: 'Spectrum Center', text: 'Low frequencies dominate, so the energy stays concentrated near the spectrum center.' },
+    edge: { region: 'Horizontal Spread', text: 'A vertical edge spreads energy across horizontal frequencies rather than a single local patch.' },
+    checker: { region: 'Outer Frequencies', text: 'Alternating texture shifts energy toward higher frequencies away from the center.' }
+  };
+
+  const canvases = {
+    original: root.querySelector('#ffdOriginal'),
+    spectrum: root.querySelector('#ffdSpectrum'),
+    lowPass: root.querySelector('#ffdLowPass'),
+    highPass: root.querySelector('#ffdHighPass')
+  };
+
+  const segBtns = root.querySelectorAll('.iaw__seg-btn');
+  const dominantRegion = root.querySelector('#ffdDominantRegion');
+  const interpretation = root.querySelector('#ffdInterpretation');
+
+  let currentPreset = 'smooth';
+  let theme = IAW.getThemeColors(root);
+
+  function clamp(value) {
+    return Math.max(0, Math.min(1, value));
+  }
+
+  function buildImage(preset) {
+    const image = [];
+    for (let y = 0; y < SIZE; y += 1) {
+      const row = [];
+      for (let x = 0; x < SIZE; x += 1) {
+        let value = 0;
+        if (preset === 'smooth') {
+          const dx1 = x - 2.2;
+          const dy1 = y - 5.0;
+          const dx2 = x - 5.6;
+          const dy2 = y - 2.4;
+          value = 0.16
+            + 0.46 * Math.exp(-(dx1 * dx1 + dy1 * dy1) / 8.5)
+            + 0.26 * Math.exp(-(dx2 * dx2 + dy2 * dy2) / 11.0)
+            + 0.05 * (x / (SIZE - 1));
+        } else if (preset === 'edge') {
+          value = 0.16 + 0.66 / (1 + Math.exp(-(x - 3.5) * 1.7)) + 0.04 * (y / (SIZE - 1) - 0.5);
+        } else {
+          const checker = ((x + y) % 2 === 0) ? 1 : -1;
+          value = 0.5 + 0.23 * checker + 0.08 * Math.exp(-((x - 3.5) * (x - 3.5) + (y - 3.5) * (y - 3.5)) / 9);
+        }
+        row.push(clamp(value));
+      }
+      image.push(row);
+    }
+    return image;
+  }
+
+  function dft2(image) {
+    const coeffs = Array.from({ length: SIZE }, () => Array.from({ length: SIZE }, () => ({ re: 0, im: 0 })));
+    for (let v = 0; v < SIZE; v += 1) {
+      for (let u = 0; u < SIZE; u += 1) {
+        let re = 0;
+        let im = 0;
+        for (let y = 0; y < SIZE; y += 1) {
+          for (let x = 0; x < SIZE; x += 1) {
+            const angle = -2 * Math.PI * ((u * x + v * y) / SIZE);
+            re += image[y][x] * Math.cos(angle);
+            im += image[y][x] * Math.sin(angle);
+          }
+        }
+        coeffs[v][u] = { re, im };
+      }
+    }
+    return coeffs;
+  }
+
+  function idft2(coeffs) {
+    const image = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+    for (let y = 0; y < SIZE; y += 1) {
+      for (let x = 0; x < SIZE; x += 1) {
+        let re = 0;
+        for (let v = 0; v < SIZE; v += 1) {
+          for (let u = 0; u < SIZE; u += 1) {
+            const angle = 2 * Math.PI * ((u * x + v * y) / SIZE);
+            re += coeffs[v][u].re * Math.cos(angle) - coeffs[v][u].im * Math.sin(angle);
+          }
+        }
+        image[y][x] = re / (SIZE * SIZE);
+      }
+    }
+    return image;
+  }
+
+  function filterCoeffs(coeffs, predicate) {
+    return coeffs.map((row, v) => row.map((coeff, u) => {
+      const fu = u <= SIZE / 2 ? u : u - SIZE;
+      const fv = v <= SIZE / 2 ? v : v - SIZE;
+      const radius = Math.sqrt(fu * fu + fv * fv);
+      return predicate(radius) ? coeff : { re: 0, im: 0 };
+    }));
+  }
+
+  function buildSpectrumMatrix(coeffs) {
+    const matrix = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+    let maxValue = 1e-6;
+    for (let v = 0; v < SIZE; v += 1) {
+      for (let u = 0; u < SIZE; u += 1) {
+        const magnitude = Math.log1p(Math.hypot(coeffs[v][u].re, coeffs[v][u].im));
+        const sy = (v + SIZE / 2) % SIZE;
+        const sx = (u + SIZE / 2) % SIZE;
+        matrix[sy][sx] = magnitude;
+        maxValue = Math.max(maxValue, magnitude);
+      }
+    }
+    return { matrix, maxValue };
+  }
+
+  function drawMatrix(canvas, matrix, colorFn) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const cell = Math.floor(Math.min(rect.width / cols, rect.height / rows));
+    const drawW = cell * cols;
+    const drawH = cell * rows;
+    const offsetX = Math.round((rect.width - drawW) / 2);
+    const offsetY = Math.round((rect.height - drawH) / 2);
+
+    for (let y = 0; y < rows; y += 1) {
+      for (let x = 0; x < cols; x += 1) {
+        ctx.fillStyle = colorFn(matrix[y][x]);
+        ctx.fillRect(offsetX + x * cell, offsetY + y * cell, Math.max(1, cell - 1), Math.max(1, cell - 1));
+      }
+    }
+
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(offsetX - 0.5, offsetY - 0.5, drawW, drawH);
+  }
+
+  function grayscaleColor(value) {
+    const lightness = 10 + clamp(value) * 78;
+    return `hsl(210, 18%, ${lightness.toFixed(1)}%)`;
+  }
+
+  function centeredColor(value, scale) {
+    const centered = scale > 1e-8 ? Math.max(-1, Math.min(1, value / scale)) : 0;
+    const magnitude = Math.abs(centered);
+    if (centered >= 0) {
+      return `hsl(42, ${20 + magnitude * 54}%, ${90 - magnitude * 48}%)`;
+    }
+    return `hsl(202, ${24 + magnitude * 52}%, ${90 - magnitude * 46}%)`;
+  }
+
+  function spectrumColor(value, maxValue) {
+    const normalized = maxValue > 1e-8 ? value / maxValue : 0;
+    const lightness = 10 + normalized * 80;
+    return `hsl(210, 42%, ${lightness.toFixed(1)}%)`;
+  }
+
+  function maxAbs(matrix) {
+    return Math.max(1e-6, ...matrix.flat().map((value) => Math.abs(value)));
+  }
+
+  function render() {
+    const image = buildImage(currentPreset);
+    const coeffs = dft2(image);
+    const lowCoeffs = filterCoeffs(coeffs, (radius) => radius <= 1.6);
+    const highCoeffs = filterCoeffs(coeffs, (radius) => radius > 1.6);
+    const lowPass = idft2(lowCoeffs).map((row) => row.map((value) => clamp(value)));
+    const highPassRaw = idft2(highCoeffs);
+    const highScale = maxAbs(highPassRaw);
+    const highPassDisplay = highPassRaw.map((row) => row.map((value) => 0.5 + 0.45 * (value / highScale)));
+    const spectrum = buildSpectrumMatrix(coeffs);
+
+    drawMatrix(canvases.original, image, grayscaleColor);
+    drawMatrix(canvases.spectrum, spectrum.matrix, (value) => spectrumColor(value, spectrum.maxValue));
+    drawMatrix(canvases.lowPass, lowPass, grayscaleColor);
+    drawMatrix(canvases.highPass, highPassDisplay, (value) => centeredColor(value - 0.5, 0.5));
+
+    dominantRegion.textContent = presets[currentPreset].region;
+    interpretation.textContent = presets[currentPreset].text;
+  }
+
+  segBtns.forEach((button) => {
+    button.addEventListener('click', () => {
+      segBtns.forEach((item) => item.classList.remove('active'));
+      button.classList.add('active');
+      currentPreset = button.dataset.preset;
+      render();
+    });
+  });
+
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    render();
+  });
+
+  window.addEventListener('resize', render);
+
+  render();
+
+  function requestMathTypeset(attempt = 0) {
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([root]).catch(() => {});
+      return;
+    }
+    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
+  }
+  requestMathTypeset();
+});
+</script>

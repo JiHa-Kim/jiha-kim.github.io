@@ -1,0 +1,440 @@
+{% capture describe %}
+<p>
+  This is the standard practical visualization: an image, its 1-level Haar subbands, and the corresponding coarse-to-fine reconstructions.
+  The approximation band stores broad structure, while the detail bands isolate left-right edges, top-bottom edges, and diagonal texture.
+</p>
+{% endcapture %}
+
+{% capture controls %}
+<button class="iaw__seg-btn active" data-preset="smooth">Smooth</button>
+<button class="iaw__seg-btn" data-preset="edge">Vertical Edge</button>
+<button class="iaw__seg-btn" data-preset="checker">Checker Texture</button>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="fwd__layout">
+  <section class="fwd__card">
+    <div class="fwd__card-label">Original</div>
+    <div class="fwd__canvas-shell"><canvas id="fwdOriginal"></canvas></div>
+  </section>
+
+  <section class="fwd__card fwd__card--bands">
+    <div class="fwd__card-label">Haar Subbands</div>
+    <div class="fwd__band-grid">
+      <div class="fwd__band-card">
+        <div class="fwd__band-label">Approx</div>
+        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdLL"></canvas></div>
+      </div>
+      <div class="fwd__band-card">
+        <div class="fwd__band-label">L-R Detail</div>
+        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdLR"></canvas></div>
+      </div>
+      <div class="fwd__band-card">
+        <div class="fwd__band-label">T-B Detail</div>
+        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdTB"></canvas></div>
+      </div>
+      <div class="fwd__band-card">
+        <div class="fwd__band-label">Diagonal</div>
+        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdDiag"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fwd__card fwd__card--recon">
+    <div class="fwd__card-label">Reconstruction</div>
+    <div class="fwd__recon-grid">
+      <div class="fwd__recon-card">
+        <div class="fwd__recon-label">Approx Only</div>
+        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdReconCoarse"></canvas></div>
+      </div>
+      <div class="fwd__recon-card">
+        <div class="fwd__recon-label">+ Main Edges</div>
+        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdReconEdges"></canvas></div>
+      </div>
+      <div class="fwd__recon-card">
+        <div class="fwd__recon-label">Full</div>
+        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdReconFull"></canvas></div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid fwd__status-grid">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Dominant Band</span>
+    <strong class="iaw__status-value" id="fwdDominantBand">Approximation</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Reading</span>
+    <strong class="iaw__status-value" id="fwdInterpretation">Most of the energy stays in the coarse approximation band.</strong>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="waveletDecompositionFigure"
+    eyebrow="Practical Wavelet View"
+    title="Image-Space Haar Decomposition"
+    description=describe
+    controls=controls
+    visuals=visuals
+    footer=footer
+    stage_id="fwdStage"
+    stage_style="height: auto; min-height: 260px; border: none; background: transparent;"
+%}
+
+<style>
+.fwd__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 1.15fr);
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.fwd__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.85rem;
+  background: var(--iaw-bg);
+  border: 1px solid var(--iaw-border);
+  border-radius: 14px;
+  box-shadow: var(--iaw-shadow-soft);
+}
+
+.fwd__card-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--iaw-muted);
+  text-align: center;
+}
+
+.fwd__canvas-shell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--iaw-surface);
+  border: 1px solid var(--iaw-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.fwd__canvas-shell--mini {
+  border-radius: 10px;
+}
+
+.fwd__canvas-shell canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fwd__band-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.fwd__band-card,
+.fwd__recon-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fwd__band-label,
+.fwd__recon-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+  text-align: center;
+}
+
+.fwd__recon-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.fwd__card--recon .fwd__recon-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--iaw-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--iaw-surface) 70%, var(--iaw-bg));
+}
+
+.fwd__card--recon .fwd__canvas-shell--mini {
+  aspect-ratio: 1 / 1;
+  width: 84px;
+}
+
+.fwd__card--recon .fwd__recon-label {
+  text-align: left;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.fwd__status-grid .iaw__status-value {
+  line-height: 1.38;
+}
+
+@media (max-width: 980px) {
+  .fwd__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .fwd__card--recon .fwd__recon-card {
+    grid-template-columns: minmax(0, 1fr) 76px;
+    padding: 0.5rem 0.55rem;
+  }
+
+  .fwd__card--recon .fwd__recon-label {
+    text-align: left;
+    white-space: normal;
+  }
+
+  .fwd__card--recon .fwd__canvas-shell--mini {
+    width: 76px;
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const root = IAW.initFigure('waveletDecompositionFigure');
+  if (!root) return;
+
+  const SIZE = 8;
+  const presets = {
+    smooth: { key: 'smooth', label: 'Approximation', text: 'Most of the energy stays in the coarse approximation band.' },
+    edge: { key: 'edge', label: 'L-R Detail', text: 'The left-right detail band captures the dominant vertical edge.' },
+    checker: { key: 'checker', label: 'Diagonal Detail', text: 'Alternating high-frequency texture pushes energy into the diagonal detail band.' }
+  };
+
+  const canvases = {
+    original: root.querySelector('#fwdOriginal'),
+    ll: root.querySelector('#fwdLL'),
+    lr: root.querySelector('#fwdLR'),
+    tb: root.querySelector('#fwdTB'),
+    diag: root.querySelector('#fwdDiag'),
+    reconCoarse: root.querySelector('#fwdReconCoarse'),
+    reconEdges: root.querySelector('#fwdReconEdges'),
+    reconFull: root.querySelector('#fwdReconFull')
+  };
+
+  const segBtns = root.querySelectorAll('.iaw__seg-btn');
+  const dominantBand = root.querySelector('#fwdDominantBand');
+  const interpretation = root.querySelector('#fwdInterpretation');
+
+  let currentPreset = 'smooth';
+  let theme = IAW.getThemeColors(root);
+
+  function clamp(value) {
+    return Math.max(0, Math.min(1, value));
+  }
+
+  function buildImage(preset) {
+    const image = [];
+    for (let y = 0; y < SIZE; y += 1) {
+      const row = [];
+      for (let x = 0; x < SIZE; x += 1) {
+        let value = 0;
+        if (preset === 'smooth') {
+          const dx1 = x - 2.2;
+          const dy1 = y - 5.0;
+          const dx2 = x - 5.6;
+          const dy2 = y - 2.4;
+          value = 0.16
+            + 0.46 * Math.exp(-(dx1 * dx1 + dy1 * dy1) / 8.5)
+            + 0.26 * Math.exp(-(dx2 * dx2 + dy2 * dy2) / 11.0)
+            + 0.05 * (x / (SIZE - 1));
+        } else if (preset === 'edge') {
+          value = 0.16 + 0.66 / (1 + Math.exp(-(x - 3.5) * 1.7)) + 0.04 * (y / (SIZE - 1) - 0.5);
+        } else {
+          const checker = ((x + y) % 2 === 0) ? 1 : -1;
+          value = 0.5 + 0.23 * checker + 0.08 * Math.exp(-((x - 3.5) * (x - 3.5) + (y - 3.5) * (y - 3.5)) / 9);
+        }
+        row.push(clamp(value));
+      }
+      image.push(row);
+    }
+    return image;
+  }
+
+  function decompose(image) {
+    const half = SIZE / 2;
+    const ll = Array.from({ length: half }, () => Array(half).fill(0));
+    const lr = Array.from({ length: half }, () => Array(half).fill(0));
+    const tb = Array.from({ length: half }, () => Array(half).fill(0));
+    const diag = Array.from({ length: half }, () => Array(half).fill(0));
+
+    for (let y = 0; y < half; y += 1) {
+      for (let x = 0; x < half; x += 1) {
+        const a = image[2 * y][2 * x];
+        const b = image[2 * y][2 * x + 1];
+        const c = image[2 * y + 1][2 * x];
+        const d = image[2 * y + 1][2 * x + 1];
+        ll[y][x] = (a + b + c + d) / 2;
+        lr[y][x] = (a - b + c - d) / 2;
+        tb[y][x] = (a + b - c - d) / 2;
+        diag[y][x] = (a - b - c + d) / 2;
+      }
+    }
+
+    return { ll, lr, tb, diag };
+  }
+
+  function reconstruct(bands) {
+    const half = bands.ll.length;
+    const image = Array.from({ length: half * 2 }, () => Array(half * 2).fill(0));
+
+    for (let y = 0; y < half; y += 1) {
+      for (let x = 0; x < half; x += 1) {
+        const ll = bands.ll[y][x];
+        const lr = bands.lr[y][x];
+        const tb = bands.tb[y][x];
+        const diag = bands.diag[y][x];
+        image[2 * y][2 * x] = clamp((ll + lr + tb + diag) / 2);
+        image[2 * y][2 * x + 1] = clamp((ll - lr + tb - diag) / 2);
+        image[2 * y + 1][2 * x] = clamp((ll + lr - tb - diag) / 2);
+        image[2 * y + 1][2 * x + 1] = clamp((ll - lr - tb + diag) / 2);
+      }
+    }
+
+    return image;
+  }
+
+  function grayscaleColor(value) {
+    const lightness = 10 + value * 78;
+    return `hsl(210, 18%, ${lightness.toFixed(1)}%)`;
+  }
+
+  function detailColor(value, scale) {
+    const normalized = scale > 1e-8 ? Math.max(-1, Math.min(1, value / scale)) : 0;
+    const magnitude = Math.abs(normalized);
+    if (normalized >= 0) {
+      return `hsl(42, ${24 + magnitude * 56}%, ${92 - magnitude * 50}%)`;
+    }
+    return `hsl(202, ${26 + magnitude * 54}%, ${92 - magnitude * 48}%)`;
+  }
+
+  function drawMatrix(canvas, matrix, colorFn) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+    const cell = Math.floor(Math.min(rect.width / cols, rect.height / rows));
+    const drawW = cell * cols;
+    const drawH = cell * rows;
+    const offsetX = Math.round((rect.width - drawW) / 2);
+    const offsetY = Math.round((rect.height - drawH) / 2);
+
+    for (let y = 0; y < rows; y += 1) {
+      for (let x = 0; x < cols; x += 1) {
+        ctx.fillStyle = colorFn(matrix[y][x]);
+        ctx.fillRect(offsetX + x * cell, offsetY + y * cell, Math.max(1, cell - 1), Math.max(1, cell - 1));
+      }
+    }
+
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(offsetX - 0.5, offsetY - 0.5, drawW, drawH);
+  }
+
+  function bandEnergy(matrix) {
+    let total = 0;
+    for (let y = 0; y < matrix.length; y += 1) {
+      for (let x = 0; x < matrix[0].length; x += 1) {
+        total += Math.abs(matrix[y][x]);
+      }
+    }
+    return total;
+  }
+
+  function render() {
+    const image = buildImage(currentPreset);
+    const bands = decompose(image);
+    const coarse = reconstruct({
+      ll: bands.ll,
+      lr: bands.lr.map((row) => row.map(() => 0)),
+      tb: bands.tb.map((row) => row.map(() => 0)),
+      diag: bands.diag.map((row) => row.map(() => 0))
+    });
+    const edges = reconstruct({
+      ll: bands.ll,
+      lr: bands.lr,
+      tb: bands.tb,
+      diag: bands.diag.map((row) => row.map(() => 0))
+    });
+    const detailScale = Math.max(
+      1e-6,
+      ...bands.lr.flat().map((value) => Math.abs(value)),
+      ...bands.tb.flat().map((value) => Math.abs(value)),
+      ...bands.diag.flat().map((value) => Math.abs(value))
+    );
+
+    drawMatrix(canvases.original, image, grayscaleColor);
+    drawMatrix(canvases.ll, bands.ll, grayscaleColor);
+    drawMatrix(canvases.lr, bands.lr, (value) => detailColor(value, detailScale));
+    drawMatrix(canvases.tb, bands.tb, (value) => detailColor(value, detailScale));
+    drawMatrix(canvases.diag, bands.diag, (value) => detailColor(value, detailScale));
+    drawMatrix(canvases.reconCoarse, coarse, grayscaleColor);
+    drawMatrix(canvases.reconEdges, edges, grayscaleColor);
+    drawMatrix(canvases.reconFull, image, grayscaleColor);
+
+    const energies = [
+      { key: 'll', label: 'Approximation', value: bandEnergy(bands.ll) },
+      { key: 'lr', label: 'L-R Detail', value: bandEnergy(bands.lr) },
+      { key: 'tb', label: 'T-B Detail', value: bandEnergy(bands.tb) },
+      { key: 'diag', label: 'Diagonal Detail', value: bandEnergy(bands.diag) }
+    ];
+    energies.sort((a, b) => b.value - a.value);
+    dominantBand.textContent = energies[0].label;
+    interpretation.textContent = presets[currentPreset].text;
+  }
+
+  segBtns.forEach((button) => {
+    button.addEventListener('click', () => {
+      segBtns.forEach((item) => item.classList.remove('active'));
+      button.classList.add('active');
+      currentPreset = button.dataset.preset;
+      render();
+    });
+  });
+
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    render();
+  });
+
+  window.addEventListener('resize', render);
+
+  render();
+
+  function requestMathTypeset(attempt = 0) {
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([root]).catch(() => {});
+      return;
+    }
+    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
+  }
+  requestMathTypeset();
+});
+</script>
