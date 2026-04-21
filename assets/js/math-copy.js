@@ -1,8 +1,5 @@
 (() => {
-  const MATH_SELECTOR = 'mjx-container[data-math-source]';
-  const MAX_READY_POLLS = 200;
-  const READY_POLL_MS = 100;
-  let observingMath = false;
+  const MATH_SELECTOR = '.math-inline[data-math-source-b64], .math-block[data-math-source-b64]';
   let copyHandlerInstalled = false;
 
   function isElement(node) {
@@ -23,63 +20,35 @@
     return null;
   }
 
-  function formatMathSource(mathItem) {
-    const source = typeof mathItem?.math === 'string' ? mathItem.math.trim() : '';
+  function decodeMathSource(node) {
+    const encoded = node?.dataset?.mathSourceB64;
+
+    if (!encoded) {
+      return '';
+    }
+
+    try {
+      const binary = window.atob(encoded);
+
+      if (typeof TextDecoder === 'function') {
+        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        return new TextDecoder().decode(bytes);
+      }
+
+      return binary;
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function formatMathSource(node) {
+    const source = decodeMathSource(node).trim();
 
     if (!source) {
       return '';
     }
 
-    return mathItem.display ? `$$\n${source}\n$$` : `$${source}$`;
-  }
-
-  function annotateMathSources() {
-    const mathItems = window.MathJax?.startup?.document?.math;
-
-    if (!mathItems) {
-      return false;
-    }
-
-    for (const mathItem of mathItems) {
-      const root = mathItem?.typesetRoot;
-      const source = formatMathSource(mathItem);
-
-      if (!isElement(root) || !source) {
-        continue;
-      }
-
-      root.dataset.mathSource = source;
-      root.dataset.mathDisplay = mathItem.display ? 'true' : 'false';
-    }
-
-    return true;
-  }
-
-  function mutationAddsMath(mutation) {
-    return Array.from(mutation.addedNodes).some((node) => {
-      if (!isElement(node)) {
-        return false;
-      }
-
-      return node.matches('mjx-container') || !!node.querySelector('mjx-container');
-    });
-  }
-
-  function installMathObserver() {
-    if (observingMath || !document.body || typeof MutationObserver !== 'function') {
-      return;
-    }
-
-    const observer = new MutationObserver((mutations) => {
-      if (!mutations.some(mutationAddsMath)) {
-        return;
-      }
-
-      annotateMathSources();
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-    observingMath = true;
+    return node.classList.contains('math-block') ? `$$\n${source}\n$$` : `$${source}$`;
   }
 
   function normalizeRange(range) {
@@ -102,13 +71,13 @@
     const mathNodes = fragment.querySelectorAll(MATH_SELECTOR);
 
     for (const node of mathNodes) {
-      const source = node.dataset.mathSource;
+      const source = formatMathSource(node);
 
       if (!source) {
         continue;
       }
 
-      const replacement = node.dataset.mathDisplay === 'true' ? `\n${source}\n` : source;
+      const replacement = node.classList.contains('math-block') ? `\n${source}\n` : source;
       node.replaceWith(document.createTextNode(replacement));
     }
   }
@@ -181,27 +150,17 @@
   }
 
   function startMathCopy() {
-    annotateMathSources();
-    installMathObserver();
-
-    if (!copyHandlerInstalled) {
-      document.addEventListener('copy', handleCopy);
-      copyHandlerInstalled = true;
-    }
-  }
-
-  function waitForMathJax(remainingPolls = MAX_READY_POLLS) {
-    if (window.MathJax?.startup?.promise) {
-      window.MathJax.startup.promise.then(startMathCopy).catch(() => {});
+    if (copyHandlerInstalled) {
       return;
     }
 
-    if (remainingPolls <= 0) {
-      return;
-    }
-
-    window.setTimeout(() => waitForMathJax(remainingPolls - 1), READY_POLL_MS);
+    document.addEventListener('copy', handleCopy);
+    copyHandlerInstalled = true;
   }
 
-  waitForMathJax();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startMathCopy, { once: true });
+  } else {
+    startMathCopy();
+  }
 })();

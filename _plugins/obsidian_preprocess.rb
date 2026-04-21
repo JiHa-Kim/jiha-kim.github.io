@@ -3,11 +3,12 @@
 require 'jekyll'
 require 'rexml/document'
 require 'digest'
+require 'base64'
 
 module Jekyll
   class ObsidianPreprocess < Jekyll::Generator
     priority :high
-    CACHE_VERSION = "2026-04-09-production-ready-v4".freeze
+    CACHE_VERSION = "2026-04-21-math-copy-wrapper-source-v1".freeze
 
     # Map Obsidian callout types -> Chirpy box classes
     TYPE_MAP = {
@@ -351,8 +352,10 @@ module Jekyll
         
         has_env = SKIP_FORMATTING_ENVS.any? { |env| math_content.include?("\\begin{#{env}}") }
         math_content = cleanup_latex_syntax(math_content) unless has_env
-        
-        "\n#{indent}<div class=\"math-block\" markdown=\"0\">\n\\[\n#{math_content.strip}\n\\]\n#{indent}</div>\n"
+
+        encoded_source = encode_math_source(math_content.strip)
+
+        "\n#{indent}<div class=\"math-block\" data-math-source-b64=\"#{encoded_source}\" markdown=\"0\">\n\\[\n#{math_content.strip}\n\\]\n#{indent}</div>\n"
       end
     end
 
@@ -360,8 +363,13 @@ module Jekyll
       content.gsub(/(?<!\\)\$(?!\$)([^$\n]+?)(?<!\\)\$|\\\(([\s\S]+?)\\\)/) do
         math_content = $1 || $2
         math_content = cleanup_latex_syntax(math_content)
-        "<span class=\"math-inline\" markdown=\"0\">\\(#{math_content.strip}\\)</span>"
+        encoded_source = encode_math_source(math_content.strip)
+        "<span class=\"math-inline\" data-math-source-b64=\"#{encoded_source}\" markdown=\"0\">\\(#{math_content.strip}\\)</span>"
       end
+    end
+
+    def encode_math_source(text)
+      Base64.strict_encode64(text.to_s)
     end
 
     def cleanup_latex_syntax(text)
