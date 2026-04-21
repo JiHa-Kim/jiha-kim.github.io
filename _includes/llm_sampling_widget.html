@@ -1,64 +1,81 @@
-<div class="otu" id="llmSamplingFigure">
-  <div class="otu__intro">
-    <div class="otu__eyebrow">Interactive Discrete Example</div>
-    <h4>Next-Token Inverse CDF Sampling</h4>
-    <p>
-      Drag the slider to sample a uniform random variable \( u \sim \mathcal{U}(0,1) \). 
-      The vocabulary space is partitioned according to the predicted probability of each token. The interval that catches \( u \) becomes the generated token!
-    </p>
+{% capture describe %}
+<p>
+  Drag the slider to sample a uniform random variable \( u \sim \mathcal{U}(0,1) \). 
+  The vocabulary space is partitioned according to the predicted probability of each token. The interval that catches \( u \) becomes the generated token!
+</p>
+{% endcapture %}
+
+{% capture controls %}
+  {% assign llmTicks = "0.0, 0.5, 1.0" | split: ", " %}
+  {% include iaw_slider.html id="llmSlider" min="0.001" max="0.999" step="0.001" value="0.75" ticks=llmTicks variant="parameter" %}
+{% endcapture %}
+
+{% capture visuals %}
+<div class="llm__stage" id="llmStage">
+  <!-- Track -->
+  <div class="llm__track" id="llmTrack">
+    <div class="llm__segment" id="segApple" data-token="&quot;apple&quot;" style="width: 60%;">
+      <span>"apple"</span>
+    </div>
+    <div class="llm__segment" id="segBanana" data-token="&quot;banana&quot;" style="width: 30%;">
+      <span>"banana"</span>
+    </div>
+    <div class="llm__segment" id="segCherry" data-token="&quot;cherry&quot;" style="width: 10%;">
+      <span>"cherry"</span>
+    </div>
+  </div>
+  
+  <!-- Axis labels -->
+  <div class="llm__axis-ticks">
+    <div class="llm__tick" style="left: 0%;">0.0</div>
+    <div class="llm__tick" style="left: 60%;">0.6</div>
+    <div class="llm__tick" style="left: 90%;">0.9</div>
+    <div class="llm__tick" style="left: 100%;">1.0</div>
   </div>
 
-  <div class="otu__stage-card">
-    <div class="llm__stage" id="llmStage" style="position: relative; padding: 40px 20px 30px 20px; user-select: none; touch-action: none;">
-      
-      <!-- Track -->
-      <div class="llm__track" id="llmTrack">
-        <div class="llm__segment" id="segApple" data-token="&quot;apple&quot;" data-color="var(--prompt-info-icon, #0ea5e9)" style="width: 60%; background: rgba(14, 165, 233, 0.2);">
-          <span>"apple"</span>
-        </div>
-        <div class="llm__segment" id="segBanana" data-token="&quot;banana&quot;" data-color="var(--prompt-warning-icon, #d97706)" style="width: 30%; background: rgba(217, 119, 6, 0.2);">
-          <span>"banana"</span>
-        </div>
-        <div class="llm__segment" id="segCherry" data-token="&quot;cherry&quot;" data-color="var(--prompt-success-icon, #10b981)" style="width: 10%; background: rgba(16, 185, 129, 0.2);">
-          <span>"cherry"</span>
-        </div>
-      </div>
-      
-      <!-- Axis labels -->
-      <div class="llm__axis-ticks">
-        <div class="llm__tick" style="left: 0%;">0.0</div>
-        <div class="llm__tick" style="left: 60%;">0.6</div>
-        <div class="llm__tick" style="left: 90%;">0.9</div>
-        <div class="llm__tick" style="left: 100%;">1.0</div>
-      </div>
-
-      <!-- Handle -->
-      <div class="llm__handle" id="llmHandle" style="left: 75%;">
-        <div class="llm__u-val" id="llmUVal">0.75</div>
-        <div class="llm__handle-head" id="llmHandleHead">
-          <span class="math-static">\( u \)</span>
-        </div>
-        <div class="llm__handle-line"></div>
-      </div>
+  <!-- Handle -->
+  <div class="llm__handle" id="llmHandle" style="left: 75%;">
+    <div class="llm__u-val" id="llmUVal">0.75</div>
+    <div class="llm__handle-head" id="llmHandleHead">
+      <span class="math-static">\( u \)</span>
     </div>
-    
-    <div class="llm__output-container">
-      <div class="llm__output-label">Generated Token</div>
-      <div class="llm__output-value" id="llmOutput">"banana"</div>
-    </div>
+    <div class="llm__handle-line"></div>
   </div>
 </div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid" style="grid-template-columns: 1fr; text-align: center;">
+  <div class="iaw__status-item" style="align-items: center;">
+    <span class="iaw__status-label" style="font-size: 0.85rem; margin-bottom: 0.3rem;">Generated Token</span>
+    <strong class="iaw__status-value" id="llmOutput" style="font-size: 1.8rem; font-family: var(--font-family-monospace, monospace); color: var(--iaw-warning);">"banana"</strong>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html 
+    id="llmSamplingFigure"
+    eyebrow="Interactive Discrete Example"
+    title="Next-Token Inverse CDF Sampling"
+    description=describe
+    visuals=visuals
+    footer=footer
+    stage_style="height: auto; min-height: 160px; border: none; background: transparent;"
+%}
 
 <style>
 .llm__stage {
-  border-radius: 12px;
-  background: var(--main-bg, #fff);
-  border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  position: relative; 
+  padding: 45px 20px 30px 20px; 
+  user-select: none; 
+  touch-action: none;
+  background: var(--iaw-bg);
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-[data-mode="dark"] .llm__stage {
-  background: var(--main-bg, #1b1b1e);
-}
+
 .llm__track {
   display: flex;
   width: 100%;
@@ -66,51 +83,58 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05) inset;
-  border: 1px solid var(--card-border, rgba(120,120,120,0.2));
+  border: 1px solid var(--iaw-border);
   cursor: pointer;
 }
+
 .llm__segment {
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-family-monospace, monospace);
   font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-color, #111);
-  border-right: 2px solid var(--main-bg, #fff);
+  font-weight: 700;
+  color: var(--iaw-text);
+  border-right: 2px solid var(--iaw-bg);
   transition: opacity 0.2s, background-color 0.2s;
   opacity: 0.4; /* dim inactive ones */
 }
-[data-mode="dark"] .llm__segment {
-  border-right: 2px solid var(--main-bg, #1b1b1e);
-  color: #fff;
-}
+
 .llm__segment:last-child {
   border-right: none;
 }
+
 .llm__segment.is-active {
   opacity: 1;
 }
-.llm__segment.is-active[data-token='"apple"'] { background: rgba(14, 165, 233, 0.4) !important; }
-.llm__segment.is-active[data-token='"banana"'] { background: rgba(217, 119, 6, 0.4) !important; }
-.llm__segment.is-active[data-token='"cherry"'] { background: rgba(16, 185, 129, 0.4) !important; }
+
+.llm__segment[data-token='"apple"'] { background: color-mix(in srgb, var(--iaw-source-b) 20%, transparent); }
+.llm__segment.is-active[data-token='"apple"'] { background: color-mix(in srgb, var(--iaw-source-b) 40%, transparent); }
+
+.llm__segment[data-token='"banana"'] { background: color-mix(in srgb, var(--iaw-source-a) 20%, transparent); }
+.llm__segment.is-active[data-token='"banana"'] { background: color-mix(in srgb, var(--iaw-source-a) 40%, transparent); }
+
+.llm__segment[data-token='"cherry"'] { background: color-mix(in srgb, var(--iaw-success) 20%, transparent); }
+.llm__segment.is-active[data-token='"cherry"'] { background: color-mix(in srgb, var(--iaw-success) 40%, transparent); }
 
 .llm__axis-ticks {
   position: relative;
   height: 20px;
   margin-top: 8px;
 }
+
 .llm__tick {
   position: absolute;
   transform: translateX(-50%);
   font-family: var(--font-family-monospace, monospace);
   font-size: 0.8rem;
-  color: var(--text-muted-color, #6b7280);
+  font-weight: 700;
+  color: var(--iaw-muted);
 }
 
 .llm__handle {
   position: absolute;
-  top: 15px; /* Above the track */
+  top: 25px; /* Above the track */
   height: 80px; /* Spans across track and ticks */
   width: 32px;
   transform: translateX(-50%);
@@ -120,26 +144,26 @@
   flex-direction: column;
   align-items: center;
 }
+
 .llm__handle:active, .llm__handle.is-dragging {
   cursor: grabbing;
 }
+
 .llm__handle-line {
   position: absolute;
   top: 25px;
-  bottom: 0;
+  bottom: -5px;
   width: 2px;
-  background: var(--text-color, #111);
+  background: var(--iaw-text);
   pointer-events: none;
 }
-[data-mode="dark"] .llm__handle-line {
-  background: #e5e7eb;
-}
+
 .llm__handle-head {
   position: relative;
   width: 28px;
   height: 28px;
-  background: var(--text-color, #111);
-  color: var(--main-bg, #fff);
+  background: var(--iaw-text);
+  color: var(--iaw-bg);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -149,60 +173,26 @@
   transition: transform 0.1s;
   z-index: 2;
 }
-[data-mode="dark"] .llm__handle-head {
-  background: #e5e7eb;
-  color: #111;
-}
+
 .llm__handle.is-dragging .llm__handle-head {
   transform: scale(1.15);
 }
+
 .llm__u-val {
   position: absolute;
   top: -24px;
   font-family: var(--font-family-monospace, monospace);
   font-size: 0.8rem;
   font-weight: bold;
-  background: var(--main-bg, #fff);
+  background: var(--iaw-bg);
   padding: 2px 6px;
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 1px solid var(--card-border, rgba(120,120,120,0.15));
-  color: var(--text-color, #111);
+  border: 1px solid var(--iaw-border);
+  color: var(--iaw-text);
   white-space: nowrap;
 }
-[data-mode="dark"] .llm__u-val {
-  background: var(--card-bg, #1b1b1e);
-}
 
-.llm__output-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 15px;
-  padding: 15px;
-  background: var(--main-bg, #fff);
-  border-radius: 8px;
-  border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
-}
-[data-mode="dark"] .llm__output-container {
-  background: var(--main-bg, #1b1b1e);
-}
-.llm__output-label {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  color: var(--text-muted-color, #6b7280);
-  margin-bottom: 4px;
-}
-.llm__output-value {
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--prompt-warning-icon, #d97706);
-  transition: color 0.2s;
-}
 .otu .mjx-container {
   margin: 0 !important;
 }
@@ -219,6 +209,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const handle = root.querySelector('#llmHandle');
   const uValDisplay = root.querySelector('#llmUVal');
   const outputVal = root.querySelector('#llmOutput');
+  const slider = root.querySelector('#llmSlider');
   let COLORS = IAW.getThemeColors(root);
   const segments = [
     { el: root.querySelector('#segApple'),  maxU: 0.6, token: '"apple"',  color: COLORS.sourceB },
@@ -241,6 +232,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     uValDisplay.innerText = currentU.toFixed(2);
+    if (slider && slider.value !== currentU.toString()) {
+      slider.value = currentU;
+    }
 
     let activeSeg = null;
     for(let seg of segments) {
@@ -273,6 +267,13 @@ document.addEventListener("DOMContentLoaded", function() {
     const x = e.clientX - trackRect.left;
     let u = x / trackRect.width;
     return Math.max(0.001, Math.min(0.999, u));
+  }
+
+  if (slider) {
+    slider.addEventListener('input', (e) => {
+      currentU = parseFloat(e.target.value);
+      updateVisuals();
+    });
   }
 
   handle.addEventListener('pointerdown', (e) => {

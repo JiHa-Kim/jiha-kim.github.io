@@ -7,26 +7,32 @@
 </p>
 {% endcapture %}
 
-{% capture controls %}
-  {% assign itsTicks = "0.0, 0.5, 1.0" | split: ", " %}
-  {% include iaw_slider.html id="itsSlider" min="0.001" max="0.999" step="0.001" value="0.70" ticks=itsTicks variant="parameter" %}
-{% endcapture %}
-
 {% capture itsOverlay %}
 <div class="iaw__overlay" id="itsOverlay">
   <div class="iaw__drag-strip" data-key="u"></div>
 
   <button type="button" class="iaw__handle iaw__handle--source" data-key="u">
-    <span>$u$ = <span id="val-u">0.70</span></span>
+    <span><small>‹</small>&nbsp;$u$ = <span id="val-u">0.70</span>&nbsp;<small>›</small></span>
   </button>
   
   <button type="button" class="iaw__handle iaw__handle--target" data-key="x" style="pointer-events: none; opacity: 0.9;">
     <span>$x$ = <span id="val-x">4.23</span></span>
   </button>
+</div>
+{% endcapture %}
 
-  <!-- Axis Labels -->
-  <div class="iaw__route-tag" style="left: 15px; top: 50%; transform: translateY(-50%) rotate(-90deg); border: none; background: transparent; font-size: 0.95rem;">$x \sim P_{\text{data}}$</div>
-  <div class="iaw__route-tag" style="bottom: 8px; left: 50%; transform: translateX(-50%); border: none; background: transparent; font-size: 0.95rem;">$u \sim \mathcal{U}(0,1)$</div>
+{% capture legend %}
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-source-a)"></span>
+  <span>Target Density $x \sim P_{\text{data}}$</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-source-b)"></span>
+  <span>Inverse CDF $x = F^{-1}(u)$</span>
+</div>
+<div class="iaw__legend-item">
+  <span style="font-weight: 800; color: var(--iaw-warning); margin-right: -2px;">U</span>
+  <span>Source Noise $u \sim \mathcal{U}(0,1)$</span>
 </div>
 {% endcapture %}
 
@@ -39,10 +45,10 @@
     eyebrow="Interactive Example"
     title="Inverse Transform Sampling"
     description=describe
-    controls=controls
+    legend=legend
     visuals=visuals
     stage_id="itsStage"
-    stage_style="height: 440px;"
+    stage_style="height: 420px;"
 %}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -59,7 +65,6 @@
   const handleX = root.querySelector('.iaw__handle[data-key="x"]');
   const valU = root.querySelector('#val-u');
   const valX = root.querySelector('#val-x');
-  const sliderU = root.querySelector('#itsSlider');
 
   let state = { u: 0.70, activeKey: null };
 
@@ -186,15 +191,12 @@
       const offsetY = canvasRect.top - stageRect.top;
 
       handleU.style.left = `${offsetX + px}px`;
-      handleU.style.top = `${offsetY + chartArea.bottom}px`;
+      handleU.style.top = `${offsetY + chartArea.bottom + 28}px`;
       valU.innerText = state.u.toFixed(2);
-      if (sliderU && sliderU.value !== state.u.toString()) {
-        sliderU.value = state.u;
-      }
 
       stripU.style.left = `${offsetX + px}px`;
 
-      handleX.style.left = `${offsetX + chartArea.left}px`;
+      handleX.style.left = `${offsetX + chartArea.left - 46}px`;
       handleX.style.top = `${offsetY + py}px`;
       valX.innerText = xVal.toFixed(2);
     }
@@ -243,6 +245,9 @@
       ]
     },
     options: {
+      layout: {
+        padding: { left: 85, bottom: 50, right: 85, top: 20 }
+      },
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: 'y',
@@ -287,14 +292,6 @@
     state.u = Math.max(0.001, Math.min(0.999, u));
     updatePdfData();
     chart.update('none');
-  }
-
-  if (sliderU) {
-    sliderU.addEventListener('input', (e) => {
-      state.u = parseFloat(e.target.value);
-      updatePdfData();
-      chart.update('none');
-    });
   }
 
   function startDragging(key, event, el) {

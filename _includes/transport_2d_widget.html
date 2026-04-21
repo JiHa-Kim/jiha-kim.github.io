@@ -46,7 +46,9 @@
       <button class="t2c__play-btn" id="t2cPlay" aria-label="Play continuous transport animation">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       </button>
-      <input type="range" class="t2c__slider" id="t2cSlider" min="0" max="1" step="0.005" value="0">
+      <div style="flex: 1 1 auto; min-width: 180px; margin: 0 0.5rem;">
+        {% include iaw_slider.html id="t2cSlider" min="0" max="1" step="0.005" value="0" variant="progress" %}
+      </div>
       <div class="t2c__time-val" id="t2cValue">t = 0.00</div>
     </div>
   </div>
