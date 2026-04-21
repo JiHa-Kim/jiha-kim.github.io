@@ -1,14 +1,14 @@
 /* Interactive Widget Framework (IAW) */
 .iaw {
   /* Identity & Branding Tokens */
-  --iaw-source-a: #ffff00; /* Pure Electric Yellow */
-  --iaw-source-b: #16a34a; /* tip-icon Green */
-  --iaw-target: #06b6d4;   /* Cyan */
+  --iaw-source-a: #facc15; /* Clear Matte Yellow */
+  --iaw-source-b: #0ea5e9; /* Professional Aqua/Sky Blue */
+  --iaw-target: var(--iaw-source-b);
 
   --iaw-primary: var(--iaw-target);
-  --iaw-success: var(--iaw-source-b);
+  --iaw-success: #059669;   /* Solid Emerald */
   --iaw-warning: var(--iaw-source-a);
-  --iaw-danger: var(--prompt-danger-icon, #dc2626);
+  --iaw-danger: #dc2626;    /* Solid Red */
   --iaw-border: var(--card-border, rgba(120, 120, 120, 0.16));
   --iaw-bg: var(--main-bg, #fff);
   --iaw-muted: var(--text-muted-color, var(--text-color, inherit));
@@ -185,11 +185,13 @@
   transition: box-shadow 0.3s ease, transform 0.2s ease, color 0.3s ease;
 }
 
-.iaw__slot--filled-a { color: var(--iaw-warning); opacity: 0.8; }
-.iaw__slot--filled-b { color: var(--iaw-success); opacity: 0.8; }
+.iaw__slot--filled-a { color: var(--iaw-source-a); }
+.iaw__slot--filled-b { color: var(--iaw-source-b); }
+.iaw__slot--target-filled { color: var(--iaw-target); }
 
-.iaw__node--a .iaw__slot--filled { color: var(--iaw-warning); opacity: 0.7; }
-.iaw__node--b .iaw__slot--filled { color: var(--iaw-success); opacity: 0.7; }
+.iaw__node--a .iaw__slot--filled { color: var(--iaw-source-a); }
+.iaw__node--b .iaw__slot--filled { color: var(--iaw-source-b); }
+.iaw__node--target .iaw__slot--filled { color: var(--iaw-target); }
 
 .iaw__footer {
   padding: 1.25rem;

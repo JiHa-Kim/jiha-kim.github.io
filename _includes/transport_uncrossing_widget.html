@@ -1,844 +1,296 @@
-<div class="otuc" id="transportUncrossingWidget">
-  <div class="otuc__intro">
-    <div class="otuc__copy">
-      <div class="otuc__eyebrow">Interactive 1D Example</div>
-      <h4>Uncrossed Versus Crossed on One Number Line</h4>
-      <p>
-        Drag the ordered source points $x_1 &lt; x_2$ and target points $y_1 &lt; y_2$. The same number line drives both comparisons: the upper row keeps ranks aligned, while the lower row swaps targets and pays the crossed cost.
-      </p>
-    </div>
+{% capture describe %}
+<p>
+  Drag the ordered source points $x_1 < x_2$ and target points $y_1 < y_2$. The same number line drives both comparisons: the top row shows the uncrossed matching (sorting order), while the bottom row shows the crossed matching. In 1D, uncrossing never increases the cost for convex costs like distance.
+</p>
+{% endcapture %}
 
-    <div class="otuc__summary-card">
-      <div class="otuc__panel-title">Current Lesson</div>
-      <div class="otuc__summary-value">
-        For $c(x,y) = \lvert x-y \rvert$, the uncrossed pairing is never worse.
-      </div>
-      <div class="otuc__summary-meta">
-        Current reduction after uncrossing:
-        <span class="otuc__summary-number" data-bind="gap_value">0.00</span>
-      </div>
-    </div>
+{% capture visuals %}
+<canvas class="iaw__canvas" id="otucCanvas"></canvas>
+<div class="iaw__overlay" id="otucOverlay">
+  <div class="iaw__drag-strip" data-key="x1"></div>
+  <div class="iaw__drag-strip" data-key="x2"></div>
+  <div class="iaw__drag-strip" data-key="y1"></div>
+  <div class="iaw__drag-strip" data-key="y2"></div>
+
+  <button type="button" class="iaw__handle iaw__handle--source" data-key="x1">
+    <span><small>‹</small>&nbsp;$x_1$&nbsp;<small>›</small></span>
+  </button>
+  <button type="button" class="iaw__handle iaw__handle--source" data-key="x2">
+    <span><small>‹</small>&nbsp;$x_2$&nbsp;<small>›</small></span>
+  </button>
+  <button type="button" class="iaw__handle iaw__handle--target" data-key="y1">
+    <span><small>‹</small>&nbsp;$y_1$&nbsp;<small>›</small></span>
+  </button>
+  <button type="button" class="iaw__handle iaw__handle--target" data-key="y2">
+    <span><small>‹</small>&nbsp;$y_2$&nbsp;<small>›</small></span>
+  </button>
+</div>
+{% endcapture %}
+
+{% capture legend %}
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-warning)"></span>
+  <span>Sources $x_i$</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-target)"></span>
+  <span>Targets $y_i$</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-success)"></span>
+  <span>Uncrossed</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-danger)"></span>
+  <span>Crossed</span>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Uncrossed Total:</span>
+    <strong class="iaw__status-value" data-bind="uncrossed_total">0.00</strong>
   </div>
-
-  <div class="otuc__point-strip">
-    <div class="otuc__point-pill">
-      <span class="otuc__point-label">$x_1$</span>
-      <strong class="otuc__point-value" data-bind="x1_value">1.00</strong>
-    </div>
-    <div class="otuc__point-pill">
-      <span class="otuc__point-label">$x_2$</span>
-      <strong class="otuc__point-value" data-bind="x2_value">3.40</strong>
-    </div>
-    <div class="otuc__point-pill">
-      <span class="otuc__point-label">$y_1$</span>
-      <strong class="otuc__point-value" data-bind="y1_value">2.20</strong>
-    </div>
-    <div class="otuc__point-pill">
-      <span class="otuc__point-label">$y_2$</span>
-      <strong class="otuc__point-value" data-bind="y2_value">6.00</strong>
-    </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Crossed Total:</span>
+    <strong class="iaw__status-value" data-bind="crossed_total">0.00</strong>
   </div>
-
-  <div class="otuc__stage-card">
-    <div class="otuc__toolbar">
-      <div class="otuc__legend">
-        <div class="otuc__legend-pill otuc__legend-pill--uncrossed">
-          Uncrossed: $x_1 \leftrightarrow y_1$ and $x_2 \leftrightarrow y_2$
-        </div>
-        <div class="otuc__legend-pill otuc__legend-pill--crossed">
-          Crossed: $x_1 \leftrightarrow y_2$ and $x_2 \leftrightarrow y_1$
-        </div>
-      </div>
-
-      <div class="otuc__drag-hint">Drag the labeled points while keeping each pair ordered.</div>
-    </div>
-
-    <div class="otuc__stage-note">
-      The central axis is the shared 1D geometry. Each colored bar is a straight interval on that line, so its width is exactly the cost term being added.
-    </div>
-
-    <div class="otuc__stage" id="otucStage">
-      <canvas id="otucChart"></canvas>
-
-      <div class="otuc__overlay">
-        <button type="button" class="otuc__handle otuc__handle--source" data-key="x1" aria-label="Move x1">
-          <span>\(x_1\)</span>
-        </button>
-        <button type="button" class="otuc__handle otuc__handle--source" data-key="x2" aria-label="Move x2">
-          <span>\(x_2\)</span>
-        </button>
-        <button type="button" class="otuc__handle otuc__handle--target" data-key="y1" aria-label="Move y1">
-          <span>\(y_1\)</span>
-        </button>
-        <button type="button" class="otuc__handle otuc__handle--target" data-key="y2" aria-label="Move y2">
-          <span>\(y_2\)</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="otuc__metrics">
-    <div class="otuc__metric-card otuc__metric-card--uncrossed">
-      <div class="otuc__metric-label">$\lvert x_1-y_1 \rvert + \lvert x_2-y_2 \rvert$</div>
-      <div class="otuc__metric-value" data-bind="uncrossed_total">3.80</div>
-    </div>
-
-    <div class="otuc__metric-card otuc__metric-card--crossed">
-      <div class="otuc__metric-label">$\lvert x_1-y_2 \rvert + \lvert x_2-y_1 \rvert$</div>
-      <div class="otuc__metric-value" data-bind="crossed_total">6.20</div>
-    </div>
-
-    <div class="otuc__metric-card">
-      <div class="otuc__metric-label">Crossed minus uncrossed</div>
-      <div class="otuc__metric-value otuc__metric-value--delta" data-bind="delta_total">2.40</div>
-    </div>
+  <div class="iaw__status-item" style="grid-column: span 2; border-top: 1px solid var(--iaw-border); padding-top: 0.5rem; margin-top: 0.25rem;">
+    <span class="iaw__status-label">Crossed minus Uncrossed (Reduction):</span>
+    <strong class="iaw__status-value" style="color: var(--iaw-success); font-size: 1.25rem;" data-bind="delta_total">0.00</strong>
   </div>
 </div>
+{% endcapture %}
+
+{% include iaw_skeleton.html 
+    id="transportUncrossingWidget"
+    eyebrow="Interactive 1D Example"
+    title="Uncrossed Versus Crossed Matched Comparison"
+    description=describe
+    visuals=visuals
+    stage_id="otucStage"
+    legend=legend
+    footer=footer
+%}
 
 <style>
-.otuc {
-  --otuc-source-color: var(--prompt-warning-icon, #d97706);
-  --otuc-target-color: var(--prompt-info-icon, #0ea5e9);
-  --otuc-uncrossed-color: var(--prompt-tip-icon, #16a34a);
-  --otuc-crossed-color: var(--prompt-danger-icon, #dc2626);
-  --otuc-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
-  --otuc-ui-bg: var(--main-bg, #fff);
-  --otuc-ui-muted: var(--text-muted-color, var(--text-color, inherit));
-  --otuc-ui-text: var(--text-color, inherit);
-  margin: 2rem 0;
-  padding: 1.25rem;
-  border: 1px solid var(--otuc-ui-border);
-  border-radius: 18px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.05));
+.iaw__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+.iaw__overlay { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+
+.iaw__drag-strip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  transform: translateX(-50%);
+  cursor: col-resize;
+  pointer-events: auto;
+  z-index: 11;
+  background: transparent;
 }
 
-.otuc__intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 300px);
-  gap: 1rem;
-  align-items: start;
+.iaw__drag-strip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--iaw-border);
+    opacity: 0.3;
+    transition: opacity 0.15s ease;
 }
 
-.otuc__eyebrow {
-  margin-bottom: 0.28rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--otuc-ui-muted);
+.iaw__drag-strip:hover::after, .iaw__drag-strip.active::after {
+    opacity: 1.0;
 }
 
-.otuc__copy h4 {
-  margin: 0 0 0.45rem 0;
-  font-size: 1.04rem;
-  color: var(--heading-color, var(--otuc-ui-text));
-}
-
-.otuc__copy p {
-  margin: 0.45rem 0 0 0;
-  font-size: 1rem;
-  line-height: 1.66;
-  color: var(--otuc-ui-muted);
-}
-
-.otuc__summary-card,
-.otuc__stage-card,
-.otuc__metric-card,
-.otuc__point-pill {
-  border: 1px solid var(--otuc-ui-border);
-  border-radius: 14px;
-  background: var(--otuc-ui-bg);
-}
-
-.otuc__summary-card {
-  padding: 0.95rem;
-}
-
-.otuc__panel-title {
-  margin-bottom: 0.55rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--otuc-ui-muted);
-}
-
-.otuc__summary-value {
-  font-size: 0.98rem;
-  line-height: 1.55;
-  font-weight: 700;
-  color: var(--otuc-ui-text);
-}
-
-.otuc__summary-meta {
-  margin-top: 0.55rem;
+.iaw__handle {
+  position: absolute;
+  z-index: 15;
+  min-width: 62px;
+  min-height: 38px;
+  background: var(--iaw-bg);
+  border: 3px solid var(--iaw-border);
+  border-radius: 999px;
   font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--otuc-ui-muted);
-}
-
-.otuc__summary-number {
-  margin-left: 0.25rem;
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 0.96rem;
   font-weight: 800;
-  color: var(--otuc-uncrossed-color);
-}
-
-.otuc__point-strip,
-.otuc__metrics {
-  display: grid;
-  gap: 0.85rem;
-}
-
-.otuc__point-strip {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 1rem;
-}
-
-.otuc__point-pill {
-  padding: 0.8rem 0.9rem;
-}
-
-.otuc__point-label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: var(--otuc-ui-muted);
-}
-
-.otuc__point-value {
-  display: block;
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 1.02rem;
-  font-weight: 800;
-  color: var(--otuc-ui-text);
-}
-
-.otuc__stage-card {
-  margin-top: 1rem;
-  padding: 0.95rem;
+  color: var(--iaw-text);
+  transform: translate(-50%, -50%);
   display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.otuc__toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: 0.85rem;
-  flex-wrap: wrap;
-}
-
-.otuc__legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.otuc__legend-pill {
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--otuc-ui-border);
-  border-radius: 12px;
-  font-size: 0.92rem;
-  font-weight: 700;
-  line-height: 1.35;
-  color: var(--otuc-ui-text);
-}
-
-.otuc__legend-pill--uncrossed {
-  border-color: color-mix(in srgb, var(--otuc-uncrossed-color) 38%, var(--otuc-ui-border));
-  background: color-mix(in srgb, var(--prompt-tip-bg, rgba(22, 163, 74, 0.1)) 78%, var(--otuc-ui-bg));
-}
-
-.otuc__legend-pill--crossed {
-  border-color: color-mix(in srgb, var(--otuc-crossed-color) 32%, var(--otuc-ui-border));
-  background: color-mix(in srgb, var(--prompt-danger-bg, rgba(220, 38, 38, 0.08)) 74%, var(--otuc-ui-bg));
-}
-
-.otuc__drag-hint,
-.otuc__stage-note {
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: var(--otuc-ui-muted);
-}
-
-.otuc__stage {
-  position: relative;
-  height: 390px;
-  border: 1px solid var(--otuc-ui-border);
-  border-radius: 14px;
-  background: var(--otuc-ui-bg);
-  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  pointer-events: auto;
   user-select: none;
   touch-action: none;
+  box-shadow: none;
+  transition: transform 0.1s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.otuc__stage canvas,
-.otuc__overlay {
-  position: absolute;
-  inset: 0;
+.iaw__handle span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.otuc__overlay {
-  pointer-events: none;
+.iaw__handle small {
+    font-size: 1.1rem;
+    opacity: 0.6;
+    line-height: 0;
+    margin-top: -1px;
 }
 
-.otuc__handle {
-  position: absolute;
-  z-index: 3;
-  min-width: 56px;
-  padding: 0.38rem 0.62rem;
-  border-radius: 999px;
-  border: 1.5px solid var(--otuc-ui-border);
-  background: var(--otuc-ui-bg);
-  color: var(--otuc-ui-text);
-  font-size: 0.96rem;
-  font-weight: 700;
-  line-height: 1;
-  transform: translate(-50%, -50%);
-  pointer-events: auto;
-  cursor: grab;
-  touch-action: none;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+.iaw__handle:hover {
+    background: color-mix(in srgb, var(--iaw-bg) 95%, var(--iaw-text) 5%);
 }
 
-.otuc__handle--source {
-  border-color: color-mix(in srgb, var(--otuc-source-color) 55%, var(--otuc-ui-border));
+.iaw__handle.active { 
+    cursor: grabbing; 
+    border-color: var(--iaw-text) !important;
+    background: var(--iaw-bg);
+    transform: translate(-50%, -50%) scale(0.95);
 }
 
-.otuc__handle--target {
-  border-color: color-mix(in srgb, var(--otuc-target-color) 55%, var(--otuc-ui-border));
-}
+.iaw__handle--source { border-color: var(--iaw-warning); }
+.iaw__handle--target { border-color: var(--iaw-target); }
 
-.otuc__handle:hover,
-.otuc__handle.is-dragging {
-  background: color-mix(in srgb, var(--card-bg, rgba(120, 120, 120, 0.08)) 76%, var(--otuc-ui-bg));
-}
-
-.otuc__handle.is-dragging {
-  cursor: grabbing;
-}
-
-.otuc__handle:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--otuc-target-color) 38%, transparent);
-  outline-offset: 2px;
-}
-
-.otuc__metrics {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 1rem;
-}
-
-.otuc__metric-card {
-  padding: 0.9rem;
-}
-
-.otuc__metric-card--uncrossed {
-  border-color: color-mix(in srgb, var(--otuc-uncrossed-color) 30%, var(--otuc-ui-border));
-}
-
-.otuc__metric-card--crossed {
-  border-color: color-mix(in srgb, var(--otuc-crossed-color) 28%, var(--otuc-ui-border));
-}
-
-.otuc__metric-label {
-  font-size: 0.92rem;
-  line-height: 1.45;
-  color: var(--otuc-ui-muted);
-}
-
-.otuc__metric-value {
-  margin-top: 0.45rem;
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 1.12rem;
-  font-weight: 800;
-  color: var(--otuc-ui-text);
-}
-
-.otuc__metric-value--delta {
-  color: var(--otuc-uncrossed-color);
-}
-
-.otuc .mjx-container {
-  margin: 0 !important;
-}
-
-@media (max-width: 980px) {
-  .otuc__intro,
-  .otuc__metrics {
-    grid-template-columns: 1fr;
-  }
-
-  .otuc__point-strip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 720px) {
-  .otuc {
-    padding: 1rem;
-  }
-
-  .otuc__stage {
-    height: 420px;
-  }
-
-  .otuc__handle {
-    min-width: 52px;
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 560px) {
-  .otuc__point-strip,
-  .otuc__metrics {
-    grid-template-columns: 1fr;
-  }
-
-  .otuc__legend-pill {
-    font-size: 0.84rem;
-  }
+@media (max-width: 640px) {
+  .iaw__handle { min-width: 54px; min-height: 32px; font-size: 0.8rem; border-width: 2px; }
+  .iaw__stage { height: 320px; }
 }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const root = document.getElementById('transportUncrossingWidget');
-  if (!root || root.dataset.initialized === 'true') return;
-  root.dataset.initialized = 'true';
+(function() {
+    const root = document.getElementById('transportUncrossingWidget');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
 
-  function initWidget(attempt = 0) {
-    if (typeof Chart === 'undefined') {
-      if (attempt < 20) window.setTimeout(function() { initWidget(attempt + 1); }, 250);
-      return;
-    }
-
-    const canvas = root.querySelector('#otucChart');
-    const handles = {
-      x1: root.querySelector('[data-key="x1"]'),
-      x2: root.querySelector('[data-key="x2"]'),
-      y1: root.querySelector('[data-key="y1"]'),
-      y2: root.querySelector('[data-key="y2"]')
-    };
+    const canvas = root.querySelector('#otucCanvas');
+    const ctx = canvas.getContext('2d');
+    const stage = root.querySelector('#otucStage');
+    const handles = root.querySelectorAll('.iaw__handle');
+    const strips = root.querySelectorAll('.iaw__drag-strip');
+    
     const binds = {
-      x1Value: root.querySelector('[data-bind="x1_value"]'),
-      x2Value: root.querySelector('[data-bind="x2_value"]'),
-      y1Value: root.querySelector('[data-bind="y1_value"]'),
-      y2Value: root.querySelector('[data-bind="y2_value"]'),
-      uncrossedTotal: root.querySelector('[data-bind="uncrossed_total"]'),
-      crossedTotal: root.querySelector('[data-bind="crossed_total"]'),
-      deltaTotal: root.querySelector('[data-bind="delta_total"]'),
-      gapValue: root.querySelector('[data-bind="gap_value"]')
+      uncrossed: root.querySelector('[data-bind="uncrossed_total"]'),
+      crossed: root.querySelector('[data-bind="crossed_total"]'),
+      delta: root.querySelector('[data-bind="delta_total"]')
     };
 
-    const DOMAIN_MIN = 0;
-    const DOMAIN_MAX = 8;
-    const MIN_GAP = 0.8;
-    const VALUE_STEP = 0.05;
+    const DOMAIN = { min: 0, max: 10 };
+    const state = { x1: 1.5, x2: 4.5, y1: 3.0, y2: 8.5, activeKey: null };
 
-    const state = {
-      x1: 1.0,
-      x2: 3.4,
-      y1: 2.2,
-      y2: 6.0
-    };
+    let COLORS = IAW.getThemeColors(root);
+    const mapper = () => IAW.createMapper(DOMAIN, { min: 50, max: canvas.width - 50 });
 
-    let theme = getThemeColors();
-    let activeKey = null;
+    function draw() {
+      if (!canvas || !stage) return;
+      canvas.width = stage.clientWidth;
+      canvas.height = stage.clientHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    function clamp(value, min, max) {
-      return Math.max(min, Math.min(max, value));
-    }
+      const h = canvas.height, yAxis = h * 0.55, yUncrossed = h * 0.25, yCrossed = h * 0.85;
+      const m = mapper();
 
-    function roundStep(value) {
-      return Math.round(value / VALUE_STEP) * VALUE_STEP;
-    }
+      // 1. Draw Number Line
+      ctx.beginPath();
+      ctx.moveTo(0, yAxis); ctx.lineTo(canvas.width, yAxis);
+      ctx.strokeStyle = COLORS.border; ctx.lineWidth = 1.5; ctx.stroke();
 
-    function formatNumber(value) {
-      return value.toFixed(2);
-    }
+      for (let i = DOMAIN.min; i <= DOMAIN.max; i++) {
+        const px = m.toRange(i);
+        ctx.beginPath(); ctx.moveTo(px, yAxis - 4); ctx.lineTo(px, yAxis + 4); ctx.stroke();
+        ctx.fillStyle = COLORS.muted; ctx.font = '700 11px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(i, px, yAxis + 20);
+      }
 
-    function getThemeColors() {
-      const style = getComputedStyle(document.documentElement);
-      const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
-      return {
-        text: style.getPropertyValue('--text-color').trim() || (isDark ? '#e5e7eb' : '#1f2937'),
-        muted: style.getPropertyValue('--text-muted-color').trim() || (isDark ? '#9ca3af' : '#6b7280'),
-        border: style.getPropertyValue('--card-border').trim() || (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'),
-        source: style.getPropertyValue('--prompt-warning-icon').trim() || '#d97706',
-        target: style.getPropertyValue('--prompt-info-icon').trim() || '#0ea5e9',
-        uncrossed: style.getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
-        crossed: style.getPropertyValue('--prompt-danger-icon').trim() || '#dc2626',
-        surface: style.getPropertyValue('--main-bg').trim() || (isDark ? '#111827' : '#ffffff')
+      // 2. Draw Connections
+      const px1 = m.toRange(state.x1), px2 = m.toRange(state.x2);
+      const py1 = m.toRange(state.y1), py2 = m.toRange(state.y2);
+
+      const drawSeg = (xS, xE, yR, col, keys) => {
+        const isActive = keys.includes(state.activeKey);
+        ctx.beginPath(); ctx.moveTo(xS, yAxis); ctx.lineTo(xS, yR); ctx.moveTo(xE, yAxis); ctx.lineTo(xE, yR);
+        ctx.lineWidth = 1; ctx.strokeStyle = COLORS.border; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(xS, yR); ctx.lineTo(xE, yR);
+        ctx.strokeStyle = col; ctx.lineWidth = isActive ? 6 : 5; ctx.stroke();
+        ctx.fillStyle = col;
+        [xS, xE].forEach(x => { ctx.beginPath(); ctx.arc(x, yR, isActive ? 5 : 4, 0, Math.PI*2); ctx.fill(); });
       };
-    }
 
-    function alphaColor(color, alpha) {
-      if (!color) return 'rgba(0, 0, 0, ' + alpha + ')';
-      if (color.startsWith('#')) {
-        let hex = color.slice(1);
-        if (hex.length === 3) {
-          hex = hex.split('').map(function(char) { return char + char; }).join('');
-        }
-        const value = parseInt(hex, 16);
-        const r = (value >> 16) & 255;
-        const g = (value >> 8) & 255;
-        const b = value & 255;
-        return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
-      }
-      if (color.startsWith('rgb')) {
-        const values = color.match(/[\d.]+/g) || [];
-        const r = values[0] || 0;
-        const g = values[1] || 0;
-        const b = values[2] || 0;
-        return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
-      }
-      return color;
-    }
+      drawSeg(px1, py1, yUncrossed - 10, COLORS.success, ['x1', 'y1']);
+      drawSeg(px2, py2, yUncrossed + 10, COLORS.success, ['x2', 'y2']);
+      drawSeg(px1, py2, yCrossed - 10, COLORS.danger, ['x1', 'y2']);
+      drawSeg(px2, py1, yCrossed + 10, COLORS.danger, ['x2', 'y1']);
 
-    function getMetrics() {
-      const uncrossed = Math.abs(state.x1 - state.y1) + Math.abs(state.x2 - state.y2);
-      const crossed = Math.abs(state.x1 - state.y2) + Math.abs(state.x2 - state.y1);
-      const delta = crossed - uncrossed;
-      return { uncrossed: uncrossed, crossed: crossed, delta: delta };
-    }
-
-    function syncText() {
-      const metrics = getMetrics();
-      binds.x1Value.textContent = formatNumber(state.x1);
-      binds.x2Value.textContent = formatNumber(state.x2);
-      binds.y1Value.textContent = formatNumber(state.y1);
-      binds.y2Value.textContent = formatNumber(state.y2);
-      binds.uncrossedTotal.textContent = formatNumber(metrics.uncrossed);
-      binds.crossedTotal.textContent = formatNumber(metrics.crossed);
-      binds.deltaTotal.textContent = formatNumber(metrics.delta);
-      binds.gapValue.textContent = formatNumber(metrics.delta);
-    }
-
-    function clampValueForKey(key, nextValue) {
-      const rounded = roundStep(nextValue);
-      if (key === 'x1') return clamp(rounded, DOMAIN_MIN, state.x2 - MIN_GAP);
-      if (key === 'x2') return clamp(rounded, state.x1 + MIN_GAP, DOMAIN_MAX);
-      if (key === 'y1') return clamp(rounded, DOMAIN_MIN, state.y2 - MIN_GAP);
-      return clamp(rounded, state.y1 + MIN_GAP, DOMAIN_MAX);
-    }
-
-    function chartLayout(chart) {
-      const chartArea = chart.chartArea;
-      return {
-        chartArea: chartArea,
-        topRowY: chartArea.top + 82,
-        axisY: chartArea.top + (chartArea.bottom - chartArea.top) * 0.54,
-        bottomRowY: chartArea.bottom - 92
-      };
-    }
-
-    function positionOverlay(chart) {
-      const xScale = chart.scales.x;
-      const layout = chartLayout(chart);
-
-      Object.keys(handles).forEach(function(key) {
-        handles[key].style.left = xScale.getPixelForValue(state[key]) + 'px';
-        handles[key].style.top = layout.axisY + 'px';
-      });
-    }
-
-    function drawGuideLine(ctx, chartArea, y, color) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.setLineDash([5, 7]);
-      ctx.moveTo(chartArea.left, y);
-      ctx.lineTo(chartArea.right, y);
-      ctx.strokeStyle = alphaColor(color, 0.24);
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawDistanceSegment(ctx, startX, endX, axisY, laneY, color) {
-      const leftX = Math.min(startX, endX);
-      const rightX = Math.max(startX, endX);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(leftX, axisY);
-      ctx.lineTo(leftX, laneY);
-      ctx.moveTo(rightX, axisY);
-      ctx.lineTo(rightX, laneY);
-      ctx.strokeStyle = alphaColor(color, 0.22);
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(leftX, laneY);
-      ctx.lineTo(rightX, laneY);
-      ctx.strokeStyle = alphaColor(color, 0.18);
-      ctx.lineWidth = 10;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(leftX, laneY);
-      ctx.lineTo(rightX, laneY);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(leftX, laneY - 7);
-      ctx.lineTo(leftX, laneY + 7);
-      ctx.moveTo(rightX, laneY - 7);
-      ctx.lineTo(rightX, laneY + 7);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawNumberLine(ctx, chart, layout) {
-      const xScale = chart.scales.x;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(chart.chartArea.left, layout.axisY);
-      ctx.lineTo(chart.chartArea.right, layout.axisY);
-      ctx.strokeStyle = theme.text;
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-
-      ctx.font = '600 13px var(--font-family-base, system-ui)';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      for (let tick = DOMAIN_MIN; tick <= DOMAIN_MAX; tick += 1) {
-        const px = xScale.getPixelForValue(tick);
-        ctx.beginPath();
-        ctx.moveTo(px, layout.axisY - 7);
-        ctx.lineTo(px, layout.axisY + 7);
-        ctx.strokeStyle = theme.border;
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-        ctx.fillStyle = theme.muted;
-        ctx.fillText(String(tick), px, layout.axisY + 12);
-      }
-      ctx.restore();
-    }
-
-    function drawProjectionLines(ctx, chart, layout) {
-      const xScale = chart.scales.x;
-      ['x1', 'x2', 'y1', 'y2'].forEach(function(key) {
-        const px = xScale.getPixelForValue(state[key]);
-        const color = key.startsWith('x') ? theme.source : theme.target;
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(px, chart.chartArea.top + 18);
-        ctx.lineTo(px, chart.chartArea.bottom - 18);
-        ctx.strokeStyle = alphaColor(color, 0.16);
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.restore();
-      });
-    }
-
-    function drawAxisMarkers(ctx, chart, layout) {
-      const xScale = chart.scales.x;
-      ['x1', 'x2', 'y1', 'y2'].forEach(function(key) {
-        const px = xScale.getPixelForValue(state[key]);
-        const color = key.startsWith('x') ? theme.source : theme.target;
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(px, layout.axisY, 5, 0, Math.PI * 2);
-        ctx.fillStyle = theme.surface;
-        ctx.fill();
-        ctx.lineWidth = 2.4;
-        ctx.strokeStyle = color;
-        ctx.stroke();
-        ctx.restore();
-      });
-    }
-
-    const uncrossingPlugin = {
-      id: 'otucIntervals',
-      afterDraw: function(chart) {
-        const ctx = chart.ctx;
-        const xScale = chart.scales.x;
-        const layout = chartLayout(chart);
-
-        positionOverlay(chart);
-        drawGuideLine(ctx, chart.chartArea, layout.topRowY, theme.uncrossed);
-        drawGuideLine(ctx, chart.chartArea, layout.bottomRowY, theme.crossed);
-        drawProjectionLines(ctx, chart, layout);
-
-        drawDistanceSegment(
-          ctx,
-          xScale.getPixelForValue(state.x1),
-          xScale.getPixelForValue(state.y1),
-          layout.axisY,
-          layout.topRowY - 14,
-          theme.uncrossed
-        );
-        drawDistanceSegment(
-          ctx,
-          xScale.getPixelForValue(state.x2),
-          xScale.getPixelForValue(state.y2),
-          layout.axisY,
-          layout.topRowY + 14,
-          theme.uncrossed
-        );
-        drawDistanceSegment(
-          ctx,
-          xScale.getPixelForValue(state.x1),
-          xScale.getPixelForValue(state.y2),
-          layout.axisY,
-          layout.bottomRowY - 14,
-          theme.crossed
-        );
-        drawDistanceSegment(
-          ctx,
-          xScale.getPixelForValue(state.x2),
-          xScale.getPixelForValue(state.y1),
-          layout.axisY,
-          layout.bottomRowY + 14,
-          theme.crossed
-        );
-
-        drawNumberLine(ctx, chart, layout);
-        drawAxisMarkers(ctx, chart, layout);
-      }
-    };
-
-    const chart = new Chart(canvas.getContext('2d'), {
-      type: 'scatter',
-      plugins: [uncrossingPlugin],
-      data: {
-        datasets: [
-          {
-            data: [],
-            pointRadius: 0
+      // 3. Structural Rails
+      ['x1', 'x2', 'y1', 'y2'].forEach(key => {
+          const x = m.toRange(state[key]);
+          if (state.activeKey === key) {
+              ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h);
+              ctx.strokeStyle = COLORS.muted; ctx.lineWidth = 1; ctx.stroke();
           }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        events: [],
-        layout: {
-          padding: {
-            top: 28,
-            right: 20,
-            bottom: 46,
-            left: 20
-          }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false }
-        },
-        scales: {
-          x: {
-            type: 'linear',
-            min: DOMAIN_MIN,
-            max: DOMAIN_MAX,
-            display: false
-          },
-          y: {
-            min: 0,
-            max: 1,
-            display: false
-          }
-        }
-      }
-    });
-
-    function updateChart() {
-      syncText();
-      chart.draw();
-    }
-
-    function valueFromClientX(clientX) {
-      const rect = canvas.getBoundingClientRect();
-      const px = clientX - rect.left;
-      return chart.scales.x.getValueForPixel(px);
-    }
-
-    function setValue(key, value) {
-      state[key] = clampValueForKey(key, value);
-      updateChart();
-    }
-
-    function stopDragging() {
-      if (!activeKey) return;
-      handles[activeKey].classList.remove('is-dragging');
-      activeKey = null;
-    }
-
-    function onPointerMove(event) {
-      if (!activeKey) return;
-      event.preventDefault();
-      setValue(activeKey, valueFromClientX(event.clientX));
-    }
-
-    function onPointerUp() {
-      stopDragging();
-    }
-
-    Object.keys(handles).forEach(function(key) {
-      const handle = handles[key];
-      handle.addEventListener('pointerdown', function(event) {
-        event.preventDefault();
-        activeKey = key;
-        handle.classList.add('is-dragging');
       });
 
-      handle.addEventListener('keydown', function(event) {
-        const step = event.shiftKey ? 0.25 : 0.1;
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
-          event.preventDefault();
-          setValue(key, state[key] - step);
-        }
-        if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
-          event.preventDefault();
-          setValue(key, state[key] + step);
-        }
+      // 4. Axis Points
+      [px1, px2].forEach((x, i) => {
+        const isActive = (state.activeKey === `x${i+1}`);
+        ctx.fillStyle = COLORS.sourceA;
+        ctx.beginPath(); ctx.arc(x, yAxis, 5, 0, Math.PI*2); ctx.fill();
+        if (isActive) { ctx.strokeStyle = COLORS.muted; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, yAxis, 11, 0, Math.PI*2); ctx.stroke(); }
       });
-    });
+      [py1, py2].forEach((x, i) => {
+        const isActive = (state.activeKey === `y${i+1}`);
+        ctx.fillStyle = COLORS.sourceB;
+        ctx.beginPath(); ctx.arc(x, yAxis, 5, 0, Math.PI*2); ctx.fill();
+        if (isActive) { ctx.strokeStyle = COLORS.muted; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, yAxis, 11, 0, Math.PI*2); ctx.stroke(); }
+      });
 
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-    window.addEventListener('pointercancel', onPointerUp);
-    window.addEventListener('resize', function() {
-      chart.resize();
-      chart.draw();
-    });
+      // 5. Update DOM
+      handles.forEach(h => { const k = h.dataset.key; h.style.left = m.toRange(state[k]) + 'px'; h.style.top = yAxis + 'px'; });
+      strips.forEach(s => { const k = s.dataset.key; s.style.left = m.toRange(state[k]) + 'px'; });
 
-    const themeObserver = new MutationObserver(function() {
-      theme = getThemeColors();
-      chart.update('none');
-    });
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-mode']
-    });
-
-    function requestMathTypeset(attempt = 0) {
-      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-        window.MathJax.typesetPromise([root]).catch(function() {});
-        return;
-      }
-      if (attempt < 20) {
-        window.setTimeout(function() { requestMathTypeset(attempt + 1); }, 250);
-      }
+      const uT = Math.abs(state.x1 - state.y1) + Math.abs(state.x2 - state.y2);
+      const cT = Math.abs(state.x1 - state.y2) + Math.abs(state.x2 - state.y1);
+      binds.uncrossed.innerText = uT.toFixed(2); binds.crossed.innerText = cT.toFixed(2);
+      binds.delta.innerText = (cT - uT).toFixed(2);
     }
 
-    syncText();
-    chart.draw();
-    requestMathTypeset();
-  }
+    function handlePointer(e) {
+      if (!state.activeKey) return;
+      const rect = stage.getBoundingClientRect();
+      let val = mapper().toDomain(e.clientX - rect.left);
+      val = Math.max(DOMAIN.min, Math.min(DOMAIN.max, val));
+      const gap = 0.5;
+      if (state.activeKey === 'x1') val = Math.min(val, state.x2 - gap);
+      if (state.activeKey === 'x2') val = Math.max(val, state.x1 + gap);
+      if (state.activeKey === 'y1') val = Math.min(val, state.y2 - gap);
+      if (state.activeKey === 'y2') val = Math.max(val, state.y1 + gap);
+      state[state.activeKey] = val; draw();
+    }
 
-  initWidget();
-});
+    function startDragging(key, e, el) {
+        state.activeKey = key; el.setPointerCapture(e.pointerId);
+        root.querySelector(`.iaw__handle[data-key="${key}"]`)?.classList.add('active');
+        root.querySelector(`.iaw__drag-strip[data-key="${key}"]`)?.classList.add('active');
+        draw();
+    }
+    function endDragging() {
+        state.activeKey = null;
+        handles.forEach(h => h.classList.remove('active')); strips.forEach(s => s.classList.remove('active'));
+        draw();
+    }
+
+    handles.forEach(h => { h.addEventListener('pointerdown', e => startDragging(h.dataset.key, e, h)); h.addEventListener('pointerup', endDragging); h.addEventListener('pointermove', handlePointer); });
+    strips.forEach(s => { s.addEventListener('pointerdown', e => startDragging(s.dataset.key, e, s)); s.addEventListener('pointerup', endDragging); s.addEventListener('pointermove', handlePointer); });
+
+    IAW.observeTheme(() => { COLORS = IAW.getThemeColors(root); draw(); });
+    if (window.ResizeObserver) new ResizeObserver(draw).observe(stage);
+    window.addEventListener('resize', draw);
+    draw(); setTimeout(draw, 300);
+})();
 </script>
