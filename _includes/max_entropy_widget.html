@@ -341,10 +341,20 @@ document.addEventListener('DOMContentLoaded', function() {
     return clipped.toFixed(3);
   }
 
+  let lastConstraintText = '';
   function updateReadout() {
     const metrics = model.metrics[currentFrame];
     entropyValue.textContent = metrics.entropy.toFixed(3);
-    constraintLabel.textContent = model.targetLabelText;
+    
+    // Only update and re-typeset if the constraint text has changed
+    if (lastConstraintText !== model.targetLabelText) {
+      constraintLabel.innerHTML = model.targetLabelText;
+      lastConstraintText = model.targetLabelText;
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([constraintLabel]).catch(() => {});
+      }
+    }
+
     momentSummary.textContent = `mean ${formatSigned(metrics.mean)}, var ${metrics.variance.toFixed(3)}`;
     valueLabel.textContent = `Step ${currentFrame} / ${FRAME_COUNT}`;
   }

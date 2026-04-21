@@ -229,6 +229,12 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--iaw-muted);
+
+  /* Prevent MathJax symbols from being squashed or distorted by uppercase/letter-spacing */
+  .mjx-container {
+    text-transform: none;
+    letter-spacing: normal;
+  }
 }
 
 .iaw__status-value {
