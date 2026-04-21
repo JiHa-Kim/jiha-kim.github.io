@@ -1,0 +1,9 @@
+<div class="iaw__status-item{% if include.class %} {{ include.class }}{% endif %}"{% if include.style %} style="{{ include.style }}"{% endif %}>
+  <span class="iaw__status-label{% if include.label_class %} {{ include.label_class }}{% endif %}"{% if include.label_style %} style="{{ include.label_style }}"{% endif %}>{{ include.label }}</span>
+  <strong
+    class="iaw__status-value{% if include.value_class %} {{ include.value_class }}{% endif %}"
+    {% if include.value_id %}id="{{ include.value_id }}"{% endif %}
+    {% if include.value_bind %}data-bind="{{ include.value_bind }}"{% endif %}
+    {% if include.value_style %}style="{{ include.value_style }}"{% endif %}
+  >{{ include.value }}</strong>
+</div>

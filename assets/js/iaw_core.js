@@ -161,6 +161,49 @@ window.IAW = (function() {
         return root;
     };
 
+    core.mountFigure = function(rootOrId, initFn, options = {}) {
+        const run = function() {
+            const root = core.initFigure(rootOrId, options);
+            if (!root) return;
+            initFn(root);
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', run, { once: true });
+        } else {
+            run();
+        }
+    };
+
+    core.bindSegmentedControl = function(rootOrButtons, callback, options = {}) {
+        const buttons = Array.isArray(rootOrButtons) || NodeList.prototype.isPrototypeOf(rootOrButtons)
+            ? Array.from(rootOrButtons)
+            : Array.from(rootOrButtons.querySelectorAll(options.selector || '.iaw__seg-btn'));
+
+        function activate(nextButton, notify = true) {
+            if (!nextButton) return null;
+            buttons.forEach((button) => button.classList.toggle('active', button === nextButton));
+            if (notify && typeof callback === 'function') callback(nextButton);
+            return nextButton;
+        }
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => activate(button, true));
+        });
+
+        if (options.triggerInitial) {
+            activate(buttons.find((button) => button.classList.contains('active')) || buttons[0], true);
+        }
+
+        return {
+            activate,
+            buttons,
+            getActive() {
+                return buttons.find((button) => button.classList.contains('active')) || null;
+            }
+        };
+    };
+
     core.requestMathTypeset = function(targets, attempt = 0) {
         if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
             const list = Array.isArray(targets) ? targets.filter(Boolean) : [targets].filter(Boolean);

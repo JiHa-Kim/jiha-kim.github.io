@@ -18,14 +18,8 @@
 
 {% capture footer %}
 <div class="iaw__status-grid t2dd__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Baseline $T_{\mathrm{KR}}$ Cost</span>
-    <strong class="iaw__status-value" id="costKRDisc">237.89</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Discrete $T_{\mathrm{OT}}$ Cost</span>
-    <strong class="iaw__status-value t2dd__cost-value--best" id="costOTDisc">114.06</strong>
-  </div>
+  {% include iaw_status_item.html label="Baseline $T_{\mathrm{KR}}$ Cost" value="237.89" value_id="costKRDisc" %}
+  {% include iaw_status_item.html label="Discrete $T_{\mathrm{OT}}$ Cost" value="114.06" value_id="costOTDisc" value_class="t2dd__cost-value--best" %}
 </div>
 
 {% include iaw_timeline_controls.html play_id="t2ddPlay" play_label="Play discrete transport animation" slider_id="t2ddSlider" min="0" max="1" step="0.005" value="0" variant="progress" %}
@@ -73,9 +67,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const root = IAW.initFigure('discreteTransportFigure');
-  if (!root) return;
+IAW.mountFigure('discreteTransportFigure', function(root) {
 
   const canvas = root.querySelector('#t2ddCanvas');
   const ctx = canvas.getContext('2d');
@@ -200,13 +192,9 @@ document.addEventListener('DOMContentLoaded', function() {
     draw();
   }
 
-  segBtns.forEach(button => {
-    button.addEventListener('click', () => {
-      segBtns.forEach(b => b.classList.remove('active'));
-      button.classList.add('active');
+  IAW.bindSegmentedControl(segBtns, (button) => {
       currentMapType = button.dataset.map;
       draw();
-    });
   });
 
   IAW.observeTheme(() => {

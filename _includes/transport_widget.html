@@ -2,6 +2,7 @@
 <p>
   In the discrete Monge problem, each source atom $z_i$ must choose exactly one target atom $x_j$.
   If the masses are indivisible, a feasible deterministic map $T$ exists only when the source atoms already come in the exact pieces demanded by the targets.
+  Here the route coefficients $c_{ij}$ are shipping rates in $\$/\mathrm{kg}$, so with 1kg boxes the Monge objective is the total dollar cost.
 </p>
 {% endcapture %}
 
@@ -38,22 +39,10 @@
 
 {% capture footer1 %}
 <div class="iaw__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Status</span>
-    <strong class="iaw__status-value otm-status" style="color: var(--iaw-success);">Feasible, Optimal</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Verdict</span>
-    <strong class="iaw__status-value otm-verdict">Cost-minimizing deterministic map.</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Active Costs</span>
-    <strong class="iaw__status-value otm-breakdown">$c_{11}+c_{22}$</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Monge Objective</span>
-    <strong class="iaw__status-value otm-total-cost" style="color: var(--iaw-primary); font-size: 1.25rem;">$3</strong>
-  </div>
+  {% include iaw_status_item.html label="Status" value="Feasible, Optimal" value_class="otm-status" value_style="color: var(--iaw-success);" %}
+  {% include iaw_status_item.html label="Verdict" value="Cost-minimizing deterministic map." value_class="otm-verdict" %}
+  {% include iaw_status_item.html label="Active Costs ($/kg)" value="$c_{11}+c_{22}$" value_class="otm-breakdown" %}
+  {% include iaw_status_item.html label="Monge Objective ($)" value="$3" value_class="otm-total-cost" value_style="color: var(--iaw-primary); font-size: 1.25rem;" %}
 </div>
 {% endcapture %}
 
@@ -93,14 +82,8 @@
 
 {% capture footer2 %}
 <div class="iaw__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Status</span>
-    <strong class="iaw__status-value" style="color: var(--iaw-danger);">Infeasible</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Verdict</span>
-    <strong class="iaw__status-value">No deterministic map can match both target masses.</strong>
-  </div>
+  {% include iaw_status_item.html label="Status" value="Infeasible" value_style="color: var(--iaw-danger);" %}
+  {% include iaw_status_item.html label="Verdict" value="No deterministic map can match both target masses." %}
 </div>
 {% endcapture %}
 
@@ -172,16 +155,15 @@
 <script>
 (function() {
     function initWidget1() {
-        const root = document.getElementById('mongeFeasibleWidget');
-        if (!root) return;
+        IAW.mountFigure('mongeFeasibleWidget', function(root) {
         const canvas = root.querySelector('#otmCanvas1'), ctx = canvas.getContext('2d'), stage = root.querySelector('#otmStage1');
         const btns = root.querySelectorAll('.iaw__seg-btn'), routesContainer = root.querySelector('.otm-routes-container');
         let state = { plan: 1 }, COLORS = IAW.getThemeColors(root);
         let renderToken = 0;
 
         const routeData = {
-          1: [{ from: '--a', to: '--c', label: 'c_{11}=1', best: true, src: 'a' }, { from: '--b', to: '--d', label: 'c_{22}=2', best: true, src: 'b' }],
-          2: [{ from: '--a', to: '--d', label: 'c_{12}=4', best: false, src: 'a' }, { from: '--b', to: '--c', label: 'c_{21}=3', best: false, src: 'b' }]
+          1: [{ from: '--a', to: '--c', label: 'c_{11}=1\\,\\$/\\mathrm{kg}', best: true, src: 'a' }, { from: '--b', to: '--d', label: 'c_{22}=2\\,\\$/\\mathrm{kg}', best: true, src: 'b' }],
+          2: [{ from: '--a', to: '--d', label: 'c_{12}=4\\,\\$/\\mathrm{kg}', best: false, src: 'a' }, { from: '--b', to: '--c', label: 'c_{21}=3\\,\\$/\\mathrm{kg}', best: false, src: 'b' }]
         };
 
         const allLabels = [];
@@ -220,7 +202,7 @@
             r.el.style.visibility = 'visible'; r.el.style.opacity = '1';
             const cx = (p1.x + p2.x)/2, cy = (p1.y + p2.y)/2;
             r.el.style.left = `${cx}px`; r.el.style.top = `${cy}px`;
-            return { el: r.el, anchorX: cx, anchorY: cy, x: cx, y: cy, w: 120, h: 30 };
+            return { el: r.el, anchorX: cx, anchorY: cy, x: cx, y: cy, w: 170, h: 30 };
           });
           IAW.resolveCollisions(activeRoutes);
           if (window.MathJax?.typesetPromise) window.MathJax.typesetPromise([routesContainer]);
@@ -253,19 +235,18 @@
           draw();
         }
 
-        btns.forEach(b => b.addEventListener('click', () => {
-          btns.forEach(x => x.classList.remove('active')); b.classList.add('active');
-          state.plan = parseInt(b.dataset.plan, 10); updateUI();
-        }));
+        IAW.bindSegmentedControl(btns, (button) => {
+          state.plan = parseInt(button.dataset.plan, 10); updateUI();
+        });
 
         IAW.observeTheme(() => { COLORS = IAW.getThemeColors(root); updateUI(); });
         window.addEventListener('resize', draw);
         window.setTimeout(updateUI, 100);
+        });
     }
 
     function initWidget2() {
-        const root = document.getElementById('mongeFailureWidget');
-        if (!root) return;
+        IAW.mountFigure('mongeFailureWidget', function(root) {
         const canvas = root.querySelector('#otmCanvas2'), ctx = canvas.getContext('2d'), stage = root.querySelector('#otmStage2');
         let COLORS = IAW.getThemeColors(root);
 
@@ -294,6 +275,7 @@
         IAW.observeTheme(() => { COLORS = IAW.getThemeColors(root); draw(); });
         window.addEventListener('resize', draw);
         window.setTimeout(draw, 100);
+        });
     }
 
     initWidget1();

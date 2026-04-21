@@ -358,9 +358,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-(function() {
-    const root = IAW.initFigure("transportSplitWidget");
-    if (!root) return;
+IAW.mountFigure("transportSplitWidget", function(root) {
 
     const SLOT_COUNT = { a: 8, b: 4, c: 4, d: 8 };
     const UNIT = 0.25;
@@ -716,5 +714,5 @@
     }
 
     init();
-})();
+});
 </script>

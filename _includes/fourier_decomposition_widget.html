@@ -34,14 +34,8 @@
 
 {% capture footer %}
 <div class="iaw__status-grid ffd__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Dominant Region</span>
-    <strong class="iaw__status-value" id="ffdDominantRegion">Spectrum Center</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Reading</span>
-    <strong class="iaw__status-value" id="ffdInterpretation">Low frequencies dominate, so the energy stays concentrated near the spectrum center.</strong>
-  </div>
+  {% include iaw_status_item.html label="Dominant Region" value="Spectrum Center" value_id="ffdDominantRegion" %}
+  {% include iaw_status_item.html label="Reading" value="Low frequencies dominate, so the energy stays concentrated near the spectrum center." value_id="ffdInterpretation" %}
 </div>
 {% endcapture %}
 
@@ -81,9 +75,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const root = IAW.initFigure('fourierDecompositionFigure');
-  if (!root) return;
+IAW.mountFigure('fourierDecompositionFigure', function(root) {
 
   const SIZE = 8;
   const presets = {
@@ -201,13 +193,9 @@ document.addEventListener('DOMContentLoaded', function() {
     interpretation.textContent = presets[currentPreset].text;
   }
 
-  segBtns.forEach((button) => {
-    button.addEventListener('click', () => {
-      segBtns.forEach((item) => item.classList.remove('active'));
-      button.classList.add('active');
+  IAW.bindSegmentedControl(segBtns, (button) => {
       currentPreset = button.dataset.preset;
       render();
-    });
   });
 
   IAW.observeTheme(() => {

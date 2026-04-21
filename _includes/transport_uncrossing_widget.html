@@ -28,38 +28,17 @@
 {% endcapture %}
 
 {% capture legend %}
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-warning)"></span>
-  <span>Sources $x_i$</span>
-</div>
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-target)"></span>
-  <span>Targets $y_i$</span>
-</div>
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-success)"></span>
-  <span>Uncrossed</span>
-</div>
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-danger)"></span>
-  <span>Crossed</span>
-</div>
+{% include iaw_legend_item.html swatch_style="background: var(--iaw-warning)" label="Sources $x_i$" %}
+{% include iaw_legend_item.html swatch_style="background: var(--iaw-target)" label="Targets $y_i$" %}
+{% include iaw_legend_item.html swatch_style="background: var(--iaw-success)" label="Uncrossed" %}
+{% include iaw_legend_item.html swatch_style="background: var(--iaw-danger)" label="Crossed" %}
 {% endcapture %}
 
 {% capture footer %}
 <div class="iaw__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Cost (Uncrossed)</span>
-    <strong class="iaw__status-value" data-bind="uncrossed_total">0.00</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Cost (Crossed)</span>
-    <strong class="iaw__status-value" data-bind="crossed_total">0.00</strong>
-  </div>
-  <div class="iaw__status-item" style="grid-column: span 2; border-top: 1px solid var(--iaw-border); padding-top: 0.5rem; margin-top: 0.25rem;">
-    <span class="iaw__status-label">Benefit of Uncrossing ($\Delta$):</span>
-    <strong class="iaw__status-value" style="color: var(--iaw-success); font-size: 1.25rem;" data-bind="delta_total">0.00</strong>
-  </div>
+  {% include iaw_status_item.html label="Cost (Uncrossed)" value="0.00" value_bind="uncrossed_total" %}
+  {% include iaw_status_item.html label="Cost (Crossed)" value="0.00" value_bind="crossed_total" %}
+  {% include iaw_status_item.html label="Benefit of Uncrossing ($\Delta$):" value="0.00" value_bind="delta_total" class="iaw__status-item--span-2 iaw__status-item--divider" value_style="color: var(--iaw-success); font-size: 1.25rem;" %}
 </div>
 {% endcapture %}
 
@@ -84,10 +63,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-(function() {
-    const root = document.getElementById('transportUncrossingWidget');
-    if (!root || root.dataset.initialized === 'true') return;
-    root.dataset.initialized = 'true';
+IAW.mountFigure('transportUncrossingWidget', function(root) {
 
     const canvas = root.querySelector('#otucCanvas');
     const ctx = canvas.getContext('2d');
@@ -212,5 +188,5 @@
     if (window.ResizeObserver) new ResizeObserver(draw).observe(stage);
     window.addEventListener('resize', draw);
     draw(); setTimeout(draw, 300);
-})();
+});
 </script>

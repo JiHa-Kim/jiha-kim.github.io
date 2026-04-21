@@ -30,30 +30,15 @@
 {% endcapture %}
 
 {% capture legend %}
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: #fbbf24; height: 3px;"></span>
-  <span>$x_1$ coordinate lines</span>
-</div>
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: #38bdf8; height: 3px;"></span>
-  <span>$x_2$ coordinate lines</span>
-</div>
+{% include iaw_legend_item.html swatch_style="background: #fbbf24; height: 3px;" label="$x_1$ coordinate lines" %}
+{% include iaw_legend_item.html swatch_style="background: #38bdf8; height: 3px;" label="$x_2$ coordinate lines" %}
 {% endcapture %}
 
 {% capture footer %}
 <div class="iaw__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Map Class</span>
-    <strong class="iaw__status-value" data-bind="mapping_desc">Permutation Matrix</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Coordinate Map</span>
-    <strong class="iaw__status-value" data-bind="mapping_formula">$y_1=x_2,\quad y_2=x_1$</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Interpretation</span>
-    <strong class="iaw__status-value" data-bind="mapping_interp">Changes generation order only.</strong>
-  </div>
+  {% include iaw_status_item.html label="Map Class" value="Permutation Matrix" value_bind="mapping_desc" %}
+  {% include iaw_status_item.html label="Coordinate Map" value="$y_1=x_2,\quad y_2=x_1$" value_bind="mapping_formula" %}
+  {% include iaw_status_item.html label="Interpretation" value="Changes generation order only." value_bind="mapping_interp" %}
 </div>
 {% endcapture %}
 
@@ -92,9 +77,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-(function() {
-    const root = IAW.initFigure('reparameterizationWidget');
-    if (!root) return;
+IAW.mountFigure('reparameterizationWidget', function(root) {
 
     const canvasIdentity = root.querySelector('#rpwCanvasIdentity');
     const canvasTransformed = root.querySelector('#rpwCanvasTransformed');
@@ -206,13 +189,9 @@
       }
     }
 
-    root.querySelectorAll('.iaw__seg-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        root.querySelectorAll('.iaw__seg-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentPreset = btn.dataset.preset;
+    IAW.bindSegmentedControl(root, (button) => {
+        currentPreset = button.dataset.preset;
         update();
-      });
     });
 
     IAW.observeTheme(() => {
@@ -223,5 +202,5 @@
     window.addEventListener('resize', update);
     setTimeout(update, 200);
     IAW.requestMathTypeset(root);
-})();
+});
 </script>

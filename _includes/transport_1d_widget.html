@@ -22,18 +22,10 @@
 {% endcapture %}
 
 {% capture legend %}
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-source-a)"></span>
-  <span>Target Density $x \sim P_{\text{data}}$</span>
-</div>
-<div class="iaw__legend-item">
-  <span class="iaw__swatch" style="background: var(--iaw-source-b)"></span>
-  <span>Inverse CDF $x = F^{-1}(u)$</span>
-</div>
-<div class="iaw__legend-item">
-  <span style="font-weight: 800; color: var(--iaw-warning); margin-right: -2px;">U</span>
-  <span>Source Noise $u \sim \mathcal{U}(0,1)$</span>
-</div>
+{% include iaw_legend_item.html swatch_style="background: var(--iaw-source-a)" label="Target Density $x \sim P_{\text{data}}$" %}
+{% include iaw_legend_item.html swatch_style="background: var(--iaw-source-b)" label="Inverse CDF $x = F^{-1}(u)$" %}
+{% capture itsNoiseMarker %}<span style="font-weight: 800; color: var(--iaw-warning); margin-right: -2px;">U</span>{% endcapture %}
+{% include iaw_legend_item.html marker_html=itsNoiseMarker label="Source Noise $u \sim \mathcal{U}(0,1)$" %}
 {% endcapture %}
 
 {% capture visuals %}
@@ -54,9 +46,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-(function() {
-  const root = IAW.initFigure('inverseTransformFigure', { requiresChart: true });
-  if (!root) return;
+IAW.mountFigure('inverseTransformFigure', function(root) {
 
   const canvas = root.querySelector('#itsChart');
   const stage = root.querySelector('#itsStage');
@@ -341,13 +331,6 @@
     chart.update();
   });
 
-  function requestMathTypeset(attempt = 0) {
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      window.MathJax.typesetPromise([root]).catch(() => {});
-      return;
-    }
-    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
-  }
-  requestMathTypeset();
-})();
+  IAW.requestMathTypeset(root);
+}, { requiresChart: true });
 </script>

@@ -18,18 +18,12 @@
 
 {% capture footer %}
 <div class="iaw__status-grid mew__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Constraint Type</span>
-    <strong class="iaw__status-value" id="meConstraintLabel">Uniform on $[-2, 2]$</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Entropy $H(P)$</span>
-    <strong class="iaw__status-value mew__entropy-readout"><span id="meValH">0.000</span> <span class="mew__entropy-unit">nats</span></strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Moments ($\mu, \sigma^2$)</span>
-    <strong class="iaw__status-value" id="meMomentSummary">0.000, 0.000</strong>
-  </div>
+  {% include iaw_status_item.html label="Constraint Type" value="Uniform on $[-2, 2]$" value_id="meConstraintLabel" %}
+  {% capture meEntropyValue %}
+  <span id="meValH">0.000</span> <span class="mew__entropy-unit">nats</span>
+  {% endcapture %}
+  {% include iaw_status_item.html label="Entropy $H(P)$" value=meEntropyValue value_class="mew__entropy-readout" %}
+  {% include iaw_status_item.html label="Moments ($\mu, \sigma^2$)" value="0.000, 0.000" value_id="meMomentSummary" %}
 </div>
 
 {% assign meTicks = "Start, Ascent, Target" | split: ", " %}
@@ -83,9 +77,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const root = IAW.initFigure('maxEntropyFigure', { requiresChart: true });
-  if (!root) return;
+IAW.mountFigure('maxEntropyFigure', function(root) {
 
   const FRAME_COUNT = {{ meFrameCount }};
   const REFERENCE_FRAME_COUNT = 100;
@@ -438,16 +430,10 @@ document.addEventListener('DOMContentLoaded', function() {
     else renderFrame(0);
   }
 
-  segBtns.forEach((btn) => {
-    btn.addEventListener('click', (event) => {
-      const nextButton = event.currentTarget.closest('.iaw__seg-btn');
-      if (!nextButton || nextButton.dataset.constraint === constraint) return;
-
-      segBtns.forEach((candidate) => candidate.classList.remove('active'));
-      nextButton.classList.add('active');
-      constraint = nextButton.dataset.constraint;
-      rebuildModel();
-    });
+  IAW.bindSegmentedControl(segBtns, (nextButton) => {
+    if (!nextButton || nextButton.dataset.constraint === constraint) return;
+    constraint = nextButton.dataset.constraint;
+    rebuildModel();
   });
 
   IAW.observeTheme(() => {
@@ -470,5 +456,5 @@ document.addEventListener('DOMContentLoaded', function() {
     onFrameChange: renderFrame
   });
   renderFrame(0);
-});
+}, { requiresChart: true });
 </script>

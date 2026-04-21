@@ -1,0 +1,8 @@
+<div class="iaw__legend-item{% if include.class %} {{ include.class }}{% endif %}">
+  {% if include.marker_html %}
+    {{ include.marker_html }}
+  {% else %}
+    <span class="iaw__swatch"{% if include.swatch_style %} style="{{ include.swatch_style }}"{% endif %}></span>
+  {% endif %}
+  <span>{{ include.label }}</span>
+</div>

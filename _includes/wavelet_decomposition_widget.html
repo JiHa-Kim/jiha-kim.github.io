@@ -62,14 +62,8 @@
 
 {% capture footer %}
 <div class="iaw__status-grid fwd__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Dominant Band</span>
-    <strong class="iaw__status-value" id="fwdDominantBand">Approximation</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Reading</span>
-    <strong class="iaw__status-value" id="fwdInterpretation">Most of the energy stays in the coarse approximation band.</strong>
-  </div>
+  {% include iaw_status_item.html label="Dominant Band" value="Approximation" value_id="fwdDominantBand" %}
+  {% include iaw_status_item.html label="Reading" value="Most of the energy stays in the coarse approximation band." value_id="fwdInterpretation" %}
 </div>
 {% endcapture %}
 
@@ -168,9 +162,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const root = IAW.initFigure('waveletDecompositionFigure');
-  if (!root) return;
+IAW.mountFigure('waveletDecompositionFigure', function(root) {
 
   const SIZE = 8;
   const presets = {
@@ -296,13 +288,9 @@ document.addEventListener('DOMContentLoaded', function() {
     interpretation.textContent = presets[currentPreset].text;
   }
 
-  segBtns.forEach((button) => {
-    button.addEventListener('click', () => {
-      segBtns.forEach((item) => item.classList.remove('active'));
-      button.classList.add('active');
+  IAW.bindSegmentedControl(segBtns, (button) => {
       currentPreset = button.dataset.preset;
       render();
-    });
   });
 
   IAW.observeTheme(() => {

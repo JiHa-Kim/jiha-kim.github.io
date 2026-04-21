@@ -43,11 +43,8 @@
 {% endcapture %}
 
 {% capture footer %}
-<div class="iaw__status-grid" style="grid-template-columns: 1fr; text-align: center;">
-  <div class="iaw__status-item" style="align-items: center;">
-    <span class="iaw__status-label" style="font-size: 0.85rem; margin-bottom: 0.3rem;">Generated Token</span>
-    <strong class="iaw__status-value" id="llmOutput" style="font-size: 1.8rem; font-family: var(--font-family-monospace, monospace); color: var(--iaw-warning);">"banana"</strong>
-  </div>
+<div class="iaw__status-grid iaw__status-grid--single">
+  {% include iaw_status_item.html label="Generated Token" value="&quot;banana&quot;" value_id="llmOutput" class="iaw__status-item--center" label_style="font-size: 0.85rem; margin-bottom: 0.3rem;" value_style="font-size: 1.8rem; font-family: var(--font-family-monospace, monospace); color: var(--iaw-warning);" %}
 </div>
 {% endcapture %}
 
@@ -137,10 +134,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const root = document.getElementById('llmSamplingFigure');
-  if (!root || root.dataset.initialized === 'true') return;
-  root.dataset.initialized = 'true';
+IAW.mountFigure('llmSamplingFigure', function(root) {
 
   const track = root.querySelector('#llmTrack');
   const handle = root.querySelector('#llmHandle');
@@ -276,13 +270,6 @@ document.addEventListener("DOMContentLoaded", function() {
   measure();
   setTimeout(measure, 100);
 
-  function requestMathTypeset(attempt = 0) {
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      window.MathJax.typesetPromise([root]).catch(() => {});
-      return;
-    }
-    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
-  }
-  requestMathTypeset();
+  IAW.requestMathTypeset(root);
 });
 </script>

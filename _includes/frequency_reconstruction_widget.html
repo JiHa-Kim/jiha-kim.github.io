@@ -80,14 +80,8 @@
 
 {% capture footer %}
 <div class="iaw__status-grid frp__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Interpretation</span>
-    <strong class="iaw__status-value" id="frpInterpretation">No local edge: both pixels are equally bright.</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Autoregressive Order</span>
-    <strong class="iaw__status-value">sample $y_{\text{low}}$ first, then refine with $y_{\text{high}}$</strong>
-  </div>
+  {% include iaw_status_item.html label="Interpretation" value="No local edge: both pixels are equally bright." value_id="frpInterpretation" %}
+  {% include iaw_status_item.html label="Autoregressive Order" value="sample $y_{\text{low}}$ first, then refine with $y_{\text{high}}$" %}
 </div>
 
 <div class="frp__slider-grid">
@@ -330,9 +324,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const root = IAW.initFigure('frequencyReconstructionFigure');
-  if (!root) return;
+IAW.mountFigure('frequencyReconstructionFigure', function(root) {
 
   const presets = {
     flat: { x1: 0.60, x2: 0.60 },

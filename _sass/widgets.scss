@@ -283,6 +283,25 @@
   gap: 0.15rem;
 }
 
+.iaw__status-grid--single {
+  grid-template-columns: 1fr;
+}
+
+.iaw__status-item--center {
+  align-items: center;
+  text-align: center;
+}
+
+.iaw__status-item--span-2 {
+  grid-column: span 2;
+}
+
+.iaw__status-item--divider {
+  border-top: 1px solid var(--iaw-border);
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+
 .iaw__status-label {
   font-size: 0.8rem;
   font-weight: 700;
@@ -304,6 +323,10 @@
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--iaw-text);
+}
+
+.iaw__status-value--mono {
+  font-family: var(--font-family-monospace, monospace);
 }
 
 .iaw__slider-box {

@@ -19,14 +19,8 @@
 
 {% capture footer %}
 <div class="iaw__status-grid t2c__status-grid">
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Sequential $T_{\mathrm{KR}}$ Cost</span>
-    <strong class="iaw__status-value" id="costKR">194.17</strong>
-  </div>
-  <div class="iaw__status-item">
-    <span class="iaw__status-label">Direct $T_{\mathrm{OT}}$ Cost</span>
-    <strong class="iaw__status-value t2c__cost-value--best" id="costOT">92.21</strong>
-  </div>
+  {% include iaw_status_item.html label="Sequential $T_{\mathrm{KR}}$ Cost" value="194.17" value_id="costKR" %}
+  {% include iaw_status_item.html label="Direct $T_{\mathrm{OT}}$ Cost" value="92.21" value_id="costOT" value_class="t2c__cost-value--best" %}
 </div>
 
 {% include iaw_timeline_controls.html play_id="t2cPlay" play_label="Play continuous transport animation" slider_id="t2cSlider" min="0" max="1" step="0.005" value="0" variant="progress" %}
@@ -74,9 +68,7 @@
 
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const root = IAW.initFigure('continuousTransportFigure');
-  if (!root) return;
+IAW.mountFigure('continuousTransportFigure', function(root) {
 
   const canvas = root.querySelector('#t2cCanvas');
   const ctx = canvas.getContext('2d');
@@ -225,13 +217,9 @@ document.addEventListener('DOMContentLoaded', function() {
     draw();
   }
 
-  segBtns.forEach(button => {
-    button.addEventListener('click', () => {
-      segBtns.forEach(b => b.classList.remove('active'));
-      button.classList.add('active');
+  IAW.bindSegmentedControl(segBtns, (button) => {
       currentMapType = button.dataset.map;
       draw();
-    });
   });
 
   IAW.observeTheme(() => {
