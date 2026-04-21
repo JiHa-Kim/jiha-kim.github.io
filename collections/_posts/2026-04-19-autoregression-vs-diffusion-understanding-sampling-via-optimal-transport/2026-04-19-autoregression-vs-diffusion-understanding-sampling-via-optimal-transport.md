@@ -104,23 +104,25 @@ To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransp
 Optimal transport is the continuous, high-dimensional version of this same mass-moving problem.
 
 > [!note] Generative Optimal Transport
-> In the generative setting, the source is the noise prior $P_{\text{noise}}$ and the target is the data distribution $P_{\text{data}}$. We seek a map $T$ with $T_\sharp P_{\text{noise}} = P_{\text{data}}$, meaning that if $Z \sim P_{\text{noise}}$, then $T(Z) \sim P_{\text{data}}$.
+> In the generative setting, we start from noise $Z \sim P_{\text{noise}}$ and want an output with distribution $P_{\text{data}}$. A transport map $T$ should therefore satisfy $T(Z) \sim P_{\text{data}}$.
 
-> [!definition] Pushforward Measure ($T_\sharp$)
-> The pushforward is defined by $(T_\sharp P)(A) = P(T^{-1}(A))$. If $T$ is a differentiable bijection, then
+> [!notation] Pushforward Shorthand
+> Later we will abbreviate "if $Z \sim P$ then $T(Z) \sim Q$" by writing $T_\sharp P = Q$.
+>
+> If $T$ is a differentiable bijection, this distribution-matching condition is equivalent to the usual change-of-variables formula:
 > $$ p_{\text{data}}(x) = p_{\text{noise}}(T^{-1}(x)) \left| \det J_{T^{-1}}(x) \right| = p_{\text{noise}}(z)\left| \det J_T(z) \right|^{-1}, \qquad x=T(z). $$
 
-> [!proof]- Pushforward Derivation
-> For any measurable set $A$, $P(T(Z)\in A)=P(Z\in T^{-1}(A))$. That identity is exactly the definition of the pushforward.
-
 > [!problem] The Monge Problem
-> Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost on source-target pairs. The Monge problem seeks a transport map $T$ minimizing
-> $$ \min_T \underset{z \,\sim\, P_{\text{noise}}}{\mathbb{E}}[c(z, T(z))] \quad \text{s.t.} \quad T_\sharp P_{\text{noise}} = P_{\text{data}}. $$
+> Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost. Monge seeks a deterministic map $T$ minimizing
+> $$ \min_T \underset{Z \,\sim\, P_{\text{noise}}}{\mathbb{E}}[c(Z, T(Z))] \quad \text{s.t.} \quad T(Z) \sim P_{\text{data}}. $$
 
-> [!info] Kantorovich Relaxation
-> For generative modeling, Monge is the ideal inference-time object: sample $z \sim P_{\text{noise}}$ and output $x = T(z)$. But with finite datasets or mini-batches, it is often more natural to optimize over a **transport plan** $\pi_{ij}$, which can split mass across several targets.
->
-> In the discrete case, if source point $i$ carries mass $a_i$, target point $j$ needs mass $b_j$, and moving one unit of mass costs $c_{ij}$, then Kantorovich transport solves
+> [!problem] The Kantorovich Problem
+> Monge forces each source point $z$ to choose a single destination $T(z)$. Kantorovich relaxes this by optimizing over any random pair $(Z,X)$ with the correct marginals:
+> $$ \min_{(Z,X)} \mathbb{E}[c(Z,X)] \quad \text{s.t.} \quad Z \sim P_{\text{noise}}, \quad X \sim P_{\text{data}}. $$
+> In probabilistic language, we are free to choose any **coupling** between noise and data. Monge is the special case $X = T(Z)$ almost surely.
+
+> [!info] Discrete Kantorovich Form
+> In the finite case, if source point $i$ carries mass $a_i$, target point $j$ needs mass $b_j$, and moving one unit of mass costs $c_{ij}$, then Kantorovich transport solves
 > $$ \min_{\pi_{ij} \ge 0} \sum_{i,j} c_{ij}\pi_{ij} $$
 > subject to
 > $$ \sum_j \pi_{ij} = a_i, \qquad \sum_i \pi_{ij} = b_j. $$
