@@ -394,6 +394,10 @@ Everything above was about **exact population-level transport**: closed-form 1D 
 > [!remark] Why the Reference Coupling Matters
 > Standard Sinkhorn usually uses the product reference $\mu \otimes \nu$, so the regularizer acts mainly as a generic smoothing term. Freulon et al. show that once the reference itself carries correlations, especially in the Gaussian case, entropic OT is no longer just "OT plus blur": it is biased toward couplings with that prescribed structure {% cite freulonEntropicOptimalTransport2026 %}.
 
+On a small fixed discrete instance, entropic regularization is easiest to read as a sharp-vs-diffuse tradeoff. As $\varepsilon$ increases, the plan keeps the same row and column marginals, but spreads mass across more nearby source-target pairs.
+
+{% include sinkhorn_regularization_widget.html %}
+
 ### Dual Potentials
 
 There is another way to look at OT. Instead of directly deciding how much mass to ship along every source-target pair, we assign a scalar "price" to each source point and each target point.
@@ -426,7 +430,7 @@ Flow matching still leaves the pairing problem open: which source sample should 
 > [!idea] Batch OT
 > Random pairings produce heavily crossed trajectories, which makes $v_\theta$ harder to learn. A mini-batch OT solve uncrosses them:
 >
-> $$ \pi^* = \arg\min_{\pi \text{ matching } X_0^B \text{ to } X_1^B} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|^2 $$
+> $$ \pi^* = \arg\min_{\pi \text{ matching } X_0^B \text{ to } X_1^B} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|_2^2 $$
 
 This is efficiently approximated with **Sinkhorn**. With product reference, it is exactly the entropic OT relaxation discussed above. In practice, uncrossed paths usually give a smoother field, better generalization, and fewer ODE steps at inference.
 

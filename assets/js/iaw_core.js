@@ -243,6 +243,76 @@ window.IAW = (function() {
         ctx.stroke();
     };
 
+    core.solveEntropicTransport = function(costMatrix, sourceWeights, targetWeights, epsilon, options = {}) {
+        if (!costMatrix || !costMatrix.length || !costMatrix[0].length) return null;
+
+        const rows = costMatrix.length;
+        const cols = costMatrix[0].length;
+        const safeEpsilon = Math.max(Number(epsilon) || 0, Number(options.minEpsilon ?? 1e-4));
+        const floor = Number(options.floor ?? 1e-300);
+        const maxIter = Number(options.maxIter ?? 600);
+        const tol = Number(options.tol ?? 1e-9);
+        const a = (sourceWeights && sourceWeights.length === rows)
+            ? sourceWeights.slice()
+            : Array(rows).fill(1 / rows);
+        const b = (targetWeights && targetWeights.length === cols)
+            ? targetWeights.slice()
+            : Array(cols).fill(1 / cols);
+
+        const kernel = costMatrix.map((row) => row.map((cost) => Math.exp(-cost / safeEpsilon)));
+        let u = Array(rows).fill(1);
+        let v = Array(cols).fill(1);
+        let error = Infinity;
+        let iterations = 0;
+
+        for (; iterations < maxIter; iterations += 1) {
+            const nextU = a.map((mass, i) => {
+                let total = 0;
+                for (let j = 0; j < cols; j += 1) total += kernel[i][j] * v[j];
+                return mass / Math.max(total, floor);
+            });
+
+            const nextV = b.map((mass, j) => {
+                let total = 0;
+                for (let i = 0; i < rows; i += 1) total += kernel[i][j] * nextU[i];
+                return mass / Math.max(total, floor);
+            });
+
+            error = 0;
+            for (let i = 0; i < rows; i += 1) error = Math.max(error, Math.abs(nextU[i] - u[i]));
+            for (let j = 0; j < cols; j += 1) error = Math.max(error, Math.abs(nextV[j] - v[j]));
+
+            u = nextU;
+            v = nextV;
+            if (error <= tol) break;
+        }
+
+        const plan = costMatrix.map((row, i) => row.map((_, j) => u[i] * kernel[i][j] * v[j]));
+        let transportCost = 0;
+        let entropy = 0;
+        let maxEntry = 0;
+
+        plan.forEach((row, i) => {
+            row.forEach((mass, j) => {
+                transportCost += mass * costMatrix[i][j];
+                if (mass > floor) entropy -= mass * Math.log(mass);
+                if (mass > maxEntry) maxEntry = mass;
+            });
+        });
+
+        return {
+            epsilon: safeEpsilon,
+            plan,
+            transportCost,
+            entropy,
+            objective: transportCost - safeEpsilon * entropy,
+            effectiveSupport: Math.exp(entropy),
+            maxEntry,
+            error,
+            iterations: iterations + 1
+        };
+    };
+
     core.initFigure = function(rootOrId, options = {}) {
         const root = typeof rootOrId === 'string' ? document.getElementById(rootOrId) : rootOrId;
         if (!root || root.dataset.initialized === 'true') return null;

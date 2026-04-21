@@ -1,0 +1,357 @@
+{% capture describe %}
+<p>
+  Fix a small balanced discrete problem with source masses $a_i$ at points $z_i$, target masses $b_j$ at points $x_j$, and squared-distance costs $c_{ij}=\|z_i-x_j\|^2$.
+  The entropically regularized plan $\pi^\varepsilon = \arg\min_{\pi \in \Pi(a,b)} \sum_{i,j} c_{ij}\pi_{ij} - \varepsilon H(\pi)$
+  stays marginally feasible but becomes progressively more diffuse as $\varepsilon$ grows.
+</p>
+{% endcapture %}
+
+{% capture sinkSourceMarker %}<span class="sink__legend-dot sink__legend-dot--source"></span>{% endcapture %}
+{% capture sinkTargetMarker %}<span class="sink__legend-dot sink__legend-dot--target"></span>{% endcapture %}
+
+{% capture legend %}
+  {% include iaw_legend_item.html marker_html=sinkSourceMarker label="Source points $z_i$" %}
+  {% include iaw_legend_item.html marker_html=sinkTargetMarker label="Target points $x_j$" %}
+  {% include iaw_legend_item.html swatch_style="background: var(--iaw-border); height: 3px;" label="Coupling mass $\pi_{ij}^{\varepsilon}$" %}
+{% endcapture %}
+
+{% capture visuals %}
+<div class="sink__layout iaw__figure-grid">
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Coupling Graph</div>
+    <div class="sink__graph-shell iaw__canvas-shell" id="sinkGraphShell">
+      <canvas id="sinkGraphCanvas"></canvas>
+    </div>
+    <div class="sink__subnote">Edge width and opacity scale with the transported mass between each pair.</div>
+  </section>
+
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Plan Matrix</div>
+    <div class="sink__matrix-frame">
+      <div class="sink__matrix-top" aria-hidden="true">
+        <span>x<sub>1</sub></span>
+        <span>x<sub>2</sub></span>
+        <span>x<sub>3</sub></span>
+        <span>x<sub>4</sub></span>
+        <span>x<sub>5</sub></span>
+      </div>
+      <div class="sink__matrix-body">
+        <div class="sink__matrix-side" aria-hidden="true">
+          <span>z<sub>1</sub></span>
+          <span>z<sub>2</sub></span>
+          <span>z<sub>3</sub></span>
+          <span>z<sub>4</sub></span>
+          <span>z<sub>5</sub></span>
+        </div>
+        <div class="sink__matrix-shell iaw__canvas-shell iaw__canvas-shell--square">
+          <canvas id="sinkMatrixCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid sink__status-grid">
+  {% include iaw_status_item.html label="Transport Cost" value="0.381" value_id="sinkCost" %}
+  {% include iaw_status_item.html label="Plan Entropy" value="2.62" value_id="sinkEntropy" %}
+  {% include iaw_status_item.html label="Effective Support" value="13.7" value_id="sinkSupport" %}
+  {% include iaw_status_item.html label="Coupling Pattern" value="Banded" value_id="sinkPattern" %}
+</div>
+
+<div class="sink__slider-row">
+  <div class="sink__slider-label">
+    <span>Regularization Strength $\varepsilon$</span>
+    <span class="sink__epsilon-value" id="sinkEpsValue">0.05</span>
+  </div>
+  {% assign sinkTicks = "0.01, 0.05, 0.10, 0.20" | split: ", " %}
+  {% include iaw_slider.html id="sinkEpsSlider" min="0.01" max="0.20" step="0.005" value="0.05" ticks=sinkTicks variant="parameter" %}
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="sinkhornRegularizationFigure"
+    eyebrow="Entropic Optimal Transport"
+    title="How Sinkhorn Diffuses a Discrete Plan"
+    description=describe
+    legend=legend
+    visuals=visuals
+    footer=footer
+    stage_id="sinkStage"
+    stage_style="height: auto; min-height: 280px; border: none; background: transparent;"
+%}
+
+<style>
+.sink__layout {
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 0.92fr);
+  align-items: stretch;
+}
+
+.sink__legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--iaw-bg) 40%, transparent);
+}
+
+.sink__legend-dot--source {
+  background: var(--iaw-source-a);
+}
+
+.sink__legend-dot--target {
+  background: var(--iaw-target);
+}
+
+.sink__graph-shell {
+  aspect-ratio: 1.28 / 1;
+  min-height: 248px;
+}
+
+.sink__subnote {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--iaw-muted);
+  text-align: center;
+}
+
+.sink__matrix-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sink__matrix-top {
+  margin-left: 1.6rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.25rem;
+}
+
+.sink__matrix-side {
+  display: grid;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.sink__matrix-top span,
+.sink__matrix-side span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--iaw-muted);
+  text-align: center;
+}
+
+.sink__matrix-body {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr);
+  gap: 0.45rem;
+  align-items: stretch;
+}
+
+.sink__matrix-shell {
+  aspect-ratio: 1 / 1;
+}
+
+.sink__status-grid .iaw__status-value {
+  line-height: 1.28;
+}
+
+.sink__slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sink__slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+}
+
+.sink__epsilon-value {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.92rem;
+  color: var(--iaw-muted);
+}
+
+@media (max-width: 900px) {
+  .sink__layout {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('sinkhornRegularizationFigure', function(root) {
+
+  const graphCanvas = root.querySelector('#sinkGraphCanvas');
+  const graphCtx = graphCanvas.getContext('2d');
+  const graphShell = root.querySelector('#sinkGraphShell');
+  const matrixCanvas = root.querySelector('#sinkMatrixCanvas');
+  const slider = root.querySelector('#sinkEpsSlider');
+  const epsilonValue = root.querySelector('#sinkEpsValue');
+  const costReadout = root.querySelector('#sinkCost');
+  const entropyReadout = root.querySelector('#sinkEntropy');
+  const supportReadout = root.querySelector('#sinkSupport');
+  const patternReadout = root.querySelector('#sinkPattern');
+
+  const sourcePoints = [
+    [0.20, 0.14],
+    [0.24, 0.31],
+    [0.18, 0.50],
+    [0.23, 0.69],
+    [0.20, 0.86]
+  ];
+  const targetPoints = [
+    [0.78, 0.10],
+    [0.82, 0.27],
+    [0.76, 0.46],
+    [0.83, 0.66],
+    [0.80, 0.88]
+  ];
+  const sourceWeights = Array(sourcePoints.length).fill(1 / sourcePoints.length);
+  const targetWeights = Array(targetPoints.length).fill(1 / targetPoints.length);
+  const maxCellMass = sourceWeights[0];
+  const costMatrix = sourcePoints.map((source) => targetPoints.map((target) => {
+    const dx = source[0] - target[0];
+    const dy = source[1] - target[1];
+    return dx * dx + dy * dy;
+  }));
+
+  let theme = IAW.getThemeColors(root);
+  const graphViewport = IAW.createStageViewport(graphShell, graphCanvas, graphCtx, {
+    xMin: 0,
+    xMax: 1,
+    yMin: 0,
+    yMax: 1
+  });
+
+  function getColors() {
+    return {
+      sourceDot: theme.sourceA,
+      targetDot: theme.target,
+      edgeBase: theme.border || theme.muted || theme.text || '#9ca3af',
+      label: theme.muted || theme.text || '#6b7280',
+      heatmap: theme.target,
+      heatmapBorder: IAW.toAlpha(theme.border || theme.muted || '#9ca3af', 0.85)
+    };
+  }
+
+  function getPattern(effectiveSupport) {
+    if (effectiveSupport < 9.5) return 'Near Matching';
+    if (effectiveSupport < 16.5) return 'Banded';
+    return 'Diffuse';
+  }
+
+  function drawGraph(plan) {
+    const rect = graphViewport.getRect();
+    const colors = getColors();
+
+    graphCtx.clearRect(0, 0, rect.width, rect.height);
+    graphCtx.lineCap = 'round';
+    graphCtx.lineJoin = 'round';
+
+    graphCtx.strokeStyle = IAW.toAlpha(colors.edgeBase, 0.45);
+    graphCtx.lineWidth = 1;
+    graphCtx.setLineDash([4, 6]);
+    graphCtx.beginPath();
+    graphCtx.moveTo(rect.width * 0.18, rect.height * 0.08);
+    graphCtx.lineTo(rect.width * 0.18, rect.height * 0.92);
+    graphCtx.moveTo(rect.width * 0.82, rect.height * 0.08);
+    graphCtx.lineTo(rect.width * 0.82, rect.height * 0.92);
+    graphCtx.stroke();
+    graphCtx.setLineDash([]);
+
+    graphCtx.fillStyle = colors.label;
+    graphCtx.font = '700 12px system-ui, sans-serif';
+    graphCtx.textAlign = 'center';
+    graphCtx.fillText('sources z_i', rect.width * 0.18, rect.height * 0.05);
+    graphCtx.fillText('targets x_j', rect.width * 0.82, rect.height * 0.05);
+
+    plan.forEach((row, i) => {
+      row.forEach((mass, j) => {
+        const ratio = IAW.clamp(mass / maxCellMass);
+        const pSource = graphViewport.mapPoint(sourcePoints[i][0], sourcePoints[i][1]);
+        const pTarget = graphViewport.mapPoint(targetPoints[j][0], targetPoints[j][1]);
+
+        graphCtx.strokeStyle = IAW.toAlpha(colors.edgeBase, 0.04 + 0.72 * ratio);
+        graphCtx.lineWidth = 0.5 + 6.5 * ratio;
+        graphCtx.beginPath();
+        graphCtx.moveTo(pSource.x, pSource.y);
+        graphCtx.lineTo(pTarget.x, pTarget.y);
+        graphCtx.stroke();
+      });
+    });
+
+    graphCtx.textAlign = 'right';
+    sourcePoints.forEach((point, index) => {
+      const p = graphViewport.mapPoint(point[0], point[1]);
+      IAW.drawCircle(graphCtx, p.x, p.y, 7, colors.sourceDot);
+      graphCtx.fillStyle = colors.label;
+      graphCtx.fillText(`z${index + 1}`, p.x - 12, p.y + 4);
+    });
+
+    graphCtx.textAlign = 'left';
+    targetPoints.forEach((point, index) => {
+      const p = graphViewport.mapPoint(point[0], point[1]);
+      IAW.drawCircle(graphCtx, p.x, p.y, 7, colors.targetDot);
+      graphCtx.fillStyle = colors.label;
+      graphCtx.fillText(`x${index + 1}`, p.x + 12, p.y + 4);
+    });
+  }
+
+  function drawMatrix(plan) {
+    const colors = getColors();
+
+    IAW.drawMatrix(matrixCanvas, plan, (value) => {
+      const ratio = IAW.clamp(value / maxCellMass);
+      if (ratio < 0.01) return IAW.toAlpha(colors.heatmap, 0.03);
+      return IAW.toAlpha(colors.heatmap, 0.08 + 0.84 * ratio);
+    }, {
+      borderColor: colors.heatmapBorder
+    });
+  }
+
+  function render() {
+    const epsilon = Number(slider.value);
+    const result = IAW.solveEntropicTransport(costMatrix, sourceWeights, targetWeights, epsilon, {
+      maxIter: 800,
+      tol: 1e-10
+    });
+
+    epsilonValue.textContent = result.epsilon.toFixed(2);
+    costReadout.textContent = result.transportCost.toFixed(3);
+    entropyReadout.textContent = result.entropy.toFixed(2);
+    supportReadout.textContent = result.effectiveSupport.toFixed(1);
+    patternReadout.textContent = getPattern(result.effectiveSupport);
+
+    drawGraph(result.plan);
+    drawMatrix(result.plan);
+  }
+
+  slider.addEventListener('input', render);
+
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    render();
+  });
+
+  window.addEventListener('resize', () => {
+    graphViewport.measure();
+    render();
+  });
+
+  graphViewport.measure();
+  render();
+  IAW.requestMathTypeset(root);
+});
+</script>
