@@ -1,0 +1,14 @@
+<div class="iaw__timeline-controls{% if include.class %} {{ include.class }}{% endif %}">
+  <button class="iaw__play-btn{% if include.button_class %} {{ include.button_class }}{% endif %}" id="{{ include.play_id }}" aria-label="{{ include.play_label | default: 'Play animation' }}">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  {% include iaw_slider.html
+    id=include.slider_id
+    min=include.min
+    max=include.max
+    step=include.step
+    value=include.value
+    ticks=include.ticks
+    variant=include.variant
+  %}
+</div>

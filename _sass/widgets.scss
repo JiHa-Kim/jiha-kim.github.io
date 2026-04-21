@@ -30,7 +30,7 @@
 
 .iaw__eyebrow {
   margin-bottom: 0.28rem;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -87,7 +87,7 @@
   background: transparent;
   padding: 0.65rem 0.5rem;
   border-radius: 10px;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--iaw-muted);
   cursor: pointer;
@@ -148,7 +148,7 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--iaw-muted);
   white-space: nowrap;
@@ -171,7 +171,7 @@
   background: color-mix(in srgb, var(--iaw-bg) 92%, transparent);
   border: 1px solid color-mix(in srgb, var(--iaw-border) 60%, transparent);
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--iaw-text);
   white-space: nowrap;
@@ -210,6 +210,26 @@
   width: 100%;
 }
 
+.iaw__status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.iaw__status-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--iaw-muted);
+}
+
+.iaw__status-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+}
+
 .iaw__slider-box {
   display: flex;
   flex-direction: column;
@@ -224,7 +244,7 @@
 }
 
 .iaw__slider-ticks span {
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--iaw-muted);
 }
@@ -240,6 +260,7 @@
   border: 1px solid var(--iaw-border);
   cursor: pointer;
   accent-color: var(--iaw-primary);
+  transition: background 0.2s ease;
 }
 
 .iaw__slider::-webkit-slider-thumb {
@@ -250,6 +271,88 @@
   background: var(--iaw-primary);
   border: 3px solid var(--iaw-bg);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s ease;
+}
+
+.iaw__slider:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+.iaw__slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--iaw-primary);
+  border: 3px solid var(--iaw-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s ease;
+}
+
+.iaw__slider:active::-moz-range-thumb {
+  transform: scale(1.15);
+}
+
+/* Variant 2: Progress Slider (Animation Timeline) */
+/* We keep the class for logic purposes but use the same sizes. We remove the thumb scaling transition during programmatic playback to prevent jitter */
+.iaw__slider--progress::-webkit-slider-thumb {
+  transition: none; 
+}
+.iaw__slider--progress::-moz-range-thumb {
+  transition: none;
+}
+
+.iaw__floating-pill {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 10;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--iaw-border) 88%, transparent);
+  background: color-mix(in srgb, var(--iaw-bg) 92%, transparent);
+  color: var(--iaw-text);
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.iaw__timeline-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.iaw__timeline-controls .iaw__slider-box {
+  flex: 1;
+  width: 100%;
+}
+
+.iaw__play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--iaw-border);
+  border-radius: 14px;
+  background: var(--iaw-bg);
+  color: var(--iaw-text);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.iaw__play-btn:hover {
+  border-color: var(--iaw-primary);
+  background: color-mix(in srgb, var(--iaw-primary) 8%, var(--iaw-bg));
+  transform: translateY(-1px);
+}
+
+.iaw__play-btn:active {
+  transform: translateY(0);
 }
 
 .iaw__actions {
@@ -268,8 +371,10 @@
 @media (max-width: 720px) {
   .iaw { padding: 1rem; }
   .iaw__segmented-control { display: grid; grid-template-columns: 1fr 1fr; }
-  .iaw__seg-btn { white-space: normal; font-size: 0.84rem; }
+  .iaw__seg-btn { white-space: normal; font-size: 0.9rem; }
   .iaw__status-readout { gap: 1rem; }
+  .iaw__timeline-controls { flex-direction: column; align-items: stretch; }
+  .iaw__play-btn { width: 100%; }
 }
 
 /* Shared Visualization Components */

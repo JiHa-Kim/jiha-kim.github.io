@@ -1,133 +1,67 @@
 {% capture describe %}
 <p>
-  Diffusion-style smoothing can be read as repeated entropy ascent under a fixed constraint. 
-  Switch the constraint, then scrub the iteration to see an arbitrary starting density relax toward the corresponding maximum-entropy target.
+  This uses projected entropy ascent on a discretized density. Each step increases entropy and then reapplies the active constraint, so the curve relaxes toward the actual max-entropy solution for that setting.
 </p>
 {% endcapture %}
 
+{% assign meFrameCount = 180 %}
+
 {% capture controls %}
-<button class="iaw__seg-btn active" data-constraint="bounded">Bounded Support $[-2, 2]$</button>
-<button class="iaw__seg-btn" data-constraint="variance">Bounded Variance $\sigma^2 = 1$</button>
+<button class="iaw__seg-btn active" data-constraint="bounded">Support [-2, 2]</button>
+<button class="iaw__seg-btn" data-constraint="variance">Mean 0, Var 1</button>
 {% endcapture %}
 
 {% capture visuals %}
-<div class="mew__iter-pill" id="meValue">Iter 0</div>
-<canvas class="iaw__canvas" id="meChart"></canvas>
+{% capture meInitialStepLabel %}Step 0 / {{ meFrameCount }}{% endcapture %}
+{% include iaw_canvas_stage.html pill_id="meValue" pill_text=meInitialStepLabel canvas_id="meChart" %}
 {% endcapture %}
 
 {% capture footer %}
-<div class="iaw__status-grid">
+<div class="iaw__status-grid mew__status-grid">
   <div class="iaw__status-item">
     <span class="iaw__status-label">Constraint</span>
     <strong class="iaw__status-value" id="meConstraintLabel">Uniform on [-2, 2]</strong>
   </div>
   <div class="iaw__status-item">
     <span class="iaw__status-label">Entropy</span>
-    <strong class="iaw__status-value"><span id="meValH">0.000</span> nats</strong>
+    <strong class="iaw__status-value mew__entropy-readout"><span id="meValH">0.000</span> <span class="mew__entropy-unit">nats</span></strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">Moments</span>
+    <strong class="iaw__status-value" id="meMomentSummary">mean 0.000, var 0.000</strong>
   </div>
 </div>
 
-<div class="mew__controls-row">
-  <button class="mew__play-btn" id="mePlay" aria-label="Play Evolution">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-  </button>
-  <div class="iaw__slider-box">
-    <input type="range" class="iaw__slider" id="meSlider" min="0" max="100" step="1" value="0">
-    <div class="iaw__slider-ticks">
-      <span>Start</span>
-      <span>Iteration Progress</span>
-      <span>Target</span>
-    </div>
-  </div>
-</div>
+{% assign meTicks = "Start, Ascent, Target" | split: ", " %}
+{% include iaw_timeline_controls.html play_id="mePlay" play_label="Play Entropy Ascent" slider_id="meSlider" min="0" max=meFrameCount step="1" value="0" ticks=meTicks variant="progress" %}
 {% endcapture %}
 
-{% include iaw_skeleton.html 
+{% include iaw_skeleton.html
     id="maxEntropyFigure"
     eyebrow="Interactive 1D Example"
-    title="Iterative Entropy Maximization"
+    title="Constrained Entropy Ascent"
     description=describe
-    visuals=visuals
     controls=controls
+    visuals=visuals
     stage_id="meStage"
     footer=footer
 %}
 
 <style>
-.mew__iter-pill {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10;
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: var(--iaw-text);
-  background: color-mix(in srgb, var(--iaw-bg) 80%, transparent);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--iaw-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  pointer-events: none;
+.mew__status-grid {
+  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
 }
 
-.mew__controls-row {
+.mew__status-grid .iaw__status-value {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.mew__entropy-readout {
   display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  width: 100%;
-}
-
-.mew__controls-row .iaw__slider-box {
-  flex: 1;
-  width: 100%;
-}
-
-.mew__play-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 1px solid var(--iaw-border);
-  background: var(--iaw-bg);
-  color: var(--iaw-text);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-}
-
-.mew__play-btn:hover {
-  background: var(--iaw-surface);
-  transform: scale(1.05);
-  border-color: var(--iaw-primary);
-}
-
-.mew__play-btn:active {
-  transform: scale(0.95);
-}
-
-.iaw__status-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.iaw__status-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--iaw-muted);
-}
-
-.iaw__status-value {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--iaw-text);
+  align-items: baseline;
+  gap: 0.32rem;
+  flex-wrap: wrap;
 }
 
 #meValH {
@@ -135,14 +69,13 @@
   color: var(--iaw-success);
 }
 
-@media (max-width: 640px) {
-  .mew__controls-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .mew__play-btn {
-    width: 100%;
-    border-radius: 10px;
+.mew__entropy-unit {
+  color: var(--iaw-muted);
+}
+
+@media (max-width: 720px) {
+  .mew__status-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
@@ -150,362 +83,382 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const root = document.getElementById('maxEntropyFigure');
-  if (!root || root.dataset.initialized === 'true') return;
-  root.dataset.initialized = 'true';
+document.addEventListener('DOMContentLoaded', function() {
+  const root = IAW.initFigure('maxEntropyFigure', { requiresChart: true });
+  if (!root) return;
+
+  const FRAME_COUNT = {{ meFrameCount }};
+  const REFERENCE_FRAME_COUNT = 100;
+  const EPS = 1e-12;
+  const targetSecondMoment = 1;
 
   const canvas = root.querySelector('#meChart');
   const ctx = canvas.getContext('2d');
   const slider = root.querySelector('#meSlider');
-  const valH = root.querySelector('#meValH');
-  const timeVal = root.querySelector('#meValue');
   const playBtn = root.querySelector('#mePlay');
+  const valueLabel = root.querySelector('#meValue');
+  const entropyValue = root.querySelector('#meValH');
   const constraintLabel = root.querySelector('#meConstraintLabel');
+  const momentSummary = root.querySelector('#meMomentSummary');
   const segBtns = root.querySelectorAll('.iaw__seg-btn');
 
-  let constraint = 'bounded'; 
+  let constraint = 'bounded';
   let currentFrame = 0;
-  let isPlaying = false;
-  let animationFrameId = null;
-  let primeRequestId = null;
-  let hasPrimedChart = false;
-  
-  let historyP = [];
-  let xValues = [];
-  let dx = 0;
-  let maxY = 1.0;
-
-  function computeHistory() {
-    historyP = [];
-    xValues = [];
-    
-    let xMin, xMax, nPoints;
-    let peaks;
-    if (constraint === 'bounded') {
-      xMin = -2; xMax = 2; nPoints = 200;
-      peaks = [ {m: -1.2, s: 0.15, w: 1}, {m: 0.3, s: 0.08, w: 0.8}, {m: 1.3, s: 0.2, w: 1.5} ];
-    } else {
-      xMin = -5; xMax = 5; nPoints = 400;
-      peaks = [ {m: -2.0, s: 0.3, w: 1}, {m: 0.5, s: 0.2, w: 1.2}, {m: 2.5, s: 0.4, w: 0.8} ];
-    }
-    dx = (xMax - xMin) / nPoints;
-    
-    for(let i=0; i<=nPoints; i++) xValues.push(xMin + i * dx);
-    
-    let currentP = new Array(nPoints+1).fill(0);
-    let sum = 0;
-    for(let i=0; i<=nPoints; i++) {
-      let x = xValues[i];
-      let val = 0;
-      for(let pk of peaks) {
-        val += pk.w * Math.exp(-0.5 * Math.pow((x - pk.m)/pk.s, 2));
-      }
-      currentP[i] = val;
-      sum += val * dx;
-    }
-    for(let i=0; i<=nPoints; i++) currentP[i] /= sum;
-    
-    if (constraint === 'variance') {
-      let v = 0;
-      for(let i=0; i<=nPoints; i++) v += currentP[i] * xValues[i] * xValues[i] * dx;
-      let scale = Math.sqrt(v);
-      let p_scaled = new Array(nPoints+1).fill(0);
-      for(let i=0; i<=nPoints; i++) {
-        let srcX = xValues[i] * scale;
-        let idx = (srcX - xMin) / dx;
-        if (idx >= 0 && idx <= nPoints) {
-           let idx0 = Math.floor(idx);
-           if (idx0 === nPoints) p_scaled[i] = scale * currentP[nPoints];
-           else {
-             let frac = idx - idx0;
-             p_scaled[i] = scale * (currentP[idx0] * (1 - frac) + currentP[idx0+1] * frac);
-           }
-        }
-      }
-      currentP = p_scaled;
-      sum = 0;
-      for(let i=0; i<=nPoints; i++) sum += currentP[i] * dx;
-      for(let i=0; i<=nPoints; i++) currentP[i] /= sum;
-    }
-    
-    historyP.push([...currentP]);
-    maxY = Math.max(...currentP) * 1.1;
-    
-    for(let frame=1; frame<=100; frame++) {
-      let nextP = [...currentP];
-      let subSteps = constraint === 'bounded' ? 20 : 30;
-      for(let sub=0; sub<subSteps; sub++) {
-        let temp = new Array(nPoints+1).fill(0);
-        for(let i=0; i<=nPoints; i++) {
-           let left = i > 0 ? nextP[i-1] : nextP[0];
-           let right = i < nPoints ? nextP[i+1] : nextP[nPoints];
-           temp[i] = 0.3*left + 0.4*nextP[i] + 0.3*right;
-        }
-        nextP = temp;
-      }
-      
-      sum = 0;
-      for(let i=0; i<=nPoints; i++) sum += nextP[i] * dx;
-      for(let i=0; i<=nPoints; i++) nextP[i] /= sum;
-      
-      if (constraint === 'variance') {
-         let v = 0;
-         for(let i=0; i<=nPoints; i++) {
-           v += nextP[i] * xValues[i] * xValues[i] * dx;
-         }
-         let scale = Math.sqrt(v); 
-         let p_scaled = new Array(nPoints+1).fill(0);
-         for(let i=0; i<=nPoints; i++) {
-           let srcX = xValues[i] * scale;
-           let idx = (srcX - xMin) / dx;
-           if (idx >= 0 && idx <= nPoints) {
-             let idx0 = Math.floor(idx);
-             if (idx0 === nPoints) p_scaled[i] = scale * nextP[nPoints];
-             else {
-               let frac = idx - idx0;
-               p_scaled[i] = scale * (nextP[idx0] * (1 - frac) + nextP[idx0+1] * frac);
-             }
-           }
-         }
-         nextP = p_scaled;
-         sum = 0;
-         for(let i=0; i<=nPoints; i++) sum += nextP[i] * dx;
-         for(let i=0; i<=nPoints; i++) nextP[i] /= sum;
-      }
-      currentP = nextP;
-      historyP.push([...currentP]);
-    }
-    
-    let targetP = new Array(nPoints+1).fill(0);
-    for(let i=0; i<=nPoints; i++) {
-      if (constraint === 'bounded') targetP[i] = 1.0 / 4.0;
-      else targetP[i] = Math.exp(-0.5 * xValues[i] * xValues[i]) / Math.sqrt(2 * Math.PI);
-    }
-    
-    for(let frame=75; frame<=100; frame++) {
-      let t = (frame - 75) / 25.0;
-      let p = historyP[frame];
-      for(let i=0; i<=nPoints; i++) {
-         p[i] = (1 - t) * p[i] + t * targetP[i];
-      }
-    }
-  }
-
-  function calcEntropy(p) {
-    let h = 0;
-    for(let i=0; i<p.length; i++) {
-      if(p[i] > 1e-9) h += -p[i] * Math.log(p[i]) * dx;
-    }
-    return h;
-  }
-
-  function getPdfData(frame) {
-    const p = historyP[frame];
-    let data = [];
-    for(let i=0; i<p.length; i++) {
-      data.push({x: xValues[i], y: p[i]});
-    }
-    return { data: data, entropy: calcEntropy(p) };
-  }
-
   let theme = IAW.getThemeColors(root);
+  let chart = null;
+  let model = null;
+  let playback = null;
 
-  function getXBounds() {
-    return constraint === 'bounded'
-      ? { min: -2.5, max: 2.5 }
-      : { min: -4, max: 4 };
+  function normalize(values) {
+    const total = values.reduce((sum, value) => sum + value, 0);
+    return values.map((value) => value / total);
   }
-  
-  computeHistory();
-  let initialData = getPdfData(0);
-  const initialXBounds = getXBounds();
 
-  let chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      datasets: [
-        {
-          label: 'PDF',
-          data: initialData.data,
-          borderColor: theme.success,
-          backgroundColor: theme.success + '22',
-          borderWidth: 3,
-          pointRadius: 0,
-          fill: true,
-          tension: 0.2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: false }
-      },
-      scales: {
-        x: {
-          type: 'linear',
-          min: initialXBounds.min,
-          max: initialXBounds.max,
-          grid: { color: theme.border, display: false },
-          ticks: { color: theme.muted, font: { size: 11, weight: 'bold' } },
-          border: { display: false }
-        },
-        y: {
-          type: 'linear',
-          min: 0,
-          max: Math.max(maxY, 0.6),
-          grid: { color: theme.border },
-          ticks: { color: theme.muted, font: { size: 11, weight: 'bold' } },
-          border: { display: false }
-        }
+  function buildGrid(xMin, xMax, nBins) {
+    const dx = (xMax - xMin) / nBins;
+    const xValues = Array.from({ length: nBins }, (_, index) => xMin + (index + 0.5) * dx);
+    return { xValues, dx };
+  }
+
+  function createMixtureMasses(xValues, peaks, floorWeight) {
+    const masses = xValues.map((x) => {
+      let value = floorWeight;
+      peaks.forEach((peak) => {
+        value += peak.weight * Math.exp(-0.5 * Math.pow((x - peak.mean) / peak.scale, 2));
+      });
+      return value;
+    });
+    return normalize(masses);
+  }
+
+  function computeMoments(q, xValues) {
+    let mean = 0;
+    let secondMoment = 0;
+
+    for (let i = 0; i < q.length; i += 1) {
+      mean += q[i] * xValues[i];
+      secondMoment += q[i] * xValues[i] * xValues[i];
+    }
+
+    return {
+      mean,
+      variance: Math.max(secondMoment - mean * mean, 0),
+      secondMoment
+    };
+  }
+
+  function computeEntropy(q, dx) {
+    let entropy = 0;
+    for (let i = 0; i < q.length; i += 1) {
+      if (q[i] > EPS) {
+        entropy -= q[i] * Math.log(q[i] / dx);
       }
     }
-  });
-
-  function updateConstraintLabel() {
-    constraintLabel.textContent = constraint === 'bounded' ? 'Uniform on [-2, 2]' : 'Gaussian with var 1';
+    return entropy;
   }
 
-  valH.innerText = initialData.entropy.toFixed(3);
-  updateConstraintLabel();
-
-  function updateChart() {
-    const { data, entropy } = getPdfData(currentFrame);
-    const xBounds = getXBounds();
-    chart.data.datasets[0].data = data;
-    chart.options.scales.x.min = xBounds.min;
-    chart.options.scales.x.max = xBounds.max;
-    chart.options.scales.y.max = Math.max(maxY, 0.6);
-    
-    chart.update('none');
-    valH.innerText = entropy.toFixed(3);
-    timeVal.innerText = `Iter ${currentFrame}`;
-    updateConstraintLabel();
+  function computeMetrics(q, xValues, dx) {
+    const moments = computeMoments(q, xValues);
+    return {
+      entropy: computeEntropy(q, dx),
+      mean: moments.mean,
+      variance: moments.variance
+    };
   }
 
-  function primeChartPaths() {
-    if (hasPrimedChart || historyP.length < 2) return;
-    const savedFrame = currentFrame;
-    const warmFrame = Math.min(savedFrame + 1, historyP.length - 1);
-    chart.data.datasets[0].data = getPdfData(warmFrame).data;
-    chart.update('none');
-    chart.data.datasets[0].data = getPdfData(savedFrame).data;
-    chart.update('none');
-    hasPrimedChart = true;
+  function massesToSeries(q, xValues, dx) {
+    return q.map((mass, index) => ({
+      x: xValues[index],
+      y: mass / dx
+    }));
   }
 
-  function scheduleChartPrime() {
-    hasPrimedChart = false;
-    if (primeRequestId) cancelAnimationFrame(primeRequestId);
-    primeRequestId = requestAnimationFrame(() => {
-      primeRequestId = requestAnimationFrame(() => {
-        primeRequestId = null;
-        if (!document.hidden) primeChartPaths();
+  function entropyMirrorStep(q, stepSize) {
+    return normalize(q.map((mass) => Math.pow(Math.max(mass, EPS), 1 - stepSize)));
+  }
+
+  function getEffectiveStepSize(baseStepSize) {
+    return 1 - Math.pow(1 - baseStepSize, REFERENCE_FRAME_COUNT / FRAME_COUNT);
+  }
+
+  function tiltMasses(baseQ, xValues, alpha, beta) {
+    const logWeights = baseQ.map((mass, index) => (
+      Math.log(Math.max(mass, EPS)) + alpha * xValues[index] + beta * xValues[index] * xValues[index]
+    ));
+    const maxLogWeight = Math.max(...logWeights);
+    const weights = logWeights.map((logWeight) => Math.exp(logWeight - maxLogWeight));
+    return normalize(weights);
+  }
+
+  function computeProjectionMoments(q, xValues) {
+    let ex = 0;
+    let ex2 = 0;
+    let ex3 = 0;
+    let ex4 = 0;
+
+    for (let i = 0; i < q.length; i += 1) {
+      const x = xValues[i];
+      const x2 = x * x;
+      ex += q[i] * x;
+      ex2 += q[i] * x2;
+      ex3 += q[i] * x2 * x;
+      ex4 += q[i] * x2 * x2;
+    }
+
+    return { ex, ex2, ex3, ex4 };
+  }
+
+  function projectMomentConstraint(baseQ, xValues, initialDual) {
+    let alpha = initialDual.alpha;
+    let beta = initialDual.beta;
+    let q = baseQ.slice();
+
+    for (let iteration = 0; iteration < 48; iteration += 1) {
+      q = tiltMasses(baseQ, xValues, alpha, beta);
+      const stats = computeProjectionMoments(q, xValues);
+      const residualMean = stats.ex;
+      const residualSecondMoment = stats.ex2 - targetSecondMoment;
+
+      if (Math.max(Math.abs(residualMean), Math.abs(residualSecondMoment)) < 1e-10) {
+        break;
+      }
+
+      const j11 = stats.ex2 - stats.ex * stats.ex;
+      const j12 = stats.ex3 - stats.ex * stats.ex2;
+      const j22 = stats.ex4 - stats.ex2 * stats.ex2;
+      const det = j11 * j22 - j12 * j12;
+
+      if (Math.abs(det) < 1e-14) {
+        break;
+      }
+
+      const deltaAlpha = (j22 * residualMean - j12 * residualSecondMoment) / det;
+      const deltaBeta = (-j12 * residualMean + j11 * residualSecondMoment) / det;
+
+      alpha -= deltaAlpha;
+      beta -= deltaBeta;
+
+      if (Math.max(Math.abs(deltaAlpha), Math.abs(deltaBeta)) < 1e-10) {
+        break;
+      }
+    }
+
+    return {
+      q: tiltMasses(baseQ, xValues, alpha, beta),
+      alpha,
+      beta
+    };
+  }
+
+  function getConstraintConfig() {
+    if (constraint === 'bounded') {
+      return {
+        xMin: -2,
+        xMax: 2,
+        nBins: 161,
+        baseStepSize: 0.12,
+        floorWeight: 0.02,
+        xBounds: { min: -2.25, max: 2.25 },
+        targetLabelText: 'Uniform on [-2, 2]',
+        peaks: [
+          { mean: -1.3, scale: 0.18, weight: 1.1 },
+          { mean: -0.15, scale: 0.32, weight: 0.6 },
+          { mean: 0.9, scale: 0.12, weight: 1.5 },
+          { mean: 1.45, scale: 0.18, weight: 0.8 }
+        ]
+      };
+    }
+
+    return {
+      xMin: -4.8,
+      xMax: 4.8,
+      nBins: 241,
+      baseStepSize: 0.10,
+      floorWeight: 0.015,
+      xBounds: { min: -4.5, max: 4.5 },
+      targetLabelText: 'Gaussian shape with mean 0, var 1',
+      peaks: [
+        { mean: -2.4, scale: 0.42, weight: 0.7 },
+        { mean: -0.9, scale: 0.25, weight: 1.1 },
+        { mean: 1.1, scale: 0.35, weight: 0.9 },
+        { mean: 2.2, scale: 0.5, weight: 0.6 }
+      ]
+    };
+  }
+
+  function buildModel() {
+    const config = getConstraintConfig();
+    const { xValues, dx } = buildGrid(config.xMin, config.xMax, config.nBins);
+    const stepSize = getEffectiveStepSize(config.baseStepSize);
+
+    let q = createMixtureMasses(xValues, config.peaks, config.floorWeight);
+    let dual = { alpha: 0, beta: -0.35 };
+
+    if (constraint === 'variance') {
+      const projectedInitial = projectMomentConstraint(q, xValues, dual);
+      q = projectedInitial.q;
+      dual = { alpha: projectedInitial.alpha, beta: projectedInitial.beta };
+    }
+
+    const history = [q.slice()];
+    const metrics = [computeMetrics(q, xValues, dx)];
+
+    for (let frame = 1; frame <= FRAME_COUNT; frame += 1) {
+      const entropyStep = entropyMirrorStep(q, stepSize);
+
+      if (constraint === 'variance') {
+        const projectedStep = projectMomentConstraint(entropyStep, xValues, dual);
+        q = projectedStep.q;
+        dual = { alpha: projectedStep.alpha, beta: projectedStep.beta };
+      } else {
+        q = entropyStep;
+      }
+
+      history.push(q.slice());
+      metrics.push(computeMetrics(q, xValues, dx));
+    }
+
+    let maxDensity = 0;
+    history.forEach((frameMasses) => {
+      frameMasses.forEach((mass) => {
+        maxDensity = Math.max(maxDensity, mass / dx);
       });
     });
+
+    return {
+      xValues,
+      dx,
+      xBounds: config.xBounds,
+      targetLabelText: config.targetLabelText,
+      history,
+      metrics,
+      maxY: maxDensity * 1.12
+    };
   }
 
-  slider.addEventListener('input', (e) => {
-    isPlaying = false;
-    updatePlayButton();
-    currentFrame = parseInt(e.target.value);
-    updateChart();
-  });
-
-  segBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      segBtns.forEach(b => b.classList.remove('active'));
-      const target = e.target.closest('.iaw__seg-btn');
-      target.classList.add('active');
-      constraint = target.dataset.constraint;
-      currentFrame = 0;
-      slider.value = 0;
-      isPlaying = false;
-      updatePlayButton();
-      computeHistory();
-      updateChart();
-      scheduleChartPrime();
-    });
-  });
-
-  function updatePlayButton() {
-    if (isPlaying) {
-      playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-    } else {
-      playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
-    }
+  function formatSigned(value) {
+    const clipped = Math.abs(value) < 5e-4 ? 0 : value;
+    return clipped.toFixed(3);
   }
 
-  let lastTime = 0;
-  let direction = 1;
+  function updateReadout() {
+    const metrics = model.metrics[currentFrame];
+    entropyValue.textContent = metrics.entropy.toFixed(3);
+    constraintLabel.textContent = model.targetLabelText;
+    momentSummary.textContent = `mean ${formatSigned(metrics.mean)}, var ${metrics.variance.toFixed(3)}`;
+    valueLabel.textContent = `Step ${currentFrame} / ${FRAME_COUNT}`;
+  }
 
-  function animate(timestamp) {
-    if (!isPlaying) return;
-    if (!lastTime) lastTime = timestamp;
-    const dt = timestamp - lastTime;
-    if (dt > 30) { 
-      lastTime = timestamp;
-      let newFrame = currentFrame + direction;
-      if (newFrame >= 100 && direction === 1) {
-        newFrame = 100;
-        direction = -1;
-        isPlaying = false;
-        updatePlayButton();
-      } else if (newFrame <= 0 && direction === -1) {
-        newFrame = 0;
-        direction = 1;
-        isPlaying = false;
-        updatePlayButton();
+  function renderFrame(frame) {
+    currentFrame = frame;
+    chart.data.datasets[0].data = massesToSeries(model.history[currentFrame], model.xValues, model.dx);
+    chart.options.scales.x.min = model.xBounds.min;
+    chart.options.scales.x.max = model.xBounds.max;
+    chart.options.scales.y.max = Math.max(model.maxY, 0.45);
+    chart.update('none');
+    updateReadout();
+  }
+
+  function createChart() {
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Current density',
+            data: [],
+            borderColor: theme.success,
+            backgroundColor: IAW.toAlpha(theme.success, 0.14),
+            borderWidth: 2.5,
+            fill: true,
+            pointRadius: 0,
+            tension: 0.18,
+            cubicInterpolationMode: 'monotone'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        layout: {
+          padding: { top: 20, right: 18, bottom: 10, left: 10 }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'nearest'
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: theme.muted,
+              font: { size: 11, weight: '600' },
+              maxTicksLimit: 7
+            },
+            border: { display: false }
+          },
+          y: {
+            min: 0,
+            grid: {
+              color: IAW.toAlpha(theme.border, 0.9)
+            },
+            ticks: {
+              color: theme.muted,
+              font: { size: 11, weight: '600' },
+              maxTicksLimit: 5
+            },
+            border: { display: false }
+          }
+        }
       }
-      currentFrame = newFrame;
-      slider.value = currentFrame;
-      updateChart();
-    }
-    if (isPlaying) animationFrameId = requestAnimationFrame(animate);
+    });
   }
 
-  playBtn.addEventListener('click', () => {
-    isPlaying = !isPlaying;
-    updatePlayButton();
-    if (isPlaying) {
-      if (!hasPrimedChart) primeChartPaths();
-      if (currentFrame >= 100) direction = -1;
-      else if (currentFrame <= 0) direction = 1;
-      lastTime = performance.now() - 34;
-      animationFrameId = requestAnimationFrame(animate);
-    } else {
-      cancelAnimationFrame(animationFrameId);
-    }
+  function rebuildModel() {
+    model = buildModel();
+    if (playback) playback.setFrame(0, { notify: true, stopPlayback: true });
+    else renderFrame(0);
+  }
+
+  segBtns.forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      const nextButton = event.currentTarget.closest('.iaw__seg-btn');
+      if (!nextButton || nextButton.dataset.constraint === constraint) return;
+
+      segBtns.forEach((candidate) => candidate.classList.remove('active'));
+      nextButton.classList.add('active');
+      constraint = nextButton.dataset.constraint;
+      rebuildModel();
+    });
   });
 
   IAW.observeTheme(() => {
     theme = IAW.getThemeColors(root);
     chart.data.datasets[0].borderColor = theme.success;
-    chart.data.datasets[0].backgroundColor = theme.success + '22';
-    chart.options.scales.x.grid.color = theme.border;
+    chart.data.datasets[0].backgroundColor = IAW.toAlpha(theme.success, 0.14);
     chart.options.scales.x.ticks.color = theme.muted;
-    chart.options.scales.y.grid.color = theme.border;
     chart.options.scales.y.ticks.color = theme.muted;
+    chart.options.scales.y.grid.color = IAW.toAlpha(theme.border, 0.9);
     chart.update('none');
   });
 
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && !hasPrimedChart) scheduleChartPrime();
+  model = buildModel();
+  createChart();
+  playback = IAW.createPlaybackController({
+    button: playBtn,
+    slider,
+    maxFrame: FRAME_COUNT,
+    frameDuration: 16,
+    onFrameChange: renderFrame
   });
-
-  function requestMathTypeset(attempt = 0) {
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      window.MathJax.typesetPromise([root]).then(() => scheduleChartPrime()).catch(() => {});
-      return;
-    }
-    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
-  }
-  scheduleChartPrime();
-  requestMathTypeset();
+  renderFrame(0);
 });
 </script>
-

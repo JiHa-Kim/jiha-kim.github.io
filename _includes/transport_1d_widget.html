@@ -7,9 +7,12 @@
 </p>
 {% endcapture %}
 
-{% capture visuals %}
-<canvas id="itsChart" class="iaw__canvas"></canvas>
+{% capture controls %}
+  {% assign itsTicks = "0.0, 0.5, 1.0" | split: ", " %}
+  {% include iaw_slider.html id="itsSlider" min="0.001" max="0.999" step="0.001" value="0.70" ticks=itsTicks variant="parameter" %}
+{% endcapture %}
 
+{% capture itsOverlay %}
 <div class="iaw__overlay" id="itsOverlay">
   <div class="iaw__drag-strip" data-key="u"></div>
 
@@ -27,11 +30,16 @@
 </div>
 {% endcapture %}
 
+{% capture visuals %}
+{% include iaw_canvas_stage.html canvas_id="itsChart" overlay=itsOverlay %}
+{% endcapture %}
+
 {% include iaw_skeleton.html 
     id="inverseTransformFigure"
     eyebrow="Interactive Example"
     title="Inverse Transform Sampling"
     description=describe
+    controls=controls
     visuals=visuals
     stage_id="itsStage"
     stage_style="height: 440px;"
@@ -41,9 +49,8 @@
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
 (function() {
-  const root = document.getElementById('inverseTransformFigure');
-  if (!root || root.dataset.initialized === 'true') return;
-  root.dataset.initialized = 'true';
+  const root = IAW.initFigure('inverseTransformFigure', { requiresChart: true });
+  if (!root) return;
 
   const canvas = root.querySelector('#itsChart');
   const stage = root.querySelector('#itsStage');
@@ -52,6 +59,7 @@
   const handleX = root.querySelector('.iaw__handle[data-key="x"]');
   const valU = root.querySelector('#val-u');
   const valX = root.querySelector('#val-x');
+  const sliderU = root.querySelector('#itsSlider');
 
   let state = { u: 0.70, activeKey: null };
 
@@ -180,6 +188,9 @@
       handleU.style.left = `${offsetX + px}px`;
       handleU.style.top = `${offsetY + chartArea.bottom}px`;
       valU.innerText = state.u.toFixed(2);
+      if (sliderU && sliderU.value !== state.u.toString()) {
+        sliderU.value = state.u;
+      }
 
       stripU.style.left = `${offsetX + px}px`;
 
@@ -209,7 +220,7 @@
           label: 'PDF Filled',
           data: pdfFilledData,
           borderColor: theme.sourceA,
-          backgroundColor: theme.sourceA + '44',
+          backgroundColor: IAW.toAlpha(theme.sourceA, 0.27),
           borderWidth: 1.5,
           pointRadius: 0,
           fill: 'start',
@@ -278,6 +289,14 @@
     chart.update('none');
   }
 
+  if (sliderU) {
+    sliderU.addEventListener('input', (e) => {
+      state.u = parseFloat(e.target.value);
+      updatePdfData();
+      chart.update('none');
+    });
+  }
+
   function startDragging(key, event, el) {
     state.activeKey = key;
     el.setPointerCapture(event.pointerId);
@@ -321,7 +340,7 @@
     chart.options.scales.y.ticks.color = theme.muted;
     chart.data.datasets[0].borderColor = theme.sourceB;
     chart.data.datasets[1].borderColor = theme.sourceA;
-    chart.data.datasets[1].backgroundColor = theme.sourceA + '44';
+    chart.data.datasets[1].backgroundColor = IAW.toAlpha(theme.sourceA, 0.27);
     chart.update();
   });
 

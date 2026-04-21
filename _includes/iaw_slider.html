@@ -1,0 +1,10 @@
+<div class="iaw__slider-box">
+  <input type="range" class="iaw__slider iaw__slider--{{ include.variant | default: 'parameter' }}" id="{{ include.id }}" min="{{ include.min | default: '0' }}" max="{{ include.max | default: '100' }}" step="{{ include.step | default: '1' }}" value="{{ include.value | default: '0' }}">
+  {% if include.ticks %}
+  <div class="iaw__slider-ticks">
+    {% for tick in include.ticks %}
+      <span>{{ tick }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>

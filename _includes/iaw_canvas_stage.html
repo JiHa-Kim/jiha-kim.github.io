@@ -1,0 +1,7 @@
+{% if include.pill_id %}
+<div class="iaw__floating-pill{% if include.pill_class %} {{ include.pill_class }}{% endif %}" id="{{ include.pill_id }}">{{ include.pill_text }}</div>
+{% endif %}
+<canvas id="{{ include.canvas_id }}" class="iaw__canvas{% if include.canvas_class %} {{ include.canvas_class }}{% endif %}"></canvas>
+{% if include.overlay %}
+{{ include.overlay }}
+{% endif %}
