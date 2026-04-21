@@ -75,89 +75,9 @@
 %}
 
 <style>
-.iaw__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
-.iaw__overlay { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
-
-.iaw__drag-strip {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 48px;
-  transform: translateX(-50%);
-  cursor: col-resize;
-  pointer-events: auto;
-  z-index: 11;
-  background: transparent;
-}
-
-.iaw__drag-strip::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--iaw-border);
-    opacity: 0.3;
-    transition: opacity 0.15s ease;
-}
-
-.iaw__drag-strip:hover::after, .iaw__drag-strip.active::after {
-    opacity: 1.0;
-}
-
-.iaw__handle {
-  position: absolute;
-  z-index: 15;
-  min-width: 62px;
-  min-height: 38px;
-  background: var(--iaw-bg);
-  border: 3px solid var(--iaw-border);
-  border-radius: 999px;
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: var(--iaw-text);
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  pointer-events: auto;
-  user-select: none;
-  touch-action: none;
-  box-shadow: none;
-  transition: transform 0.1s ease, border-color 0.2s ease, background 0.2s ease;
-}
-
-.iaw__handle span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.iaw__handle small {
-    font-size: 1.1rem;
-    opacity: 0.6;
-    line-height: 0;
-    margin-top: -1px;
-}
-
-.iaw__handle:hover {
-    background: color-mix(in srgb, var(--iaw-bg) 95%, var(--iaw-text) 5%);
-}
-
-.iaw__handle.active { 
-    cursor: grabbing; 
-    border-color: var(--iaw-text) !important;
-    background: var(--iaw-bg);
-    transform: translate(-50%, -50%) scale(0.95);
-}
-
-.iaw__handle--source { border-color: var(--iaw-warning); }
-.iaw__handle--target { border-color: var(--iaw-target); }
+.iaw__stage { height: 380px; }
 
 @media (max-width: 640px) {
-  .iaw__handle { min-width: 54px; min-height: 32px; font-size: 0.8rem; border-width: 2px; }
   .iaw__stage { height: 320px; }
 }
 </style>

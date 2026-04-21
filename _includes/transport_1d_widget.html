@@ -1,162 +1,59 @@
-<div class="otu" id="inverseTransformFigure">
-  <div class="otu__intro">
-    <div class="otu__eyebrow">Interactive Example</div>
-    <h4>Inverse Transform Sampling</h4>
-    <p>
-      Drag the <strong>\( u \)</strong> slider along the horizontal axis, which represents uniform noise.
-      The solid blue curve is the <strong>Inverse CDF</strong> \( x = F^{-1}(u) \).
-      The shape along the vertical axis shows the target density \( p(x) \). 
-      Notice how the <span style="color: var(--prompt-warning-icon, #d97706); font-weight: bold;">cumulative mass</span> (the filled orange area) visually grows in proportion to your chosen \( u \) input!
-    </p>
-  </div>
+{% capture describe %}
+<p>
+  Drag the <strong>$u$</strong> handle along the horizontal axis, which represents uniform noise.
+  The solid blue curve is the <strong>Inverse CDF</strong> $x = F^{-1}(u)$.
+  The shape along the vertical axis shows the target density $p(x)$. 
+  Notice how the <span style="color: var(--iaw-warning); font-weight: bold;">cumulative mass</span> (the filled orange area) visually grows in proportion to your chosen $u$ input!
+</p>
+{% endcapture %}
 
-  <div class="otu__stage-card">
-    <div class="otu__stage" id="itsStage" style="height: 440px; position: relative;">
-      <canvas id="itsChart"></canvas>
+{% capture visuals %}
+<canvas id="itsChart" class="iaw__canvas"></canvas>
 
-      <!-- Draggable pill on X-axis -->
-      <div class="otu__badge otu__badge--u" id="itsBadgeU">
-        <span class="math-static">\( u \)</span>&nbsp;=&nbsp;<span id="val-u">0.70</span>
-      </div>
-      
-      <!-- Readout pill on Y-axis -->
-      <div class="otu__badge otu__badge--xval" id="itsBadgeX">
-        <span class="math-static">\( x \)</span>&nbsp;=&nbsp;<span id="val-x">4.23</span>
-      </div>
-      
-      <!-- LaTeX Axis Labels -->
-      <div class="otu__axis-title otu__axis-title--y">\( x \sim P_{\text{data}} \)</div>
-      <div class="otu__axis-title otu__axis-title--x">\( u \sim \mathcal{U}(0,1) \)</div>
-    </div>
-  </div>
+<div class="iaw__overlay" id="itsOverlay">
+  <div class="iaw__drag-strip" data-key="u"></div>
+
+  <button type="button" class="iaw__handle iaw__handle--source" data-key="u">
+    <span>$u$ = <span id="val-u">0.70</span></span>
+  </button>
+  
+  <button type="button" class="iaw__handle iaw__handle--target" data-key="x" style="pointer-events: none; opacity: 0.9;">
+    <span>$x$ = <span id="val-x">4.23</span></span>
+  </button>
+
+  <!-- Axis Labels -->
+  <div class="iaw__route-tag" style="left: 15px; top: 50%; transform: translateY(-50%) rotate(-90deg); border: none; background: transparent; font-size: 0.95rem;">$x \sim P_{\text{data}}$</div>
+  <div class="iaw__route-tag" style="bottom: 8px; left: 50%; transform: translateX(-50%); border: none; background: transparent; font-size: 0.95rem;">$u \sim \mathcal{U}(0,1)$</div>
 </div>
+{% endcapture %}
 
-<style>
-.otu {
-  margin: 1.35rem 0 2rem 0;
-  padding: 1rem;
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.16));
-  border-radius: 14px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.04));
-}
-
-.otu__eyebrow {
-  margin-bottom: 0.28rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted-color, var(--text-color, inherit));
-}
-
-.otu__intro h4 {
-  margin: 0;
-  font-size: 1.04rem;
-}
-
-.otu__intro p {
-  margin: 0.45rem 0 0 0;
-  line-height: 1.66;
-  color: var(--text-muted-color, var(--text-color, inherit));
-}
-
-.otu__stage-card {
-  margin-top: 1rem;
-  padding: 0.9rem;
-  border: 1px solid var(--card-border, rgba(120, 120, 120, 0.14));
-  border-radius: 12px;
-  background: var(--main-bg, rgba(255, 255, 255, 0.76));
-}
-
-.otu__stage {
-  position: relative;
-  background: var(--main-bg, #fff);
-  border-radius: 12px;
-  padding: 15px 25px 45px 55px;
-  border: 1px solid var(--card-border, rgba(100, 100, 100, 0.15));
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-  user-select: none;
-  touch-action: none;
-}
-
-.otu__badge {
-  position: absolute;
-  z-index: 10;
-  padding: 4px 10px;
-  background: var(--main-bg, #fff);
-  border-radius: 999px;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
-  transition: box-shadow 0.1s, transform 0.1s;
-}
-
-.otu__badge--u {
-  border: 2px solid var(--prompt-warning-icon, #d97706);
-  color: var(--text-color, inherit);
-  cursor: grab;
-  pointer-events: auto; /* U badge is draggable directly */
-}
-
-.otu__badge--u:active, .otu__badge--u.is-dragging {
-  cursor: grabbing;
-  transform: translate(-50%, -50%) scale(1.05);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.otu__badge--xval {
-  border: 2px solid var(--prompt-info-icon, #0ea5e9);
-  color: var(--text-color, inherit);
-  pointer-events: none;
-}
-
-.otu__axis-title {
-  position: absolute;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-color, inherit);
-  pointer-events: none;
-}
-
-.otu__axis-title--y {
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%) rotate(-90deg);
-  transform-origin: center;
-}
-
-.otu__axis-title--x {
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.otu .mjx-container {
-  margin: 0 !important;
-}
-
-[data-mode="dark"] .otu__stage {
-  background: var(--main-bg, #1b1b1e);
-}
-</style>
+{% include iaw_skeleton.html 
+    id="inverseTransformFigure"
+    eyebrow="Interactive Example"
+    title="Inverse Transform Sampling"
+    description=describe
+    visuals=visuals
+    stage_id="itsStage"
+    stage_style="height: 440px;"
+%}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+(function() {
   const root = document.getElementById('inverseTransformFigure');
   if (!root || root.dataset.initialized === 'true') return;
   root.dataset.initialized = 'true';
 
+  const canvas = root.querySelector('#itsChart');
   const stage = root.querySelector('#itsStage');
-  const badgeU = root.querySelector('#itsBadgeU');
-  const badgeX = root.querySelector('#itsBadgeX');
+  const handleU = root.querySelector('.iaw__handle[data-key="u"]');
+  const stripU = root.querySelector('.iaw__drag-strip[data-key="u"]');
+  const handleX = root.querySelector('.iaw__handle[data-key="x"]');
   const valU = root.querySelector('#val-u');
   const valX = root.querySelector('#val-x');
 
-  let state = { u: 0.5 };
-  let isDragging = false;
+  let state = { u: 0.70, activeKey: null };
 
   // Math utilities for Gaussian Mixture
   function erf(x) {
@@ -224,7 +121,6 @@ document.addEventListener("DOMContentLoaded", function() {
         pdfEmptyData.push({ x: pdf, y: x_val });
       }
     }
-    // Add the exact intersection point to keep the boundary sharp
     const exactPdf = targetPDF(xVal);
     pdfFilledData.push({ x: exactPdf, y: xVal });
     pdfEmptyData.unshift({ x: exactPdf, y: xVal });
@@ -233,8 +129,8 @@ document.addEventListener("DOMContentLoaded", function() {
   updatePdfData();
 
   let theme = IAW.getThemeColors(root);
-
-  const ctx = document.getElementById('itsChart').getContext('2d');
+  const DOMAIN_U = { min: 0, max: 1 };
+  const ctx = canvas.getContext('2d');
   
   const transportPlugin = {
     id: 'transportLines',
@@ -251,17 +147,12 @@ document.addEventListener("DOMContentLoaded", function() {
       ctx.lineWidth = 2;
       ctx.strokeStyle = theme.sourceA;
       
-      // Vertical line (from u on X-axis up to curve)
       ctx.moveTo(px, chartArea.bottom);
       ctx.lineTo(px, py);
-      
-      // Horizontal line (from curve to Y-axis)
       ctx.moveTo(px, py);
       ctx.lineTo(chartArea.left, py);
-      
       ctx.stroke();
 
-      // Intersection points
       ctx.setLineDash([]);
       ctx.fillStyle = theme.sourceA;
       
@@ -280,18 +171,20 @@ document.addEventListener("DOMContentLoaded", function() {
       
       ctx.restore();
 
-      // Update HTML Overlays
+      // Update Handles
       const stageRect = stage.getBoundingClientRect();
       const canvasRect = chart.canvas.getBoundingClientRect();
       const offsetX = canvasRect.left - stageRect.left;
       const offsetY = canvasRect.top - stageRect.top;
 
-      badgeU.style.left = `${offsetX + px}px`;
-      badgeU.style.top = `${offsetY + chartArea.bottom}px`;
+      handleU.style.left = `${offsetX + px}px`;
+      handleU.style.top = `${offsetY + chartArea.bottom}px`;
       valU.innerText = state.u.toFixed(2);
 
-      badgeX.style.left = `${offsetX + chartArea.left}px`;
-      badgeX.style.top = `${offsetY + py}px`;
+      stripU.style.left = `${offsetX + px}px`;
+
+      handleX.style.left = `${offsetX + chartArea.left}px`;
+      handleX.style.top = `${offsetY + py}px`;
       valX.innerText = xVal.toFixed(2);
     }
   };
@@ -313,10 +206,10 @@ document.addEventListener("DOMContentLoaded", function() {
           yAxisID: 'y'
         },
         {
-          label: 'PDF Filled (Cumulative Mass)',
+          label: 'PDF Filled',
           data: pdfFilledData,
           borderColor: theme.sourceA,
-          backgroundColor: theme.sourceA + '44', // Use hex + alpha for matte feel
+          backgroundColor: theme.sourceA + '44',
           borderWidth: 1.5,
           pointRadius: 0,
           fill: 'start',
@@ -327,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function() {
         {
           label: 'PDF Empty',
           data: pdfEmptyData,
-          borderColor: theme.ticks,
+          borderColor: theme.muted,
           backgroundColor: 'rgba(150, 150, 150, 0.1)',
           borderWidth: 1.5,
           pointRadius: 0,
@@ -341,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      indexAxis: 'y', // This is crucial to fill the PDF to the X-axis correctly
+      indexAxis: 'y',
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
@@ -353,13 +246,13 @@ document.addEventListener("DOMContentLoaded", function() {
           min: 0,
           max: 1,
           position: 'bottom',
-          grid: { color: theme.grid },
-          ticks: { color: theme.ticks, font: { size: 12 } }
+          grid: { color: theme.border },
+          ticks: { color: theme.muted, font: { size: 12 } }
         },
         xPdf: {
           type: 'linear',
           min: 0,
-          max: maxPdfVal * 3.5, // Occupy roughly the left 30% of the graph
+          max: maxPdfVal * 3.5,
           position: 'top',
           display: false
         },
@@ -368,67 +261,70 @@ document.addEventListener("DOMContentLoaded", function() {
           min: 0,
           max: 10,
           position: 'left',
-          grid: { color: theme.grid },
-          ticks: { color: theme.ticks, font: { size: 12 } }
+          grid: { color: theme.border },
+          ticks: { color: theme.muted, font: { size: 12 } }
         }
       }
     }
   });
 
-  function getUFromMouseEvent(event) {
+  function handlePointer(event) {
+    if (!state.activeKey) return;
     const canvasRect = chart.canvas.getBoundingClientRect();
     const xPos = event.clientX - canvasRect.left;
     let u = chart.scales.x.getValueForPixel(xPos);
-    return Math.max(0.001, Math.min(0.999, u));
-  }
-
-  function onPointerMove(event) {
-    if (!isDragging) return;
-    state.u = getUFromMouseEvent(event);
+    state.u = Math.max(0.001, Math.min(0.999, u));
     updatePdfData();
-    chart.update('none'); // Update without animation
+    chart.update('none');
   }
 
-  function stopDrag() {
-    isDragging = false;
-    badgeU.classList.remove('is-dragging');
-  }
-
-  badgeU.addEventListener('pointerdown', (event) => {
-    isDragging = true;
-    badgeU.classList.add('is-dragging');
-    badgeU.setPointerCapture(event.pointerId);
+  function startDragging(key, event, el) {
+    state.activeKey = key;
+    el.setPointerCapture(event.pointerId);
+    el.classList.add('active');
+    stripU.classList.add('active');
     event.preventDefault();
-  });
+  }
 
-  // Also allow clicking on the canvas directly to move the handle
+  function stopDragging() {
+    state.activeKey = null;
+    handleU.classList.remove('active');
+    stripU.classList.remove('active');
+  }
+
+  handleU.addEventListener('pointerdown', e => startDragging('u', e, handleU));
+  window.addEventListener('pointermove', handlePointer);
+  window.addEventListener('pointerup', stopDragging);
+  window.addEventListener('pointercancel', stopDragging);
+
+  stripU.addEventListener('pointerdown', e => startDragging('u', e, stripU));
+
+  // Canvas interaction
   chart.canvas.addEventListener('pointerdown', (event) => {
-    state.u = getUFromMouseEvent(event);
-    isDragging = true;
-    badgeU.classList.add('is-dragging');
+    const canvasRect = chart.canvas.getBoundingClientRect();
+    const xPos = event.clientX - canvasRect.left;
+    state.u = Math.max(0.001, Math.min(0.999, chart.scales.x.getValueForPixel(xPos)));
+    state.activeKey = 'u';
+    handleU.setPointerCapture(event.pointerId);
+    handleU.classList.add('active');
+    stripU.classList.add('active');
     updatePdfData();
     chart.update('none');
     event.preventDefault();
   });
 
-  window.addEventListener('pointermove', onPointerMove);
-  window.addEventListener('pointerup', stopDrag);
-  window.addEventListener('pointercancel', stopDrag);
-
-  // Theme observer
   IAW.observeTheme(() => {
     theme = IAW.getThemeColors(root);
-    chart.options.scales.x.grid.color = theme.grid;
-    chart.options.scales.x.ticks.color = theme.ticks;
-    chart.options.scales.y.grid.color = theme.grid;
-    chart.options.scales.y.ticks.color = theme.ticks;
+    chart.options.scales.x.grid.color = theme.border;
+    chart.options.scales.x.ticks.color = theme.muted;
+    chart.options.scales.y.grid.color = theme.border;
+    chart.options.scales.y.ticks.color = theme.muted;
     chart.data.datasets[0].borderColor = theme.sourceB;
     chart.data.datasets[1].borderColor = theme.sourceA;
     chart.data.datasets[1].backgroundColor = theme.sourceA + '44';
     chart.update();
   });
 
-  // MathJax Typesetting for static labels
   function requestMathTypeset(attempt = 0) {
     if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
       window.MathJax.typesetPromise([root]).catch(() => {});
@@ -437,5 +333,5 @@ document.addEventListener("DOMContentLoaded", function() {
     if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
   }
   requestMathTypeset();
-});
+})();
 </script>
