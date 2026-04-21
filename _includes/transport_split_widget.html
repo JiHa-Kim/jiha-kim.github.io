@@ -1,1100 +1,493 @@
-<div class="otx" id="transportSplitWidget">
-  <div class="otx__intro">
-    <div class="otx__copy">
-      <div class="otx__eyebrow">Interactive Mass-Splitting Example</div>
-      <h4>Split-mass transport with two sources</h4>
-      <p>
-        Source $A$ has $2\text{ kg}$ of loose dirt, and source $B$ has $1\text{ kg}$. Hole $C$ needs $1\text{ kg}$, while hole $D$ needs $2\text{ kg}$. Once you choose how much mass to send from $A$ to $C$, conservation determines the other three entries of the transport plan automatically.
-      </p>
-    </div>
+{% capture describe %}
+<p>
+  Source $A$ has $2\text{ kg}$ of loose dirt, and source $B$ has $1\text{ kg}$. Hole $C$ needs $1\text{ kg}$, while hole $D$ needs $2\text{ kg}$. Once you choose how much mass to send from $A$ to $C$, conservation determines the other three entries of the transport plan automatically.
+</p>
+{% endcapture %}
 
-    <div class="otx__cost-card">
-      <div class="otx__cost-title">Shipping Cost per kg</div>
-      <div class="otx__cost-grid">
-        <div class="otx__cost-head otx__matrix-dir">
-          <span>From</span>
-          <span>&rarr;</span>
-          <span>To</span>
-        </div>
-        <div class="otx__cost-head">To $C$</div>
-        <div class="otx__cost-head">To $D$</div>
-        <div class="otx__cost-head">From $A$</div>
-        <div>$\$1$</div>
-        <div>$\$3$</div>
-        <div class="otx__cost-head">From $B$</div>
-        <div>$\$4$</div>
-        <div>$\$1$</div>
-      </div>
-    </div>
+{% capture visuals %}
+<canvas id="otxCanvas" class="iaw__canvas"></canvas>
+<div id="otxParticleLayer" class="iaw__particle-layer"></div>
+
+<div class="iaw__node iaw__node--a">
+  <div class="iaw__node-row">
+    <div class="iaw__node-title">Source $A$</div>
+    <div class="iaw__node-badge">2 kg</div>
   </div>
+  <div class="iaw__tray"><div class="iaw__slots iaw__slots--8" data-slots="a"></div></div>
+</div>
 
-  <div class="otx__summary-strip">
-    <div class="otx__summary-pill">
-      <span class="otx__summary-label">Atomic Unit</span>
-      <strong class="otx__summary-value">0.25 kg per pebble</strong>
-    </div>
-    <div class="otx__summary-pill">
-      <span class="otx__summary-label">Free Variable</span>
-      <strong class="otx__summary-value">$x = \pi_{AC}$</strong>
-    </div>
-    <div class="otx__summary-pill">
-      <span class="otx__summary-label">Cheapest Choice</span>
-      <strong class="otx__summary-value">$x = 1$</strong>
-    </div>
+<div class="iaw__node iaw__node--b">
+  <div class="iaw__node-row">
+    <div class="iaw__node-title">Source $B$</div>
+    <div class="iaw__node-badge">1 kg</div>
   </div>
+  <div class="iaw__tray"><div class="iaw__slots iaw__slots--4" data-slots="b"></div></div>
+</div>
 
-  <div class="otx__stage-card">
-    <div class="otx__stage-note">
-      Drag the free variable to change the plan in real time. While dragging, the geometry updates immediately; when you release the slider, the pebbles replay from the source trays so the mass balance is easy to read.
-    </div>
-
-    <div class="otx__stage" id="otxStage">
-      <canvas class="otx__canvas" aria-hidden="true"></canvas>
-
-      <div class="otx__route-tag otx__route-tag--ac" data-route-tag="ac">$A \to C$ $\$1/\mathrm{kg}$</div>
-      <div class="otx__route-tag otx__route-tag--ad" data-route-tag="ad">$A \to D$ $\$3/\mathrm{kg}$</div>
-      <div class="otx__route-tag otx__route-tag--bc" data-route-tag="bc">$B \to C$ $\$4/\mathrm{kg}$</div>
-      <div class="otx__route-tag otx__route-tag--bd" data-route-tag="bd">$B \to D$ $\$1/\mathrm{kg}$</div>
-
-      <div class="otx__node otx__node--source otx__node--a" data-node="a">
-        <div class="otx__node-row">
-          <span class="otx__node-title">Source A</span>
-          <span class="otx__node-badge">2 kg</span>
-        </div>
-        <div class="otx__tray otx__tray--source">
-          <div class="otx__slots otx__slots--8" data-slots="a"></div>
-        </div>
-      </div>
-
-      <div class="otx__node otx__node--source otx__node--b" data-node="b">
-        <div class="otx__node-row">
-          <span class="otx__node-title">Source B</span>
-          <span class="otx__node-badge">1 kg</span>
-        </div>
-        <div class="otx__tray otx__tray--source">
-          <div class="otx__slots otx__slots--4" data-slots="b"></div>
-        </div>
-      </div>
-
-      <div class="otx__node otx__node--target otx__node--c" data-node="c">
-        <div class="otx__node-row">
-          <span class="otx__node-title">Hole C</span>
-          <span class="otx__node-badge">needs 1 kg</span>
-        </div>
-        <div class="otx__tray otx__tray--target">
-          <div class="otx__slots otx__slots--4" data-slots="c"></div>
-        </div>
-      </div>
-
-      <div class="otx__node otx__node--target otx__node--d" data-node="d">
-        <div class="otx__node-row">
-          <span class="otx__node-title">Hole D</span>
-          <span class="otx__node-badge">needs 2 kg</span>
-        </div>
-        <div class="otx__tray otx__tray--target">
-          <div class="otx__slots otx__slots--8" data-slots="d"></div>
-        </div>
-      </div>
-
-      <div class="otx__particle-layer" aria-hidden="true"></div>
-    </div>
+<div class="iaw__node iaw__node--c">
+  <div class="iaw__node-row">
+    <div class="iaw__node-title">Hole $C$</div>
+    <div class="iaw__node-badge">needs 1 kg</div>
   </div>
+  <div class="iaw__tray"><div class="iaw__slots iaw__slots--4" data-slots="c"></div></div>
+</div>
 
-  <div class="otx__bottom">
-    <div class="otx__panel otx__panel--controls">
-      <div class="otx__panel-title">Choose the free variable</div>
+<div class="iaw__node iaw__node--d">
+  <div class="iaw__node-row">
+    <div class="iaw__node-title">Hole $D$</div>
+    <div class="iaw__node-badge">needs 2 kg</div>
+  </div>
+  <div class="iaw__tray"><div class="iaw__slots iaw__slots--8" data-slots="d"></div></div>
+</div>
 
-      <div class="otx__slider-row">
-        <label class="otx__slider-label" for="otxSlider">$x = \pi_{AC}$</label>
-        <div class="otx__slider-value"><span data-bind="x_value">0.50</span> kg</div>
-      </div>
+<div id="otxRoutes"></div>
+{% endcapture %}
 
-      <input
-        type="range"
-        id="otxSlider"
-        class="otx__slider"
-        min="0"
-        max="1"
-        step="0.25"
-        value="0.50"
-      >
+{% capture legend %}
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-warning)"></span>
+  <span>$A \to C$: $\$1/\mathrm{kg}$, $A \to D$: $\$3/\mathrm{kg}$</span>
+</div>
+<div class="iaw__legend-item">
+  <span class="iaw__swatch" style="background: var(--iaw-success)"></span>
+  <span>$B \to C$: $\$4/\mathrm{kg}$, $B \to D$: $\$1/\mathrm{kg}$</span>
+</div>
+<div class="iaw__legend-item" style="margin-top: 2px;">
+  <span>$1\text{ pebble} = 0.25\text{kg}$</span>
+</div>
+{% endcapture %}
 
-      <div class="otx__slider-ticks">
-        <span>0</span>
-        <span>0.25</span>
-        <span>0.5</span>
-        <span>0.75</span>
-        <span>1</span>
-      </div>
-
-      <div class="otx__actions">
-        <button id="otxReplayBtn" class="btn btn-outline-secondary w-100 otx__btn">Replay Current Plan</button>
-        <button id="otxBestBtn" class="btn btn-outline-primary w-100 otx__btn">Replay Cheapest Plan</button>
-      </div>
-    </div>
-
-    <div class="otx__panel otx__panel--math">
-      <div class="otx__panel-title">Mass Conservation and Cost</div>
-
-      <div class="otx__eq-grid">
-        <div class="otx__eq-label">$\pi_{AC}$</div>
-        <div class="otx__eq-value"><span data-bind="pi_ac">0.50</span> kg</div>
-        <div class="otx__eq-label">$\pi_{AD}$</div>
-        <div class="otx__eq-value"><span data-bind="pi_ad">1.50</span> kg</div>
-        <div class="otx__eq-label">$\pi_{BC}$</div>
-        <div class="otx__eq-value"><span data-bind="pi_bc">0.50</span> kg</div>
-        <div class="otx__eq-label">$\pi_{BD}$</div>
-        <div class="otx__eq-value"><span data-bind="pi_bd">0.50</span> kg</div>
-      </div>
-
-      <div class="otx__formula">
-        $\mathrm{Cost}(x) = \pi_{AC} + 3\pi_{AD} + 4\pi_{BC} + \pi_{BD}$
-      </div>
-      <div class="otx__formula otx__formula--compact">
-        $\mathrm{Cost}(x) = 10 - 5x$, so the current total is <span class="otx__total-badge">$ \mathbf{ \$ } $ <span data-bind="cost_value">7.50</span></span>
-      </div>
-    </div>
+{% capture footer %}
+<div class="iaw__slider-box">
+  <input type="range" id="otxSlider" class="iaw__slider" min="0" max="1" step="0.25" value="0.5">
+  <div class="iaw__slider-ticks">
+    <span>Plan $A \to D$</span>
+    <span>Symmetric</span>
+    <span>Plan $A \to C$</span>
   </div>
 </div>
 
+<div class="iaw__status-grid">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">$\pi_{AC}$ ($A \to C$):</span>
+    <strong class="iaw__status-value" data-bind="pi_ac">0.50</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">$\pi_{AD}$ ($A \to D$):</span>
+    <strong class="iaw__status-value" data-bind="pi_ad">1.50</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">$\pi_{BC}$ ($B \to C$):</span>
+    <strong class="iaw__status-value" data-bind="pi_bc">0.50</strong>
+  </div>
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">$\pi_{BD}$ ($B \to D$):</span>
+    <strong class="iaw__status-value" data-bind="pi_bd">0.50</strong>
+  </div>
+</div>
+
+<div class="iaw__actions" style="margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--iaw-border);">
+  <div class="iaw__status-item">
+    <span class="iaw__status-label">TOTAL COST:</span>
+    <strong class="iaw__status-value" style="font-size: 1.4rem; color: var(--iaw-primary);">$<span data-bind="cost_value">7.50</span></strong>
+  </div>
+  <div class="iaw__actions-group" style="display: flex; gap: 0.75rem; flex: 1; justify-content: flex-end;">
+    <button id="otxReplayBtn" class="btn btn-outline-secondary iaw__btn" style="flex: none; padding: 0.5rem 1rem;">Replay</button>
+    <button id="otxBestBtn" class="btn btn-outline-primary iaw__btn" style="flex: none; padding: 0.5rem 1.25rem;">Cheapest</button>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html 
+    id="transportSplitWidget"
+    eyebrow="Interactive Example"
+    title="Optimal Transport with Mass Splitting"
+    description=describe
+    visuals=visuals
+    stage_id="otxStage"
+    legend=legend
+    footer=footer
+%}
+
 <style>
-.otx {
-  --otx-source-color: var(--prompt-warning-icon, #d97706);
-  --otx-source-bg: var(--prompt-warning-bg, rgba(217, 119, 6, 0.1));
-  --otx-source-alt-color: var(--prompt-tip-icon, #16a34a);
-  --otx-source-alt-bg: var(--prompt-tip-bg, rgba(22, 163, 74, 0.1));
-  --otx-target-color: var(--prompt-info-icon, #0ea5e9);
-  --otx-target-bg: var(--prompt-info-bg, rgba(14, 165, 233, 0.1));
-  --otx-ui-border: var(--card-border, rgba(120, 120, 120, 0.16));
-  --otx-ui-text: var(--text-color, inherit);
-  --otx-ui-muted: var(--text-muted-color, var(--text-color, inherit));
-  --otx-ui-bg: var(--main-bg, #fff);
-  margin: 2rem 0;
-  padding: 1.25rem;
-  border: 1px solid var(--otx-ui-border);
-  border-radius: 18px;
-  background: var(--card-bg, rgba(120, 120, 120, 0.05));
-}
-
-.otx__intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(220px, 260px);
-  gap: 1rem;
-  align-items: start;
-}
-
-.otx__eyebrow {
-  margin-bottom: 0.28rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--otx-ui-muted);
-}
-
-.otx__copy h4 {
-  margin: 0 0 0.45rem 0;
-  font-size: 1.04rem;
-  color: var(--heading-color, var(--text-color, inherit));
-}
-
-.otx__copy p {
-  margin: 0.45rem 0 0 0;
-  font-size: 1rem;
-  line-height: 1.66;
-  color: var(--otx-ui-muted);
-}
-
-.otx__summary-strip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
-  margin: 1rem 0 0 0;
-}
-
-.otx__summary-pill {
-  padding: 0.8rem 0.9rem;
-  border: 1px solid var(--otx-ui-border);
-  border-radius: 14px;
-  background: var(--otx-ui-bg);
-}
-
-.otx__summary-label {
-  display: block;
-  margin-bottom: 0.28rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--otx-ui-muted);
-}
-
-.otx__summary-value {
-  display: block;
-  font-size: 0.98rem;
-  font-weight: 800;
-  color: var(--otx-ui-text);
-}
-
-.otx__cost-card,
-.otx__stage-card,
-.otx__panel {
-  border: 1px solid var(--otx-ui-border);
-  border-radius: 14px;
-  background: var(--otx-ui-bg);
-}
-
-.otx__cost-card {
-  padding: 0.85rem;
-}
-
-.otx__cost-title,
-.otx__panel-title {
-  margin-bottom: 0.65rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--otx-ui-muted);
-}
-
-.otx__cost-grid {
-  display: grid;
-  grid-template-columns: 84px repeat(2, minmax(52px, 1fr));
-  overflow: hidden;
-  border: 1px solid var(--otx-ui-border);
-  border-radius: 10px;
-  font-size: 0.98rem;
-}
-
-.otx__cost-grid > div {
-  padding: 0.58rem 0.58rem;
-  text-align: center;
-  border-right: 1px solid var(--otx-ui-border);
-  border-bottom: 1px solid var(--otx-ui-border);
-  background: var(--otx-ui-bg);
-}
-
-.otx__cost-grid > div:nth-child(3n) {
-  border-right: none;
-}
-
-.otx__cost-grid > div:nth-last-child(-n + 3) {
-  border-bottom: none;
-}
-
-.otx__matrix-dir {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-  padding: 0.25rem !important;
-  font-size: 0.68rem !important;
-  color: var(--otx-ui-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.otx__matrix-dir span:nth-child(2) {
-  font-size: 0.9rem;
-  line-height: 1;
-}
-
-.otx__cost-head {
-  font-weight: 700;
-  color: var(--otx-ui-text);
-  background: var(--card-bg, rgba(120, 120, 120, 0.05)) !important;
-}
-
-.otx__stage-card {
-  margin: 1rem 0;
-  padding: 0.9rem;
-}
-
-.otx__stage-note {
-  margin-bottom: 0.7rem;
-  font-size: 0.96rem;
-  line-height: 1.55;
-  color: var(--otx-ui-muted);
-}
-
-.otx__stage {
-  position: relative;
-  height: 360px;
-  border: 1px solid var(--otx-ui-border);
-  border-radius: 14px;
-  background: var(--otx-ui-bg);
-  overflow: hidden;
-}
-
-.otx__canvas,
-.otx__particle-layer {
-  position: absolute;
-  inset: 0;
-}
-
-.otx__canvas {
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-.otx__particle-layer {
-  z-index: 4;
-  pointer-events: none;
-}
-
-.otx__node {
-  position: absolute;
-  width: 214px;
-  z-index: 3;
-}
-
-.otx__node--a {
-  left: 18px;
-  top: 18px;
-}
-
-.otx__node--b {
-  left: 18px;
-  bottom: 18px;
-}
-
-.otx__node--c {
-  right: 18px;
-  top: 18px;
-}
-
-.otx__node--d {
-  right: 18px;
-  bottom: 18px;
-}
-
-.otx__node-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.45rem;
-}
-
-.otx__node-title {
-  font-size: 1.08rem;
-  font-weight: 800;
-  color: var(--otx-ui-text);
-}
-
-.otx__node-badge {
-  flex: 0 0 auto;
-  padding: 0.18rem 0.52rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  background: var(--card-bg, rgba(120, 120, 120, 0.08));
-  color: var(--otx-ui-text);
-}
-
-.otx__tray {
-  padding: 0.8rem;
-  border-radius: 12px;
-  border: 1px solid var(--otx-ui-border);
-}
-
-.otx__tray--source {
-  background: var(--card-bg, rgba(120, 120, 120, 0.05));
-}
-
-.otx__tray--target {
-  background: var(--card-bg, rgba(120, 120, 120, 0.04));
-}
-
-.otx__node--a .otx__tray,
-.otx__node--a .otx__node-badge {
-  border-color: var(--otx-ui-border);
-  background-color: color-mix(in srgb, var(--otx-source-bg) 88%, var(--otx-ui-bg));
-}
-
-.otx__node--b .otx__tray,
-.otx__node--b .otx__node-badge {
-  border-color: var(--otx-ui-border);
-  background-color: color-mix(in srgb, var(--otx-source-alt-bg) 88%, var(--otx-ui-bg));
-}
-
-.otx__node--c .otx__tray,
-.otx__node--c .otx__node-badge,
-.otx__node--d .otx__tray,
-.otx__node--d .otx__node-badge {
-  border-color: var(--otx-ui-border);
-  background-color: color-mix(in srgb, var(--otx-target-bg) 88%, var(--otx-ui-bg));
-}
-
-.otx__slots {
-  display: grid;
-  gap: 0.45rem;
-  align-items: center;
-  justify-items: center;
-}
-
-.otx__slots--4 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.otx__slots--8 {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.otx__slot {
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: 1.5px solid var(--otx-ui-border);
-  background: var(--card-bg, rgba(120, 120, 120, 0.04));
-}
-
-.otx__node--target .otx__slot {
-  background: var(--otx-target-bg);
-}
-
-.otx__route-tag {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  z-index: 2;
-  padding: 0.28rem 0.62rem;
-  border: 1px solid var(--otx-ui-border);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--card-bg, rgba(120, 120, 120, 0.06)) 82%, var(--otx-ui-bg));
-  font-size: 0.88rem;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--otx-ui-text);
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.otx__particle {
-  position: absolute;
-  width: 15px;
-  height: 15px;
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-  border: none;
-  box-shadow: none;
-}
-
-.otx__bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: 1rem;
-}
-
-.otx__panel {
-  padding: 1rem;
-}
-
-.otx__slider-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.otx__slider-label {
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.otx__slider-value {
-  padding: 0.18rem 0.52rem;
-  border-radius: 999px;
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  background: var(--card-bg, rgba(120, 120, 120, 0.08));
-  color: var(--otx-ui-text);
-}
-
-.otx__total-badge {
-  display: inline-block;
-  padding: 0.18rem 0.52rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  background: var(--prompt-gray-bg, rgba(156, 163, 175, 0.1));
-  color: var(--prompt-gray-icon, #9ca3af);
-  margin-left: 0.3rem;
-}
-
-.otx__slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 8px;
-  margin: 0.3rem 0 0.45rem 0;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    var(--otx-source-color) 0%,
-    color-mix(in srgb, var(--otx-source-color) 24%, var(--otx-ui-bg)) 18%,
-    color-mix(in srgb, var(--otx-target-color) 22%, var(--otx-ui-bg)) 50%,
-    color-mix(in srgb, var(--otx-source-alt-color) 24%, var(--otx-ui-bg)) 82%,
-    var(--otx-source-alt-color) 100%
-  );
-  border: 1px solid var(--otx-ui-border);
-  accent-color: var(--otx-target-color);
-}
-
-.otx__slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: 2px solid var(--otx-ui-bg);
-  background: var(--otx-target-color);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--otx-target-color) 55%, var(--otx-ui-border)), 0 4px 14px rgba(0, 0, 0, 0.16);
-  cursor: pointer;
-}
-
-.otx__slider::-moz-range-track {
-  height: 8px;
-  border-radius: 999px;
-  background: transparent;
-  border: none;
-}
-
-.otx__slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: 2px solid var(--otx-ui-bg);
-  background: var(--otx-target-color);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--otx-target-color) 55%, var(--otx-ui-border)), 0 4px 14px rgba(0, 0, 0, 0.16);
-  cursor: pointer;
-}
-
-.otx__slider-ticks {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.25rem;
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: var(--otx-ui-muted);
-}
-
-.otx__slider-ticks span:nth-child(1) {
-  text-align: left;
-}
-
-.otx__slider-ticks span:nth-child(2),
-.otx__slider-ticks span:nth-child(3),
-.otx__slider-ticks span:nth-child(4) {
-  text-align: center;
-}
-
-.otx__slider-ticks span:nth-child(5) {
-  text-align: right;
-}
-
-.otx__actions {
-  display: flex;
-  gap: 0.8rem;
-  margin-top: 0.95rem;
-}
-
-.otx__btn {
-  min-height: 42px;
-  padding: 0.68rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.otx__btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--otx-target-color) 38%, transparent);
-  outline-offset: 2px;
-}
-
-.otx__eq-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.45rem 0.85rem;
-  margin-bottom: 0.8rem;
-}
-
-.otx__eq-label {
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: var(--otx-ui-text);
-}
-
-.otx__eq-value {
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: var(--otx-ui-text);
-}
-
-.otx__formula {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--otx-ui-text);
-}
-
-.otx__formula--compact {
-  margin-top: 0.35rem;
-  color: var(--otx-ui-text);
-}
-
-.otx .mjx-container {
-  margin: 0 !important;
-}
-
-@media (max-width: 980px) {
-  .otx__intro,
-  .otx__bottom,
-  .otx__summary-strip {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 760px) {
-  .otx {
-    padding: 1rem;
-  }
-
-  .otx__stage {
-    height: 420px;
-  }
-
-  .otx__node {
-    width: 168px;
-  }
-
-  .otx__actions {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 560px) {
-  .otx__stage {
-    height: 470px;
-  }
-
-  .otx__node {
-    width: 144px;
-  }
-
-  .otx__node--a,
-  .otx__node--b {
-    left: 12px;
-  }
-
-  .otx__node--c,
-  .otx__node--d {
-    right: 12px;
-  }
-
-  .otx__route-tag {
-    font-size: 0.68rem;
-    padding: 0.16rem 0.42rem;
-  }
+/* Widget-specific geometry and colors */
+.iaw__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+.iaw__particle-layer { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.iaw__node { position: absolute; width: 214px; z-index: 3; }
+.iaw__node--a { left: 40px; top: 60px; }
+.iaw__node--b { left: 40px; bottom: 30px; }
+.iaw__node--c { right: 40px; top: 60px; }
+.iaw__node--d { right: 40px; bottom: 30px; }
+.iaw__node-row { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.45rem; }
+.iaw__node-title { font-size: 1.02rem; font-weight: 800; }
+.iaw__node-badge { padding: 0.16rem 0.48rem; border-radius: 999px; font-size: 0.76rem; font-weight: 700; border: 1px solid var(--iaw-border); }
+.iaw__tray { padding: 0.75rem; border-radius: 12px; border: 1px solid var(--iaw-border); }
+.iaw__slots { display: grid; gap: 0.35rem; grid-template-columns: repeat(4, 1fr); align-items: center; justify-items: center; }
+.iaw__slot { width: 18px; height: 18px; border-radius: 999px; border: 1.5px solid var(--iaw-border); background: rgba(120, 120, 120, 0.04); }
+
+.iaw__node--a .iaw__tray, .iaw__node--a .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-warning) 8%, var(--iaw-bg)); }
+.iaw__node--b .iaw__tray, .iaw__node--b .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-success) 8%, var(--iaw-bg)); }
+.iaw__node--c .iaw__tray, .iaw__node--c .iaw__node-badge,
+.iaw__node--d .iaw__tray, .iaw__node--d .iaw__node-badge { background-color: color-mix(in srgb, var(--iaw-primary) 8%, var(--iaw-bg)); }
+
+.iaw__particle { position: absolute; width: 14px; height: 14px; border-radius: 999px; transform: translate(-50%, -50%); z-index: 5; }
+
+/* Dynamic Slider Color */
+.iaw__slider { background: var(--slider-bg, var(--iaw-border)) !important; }
+
+@media (max-width: 820px) {
+  .iaw__node { width: 180px; }
+  .iaw__stage { height: 460px; }
+}
+@media (max-width: 640px) {
+  .iaw__node { width: 150px; }
+  .iaw__stage { height: 540px; }
+  .iaw__node--a, .iaw__node--b { left: 12px; }
+  .iaw__node--c, .iaw__node--d { right: 12px; }
+  .iaw__status-grid { grid-template-columns: 1fr; gap: 0.5rem; }
 }
 </style>
 
 <script>
 (function() {
-  const root = document.getElementById('transportSplitWidget');
-  if (!root || root.dataset.initialized === 'true') return;
-  root.dataset.initialized = 'true';
+    const root = document.getElementById('transportSplitWidget');
+    if (!root || root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
 
-  const stage = root.querySelector('#otxStage');
-  const canvas = root.querySelector('.otx__canvas');
-  const ctx = canvas.getContext('2d');
-  const particleLayer = root.querySelector('.otx__particle-layer');
-  const slider = root.querySelector('#otxSlider');
-  const replayBtn = root.querySelector('#otxReplayBtn');
-  const bestBtn = root.querySelector('#otxBestBtn');
+    // Constants
+    const SLOT_COUNTS = { a: 8, b: 4, c: 4, d: 8 };
+    const UNIT_KG = 0.25;
+    const ANIM_DURATION = 3000;
+    const POST_ANIM_WAIT = 2000;
+    
+    // Theme colors
+    const COLORS = {
+      a: getComputedStyle(document.documentElement).getPropertyValue('--prompt-warning-icon').trim() || '#d97706',
+      b: getComputedStyle(document.documentElement).getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
+      border: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || 'rgba(120,120,120,0.16)'
+    };
 
-  const binds = {
-    xValue: root.querySelector('[data-bind="x_value"]'),
-    piAC: root.querySelector('[data-bind="pi_ac"]'),
-    piAD: root.querySelector('[data-bind="pi_ad"]'),
-    piBC: root.querySelector('[data-bind="pi_bc"]'),
-    piBD: root.querySelector('[data-bind="pi_bd"]'),
-    costValue: root.querySelector('[data-bind="cost_value"]')
-  };
+    let state = {
+      x: 0.5,
+      animating: false,
+      plans: { pi_ac: 0.5, pi_ad: 1.5, pi_bc: 0.5, pi_bd: 0.5 },
+      cost: 7.5,
+      labelsResolved: false
+    };
 
-  const routeTags = {
-    ac: root.querySelector('[data-route-tag="ac"]'),
-    ad: root.querySelector('[data-route-tag="ad"]'),
-    bc: root.querySelector('[data-route-tag="bc"]'),
-    bd: root.querySelector('[data-route-tag="bd"]')
-  };
+    const canvas = root.querySelector('#otxCanvas');
+    const ctx = canvas.getContext('2d');
+    const particleLayer = root.querySelector('#otxParticleLayer');
+    const slider = root.querySelector('#otxSlider');
+    const replayBtn = root.querySelector('#otxReplayBtn');
+    const bestBtn = root.querySelector('#otxBestBtn');
+    const routesContainer = root.querySelector('#otxRoutes');
 
-  const UNIT_KG = 0.25;
-  const SLOT_COUNTS = { a: 8, b: 4, c: 4, d: 8 };
-  const COLORS = {
-    a: getComputedStyle(document.documentElement).getPropertyValue('--prompt-warning-icon').trim() || '#d97706',
-    b: getComputedStyle(document.documentElement).getPropertyValue('--prompt-tip-icon').trim() || '#16a34a',
-    info: getComputedStyle(document.documentElement).getPropertyValue('--prompt-info-icon').trim() || '#0ea5e9',
-    border: getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim() || 'rgba(120,120,120,0.16)',
-    text: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim() || '#111827'
-  };
-  const ROUTE_COLORS = { ac: COLORS.a, ad: COLORS.a, bc: COLORS.b, bd: COLORS.b };
-  const ROUTE_COSTS = { ac: 1, ad: 3, bc: 4, bd: 1 };
-  const ROUTE_OFFSETS = {
-    ac: { x: 0, y: -16 },
-    ad: { x: 16, y: -10 },
-    bc: { x: -16, y: 10 },
-    bd: { x: 0, y: 16 }
-  };
+    const binds = {
+      cost: root.querySelector('[data-bind="cost_value"]'),
+      pi_ac: root.querySelector('[data-bind="pi_ac"]'),
+      pi_ad: root.querySelector('[data-bind="pi_ad"]'),
+      pi_bc: root.querySelector('[data-bind="pi_bc"]'),
+      pi_bd: root.querySelector('[data-bind="pi_bd"]')
+    };
 
-  const slotElements = {};
-  const slotCenters = {};
-  const trayRects = {};
-  const particles = [];
+    const routeConfigs = [
+      { key: 'ac', from: 'a', to: 'c', label: 'A \\to C: \\$1/\\mathrm{kg}', t: 0.5 },
+      { key: 'ad', from: 'a', to: 'd', label: 'A \\to D: \\$3/\\mathrm{kg}', t: 0.5 },
+      { key: 'bc', from: 'b', to: 'c', label: 'B \\to C: \\$4/\\mathrm{kg}', t: 0.5 },
+      { key: 'bd', from: 'b', to: 'd', label: 'B \\to D: \\$1/\\mathrm{kg}', t: 0.5 }
+    ];
 
-  let width = 0;
-  let height = 0;
-  let animation = null;
-  let currentPlan = null;
-  let frameHandle = null;
+    function initSlots() {
+      // Slots
+      Object.entries(SLOT_COUNTS).forEach(([key, count]) => {
+        const container = root.querySelector(`[data-slots="${key}"]`);
+        if (!container) return;
+        container.innerHTML = '';
+        for(let i=0; i < count; i++) {
+          const slot = document.createElement('div');
+          slot.className = 'iaw__slot';
+          container.appendChild(slot);
+        }
+      });
+      fillTrays('sources');
 
-  function buildSlots() {
-    Object.entries(SLOT_COUNTS).forEach(([key, count]) => {
-      const slotsHost = root.querySelector(`[data-slots="${key}"]`);
-      slotElements[key] = [];
-      slotsHost.innerHTML = '';
-      for (let i = 0; i < count; i++) {
-        const slot = document.createElement('div');
-        slot.className = 'otx__slot';
-        slotsHost.appendChild(slot);
-        slotElements[key].push(slot);
+      // Persistent Labels to avoid flickering
+      routesContainer.innerHTML = '';
+      routeConfigs.forEach(r => {
+        const el = document.createElement('div');
+        el.className = 'iaw__route-tag';
+        el.innerHTML = `$${r.label}$`;
+        el.dataset.route = r.key;
+        routesContainer.appendChild(el);
+        r.el = el;
+      });
+
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([routesContainer]).then(() => {
+          setTimeout(drawStatic, 100); 
+        });
       }
-    });
-  }
 
-  function buildParticles() {
-    particleLayer.innerHTML = '';
-    particles.length = 0;
-
-    for (let i = 0; i < SLOT_COUNTS.a; i++) {
-      const el = document.createElement('div');
-      el.className = 'otx__particle';
-      el.style.background = COLORS.a;
-      particleLayer.appendChild(el);
-      particles.push({ id: `a-${i}`, source: 'a', index: i, el });
+      // Robust layout detection: Watch for size changes (MathJax completion)
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => {
+          if (!state.animating) drawStatic();
+        });
+        routeConfigs.forEach(r => ro.observe(r.el));
+      }
     }
 
-    for (let i = 0; i < SLOT_COUNTS.b; i++) {
-      const el = document.createElement('div');
-      el.className = 'otx__particle';
-      el.style.background = COLORS.b;
-      particleLayer.appendChild(el);
-      particles.push({ id: `b-${i}`, source: 'b', index: i, el });
+    function fillTrays(type) {
+        const trs = type === 'sources' ? ['a', 'b'] : ['c', 'd'];
+        trs.forEach(key => {
+            const slots = root.querySelectorAll(`[data-slots="${key}"] .iaw__slot`);
+            slots.forEach(s => s.classList.add('iaw__slot--filled'));
+        });
     }
-  }
 
-  function measure() {
-    const stageRect = stage.getBoundingClientRect();
-    width = stageRect.width;
-    height = stageRect.height;
+    function clearTrays(type) {
+        const trs = type === 'sources' ? ['a', 'b'] : ['c', 'd'];
+        trs.forEach(key => {
+            const slots = root.querySelectorAll(`[data-slots="${key}"] .iaw__slot`);
+            slots.forEach(s => {
+                s.classList.remove('iaw__slot--filled');
+                s.classList.remove('iaw__slot--filled-a');
+                s.classList.remove('iaw__slot--filled-b');
+            });
+        });
+    }
 
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    function calculatePlans(x) {
+      const ac = x;
+      const ad = 2.0 - ac;
+      const bc = 1.0 - ac;
+      const bd = x; 
+      const cost = 1*ac + 3*ad + 4*bc + 1*bd;
+      return { pi_ac: ac, pi_ad: ad, pi_bc: bc, pi_bd: bd, cost: cost };
+    }
 
-    Object.keys(slotElements).forEach((key) => {
-      slotCenters[key] = slotElements[key].map((slot) => {
-        const rect = slot.getBoundingClientRect();
+    function syncState(x) {
+      state.x = x;
+      const p = calculatePlans(x);
+      state.plans = p;
+      state.cost = p.cost;
+      binds.cost.innerText = p.cost.toFixed(2);
+      binds.pi_ac.innerText = p.pi_ac.toFixed(2);
+      binds.pi_ad.innerText = p.pi_ad.toFixed(2);
+      binds.pi_bc.innerText = p.pi_bc.toFixed(2);
+      binds.pi_bd.innerText = p.pi_bd.toFixed(2);
+      
+      const mix = Math.round(x * 100);
+      slider.style.setProperty('--slider-bg', `linear-gradient(90deg, ${COLORS.a} ${mix}%, ${COLORS.b} ${mix}%)`);
+    }
+
+    function getSlotCenter(nodeKey, index) {
+      const node = root.querySelector(`.iaw__node--${nodeKey}`);
+      if (!node) return { x:0, y:0 };
+      const slots = node.querySelectorAll('.iaw__slot');
+      const slot = slots[Math.min(index, slots.length - 1)] || node;
+      const stageRect = root.querySelector('#otxStage').getBoundingClientRect();
+      const slotRect = slot.getBoundingClientRect();
+      return {
+        x: slotRect.left - stageRect.left + slotRect.width / 2,
+        y: slotRect.top - stageRect.top + slotRect.height / 2
+      };
+    }
+
+    function getNodePoint(nodeKey) {
+      const node = root.querySelector(`.iaw__node--${nodeKey}`);
+      if (!node) return { x:0, y:0 };
+      const tray = node.querySelector('.iaw__tray');
+      const stageRect = root.querySelector('#otxStage').getBoundingClientRect();
+      const nodeRect = node.getBoundingClientRect();
+      const trayRect = tray.getBoundingClientRect();
+      const isSource = (nodeKey === 'a' || nodeKey === 'b');
+      
+      return {
+        x: isSource ? (nodeRect.right - stageRect.left) : (nodeRect.left - stageRect.left),
+        y: trayRect.top - stageRect.top + trayRect.height / 2
+      };
+    }
+
+    function drawStatic() {
+      const stage = root.querySelector('#otxStage');
+      if (!stage) return;
+      canvas.width = stage.clientWidth;
+      canvas.height = stage.clientHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const nodes = routeConfigs.map(r => {
+        const p0 = getNodePoint(r.from);
+        const p3 = getNodePoint(r.to);
+        const mass = state.plans[`pi_${r.key}`];
+        
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p3.x, p3.y);
+        
+        const color = (r.from === 'a') ? COLORS.a : COLORS.b;
+        ctx.strokeStyle = color;
+        ctx.globalAlpha = 0.25 + (mass > 0 ? 0.35 : 0);
+        ctx.setLineDash(mass > 0 ? [] : [5, 5]);
+        ctx.lineWidth = Math.max(0.6, mass * 5); 
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1.0;
+
+        // Label properties
+        const lx = p0.x + (p3.x - p0.x) * r.t;
+        const ly = p0.y + (p3.y - p0.y) * r.t;
+        r.el.style.opacity = mass > 0 ? 1 : 0.4;
+        
         return {
-          x: rect.left - stageRect.left + rect.width / 2,
-          y: rect.top - stageRect.top + rect.height / 2
+          r,
+          x: lx,
+          y: ly,
+          w: r.el.offsetWidth || 80,
+          h: r.el.offsetHeight || 28
         };
       });
-    });
 
-    ['a', 'b', 'c', 'd'].forEach((key) => {
-      const tray = root.querySelector(`.otx__node--${key} .otx__tray`);
-      const rect = tray.getBoundingClientRect();
-      trayRects[key] = {
-        left: rect.left - stageRect.left,
-        right: rect.right - stageRect.left,
-        top: rect.top - stageRect.top,
-        bottom: rect.bottom - stageRect.top,
-        width: rect.width,
-        height: rect.height
+      // SMART COLLISION RESOLUTION: Per-Cluster Symmetric Stacking
+      const resolve = () => {
+        if (!nodes || nodes.length === 0) return;
+        
+        // Group nodes by ACTUAL overlap (clusters)
+        const clusters = [];
+        const processed = new Set();
+        
+        for (let i = 0; i < nodes.length; i++) {
+          if (processed.has(i)) continue;
+          
+          let cluster = [nodes[i]];
+          processed.add(i);
+          
+          // Find all others that overlap with this cluster
+          let changed = true;
+          while (changed) {
+            changed = false;
+            for (let j = 0; j < nodes.length; j++) {
+              if (processed.has(j)) continue;
+              
+              const n2 = nodes[j];
+              const overlapsAny = cluster.some(n1 => {
+                const dx = Math.abs(n1.x - n2.x);
+                const dy = Math.abs(n1.y - n2.y);
+                const ox = (n1.w + n2.w) / 2 + 10 - dx;
+                const oy = (n1.h + n2.h) / 2 + 6 - dy;
+                return ox > 0 && oy > 0;
+              });
+
+              if (overlapsAny) {
+                cluster.push(n2);
+                processed.add(j);
+                changed = true;
+              }
+            }
+          }
+          clusters.push(cluster);
+        }
+
+        // Symmetrically resolve each cluster
+        clusters.forEach(cluster => {
+          if (cluster.length <= 1) return;
+          
+          cluster.sort((a, b) => a.y - b.y);
+          const gap = 8;
+          const totalHeight = cluster.reduce((s, n) => s + n.h, 0) + (cluster.length - 1) * gap;
+          const targetCenterY = cluster.reduce((s, n) => s + n.y, 0) / cluster.length;
+
+          let currentY = targetCenterY - totalHeight / 2;
+          cluster.forEach(n => {
+            n.y = currentY + n.h / 2;
+            currentY += n.h + gap;
+          });
+        });
+
+        nodes.forEach(n => {
+          n.r.el.style.left = `${n.x}px`;
+          n.r.el.style.top = `${n.y}px`;
+        });
       };
+
+      resolve();
+    }
+
+    async function runPlan() {
+      if (state.animating) return;
+      state.animating = true;
+      particleLayer.innerHTML = '';
+      clearTrays('targets');
+      fillTrays('sources');
+
+      const p = state.plans;
+      const pebbles = [
+        ...Array(Math.round(p.pi_ac / UNIT_KG)).fill({ f:'a', t:'c', r:'ac' }),
+        ...Array(Math.round(p.pi_ad / UNIT_KG)).fill({ f:'a', t:'d', r:'ad' }),
+        ...Array(Math.round(p.pi_bc / UNIT_KG)).fill({ f:'b', t:'c', r:'bc' }),
+        ...Array(Math.round(p.pi_bd / UNIT_KG)).fill({ f:'b', t:'d', r:'bd' })
+      ];
+
+      let counters = { a:0, b:0, c:0, d:0 };
+      const promises = pebbles.map((route, i) => {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            const srcSlots = root.querySelectorAll(`[data-slots="${route.f}"] .iaw__slot`);
+            srcSlots[counters[route.f]].classList.remove('iaw__slot--filled');
+
+            const el = document.createElement('div');
+            el.className = 'iaw__particle';
+            el.style.background = (route.f === 'a') ? COLORS.a : COLORS.b;
+            particleLayer.appendChild(el);
+
+            const start = getSlotCenter(route.f, counters[route.f]++);
+            const end = getSlotCenter(route.t, counters[route.t]++);
+
+            const keyframes = [];
+            for(let t=0; t<=1; t+=0.04) {
+                const lx = start.x + (end.x - start.x) * t;
+                const ly = start.y + (end.y - start.y) * t;
+                keyframes.push({ left: `${lx}px`, top: `${ly}px`, opacity: 1 });
+            }
+
+            el.animate(keyframes, {
+              duration: ANIM_DURATION,
+              easing: 'ease-in-out',
+              fill: 'forwards'
+            }).onfinish = () => { 
+                el.remove(); 
+                const tgtSlots = root.querySelectorAll(`[data-slots="${route.t}"] .iaw__slot`);
+                const slot = tgtSlots[counters[route.t + '_filled'] || 0];
+                slot.classList.add('iaw__slot--filled');
+                slot.classList.add(`iaw__slot--filled-${route.f}`);
+                counters[route.t + '_filled'] = (counters[route.t + '_filled'] || 0) + 1;
+                resolve(); 
+            };
+          }, i * 150);
+        });
+      });
+
+      await Promise.all(promises);
+      setTimeout(() => {
+          clearTrays('targets');
+          fillTrays('sources');
+          state.animating = false;
+      }, POST_ANIM_WAIT);
+    }
+
+    slider.addEventListener('input', (e) => {
+      syncState(parseFloat(e.target.value));
+      drawStatic();
+      if (!state.animating) runPlan();
     });
-  }
 
-  function roundQuarter(value) {
-    return Math.round(value / UNIT_KG) * UNIT_KG;
-  }
+    replayBtn.addEventListener('click', runPlan);
+    bestBtn.addEventListener('click', () => { slider.value = 1.0; syncState(1.0); drawStatic(); runPlan(); });
 
-  function formatKg(value) {
-    return value.toFixed(2).replace(/\.00$/, '.00');
-  }
-
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
-
-  function computePlan(xInput) {
-    const x = clamp(roundQuarter(xInput), 0, 1);
-    const unitsAC = Math.round(x / UNIT_KG);
-    const unitsAD = SLOT_COUNTS.a - unitsAC;
-    const unitsBC = SLOT_COUNTS.c - unitsAC;
-    const unitsBD = SLOT_COUNTS.b - unitsBC;
-
-    const assignments = [];
-    const groups = {
-      ac: { start: slotCenters.a.slice(0, unitsAC), end: slotCenters.c.slice(0, unitsAC) },
-      ad: { start: slotCenters.a.slice(unitsAC), end: slotCenters.d.slice(0, unitsAD) },
-      bc: { start: slotCenters.b.slice(0, unitsBC), end: slotCenters.c.slice(unitsAC) },
-      bd: { start: slotCenters.b.slice(unitsBC), end: slotCenters.d.slice(unitsAD) }
-    };
-
-    const particlesA = particles.filter((particle) => particle.source === 'a');
-    const particlesB = particles.filter((particle) => particle.source === 'b');
-
-    particlesA.slice(0, unitsAC).forEach((particle, i) => {
-      assignments.push({ particle, route: 'ac', start: groups.ac.start[i], end: groups.ac.end[i] });
-    });
-    particlesA.slice(unitsAC).forEach((particle, i) => {
-      assignments.push({ particle, route: 'ad', start: groups.ad.start[i], end: groups.ad.end[i] });
-    });
-    particlesB.slice(0, unitsBC).forEach((particle, i) => {
-      assignments.push({ particle, route: 'bc', start: groups.bc.start[i], end: groups.bc.end[i] });
-    });
-    particlesB.slice(unitsBC).forEach((particle, i) => {
-      assignments.push({ particle, route: 'bd', start: groups.bd.start[i], end: groups.bd.end[i] });
-    });
-
-    const kg = {
-      ac: unitsAC * UNIT_KG,
-      ad: unitsAD * UNIT_KG,
-      bc: unitsBC * UNIT_KG,
-      bd: unitsBD * UNIT_KG
-    };
-
-    const cost = kg.ac * ROUTE_COSTS.ac +
-      kg.ad * ROUTE_COSTS.ad +
-      kg.bc * ROUTE_COSTS.bc +
-      kg.bd * ROUTE_COSTS.bd;
-
-    return {
-      x,
-      units: { ac: unitsAC, ad: unitsAD, bc: unitsBC, bd: unitsBD },
-      kg,
-      cost,
-      assignments
-    };
-  }
-
-  function routeEndpoints(route) {
-    const offset = 14;
-    const specs = {
-      ac: { from: 'a', to: 'c', fromY: 0.34, toY: 0.34 },
-      ad: { from: 'a', to: 'd', fromY: 0.70, toY: 0.30 },
-      bc: { from: 'b', to: 'c', fromY: 0.30, toY: 0.70 },
-      bd: { from: 'b', to: 'd', fromY: 0.66, toY: 0.66 }
-    };
-    const spec = specs[route];
-    const from = trayRects[spec.from];
-    const to = trayRects[spec.to];
-
-    return {
-      start: {
-        x: from.right + offset,
-        y: from.top + from.height * spec.fromY
-      },
-      end: {
-        x: to.left - offset,
-        y: to.top + to.height * spec.toY
-      }
-    };
-  }
-
-  function pathForRoute(route, start, end) {
-    const dx = end.x - start.x;
-    const bend = route === 'ac'
-      ? -16
-      : route === 'bd'
-        ? 16
-        : route === 'ad'
-          ? 38
-          : -38;
-
-    return {
-      p0: start,
-      p1: { x: start.x + dx * 0.32, y: start.y + bend },
-      p2: { x: end.x - dx * 0.32, y: end.y + bend },
-      p3: end
-    };
-  }
-
-  function bezierPoint(path, t) {
-    const mt = 1 - t;
-    return {
-      x: mt * mt * mt * path.p0.x + 3 * mt * mt * t * path.p1.x + 3 * mt * t * t * path.p2.x + t * t * t * path.p3.x,
-      y: mt * mt * mt * path.p0.y + 3 * mt * mt * t * path.p1.y + 3 * mt * t * t * path.p2.y + t * t * t * path.p3.y
-    };
-  }
-
-  function alphaColor(hex, alpha) {
-    if (!hex || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) {
-      return hex;
-    }
-
-    let value = hex.slice(1);
-    if (value.length === 3) {
-      value = value.split('').map((char) => char + char).join('');
-    }
-
-    const r = parseInt(value.slice(0, 2), 16);
-    const g = parseInt(value.slice(2, 4), 16);
-    const b = parseInt(value.slice(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  function drawFlows(plan) {
-    ctx.clearRect(0, 0, width, height);
-
-    ['ac', 'ad', 'bc', 'bd'].forEach((route) => {
-      const count = plan.units[route];
-      const tag = routeTags[route];
-      if (!count) {
-        tag.style.opacity = '0';
-        return;
-      }
-
-      const endpoints = routeEndpoints(route);
-      const path = pathForRoute(route, endpoints.start, endpoints.end);
-      const lineWidth = 4 + count * 4;
-
-      ctx.beginPath();
-      ctx.moveTo(path.p0.x, path.p0.y);
-      ctx.bezierCurveTo(path.p1.x, path.p1.y, path.p2.x, path.p2.y, path.p3.x, path.p3.y);
-      ctx.lineWidth = lineWidth;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = alphaColor(ROUTE_COLORS[route], 0.34);
-      ctx.stroke();
-
-      const mid = bezierPoint(path, 0.5);
-      tag.style.left = `${mid.x + ROUTE_OFFSETS[route].x}px`;
-      tag.style.top = `${mid.y + ROUTE_OFFSETS[route].y}px`;
-      tag.style.opacity = '1';
-    });
-  }
-
-  function syncText(plan) {
-    binds.xValue.textContent = formatKg(plan.x);
-    binds.piAC.textContent = formatKg(plan.kg.ac);
-    binds.piAD.textContent = formatKg(plan.kg.ad);
-    binds.piBC.textContent = formatKg(plan.kg.bc);
-    binds.piBD.textContent = formatKg(plan.kg.bd);
-    binds.costValue.textContent = plan.cost.toFixed(2);
-  }
-
-  function easeInOut(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  }
-
-  function positionParticles(progress) {
-    currentPlan.assignments.forEach((item) => {
-      const path = pathForRoute(item.route, item.start, item.end);
-      const point = progress >= 1 ? item.end : bezierPoint(path, easeInOut(progress));
-      item.particle.el.style.left = `${point.x}px`;
-      item.particle.el.style.top = `${point.y}px`;
-    });
-  }
-
-  function renderFrame(now) {
-    if (!animation) {
-      positionParticles(1);
-      frameHandle = null;
-      return;
-    }
-
-    const progress = clamp((now - animation.start) / animation.duration, 0, 1);
-    positionParticles(progress);
-
-    if (progress >= 1) {
-      animation = null;
-      frameHandle = null;
-      return;
-    }
-
-    frameHandle = requestAnimationFrame(renderFrame);
-  }
-
-  function cancelAnimation() {
-    if (frameHandle) {
-      cancelAnimationFrame(frameHandle);
-      frameHandle = null;
-    }
-    animation = null;
-  }
-
-  function renderPlan(xValue, replay) {
-    currentPlan = computePlan(xValue);
-    syncText(currentPlan);
-    drawFlows(currentPlan);
-
-    cancelAnimation();
-    if (replay) {
-      animation = { start: performance.now(), duration: 1150 };
-      positionParticles(0);
-      frameHandle = requestAnimationFrame(renderFrame);
-    } else {
-      positionParticles(1);
-    }
-  }
-
-  buildSlots();
-  buildParticles();
-  measure();
-  renderPlan(parseFloat(slider.value), false);
-
-  function requestMathTypeset(attempt = 0) {
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      window.MathJax.typesetPromise([root]).catch(() => {});
-      return;
-    }
-    if (attempt < 20) {
-      window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
-    }
-  }
-
-  requestMathTypeset();
-
-  slider.addEventListener('input', (event) => {
-    renderPlan(parseFloat(event.target.value), false);
-  });
-
-  slider.addEventListener('change', (event) => {
-    renderPlan(parseFloat(event.target.value), true);
-  });
-
-  replayBtn.addEventListener('click', () => {
-    renderPlan(parseFloat(slider.value), true);
-  });
-
-  bestBtn.addEventListener('click', () => {
-    slider.value = '1.00';
-    renderPlan(1, true);
-  });
-
-  window.addEventListener('resize', () => {
-    measure();
-    renderPlan(parseFloat(slider.value), false);
-  });
+    initSlots();
+    syncState(0.5);
+    setTimeout(drawStatic, 250);
+    window.addEventListener('resize', drawStatic);
 })();
 </script>
