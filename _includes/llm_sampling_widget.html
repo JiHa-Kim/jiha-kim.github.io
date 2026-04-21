@@ -59,6 +59,19 @@
 %}
 
 <style>
+#llmSamplingFigure {
+  --llm-handle-border: color-mix(in srgb, var(--iaw-text) 16%, var(--iaw-border));
+  --llm-handle-border-hover: color-mix(in srgb, var(--iaw-text) 28%, var(--iaw-border));
+}
+
+#llmSamplingFigure #llmHandle {
+  border-color: var(--llm-handle-border);
+}
+
+#llmSamplingFigure #llmHandle:hover {
+  border-color: var(--llm-handle-border-hover);
+}
+
 .llm__stage {
   position: relative; 
   padding: 45px 20px 30px 20px; 
