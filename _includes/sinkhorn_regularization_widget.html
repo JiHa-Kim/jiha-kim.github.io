@@ -19,8 +19,24 @@
 <div class="sink__layout iaw__figure-grid">
   <section class="iaw__figure-card iaw__figure-card--compact">
     <div class="iaw__figure-label">Coupling Graph</div>
+    <div class="sink__graph-head">
+      <div class="sink__graph-head-label">Source Atoms $z_i$</div>
+      <div class="sink__graph-head-label">Target Atoms $x_j$</div>
+    </div>
     <div class="sink__graph-shell iaw__canvas-shell" id="sinkGraphShell">
       <canvas id="sinkGraphCanvas"></canvas>
+      <div class="sink__graph-overlay" aria-hidden="true">
+        <span class="sink__point-label sink__point-label--source" id="sinkSourceLabel1">$z_1$</span>
+        <span class="sink__point-label sink__point-label--source" id="sinkSourceLabel2">$z_2$</span>
+        <span class="sink__point-label sink__point-label--source" id="sinkSourceLabel3">$z_3$</span>
+        <span class="sink__point-label sink__point-label--source" id="sinkSourceLabel4">$z_4$</span>
+        <span class="sink__point-label sink__point-label--source" id="sinkSourceLabel5">$z_5$</span>
+        <span class="sink__point-label sink__point-label--target" id="sinkTargetLabel1">$x_1$</span>
+        <span class="sink__point-label sink__point-label--target" id="sinkTargetLabel2">$x_2$</span>
+        <span class="sink__point-label sink__point-label--target" id="sinkTargetLabel3">$x_3$</span>
+        <span class="sink__point-label sink__point-label--target" id="sinkTargetLabel4">$x_4$</span>
+        <span class="sink__point-label sink__point-label--target" id="sinkTargetLabel5">$x_5$</span>
+      </div>
     </div>
     <div class="sink__subnote">Edge width and opacity scale with the transported mass between each pair.</div>
   </section>
@@ -28,20 +44,20 @@
   <section class="iaw__figure-card iaw__figure-card--compact">
     <div class="iaw__figure-label">Plan Matrix</div>
     <div class="sink__matrix-frame">
-      <div class="sink__matrix-top" aria-hidden="true">
-        <span>x<sub>1</sub></span>
-        <span>x<sub>2</sub></span>
-        <span>x<sub>3</sub></span>
-        <span>x<sub>4</sub></span>
-        <span>x<sub>5</sub></span>
+      <div class="sink__matrix-top">
+        <span>$x_1$</span>
+        <span>$x_2$</span>
+        <span>$x_3$</span>
+        <span>$x_4$</span>
+        <span>$x_5$</span>
       </div>
       <div class="sink__matrix-body">
-        <div class="sink__matrix-side" aria-hidden="true">
-          <span>z<sub>1</sub></span>
-          <span>z<sub>2</sub></span>
-          <span>z<sub>3</sub></span>
-          <span>z<sub>4</sub></span>
-          <span>z<sub>5</sub></span>
+        <div class="sink__matrix-side">
+          <span>$z_1$</span>
+          <span>$z_2$</span>
+          <span>$z_3$</span>
+          <span>$z_4$</span>
+          <span>$z_5$</span>
         </div>
         <div class="sink__matrix-shell iaw__canvas-shell iaw__canvas-shell--square">
           <canvas id="sinkMatrixCanvas"></canvas>
@@ -110,8 +126,49 @@
   min-height: 248px;
 }
 
+.sink__graph-head {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.sink__graph-head-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+  text-align: center;
+}
+
+.sink__graph-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sink__point-label {
+  position: absolute;
+  padding: 0.16rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--iaw-border) 88%, transparent);
+  background: color-mix(in srgb, var(--iaw-bg) 94%, transparent);
+  color: var(--iaw-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: var(--iaw-shadow-soft);
+}
+
+.sink__point-label--source {
+  transform: translate(-100%, -50%);
+}
+
+.sink__point-label--target {
+  transform: translate(0, -50%);
+}
+
 .sink__subnote {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.4;
   color: var(--iaw-muted);
   text-align: center;
@@ -139,9 +196,9 @@
 
 .sink__matrix-top span,
 .sink__matrix-side span {
-  font-size: 0.78rem;
+  font-size: 0.94rem;
   font-weight: 700;
-  color: var(--iaw-muted);
+  color: var(--iaw-text);
   text-align: center;
 }
 
@@ -171,14 +228,14 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 0.75rem;
-  font-size: 0.92rem;
+  font-size: 0.96rem;
   font-weight: 700;
   color: var(--iaw-text);
 }
 
 .sink__epsilon-value {
   font-family: var(--font-family-monospace, monospace);
-  font-size: 0.92rem;
+  font-size: 0.96rem;
   color: var(--iaw-muted);
 }
 
@@ -198,6 +255,8 @@ IAW.mountFigure('sinkhornRegularizationFigure', function(root) {
   const graphShell = root.querySelector('#sinkGraphShell');
   const matrixCanvas = root.querySelector('#sinkMatrixCanvas');
   const slider = root.querySelector('#sinkEpsSlider');
+  const sourceLabelEls = [1, 2, 3, 4, 5].map((index) => root.querySelector(`#sinkSourceLabel${index}`));
+  const targetLabelEls = [1, 2, 3, 4, 5].map((index) => root.querySelector(`#sinkTargetLabel${index}`));
   const epsilonValue = root.querySelector('#sinkEpsValue');
   const costReadout = root.querySelector('#sinkCost');
   const entropyReadout = root.querySelector('#sinkEntropy');
@@ -252,6 +311,22 @@ IAW.mountFigure('sinkhornRegularizationFigure', function(root) {
     return 'Diffuse';
   }
 
+  function positionGraphLabels() {
+    sourcePoints.forEach((point, index) => {
+      const p = graphViewport.mapPoint(point[0], point[1]);
+      const label = sourceLabelEls[index];
+      label.style.left = `${p.x - 12}px`;
+      label.style.top = `${p.y}px`;
+    });
+
+    targetPoints.forEach((point, index) => {
+      const p = graphViewport.mapPoint(point[0], point[1]);
+      const label = targetLabelEls[index];
+      label.style.left = `${p.x + 12}px`;
+      label.style.top = `${p.y}px`;
+    });
+  }
+
   function drawGraph(plan) {
     const rect = graphViewport.getRect();
     const colors = getColors();
@@ -271,12 +346,6 @@ IAW.mountFigure('sinkhornRegularizationFigure', function(root) {
     graphCtx.stroke();
     graphCtx.setLineDash([]);
 
-    graphCtx.fillStyle = colors.label;
-    graphCtx.font = '700 12px system-ui, sans-serif';
-    graphCtx.textAlign = 'center';
-    graphCtx.fillText('sources z_i', rect.width * 0.18, rect.height * 0.05);
-    graphCtx.fillText('targets x_j', rect.width * 0.82, rect.height * 0.05);
-
     plan.forEach((row, i) => {
       row.forEach((mass, j) => {
         const ratio = IAW.clamp(mass / maxCellMass);
@@ -292,21 +361,17 @@ IAW.mountFigure('sinkhornRegularizationFigure', function(root) {
       });
     });
 
-    graphCtx.textAlign = 'right';
     sourcePoints.forEach((point, index) => {
       const p = graphViewport.mapPoint(point[0], point[1]);
       IAW.drawCircle(graphCtx, p.x, p.y, 7, colors.sourceDot);
-      graphCtx.fillStyle = colors.label;
-      graphCtx.fillText(`z${index + 1}`, p.x - 12, p.y + 4);
     });
 
-    graphCtx.textAlign = 'left';
     targetPoints.forEach((point, index) => {
       const p = graphViewport.mapPoint(point[0], point[1]);
       IAW.drawCircle(graphCtx, p.x, p.y, 7, colors.targetDot);
-      graphCtx.fillStyle = colors.label;
-      graphCtx.fillText(`x${index + 1}`, p.x + 12, p.y + 4);
     });
+
+    positionGraphLabels();
   }
 
   function drawMatrix(plan) {
