@@ -17,8 +17,8 @@
 
 {% capture visuals %}
 <div class="frp__flow">
-  <section class="frp__card">
-    <div class="frp__card-label">Patch $x$</div>
+  <section class="iaw__figure-card">
+    <div class="iaw__figure-label">Patch $x$</div>
     <div class="frp__pixel-row">
       <div class="frp__pixel-stack">
         <div class="frp__pixel" id="frpPixelX1"></div>
@@ -33,8 +33,8 @@
 
   <div class="frp__arrow" aria-hidden="true">→</div>
 
-  <section class="frp__card">
-    <div class="frp__card-label">Haar $y$</div>
+  <section class="iaw__figure-card">
+    <div class="iaw__figure-label">Haar $y$</div>
     <div class="frp__coef-list">
       <div class="frp__coef-row">
         <div class="frp__coef-name">$y_{\text{low}}$</div>
@@ -56,8 +56,8 @@
 
   <div class="frp__arrow" aria-hidden="true">→</div>
 
-  <section class="frp__card">
-    <div class="frp__card-label">Coarse → Final</div>
+  <section class="iaw__figure-card">
+    <div class="iaw__figure-label">Coarse → Final</div>
     <div class="frp__recon-list">
       <div class="frp__recon-row">
         <div class="frp__recon-label">from $y_{\text{low}}$</div>
@@ -122,25 +122,6 @@
   gap: 0.75rem;
   align-items: stretch;
   width: 100%;
-}
-
-.frp__card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  padding: 0.85rem;
-  background: var(--iaw-bg);
-  border: 1px solid var(--iaw-border);
-  border-radius: 14px;
-  box-shadow: var(--iaw-shadow-soft);
-}
-
-.frp__card-label {
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--iaw-muted);
-  text-align: center;
 }
 
 .frp__arrow {
@@ -386,8 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let theme = IAW.getThemeColors(root);
 
   function pixelColor(value) {
-    const lightness = 10 + value * 78;
-    return `hsl(210, 18%, ${lightness.toFixed(1)}%)`;
+    return IAW.grayscaleColor(value);
   }
 
   function formatValue(value) {
@@ -471,15 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
     render();
   });
 
-  function requestMathTypeset(attempt = 0) {
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      window.MathJax.typesetPromise([root]).catch(() => {});
-      return;
-    }
-    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
-  }
-
   render();
-  requestMathTypeset();
+  IAW.requestMathTypeset(root);
 });
 </script>

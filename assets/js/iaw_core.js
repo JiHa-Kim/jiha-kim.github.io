@@ -40,6 +40,7 @@ window.IAW = (function() {
      * Utility: Mapping and Math
      */
     core.lerp = (a, b, t) => a + (b - a) * t;
+    core.clamp = (value, min = 0, max = 1) => Math.max(min, Math.min(max, value));
 
     core.toAlpha = function(color, alpha) {
         const trimmed = String(color || '').trim();
@@ -75,12 +76,103 @@ window.IAW = (function() {
         };
     };
 
+    core.grayscaleColor = function(value) {
+        const lightness = 10 + core.clamp(value) * 78;
+        return `hsl(210, 18%, ${lightness.toFixed(1)}%)`;
+    };
+
+    core.maxAbs = function(matrix, floor = 1e-6) {
+        return Math.max(floor, ...matrix.flat().map((value) => Math.abs(value)));
+    };
+
+    core.buildFrequencyExampleImage = function(preset, size = 8) {
+        const image = [];
+
+        for (let y = 0; y < size; y += 1) {
+            const row = [];
+            for (let x = 0; x < size; x += 1) {
+                let value = 0;
+
+                if (preset === 'smooth') {
+                    const dx1 = x - 2.2;
+                    const dy1 = y - 5.0;
+                    const dx2 = x - 5.6;
+                    const dy2 = y - 2.4;
+                    value = 0.16
+                        + 0.46 * Math.exp(-(dx1 * dx1 + dy1 * dy1) / 8.5)
+                        + 0.26 * Math.exp(-(dx2 * dx2 + dy2 * dy2) / 11.0)
+                        + 0.05 * (x / (size - 1));
+                } else if (preset === 'edge') {
+                    value = 0.16 + 0.66 / (1 + Math.exp(-(x - 3.5) * 1.7)) + 0.04 * (y / (size - 1) - 0.5);
+                } else {
+                    const checker = ((x + y) % 2 === 0) ? 1 : -1;
+                    value = 0.5 + 0.23 * checker + 0.08 * Math.exp(-((x - 3.5) * (x - 3.5) + (y - 3.5) * (y - 3.5)) / 9);
+                }
+
+                row.push(core.clamp(value));
+            }
+            image.push(row);
+        }
+
+        return image;
+    };
+
+    core.drawMatrix = function(canvas, matrix, colorFn, options = {}) {
+        if (!canvas || !matrix || !matrix.length || !matrix[0].length) return;
+
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width < 1 || rect.height < 1) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        const rows = matrix.length;
+        const cols = matrix[0].length;
+        const cell = Math.max(1, Math.floor(Math.min(rect.width / cols, rect.height / rows)));
+        const drawW = cell * cols;
+        const drawH = cell * rows;
+        const offsetX = Math.round((rect.width - drawW) / 2);
+        const offsetY = Math.round((rect.height - drawH) / 2);
+
+        for (let y = 0; y < rows; y += 1) {
+            for (let x = 0; x < cols; x += 1) {
+                ctx.fillStyle = colorFn(matrix[y][x], x, y);
+                ctx.fillRect(offsetX + x * cell, offsetY + y * cell, Math.max(1, cell - 1), Math.max(1, cell - 1));
+            }
+        }
+
+        if (options.borderColor) {
+            ctx.strokeStyle = options.borderColor;
+            ctx.lineWidth = options.borderWidth || 1;
+            ctx.strokeRect(offsetX - 0.5, offsetY - 0.5, drawW, drawH);
+        }
+    };
+
     core.initFigure = function(rootOrId, options = {}) {
         const root = typeof rootOrId === 'string' ? document.getElementById(rootOrId) : rootOrId;
         if (!root || root.dataset.initialized === 'true') return null;
         if (options.requiresChart && !window.Chart) return null;
         root.dataset.initialized = 'true';
         return root;
+    };
+
+    core.requestMathTypeset = function(targets, attempt = 0) {
+        if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+            const list = Array.isArray(targets) ? targets.filter(Boolean) : [targets].filter(Boolean);
+            if (list.length) {
+                window.MathJax.typesetPromise(list).catch(() => {});
+            }
+            return;
+        }
+
+        if (attempt < 20) {
+            window.setTimeout(() => core.requestMathTypeset(targets, attempt + 1), 250);
+        }
     };
 
     core.setPlayButtonState = function(button, isPlaying) {

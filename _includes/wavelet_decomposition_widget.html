@@ -12,48 +12,48 @@
 {% endcapture %}
 
 {% capture visuals %}
-<div class="fwd__layout">
-  <section class="fwd__card">
-    <div class="fwd__card-label">Original</div>
-    <div class="fwd__canvas-shell"><canvas id="fwdOriginal"></canvas></div>
+<div class="fwd__layout iaw__figure-grid">
+  <section class="fwd__card iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Original</div>
+    <div class="fwd__canvas-shell iaw__canvas-shell iaw__canvas-shell--square"><canvas id="fwdOriginal"></canvas></div>
   </section>
 
-  <section class="fwd__card fwd__card--bands">
-    <div class="fwd__card-label">Haar Subbands</div>
+  <section class="fwd__card fwd__card--bands iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Haar Subbands</div>
     <div class="fwd__band-grid">
       <div class="fwd__band-card">
         <div class="fwd__band-label">Approx</div>
-        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdLL"></canvas></div>
+        <div class="fwd__canvas-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini"><canvas id="fwdLL"></canvas></div>
       </div>
       <div class="fwd__band-card">
         <div class="fwd__band-label">L-R Detail</div>
-        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdLR"></canvas></div>
+        <div class="fwd__canvas-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini"><canvas id="fwdLR"></canvas></div>
       </div>
       <div class="fwd__band-card">
         <div class="fwd__band-label">T-B Detail</div>
-        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdTB"></canvas></div>
+        <div class="fwd__canvas-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini"><canvas id="fwdTB"></canvas></div>
       </div>
       <div class="fwd__band-card">
         <div class="fwd__band-label">Diagonal</div>
-        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdDiag"></canvas></div>
+        <div class="fwd__canvas-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini"><canvas id="fwdDiag"></canvas></div>
       </div>
     </div>
   </section>
 
-  <section class="fwd__card fwd__card--recon">
-    <div class="fwd__card-label">Reconstruction</div>
+  <section class="fwd__card fwd__card--recon iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Reconstruction</div>
     <div class="fwd__recon-grid">
       <div class="fwd__recon-card">
         <div class="fwd__recon-label">Approx Only</div>
-        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdReconCoarse"></canvas></div>
+        <div class="fwd__canvas-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini"><canvas id="fwdReconCoarse"></canvas></div>
       </div>
       <div class="fwd__recon-card">
         <div class="fwd__recon-label">+ Main Edges</div>
-        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdReconEdges"></canvas></div>
+        <div class="fwd__canvas-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini"><canvas id="fwdReconEdges"></canvas></div>
       </div>
       <div class="fwd__recon-card">
         <div class="fwd__recon-label">Full</div>
-        <div class="fwd__canvas-shell fwd__canvas-shell--mini"><canvas id="fwdReconFull"></canvas></div>
+        <div class="fwd__canvas-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini"><canvas id="fwdReconFull"></canvas></div>
       </div>
     </div>
   </section>
@@ -87,50 +87,7 @@
 
 <style>
 .fwd__layout {
-  display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 1.15fr);
-  gap: 0.85rem;
-  width: 100%;
-}
-
-.fwd__card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  padding: 0.85rem;
-  background: var(--iaw-bg);
-  border: 1px solid var(--iaw-border);
-  border-radius: 14px;
-  box-shadow: var(--iaw-shadow-soft);
-}
-
-.fwd__card-label {
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--iaw-muted);
-  text-align: center;
-}
-
-.fwd__canvas-shell {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  background: var(--iaw-surface);
-  border: 1px solid var(--iaw-border);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.fwd__canvas-shell--mini {
-  border-radius: 10px;
-}
-
-.fwd__canvas-shell canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
 }
 
 .fwd__band-grid {
@@ -171,7 +128,7 @@
   background: color-mix(in srgb, var(--iaw-surface) 70%, var(--iaw-bg));
 }
 
-.fwd__card--recon .fwd__canvas-shell--mini {
+.fwd__card--recon .fwd__canvas-shell {
   aspect-ratio: 1 / 1;
   width: 84px;
 }
@@ -203,7 +160,7 @@
     white-space: normal;
   }
 
-  .fwd__card--recon .fwd__canvas-shell--mini {
+  .fwd__card--recon .fwd__canvas-shell {
     width: 76px;
   }
 }
@@ -240,38 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentPreset = 'smooth';
   let theme = IAW.getThemeColors(root);
 
-  function clamp(value) {
-    return Math.max(0, Math.min(1, value));
-  }
-
-  function buildImage(preset) {
-    const image = [];
-    for (let y = 0; y < SIZE; y += 1) {
-      const row = [];
-      for (let x = 0; x < SIZE; x += 1) {
-        let value = 0;
-        if (preset === 'smooth') {
-          const dx1 = x - 2.2;
-          const dy1 = y - 5.0;
-          const dx2 = x - 5.6;
-          const dy2 = y - 2.4;
-          value = 0.16
-            + 0.46 * Math.exp(-(dx1 * dx1 + dy1 * dy1) / 8.5)
-            + 0.26 * Math.exp(-(dx2 * dx2 + dy2 * dy2) / 11.0)
-            + 0.05 * (x / (SIZE - 1));
-        } else if (preset === 'edge') {
-          value = 0.16 + 0.66 / (1 + Math.exp(-(x - 3.5) * 1.7)) + 0.04 * (y / (SIZE - 1) - 0.5);
-        } else {
-          const checker = ((x + y) % 2 === 0) ? 1 : -1;
-          value = 0.5 + 0.23 * checker + 0.08 * Math.exp(-((x - 3.5) * (x - 3.5) + (y - 3.5) * (y - 3.5)) / 9);
-        }
-        row.push(clamp(value));
-      }
-      image.push(row);
-    }
-    return image;
-  }
-
   function decompose(image) {
     const half = SIZE / 2;
     const ll = Array.from({ length: half }, () => Array(half).fill(0));
@@ -305,19 +230,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const lr = bands.lr[y][x];
         const tb = bands.tb[y][x];
         const diag = bands.diag[y][x];
-        image[2 * y][2 * x] = clamp((ll + lr + tb + diag) / 2);
-        image[2 * y][2 * x + 1] = clamp((ll - lr + tb - diag) / 2);
-        image[2 * y + 1][2 * x] = clamp((ll + lr - tb - diag) / 2);
-        image[2 * y + 1][2 * x + 1] = clamp((ll - lr - tb + diag) / 2);
+        image[2 * y][2 * x] = IAW.clamp((ll + lr + tb + diag) / 2);
+        image[2 * y][2 * x + 1] = IAW.clamp((ll - lr + tb - diag) / 2);
+        image[2 * y + 1][2 * x] = IAW.clamp((ll + lr - tb - diag) / 2);
+        image[2 * y + 1][2 * x + 1] = IAW.clamp((ll - lr - tb + diag) / 2);
       }
     }
 
     return image;
-  }
-
-  function grayscaleColor(value) {
-    const lightness = 10 + value * 78;
-    return `hsl(210, 18%, ${lightness.toFixed(1)}%)`;
   }
 
   function detailColor(value, scale) {
@@ -327,35 +247,6 @@ document.addEventListener('DOMContentLoaded', function() {
       return `hsl(42, ${24 + magnitude * 56}%, ${92 - magnitude * 50}%)`;
     }
     return `hsl(202, ${26 + magnitude * 54}%, ${92 - magnitude * 48}%)`;
-  }
-
-  function drawMatrix(canvas, matrix, colorFn) {
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, rect.width, rect.height);
-
-    const rows = matrix.length;
-    const cols = matrix[0].length;
-    const cell = Math.floor(Math.min(rect.width / cols, rect.height / rows));
-    const drawW = cell * cols;
-    const drawH = cell * rows;
-    const offsetX = Math.round((rect.width - drawW) / 2);
-    const offsetY = Math.round((rect.height - drawH) / 2);
-
-    for (let y = 0; y < rows; y += 1) {
-      for (let x = 0; x < cols; x += 1) {
-        ctx.fillStyle = colorFn(matrix[y][x]);
-        ctx.fillRect(offsetX + x * cell, offsetY + y * cell, Math.max(1, cell - 1), Math.max(1, cell - 1));
-      }
-    }
-
-    ctx.strokeStyle = theme.border;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(offsetX - 0.5, offsetY - 0.5, drawW, drawH);
   }
 
   function bandEnergy(matrix) {
@@ -369,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function render() {
-    const image = buildImage(currentPreset);
+    const image = IAW.buildFrequencyExampleImage(currentPreset, SIZE);
     const bands = decompose(image);
     const coarse = reconstruct({
       ll: bands.ll,
@@ -383,21 +274,16 @@ document.addEventListener('DOMContentLoaded', function() {
       tb: bands.tb,
       diag: bands.diag.map((row) => row.map(() => 0))
     });
-    const detailScale = Math.max(
-      1e-6,
-      ...bands.lr.flat().map((value) => Math.abs(value)),
-      ...bands.tb.flat().map((value) => Math.abs(value)),
-      ...bands.diag.flat().map((value) => Math.abs(value))
-    );
+    const detailScale = Math.max(IAW.maxAbs(bands.lr), IAW.maxAbs(bands.tb), IAW.maxAbs(bands.diag));
 
-    drawMatrix(canvases.original, image, grayscaleColor);
-    drawMatrix(canvases.ll, bands.ll, grayscaleColor);
-    drawMatrix(canvases.lr, bands.lr, (value) => detailColor(value, detailScale));
-    drawMatrix(canvases.tb, bands.tb, (value) => detailColor(value, detailScale));
-    drawMatrix(canvases.diag, bands.diag, (value) => detailColor(value, detailScale));
-    drawMatrix(canvases.reconCoarse, coarse, grayscaleColor);
-    drawMatrix(canvases.reconEdges, edges, grayscaleColor);
-    drawMatrix(canvases.reconFull, image, grayscaleColor);
+    IAW.drawMatrix(canvases.original, image, IAW.grayscaleColor, { borderColor: theme.border });
+    IAW.drawMatrix(canvases.ll, bands.ll, IAW.grayscaleColor, { borderColor: theme.border });
+    IAW.drawMatrix(canvases.lr, bands.lr, (value) => detailColor(value, detailScale), { borderColor: theme.border });
+    IAW.drawMatrix(canvases.tb, bands.tb, (value) => detailColor(value, detailScale), { borderColor: theme.border });
+    IAW.drawMatrix(canvases.diag, bands.diag, (value) => detailColor(value, detailScale), { borderColor: theme.border });
+    IAW.drawMatrix(canvases.reconCoarse, coarse, IAW.grayscaleColor, { borderColor: theme.border });
+    IAW.drawMatrix(canvases.reconEdges, edges, IAW.grayscaleColor, { borderColor: theme.border });
+    IAW.drawMatrix(canvases.reconFull, image, IAW.grayscaleColor, { borderColor: theme.border });
 
     const energies = [
       { key: 'll', label: 'Approximation', value: bandEnergy(bands.ll) },
@@ -427,14 +313,6 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('resize', render);
 
   render();
-
-  function requestMathTypeset(attempt = 0) {
-    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-      window.MathJax.typesetPromise([root]).catch(() => {});
-      return;
-    }
-    if (attempt < 20) window.setTimeout(() => requestMathTypeset(attempt + 1), 250);
-  }
-  requestMathTypeset();
+  IAW.requestMathTypeset(root);
 });
 </script>
