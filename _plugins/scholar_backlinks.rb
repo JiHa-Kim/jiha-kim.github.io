@@ -7,10 +7,79 @@ module Jekyll
       alias_method :old_cite, :cite
       alias_method :old_bibliography_tag, :bibliography_tag
 
-      SCHOLAR_BACKLINKS_CACHE_VERSION = "2026-04-22-render-cache-v1".freeze
+      SCHOLAR_BACKLINKS_CACHE_VERSION = "2026-04-22-render-cache-v2".freeze
 
       def scholar_backlinks_config
         config['backlinks'] || { 'enabled' => false }
+      end
+
+      def scholar_site_cache(name)
+        site.instance_variable_get(name) || site.instance_variable_set(name, {})
+      end
+
+      def shared_csl_renderer_cache
+        scholar_site_cache(:@scholar_shared_csl_renderer_cache)
+      end
+
+      def converted_entry_cache
+        scholar_site_cache(:@scholar_converted_entry_cache)
+      end
+
+      def scholar_bibliography_signature
+        @scholar_bibliography_signature ||= begin
+          paths = bibtex_paths
+          Digest::SHA1.hexdigest(
+            paths.sort.map { |path| "#{path}:#{File.mtime(path).to_f}" }.join("\n")
+          )
+        end
+      end
+
+      def converted_entry(entry)
+        return unless entry
+        return entry if bibtex_filters.empty?
+
+        cache_key = [scholar_bibliography_signature, bibtex_filters.join(","), entry.key.to_s]
+        converted_entry_cache[cache_key] ||= entry.dup.convert(*bibtex_filters)
+      end
+
+      def csl_renderer(force = false)
+        cache_key = [style, config["locale"]]
+        shared_csl_renderer_cache.delete(cache_key) if force
+        shared_csl_renderer_cache[cache_key] ||= CiteProc::Ruby::Renderer.new(
+          :format => "html",
+          :style => style,
+          :locale => config["locale"]
+        )
+      end
+
+      def bibliography_template_source
+        @bibliography_template_source ||= begin
+          tmp = bibliography_template
+
+          case
+          when tmp.nil?
+            ""
+          when site.layouts.key?(tmp)
+            site.layouts[tmp].content.to_s
+          else
+            tmp.to_s
+          end
+        end
+      end
+
+      def reference_only_bibliography_template?
+        template = bibliography_template_source.strip
+        template.empty? || template == "{{reference}}"
+      end
+
+      def reference_tag(entry, index = nil)
+        return missing_reference unless entry
+
+        entry = converted_entry(entry)
+        reference = render_bibliography(entry, index)
+
+        content_tag reference_tagname, reference,
+          :id => [prefix, entry.key].compact.join('-')
       end
 
       def scholar_render_cache_key(*parts)
@@ -31,9 +100,7 @@ module Jekyll
           items = keys.filter_map do |key|
             next unless bibliography.key?(key)
 
-            entry = bibliography[key].dup
-            entry = entry.convert(*bibtex_filters) unless bibtex_filters.empty?
-            entry
+            converted_entry(bibliography[key])
           end
 
           rendered = render_citation(items)
@@ -52,12 +119,17 @@ module Jekyll
           style,
           config["locale"],
           page["path"] || page["url"] || page["id"],
+          bibliography_template_source,
           index,
           entry.key
         )
 
         cite_cache.getset(cache_key) do
-          old_bibliography_tag(entry, index)
+          if reference_only_bibliography_template?
+            reference_tag(entry, index)
+          else
+            old_bibliography_tag(entry, index)
+          end
         end
       end
 
