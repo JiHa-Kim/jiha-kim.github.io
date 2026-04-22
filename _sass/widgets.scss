@@ -618,10 +618,46 @@
 }
 
 .iaw__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
   padding: 0.75rem;
   font-size: 0.95rem;
   font-weight: 700;
+  color: var(--iaw-text);
+  background: var(--iaw-bg);
+  border: 1px solid var(--iaw-border);
   border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+
+.iaw__btn:hover {
+  border-color: var(--iaw-primary);
+  background: color-mix(in srgb, var(--iaw-primary) 8%, var(--iaw-bg));
+  transform: translateY(-1px);
+}
+
+.iaw__btn:active {
+  transform: translateY(0);
+}
+
+.iaw__btn:disabled {
+  opacity: 0.72;
+  cursor: default;
+  transform: none;
+}
+
+.iaw__btn--primary {
+  border-color: color-mix(in srgb, var(--iaw-primary) 34%, var(--iaw-border));
+  background: color-mix(in srgb, var(--iaw-primary) 12%, var(--iaw-bg));
+}
+
+.iaw__btn--primary:hover {
+  border-color: var(--iaw-primary);
+  background: color-mix(in srgb, var(--iaw-primary) 18%, var(--iaw-bg));
 }
 
 @media (max-width: 720px) {
