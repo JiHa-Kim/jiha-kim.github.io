@@ -2,7 +2,7 @@
 layout: post
 title: Autoregression vs Diffusion - Understanding Sampling via Optimal Transport
 date: 2026-04-19 16:09 +0000
-description: Autoregression and diffusion look like opposites, but both are solving the same transport problem: how to turn simple noise into structured data.
+description: Autoregression and diffusion look like opposites, but both are solving the same transport problem - how to turn simple noise into structured data.
 image: 
 categories:
 - Machine Learning
