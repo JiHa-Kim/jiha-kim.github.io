@@ -1,0 +1,387 @@
+{% capture describe %}
+<p>
+  This is a finite-sample picture of the polar factorization theorem. The middle column applies a latent rearrangement
+  $M$ that preserves the empirical source law, and the right column applies the same Brenier map $T=\nabla\psi$.
+  So the final output cloud stays fixed while only the coupling and its quadratic cost change.
+</p>
+{% endcapture %}
+
+{% capture controls %}
+<button class="iaw__seg-btn active" data-perm="id">$M=\mathrm{Id}$</button>
+<button class="iaw__seg-btn" data-perm="swap">Pair Swap</button>
+<button class="iaw__seg-btn" data-perm="cycle">Cycle</button>
+<button class="iaw__seg-btn" data-perm="reverse">Reverse</button>
+{% endcapture %}
+
+{% capture pfrDashedMarker %}
+<span class="pfr__legend-line pfr__legend-line--dashed"></span>
+{% endcapture %}
+{% capture pfrSolidMarker %}
+<span class="pfr__legend-line pfr__legend-line--solid"></span>
+{% endcapture %}
+{% capture pfrTargetMarker %}
+<span class="pfr__legend-dot"></span>
+{% endcapture %}
+
+{% capture legend %}
+  {% include iaw_legend_item.html marker_html=pfrDashedMarker label="Latent rearrangement $M$" %}
+  {% include iaw_legend_item.html marker_html=pfrSolidMarker label="Brenier map $T=\nabla\psi$" %}
+  {% include iaw_legend_item.html marker_html=pfrTargetMarker label="Shared output cloud $T(\{z_i\})$" %}
+{% endcapture %}
+
+{% capture pfrOverlay %}
+<div class="pfr__overlay">
+  <div class="pfr__col-label pfr__col-label--left">Source $z$</div>
+  <div class="pfr__col-label pfr__col-label--mid">Rearranged $M(z)$</div>
+  <div class="pfr__col-label pfr__col-label--right">Output $F(z)$</div>
+</div>
+{% endcapture %}
+
+{% capture visuals %}
+{% include iaw_canvas_stage.html canvas_id="pfrCanvas" overlay=pfrOverlay %}
+{% endcapture %}
+
+{% capture pfrCurrentValue %}
+<span id="pfrCurrentCost">0.00</span> <span id="pfrGap" class="pfr__gap-inline">(+0.00)</span>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid pfr__status-grid">
+  {% include iaw_status_item.html class="iaw__status-item--span-2" label="Invariant" value="same empirical source law after $M$, same output cloud after $T \circ M$" %}
+  {% include iaw_status_item.html label="Brenier Cost" value="0.00" value_id="pfrBaseCost" %}
+  {% include iaw_status_item.html label="Current / Excess" value=pfrCurrentValue %}
+</div>
+
+{% include iaw_timeline_controls.html play_id="pfrPlay" play_label="Play polar factorization animation" slider_id="pfrSlider" min="0" max="1" step="0.005" value="0" variant="progress" %}
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="polarFactorizationFigure"
+    eyebrow="Polar Factorization"
+    title="Same Output Law, Different Coupling"
+    description=describe
+    controls=controls
+    legend=legend
+    visuals=visuals
+    footer=footer
+    stage_id="pfrStage"
+    stage_style="height: 390px;"
+%}
+
+<style>
+.pfr__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pfr__col-label {
+  position: absolute;
+  top: 0.5rem;
+  transform: translateX(-50%);
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--iaw-bg) 92%, transparent);
+  color: var(--iaw-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.pfr__col-label--left { left: 16.7%; }
+.pfr__col-label--mid { left: 50%; }
+.pfr__col-label--right { left: 83.3%; }
+
+.pfr__legend-line {
+  width: 18px;
+  height: 0;
+  display: inline-block;
+  flex-shrink: 0;
+  border-top: 2px solid var(--iaw-border);
+}
+
+.pfr__legend-line--dashed {
+  border-top-style: dashed;
+}
+
+.pfr__legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  display: inline-block;
+  flex-shrink: 0;
+  background: var(--iaw-target);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--iaw-bg) 40%, transparent);
+}
+
+.pfr__status-grid {
+  margin-bottom: 0.35rem;
+}
+
+.pfr__gap-inline {
+  color: var(--iaw-success);
+}
+
+#pfrStage {
+  height: 390px;
+}
+
+@media (max-width: 720px) {
+  #pfrStage {
+    height: 360px;
+  }
+
+  .pfr__col-label {
+    font-size: 0.78rem;
+    padding: 0.1rem 0.35rem;
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('polarFactorizationFigure', function(root) {
+
+  const canvas = root.querySelector('#pfrCanvas');
+  const ctx = canvas.getContext('2d');
+  const stage = root.querySelector('#pfrStage');
+  const slider = root.querySelector('#pfrSlider');
+  const playBtn = root.querySelector('#pfrPlay');
+  const segBtns = root.querySelectorAll('.iaw__seg-btn');
+  const baseCostEl = root.querySelector('#pfrBaseCost');
+  const currentCostEl = root.querySelector('#pfrCurrentCost');
+  const gapEl = root.querySelector('#pfrGap');
+
+  const sourcePoints = [
+    [-1.52, 0.78],
+    [-1.03, -0.68],
+    [-0.72, 0.11],
+    [-0.24, 1.03],
+    [-0.02, -1.18],
+    [0.28, 0.44],
+    [0.74, -0.18],
+    [1.06, 0.87],
+    [1.32, -0.82],
+    [0.34, 1.44]
+  ];
+  const linearMap = [[1.26, 0.38], [0.38, 1.12]];
+  const shift = [0.22, -0.18];
+  const targetPoints = sourcePoints.map(([x, y]) => [
+    linearMap[0][0] * x + linearMap[0][1] * y + shift[0],
+    linearMap[1][0] * x + linearMap[1][1] * y + shift[1]
+  ]);
+
+  const permutations = {
+    id: { map: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
+    swap: { map: [1, 0, 2, 4, 3, 5, 7, 6, 8, 9] },
+    cycle: { map: [2, 3, 4, 5, 6, 7, 8, 9, 0, 1] },
+    reverse: { map: [9, 8, 7, 6, 5, 4, 3, 2, 1, 0] }
+  };
+
+  let activePerm = 'id';
+  let currentT = 0;
+  let theme = IAW.getThemeColors(root);
+
+  function getExtent(points, padding = 0.14) {
+    const xs = points.map((point) => point[0]);
+    const ys = points.map((point) => point[1]);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const spanX = Math.max(maxX - minX, 1e-6);
+    const spanY = Math.max(maxY - minY, 1e-6);
+
+    return {
+      xMin: minX - padding * spanX,
+      xMax: maxX + padding * spanX,
+      yMin: minY - padding * spanY,
+      yMax: maxY + padding * spanY
+    };
+  }
+
+  const sourceExtent = getExtent(sourcePoints);
+  const targetExtent = getExtent(targetPoints);
+
+  function getPanels(rect) {
+    const marginX = 28;
+    const gap = 28;
+    const plotTop = 52;
+    const plotBottom = 22;
+    const panelWidth = (rect.width - 2 * marginX - 2 * gap) / 3;
+    const panelHeight = rect.height - plotTop - plotBottom;
+
+    return [0, 1, 2].map((index) => ({
+      x: marginX + index * (panelWidth + gap),
+      y: plotTop,
+      width: panelWidth,
+      height: panelHeight
+    }));
+  }
+
+  function mapIntoPanel(point, panel, extent) {
+    const inset = 12;
+    const width = Math.max(panel.width - inset * 2, 1);
+    const height = Math.max(panel.height - inset * 2, 1);
+    const nx = (point[0] - extent.xMin) / (extent.xMax - extent.xMin);
+    const ny = (point[1] - extent.yMin) / (extent.yMax - extent.yMin);
+
+    return {
+      x: panel.x + inset + nx * width,
+      y: panel.y + panel.height - inset - ny * height
+    };
+  }
+
+  function costForPermutation(key) {
+    const perm = permutations[key].map;
+    let total = 0;
+    sourcePoints.forEach((point, index) => {
+      const target = targetPoints[perm[index]];
+      const dx = point[0] - target[0];
+      const dy = point[1] - target[1];
+      total += dx * dx + dy * dy;
+    });
+    return total / sourcePoints.length;
+  }
+
+  const baseCost = costForPermutation('id');
+
+  function getColors() {
+    return {
+      guide: IAW.toAlpha(theme.border || theme.muted || '#9ca3af', 0.26),
+      path: IAW.toAlpha(theme.border || theme.muted || '#9ca3af', 0.34),
+      sourceDot: IAW.toAlpha(theme.text || '#d1d5db', 0.74),
+      midDot: IAW.toAlpha(theme.text || '#d1d5db', 0.74),
+      targetDot: IAW.toAlpha(theme.target || '#38bdf8', 0.85),
+      movingDot: theme.sourceA || '#d4a017'
+    };
+  }
+
+  function drawSegment(from, to, options = {}) {
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.strokeStyle = options.color;
+    ctx.lineWidth = options.lineWidth ?? 1.2;
+    ctx.setLineDash(options.dash || []);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function lerpPoint(a, b, t) {
+    return {
+      x: a.x + (b.x - a.x) * t,
+      y: a.y + (b.y - a.y) * t
+    };
+  }
+
+  function draw() {
+    const rect = stage.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const panels = getPanels(rect);
+    const colors = getColors();
+    const perm = permutations[activePerm].map;
+    const phase = IAW.getTwoStageProgress(currentT, { firstStageEnd: 0.43, pauseEnd: 0.56 });
+
+    [1, 2].forEach((index) => {
+      const x = panels[index].x - 14;
+      ctx.strokeStyle = colors.guide;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, panels[index].y - 8);
+      ctx.lineTo(x, panels[index].y + panels[index].height + 8);
+      ctx.stroke();
+    });
+
+    const leftPositions = sourcePoints.map((point) => mapIntoPanel(point, panels[0], sourceExtent));
+    const middlePositions = sourcePoints.map((point) => mapIntoPanel(point, panels[1], sourceExtent));
+    const rightPositions = targetPoints.map((point) => mapIntoPanel(point, panels[2], targetExtent));
+
+    sourcePoints.forEach((_, index) => {
+      const left = leftPositions[index];
+      const middle = middlePositions[perm[index]];
+      const right = rightPositions[perm[index]];
+
+      drawSegment(left, middle, {
+        color: colors.path,
+        lineWidth: 1.1,
+        dash: [5, 6]
+      });
+
+      drawSegment(middle, right, {
+        color: colors.path,
+        lineWidth: 1.15
+      });
+    });
+
+    leftPositions.forEach((point) => IAW.drawCircle(ctx, point.x, point.y, 4, colors.sourceDot));
+    middlePositions.forEach((point) => IAW.drawCircle(ctx, point.x, point.y, 4, colors.midDot));
+    rightPositions.forEach((point) => IAW.drawCircle(ctx, point.x, point.y, 4.2, colors.targetDot));
+
+    sourcePoints.forEach((_, index) => {
+      const left = leftPositions[index];
+      const middle = middlePositions[perm[index]];
+      const right = rightPositions[perm[index]];
+      let current;
+
+      if (phase.phase === 'first') {
+        current = lerpPoint(left, middle, phase.first);
+      } else if (phase.phase === 'pause') {
+        current = middle;
+      } else {
+        current = lerpPoint(middle, right, phase.second);
+      }
+
+      IAW.drawCircle(ctx, current.x, current.y, 3.6, colors.movingDot);
+    });
+  }
+
+  function updateReadouts() {
+    const currentCost = costForPermutation(activePerm);
+    const gap = currentCost - baseCost;
+    baseCostEl.textContent = baseCost.toFixed(2);
+    currentCostEl.textContent = currentCost.toFixed(2);
+    gapEl.textContent = `(${gap >= 0 ? '+' : ''}${gap.toFixed(2)})`;
+    gapEl.style.color = Math.abs(gap) < 1e-9 ? 'var(--iaw-success)' : 'var(--iaw-warning)';
+  }
+
+  function renderFrame(t) {
+    currentT = t;
+    draw();
+  }
+
+  IAW.bindSegmentedControl(segBtns, (button) => {
+    activePerm = button.dataset.perm;
+    slider.value = '0';
+    renderFrame(0);
+    updateReadouts();
+  });
+
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    draw();
+  });
+
+  window.addEventListener('resize', draw);
+
+  updateReadouts();
+  draw();
+
+  IAW.createPlaybackController({
+    button: playBtn,
+    slider: slider,
+    maxFrame: 1,
+    isTimeBased: true,
+    speed: 0.0006,
+    onFrameChange: renderFrame
+  });
+
+  IAW.requestMathTypeset(root);
+});
+</script>

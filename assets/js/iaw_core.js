@@ -210,6 +210,29 @@ window.IAW = (function() {
         return { x: 1, y: 1 };
     };
 
+    core.getTwoStageProgress = function(value, options = {}) {
+        const firstStageEnd = Number(options.firstStageEnd ?? 0.42);
+        const pauseEnd = Number(options.pauseEnd ?? 0.56);
+        const ease = typeof options.ease === 'function' ? options.ease : core.easeOutQuart;
+        const t = core.clamp(Number(value) || 0);
+        const firstSpan = Math.max(firstStageEnd, 1e-6);
+        const secondSpan = Math.max(1 - pauseEnd, 1e-6);
+
+        if (t <= firstStageEnd) {
+            return { first: ease(t / firstSpan), second: 0, phase: 'first' };
+        }
+
+        if (t <= pauseEnd) {
+            return { first: 1, second: 0, phase: 'pause' };
+        }
+
+        return {
+            first: 1,
+            second: ease((t - pauseEnd) / secondSpan),
+            phase: 'second'
+        };
+    };
+
     core.getTransport2DPalette = function(theme, options = {}) {
         const neutralBase = theme.border || theme.muted || theme.text || '#9ca3af';
 

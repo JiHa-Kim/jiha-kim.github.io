@@ -402,9 +402,39 @@ On a small fixed discrete instance, entropic OT is easiest to read as a sharp-vs
 
 {% include sinkhorn_regularization_widget.html %}
 
+### Uncrossing Paths: Mini-Batch OT
+
+Flow matching still leaves one practical question open: inside a mini-batch, which source sample should be paired with which target sample?
+
+> [!idea] Batch OT
+> Random pairings produce heavily crossed trajectories, which makes $v_\theta$ harder to learn. A mini-batch OT solve uncrosses them:
+>
+> $$ \pi^* = \arg\min_{\pi \text{ matching } X_0^B \text{ to } X_1^B} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|_2^2 $$
+
+This is efficiently approximated with **Sinkhorn**. With product reference, it is exactly the entropic OT relaxation above. The immediate geometric effect is simple: the supervised trajectories cross less, so the regression target for $v_\theta$ is less tangled.
+
+On a small cached batch, the contrast is easiest to see directly:
+
+{% include random_pairwise_flows_widget.html %}
+
+> [!note] Endpoint Matching Is Not Yet a Dynamical Model
+> Mini-batch OT only picks endpoint pairings for one time gap. That is enough to uncross paths, but not enough to define a law over whole trajectories.
+>
+> Freulon et al. make this precise in the Gaussian setting: to reconstruct dynamics from finitely many marginals, the reference coupling used at each pairwise entropic OT step should come from one common continuous-time reference process. A Gaussian-process reference gives pairwise transitions that fit together into one coherent continuous-time model; a product reference instead pushes each gap toward independence, so temporal coherence is not built in {% cite freulonEntropicOptimalTransport2026 %}.
+
+## One-Step Maps
+
+> [!idea] Drifting Models
+> CNFs and diffusion-style flows approximate unconstrained transport, but they still spend inference time tracing a path. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} move that iteration into training: the pushforward distribution evolves during optimization, and inference becomes a single evaluation of
+> $$ x=f_\theta(z), \qquad z \sim P_{\text{noise}}. $$
+> The point is to amortize transport into training time rather than sampling time.
+
+Conceptually, this closes the loop:
+$$ \text{Map (Brenier, intractable)} \to \text{Flow (tractable, multi-step)} \to \text{Learned one-step map}. $$
+
 ### Dual Potentials
 
-There is another equivalent way to describe OT. Instead of optimizing the transport plan directly, we assign a scalar "price" to each source point and each target point.
+Before returning to exact-map structure, it is useful to switch from the primal viewpoint of moving mass to the dual viewpoint of certifying transport cost by potentials.
 
 > [!problem] Discrete Kantorovich Dual
 > In the discrete case, the dual problem is
@@ -429,33 +459,7 @@ The same tiny transport example makes this lower-bound picture concrete:
 > Under standard assumptions, this equals the Kantorovich optimum.
 
 > [!note] Why This Matters Here
-> These dual potentials are the continuous analogue of the discrete prices. They reappear in regularized OT, Sinkhorn-style updates, and later potential-based viewpoints on transport geometry.
-
-### Uncrossing Paths: Mini-Batch OT
-
-Flow matching still leaves one practical question open: inside a mini-batch, which source sample should be paired with which target sample?
-
-> [!idea] Batch OT
-> Random pairings produce heavily crossed trajectories, which makes $v_\theta$ harder to learn. A mini-batch OT solve uncrosses them:
->
-> $$ \pi^* = \arg\min_{\pi \text{ matching } X_0^B \text{ to } X_1^B} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|_2^2 $$
-
-This is efficiently approximated with **Sinkhorn**. With product reference, it is exactly the entropic OT relaxation above. The immediate geometric effect is simple: the supervised trajectories cross less, so the regression target for $v_\theta$ is less tangled.
-
-> [!note] Endpoint Matching Is Not Yet a Dynamical Model
-> Mini-batch OT only picks endpoint pairings for one time gap. That is enough to uncross paths, but not enough to define a law over whole trajectories.
->
-> Freulon et al. make this precise in the Gaussian setting: to reconstruct dynamics from finitely many marginals, the reference coupling used at each pairwise entropic OT step should come from one common continuous-time reference process. A Gaussian-process reference gives pairwise transitions that fit together into one coherent continuous-time model; a product reference instead pushes each gap toward independence, so temporal coherence is not built in {% cite freulonEntropicOptimalTransport2026 %}.
-
-## One-Step Maps
-
-> [!idea] Drifting Models
-> CNFs and diffusion-style flows approximate unconstrained transport, but they still spend inference time tracing a path. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} move that iteration into training: the pushforward distribution evolves during optimization, and inference becomes a single evaluation of
-> $$ x=f_\theta(z), \qquad z \sim P_{\text{noise}}. $$
-> The point is to amortize transport into training time rather than sampling time.
-
-Conceptually, this closes the loop:
-$$ \text{Map (Brenier, intractable)} \to \text{Flow (tractable, multi-step)} \to \text{Learned one-step map}. $$
+> These dual potentials are the continuous analogue of the discrete prices. They reappear in regularized OT, Sinkhorn-style updates, and potential-based viewpoints on transport geometry.
 
 ## Optional Refinement: Polar Factorization
 
@@ -472,6 +476,10 @@ Even if a generator already matches the correct density, its internal geometry n
 > If $\widetilde{G}=G\circ M$ and $M_\sharp P_{\text{noise}}=P_{\text{noise}}$, then
 > $$ \widetilde{G}_\sharp P_{\text{noise}} = G_\sharp P_{\text{noise}}. $$
 > So a latent rearrangement does **not** change the modeled density. It only changes the coupling: which latent point is paired with which output sample.
+
+A finite-sample version makes the factorization concrete: the middle column preserves the same empirical source cloud, the right column preserves the same output cloud, and only the pairing cost changes.
+
+{% include polar_factorization_widget.html %}
 
 > [!corollary] Immediate Consequence of Brenier's Theorem
 > If $T=\nabla\psi$ is Brenier's map from $P_{\text{noise}}$ to $P_{\text{data}}$, then for any exact generator $\widetilde{G}$ with the same pushforward law,
