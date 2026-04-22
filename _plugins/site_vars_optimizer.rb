@@ -1,57 +1,35 @@
-require 'jekyll'
-require 'digest'
+# frozen_string_literal: true
+
+require "digest"
+require "jekyll"
+require_relative "site_item_helpers"
 
 module Jekyll
   # This plugin pre-calculates common variables that are otherwise
   # calculated repeatedly in Liquid templates (O(N) -> O(1)).
   class SiteVarsOptimizer < Generator
     priority :highest
+    CACHE_VERSION = "2026-04-22-site-vars-v2".freeze
 
     def generate(site)
-      # 1. Pre-calculate Site Origin Type
-      origin_type = 'cors'
-      if site.config.dig('assets', 'self_host', 'enabled')
-        env = site.config.dig('assets', 'self_host', 'env')
-        if env.nil? || env == Jekyll.env
-          origin_type = 'basic'
-        end
-      end
-      site.data['origin_type'] = origin_type
+      @cache ||= Jekyll::Cache.new("SiteVarsOptimizer")
 
-      # 2. Pre-calculate Site Preference Mode
-      site.data['prefer_mode'] = ""
-      if site.config['theme_mode']
-        site.data['prefer_mode'] = %(data-mode="#{site.config['theme_mode']}")
-      end
+      site.data["origin_type"] = self.class.origin_type(site)
+      site.data["prefer_mode"] = self.class.prefer_mode(site)
+      site.data["favicon_path"] = self.class.favicon_path(site)
 
-      # 3. Pre-calculate Favicon Path
-      site.data['favicon_path'] = File.join(site.baseurl || '', '/assets/img/favicons')
-      site.each_site_file do |item|
+      Jekyll::SiteItemHelpers.each_unique_content_item(site) do |item|
         next unless item.respond_to?(:data)
-        
-        # Language detection
-        page_lang = item.data['lang']
-        if page_lang && site.data.dig('locales', page_lang)
-          item.data['lang'] = page_lang
-        elsif site.data.dig('locales', site.config['lang'])
-          item.data['lang'] = site.config['lang']
-        else
-          item.data['lang'] = 'en'
-        end
 
-        # Header detection for TOC/Math (avoiding expensive contains checks in Liquid)
-        # Use a memory cache to avoid scanning content of every single file every time
-        if item.respond_to?(:content) && item.content
-          $site_vars_cache ||= {}
-          cache_key = Digest::MD5.hexdigest("#{item.path}_#{item.content}")
-          
-          if $site_vars_cache.key?(cache_key)
-            item.data['has_h2_h3'] = $site_vars_cache[cache_key]
-          else
-            has_h2_h3 = item.content.include?('<h2') || item.content.include?('<h3')
-            $site_vars_cache[cache_key] = has_h2_h3
-            item.data['has_h2_h3'] = has_h2_h3
-          end
+        item.data["lang"] = self.class.resolve_lang(site, item)
+        next unless item.respond_to?(:content) && item.content
+
+        cache_key = Digest::MD5.hexdigest(
+          "#{CACHE_VERSION}#{item.path}#{item.content}"
+        )
+
+        item.data["has_h2_h3"] = @cache.getset(cache_key) do
+          self.class.has_h2_h3?(item.content)
         end
       end
     end
@@ -78,6 +56,41 @@ module Jekyll
         File.join(site.baseurl, url)
       end
     end
+
+    def self.origin_type(site)
+      return "cors" unless site.config.dig("assets", "self_host", "enabled")
+
+      env = site.config.dig("assets", "self_host", "env")
+      return "basic" if env.nil? || env == Jekyll.env
+
+      "cors"
+    end
+
+    def self.prefer_mode(site)
+      mode = site.config["theme_mode"]
+      mode ? %(data-mode="#{mode}") : ""
+    end
+
+    def self.favicon_path(site)
+      File.join(site.baseurl || "", "/assets/img/favicons")
+    end
+
+    def self.resolve_lang(site, item)
+      page_lang = item.data["lang"]
+      return page_lang if page_lang && site.data.dig("locales", page_lang)
+      return site.config["lang"] if site.data.dig("locales", site.config["lang"])
+
+      "en"
+    end
+
+    def self.has_h2_h3?(content)
+      return true if content.include?("<h2") || content.include?("<h3")
+      return true if content.match?(/^\s{0,3}###?\s+\S/m)
+      return true if content.match?(/^\S.+\n---+\s*$/m)
+
+      false
+    end
+
     def self.render_seo(site, item)
       title = item.data['title'] || site.config['title']
       description = item.data['description'] || item.data['excerpt'] || site.config['description']
@@ -131,7 +144,6 @@ module Jekyll
     # 2. Pre-render SEO tags in Ruby natively to bypass Liquid overhead
     item.data['precomputed_seo_html'] = SiteVarsOptimizer.render_seo(site, item)
   end
-
   # High-performance Ruby-based HTML Compression
   # Replaces the theme's extremely slow Liquid-based compress.html layout
   Hooks.register [:posts, :pages, :docs], :post_render do |item|

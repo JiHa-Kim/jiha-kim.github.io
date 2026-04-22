@@ -1,59 +1,57 @@
 <!-- JS selector for site. -->
 
 <!-- commons -->
-
-{% assign urls = site.data.origin[type].search.js %}
+{% assign urls = site.data.origin[include.type].search.js %}
 
 <!-- layout specified -->
+{% if include.layout == 'post' or include.layout == 'page' or include.layout == 'home' %}
+  {% assign urls = urls | append: ',' | append: site.data.origin[include.type]['lazy-polyfill'].js %}
 
-{% if page.layout == 'post' or page.layout == 'page' or page.layout == 'home' %}
-  {% assign urls = urls | append: ',' | append: site.data.origin[type]['lazy-polyfill'].js %}
-
-  {% unless page.layout == 'home' %}
+  {% unless include.layout == 'home' %}
     <!-- image lazy-loading & popup & clipboard -->
     {% assign urls = urls
       | append: ','
-      | append: site.data.origin[type].glightbox.js
+      | append: site.data.origin[include.type].glightbox.js
       | append: ','
-      | append: site.data.origin[type].clipboard.js
+      | append: site.data.origin[include.type].clipboard.js
     %}
   {% endunless %}
 {% endif %}
 
-{% if page.layout == 'home'
-  or page.layout == 'post'
-  or page.layout == 'archives'
-  or page.layout == 'category'
-  or page.layout == 'tag'
+{% if include.layout == 'home'
+  or include.layout == 'post'
+  or include.layout == 'archives'
+  or include.layout == 'category'
+  or include.layout == 'tag'
 %}
   {% assign locale = include.lang | split: '-' | first %}
 
   {% assign urls = urls
     | append: ','
-    | append: site.data.origin[type].dayjs.js.common
+    | append: site.data.origin[include.type].dayjs.js.common
     | append: ','
-    | append: site.data.origin[type].dayjs.js.locale
+    | append: site.data.origin[include.type].dayjs.js.locale
     | replace: ':LOCALE', locale
     | append: ','
-    | append: site.data.origin[type].dayjs.js.relativeTime
+    | append: site.data.origin[include.type].dayjs.js.relativeTime
     | append: ','
-    | append: site.data.origin[type].dayjs.js.localizedFormat
+    | append: site.data.origin[include.type].dayjs.js.localizedFormat
   %}
 {% endif %}
 
-{% if page.content contains '<h2' or page.content contains '<h3' and site.toc and page.toc %}
-  {% assign urls = urls | append: ',' | append: site.data.origin[type].toc.js %}
+{% if include.has_h2_h3 and include.toc and include.page_toc %}
+  {% assign urls = urls | append: ',' | append: site.data.origin[include.type].toc.js %}
 {% endif %}
 
-{% if page.mermaid %}
-  {% assign urls = urls | append: ',' | append: site.data.origin[type].mermaid.js %}
+{% if include.mermaid %}
+  {% assign urls = urls | append: ',' | append: site.data.origin[include.type].mermaid.js %}
 {% endif %}
 
 {% include jsdelivr-combine.html urls=urls %}
 
-{% case page.layout %}
+{% case include.layout %}
   {% when 'home', 'categories', 'post', 'page' %}
-    {% assign js = page.layout %}
+    {% assign js = include.layout %}
   {% when 'archives', 'category', 'tag' %}
     {% assign js = 'misc' %}
   {% else %}
@@ -64,17 +62,17 @@
 
 <script defer src="{{ script | relative_url }}"></script>
 
-{% if page.math %}
+{% if include.math %}
   <!-- MathJax -->
   <script defer src="{{ '/assets/js/data/mathjax.js' | relative_url }}"></script>
   <script defer src="{{ '/assets/js/math-copy.js' | relative_url }}"></script>
   <script defer src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" defer src="{{ site.data.origin[type].mathjax.js | relative_url }}"></script>
+  <script id="MathJax-script" defer src="{{ site.data.origin[include.type].mathjax.js | relative_url }}"></script>
   <script defer src="{{ '/assets/js/math-lazy-fallback.js' | relative_url }}"></script>
 {% endif %}
 
 <!-- Pageviews -->
-{% if page.layout == 'post' %}
+{% if include.layout == 'post' %}
   {% assign provider = site.pageviews.provider %}
 
   {% if provider and provider != empty %}

@@ -4,6 +4,7 @@ require "cgi"
 require "digest"
 require "json"
 require "jekyll"
+require_relative "site_item_helpers"
 
 module Jekyll
   class BuildTimeOptimizer < Generator
@@ -33,7 +34,7 @@ module Jekyll
     end
 
     def precompute_plain_text(site)
-      each_candidate(site) do |item|
+      Jekyll::SiteItemHelpers.each_post_like_item(site) do |item|
         next unless item.content && !item.content.empty?
 
         cache_key = Digest::MD5.hexdigest("#{CACHE_VERSION}#{item.content}")
@@ -67,33 +68,6 @@ module Jekyll
       end
 
       site.data["search_index_json"] = JSON.generate(entries)
-    end
-
-    def each_candidate(site)
-      seen = {}
-
-      site.posts.docs.each do |post|
-        seen[post.path] = true
-        yield post
-      end
-
-      site.pages.each do |page|
-        next unless page.data["layout"] == "post"
-        next if seen[page.path]
-
-        seen[page.path] = true
-        yield page
-      end
-
-      site.collections.each_value do |collection|
-        collection.docs.each do |doc|
-          next unless doc.data["layout"] == "post"
-          next if seen[doc.path]
-
-          seen[doc.path] = true
-          yield doc
-        end
-      end
     end
 
     def join_url(*parts)
