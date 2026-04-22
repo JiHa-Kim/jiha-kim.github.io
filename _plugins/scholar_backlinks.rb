@@ -1,5 +1,6 @@
 
 require "digest"
+require_relative "scholar_artifact_cache"
 
 module Jekyll
   class Scholar
@@ -76,7 +77,7 @@ module Jekyll
         return missing_reference unless entry
 
         entry = converted_entry(entry)
-        reference = render_bibliography(entry, index)
+        reference = Jekyll::ScholarArtifactCache.artifact_reference_html(self, entry) || render_bibliography(entry, index)
 
         content_tag reference_tagname, reference,
           :id => [prefix, entry.key].compact.join('-')

@@ -1,0 +1,512 @@
+{
+  "version": "2026-04-22-scholar-reference-artifacts-v1",
+  "contexts": {
+    "aa74b805be36a463e91491e87648b21460405dfd": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/crash-courses/convex-analysis/references.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/crash-courses/convex-analysis/references.bib": "060ef473c9c54e323d6785793460c3cf9a5801e0"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "crash-courses/convex-analysis/references.bib",
+      "entry_count": 7,
+      "index_sensitive": false,
+      "references": {
+        "bauschkeConvexAnalysisMonotone2011": "Bauschke, H. H., &amp; Combettes, P. L. (2011). <i>Convex Analysis and Monotone Operator Theory in Hilbert Spaces</i>. Springer New York. https://doi.org/10.1007/978-1-4419-9467-7",
+        "boydConvexOptimization2004": "Boyd, S. P., &amp; Vandenberghe, L. (2004). <i>Convex Optimization</i>. Cambridge University Press.",
+        "hiriart-urrutyConvexAnalysisMinimization1993": "Hiriart-Urruty, J.-B., &amp; Lemaréchal, C. (1993). <i>Convex Analysis and Minimization Algorithms I</i> (M. Artin, S. S. Chern, J. Coates, J. M. Fröhlich, H. Hironaka, F. Hirzebruch, L. Hörmander, C. C. Moore, J. K. Moser, M. Nagata, W. Schmidt, D. S. Scott, \\relax Y. G. Sinai, J. Tits, M. Waldschmidt, S. Watanabe, M. Berger, B. Eckmann, &amp; S. R. S. Varadhan, Eds.; Vol. 305). Springer Berlin Heidelberg. https://doi.org/10.1007/978-3-662-02796-7",
+        "morduchovicEasyPathConvex2014": "Morduchovič, B. S., &amp; Nguyen, M. N. (2014). <i>An Easy Path to Convex Analysis and Applications</i> (Online-Ausg). Morgan &amp; Claypool Publishers.",
+        "orabonaModernIntroductionOnline2025": "Orabona, F. (2025). <i>A Modern Introduction to Online Learning</i> (Issue arXiv:1912.13213). arXiv. https://doi.org/10.48550/arXiv.1912.13213",
+        "peyreMathematicalFoundationsData": "Peyre, G. <i>Mathematical Foundations of Data Sciences</i>.",
+        "Rockafellar_1997": "Rockafellar, R. T. (1997). <i>Convex Analysis (Princeton Paperbacks)</i>. Princeton University Press."
+      }
+    },
+    "fe1cfb34b07d228d768567163a268b31631247ba": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/crash-courses/functional-analysis/matrix-norms.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/crash-courses/functional-analysis/matrix-norms.bib": "96119d3164c2ea1405b5723456030b4376ae2553"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "crash-courses/functional-analysis/matrix-norms.bib",
+      "entry_count": 6,
+      "index_sensitive": false,
+      "references": {
+        "hornMatrixAnalysis2017": "Horn, R. A., &amp; Johnson, C. R. (2017). <i>Matrix Analysis</i> (Second edition, corrected reprint). Cambridge University Press.",
+        "VectorMatrixNorms": "<i>Vector and Matrix Norms</i>. Retrieved June 6, 2025, from https://wiki.ruda.city/Vector-and-Matrix-Norms",
+        "aziznejadDualityMappingSchatten2020": "Aziznejad, S., &amp; Unser, M. (2020). <i>Duality Mapping for Schatten Matrix Norms</i> (Issue arXiv:2009.07768). arXiv. https://doi.org/10.48550/arXiv.2009.07768",
+        "guthESTIMATINGMATRIXNORM": "Guth, L., Maldague, D., &amp; Urschel, J. <i>ESTIMATING THE MATRIX p → q NORM</i>.",
+        "tyrtyshnikovBriefIntroductionNumerical1997": "Tyrtyshnikov, E. E. (1997). <i>A Brief Introduction to Numerical Analysis</i>. Birkhäuser Boston. https://doi.org/10.1007/978-0-8176-8136-4",
+        "MatrixNorm2025": "Matrix Norm. (2025). <i>Wikipedia</i>. https://en.wikipedia.org/wiki/Matrix_norm"
+      }
+    },
+    "3f21a406791cb87938722143718943e308a0ea0a": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/crash-courses/functional-analysis/properties-of-matrix-norms.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/crash-courses/functional-analysis/properties-of-matrix-norms.bib": "00222d0459c8d4e9deb87bb0fbd3b95b2f866fe4"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "crash-courses/functional-analysis/properties-of-matrix-norms.bib",
+      "entry_count": 9,
+      "index_sensitive": false,
+      "references": {
+        "0602Matrix": "<i>06 02 Matrix Norms and Unitary Matrices</i>. Retrieved June 6, 2025, from https://nla.skoltech.ru/archive/2019/lectures/html/06%2002%20Matrix%20norms%20and%20unitary%20matrices.html",
+        "dokmanicMoorePenrosePartGeneralized2017": "Dokmanić, I., &amp; Gribonval, R. (2017). <i>Beyond Moore-Penrose Part I: Generalized Inverses That Minimize Matrix Norms</i> (Issue arXiv:1706.08349). arXiv. https://doi.org/10.48550/arXiv.1706.08349",
+        "domonLeftUnitarilyInvariant": "Domon, M., Sano, T., &amp; Toba, T. <i>Left Unitarily Invariant Norms on Matrices</i>.",
+        "highamWhatPolarDecomposition2020": "Higham, N. (2020). What Is the Polar Decomposition? In <i>Nick Higham</i>. https://nhigham.com/2020/07/28/what-is-the-polar-decomposition/",
+        "highamWhatUnitarilyInvariant2021": "Higham, N. (2021). What Is a Unitarily Invariant Norm? In <i>Nick Higham</i>. https://nhigham.com/2021/02/02/what-is-a-unitarily-invariant-norm/",
+        "hornMatrixAnalysis2017": "Horn, R. A., &amp; Johnson, C. R. (2017). <i>Matrix Analysis</i> (Second edition, corrected reprint). Cambridge University Press.",
+        "mirskySYMMETRICGAUGEFUNCTIONS1960": "MIRSKY, L. (1960). SYMMETRIC GAUGE FUNCTIONS AND UNITARILY INVARIANT NORMS. <i>The Quarterly Journal of Mathematics</i>, <i>11</i>(1), 50–59. https://doi.org/10.1093/qmath/11.1.50",
+        "saluevGenericPropertiesCriterion2015": "Saluev, T., &amp; Sitdikov, I. (2015). Generic Properties and a Criterion of an Operator Norm. <i>Linear Algebra and Its Applications</i>, <i>485</i>, 1–20. https://doi.org/10.1016/j.laa.2015.07.020",
+        "user1551AnswerWhatAre2019": "user1551. (2019). Answer to \"What Are Some Lesser Known Unitary Invariant Norms for Matrices?\". In <i>Mathematics Stack Exchange</i>. https://math.stackexchange.com/a/3311122"
+      }
+    },
+    "323c7debe2336b3b554b9d0cf2bd588d2fe1029a": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/crash-courses/linear-algebra/linear-algebra-1.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/crash-courses/linear-algebra/linear-algebra-1.bib": "07916493911336c57a367782344ee0f12ee4307d"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "crash-courses/linear-algebra/linear-algebra-1.bib",
+      "entry_count": 6,
+      "index_sensitive": false,
+      "references": {
+        "grantsandersonEssenceLinearAlgebra2025": "Grant Sanderson. (2025). <i>Essence of Linear Algebra - YouTube</i>. https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab",
+        "gregorygundersonGeometricalUnderstandingMatrices2018": "Gregory Gunderson. (2018). <i>A Geometrical Understanding of Matrices</i>. https://gregorygundersen.com/blog/2018/10/24/matrices/",
+        "gregorygundersonLinearIndependenceBasis2021": "Gregory Gunderson. (2021). <i>Linear Independence, Basis, and the Gram–Schmidt Algorithm</i>. https://gregorygundersen.com/blog/2021/04/24/linear-independence/",
+        "gregorygundersonMatricesFunctionsMatrices2022": "Gregory Gunderson. (2022). <i>Matrices as Functions, Matrices as Data</i>. https://gregorygundersen.com/blog/2022/08/28/matrices-as-functions-and-data/",
+        "gregorygundersonTwoFormsDot2018": "Gregory Gunderson. (2018). <i>Two Forms of the Dot Product</i>. https://gregorygundersen.com/blog/2018/06/26/dot-product/",
+        "jamesmaynardLinearAlgebraII2020": "James Maynard. (2020). <i>Linear Algebra II: Oxford Mathematics 1st Year Student Lecture - James Maynard - YouTube</i>. https://www.youtube.com/watch?v=pQhVDRojC1U"
+      }
+    },
+    "94584dddde30533b46f2af406b9ffe22826c3ece": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/crash-courses/linear-algebra/linear-algebra-2.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/crash-courses/linear-algebra/linear-algebra-2.bib": "19123eb9236976bae23fce0377ae0873a4bbf0b6"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "crash-courses/linear-algebra/linear-algebra-2.bib",
+      "entry_count": 11,
+      "index_sensitive": false,
+      "references": {
+        "FirstCourseLinear2018": "A First Course in Linear Algebra (Kuttler). (2018). In <i>Mathematics LibreTexts</i>. https://math.libretexts.org/Bookshelves/Linear_Algebra/A_First_Course_in_Linear_Algebra_(Kuttler)",
+        "gregorygundersonProofSingularValue2018": "Gregory Gunderson. (2018). <i>Proof of the Singular Value Decomposition</i>. https://gregorygundersen.com/blog/2018/12/20/svd-proof/",
+        "gregorygundersonSingularValueDecomposition2018": "Gregory Gunderson. (2018). <i>Singular Value Decomposition as Simply as Possible</i>. https://gregorygundersen.com/blog/2018/12/10/svd/",
+        "InteractiveLinearAlgebra2021": "Interactive Linear Algebra (Margalit and Rabinoff). (2021). In <i>Mathematics LibreTexts</i>. https://math.libretexts.org/Bookshelves/Linear_Algebra/Interactive_Linear_Algebra_(Margalit_and_Rabinoff)",
+        "IntroductionMatrixAlgebra2022": "Introduction to Matrix Algebra (Kaw). (2022). In <i>Mathematics LibreTexts</i>. https://math.libretexts.org/Bookshelves/Linear_Algebra/Introduction_to_Matrix_Algebra_(Kaw)",
+        "LinearAlgebraSchilling2013": "Linear Algebra (Schilling, Nachtergaele and Lankham). (2013). In <i>Mathematics LibreTexts</i>. https://math.libretexts.org/Bookshelves/Linear_Algebra/Book%3A_Linear_Algebra_(Schilling_Nachtergaele_and_Lankham)",
+        "LinearAlgebraWaldron2016": "Linear Algebra (Waldron, Cherney, and Denton). (2016). In <i>Mathematics LibreTexts</i>. https://math.libretexts.org/Bookshelves/Linear_Algebra/Map%3A_Linear_Algebra_(Waldron_Cherney_and_Denton)",
+        "MatrixAlgebraComputational2021": "Matrix Algebra with Computational Applications (Colbry). (2021). In <i>Mathematics LibreTexts</i>. https://math.libretexts.org/Bookshelves/Linear_Algebra/Matrix_Algebra_with_Computational_Applications_(Colbry)",
+        "MatrixAnalysisCox2019": "Matrix Analysis (Cox). (2019). In <i>Mathematics LibreTexts</i>. https://math.libretexts.org/Bookshelves/Linear_Algebra/Matrix_Analysis_(Cox)",
+        "stevebruntonSingularValueDecomposition": "Steve Brunton. Singular Value Decomposition [Data-Driven Science and Engineering]. In <i>YouTube</i>. Retrieved May 26, 2025, from http://www.youtube.com/playlist?list=PLMrJAkhIeNNSVjnsviglFoY2nXildDCcv",
+        "UnderstandingLinearAlgebra2021": "Understanding Linear Algebra (Austin). (2021). In <i>Mathematics LibreTexts</i>. https://math.libretexts.org/Bookshelves/Linear_Algebra/Understanding_Linear_Algebra_(Austin)"
+      }
+    },
+    "fee93f8ba000054373f546cceca53a994de59d8e": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/crash-courses/variational-calculus.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/crash-courses/variational-calculus.bib": "e6a954da4efbd6db3e6fc343b1bc454d435d330b"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "crash-courses/variational-calculus.bib",
+      "entry_count": 1,
+      "index_sensitive": false,
+      "references": {
+        "maynardCALCULUSVARIATIONS": "Maynard, J. <i>CALCULUS OF VARIATIONS</i>."
+      }
+    },
+    "023c6a41da632a04d0ff7dba86759f07ce7f1881": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/posts/2025-11-26-discrete-calculus/discrete-calculus.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/posts/2025-11-26-discrete-calculus/discrete-calculus.bib": "f3bbeacd71bcb0c8a96ce588207ec9503aea28ed"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "posts/2025-11-26-discrete-calculus/discrete-calculus.bib",
+      "entry_count": 10,
+      "index_sensitive": false,
+      "references": {
+        "mathoverflowNotation2021": "Paré, T. (2021). <i>Answer to “Suggestions for good notation.”</i> https://mathoverflow.net/a/395605",
+        "bartholdyUmbralCalculus2023": "Bartholdy, C. (2023). <i>Answer to “What’s umbral calculus about?”</i> https://math.stackexchange.com/a/4678732",
+        "copelandUmbralCalculus2014": "Copeland, T. (2014). <i>Answer to “What’s umbral calculus about?”</i> https://math.stackexchange.com/a/1085165",
+        "copelandBafflingUmbral2023": "Copeland, T. (2023). <i>Answer to “Question about ‘baffling’ umbral calculus result.”</i> https://math.stackexchange.com/a/4728887",
+        "mathologerNewtonCalculus2021": "Mathologer. (2021). <i>Why don’t they teach Newton’s calculus of “What comes next?”</i> [Video recording]. https://www.youtube.com/watch?v=4AuV93LOPcE",
+        "supwareOperationalCalculus2022": "Supware. (2022). <i>The Abstract World of Operational Calculus</i> [Video recording]. https://www.youtube.com/watch?v=N8Rxlc-fGr0",
+        "shadowyUmbralCalculus": "YouTube. (n.d.). <i>The Shadowy World of Umbral Calculus</i>. https://www.youtube.com/watch?v=D0EUFP7-P1M",
+        "generatingFunctions1": "Codeforces. (n.d.). <i>[Tutorial] Generating Functions in Competitive Programming (Part 1)</i>. https://codeforces.com/blog/entry/77468",
+        "generatingFunctions2": "Codeforces. (n.d.). <i>[Tutorial] Generating Functions in Competitive Programming (Part 2)</i>. https://codeforces.com/blog/entry/77551",
+        "wikipediaUmbralCalculus2025": "Wikipedia contributors. (2025). <i>Umbral calculus</i>. https://en.wikipedia.org/w/index.php?title=Umbral_calculus&oldid=1309368182"
+      }
+    },
+    "df52483f9b45a107843ef32013da5d1d0d00c5f1": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib": "809afb2c6e4b07652e9c9156fd4f00901065817d"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "posts/2026-02-21-fast-matrix-inverse-roots/fast-matrix-invroots.bib",
+      "entry_count": 20,
+      "index_sensitive": false,
+      "references": {
+        "amariNaturalGradientWorks1998": "Amari, S.-ichi. (1998). Natural Gradient Works Efficiently in Learning. <i>Neural Computation</i>, <i>10</i>(2), 251–276. https://doi.org/10.1162/089976698300017746",
+        "amselPolarExpressOptimal2025a": "Amsel, N., Persson, D., Musco, C., &amp; Gower, R. M. (2025). <i>The Polar Express: Optimal Matrix Sign Methods and Their Application to the Muon Algorithm</i> (Issue arXiv:2505.16932). arXiv. https://doi.org/10.48550/arXiv.2505.16932",
+        "anilScalableSecondOrder2021a": "Anil, R., Gupta, V., Koren, T., Regan, K., &amp; Singer, Y. (2021). <i>Scalable Second Order Optimization for Deep Learning</i> (Issue arXiv:2002.09018). arXiv. https://doi.org/10.48550/arXiv.2002.09018",
+        "boissinTurboMuonAcceleratingOrthogonalityBased2025a": "Boissin, T., Massena, T., Mamalet, F., &amp; Serrurier, M. (2025). <i>Turbo-Muon: Accelerating Orthogonality-Based Optimization with Pre-Conditioning</i> (Issue arXiv:2512.04632). arXiv. https://doi.org/10.48550/arXiv.2512.04632",
+        "davidonVARIABLEMETRICMETHOD1959": "Davidon, W. C. (1959). <i>VARIABLE METRIC METHOD FOR MINIMIZATION</i> (No. ANL-5990; Issue ANL-5990). Argonne National Lab., Lemont, Ill. https://doi.org/10.2172/4252678",
+        "Gerschgorin1931": "Gerschgorin, S. (1931). Über Die Abgrenzung Der Eigenwerte Einer Matrix. <i>Izvestiya Akademii Nauk SSSR, Seriya Matematicheskaya</i>, <i>6</i>, 749–754. http://mi.mathnet.ru/eng/im5235",
+        "guoSchurNewtonMethod2006": "Guo, C.-H., &amp; Higham, N. J. (2006). A Schur–Newton Method for the Matrix \\lowercase\\textbraceleft\\boldmath \\emphp \\textbraceright th Root and Its Inverse. <i>SIAM Journal on Matrix Analysis and Applications</i>, <i>28</i>(3), 788–804. https://doi.org/10.1137/050643374",
+        "guptaShampooPreconditionedStochastic2018": "Gupta, V., Koren, T., &amp; Singer, Y. (2018). <i>Shampoo: Preconditioned Stochastic Tensor Optimization</i> (Issue arXiv:1802.09568). arXiv. https://doi.org/10.48550/arXiv.1802.09568",
+        "highamMatrixProcrustesProblems": "Higham, N. <i>Matrix Procrustes Problems</i>.",
+        "highamWhatGershgorinsTheorem2022": "Higham, N. (2022). What Is Gershgorin’s Theorem? In <i>Nick Higham</i>. https://nhigham.com/2022/11/22/what-is-gershgorins-theorem/",
+        "hornMatrixAnalysis2017a": "Horn, R. A., &amp; Johnson, C. R. (2017). <i>Matrix Analysis</i> (Second edition, corrected reprint). Cambridge University Press.",
+        "kovarikIterativeMethodsImproving1970": "Kovarik, Z. (1970). Some Iterative Methods for Improving Orthonormality. <i>SIAM Journal on Numerical Analysis</i>, <i>7</i>(3), 386–389. https://doi.org/10.1137/0707031",
+        "MuonOptimizerHidden": "<i>Muon: An Optimizer for Hidden Layers in Neural Networks \\textbar Keller Jordan Blog</i>. Retrieved February 22, 2026, from https://kellerjordan.github.io/posts/muon/",
+        "NewtonSchulzDocsmodulasystems": "<i>Newton-Schulz - Docs.Modula.Systems</i>. Retrieved February 21, 2026, from https://docs.modula.systems/algorithms/newton-schulz/",
+        "rohananil_arohan_JustFunLinear2024": "rohan anil [@_arohan_]. (2024). Just Some Fun Linear Algebra: Shampoo L(t) = L(t-1) + Gt @ Gt.T R(t) = R(t-1) + Gt.T @ Gt Update Rule: L(t)^\\textbraceleft -1/4\\textbraceright @ Gt @ R(t)^\\textbraceleft -1/4\\textbraceright One Sided Shampoo (for Embedding or Very Large Layers) Update: L(t)^\\textbraceleft -1/2\\textbraceright @ Gt or Gt @ R(t)^\\textbraceleft -1/2\\textbraceright @kellerjordan0 Modification, No [Tweet]. In <i>Twitter</i>. https://x.com/_arohan_/status/1843050297985466565",
+        "ruizScalingAlgorithmEquilibrate": "Ruiz, D. <i>A Scaling Algorithm to Equilibrate Both Rows and Columns Norms in Matrices</i>.",
+        "chenIterativeMethodsComputing1991": "Chen, H. C., &amp; Chow, S. S. (1991). On Iterative Methods for Computing the Polar Decomposition of a Matrix. <i>Linear Algebra and Its Applications</i>, <i>159</i>, 235–245. https://doi.org/10.1016/0024-3795(91)90236-V",
+        "nakatsukasaComputingPolarDecomposition2016": "Nakatsukasa, Y., &amp; Freund, R. W. (2016). Computing the Polar Decomposition with the Halley Iteration. <i>SIAM Journal on Scientific Computing</i>, <i>38</i>(3), A1412–A1444. https://doi.org/10.1137/15M1044431",
+        "highamFunctionsOfMatrices2008": "Higham, N. J. (2008). <i>Functions of Matrices: Theory and Computation</i>. SIAM.",
+        "clenshawNOTEONMINIMIZATION1955": "Clenshaw, C. W. (1955). A Note on the Summation of Chebyshev Series. <i>Mathematical Tables and Other Aids to Computation</i>, <i>9</i>(51), 118–120. https://doi.org/10.2307/2002574"
+      }
+    },
+    "a5d121419bd13ee61083376f6c5b0877f829a9b0": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/posts/2026-03-23-lion-k-ccwd/lion-k-ccwd.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/posts/2026-03-23-lion-k-ccwd/lion-k-ccwd.bib": "378d215e65eab96a3c9accdfaf60d9709c7ff4f4"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "posts/2026-03-23-lion-k-ccwd/lion-k-ccwd.bib",
+      "entry_count": 16,
+      "index_sensitive": false,
+      "references": {
+        "AsymptoticEstimationAdamWs": "<i>Asymptotic Estimation of AdamW’s Weight RMS (Part 1) - Science Space\\textbarScientific Spaces</i>. Retrieved March 22, 2026, from https://kexue.fm/archives/11307",
+        "bernstein2025deriving": "Bernstein, J. (2025). <i>Deriving Muon</i>. https://jeremybernste.in/writing/deriving-muon",
+        "chenCautiousWeightDecay2026": "Chen, L., Li, J., Liang, K., Su, B., Xie, C., Pierse, N. W., Liang, C., Lao, N., &amp; Liu, Q. (2026). <i>Cautious Weight Decay</i> (Issue arXiv:2510.12402). arXiv. https://doi.org/10.48550/arXiv.2510.12402",
+        "chenLionSecretlySolves2025": "Chen, L., Liu, B., Liang, K., &amp; Liu, Q. (2025). <i>Lion Secretly Solves Constrained Optimization: As Lyapunov Predicts</i> (Issue arXiv:2310.05898). arXiv. https://doi.org/10.48550/arXiv.2310.05898",
+        "chouCorrectionDecoupledWeight2026": "Chou, J. C.-C. (2026). <i>Correction of Decoupled Weight Decay</i> (Issue arXiv:2512.08217). arXiv. https://doi.org/10.48550/arXiv.2512.08217",
+        "defazioWhyGradientsRapidly2025": "Defazio, A. (2025). <i>Why Gradients Rapidly Increase Near the End of Training</i> (Issue arXiv:2506.02285). arXiv. https://doi.org/10.48550/arXiv.2506.02285",
+        "jordan2024muon": "Jordan, K., Jin, Y., Boza, V., You, J., Cesista, F., Newhouse, L., &amp; Bernstein, J. (2024). <i>Muon: An Optimizer for Hidden Layers in Neural Networks</i>. https://kellerjordan.github.io/posts/muon/",
+        "marekSmallBatchSize2025": "Marek, M., Lotfi, S., Somasundaram, A., Wilson, A. G., &amp; Goldblum, M. (2025). <i>Small Batch Size Training for Language Models: When Vanilla SGD Works, and Why Gradient Accumulation Is Wasteful</i> (Issue arXiv:2507.07101). arXiv. https://doi.org/10.48550/arXiv.2507.07101",
+        "mlodozeniecCompletedHyperparameterTransfer2025": "Mlodozeniec, B., Ablin, P., Béthune, L., Busbridge, D., Klein, M., Ramapuram, J., &amp; Cuturi, M. (2025). <i>Completed Hyperparameter Transfer across Modules, Width, Depth, Batch and Duration</i> (Issue arXiv:2512.22382). arXiv. https://doi.org/10.48550/arXiv.2512.22382",
+        "MuonNuclearLion": "<i>Muon Is a Nuclear Lion King</i>. Retrieved March 23, 2026, from https://www.cs.utexas.edu/ lqiang/lionk/html/intro.html",
+        "MuPZhiShang2XianXingCengYuZuiSuXiaJiangKeXueKongJian-Scientific": "<i>MuP之上：2. 线性层与最速下降 - 科学空间\\textbarScientific Spaces</i>. Retrieved March 22, 2026, from https://kexue.fm/archives/11605",
+        "MuPZhiShang3TeShuQingKuangTeShuChuLiKeXueKongJian-Scientific": "<i>MuP之上：3. 特殊情况特殊处理 - 科学空间\\textbarScientific Spaces</i>. Retrieved March 22, 2026, from https://kexue.fm/archives/11647",
+        "pethickTrainingDeepLearning2025a": "Pethick, T., Xie, W., Antonakopoulos, K., Zhu, Z., Silveti-Falls, A., &amp; Cevher, V. (2025). <i>Training Deep Learning Models with Norm-Constrained LMOs</i> (Issue arXiv:2502.07529). arXiv. https://doi.org/10.48550/arXiv.2502.07529",
+        "yangSpectralConditionFeature2024": "Yang, G., Simon, J. B., &amp; Bernstein, J. (2024). <i>A Spectral Condition for Feature Learning</i> (Issue arXiv:2310.17813). arXiv. https://doi.org/10.48550/arXiv.2310.17813",
+        "yangTensorProgramsTuning2022": "Yang, G., Hu, E. J., Babuschkin, I., Sidor, S., Liu, X., Farhi, D., Ryder, N., Pachocki, J., Chen, W., &amp; Gao, J. (2022). <i>Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer</i> (Issue arXiv:2203.03466). arXiv. https://doi.org/10.48550/arXiv.2203.03466",
+        "yangTensorProgramsVI2023": "Yang, G., Yu, D., Zhu, C., &amp; Hayou, S. (2023). <i>Tensor Programs VI: Feature Learning in Infinite-Depth Neural Networks</i> (Issue arXiv:2310.02244). arXiv. https://doi.org/10.48550/arXiv.2310.02244"
+      }
+    },
+    "50a32468d0efad4204be0ea4168dd20dbc4fbea2": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/posts/2026-03-31-second-order-residual-networks/second-order-resnets.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/posts/2026-03-31-second-order-residual-networks/second-order-resnets.bib": "00c8a731d913916d52849969b73dd56dffebf61d"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "posts/2026-03-31-second-order-residual-networks/second-order-resnets.bib",
+      "entry_count": 5,
+      "index_sensitive": false,
+      "references": {
+        "chenNeuralOrdinaryDifferential2019": "Chen, R. T. Q., Rubanova, Y., Bettencourt, J., &amp; Duvenaud, D. (2019). <i>Neural Ordinary Differential Equations</i> (Issue arXiv:1806.07366). arXiv. https://doi.org/10.48550/arXiv.1806.07366",
+        "heDeepResidualLearning2015": "He, K., Zhang, X., Ren, S., &amp; Sun, J. (2015). <i>Deep Residual Learning for Image Recognition</i> (Issue arXiv:1512.03385). arXiv. https://doi.org/10.48550/arXiv.1512.03385",
+        "katharopoulosTransformersAreRNNs2020": "Katharopoulos, A., Vyas, A., Pappas, N., &amp; Fleuret, F. (2020). <i>Transformers Are RNNs: Fast Autoregressive Transformers with Linear Attention</i> (Issue arXiv:2006.16236). arXiv. https://doi.org/10.48550/arXiv.2006.16236",
+        "sanderMomentumResidualNeural2021": "Sander, M. E., Ablin, P., Blondel, M., &amp; Peyré, G. (2021). Momentum Residual Neural Networks. <i>Proceedings of the 38th International Conference on Machine Learning</i>, 9276–9287. https://proceedings.mlr.press/v139/sander21a.html",
+        "hochreiterLongShortTermMemory1997": "Hochreiter, S., &amp; Schmidhuber, J. (1997). Long Short-Term Memory. <i>Neural Computation</i>, <i>9</i>(8), 1735–1780. https://doi.org/10.1162/neco.1997.9.8.1735"
+      }
+    },
+    "9eddc59fb686e07cc2db9d689388a6f48bf4969b": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/posts/2026-04-05-rational-polar-decomposition/rational-polar-decomposition.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/posts/2026-04-05-rational-polar-decomposition/rational-polar-decomposition.bib": "f9c40a9c4f570e7e009e3cdbe43a727456c22a93"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "posts/2026-04-05-rational-polar-decomposition/rational-polar-decomposition.bib",
+      "entry_count": 7,
+      "index_sensitive": false,
+      "references": {
+        "nakatsukasaOptimizingHalleyIteration2010": "Nakatsukasa, Y., Bai, Z., &amp; Gygi, F. (2010). Optimizing Halley’s Iteration for Computing the Matrix Polar Decomposition. <i>SIAM Journal on Matrix Analysis and Applications</i>, <i>31</i>(5), 2700–2720. https://doi.org/10.1137/090774999",
+        "nakatsukasaStableAndEfficientQDWH2013": "Nakatsukasa, Y., &amp; Higham, N. J. (2013). Stable and Efficient QDWH Algorithm for Computing the SVD. <i>SIAM Journal on Scientific Computing</i>, <i>35</i>(3), A1325–A1349. https://doi.org/10.1137/120876605",
+        "daoAILabGramNewtonSchulz2026": "Dao AI Lab. (2026). <i>A Fast, Hardware-Aware Newton-Schulz Algorithm for Muon</i>. https://dao-lab.ai/blog/2026/gram-newton-schulz/",
+        "jordanMuonOptimizer2024": "Jordan, K. (2024). <i>Muon: An Optimizer for Hidden Layers in Neural Networks</i>. https://kellerjordan.github.io/posts/muon/",
+        "polarExpress2025": "Amsel, N., Persson, D., Musco, C., &amp; Gower, R. M. (2025). <i>The Polar Express: Optimal Matrix Sign Methods and Their Application to the Muon Algorithm</i> (Issue arXiv:2505.16932). arXiv. https://arxiv.org/abs/2505.16932",
+        "youjiachengJi_Ha_KimNormalizeSeems2026": "You Jiacheng. (2026). @Ji_Ha_Kim Normalize the X Seems Better? A=X.T@X It’s Mathematically Equivalent to Jacobi Precond, but Its Rounding Error Won’t Break Positiveness. [Tweet]. In <i>Twitter</i>. https://x.com/YouJiacheng/status/2041217049138225556",
+        "nakatsukasaComputingFundamentalMatrix2016": "Nakatsukasa, Y., &amp; Freund, R. W. (2016). Computing fundamental matrix decompositions accurately via the matrix sign function in two iterations: The power of Zolotarev’s functions. <i>SIAM Review</i>, <i>58</i>(3), 461–493. https://doi.org/10.1137/140990334"
+      }
+    },
+    "cc4dc4d46010dc25794195dbbd1bdfb3707f6989": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/posts/2026-04-19-autoregression-vs-diffusion-understanding-sampling-via-optimal-transport/autoregression-diffusion.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/posts/2026-04-19-autoregression-vs-diffusion-understanding-sampling-via-optimal-transport/autoregression-diffusion.bib": "5b123a262d9ae1d0642cb9c23d26f07aee9c45cb"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "posts/2026-04-19-autoregression-vs-diffusion-understanding-sampling-via-optimal-transport/autoregression-diffusion.bib",
+      "entry_count": 29,
+      "index_sensitive": false,
+      "references": {
+        "benamouBrenierComputationalFluid2000": "Benamou, J.-D., &amp; Brenier, Y. (2000). A Computational Fluid Mechanics Solution to the Monge-Kantorovich Mass Transfer Problem. <i>Numerische Mathematik</i>, <i>84</i>(3), 375–393. https://doi.org/10.1007/s002119900117",
+        "brenierPolarFactorizationMonotone1991": "Brenier, Y. (1991). Polar Factorization and Monotone Rearrangement of Vector-valued Functions. <i>Communications on Pure and Applied Mathematics</i>, <i>44</i>(4), 375–417. https://doi.org/10.1002/cpa.3160440402",
+        "dengGenerativeModelingDrifting2026": "Deng, M., Li, H., Li, T., Du, Y., &amp; He, K. (2026). <i>Generative Modeling via Drifting</i> (Issue arXiv:2602.04770). arXiv. https://doi.org/10.48550/arXiv.2602.04770",
+        "DiffusionSpectralAutoregression2024": "Diffusion Is Spectral Autoregression. (2024). In <i>Sander Dieleman</i>. https://sander.ai/2024/09/02/spectral-autoregression.html",
+        "falck2025spectralauto": "Falck, F. (2025). <i>Diffusion Is Not Necessarily Spectral Autoregression</i>. https://fabianfalck.com/posts/spectralauto",
+        "freulonEntropicOptimalTransport2026": "Freulon, P., Georgakis, N., &amp; Panaretos, V. (2026). <i>Entropic Optimal Transport beyond Product Reference Couplings: The Gaussian Case on Euclidean Space</i> (Issue arXiv:2507.01709). arXiv. https://doi.org/10.48550/arXiv.2507.01709",
+        "guillenFiveLecturesOptimal2010": "Guillen, N., &amp; McCann, R. (2010). <i>Five Lectures on Optimal Transportation: Geometry, Regularity and Applications</i> (Issue arXiv:1011.2911). arXiv. https://doi.org/10.48550/arXiv.1011.2911",
+        "InverseTransformSampling2025": "Inverse Transform Sampling. (2025). <i>Wikipedia</i>. https://en.wikipedia.org/w/index.php?title=Inverse_transform_sampling&oldid=1330078866",
+        "kornilovOptimalFlowMatching2024": "Kornilov, N., Mokrov, P., Gasnikov, A., &amp; Korotin, A. (2024). <i>Optimal Flow Matching: Learning Straight Trajectories in Just One Step</i> (Issue arXiv:2403.13117). arXiv. https://doi.org/10.48550/arXiv.2403.13117",
+        "laiPrinciplesDiffusionModels2025": "Lai, C.-H., Song, Y., Kim, D., Mitsufuji, Y., &amp; Ermon, S. (2025). <i>The Principles of Diffusion Models</i> (Issue arXiv:2510.21890). arXiv. https://doi.org/10.48550/arXiv.2510.21890",
+        "leonardSurveySchrodinger2013": "Léonard, C. (2013). <i>A Survey of the Schrödinger Problem and Some of Its Connections with Optimal Transport</i> (Issue arXiv:1308.0215). arXiv. https://doi.org/10.48550/arXiv.1308.0215",
+        "lipmanFlowMatchingGenerative2023": "Lipman, Y., Chen, R. T. Q., Ben-Hamu, H., Nickel, M., &amp; Le, M. (2023). <i>Flow Matching for Generative Modeling</i> (Issue arXiv:2210.02747). arXiv. https://doi.org/10.48550/arXiv.2210.02747",
+        "liuFlowStraightFast2022": "Liu, X., Gong, C., &amp; Liu, Q. (2022). <i>Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow</i> (Issue arXiv:2209.03003). arXiv. https://doi.org/10.48550/arXiv.2209.03003",
+        "morelTurningNormalizingFlows2023": "Morel, G., Drumetz, L., Benaïchouche, S., Courty, N., &amp; Rousseau, F. (2023). <i>Turning Normalizing Flows into Monge Maps with Geodesic Gaussian Preserving Flows</i> (Issue arXiv:2209.10873). arXiv. https://doi.org/10.48550/arXiv.2209.10873",
+        "NormalDistribution2026": "Normal Distribution. (2026). <i>Wikipedia</i>. https://en.wikipedia.org/w/index.php?title=Normal_distribution&oldid=1349034873#Maximum_entropy",
+        "OptimalTransportWiki": "<i>Optimal Transport Wiki – OT WIKI</i>. Retrieved April 21, 2026, from https://www.otwiki.xyz/",
+        "passIntroductionOptimalTransport": "Pass, B., &amp; Alberta, U. An Introduction to Optimal Transport. <i>Matching Theory</i>.",
+        "peyreOptimalTransportMachine2025": "Peyré, G. (2025). <i>Optimal Transport for Machine Learners</i> (Issue arXiv:2505.06589). arXiv. https://doi.org/10.48550/arXiv.2505.06589",
+        "PrinciplesDiffusionModels": "<i>The Principles of Diffusion Models</i>. Retrieved April 19, 2026, from https://the-principles-of-diffusion-models.github.io/",
+        "QuadrangleInequalityProperties": "Quadrangle Inequality Properties. In <i>Codeforces</i>. Retrieved April 20, 2026, from https://codeforces.com/blog/entry/86306",
+        "santambrogioIntroductionOptimalTransport2014": "Santambrogio, F. (2014). Introduction to Optimal Transport Theory. In Y. Ollivier, H. Pajot, &amp; C. Villani (Eds.), <i>Optimal Transport</i> (1st ed., pp. 3–21). Cambridge University Press. https://doi.org/10.1017/CBO9781107297296.002",
+        "santambrogioOptimalTransportApplied": "Santambrogio, F. <i>Optimal Transport for Applied Mathematicians – Calculus of Variations, PDEs and Modeling</i>.",
+        "tangFoundationsSchrodingerBridges2026": "Tang, S. (2026). <i>Foundations of Schrödinger Bridges for Generative Modeling</i> (Issue arXiv:2603.18992). arXiv. https://doi.org/10.48550/arXiv.2603.18992",
+        "thorpeIntroductionOptimalTransport": "Thorpe, M. (2018). <i>Introduction to Optimal Transport</i>.",
+        "tongSimulationFreeSchrodinger2024": "Tong, A. Y., Malkin, N., Fatras, K., Atanackovic, L., Zhang, Y., Huguet, G., Wolf, G., &amp; Bengio, Y. (2024). Simulation-Free Schrödinger Bridges via Score and Flow Matching. <i>Proceedings of the 27th International Conference on Artificial Intelligence and Statistics</i>, <i>238</i>, 1279–1287. https://proceedings.mlr.press/v238/tong24a.html",
+        "vesseronNeuralImplementationBreniers2025": "Vesseron, N., &amp; Cuturi, M. (2025). <i>On a Neural Implementation of Brenier’s Polar Factorization</i> (Issue arXiv:2403.03071). arXiv. https://doi.org/10.48550/arXiv.2403.03071",
+        "villaniOptimalTransportOld2009": "Villani, C. (2009). <i>Optimal Transport: Old and New</i> (Issue 338). Springer.",
+        "villaniTopicsOptimalTransportation2016": "Villani, C. (2016). <i>Topics in Optimal Transportation</i> (Reprinted with corrections, Issue 58). American Mathematical Society.",
+        "yuFrequencyAutoregressiveImage2026": "Yu, H., Luo, H., Yuan, H., Rong, Y., Huang, J., &amp; Zhao, F. (2026). <i>Frequency Autoregressive Image Generation with Continuous Tokens</i> (Issue arXiv:2503.05305). arXiv. https://doi.org/10.48550/arXiv.2503.05305"
+      }
+    },
+    "c265473b5ba3279021860b20f3211d56c52f879b": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/references.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/references.bib": "adc83b19e793491b1c6ea0fd8b46cd9f32e592fc"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "references.bib",
+      "entry_count": 0,
+      "index_sensitive": false,
+      "references": {}
+    },
+    "9bc248884d4b18e772b11979abb9c8b383dc781e": {
+      "artifact_version": "2026-04-22-scholar-reference-artifacts-v1",
+      "style": "apa",
+      "locale": "en",
+      "bibtex_filters": [
+        "latex",
+        "superscript"
+      ],
+      "bibliography_paths": [
+        "_bibliography/series/ml-optimization/adam-online-learning.bib"
+      ],
+      "bibliography_digests": {
+        "_bibliography/series/ml-optimization/adam-online-learning.bib": "5c59f19f99e63a1340976dc344bd70c8846688eb"
+      },
+      "gem_versions": {
+        "jekyll-scholar": "7.3.0",
+        "bibtex-ruby": "6.2.0",
+        "citeproc": "1.1.0",
+        "citeproc-ruby": "2.1.8",
+        "csl": "2.2.1"
+      },
+      "bibliography": "series/ml-optimization/adam-online-learning.bib",
+      "entry_count": 3,
+      "index_sensitive": false,
+      "references": {
+        "ahnAdamModelExponential2024": "Ahn, K., &amp; Cutkosky, A. (2024). <i>Adam with Model Exponential Moving Average Is Effective for Nonconvex Optimization</i> (Issue arXiv:2405.18199). arXiv. https://doi.org/10.48550/arXiv.2405.18199",
+        "ahnUnderstandingAdamOptimizer2024": "Ahn, K., Zhang, Z., Kook, Y., &amp; Dai, Y. (2024). <i>Understanding Adam Optimizer via Online Learning of Updates: Adam Is FTRL in Disguise</i> (Issue arXiv:2402.01567). arXiv. https://doi.org/10.48550/arXiv.2402.01567",
+        "kingmaAdamMethodStochastic2017": "Kingma, D. P., &amp; Ba, J. (2017). <i>Adam: A Method for Stochastic Optimization</i> (Issue arXiv:1412.6980). arXiv. https://doi.org/10.48550/arXiv.1412.6980"
+      }
+    }
+  }
+}
