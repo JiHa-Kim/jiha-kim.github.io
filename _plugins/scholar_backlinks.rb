@@ -67,7 +67,7 @@ module Jekyll
             cache_key = keys.join(',')
             rendered = (citation_cache[cache_key] ||= render_citation(items))
 
-            link_to link_target_for(keys[0]), rendered, {
+            link_to link_target_for(primary_key), rendered, {
               class: config['cite_class'],
               id: primary_id
             }
