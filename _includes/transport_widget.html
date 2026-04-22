@@ -42,7 +42,7 @@
   {% include iaw_status_item.html label="Status" value="Feasible, Optimal" value_class="otm-status" value_style="color: var(--iaw-success);" %}
   {% include iaw_status_item.html label="Verdict" value="Cost-minimizing deterministic map." value_class="otm-verdict" %}
   {% include iaw_status_item.html label="Active Costs ($/kg)" value="$c_{11}+c_{22}$" value_class="otm-breakdown" %}
-  {% include iaw_status_item.html label="Monge Objective ($)" value="$3" value_class="otm-total-cost" value_style="color: var(--iaw-primary); font-size: 1.25rem;" %}
+  {% include iaw_status_item.html label="Monge Objective ($)" value="3" value_class="otm-total-cost" value_style="color: var(--iaw-primary); font-size: 1.25rem;" %}
 </div>
 {% endcapture %}
 
@@ -205,13 +205,15 @@
             return { el: r.el, anchorX: cx, anchorY: cy, x: cx, y: cy, w: 170, h: 30 };
           });
           IAW.resolveCollisions(activeRoutes);
-          if (window.MathJax?.typesetPromise) window.MathJax.typesetPromise([routesContainer]);
+          IAW.requestMathTypeset(routesContainer);
         }
 
         function updateUI() {
           const p = state.plan;
-          root.querySelector('.otm-total-cost').textContent = p === 1 ? '$3' : '$7';
-          root.querySelector('.otm-breakdown').textContent = p === 1 ? '$c_{11}+c_{22}$' : '$c_{12}+c_{21}$';
+          const totalCost = root.querySelector('.otm-total-cost');
+          const breakdown = root.querySelector('.otm-breakdown');
+          totalCost.textContent = p === 1 ? '3' : '7';
+          breakdown.textContent = p === 1 ? '$c_{11}+c_{22}$' : '$c_{12}+c_{21}$';
           const status = root.querySelector('.otm-status');
           const verdict = root.querySelector('.otm-verdict');
           if (p === 1) {
@@ -232,6 +234,7 @@
             hD.style.borderColor = COLORS.sourceA; hD.style.color = COLORS.sourceA;
             hC.style.borderColor = COLORS.sourceB; hC.style.color = COLORS.sourceB;
           }
+          IAW.requestMathTypeset(breakdown);
           draw();
         }
 
@@ -242,6 +245,7 @@
         IAW.observeTheme(() => { COLORS = IAW.getThemeColors(root); updateUI(); });
         window.addEventListener('resize', draw);
         window.setTimeout(updateUI, 100);
+        IAW.requestMathTypeset(root);
         });
     }
 
@@ -275,6 +279,7 @@
         IAW.observeTheme(() => { COLORS = IAW.getThemeColors(root); draw(); });
         window.addEventListener('resize', draw);
         window.setTimeout(draw, 100);
+        IAW.requestMathTypeset(root);
         });
     }
 

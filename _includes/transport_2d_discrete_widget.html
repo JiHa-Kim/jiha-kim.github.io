@@ -175,5 +175,6 @@ IAW.mountFigure('discreteTransportFigure', function(root) {
     speed: () => currentMapType === 'seq' ? 0.00085 : 0.0006,
     onFrameChange: renderFrame
   });
+  IAW.requestMathTypeset(root);
 });
 </script>

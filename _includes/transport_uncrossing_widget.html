@@ -188,5 +188,6 @@ IAW.mountFigure('transportUncrossingWidget', function(root) {
     if (window.ResizeObserver) new ResizeObserver(draw).observe(stage);
     window.addEventListener('resize', draw);
     draw(); setTimeout(draw, 300);
+    IAW.requestMathTypeset(root);
 });
 </script>

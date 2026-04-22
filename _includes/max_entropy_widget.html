@@ -342,9 +342,7 @@ IAW.mountFigure('maxEntropyFigure', function(root) {
     if (lastConstraintText !== model.targetLabelText) {
       constraintLabel.innerHTML = model.targetLabelText;
       lastConstraintText = model.targetLabelText;
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([constraintLabel]).catch(() => {});
-      }
+      IAW.requestMathTypeset(constraintLabel);
     }
 
     momentSummary.textContent = `mean ${formatSigned(metrics.mean)}, var ${metrics.variance.toFixed(3)}`;
@@ -456,5 +454,6 @@ IAW.mountFigure('maxEntropyFigure', function(root) {
     onFrameChange: renderFrame
   });
   renderFrame(0);
+  IAW.requestMathTypeset(root);
 }, { requiresChart: true });
 </script>
