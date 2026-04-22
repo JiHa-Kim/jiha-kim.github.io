@@ -1,0 +1,431 @@
+{% capture describe %}
+<p>
+  Move through the feasible family $f_1=t$, $f_2=-t$, $g_1=1-t$, $g_2=1+t$ and watch the dual lower bound rise
+  until the used constraints become tight. Masses are in $\mathrm{kg}$ and costs are in $\$/\mathrm{kg}$.
+</p>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="kdu__layout iaw__edge-safe">
+  <section class="kdu__strip iaw__split-strip">
+    <div class="kdu__data-block iaw__split-pane">
+      <div class="kdu__data-table iaw__display-math">
+        $$
+        \begin{array}{c|cc|c}
+         & x_1 & x_2 & a_i \,(\mathrm{kg}) \\
+        \hline
+        z_1 & c_{11}=1\,\$/\mathrm{kg} & c_{12}=3\,\$/\mathrm{kg} & 2 \\
+        z_2 & c_{21}=4\,\$/\mathrm{kg} & c_{22}=1\,\$/\mathrm{kg} & 1 \\
+        \hline
+        b_j\,(\mathrm{kg}) & 1 & 2 &
+        \end{array}
+        $$
+      </div>
+    </div>
+
+    <div class="kdu__controls-block iaw__split-pane iaw__split-pane--divider">
+      <div class="kdu__slider-label">
+        <span>Price Spread $t$</span>
+        <span class="kdu__slider-value" id="kduTValue">0.00</span>
+      </div>
+      {% assign kduTicks = "0.0, 0.5, 1.0" | split: ", " %}
+      {% include iaw_slider.html id="kduSlider" min="0" max="1" step="0.05" value="0" ticks=kduTicks variant="parameter" %}
+
+      <div class="kdu__summary-strip">
+        <div class="kdu__summary-pill">
+          <span class="kdu__summary-name">Primal</span>
+          <strong class="kdu__summary-value">$5.00</strong>
+        </div>
+        <div class="kdu__summary-pill">
+          <span class="kdu__summary-name">Dual</span>
+          <strong class="kdu__summary-value kdu__summary-value--accent" id="kduBound">$3.00</strong>
+        </div>
+        <div class="kdu__summary-pill">
+          <span class="kdu__summary-name">Gap</span>
+          <strong class="kdu__summary-value" id="kduGap">$2.00</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kdu__matrix-shell iaw__table-shell">
+    <div class="kdu__matrix iaw__table-grid">
+      <div class="kdu__corner iaw__table-cell iaw__table-cell--first-row iaw__table-cell--first-col">
+        <div class="kdu__corner-main">$f_i + g_j \le c_{ij}$</div>
+      </div>
+
+      <div class="kdu__head kdu__head--col iaw__table-cell iaw__table-cell--first-row">
+        <div class="kdu__axis-node">$x_1$</div>
+        <div class="kdu__axis-potential">
+          <span class="kdu__axis-name">$g_1$</span>
+          <strong class="kdu__axis-value" id="kduG1">+1.00</strong>
+        </div>
+      </div>
+      <div class="kdu__head kdu__head--col iaw__table-cell iaw__table-cell--first-row">
+        <div class="kdu__axis-node">$x_2$</div>
+        <div class="kdu__axis-potential">
+          <span class="kdu__axis-name">$g_2$</span>
+          <strong class="kdu__axis-value" id="kduG2">+1.00</strong>
+        </div>
+      </div>
+
+      <div class="kdu__head kdu__head--row iaw__table-cell iaw__table-cell--first-col">
+        <div class="kdu__axis-node">$z_1$</div>
+        <div class="kdu__axis-potential">
+          <span class="kdu__axis-name">$f_1$</span>
+          <strong class="kdu__axis-value" id="kduF1">+0.00</strong>
+        </div>
+      </div>
+      <article class="kdu__cell kdu__cell--used iaw__table-cell" id="kduCell11">
+        <div class="kdu__cell-main"><span id="kduSum11">1.00</span> &le; 1.00</div>
+      </article>
+      <article class="kdu__cell kdu__cell--used iaw__table-cell" id="kduCell12">
+        <div class="kdu__cell-main"><span id="kduSum12">1.00</span> &le; 3.00</div>
+      </article>
+
+      <div class="kdu__head kdu__head--row iaw__table-cell iaw__table-cell--first-col">
+        <div class="kdu__axis-node">$z_2$</div>
+        <div class="kdu__axis-potential">
+          <span class="kdu__axis-name">$f_2$</span>
+          <strong class="kdu__axis-value" id="kduF2">+0.00</strong>
+        </div>
+      </div>
+      <article class="kdu__cell iaw__table-cell" id="kduCell21">
+        <div class="kdu__cell-main"><span id="kduSum21">1.00</span> &le; 4.00</div>
+      </article>
+      <article class="kdu__cell kdu__cell--used iaw__table-cell" id="kduCell22">
+        <div class="kdu__cell-main"><span id="kduSum22">1.00</span> &le; 1.00</div>
+      </article>
+    </div>
+  </section>
+
+  <div class="kdu__interpretation">
+    <span id="kduInterpSlack">
+      Filled dots mark the routes used by $\pi^*$. The route $z_1 \to x_2$ is still slack, so the dual bound stays below the primal cost.
+    </span>
+    <span id="kduInterpTight" hidden>
+      All filled-dot routes satisfy $f_i + g_j = c_{ij}$, so the dual lower bound matches the primal cost.
+    </span>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="kantorovichDualFigure"
+    eyebrow="Discrete Kantorovich Dual"
+    title="Prices as Lower Bounds"
+    description=describe
+    visuals=visuals
+    stage_id="kduStage"
+    stage_style="height: auto; min-height: 240px; border: none; background: transparent;"
+%}
+
+<style>
+.kdu__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.kdu__strip {
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+}
+
+.kdu__data-block {
+  justify-content: center;
+}
+
+.kdu__controls-block {
+  padding-right: clamp(0.2rem, 0.8vw, 0.45rem);
+}
+
+.kdu__data-table {
+  font-size: 1rem;
+}
+
+.kdu__slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+}
+
+.kdu__slider-value {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.96rem;
+  color: var(--iaw-muted);
+}
+
+.kdu__controls-block .iaw__slider-box {
+  gap: 0.15rem;
+}
+
+.kdu__controls-block .iaw__slider {
+  margin: 0.32rem 0 0.2rem;
+}
+
+.kdu__controls-block .iaw__slider-ticks span {
+  font-size: 0.78rem;
+}
+
+.kdu__summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.kdu__summary-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.48rem 0.65rem;
+  border: 1px solid var(--iaw-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--iaw-surface) 74%, var(--iaw-bg));
+}
+
+.kdu__summary-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--iaw-muted);
+}
+
+.kdu__summary-value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--iaw-text);
+  line-height: 1.1;
+}
+
+.kdu__summary-value--accent {
+  color: var(--iaw-success);
+}
+
+.kdu__matrix-shell {
+  margin-inline: 0.1rem;
+}
+
+.kdu__matrix {
+  grid-template-columns: minmax(104px, 0.84fr) repeat(2, minmax(0, 1fr));
+}
+
+.kdu__corner,
+.kdu__head,
+.kdu__cell {
+  background: var(--iaw-bg);
+}
+
+.kdu__corner,
+.kdu__head {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.18rem;
+  padding: 0.82rem 0.8rem;
+}
+
+.kdu__corner {
+  background: color-mix(in srgb, var(--iaw-surface) 84%, var(--iaw-bg));
+}
+
+.kdu__head {
+  background: color-mix(in srgb, var(--iaw-surface) 72%, var(--iaw-bg));
+}
+
+.kdu__axis-node {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+}
+
+.kdu__corner-main {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+  line-height: 1.25;
+}
+
+.kdu__axis-potential {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  color: var(--iaw-muted);
+}
+
+.kdu__axis-name {
+  font-size: 0.82rem;
+}
+
+.kdu__axis-value {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.95rem;
+  color: var(--iaw-text);
+}
+
+.kdu__cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  padding: 0.9rem 0.85rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.kdu__cell--used {
+  background: color-mix(in srgb, var(--iaw-warning) 3%, var(--iaw-bg));
+}
+
+.kdu__cell--used::after {
+  content: '';
+  position: absolute;
+  top: 0.82rem;
+  right: 0.82rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--iaw-warning) 82%, var(--iaw-bg));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--iaw-bg) 65%, transparent);
+}
+
+.kdu__cell.is-tight {
+  background: color-mix(in srgb, var(--iaw-success) 8%, var(--iaw-bg));
+}
+
+.kdu__cell.is-tight::after {
+  background: var(--iaw-success);
+}
+
+.kdu__cell-main {
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 1.04rem;
+  font-weight: 700;
+  color: var(--iaw-text);
+  line-height: 1.1;
+  text-align: center;
+}
+
+.kdu__interpretation {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--iaw-muted);
+  padding: 0.15rem 0.55rem 0.2rem;
+}
+
+.kdu__interpretation [hidden] {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .kdu__strip {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .kdu__matrix {
+    grid-template-columns: 84px repeat(2, minmax(0, 1fr));
+  }
+
+  .kdu__summary-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .kdu__corner,
+  .kdu__head,
+  .kdu__cell {
+    padding: 0.7rem 0.55rem;
+  }
+
+  .kdu__axis-node,
+  .kdu__corner-main,
+  .kdu__cell-main {
+    font-size: 0.9rem;
+  }
+
+  .kdu__axis-name,
+  .kdu__axis-value {
+    font-size: 0.78rem;
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('kantorovichDualFigure', function(root) {
+  const slider = root.querySelector('#kduSlider');
+  const tValue = root.querySelector('#kduTValue');
+  const bound = root.querySelector('#kduBound');
+  const gap = root.querySelector('#kduGap');
+  const interpSlack = root.querySelector('#kduInterpSlack');
+  const interpTight = root.querySelector('#kduInterpTight');
+
+  const potentialBinds = {
+    f1: root.querySelector('#kduF1'),
+    f2: root.querySelector('#kduF2'),
+    g1: root.querySelector('#kduG1'),
+    g2: root.querySelector('#kduG2')
+  };
+
+  const cellBinds = {
+    '11': { sum: root.querySelector('#kduSum11'), cell: root.querySelector('#kduCell11'), cost: 1 },
+    '12': { sum: root.querySelector('#kduSum12'), cell: root.querySelector('#kduCell12'), cost: 3 },
+    '21': { sum: root.querySelector('#kduSum21'), cell: root.querySelector('#kduCell21'), cost: 4 },
+    '22': { sum: root.querySelector('#kduSum22'), cell: root.querySelector('#kduCell22'), cost: 1 }
+  };
+
+  function formatSigned(value) {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}`;
+  }
+
+  function update() {
+    const t = Number(slider.value);
+    const f1 = t;
+    const f2 = -t;
+    const g1 = 1 - t;
+    const g2 = 1 + t;
+    const sums = {
+      '11': f1 + g1,
+      '12': f1 + g2,
+      '21': f2 + g1,
+      '22': f2 + g2
+    };
+    const lowerBound = 2 * f1 + f2 + g1 + 2 * g2;
+    const dualGap = 5 - lowerBound;
+    const usedTight = ['11', '12', '22'].filter((key) => Math.abs(sums[key] - cellBinds[key].cost) < 1e-9).length;
+
+    tValue.textContent = t.toFixed(2);
+    potentialBinds.f1.textContent = formatSigned(f1);
+    potentialBinds.f2.textContent = formatSigned(f2);
+    potentialBinds.g1.textContent = formatSigned(g1);
+    potentialBinds.g2.textContent = formatSigned(g2);
+
+    Object.entries(cellBinds).forEach(([key, bind]) => {
+      const isTight = Math.abs(sums[key] - bind.cost) < 1e-9;
+      bind.sum.textContent = sums[key].toFixed(2);
+      bind.cell.classList.toggle('is-tight', isTight);
+    });
+
+    bound.textContent = `$${lowerBound.toFixed(2)}`;
+    gap.textContent = `$${dualGap.toFixed(2)}`;
+
+    if (usedTight === 3) {
+      interpSlack.hidden = true;
+      interpTight.hidden = false;
+    } else {
+      interpSlack.hidden = false;
+      interpTight.hidden = true;
+    }
+  }
+
+  slider.addEventListener('input', update);
+  update();
+  IAW.requestMathTypeset(root);
+});
+</script>

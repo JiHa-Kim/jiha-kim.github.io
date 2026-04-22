@@ -178,6 +178,88 @@
   gap: 0.4rem;
 }
 
+.iaw__edge-safe {
+  padding: clamp(0.35rem, 1.1vw, 0.7rem);
+}
+
+.iaw__split-strip {
+  display: grid;
+  gap: 1rem;
+  align-items: center;
+}
+
+.iaw__split-pane {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.iaw__split-pane--divider {
+  padding-left: 1rem;
+  border-left: 1px solid var(--iaw-border);
+}
+
+.iaw__display-math {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  overflow: visible;
+  color: var(--iaw-text);
+}
+
+.iaw__display-math mjx-container[display="true"] {
+  overflow: visible !important;
+  max-width: none;
+  margin: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.iaw__inset-shell {
+  border: 1px solid var(--iaw-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--iaw-border);
+  padding: 4px;
+}
+
+.iaw__inset-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--iaw-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.iaw__table-shell {
+  border: 1px solid var(--iaw-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--iaw-bg);
+}
+
+.iaw__table-grid {
+  display: grid;
+  gap: 0;
+  width: 100%;
+}
+
+.iaw__table-cell {
+  position: relative;
+  border-top: 1px solid color-mix(in srgb, var(--iaw-border) 72%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--iaw-border) 72%, transparent);
+}
+
+.iaw__table-cell--first-row {
+  border-top: none;
+}
+
+.iaw__table-cell--first-col {
+  border-left: none;
+}
+
 .iaw__canvas-shell {
   position: relative;
   background: var(--iaw-surface);
@@ -339,7 +421,7 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  padding: 0 4px;
+  padding: 0 clamp(6px, 1vw, 10px);
 }
 
 .iaw__slider-ticks span {
@@ -474,6 +556,24 @@
   .iaw__status-readout { gap: 1rem; }
   .iaw__timeline-controls { flex-direction: column; align-items: stretch; }
   .iaw__play-btn { width: 100%; }
+  .iaw__split-pane--divider {
+    padding-left: 0;
+    padding-top: 0.75rem;
+    border-left: none;
+    border-top: 1px solid var(--iaw-border);
+  }
+}
+
+@media (max-width: 560px) {
+  .iaw__display-math {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.2rem;
+  }
+
+  .iaw__display-math mjx-container[display="true"] {
+    min-width: max-content;
+  }
 }
 
 /* Shared Visualization Components */

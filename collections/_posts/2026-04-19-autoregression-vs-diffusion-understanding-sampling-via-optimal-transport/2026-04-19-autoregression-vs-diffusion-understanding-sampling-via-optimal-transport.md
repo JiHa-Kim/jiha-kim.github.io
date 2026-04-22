@@ -330,11 +330,16 @@ If we abandon the greedy sequence and seek the true globally optimal map for the
 
 ## Constrained vs. Unconstrained Transport
 
-At this point we have two exact high-dimensional stories. Autoregression gives a tractable, order-dependent triangular map; Brenier gives the symmetric quadratic-cost optimum. That single difference creates the main architectural split.
+At this point we have two exact high-dimensional constructions:
+
+1. **Knothe-Rosenblatt / autoregression**: tractable, sequential, and order-dependent.
+2. **Brenier / quadratic OT**: symmetric and globally optimal for $W_2^2$, but not available as a simple sequential recipe.
+
+That distinction is the main architectural split.
 
 > [!summary] Autoregression vs. Diffusion
 >
-> | Feature | Autoregression (Knothe-Rosenblatt) | Flow / Diffusion (Brenier-like) |
+> | Feature | Autoregression (Knothe-Rosenblatt) | Flow / Diffusion (Unconstrained) |
 > | :--- | :--- | :--- |
 > | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | $T(x) = \nabla \psi(x)$, $\psi$ convex |
 > | **Tractability** | Exact sequential 1D inversions | Learned via velocity regression |
@@ -342,9 +347,9 @@ At this point we have two exact high-dimensional stories. Autoregression gives a
 > | **Training Signal** | Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM / score matching |
 > | **Inference** | $D$ sequential steps | ODE integration (or one-step maps) |
 
-Autoregression wins on tractability and exact likelihoods, but it generates sequentially and inherits an ordering bias. Unconstrained transport is geometrically better aligned with the symmetric quadratic cost, but it loses the simple closed-form procedure and must be learned numerically.
+Autoregression keeps an exact sequential sampler and exact likelihood factorization, but pays for it with an ordering bias. Unconstrained transport is geometrically better aligned with the symmetric quadratic cost, but it must be learned numerically.
 
-Two complementary 2D pictures help keep the distinction straight. First, we compare two <strong>exact continuous maps at the population-law level</strong>: same source law, same target law, different map, visualized against ellipse contours of the true target distribution. Then we pass to an <strong>empirical finite-sample discretization of those same underlying laws</strong>: one frozen source cloud, one frozen target cloud, and two couplings on that exact cached point set.
+Two 2D pictures help keep the distinction straight. First, we compare two <strong>exact continuous maps at the population-law level</strong>: same source law, same target law, different map. Then we pass to a <strong>finite-sample discretization</strong> of those same laws: one frozen source cloud, one frozen target cloud, and two couplings on the same cached point set.
 
 {% include transport_2d_widget.html %}
 
@@ -352,34 +357,30 @@ Two complementary 2D pictures help keep the distinction straight. First, we comp
 
 ## Unconstrained Transport: Continuous Flows
 
-Instead of restricting the map to a triangular form, we can learn a time-dependent velocity field and integrate it {% cite laiPrinciplesDiffusionModels2025 %}.
+A standard way to approximate an unconstrained transport is to learn a time-dependent velocity field and integrate it {% cite laiPrinciplesDiffusionModels2025 %}.
 
 > [!definition] Continuous Normalizing Flow (CNF)
 > $$ \frac{dx}{dt} = v_\theta(x, t), \qquad x(0) \sim P_{\text{noise}}, \quad x(1) \sim P_{\text{data}} $$
-> The velocity field defines a flow map $\phi_t$, and we want $\phi_1(X)$ to follow $P_{\text{data}}$ when $X \sim P_{\text{noise}}$.
+> The field induces a flow map $\phi_t$, and we want $\phi_1(X)$ to follow $P_{\text{data}}$ when $X \sim P_{\text{noise}}$.
 
-This sidesteps computing $\nabla\psi$ directly—but raises a new question: what should $v_\theta$ regress against?
+This avoids parameterizing $\nabla\psi$ directly, but creates a new training question: what velocity should $v_\theta$ regress toward?
 
 ### Flow Matching & Rectified Flows
 
-**Flow Matching** {% cite lipmanFlowMatchingGenerative2023 %} and concurrent **Rectified Flows** use an analytic conditional target: for a random pair $(X_0, X_1)$ with $X_0 \sim P_{\text{noise}}$ and $X_1 \sim P_{\text{data}}$, take the straight line $X_t=(1-t)X_0+tX_1$ with velocity $u_t=X_1-X_0$.
+**Flow Matching** {% cite lipmanFlowMatchingGenerative2023 %} and closely related **Rectified Flow** methods use a simple conditional target: for a random pair $(X_0, X_1)$ with $X_0 \sim P_{\text{noise}}$ and $X_1 \sim P_{\text{data}}$, interpolate linearly,
+$$ X_t=(1-t)X_0+tX_1, $$
+and regress toward the constant velocity $X_1-X_0$.
 
 > [!definition] Conditional Flow Matching (CFM) Objective
 > $$ \mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t,\, X_0,\, X_1}\bigl\| v_\theta(X_t,\, t) - (X_1 - X_0) \bigr\|^2 $$
-> Here we sample a time $t$, a source point $X_0$, and a target point $X_1$, then regress the model toward the straight-line velocity.
+> We sample a time $t$, a source point $X_0$, and a target point $X_1$, then regress the model toward the straight-line conditional velocity.
 
 > [!remark] Conditional vs. Marginal Optimality
-> For a fixed pair $(X_0, X_1)$, the straight line is optimal between those endpoints. But after averaging over random pairs, the learned field is **not** guaranteed to equal the Brenier-optimal field {% cite lipmanFlowMatchingGenerative2023 %}. The advantage is not exact OT, but a simple regression target.
+> For a fixed pair $(X_0, X_1)$, the straight line is optimal between those two endpoints. But after averaging over random pairs, the resulting field is **not** guaranteed to be the Brenier-optimal global field {% cite lipmanFlowMatchingGenerative2023 %}. The appeal is not exact OT, but a simple and stable regression target.
 
-> [!todo] Visualization Placeholder: Conditional Paths vs. Global Field
-> Use two panels:
-> 1. several straight conditional paths for fixed endpoint pairs,
-> 2. the averaged vector field they induce.
-> The purpose is to clarify the difference between conditional OT and the global learned field.
+## Practical OT: Regularized Couplings
 
-## Practical OT: Entropic Regularization and Sinkhorn
-
-Everything above was about **exact population-level transport**: closed-form 1D maps, exact triangular rearrangements, and Brenier's exact quadratic-cost optimizer. In practice, training uses softened finite-sample approximations instead.
+Everything above was **exact** and **population-level**: closed-form 1D maps, exact triangular rearrangements, and Brenier's exact quadratic-cost optimizer. In practice, training works with finite batches and regularized couplings instead.
 
 > [!definition] Entropic Optimal Transport
 > Given source and target distributions $\mu,\nu$ and a reference coupling $\pi_{\mathrm{ref}}$, entropic OT solves
@@ -392,15 +393,15 @@ Everything above was about **exact population-level transport**: closed-form 1D 
 > So with product reference $\mu \otimes \nu$, KL regularization is the same as negative-entropy regularization up to constants, and therefore has the same minimizer. This follows by expanding the logarithm and using the fact that $\pi$ has marginals $\mu$ and $\nu$.
 
 > [!remark] Why the Reference Coupling Matters
-> Standard Sinkhorn usually uses the product reference $\mu \otimes \nu$, so the regularizer acts mainly as a generic smoothing term. Freulon et al. show that once the reference itself carries correlations, especially in the Gaussian case, entropic OT is no longer just "OT plus blur": it is biased toward couplings with that prescribed structure {% cite freulonEntropicOptimalTransport2026 %}.
+> With the usual product reference $\mu \otimes \nu$, the KL term mainly favors diffuse couplings. Freulon et al. show that once the reference itself carries correlations, especially in the Gaussian case, the penalty no longer acts like generic smoothing: it favors couplings compatible with that reference structure {% cite freulonEntropicOptimalTransport2026 %}.
 
-On a small fixed discrete instance, entropic regularization is easiest to read as a sharp-vs-diffuse tradeoff. As $\varepsilon$ increases, the plan keeps the same row and column marginals, but spreads mass across more nearby source-target pairs.
+On a small fixed discrete instance, entropic OT is easiest to read as a sharp-vs-diffuse tradeoff. As $\varepsilon$ increases, the plan keeps the same row and column marginals but spreads mass across more nearby source-target pairs.
 
 {% include sinkhorn_regularization_widget.html %}
 
 ### Dual Potentials
 
-There is another way to look at OT. Instead of directly deciding how much mass to ship along every source-target pair, we assign a scalar "price" to each source point and each target point.
+There is another equivalent way to describe OT. Instead of optimizing the transport plan directly, we assign a scalar "price" to each source point and each target point.
 
 > [!problem] Discrete Kantorovich Dual
 > In the discrete case, the dual problem is
@@ -415,72 +416,70 @@ There is another way to look at OT. Instead of directly deciding how much mass t
 > [!tip] Complementary Slackness
 > At optimality, transported pairs typically satisfy $\pi_{ij}>0 \Rightarrow f_i+g_j=c_{ij}$. In words: mass only travels along pairs whose price constraint is tight. So the dual potentials identify the active geometry of the coupling.
 
+The same tiny transport example makes this lower-bound picture concrete:
+
+{% include kantorovich_dual_widget.html %}
+
 > [!problem] Continuous Kantorovich Dual
 > The continuous version is the same idea, but now the prices are functions rather than finite lists of numbers. Among all $f$ and $g$ satisfying $f(z)+g(x)\le c(z,x)$ for every $z,x$, the best lower bound is
 > $$ \sup_{f,g} \; \mathbb{E}[f(Z)] + \mathbb{E}[g(X)], \qquad Z \sim P_{\text{noise}},\; X \sim P_{\text{data}}. $$
 > Under standard assumptions, this equals the Kantorovich optimum.
 
 > [!note] Why This Matters Here
-> These dual potentials are just the continuous analogue of the discrete prices. They are the quantities that reappear in regularized OT, Sinkhorn-style updates, and later potential-based viewpoints on transport geometry.
+> These dual potentials are the continuous analogue of the discrete prices. They reappear in regularized OT, Sinkhorn-style updates, and later potential-based viewpoints on transport geometry.
 
 ### Uncrossing Paths: Mini-Batch OT
 
-Flow matching still leaves the pairing problem open: which source sample should be paired with which target sample inside a mini-batch?
+Flow matching still leaves one practical question open: inside a mini-batch, which source sample should be paired with which target sample?
 
 > [!idea] Batch OT
 > Random pairings produce heavily crossed trajectories, which makes $v_\theta$ harder to learn. A mini-batch OT solve uncrosses them:
 >
 > $$ \pi^* = \arg\min_{\pi \text{ matching } X_0^B \text{ to } X_1^B} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|_2^2 $$
 
-This is efficiently approximated with **Sinkhorn**. With product reference, it is exactly the entropic OT relaxation discussed above. In practice, uncrossed paths usually give a smoother field, better generalization, and fewer ODE steps at inference.
+This is efficiently approximated with **Sinkhorn**. With product reference, it is exactly the entropic OT relaxation above. The immediate geometric effect is simple: the supervised trajectories cross less, so the regression target for $v_\theta$ is less tangled.
 
 > [!note] Endpoint Matching Is Not Yet a Dynamical Model
-> Mini-batch OT only decides which source points pair with which targets in one batch. If several time marginals must assemble into one stochastic process, then the reference coupling becomes a modeling choice rather than a mere computational trick. Freulon et al. show this explicitly in the Gaussian case: non-product references can encode correlations that persist across time, while product references do not {% cite freulonEntropicOptimalTransport2026 %}.
-
-> [!todo] Visualization Placeholder: Before/After Batch OT
-> Show the same batch twice:
-> 1. with random pairings that produce crossing trajectories,
-> 2. with OT-matched pairings that produce nearly parallel trajectories.
-> This should be one of the highest-priority visuals in the article.
+> Mini-batch OT only picks endpoint pairings for one time gap. That is enough to uncross paths, but not enough to define a law over whole trajectories.
+>
+> Freulon et al. make this precise in the Gaussian setting: to reconstruct dynamics from finitely many marginals, the reference coupling used at each pairwise entropic OT step should come from one common continuous-time reference process. A Gaussian-process reference gives pairwise transitions that fit together into one coherent continuous-time model; a product reference instead pushes each gap toward independence, so temporal coherence is not built in {% cite freulonEntropicOptimalTransport2026 %}.
 
 ## One-Step Maps
 
-> [!idea] Generative Drifting
-> Flow models still require multi-step ODE integration at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} try to remove that solve by learning a direct map $x=f_\theta(z)$ with $z \sim P_{\text{noise}}$.
->
-> This closes the loop: **Map** (Brenier, intractable) → **Flow** (tractable ODE, multi-step) → **Map** (learned, one-step).
+> [!idea] Drifting Models
+> CNFs and diffusion-style flows approximate unconstrained transport, but they still spend inference time tracing a path. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} move that iteration into training: the pushforward map evolves during optimization, and inference becomes a single evaluation of
+> $$ x=f_\theta(z), \qquad z \sim P_{\text{noise}}. $$
+> The point is to amortize transport into training time rather than sampling time.
 
-> [!example] Visualizing the Vector Field
-> *Placeholder: Insert visualization showing a continuous 2D vector field guiding Gaussian noise into a multimodal target cluster.*
+Conceptually, this closes the loop:
+$$ \text{Map (Brenier, intractable)} \to \text{Flow (tractable, multi-step)} \to \text{Learned one-step map}. $$
 
 ## Optional Refinement: Polar Factorization
 
-There is one further refinement worth mentioning. Even if a generator already matches the right density, its internal geometry need not be transport-optimal.
+Even if a generator already matches the correct density, its internal geometry need not be transport-optimal.
 
 > [!corollary] Polar Factorization Theorem
 > Any exact generator $F$ with $F_\sharp P_{\text{noise}} = P_{\text{data}}$ can be written as
 > $$ F=\nabla\psi \circ M, $$
 > where $\nabla\psi$ is the Brenier map and $M$ preserves the source law: $M_\sharp P_{\text{noise}}=P_{\text{noise}}$.
 >
-> This is the infinite-dimensional analogue of matrix polar decomposition. It says every exact generator can be decomposed into an internal relabeling of latent noise, followed by the optimal transport {% cite vesseronNeuralImplementationBreniers2025 %}.
+> This is the infinite-dimensional analogue of matrix polar decomposition. Every exact generator can be decomposed into a source-law-preserving latent rearrangement, followed by the optimal transport {% cite vesseronNeuralImplementationBreniers2025 %}.
 
-> [!remark] Reading Polar Factorization Backwards
-> Equivalently, $\nabla\psi = F \circ M^{-1}$. So every exact generator differs from the Brenier map only by a latent rearrangement that preserves the source law.
+> [!remark] Same Density, Different Pairing
+> If $\widetilde{G}=G\circ M$ and $M_\sharp P_{\text{noise}}=P_{\text{noise}}$, then
+> $$ \widetilde{G}_\sharp P_{\text{noise}} = G_\sharp P_{\text{noise}}. $$
+> So a latent rearrangement does **not** change the modeled density. It only changes the coupling: which latent point is paired with which output sample.
 
-> [!proposition] Same Density, Different Geometry
-> If $\widetilde{G}=G\circ M$ and $M_\sharp P_{\text{noise}}=P_{\text{noise}}$, then $\widetilde{G}_\sharp P_{\text{noise}}=G_\sharp P_{\text{noise}}$. So rearranging the latent noise leaves the modeled density unchanged; it only changes which latent point is sent to which sample.
->
+> [!corollary] Immediate Consequence of Brenier's Theorem
 > If $T=\nabla\psi$ is Brenier's map from $P_{\text{noise}}$ to $P_{\text{data}}$, then for any exact generator $\widetilde{G}$ with the same pushforward law,
 > $$ \mathbb{E}\|Z-T(Z)\|_2^2 \le \mathbb{E}\|Z-\widetilde{G}(Z)\|_2^2, \qquad Z\sim P_{\text{noise}}. $$
+> This is just Brenier's theorem applied to the class of exact generators: among all maps with pushforward $P_{\text{data}}$, the Brenier map has the smallest quadratic transport cost.
 
-> [!proof]-
-> Pushforwards compose, so $\widetilde{G}_\sharp P_{\text{noise}}=(G\circ M)_\sharp P_{\text{noise}}=G_\sharp(M_\sharp P_{\text{noise}})=G_\sharp P_{\text{noise}}$. The inequality then follows from Brenier optimality, since both $T$ and $\widetilde{G}$ push the same source law to the same target law.
-
-This is the core insight behind Morel et al.: a trained normalizing flow may already model the right density, yet still move mass inefficiently. They learn a Gaussian-preserving latent rearrangement that lowers transport cost without changing the final density, pushing a pre-trained flow toward its Monge representative {% cite morelTurningNormalizingFlows2023 %}.
+This is exactly the lens used by Morel et al.: start from a trained normalizing flow that already matches $P_{\text{data}}$, then search over Gaussian-preserving latent rearrangements that lower its quadratic transport cost without changing the final density. The target is not a new density model, but a coupling closer to the Monge map {% cite morelTurningNormalizingFlows2023 %}.
 
 ### Gaussian-Preserving Rearrangements
 
-For standard normal priors, Morel et al. make this concrete by moving into uniform coordinates, applying a volume-preserving shuffle, and mapping back.
+For standard normal priors, Morel et al. make this concrete by moving to uniform coordinates, applying a volume-preserving shuffle there, and mapping back.
 
 > [!proposition] Gaussian-Preserving Rearrangements via Uniform Coordinates
 > Let $\Phi:\mathbb{R}^D \to (0,1)^D$ be the coordinatewise standard normal CDF and let $\phi:(0,1)^D \to (0,1)^D$ be a smooth volume-preserving diffeomorphism with $|\det J_\phi|=1$. Then
@@ -491,7 +490,7 @@ For standard normal priors, Morel et al. make this concrete by moving into unifo
 > If $U=\Phi(Z)$, then $U$ is uniform on $(0,1)^D$. Volume preservation implies $\phi(U)$ is still uniform, and applying $\Phi^{-1}$ coordinatewise sends it back to a standard Gaussian. Hence $M(Z)\sim \mathcal{N}(0,I)$.
 
 > [!remark] Why Divergence-Free ODEs and Euler Regularization Appear
-> Morel et al. parameterize $\phi$ as the endpoint of an ODE $\dot X_t=v_t(X_t)$ on the cube, with $\nabla\cdot v_t=0$ and tangential boundary conditions. Liouville's formula then keeps $\det J_{X_t}$ constant, so each time-$t$ map preserves volume. Euler regularization does not change the endpoint density; it selects a smoother, lower-energy path among these admissible rearrangements {% cite morelTurningNormalizingFlows2023 %}.
+> Morel et al. parameterize $\phi$ as the endpoint of an ODE $\dot X_t=v_t(X_t)$ on the cube, with $\nabla\cdot v_t=0$ and tangential boundary conditions. Liouville's formula then keeps $\det J_{X_t}$ constant, so each time-$t$ map preserves volume. Euler regularization does not change which endpoints preserve the density; it selects a lower-energy volume-preserving path to the same endpoint {% cite morelTurningNormalizingFlows2023 %}.
 
 ## Conclusion
 
