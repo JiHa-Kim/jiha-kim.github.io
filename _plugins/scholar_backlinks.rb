@@ -45,19 +45,20 @@ module Jekyll
           csl_prefix + rendered_links.join(delimiter) + csl_suffix
         else
           # Default case: combined links
-          backref_ids = []
-          keys.each do |key|
-            if bibliography.key?(key)
-              idx = page['scholar_backlinks'][key].length + 1
-              backref_id = "cite-#{key}-#{idx}"
-              page['scholar_backlinks'][key] << backref_id
-              backref_ids << backref_id
+          valid_keys = keys.select { |key| bibliography.key?(key) }
+          primary_key = valid_keys.first
+
+          if primary_key
+            primary_idx = page['scholar_backlinks'][primary_key].length + 1
+            primary_id = "cite-#{primary_key}-#{primary_idx}"
+
+            # A combined citation renders as one HTML anchor, so every cited
+            # entry must backlink to that shared anchor instead of unique ids
+            # that do not exist in the output.
+            valid_keys.each do |key|
+              page['scholar_backlinks'][key] << primary_id
             end
-          end
-          
-          primary_id = backref_ids.first
-          
-          if bibliography.key?(keys[0])
+
             items = keys.map { |k| bibliography[k] }.compact.map do |e|
               e = e.dup
               e = e.convert(*bibtex_filters) unless bibtex_filters.empty?
