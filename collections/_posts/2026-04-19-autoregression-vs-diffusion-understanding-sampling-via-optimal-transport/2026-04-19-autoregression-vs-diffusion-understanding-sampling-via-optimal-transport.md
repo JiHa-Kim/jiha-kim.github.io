@@ -375,7 +375,7 @@ $$ X_t=(1-t)X_0+tX_1, $$
 and regress toward the constant velocity $X_1-X_0$.
 
 > [!definition] Conditional Flow Matching (CFM) Objective
-> $$ \mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t,\, X_0,\, X_1}\bigl\| v_\theta(X_t,\, t) - (X_1 - X_0) \bigr\|^2 $$
+> $$ \mathcal{L}_{\text{CFM}}(\theta) = \mathbb{E}_{t,\, X_0,\, X_1}\bigl\| v_\theta(X_t,\, t) - (X_1 - X_0) \bigr\|_2^2 $$
 > We sample a time $t$, a source point $X_0$, and a target point $X_1$, then regress the model toward the straight-line conditional velocity.
 
 > [!remark] Conditional vs. Marginal Optimality

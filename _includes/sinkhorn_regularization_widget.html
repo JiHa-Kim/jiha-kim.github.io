@@ -79,10 +79,10 @@
   {% include iaw_status_item.html label="Coupling Pattern" value="Banded" value_id="sinkPattern" %}
 </div>
 
-<div class="sink__slider-row">
-  <div class="sink__slider-label">
+<div class="sink__slider-row iaw__control-stack">
+  <div class="sink__slider-label iaw__slider-header">
     <span>Regularization Strength $\varepsilon$</span>
-    <span class="sink__epsilon-value" id="sinkEpsValue">0.05</span>
+    <span class="sink__epsilon-value iaw__slider-readout" id="sinkEpsValue">0.05</span>
   </div>
   {% assign sinkTicks = "0.01, 0.05, 0.10, 0.20" | split: ", " %}
   {% include iaw_slider.html id="sinkEpsSlider" min="0.01" max="0.20" step="0.005" value="0.05" ticks=sinkTicks variant="parameter" %}
@@ -236,28 +236,6 @@
 
 .sink__status-grid .iaw__status-value {
   line-height: 1.28;
-}
-
-.sink__slider-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.sink__slider-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-  font-size: 0.96rem;
-  font-weight: 700;
-  color: var(--iaw-text);
-}
-
-.sink__epsilon-value {
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 0.96rem;
-  color: var(--iaw-muted);
 }
 
 @media (max-width: 900px) {

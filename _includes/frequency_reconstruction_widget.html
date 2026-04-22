@@ -84,14 +84,14 @@
   {% include iaw_status_item.html label="Autoregressive Order" value="sample $y_{\text{low}}$ first, then refine with $y_{\text{high}}$" %}
 </div>
 
-<div class="frp__slider-grid">
-  <div class="frp__slider-field">
-    <div class="frp__slider-label">$x_1$ Intensity</div>
+<div class="frp__slider-grid iaw__slider-grid">
+  <div class="frp__slider-field iaw__slider-field">
+    <div class="frp__slider-label iaw__slider-field-label">$x_1$ Intensity</div>
     {% assign frpTicks = "0.0, 0.5, 1.0" | split: ", " %}
     {% include iaw_slider.html id="frpSliderX1" min="0" max="1" step="0.05" value="0.60" ticks=frpTicks variant="parameter" %}
   </div>
-  <div class="frp__slider-field">
-    <div class="frp__slider-label">$x_2$ Intensity</div>
+  <div class="frp__slider-field iaw__slider-field">
+    <div class="frp__slider-label iaw__slider-field-label">$x_2$ Intensity</div>
     {% include iaw_slider.html id="frpSliderX2" min="0" max="1" step="0.05" value="0.60" ticks=frpTicks variant="parameter" %}
   </div>
 </div>
@@ -273,24 +273,6 @@
   font-family: var(--font-family-monospace, monospace);
 }
 
-.frp__slider-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.frp__slider-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.frp__slider-label {
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: var(--iaw-text);
-}
-
 .frp__slider-field .iaw__slider-box {
   width: 100%;
 }
@@ -307,10 +289,6 @@
 }
 
 @media (max-width: 720px) {
-  .frp__slider-grid {
-    grid-template-columns: 1fr;
-  }
-
   .frp__recon-row {
     grid-template-columns: 1fr;
     justify-items: center;

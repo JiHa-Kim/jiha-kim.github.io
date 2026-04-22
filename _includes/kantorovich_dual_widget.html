@@ -24,25 +24,25 @@
     </div>
 
     <div class="kdu__controls-block iaw__split-pane iaw__split-pane--divider">
-      <div class="kdu__slider-label">
+      <div class="kdu__slider-label iaw__slider-header">
         <span>Price Spread $t$</span>
-        <span class="kdu__slider-value" id="kduTValue">0.00</span>
+        <span class="kdu__slider-value iaw__slider-readout" id="kduTValue">0.00</span>
       </div>
       {% assign kduTicks = "0.0, 0.5, 1.0" | split: ", " %}
       {% include iaw_slider.html id="kduSlider" min="0" max="1" step="0.05" value="0" ticks=kduTicks variant="parameter" %}
 
-      <div class="kdu__summary-strip">
-        <div class="kdu__summary-pill">
-          <span class="kdu__summary-name">Primal</span>
-          <strong class="kdu__summary-value">$5.00</strong>
+      <div class="kdu__summary-strip iaw__metric-strip">
+        <div class="kdu__summary-pill iaw__metric-pill">
+          <span class="kdu__summary-name iaw__metric-name">Primal</span>
+          <strong class="kdu__summary-value iaw__metric-value">$5.00</strong>
         </div>
-        <div class="kdu__summary-pill">
-          <span class="kdu__summary-name">Dual</span>
-          <strong class="kdu__summary-value kdu__summary-value--accent" id="kduBound">$3.00</strong>
+        <div class="kdu__summary-pill iaw__metric-pill">
+          <span class="kdu__summary-name iaw__metric-name">Dual</span>
+          <strong class="kdu__summary-value iaw__metric-value iaw__metric-value--accent" id="kduBound">$3.00</strong>
         </div>
-        <div class="kdu__summary-pill">
-          <span class="kdu__summary-name">Gap</span>
-          <strong class="kdu__summary-value" id="kduGap">$2.00</strong>
+        <div class="kdu__summary-pill iaw__metric-pill">
+          <span class="kdu__summary-name iaw__metric-name">Gap</span>
+          <strong class="kdu__summary-value iaw__metric-value" id="kduGap">$2.00</strong>
         </div>
       </div>
     </div>
@@ -143,22 +143,6 @@
   font-size: 1rem;
 }
 
-.kdu__slider-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.75rem;
-  font-size: 0.96rem;
-  font-weight: 700;
-  color: var(--iaw-text);
-}
-
-.kdu__slider-value {
-  font-family: var(--font-family-monospace, monospace);
-  font-size: 0.96rem;
-  color: var(--iaw-muted);
-}
-
 .kdu__controls-block .iaw__slider-box {
   gap: 0.15rem;
 }
@@ -169,41 +153,6 @@
 
 .kdu__controls-block .iaw__slider-ticks span {
   font-size: 0.78rem;
-}
-
-.kdu__summary-strip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.45rem;
-}
-
-.kdu__summary-pill {
-  display: flex;
-  flex-direction: column;
-  gap: 0.12rem;
-  padding: 0.48rem 0.65rem;
-  border: 1px solid var(--iaw-border);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--iaw-surface) 74%, var(--iaw-bg));
-}
-
-.kdu__summary-name {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--iaw-muted);
-}
-
-.kdu__summary-value {
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--iaw-text);
-  line-height: 1.1;
-}
-
-.kdu__summary-value--accent {
-  color: var(--iaw-success);
 }
 
 .kdu__matrix-shell {
@@ -331,10 +280,6 @@
 @media (max-width: 560px) {
   .kdu__matrix {
     grid-template-columns: 84px repeat(2, minmax(0, 1fr));
-  }
-
-  .kdu__summary-strip {
-    grid-template-columns: 1fr;
   }
 
   .kdu__corner,
