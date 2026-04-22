@@ -1,0 +1,735 @@
+{% capture describe %}
+<p>
+  Choose either a convex-gradient map or a non-monotone comparison map. Drag two nearby source points $x,y$.
+  The colored cloud shows how the whole space moves, and the tail-to-tail vector board makes the sign of
+  $\langle M(x)-M(y),\,x-y\rangle$ visually obvious: if the projected component points the same way as $x-y$, the
+  correlation is positive; if it crosses into the red half-plane, the map is locally folding backward.
+</p>
+{% endcapture %}
+
+{% capture controls %}
+<button class="iaw__seg-btn active" data-mode="convex">Convex Gradient</button>
+<button class="iaw__seg-btn" data-mode="fold">Non-Monotone Map</button>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="brm__layout iaw__figure-grid">
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Source Pair</div>
+    <div class="brm__shell iaw__canvas-shell" id="brmSourceShell">
+      <canvas id="brmSourceCanvas"></canvas>
+      <div class="brm__overlay" aria-hidden="true">
+        <span class="brm__point-label brm__point-label--x" id="brmSourceLabelX">$x$</span>
+        <span class="brm__point-label brm__point-label--y" id="brmSourceLabelY">$y$</span>
+      </div>
+    </div>
+    <div class="brm__note">Drag $x$ and $y$ in the source cloud.</div>
+  </section>
+
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Mapped Pair</div>
+    <div class="brm__shell iaw__canvas-shell" id="brmImageShell">
+      <canvas id="brmImageCanvas"></canvas>
+      <div class="brm__overlay" aria-hidden="true">
+        <span class="brm__point-label brm__point-label--x" id="brmImageLabelX">$M(x)$</span>
+        <span class="brm__point-label brm__point-label--y" id="brmImageLabelY">$M(y)$</span>
+      </div>
+    </div>
+    <div class="brm__note" id="brmModeNote">Same colored cloud after the selected map.</div>
+  </section>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="brm__compare-shell iaw__canvas-shell" id="brmCompareShell">
+  <canvas id="brmCompareCanvas"></canvas>
+</div>
+<div class="brm__compare-note" id="brmCompareNote">
+  Tail-to-tail view: yellow is $x-y$, and green or red is $M(x)-M(y)$.
+</div>
+
+<div class="iaw__table-shell brm__calc-shell">
+  <div class="iaw__table-grid brm__calc-grid">
+    <div class="iaw__table-cell iaw__table-cell--first-row iaw__table-cell--first-col brm__calc-label">$x-y$</div>
+    <div class="iaw__table-cell iaw__table-cell--first-row brm__calc-value brm__calc-value--mono" id="brmDelta"></div>
+    <div class="iaw__table-cell iaw__table-cell--first-col brm__calc-label">$M(x)-M(y)$</div>
+    <div class="iaw__table-cell brm__calc-value brm__calc-value--mono" id="brmMappedDelta"></div>
+    <div class="iaw__table-cell iaw__table-cell--first-col brm__calc-label">$\langle M(x)-M(y),\,x-y\rangle$</div>
+    <div class="iaw__table-cell brm__calc-value brm__calc-value--mono" id="brmInner"></div>
+  </div>
+</div>
+
+<div class="iaw__status-grid iaw__status-grid--single">
+  {% include iaw_status_item.html label="Reading" value="Positive inner product: the mapped difference still points forward along the source direction." value_id="brmReading" %}
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="brenierMonotonicityFigure"
+    eyebrow="Brenier Intuition"
+    title="Local Monotonicity vs Local Folding"
+    description=describe
+    controls=controls
+    visuals=visuals
+    footer=footer
+    stage_id="brmStage"
+    stage_style="height: auto; min-height: 250px; border: none; background: transparent;"
+%}
+
+<style>
+.brm__layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.brm__shell {
+  aspect-ratio: 1 / 1;
+  min-height: 252px;
+}
+
+.brm__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.brm__point-label {
+  position: absolute;
+  padding: 0.14rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--iaw-border) 88%, transparent);
+  background: color-mix(in srgb, var(--iaw-bg) 94%, transparent);
+  color: var(--iaw-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: var(--iaw-shadow-soft);
+  transform: translate(-50%, -50%);
+}
+
+.brm__point-label--x {
+  border-color: color-mix(in srgb, var(--iaw-source-a) 34%, var(--iaw-border));
+}
+
+.brm__point-label--y {
+  border-color: color-mix(in srgb, var(--iaw-target) 34%, var(--iaw-border));
+}
+
+.brm__note {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--iaw-muted);
+  text-align: center;
+}
+
+.brm__compare-shell {
+  min-height: 160px;
+}
+
+.brm__compare-note {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--iaw-muted);
+}
+
+.brm__compare-note mjx-container {
+  margin: 0;
+}
+
+.brm__calc-shell {
+  overflow: hidden;
+}
+
+.brm__calc-grid {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+}
+
+.brm__calc-label,
+.brm__calc-value {
+  background: var(--iaw-bg);
+  padding: 0.72rem 0.9rem;
+}
+
+.brm__calc-label {
+  display: flex;
+  align-items: center;
+  color: var(--iaw-text);
+  font-size: 0.96rem;
+  font-weight: 700;
+}
+
+.brm__calc-label mjx-container {
+  margin: 0;
+}
+
+.brm__calc-value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  color: var(--iaw-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.brm__calc-value--mono {
+  font-family: var(--font-family-monospace, monospace);
+}
+
+@media (max-width: 900px) {
+  .brm__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .brm__calc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brm__calc-value {
+    justify-content: flex-start;
+  }
+
+  .brm__calc-label,
+  .brm__calc-value {
+    border-left: none !important;
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('brenierMonotonicityFigure', function(root) {
+
+  const sourceCanvas = root.querySelector('#brmSourceCanvas');
+  const imageCanvas = root.querySelector('#brmImageCanvas');
+  const compareCanvas = root.querySelector('#brmCompareCanvas');
+  const sourceShell = root.querySelector('#brmSourceShell');
+  const imageShell = root.querySelector('#brmImageShell');
+  const compareShell = root.querySelector('#brmCompareShell');
+  const sourceCtx = sourceCanvas.getContext('2d');
+  const imageCtx = imageCanvas.getContext('2d');
+  const compareCtx = compareCanvas.getContext('2d');
+  const deltaEl = root.querySelector('#brmDelta');
+  const mappedDeltaEl = root.querySelector('#brmMappedDelta');
+  const innerEl = root.querySelector('#brmInner');
+  const readingEl = root.querySelector('#brmReading');
+  const modeNoteEl = root.querySelector('#brmModeNote');
+  const compareNoteEl = root.querySelector('#brmCompareNote');
+
+  const labelEls = {
+    sourceX: root.querySelector('#brmSourceLabelX'),
+    sourceY: root.querySelector('#brmSourceLabelY'),
+    imageX: root.querySelector('#brmImageLabelX'),
+    imageY: root.querySelector('#brmImageLabelY')
+  };
+
+  const PAD_X = 10;
+  const PAD_Y = 10;
+  const SOURCE_VIEW_ZOOM = 1.08;
+  const IMAGE_VIEW_ZOOM = 1.46;
+  const sourceExtent = { xMin: -1.55, xMax: 1.55, yMin: -1.35, yMax: 1.35 };
+  const cloudPoints = buildGridPoints(sourceExtent, 15);
+  const rotatedTheta = 0.78;
+  const rotatedCos = Math.cos(rotatedTheta);
+  const rotatedSin = Math.sin(rotatedTheta);
+
+  const modes = {
+    convex: {
+      note: 'Same colored cloud after a convex-gradient map $M=\\nabla\\psi$.',
+      initialPair: {
+        x: { x: 0.92, y: -0.42 },
+        y: { x: -0.30, y: 0.26 }
+      },
+      map(point) {
+        const r1 = rotatedCos * point.x + rotatedSin * point.y;
+        const r2 = -rotatedSin * point.x + rotatedCos * point.y;
+        const g1 = 1.20 * r1 + 0.14 * r2 + 0.46 * Math.pow(r1, 3);
+        const g2 = 0.14 * r1 + 0.92 * r2 + 0.22 * Math.pow(r2, 3);
+        return {
+          x: rotatedCos * g1 - rotatedSin * g2,
+          y: rotatedSin * g1 + rotatedCos * g2
+        };
+      }
+    },
+    fold: {
+      note: 'Same colored cloud after a milder non-monotone comparison map with one local fold.',
+      initialPair: {
+        x: { x: 0.95, y: 0.95 },
+        y: { x: 0.40, y: 0.40 }
+      },
+      map(point) {
+        const s = 0.84 * point.x + 0.54 * point.y;
+        const t = -0.54 * point.x + 0.84 * point.y;
+        const u = 0.92 * s - 0.62 * Math.pow(s, 3) + 0.12 * t;
+        const v = 0.08 * s + 0.96 * t;
+        return {
+          x: 0.84 * u - 0.54 * v,
+          y: 0.54 * u + 0.84 * v
+        };
+      }
+    }
+  };
+
+  const modeData = Object.fromEntries(Object.entries(modes).map(([key, mode]) => {
+    const ambientGrid = cloudPoints.map((source) => ({
+      source,
+      mapped: mode.map(source)
+    }));
+
+    return [
+      key,
+      {
+        ...mode,
+        ambientGrid,
+        imageExtent: getExtentFromPoints(ambientGrid.map((item) => item.mapped), 0.025, 0.03)
+      }
+    ];
+  }));
+
+  const state = {
+    x: { ...modeData.convex.initialPair.x },
+    y: { ...modeData.convex.initialPair.y }
+  };
+
+  let theme = IAW.getThemeColors(root);
+  let activeKey = null;
+  let activeMode = 'convex';
+
+  function subtract(a, b) {
+    return { x: a.x - b.x, y: a.y - b.y };
+  }
+
+  function dot(a, b) {
+    return a.x * b.x + a.y * b.y;
+  }
+
+  function norm(vector) {
+    return Math.hypot(vector.x, vector.y);
+  }
+
+  function activeMap(point) {
+    return modeData[activeMode].map(point);
+  }
+
+  function formatVectorText(vector) {
+    return `(${vector.x.toFixed(2)}, ${vector.y.toFixed(2)})`;
+  }
+
+  function setupCanvas(canvas, ctx) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    return rect;
+  }
+
+  function getViewport(rect, extent, zoom = 1) {
+    const spanX = Math.max(extent.xMax - extent.xMin, 1e-6);
+    const spanY = Math.max(extent.yMax - extent.yMin, 1e-6);
+    const usableWidth = Math.max(rect.width - 2 * PAD_X, 1);
+    const usableHeight = Math.max(rect.height - 2 * PAD_Y, 1);
+    const scale = Math.min(usableWidth / spanX, usableHeight / spanY) * zoom;
+    const drawWidth = spanX * scale;
+    const drawHeight = spanY * scale;
+
+    return {
+      scale,
+      left: (rect.width - drawWidth) / 2,
+      top: (rect.height - drawHeight) / 2
+    };
+  }
+
+  function toScreen(point, rect, extent, zoom = 1) {
+    const viewport = getViewport(rect, extent, zoom);
+    return {
+      x: viewport.left + (point.x - extent.xMin) * viewport.scale,
+      y: viewport.top + (extent.yMax - point.y) * viewport.scale
+    };
+  }
+
+  function fromScreen(point, rect, extent, zoom = 1) {
+    const viewport = getViewport(rect, extent, zoom);
+    return {
+      x: extent.xMin + (point.x - viewport.left) / viewport.scale,
+      y: extent.yMax - (point.y - viewport.top) / viewport.scale
+    };
+  }
+
+  function getExtentFromPoints(points, padX = 0.10, padY = 0.12) {
+    const xs = points.map((point) => point.x);
+    const ys = points.map((point) => point.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const spanX = Math.max(1.0, maxX - minX);
+    const spanY = Math.max(1.0, maxY - minY);
+
+    return {
+      xMin: minX - padX * spanX,
+      xMax: maxX + padX * spanX,
+      yMin: minY - padY * spanY,
+      yMax: maxY + padY * spanY
+    };
+  }
+
+  function buildGridPoints(extent, steps) {
+    const points = [];
+
+    for (let iy = 0; iy < steps; iy += 1) {
+      for (let ix = 0; ix < steps; ix += 1) {
+        points.push({
+          x: extent.xMin + (ix / (steps - 1)) * (extent.xMax - extent.xMin),
+          y: extent.yMin + (iy / (steps - 1)) * (extent.yMax - extent.yMin)
+        });
+      }
+    }
+
+    return points;
+  }
+
+  function ambientColor(point, extent) {
+    const tx = (point.x - extent.xMin) / (extent.xMax - extent.xMin);
+    const ty = (point.y - extent.yMin) / (extent.yMax - extent.yMin);
+    const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
+    const hue = 24 + 220 * tx;
+    const saturation = 76;
+    const lightness = isDark ? 46 + 16 * ty : 50 + 10 * ty;
+    const alpha = isDark ? 0.46 : 0.42;
+    return `hsla(${hue.toFixed(1)}, ${saturation}%, ${lightness.toFixed(1)}%, ${alpha})`;
+  }
+
+  function sourceVectorColor() {
+    return theme.sourceA || '#d4a017';
+  }
+
+  function drawArrowHead(ctx, from, to, color) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const length = Math.hypot(dx, dy) || 1;
+    const ux = dx / length;
+    const uy = dy / length;
+    const px = -uy;
+    const py = ux;
+    const size = 12;
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(to.x, to.y);
+    ctx.lineTo(to.x - ux * size + px * size * 0.45, to.y - uy * size + py * size * 0.45);
+    ctx.lineTo(to.x - ux * size - px * size * 0.45, to.y - uy * size - py * size * 0.45);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawPoint(ctx, point, color) {
+    ctx.fillStyle = color;
+    ctx.strokeStyle = IAW.toAlpha(theme.bg || '#fff', 0.96);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  function positionLabel(el, point, dx, dy) {
+    if (!el) return;
+    const width = el.offsetWidth || 42;
+    const height = el.offsetHeight || 20;
+    const clampedX = Math.max(width / 2 + 6, Math.min(point.boundsWidth - width / 2 - 6, point.x + dx));
+    const clampedY = Math.max(height / 2 + 6, Math.min(point.boundsHeight - height / 2 - 6, point.y + dy));
+    el.style.left = `${clampedX}px`;
+    el.style.top = `${clampedY}px`;
+  }
+
+  function drawAmbientCloud(ctx, rect, extent, points, key, zoom) {
+    points.forEach((item) => {
+      const screen = toScreen(item[key], rect, extent, zoom);
+      ctx.fillStyle = ambientColor(item.source, sourceExtent);
+      ctx.beginPath();
+      ctx.arc(screen.x, screen.y, 2.0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function drawPair(canvas, ctx, labels, a, b, arrowColor, extent, ambientPoints, key, zoom) {
+    const rect = setupCanvas(canvas, ctx);
+    const aScreen = toScreen(a, rect, extent, zoom);
+    const bScreen = toScreen(b, rect, extent, zoom);
+
+    drawAmbientCloud(ctx, rect, extent, ambientPoints, key, zoom);
+
+    ctx.strokeStyle = IAW.toAlpha(theme.bg || '#fff', document.documentElement.getAttribute('data-mode') === 'dark' ? 0.68 : 0.82);
+    ctx.lineWidth = 6.4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(bScreen.x, bScreen.y);
+    ctx.lineTo(aScreen.x, aScreen.y);
+    ctx.stroke();
+
+    ctx.strokeStyle = arrowColor;
+    ctx.lineWidth = 4.2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(bScreen.x, bScreen.y);
+    ctx.lineTo(aScreen.x, aScreen.y);
+    ctx.stroke();
+    drawArrowHead(ctx, bScreen, aScreen, arrowColor);
+
+    drawPoint(ctx, aScreen, theme.sourceA || '#d4a017');
+    drawPoint(ctx, bScreen, theme.target || '#0ea5e9');
+
+    positionLabel(labels.x, { ...aScreen, boundsWidth: rect.width, boundsHeight: rect.height }, 0, -18);
+    positionLabel(labels.y, { ...bScreen, boundsWidth: rect.width, boundsHeight: rect.height }, 0, -18);
+  }
+
+  function clampPoint(point, extent) {
+    return {
+      x: IAW.clamp(point.x, extent.xMin, extent.xMax),
+      y: IAW.clamp(point.y, extent.yMin, extent.yMax)
+    };
+  }
+
+  function pickActivePoint(clientX, clientY) {
+    const rect = sourceCanvas.getBoundingClientRect();
+    const local = { x: clientX - rect.left, y: clientY - rect.top };
+    const xScreen = toScreen(state.x, rect, sourceExtent, SOURCE_VIEW_ZOOM);
+    const yScreen = toScreen(state.y, rect, sourceExtent, SOURCE_VIEW_ZOOM);
+    const dx = Math.hypot(local.x - xScreen.x, local.y - xScreen.y);
+    const dy = Math.hypot(local.x - yScreen.x, local.y - yScreen.y);
+    const threshold = 26;
+
+    if (dx > threshold && dy > threshold) return null;
+    return dx <= dy ? 'x' : 'y';
+  }
+
+  function updateDraggedPoint(clientX, clientY) {
+    if (!activeKey) return;
+    const rect = sourceCanvas.getBoundingClientRect();
+    const world = fromScreen({ x: clientX - rect.left, y: clientY - rect.top }, rect, sourceExtent, SOURCE_VIEW_ZOOM);
+    state[activeKey] = clampPoint(world, sourceExtent);
+    render();
+  }
+
+  function handlePointerDown(event) {
+    const key = pickActivePoint(event.clientX, event.clientY);
+    if (!key) return;
+    activeKey = key;
+    sourceShell.style.cursor = 'grabbing';
+    sourceShell.setPointerCapture(event.pointerId);
+    updateDraggedPoint(event.clientX, event.clientY);
+  }
+
+  function handlePointerMove(event) {
+    if (!activeKey) return;
+    updateDraggedPoint(event.clientX, event.clientY);
+  }
+
+  function handlePointerUp(event) {
+    if (!activeKey) return;
+    activeKey = null;
+    sourceShell.style.cursor = 'grab';
+    if (sourceShell.hasPointerCapture(event.pointerId)) {
+      sourceShell.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  function drawComparisonBoard(delta, mappedDelta, inner) {
+    const rect = setupCanvas(compareCanvas, compareCtx);
+    const origin = { x: rect.width * 0.50, y: rect.height * 0.58 };
+    const sourceNorm = Math.max(norm(delta), 1e-6);
+    const extent = Math.max(sourceNorm, norm(mappedDelta), 1e-6);
+    const scale = Math.min(rect.width, rect.height) * 0.29 / extent;
+    const unit = { x: delta.x / sourceNorm, y: delta.y / sourceNorm };
+    const axisStart = { x: origin.x - unit.x * rect.width * 0.34, y: origin.y + unit.y * rect.width * 0.34 };
+    const axisEnd = { x: origin.x + unit.x * rect.width * 0.34, y: origin.y - unit.y * rect.width * 0.34 };
+
+    const sourceTip = { x: origin.x + delta.x * scale, y: origin.y - delta.y * scale };
+    const mappedTip = { x: origin.x + mappedDelta.x * scale, y: origin.y - mappedDelta.y * scale };
+    const normal = { x: -unit.y, y: unit.x };
+    const halfPlaneExtent = Math.max(rect.width, rect.height) * 0.92;
+    const boundaryA = {
+      x: origin.x + normal.x * halfPlaneExtent,
+      y: origin.y - normal.y * halfPlaneExtent
+    };
+    const boundaryB = {
+      x: origin.x - normal.x * halfPlaneExtent,
+      y: origin.y + normal.y * halfPlaneExtent
+    };
+    const positiveA = {
+      x: boundaryA.x + unit.x * halfPlaneExtent,
+      y: boundaryA.y - unit.y * halfPlaneExtent
+    };
+    const positiveB = {
+      x: boundaryB.x + unit.x * halfPlaneExtent,
+      y: boundaryB.y - unit.y * halfPlaneExtent
+    };
+    const negativeA = {
+      x: boundaryA.x - unit.x * halfPlaneExtent,
+      y: boundaryA.y + unit.y * halfPlaneExtent
+    };
+    const negativeB = {
+      x: boundaryB.x - unit.x * halfPlaneExtent,
+      y: boundaryB.y + unit.y * halfPlaneExtent
+    };
+    const mappedColor = inner >= 0
+      ? IAW.toAlpha(theme.success || '#059669', 0.92)
+      : IAW.toAlpha(theme.danger || '#dc2626', 0.96);
+    const positivePlaneColor = IAW.toAlpha(theme.success || '#059669', 0.10);
+    const negativePlaneColor = IAW.toAlpha(theme.danger || '#dc2626', 0.10);
+
+    compareCtx.lineCap = 'round';
+    compareCtx.lineJoin = 'round';
+
+    compareCtx.fillStyle = negativePlaneColor;
+    compareCtx.beginPath();
+    compareCtx.moveTo(boundaryA.x, boundaryA.y);
+    compareCtx.lineTo(boundaryB.x, boundaryB.y);
+    compareCtx.lineTo(negativeB.x, negativeB.y);
+    compareCtx.lineTo(negativeA.x, negativeA.y);
+    compareCtx.closePath();
+    compareCtx.fill();
+
+    compareCtx.fillStyle = positivePlaneColor;
+    compareCtx.beginPath();
+    compareCtx.moveTo(boundaryA.x, boundaryA.y);
+    compareCtx.lineTo(boundaryB.x, boundaryB.y);
+    compareCtx.lineTo(positiveB.x, positiveB.y);
+    compareCtx.lineTo(positiveA.x, positiveA.y);
+    compareCtx.closePath();
+    compareCtx.fill();
+
+    compareCtx.strokeStyle = IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.42);
+    compareCtx.lineWidth = 1.5;
+    compareCtx.setLineDash([4, 4]);
+    compareCtx.beginPath();
+    compareCtx.moveTo(boundaryA.x, boundaryA.y);
+    compareCtx.lineTo(boundaryB.x, boundaryB.y);
+    compareCtx.stroke();
+    compareCtx.setLineDash([]);
+
+    compareCtx.strokeStyle = IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.42);
+    compareCtx.lineWidth = 1.2;
+    compareCtx.setLineDash([5, 5]);
+    compareCtx.beginPath();
+    compareCtx.moveTo(axisStart.x, axisStart.y);
+    compareCtx.lineTo(axisEnd.x, axisEnd.y);
+    compareCtx.stroke();
+    compareCtx.setLineDash([]);
+
+    compareCtx.strokeStyle = sourceVectorColor();
+    compareCtx.lineWidth = 4.2;
+    compareCtx.beginPath();
+    compareCtx.moveTo(origin.x, origin.y);
+    compareCtx.lineTo(sourceTip.x, sourceTip.y);
+    compareCtx.stroke();
+    drawArrowHead(compareCtx, origin, sourceTip, sourceVectorColor());
+
+    compareCtx.strokeStyle = mappedColor;
+    compareCtx.lineWidth = 4.2;
+    compareCtx.beginPath();
+    compareCtx.moveTo(origin.x, origin.y);
+    compareCtx.lineTo(mappedTip.x, mappedTip.y);
+    compareCtx.stroke();
+    drawArrowHead(compareCtx, origin, mappedTip, mappedColor);
+
+    compareCtx.fillStyle = IAW.toAlpha(theme.text || '#111827', 0.86);
+    compareCtx.beginPath();
+    compareCtx.arc(origin.x, origin.y, 4.2, 0, Math.PI * 2);
+    compareCtx.fill();
+  }
+
+  function render() {
+    const mode = modeData[activeMode];
+    const mx = activeMap(state.x);
+    const my = activeMap(state.y);
+    const delta = subtract(state.x, state.y);
+    const mappedDelta = subtract(mx, my);
+    const inner = dot(mappedDelta, delta);
+
+    drawPair(
+      sourceCanvas,
+      sourceCtx,
+      { x: labelEls.sourceX, y: labelEls.sourceY },
+      state.x,
+      state.y,
+      sourceVectorColor(),
+      sourceExtent,
+      mode.ambientGrid,
+      'source',
+      SOURCE_VIEW_ZOOM
+    );
+
+    drawPair(
+      imageCanvas,
+      imageCtx,
+      { x: labelEls.imageX, y: labelEls.imageY },
+      mx,
+      my,
+      inner >= 0 ? IAW.toAlpha(theme.success || '#059669', 0.88) : IAW.toAlpha(theme.danger || '#dc2626', 0.92),
+      mode.imageExtent,
+      mode.ambientGrid,
+      'mapped',
+      IMAGE_VIEW_ZOOM
+    );
+
+    drawComparisonBoard(delta, mappedDelta, inner);
+
+    deltaEl.textContent = formatVectorText(delta);
+    mappedDeltaEl.textContent = formatVectorText(mappedDelta);
+    innerEl.textContent = `${inner >= 0 ? '' : ''}${inner.toFixed(2)}`;
+    innerEl.style.color = inner >= 0 ? (theme.success || '#059669') : (theme.danger || '#dc2626');
+
+    modeNoteEl.textContent = activeMode === 'convex'
+      ? 'Same colored cloud after the convex-gradient map.'
+      : 'Same colored cloud after the non-monotone comparison map.';
+    compareNoteEl.textContent = inner >= 0
+      ? 'Tail-to-tail view: the mapped difference stays in the green half-plane set by x-y.'
+      : 'Tail-to-tail view: the mapped difference crosses the separating line into the red half-plane.';
+
+    readingEl.textContent = inner >= 0
+      ? 'Positive inner product: the projected map arrow still points the same way as the source direction.'
+      : 'Negative inner product: the projected map arrow flips and points backward against the source direction.';
+  }
+
+  function setMode(nextMode) {
+    activeMode = nextMode;
+    activeKey = null;
+    sourceShell.style.cursor = 'grab';
+    state.x = { ...modeData[nextMode].initialPair.x };
+    state.y = { ...modeData[nextMode].initialPair.y };
+    render();
+  }
+
+  sourceShell.addEventListener('pointerdown', handlePointerDown);
+  sourceShell.addEventListener('pointermove', handlePointerMove);
+  sourceShell.addEventListener('pointerup', handlePointerUp);
+  sourceShell.addEventListener('pointercancel', handlePointerUp);
+  sourceShell.style.cursor = 'grab';
+
+  IAW.bindSegmentedControl(root.querySelectorAll('.iaw__seg-btn'), function(button) {
+    setMode(button.dataset.mode || 'convex');
+  }, { triggerInitial: true });
+
+  const resizeObserver = window.ResizeObserver ? new ResizeObserver(render) : null;
+  if (resizeObserver) {
+    resizeObserver.observe(sourceShell);
+    resizeObserver.observe(imageShell);
+    resizeObserver.observe(compareShell);
+  } else {
+    window.addEventListener('resize', render);
+  }
+
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    render();
+  });
+
+  window.setTimeout(render, 250);
+  IAW.requestMathTypeset(root);
+});
+</script>
