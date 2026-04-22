@@ -368,7 +368,13 @@ window.IAW = (function() {
         if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
             const list = Array.isArray(targets) ? targets.filter(Boolean) : [targets].filter(Boolean);
             if (list.length) {
-                window.MathJax.typesetPromise(list).catch(() => {});
+                window.MathJax.typesetPromise(list)
+                    .then(() => {
+                        if (typeof window.refreshMathCopySources === 'function') {
+                            window.refreshMathCopySources();
+                        }
+                    })
+                    .catch(() => {});
             }
             return;
         }

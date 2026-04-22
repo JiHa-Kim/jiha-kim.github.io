@@ -1,5 +1,9 @@
 (() => {
-  const MATH_SELECTOR = '.math-inline[data-math-source-b64], .math-block[data-math-source-b64]';
+  const WRAPPER_SELECTOR = '.math-inline[data-math-source-b64], .math-block[data-math-source-b64]';
+  const RENDERED_SELECTOR = 'mjx-container[data-math-source]';
+  const MATH_SELECTOR = `${WRAPPER_SELECTOR}, ${RENDERED_SELECTOR}`;
+  const MAX_READY_POLLS = 200;
+  const READY_POLL_MS = 100;
   let copyHandlerInstalled = false;
 
   function isElement(node) {
@@ -21,6 +25,12 @@
   }
 
   function decodeMathSource(node) {
+    const directSource = node?.dataset?.mathSource;
+
+    if (typeof directSource === 'string' && directSource.trim()) {
+      return directSource;
+    }
+
     const encoded = node?.dataset?.mathSourceB64;
 
     if (!encoded) {
@@ -48,7 +58,12 @@
       return '';
     }
 
-    return node.classList.contains('math-block') ? `$$\n${source}\n$$` : `$${source}$`;
+    const isDisplay =
+      node.classList.contains('math-block') ||
+      node.dataset.mathDisplay === 'true' ||
+      node.getAttribute('display') === 'true';
+
+    return isDisplay ? `$$\n${source}\n$$` : `$${source}$`;
   }
 
   function normalizeRange(range) {
@@ -68,9 +83,9 @@
   }
 
   function replaceMathWithSource(fragment) {
-    const mathNodes = fragment.querySelectorAll(MATH_SELECTOR);
+    const wrapperNodes = fragment.querySelectorAll(WRAPPER_SELECTOR);
 
-    for (const node of mathNodes) {
+    for (const node of wrapperNodes) {
       const source = formatMathSource(node);
 
       if (!source) {
@@ -78,6 +93,19 @@
       }
 
       const replacement = node.classList.contains('math-block') ? `\n${source}\n` : source;
+      node.replaceWith(document.createTextNode(replacement));
+    }
+
+    const renderedNodes = fragment.querySelectorAll(RENDERED_SELECTOR);
+
+    for (const node of renderedNodes) {
+      const source = formatMathSource(node);
+
+      if (!source) {
+        continue;
+      }
+
+      const replacement = node.dataset.mathDisplay === 'true' ? `\n${source}\n` : source;
       node.replaceWith(document.createTextNode(replacement));
     }
   }
@@ -115,6 +143,26 @@
     }
 
     return false;
+  }
+
+  function annotateRenderedMath() {
+    const mathItems = window.MathJax?.startup?.document?.math;
+
+    if (!mathItems) {
+      return;
+    }
+
+    for (const mathItem of mathItems) {
+      const root = mathItem?.typesetRoot;
+      const source = typeof mathItem?.math === 'string' ? mathItem.math.trim() : '';
+
+      if (!isElement(root) || !source) {
+        continue;
+      }
+
+      root.dataset.mathSource = source;
+      root.dataset.mathDisplay = mathItem.display ? 'true' : 'false';
+    }
   }
 
   function handleCopy(event) {
@@ -158,9 +206,24 @@
     copyHandlerInstalled = true;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startMathCopy, { once: true });
-  } else {
-    startMathCopy();
+  window.refreshMathCopySources = annotateRenderedMath;
+
+  function waitForMathJax(remainingPolls = MAX_READY_POLLS) {
+    if (window.MathJax?.startup?.promise) {
+      window.MathJax.startup.promise.then(() => {
+        annotateRenderedMath();
+        startMathCopy();
+      }).catch(() => {});
+      return;
+    }
+
+    if (remainingPolls <= 0) {
+      startMathCopy();
+      return;
+    }
+
+    window.setTimeout(() => waitForMathJax(remainingPolls - 1), READY_POLL_MS);
   }
+
+  waitForMathJax();
 })();
