@@ -10,8 +10,14 @@ categories:
 tags:
 - Autoregression
 - Diffusion
+- Flow
 - Sampling
 - Optimal Transport
+- Monge Problem
+- Kantorovich Problem
+- Earth Mover's Distance
+- Brenier's Theorem
+- Polar Factorization Theorem
 scholar:
   bibliography: posts/2026-04-19-autoregression-vs-diffusion-understanding-sampling-via-optimal-transport/autoregression-diffusion.bib
 llm-instructions: |
