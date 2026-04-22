@@ -1,0 +1,461 @@
+{% capture describe %}
+<p>
+  Both panels use the same cached source batch $X_0^B$ and target batch $X_1^B$. Only the pairing changes.
+  Faint gray traces show the full straight-line paths, aqua dots show the fixed endpoints, and the yellow dots with short arrows show the current interpolants $X_t$ and their velocity targets $X_1 - X_0$.
+</p>
+{% endcapture %}
+
+{% capture pathMarker %}<span class="botw__legend-line"></span>{% endcapture %}
+{% capture targetMarker %}<span class="botw__legend-dot botw__legend-dot--target"></span>{% endcapture %}
+{% capture currentMarker %}<span class="botw__legend-dot botw__legend-dot--current"></span>{% endcapture %}
+{% capture velocityMarker %}<span class="botw__legend-arrow"></span>{% endcapture %}
+
+{% capture legend %}
+  {% include iaw_legend_item.html marker_html=pathMarker label="full path" %}
+  {% include iaw_legend_item.html marker_html=targetMarker label="target batch $X_1^B$" %}
+  {% include iaw_legend_item.html marker_html=currentMarker label="current state $X_t$" %}
+  {% include iaw_legend_item.html marker_html=velocityMarker label="velocity target $X_1 - X_0$" %}
+{% endcapture %}
+
+{% capture visuals %}
+<div class="botw__layout iaw__figure-grid">
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="botw__panel-head">
+      <div class="iaw__figure-label botw__panel-label">Random Pairing</div>
+      <div class="botw__panel-meta" id="botwRandomCrossings">16 crossings</div>
+    </div>
+    <div class="iaw__canvas-shell botw__canvas-shell" id="botwRandomShell">
+      <canvas id="botwRandomCanvas"></canvas>
+    </div>
+  </section>
+
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="botw__panel-head">
+      <div class="iaw__figure-label botw__panel-label">Mini-Batch OT</div>
+      <div class="botw__panel-meta" id="botwOTCrossings">0 crossings</div>
+    </div>
+    <div class="iaw__canvas-shell botw__canvas-shell" id="botwOTShell">
+      <canvas id="botwOTCanvas"></canvas>
+    </div>
+  </section>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__split-strip botw__footer-strip">
+  <div class="iaw__split-pane">
+    <div class="iaw__slider-header">
+      <span>Interpolation Time $t$</span>
+      <span class="iaw__slider-readout" id="botwTimeReadout">t = 0.50</span>
+    </div>
+    {% include iaw_timeline_controls.html play_id="botwPlay" play_label="Play mini-batch interpolation animation" slider_id="botwSlider" min="0" max="1" step="0.005" value="0.5" variant="progress" %}
+  </div>
+  <div class="iaw__split-pane iaw__split-pane--divider">
+    <div class="iaw__metric-strip botw__metric-strip">
+      <div class="iaw__metric-pill">
+        <span class="iaw__metric-name">Random Cost</span>
+        <strong class="iaw__metric-value" id="botwRandomCost">32.86</strong>
+      </div>
+      <div class="iaw__metric-pill">
+        <span class="iaw__metric-name">Random Spread</span>
+        <strong class="iaw__metric-value" id="botwRandomSpread">1.68</strong>
+      </div>
+      <div class="iaw__metric-pill">
+        <span class="iaw__metric-name">OT Cost</span>
+        <strong class="iaw__metric-value iaw__metric-value--accent" id="botwOTCost">13.39</strong>
+      </div>
+      <div class="iaw__metric-pill">
+        <span class="iaw__metric-name">OT Spread</span>
+        <strong class="iaw__metric-value iaw__metric-value--accent" id="botwOTSpread">0.64</strong>
+      </div>
+    </div>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="batchOTFigure"
+    eyebrow="Finite-Batch Pairing"
+    title="Random Pairings vs Mini-Batch OT"
+    description=describe
+    legend=legend
+    visuals=visuals
+    stage_id="botwStage"
+    stage_style="height: auto; min-height: 280px; border: none; background: transparent;"
+    footer=footer
+%}
+
+<style>
+.botw__layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.botw__panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.botw__panel-label {
+  text-align: left;
+}
+
+.botw__panel-meta {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--iaw-muted);
+  white-space: nowrap;
+}
+
+.botw__canvas-shell {
+  aspect-ratio: 1.08 / 1;
+  min-height: 260px;
+}
+
+.botw__footer-strip {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+}
+
+.botw__metric-strip {
+  grid-template-columns: repeat(2, minmax(112px, 1fr));
+}
+
+.botw__legend-line {
+  width: 16px;
+  height: 0;
+  border-top: 2px solid color-mix(in srgb, var(--iaw-border) 86%, transparent);
+  opacity: 0.85;
+}
+
+.botw__legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.botw__legend-dot--target {
+  background: color-mix(in srgb, var(--iaw-target) 82%, transparent);
+}
+
+.botw__legend-dot--current {
+  background: var(--iaw-source-a);
+}
+
+.botw__legend-arrow {
+  position: relative;
+  width: 16px;
+  height: 2px;
+  background: color-mix(in srgb, var(--iaw-text) 58%, transparent);
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.botw__legend-arrow::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid color-mix(in srgb, var(--iaw-text) 58%, transparent);
+  border-right: 2px solid color-mix(in srgb, var(--iaw-text) 58%, transparent);
+  transform: translateY(-50%) rotate(45deg);
+  transform-origin: center;
+}
+
+@media (max-width: 860px) {
+  .botw__footer-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .botw__footer-strip .iaw__split-pane--divider {
+    padding-left: 0;
+    border-left: none;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--iaw-border);
+  }
+}
+
+@media (max-width: 720px) {
+  .botw__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .botw__panel-head {
+    gap: 0.45rem;
+  }
+
+  .botw__panel-label {
+    font-size: 0.76rem;
+  }
+
+  .botw__panel-meta {
+    font-size: 0.74rem;
+  }
+
+  .botw__canvas-shell {
+    min-height: 240px;
+  }
+
+  .botw__metric-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('batchOTFigure', function(root) {
+
+  const randomShell = root.querySelector('#botwRandomShell');
+  const randomCanvas = root.querySelector('#botwRandomCanvas');
+  const randomCtx = randomCanvas.getContext('2d');
+  const otShell = root.querySelector('#botwOTShell');
+  const otCanvas = root.querySelector('#botwOTCanvas');
+  const otCtx = otCanvas.getContext('2d');
+  const slider = root.querySelector('#botwSlider');
+  const playBtn = root.querySelector('#botwPlay');
+  const timeReadout = root.querySelector('#botwTimeReadout');
+  const randomCrossingsEl = root.querySelector('#botwRandomCrossings');
+  const otCrossingsEl = root.querySelector('#botwOTCrossings');
+  const randomCostEl = root.querySelector('#botwRandomCost');
+  const otCostEl = root.querySelector('#botwOTCost');
+  const randomSpreadEl = root.querySelector('#botwRandomSpread');
+  const otSpreadEl = root.querySelector('#botwOTSpread');
+
+  const sourcePoints = [
+    [1.08, 0.0], [0.9275, 0.5256], [0.3217, 0.7723], [-0.2963, 0.7113], [-0.6905, 0.3913],
+    [-0.92, 0.0], [-0.9675, -0.5483], [-0.3617, -0.8683], [0.2563, -0.6153], [0.6505, -0.3687]
+  ];
+  const targetPoints = [
+    [0.4751, 0.9928], [1.5473, -0.1128], [1.8863, 1.159], [0.1777, -0.3918], [1.8946, 0.2319],
+    [0.1535, 0.5784], [2.238, 0.7024], [0.956, -0.5262], [1.1336, 1.2238], [0.038, 0.1424]
+  ];
+  const randomAssignment = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const otAssignment = [6, 2, 8, 0, 5, 9, 3, 7, 1, 4];
+
+  const allPoints = sourcePoints.concat(targetPoints);
+  const allX = allPoints.map((point) => point[0]);
+  const allY = allPoints.map((point) => point[1]);
+  const padding = 0.42;
+  const mapScale = {
+    xMin: Math.min(...allX) - padding,
+    xMax: Math.max(...allX) + padding,
+    yMin: Math.min(...allY) - padding,
+    yMax: Math.max(...allY) + padding
+  };
+
+  let currentT = Number(slider.value) || 0.5;
+  let theme = IAW.getThemeColors(root);
+
+  const randomViewport = IAW.createStageViewport(randomShell, randomCanvas, randomCtx, mapScale);
+  const otViewport = IAW.createStageViewport(otShell, otCanvas, otCtx, mapScale);
+
+  function lerpPoint(source, target, t) {
+    return [
+      IAW.lerp(source[0], target[0], t),
+      IAW.lerp(source[1], target[1], t)
+    ];
+  }
+
+  function drawArrow(ctx, start, end, color) {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const length = Math.hypot(dx, dy);
+    if (length < 1e-6) return;
+
+    const ux = dx / length;
+    const uy = dy / length;
+    const headSize = 5;
+    const tail = {
+      x: end.x - ux * headSize,
+      y: end.y - uy * headSize
+    };
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.35;
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(tail.x, tail.y);
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(end.x, end.y);
+    ctx.lineTo(end.x - ux * headSize - uy * 2.6, end.y - uy * headSize + ux * 2.6);
+    ctx.lineTo(end.x - ux * headSize + uy * 2.6, end.y - uy * headSize - ux * 2.6);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function countCrossings(assignment) {
+    function orientation(a, b, c) {
+      return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+    }
+
+    function intersects(a, b, c, d) {
+      const o1 = orientation(a, b, c);
+      const o2 = orientation(a, b, d);
+      const o3 = orientation(c, d, a);
+      const o4 = orientation(c, d, b);
+      return ((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0)) && ((o3 > 0 && o4 < 0) || (o3 < 0 && o4 > 0));
+    }
+
+    let total = 0;
+
+    sourcePoints.forEach((source, i) => {
+      for (let j = i + 1; j < sourcePoints.length; j += 1) {
+        if (intersects(source, targetPoints[assignment[i]], sourcePoints[j], targetPoints[assignment[j]])) {
+          total += 1;
+        }
+      }
+    });
+
+    return total;
+  }
+
+  function computeCost(assignment) {
+    return sourcePoints.reduce((total, source, index) => {
+      const target = targetPoints[assignment[index]];
+      const dx = source[0] - target[0];
+      const dy = source[1] - target[1];
+      return total + dx * dx + dy * dy;
+    }, 0);
+  }
+
+  function computeLocalSpread(assignment, t) {
+    const currentPoints = sourcePoints.map((source, index) => lerpPoint(source, targetPoints[assignment[index]], t));
+    const velocities = sourcePoints.map((source, index) => [
+      targetPoints[assignment[index]][0] - source[0],
+      targetPoints[assignment[index]][1] - source[1]
+    ]);
+
+    let total = 0;
+
+    currentPoints.forEach((point, index) => {
+      let bestDistance = Infinity;
+      let neighbor = -1;
+
+      currentPoints.forEach((candidate, candidateIndex) => {
+        if (candidateIndex === index) return;
+        const dx = point[0] - candidate[0];
+        const dy = point[1] - candidate[1];
+        const dist = dx * dx + dy * dy;
+        if (dist < bestDistance) {
+          bestDistance = dist;
+          neighbor = candidateIndex;
+        }
+      });
+
+      if (neighbor >= 0) {
+        const dvx = velocities[index][0] - velocities[neighbor][0];
+        const dvy = velocities[index][1] - velocities[neighbor][1];
+        total += Math.hypot(dvx, dvy);
+      }
+    });
+
+    return total / currentPoints.length;
+  }
+
+  const randomCrossingsCount = countCrossings(randomAssignment);
+  const otCrossingsCount = countCrossings(otAssignment);
+  const randomCostBase = computeCost(randomAssignment);
+  const otCostBase = computeCost(otAssignment);
+
+  function getPalette() {
+    const colors = IAW.getTransport2DPalette(theme, {
+      pathAlpha: 0.22,
+      targetDotAlpha: 0.8
+    });
+
+    return {
+      path: colors.path,
+      targetDot: colors.targetDot,
+      currentDot: colors.movingDot,
+      arrow: IAW.toAlpha(theme.muted || theme.text || '#64748b', 0.78)
+    };
+  }
+
+  function drawPanel(ctx, viewport, assignment, palette) {
+    viewport.measure();
+    const rect = viewport.getRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    sourcePoints.forEach((source, index) => {
+      const target = targetPoints[assignment[index]];
+      IAW.drawTransportPath(ctx, viewport.mapPoint, source, target, {
+        color: palette.path,
+        lineWidth: 1
+      });
+    });
+
+    targetPoints.forEach((target) => {
+      const pTarget = viewport.mapPoint(target[0], target[1]);
+      IAW.drawCircle(ctx, pTarget.x, pTarget.y, 3.2, palette.targetDot);
+    });
+
+    sourcePoints.forEach((source, index) => {
+      const target = targetPoints[assignment[index]];
+      const current = lerpPoint(source, target, currentT);
+      const pCurrent = viewport.mapPoint(current[0], current[1]);
+      const pTip = viewport.mapPoint(
+        current[0] + 0.24 * (target[0] - source[0]),
+        current[1] + 0.24 * (target[1] - source[1])
+      );
+
+      drawArrow(ctx, pCurrent, pTip, palette.arrow);
+      IAW.drawCircle(ctx, pCurrent.x, pCurrent.y, 3.9, palette.currentDot);
+    });
+  }
+
+  function updateReadouts() {
+    const randomSpread = computeLocalSpread(randomAssignment, currentT);
+    const otSpread = computeLocalSpread(otAssignment, currentT);
+
+    timeReadout.textContent = `t = ${currentT.toFixed(2)}`;
+    randomCrossingsEl.textContent = `${randomCrossingsCount} crossings`;
+    otCrossingsEl.textContent = `${otCrossingsCount} crossings`;
+    randomCostEl.textContent = randomCostBase.toFixed(2);
+    otCostEl.textContent = otCostBase.toFixed(2);
+    randomSpreadEl.textContent = randomSpread.toFixed(2);
+    otSpreadEl.textContent = otSpread.toFixed(2);
+  }
+
+  function draw() {
+    const palette = getPalette();
+    drawPanel(randomCtx, randomViewport, randomAssignment, palette);
+    drawPanel(otCtx, otViewport, otAssignment, palette);
+  }
+
+  function renderFrame(t) {
+    currentT = Number(t);
+    updateReadouts();
+    draw();
+  }
+
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    draw();
+  });
+
+  window.addEventListener('resize', draw);
+
+  updateReadouts();
+  draw();
+
+  IAW.createPlaybackController({
+    button: playBtn,
+    slider: slider,
+    maxFrame: 1,
+    isTimeBased: true,
+    speed: 0.00055,
+    initialFrame: currentT,
+    onFrameChange: renderFrame
+  });
+
+  IAW.requestMathTypeset(root);
+});
+</script>
