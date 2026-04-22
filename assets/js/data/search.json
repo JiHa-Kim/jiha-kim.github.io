@@ -1,0 +1,5 @@
+---
+layout:
+swcache: true
+---
+{{ site.data.search_index_json }}

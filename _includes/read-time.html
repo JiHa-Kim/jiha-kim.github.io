@@ -1,16 +1,20 @@
 <!-- Calculate the post's reading time, and display the word count in tooltip -->
 
-{% assign words = include.content | strip_html | number_of_words: 'auto' %}
+{% assign words = page.readtime_words %}
+{% assign read_time = page.readtime_minutes %}
 
-<!-- words per minute -->
+{% unless words and read_time %}
+  {% assign words = include.content | strip_html | number_of_words: 'auto' %}
 
-{% assign wpm = 180 %}
-{% assign min_time = 1 %}
+  <!-- words per minute -->
+  {% assign wpm = 180 %}
+  {% assign min_time = 1 %}
 
-{% assign read_time = words | divided_by: wpm %}
+  {% assign read_time = words | divided_by: wpm %}
 
-{% unless read_time > 0 %}
-  {% assign read_time = min_time %}
+  {% unless read_time > 0 %}
+    {% assign read_time = min_time %}
+  {% endunless %}
 {% endunless %}
 
 {% capture read_prompt %}

@@ -1,0 +1,45 @@
+{%- comment -%}
+  Fast path for post summaries and the search index.
+  Falls back to the theme's original markdownify path if precomputed text is absent.
+{%- endcomment -%}
+
+{%- assign plain_text = post.plain_text_content -%}
+
+{%- if post.description and include.full_text != true -%}
+  {{- post.description -}}
+{%- elsif plain_text and plain_text != '' -%}
+  {%- assign content = plain_text -%}
+
+  {%- unless include.full_text -%}
+    {%- assign max_length = include.max_length | default: 200 -%}
+    {%- assign content = content | truncate: max_length -%}
+  {%- endunless -%}
+
+  {{- content -}}
+{%- else -%}
+  {%- assign content = post.content -%}
+
+  {%- if content contains '<td class="rouge-gutter gl"><pre class="lineno">' -%}
+    {%- assign content = content
+      | replace: '<td class="rouge-gutter gl"><pre class="lineno">',
+        '<!-- <td class="rouge-gutter gl"><pre class="lineno">'
+    -%}
+    {%- assign content = content | replace: '</td><td class="rouge-code">', '</td> --><td class="rouge-code">' -%}
+  {%- endif -%}
+
+  {%- assign content = content
+    | markdownify
+    | strip_html
+    | newline_to_br
+    | replace: '<br />', ' '
+    | strip_newlines
+    | strip
+  -%}
+
+  {%- unless include.full_text -%}
+    {%- assign max_length = include.max_length | default: 200 -%}
+    {%- assign content = content | truncate: max_length -%}
+  {%- endunless -%}
+
+  {{- content -}}
+{%- endif -%}
