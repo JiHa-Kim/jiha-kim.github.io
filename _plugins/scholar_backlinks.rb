@@ -1,17 +1,64 @@
 
+require "digest"
+
 module Jekyll
   class Scholar
     module Utilities
       alias_method :old_cite, :cite
       alias_method :old_bibliography_tag, :bibliography_tag
 
+      SCHOLAR_BACKLINKS_CACHE_VERSION = "2026-04-22-render-cache-v1".freeze
+
       def scholar_backlinks_config
         config['backlinks'] || { 'enabled' => false }
       end
 
-      # Cache rendered citations to avoid re-running expensive scholar logic
-      def citation_cache
-        @citation_cache ||= {}
+      def scholar_render_cache_key(*parts)
+        digest = Digest::SHA1.hexdigest(parts.flatten.compact.map(&:to_s).join("\0"))
+        "scholar-backlinks:#{SCHOLAR_BACKLINKS_CACHE_VERSION}:#{digest}"
+      end
+
+      def rendered_citation(keys, strip_wrappers: false)
+        cache_key = scholar_render_cache_key(
+          "citation",
+          style,
+          config["locale"],
+          bibtex_filters.join(","),
+          keys
+        )
+
+        cite_cache.getset(cache_key) do
+          items = keys.filter_map do |key|
+            next unless bibliography.key?(key)
+
+            entry = bibliography[key].dup
+            entry = entry.convert(*bibtex_filters) unless bibtex_filters.empty?
+            entry
+          end
+
+          rendered = render_citation(items)
+          if strip_wrappers
+            rendered = rendered.sub(/^#{Regexp.escape(csl_prefix)}/, "")
+            rendered = rendered.sub(/#{Regexp.escape(csl_suffix)}$/, "")
+          end
+          rendered
+        end
+      end
+
+      def cached_bibliography_reference(entry, index)
+        page = context.registers[:page] || {}
+        cache_key = scholar_render_cache_key(
+          "bibliography",
+          style,
+          config["locale"],
+          page["path"] || page["url"] || page["id"],
+          index,
+          entry.key
+        )
+
+        cite_cache.getset(cache_key) do
+          old_bibliography_tag(entry, index)
+        end
       end
 
       def cite(keys)
@@ -22,17 +69,12 @@ module Jekyll
         if config['separate_links']
           rendered_links = keys.map do |key|
             if bibliography.key?(key)
-              entry = bibliography[key].dup
-              entry = entry.convert(*bibtex_filters) unless bibtex_filters.empty?
-              
               idx = page['scholar_backlinks'][key].length + 1
               backref_id = "cite-#{key}-#{idx}"
               page['scholar_backlinks'][key] << backref_id
-              
-              rendered = (citation_cache[key] ||= render_citation([entry])
-                .sub(/^#{Regexp.escape(csl_prefix)}/, '')
-                .sub(/#{Regexp.escape(csl_suffix)}$/, ''))
-              
+
+              rendered = rendered_citation([key], strip_wrappers: true)
+
               link_to link_target_for(key), rendered, {
                 class: config['cite_class'],
                 id: backref_id
@@ -59,13 +101,7 @@ module Jekyll
               page['scholar_backlinks'][key] << primary_id
             end
 
-            items = keys.map { |k| bibliography[k] }.compact.map do |e|
-              e = e.dup
-              e = e.convert(*bibtex_filters) unless bibtex_filters.empty?
-              e
-            end
-            cache_key = keys.join(',')
-            rendered = (citation_cache[cache_key] ||= render_citation(items))
+            rendered = rendered_citation(valid_keys)
 
             link_to link_target_for(primary_key), rendered, {
               class: config['cite_class'],
@@ -78,7 +114,7 @@ module Jekyll
       end
 
       def bibliography_tag(entry, index)
-        reference = old_bibliography_tag(entry, index)
+        reference = cached_bibliography_reference(entry, index)
         
         # Append back-references if enabled
         return reference unless scholar_backlinks_config['enabled']

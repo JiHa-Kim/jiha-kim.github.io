@@ -49,20 +49,27 @@ module Jekyll
     PROTECT_RE = /((?:^\s*```.*?$)(?:.*?)(?:^\s*```$)|(?i:<pre[^>]*>.*?<\/pre>)|(?i:<div class="math-block"[^>]*>.*?<\/div>)|(?i:<span class="math-inline"[^>]*>.*?<\/span>)|(?:(?<!`)`[^`\n]+`(?!`)))/m
 
     def generate(site)
-      site.posts.docs.each { |doc| process_doc(doc) }
-      site.pages.each { |page| process_doc(page) }
+      seen = {}
+
+      site.pages.each { |page| process_doc(page, seen) }
       site.collections.each do |_, collection|
-        collection.docs.each { |doc| process_doc(doc) }
+        collection.docs.each { |doc| process_doc(doc, seen) }
       end
     end
 
-    def process_doc(doc)
+    def process_doc(doc, seen = nil)
+      if seen
+        return if seen[doc.object_id]
+        seen[doc.object_id] = true
+      end
+
+      return if doc.data['obsidian_preprocessed']
       return unless doc.data['layout'] # Only process content with layouts
       return unless doc.content && !doc.content.empty?
 
       # Optimization: Skip if no Obsidian-style elements exist
       # This saves significant regex work on simple pages.
-      has_algorithm = doc.content.match?(/^\s*```(?:pseudo|pseudocode|algorithm)\b/m)
+      has_algorithm = doc.content.include?("```") && doc.content.match?(/^\s*```(?:pseudo|pseudocode|algorithm)\b/m)
       return unless doc.content.include?('>') || doc.content.include?('$') || has_algorithm
 
       # Use Jekyll's persistent cache (stored in .jekyll-cache/)
@@ -76,6 +83,8 @@ module Jekyll
         Jekyll.logger.debug "ObsidianPreprocess:", "Cache miss for #{doc.relative_path}, transforming..."
         transform_markdown(doc.content, doc)
       end
+
+      doc.data['obsidian_preprocessed'] = true
     end
 
     def transform_markdown(content, doc)
@@ -513,13 +522,29 @@ module Jekyll
 end
 
 # Register post_convert hook for HTML refactorings
+OBSIDIAN_HTML_REFACTORER = Jekyll::ObsidianPreprocess.new(nil)
+
 Jekyll::Hooks.register [:pages, :documents], :post_convert do |doc|
   # Only process full HTML content docs
-  if doc.content
-    preprocessor = Jekyll::ObsidianPreprocess.new(nil)
-    doc.content = preprocessor.refactor_tables(doc.content)
-    doc.content = preprocessor.refactor_checkboxes(doc.content)
-    doc.content = preprocessor.refactor_images(doc.content, doc)
-    doc.content = preprocessor.refactor_headings(doc.content)
+  next unless doc.content&.include?("<")
+
+  content = doc.content
+
+  if content.include?("<table")
+    content = OBSIDIAN_HTML_REFACTORER.refactor_tables(content)
   end
+
+  if content.include?('type="checkbox"')
+    content = OBSIDIAN_HTML_REFACTORER.refactor_checkboxes(content)
+  end
+
+  if content.include?("<img ")
+    content = OBSIDIAN_HTML_REFACTORER.refactor_images(content, doc)
+  end
+
+  if content.include?("<h2") || content.include?("<h3") || content.include?("<h4") || content.include?("<h5")
+    content = OBSIDIAN_HTML_REFACTORER.refactor_headings(content)
+  end
+
+  doc.content = content
 end
