@@ -197,11 +197,11 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 > For example, if a point $x$ is at the $70\%$ quantile of the source distribution, then it should be sent to the $70\%$ quantile of the target distribution.
 
 > [!problem] Continuous 1D OT
-> Let $F$ and $G$ be the source and target CDFs. For the same class of 1D convex costs $c(x,y)=h(x-y)$, we seek a map $T$ that sends the source distribution to the target distribution and, among all such maps, has the smallest transport cost:
-> $$ \min_T \int c(x, T(x))\,dF(x) $$
+> Let $P$ and $Q$ be 1D source and target laws with CDFs $F$ and $G$. For the same class of 1D convex costs $c(x,y)=h(x-y)$, we seek a map $T$ that sends the source law to the target law and, among all such maps, has the smallest transport cost:
+> $$ \min_T \int c(x, T(x))\,dP(x) $$
 > subject to
-> $$ T_\sharp F = G. $$
-> In words: if $X$ has source CDF $F$, then $T(X)$ should have target CDF $G$.
+> $$ T_\sharp P = Q. $$
+> In words: if $X \sim P$, then $T(X)$ should have CDF $G$.
 
 > [!solution] Quantile Matching
 > For 1D convex costs, the optimal map factorizes through a uniform base $u \sim \mathcal{U}(0,1)$:
@@ -210,9 +210,9 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 > 2. **Pushforward**: Sample $T(x) = G^{-1}(u)$. This exactly recovers inverse transform sampling.
 
 > [!proof]-
-> First check that the map has the right output distribution. If $X \sim F$ and $U = F(X)$, then $U \sim \mathcal{U}(0,1)$. Define $Y = G^{-1}(U) = G^{-1}(F(X))$. Then for any $t$,
+> First check that the map has the right output distribution. If $X \sim P$ and $U = F(X)$, then $U \sim \mathcal{U}(0,1)$. Define $Y = G^{-1}(U) = G^{-1}(F(X))$. Then for any $t$,
 > $$ P(Y \le t) = P(G^{-1}(U) \le t) = P(U \le G(t)) = G(t), $$
-> so $Y$ has CDF $G$. Therefore $T_\sharp F = G$.
+> so $Y$ has CDF $G$. Therefore $T_\sharp P = Q$.
 >
 > Now check optimality. For each $m$, take the equally spaced quantile levels $u_k = \frac{k-\frac12}{m}$ and define
 > $$ x_k = F^{-1}(u_k), \qquad y_k = G^{-1}(u_k), \qquad k=1,\dots,m. $$
@@ -221,7 +221,7 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 > over all permutations $\sigma$. As $m \to \infty$, these sums converge to the quantile integral
 > $$ \int_0^1 h\bigl(F^{-1}(u) - G^{-1}(u)\bigr)\,du, $$
 > which is exactly
-> $$ \int h(x - T(x))\,dF(x) \qquad \text{for } T(x)=G^{-1}(F(x)). $$
+> $$ \int h(x - T(x))\,dP(x) \qquad \text{for } T(x)=G^{-1}(F(x)). $$
 > So equal-quantile matching is optimal in the continuous problem as well.
 >
 > If $h$ is strictly convex, such as $h(t)=t^2$, this optimizer is unique up to sets of measure zero. For $h(t)=|t|$, ties can occur.
@@ -352,7 +352,7 @@ Brenier chooses the optimal **endpoint map**. Dynamic OT asks for the optimal **
 > So instead of optimizing one endpoint map directly, we optimize over all density paths and velocity fields that transport $\mu_0$ to $\mu_1$ with minimal kinetic action {% cite benamouBrenierComputationalFluid2000 %}.
 
 > [!remark] Eulerian and Lagrangian Views
-> The formula above is **Eulerian**: it works with a density field $\rho_t$ and a velocity field $v_t$ over space-time. When the Brenier map $T$ exists, the same optimizer can be written **Lagrangianly** by following particles
+> The formula above is **Eulerian**: it works with a density field $\rho_t$ and a velocity field $v_t$ over space-time. When the Brenier map $T$ exists, the same optimizer can be written in **Lagrangian coordinates** by following particles
 > $$
 > X_t=(1-t)X_0+t\,T(X_0), \qquad X_0\sim \mu_0,
 > $$
@@ -363,7 +363,7 @@ Brenier chooses the optimal **endpoint map**. Dynamic OT asks for the optimal **
 > $$
 > \inf_{P:\,P_0=\mu_0,\ P_1=\mu_1}\operatorname{KL}(P \Vert R),
 > $$
-> where $R$ is a reference diffusion or more general reference process on path space. This is the **Schrödinger bridge** problem. At finite noise it selects the most likely stochastic dynamics compatible with the endpoint marginals; in the zero-noise limit it recovers OT. This is the right language for diffusion-style bridge methods and for later multi-time questions where the reference process is part of the model, not just a numerical regularizer {% cite leonardSurveySchrodinger2013 chenRelationOptimalTransport2014 deBortoliDiffusionSchrodingerBridge2021 tongSimulationFreeSchrodinger2024 %}.
+> where $R$ is a reference diffusion or more general reference process on path space. This is the **Schrödinger bridge** problem. At finite noise it selects the most likely stochastic dynamics compatible with the endpoint marginals. For the standard Brownian reference, the small-noise limit recovers quadratic OT. This is the right language for diffusion-style bridge methods and for later multi-time questions where the reference process is part of the model, not just a numerical regularizer {% cite leonardSurveySchrodinger2013 chenRelationOptimalTransport2014 deBortoliDiffusionSchrodingerBridge2021 tongSimulationFreeSchrodinger2024 %}.
 
 Continuous normalizing flows live in the same continuity-equation formalism, but their training objectives do **not** minimize the Benamou-Brenier action by default. They learn an admissible transport dynamics, not necessarily the Wasserstein geodesic.
 
@@ -527,7 +527,7 @@ The same tiny transport example makes this lower-bound picture concrete:
 Even if a generator already matches the correct density, its internal geometry need not be transport-optimal.
 
 > [!corollary] Polar Factorization Theorem
-> Under the same regularity assumptions as Brenier's theorem, any exact generator $F$ with $F_\sharp P_{\text{noise}} = P_{\text{data}}$ can be written as
+> Under the same regularity assumptions as Brenier's theorem, any exact generator $F$ with $F_\sharp P_{\text{noise}} = P_{\text{data}}$ can be factorized $P_{\text{noise}}$-almost everywhere as
 > $$ F=\nabla\psi \circ M, $$
 > where $\nabla\psi$ is the Brenier map and $M$ preserves the source law: $M_\sharp P_{\text{noise}}=P_{\text{noise}}$.
 >
