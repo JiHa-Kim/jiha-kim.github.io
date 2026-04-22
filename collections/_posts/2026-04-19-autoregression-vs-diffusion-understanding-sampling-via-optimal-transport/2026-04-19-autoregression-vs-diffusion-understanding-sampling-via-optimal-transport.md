@@ -429,7 +429,7 @@ the target velocity is the constant displacement $X_1-X_0$.
 > If $q=P_{\text{noise}}\otimes P_{\text{data}}$, we get the usual independent-pairing target.
 > If $q$ is chosen from an OT plan, we get an OT-informed target.
 > If the conditional paths are Brownian bridges weighted by an entropic OT coupling, we move to Schrödinger-bridge variants.
-> So flow matching is a framework for turning a chosen coupling-and-path construction into a regression loss; it is not automatically the Benamou-Brenier geodesic {% cite lipmanFlowMatchingGenerative2023 liuFlowStraightFast2022 tongSimulationFreeSchrodinger2024 deBortoliDiffusionSchrodingerBridge2021 %}.
+> So flow matching is a framework for turning a chosen coupling-and-path construction into a regression loss; it is not automatically the Benamou-Brenier geodesic {% cite lipmanFlowMatchingGenerative2023 liuFlowStraightFast2022 tongSimulationFreeSchrodinger2024 deBortoliDiffusionSchrodingerBridge2021 %}. However, by parameterizing the vector field via convex functions, **Optimal Flow Matching** {% cite kornilovOptimalFlowMatching2024 %} is able to recover the straight OT displacement in just one FM step.
 
 ## Practical OT: Regularized Couplings
 
@@ -474,7 +474,7 @@ On a small cached batch, the contrast is easiest to see directly:
 
 ## One-Step Maps
 
-One-step generators try to learn the transport map directly, rather than integrating an ODE or running many denoising steps at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} are a concrete example.
+One-step generators try to learn the transport map directly, rather than integrating an ODE or running many denoising steps at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} and **Optimal Flow Matching** {% cite kornilovOptimalFlowMatching2024 %} are concrete examples.
 
 > [!definition] Drifting Model
 > A drifting model parameterizes a one-step generator
