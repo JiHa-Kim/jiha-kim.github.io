@@ -1,0 +1,594 @@
+{% capture describe %}
+<p>
+  Think of a tiny terrain generator. The target distribution lives over coherent terrains in $x$-space, which is hard to sample from directly. The reduction is to sample a tiny easy seed, then let one deterministic generator produce the terrain.
+</p>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="srw__layout iaw__figure-grid">
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Direct Final-Space Sampling</div>
+    <div class="iaw__canvas-shell srw__source-shell" id="srwDirectSourceShell">
+      <div class="srw__slot-grid" id="srwSlotGrid">
+        {% for _ in (1..24) %}
+        <div class="srw__slot">·</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="srw__down-arrow" id="srwDirectArrow" aria-hidden="true">
+      <i class="fas fa-arrow-down"></i>
+    </div>
+    <div class="iaw__canvas-shell srw__terrain-shell" id="srwDirectTerrainShell">
+      <canvas id="srwDirectCanvas"></canvas>
+    </div>
+  </section>
+
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Easy Seed + Generator</div>
+    <div class="iaw__canvas-shell srw__source-shell srw__source-shell--generator" id="srwEasySourceShell">
+      <div class="srw__dice-row">
+        <i class="fas fa-dice-one srw__die" id="srwDie1" aria-hidden="true"></i>
+        <i class="fas fa-dice-two srw__die" id="srwDie2" aria-hidden="true"></i>
+        <div class="srw__flow-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></div>
+        <div class="srw__black-box" id="srwBlackBox" aria-label="generator">
+          <i class="fas fa-cogs"></i>
+        </div>
+      </div>
+    </div>
+    <div class="srw__down-arrow" id="srwEasyArrow" aria-hidden="true">
+      <i class="fas fa-arrow-down"></i>
+    </div>
+    <div class="iaw__canvas-shell srw__terrain-shell" id="srwEasyTerrainShell">
+      <canvas id="srwProceduralCanvas"></canvas>
+    </div>
+  </section>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="srw__footer-actions">
+  <button type="button" class="btn btn-primary" id="srwSampleBtn">Sample!</button>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="samplingReductionFigure"
+    eyebrow="Generative Reduction"
+    title="Hard Samples from Easy Randomness"
+    description=describe
+    visuals=visuals
+    footer=footer
+    stage_id="srwStage"
+    stage_style="height: auto; min-height: 260px; border: none; background: transparent;"
+%}
+
+<style>
+.srw__layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0;
+  row-gap: 0.85rem;
+  align-items: stretch;
+}
+
+.srw__source-shell,
+.srw__terrain-shell {
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.srw__source-shell {
+  height: auto;
+  min-height: 154px;
+  padding: 0.72rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.srw__terrain-shell {
+  height: 228px;
+  min-height: 228px;
+}
+
+.srw__source-shell.is-active,
+.srw__terrain-shell.is-active {
+  border-color: color-mix(in srgb, var(--iaw-primary) 44%, var(--iaw-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--iaw-primary) 12%, transparent);
+}
+
+.srw__slot-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.36rem;
+  width: 100%;
+  max-width: 18rem;
+  margin: 0 auto;
+}
+
+.srw__slot {
+  min-height: 1.62rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--iaw-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--iaw-surface) 76%, var(--iaw-bg));
+  font-family: var(--font-family-monospace, monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--iaw-muted);
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.srw__slot.is-active {
+  background: color-mix(in srgb, var(--iaw-source-a) 16%, var(--iaw-bg));
+  border-color: color-mix(in srgb, var(--iaw-source-a) 42%, var(--iaw-border));
+  color: var(--iaw-text);
+  transform: translateY(-1px);
+}
+
+.srw__slot.is-settled {
+  background: color-mix(in srgb, var(--iaw-border) 22%, var(--iaw-bg));
+  color: var(--iaw-text);
+}
+
+.srw__dice-row {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  gap: 0.78rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.srw__die {
+  display: block;
+  width: 2.5rem;
+  text-align: center;
+  font-size: 2.2rem;
+  line-height: 1;
+  color: var(--iaw-text);
+  transition: color 0.18s ease, transform 0.18s ease, opacity 0.18s ease;
+}
+
+.srw__die.is-rolling {
+  color: var(--iaw-source-a);
+  transform: translateY(-1px) scale(1.03);
+}
+
+.srw__flow-arrow {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--iaw-muted);
+  text-align: center;
+}
+
+.srw__flow-arrow i {
+  display: block;
+}
+
+.srw__black-box {
+  position: relative;
+  min-width: 5rem;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, black 72%, var(--iaw-border));
+  background: #111111;
+  color: #f8fafc;
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+[data-mode="dark"] .srw__black-box {
+  background: #0a0a0a;
+}
+
+.srw__black-box.is-active {
+  border-color: color-mix(in srgb, var(--iaw-primary) 68%, white 8%);
+  background: color-mix(in srgb, #111111 72%, var(--iaw-primary) 28%);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--iaw-primary) 18%, transparent),
+    0 10px 28px -18px color-mix(in srgb, var(--iaw-primary) 55%, transparent);
+  transform: translateY(-1px) scale(1.03);
+}
+
+.srw__black-box i {
+  font-size: 1.22rem;
+}
+
+.srw__black-box.is-active i {
+  animation: srw__gear-spin 0.9s linear infinite;
+}
+
+.srw__down-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  color: var(--iaw-muted);
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.srw__down-arrow i {
+  font-size: 1.3rem;
+}
+
+.srw__down-arrow.is-active {
+  color: var(--iaw-primary);
+  transform: translateY(1px);
+}
+
+.srw__footer-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.srw__footer-actions .btn {
+  min-width: 126px;
+}
+
+@keyframes srw__gear-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 860px) {
+  .srw__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .srw__source-shell {
+    min-height: 146px;
+  }
+
+  .srw__terrain-shell {
+    height: 198px;
+    min-height: 198px;
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('samplingReductionFigure', function(root) {
+
+  const directCanvas = root.querySelector('#srwDirectCanvas');
+  const proceduralCanvas = root.querySelector('#srwProceduralCanvas');
+  const directCtx = directCanvas.getContext('2d');
+  const proceduralCtx = proceduralCanvas.getContext('2d');
+  const directSourceShell = root.querySelector('#srwDirectSourceShell');
+  const easySourceShell = root.querySelector('#srwEasySourceShell');
+  const directTerrainShell = root.querySelector('#srwDirectTerrainShell');
+  const easyTerrainShell = root.querySelector('#srwEasyTerrainShell');
+  const directArrow = root.querySelector('#srwDirectArrow');
+  const easyArrow = root.querySelector('#srwEasyArrow');
+  const slots = Array.from(root.querySelectorAll('.srw__slot'));
+  const die1El = root.querySelector('#srwDie1');
+  const die2El = root.querySelector('#srwDie2');
+  const blackBox = root.querySelector('#srwBlackBox');
+  const sampleBtn = root.querySelector('#srwSampleBtn');
+
+  let theme = IAW.getThemeColors(root);
+  let timeouts = [];
+  let intervals = [];
+  let lastTerrainGrid = null;
+
+  function rememberTimeout(id) {
+    timeouts.push(id);
+    return id;
+  }
+
+  function rememberInterval(id) {
+    intervals.push(id);
+    return id;
+  }
+
+  function clearTimers() {
+    timeouts.forEach((id) => window.clearTimeout(id));
+    intervals.forEach((id) => window.clearInterval(id));
+    timeouts = [];
+    intervals = [];
+  }
+
+  function hashValue(seed, x, y, salt = 0) {
+    const raw = Math.sin(seed * 731.7 + x * 121.4 + y * 77.9 + salt * 19.3) * 43758.5453;
+    return raw - Math.floor(raw);
+  }
+
+  function resizeCanvas(canvas, ctx) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return rect;
+  }
+
+  function clamp01(value) {
+    return Math.max(0, Math.min(1, value));
+  }
+
+  function sampleTerrainHeight(seed, nx, ny) {
+    const peakA = { x: 0.18 + 0.52 * hashValue(seed, 1, 0, 3), y: 0.18 + 0.52 * hashValue(seed, 2, 0, 4) };
+    const peakB = { x: 0.18 + 0.52 * hashValue(seed, 3, 0, 5), y: 0.18 + 0.52 * hashValue(seed, 4, 0, 6) };
+    const ridge = 0.18 + 0.18 * hashValue(seed, 5, 0, 7);
+    const phase = hashValue(seed, 6, 0, 8) * Math.PI * 2;
+    const dxA = nx - peakA.x;
+    const dyA = ny - peakA.y;
+    const dxB = nx - peakB.x;
+    const dyB = ny - peakB.y;
+    const hillA = 0.54 * Math.exp(-(dxA * dxA + dyA * dyA) / 0.06);
+    const hillB = 0.42 * Math.exp(-(dxB * dxB + dyB * dyB) / 0.04);
+    const ridgeWave = ridge * Math.sin((1.4 + 0.7 * hashValue(seed, 7, 0, 9)) * Math.PI * nx + phase);
+    const tilt = 0.16 * (1 - ny);
+    const basin = 0.1 * Math.cos(Math.PI * 1.3 * ny + phase * 0.4);
+    return clamp01(0.12 + hillA + hillB + 0.12 * ridgeWave + tilt + basin);
+  }
+
+  function buildTerrainGrid(seed) {
+    const rows = 4;
+    const cols = 6;
+    return Array.from({ length: rows }, (_, row) => Array.from({ length: cols }, (_, col) => {
+      const nx = col / (cols - 1);
+      const ny = row / (rows - 1);
+      return Math.round(9 * sampleTerrainHeight(seed, nx, ny));
+    }));
+  }
+
+  function getTerrainPalette(height) {
+    const hue = 90 - height * 38;
+    const sat = 34 + height * 20;
+    const light = 36 + height * 16;
+    return {
+      top: `hsl(${hue.toFixed(1)} ${sat.toFixed(1)}% ${light.toFixed(1)}%)`,
+      west: `hsl(${hue.toFixed(1)} ${(sat - 4).toFixed(1)}% ${(light - 9).toFixed(1)}%)`,
+      south: `hsl(${hue.toFixed(1)} ${(sat - 10).toFixed(1)}% ${(light - 14).toFixed(1)}%)`
+    };
+  }
+
+  function drawPolygon(ctx, points, fillStyle, strokeStyle = null, lineWidth = 0.8) {
+    if (!points || points.length < 3) return;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i += 1) {
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fillStyle;
+    ctx.fill();
+
+    if (strokeStyle) {
+      ctx.strokeStyle = strokeStyle;
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+    }
+  }
+
+  function drawTerrain(ctx, canvas, grid) {
+    const rect = resizeCanvas(canvas, ctx);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const normalizedGrid = grid.map((row) => row.map((value) => value / 9));
+    const maxHeight = Math.max(...normalizedGrid.flat());
+    const marginX = 18;
+    const marginY = 16;
+    const sxFromWidth = Math.max((rect.width - marginX * 2) / (cols + rows), 1);
+    const sxFromHeight = Math.max((rect.height - marginY * 2) / ((cols + rows) * 0.54 + Math.max(maxHeight, 0.08) * 1.55), 1);
+    const sx = Math.min(sxFromWidth, sxFromHeight);
+    const sy = sx * 0.54;
+    const sz = sx * 1.55;
+    const projectedMinX = -rows * sx;
+    const projectedMaxX = cols * sx;
+    const projectedMinY = -Math.max(maxHeight, 0.08) * sz;
+    const projectedMaxY = (rows + cols) * sy;
+    const spanX = projectedMaxX - projectedMinX;
+    const spanY = projectedMaxY - projectedMinY;
+    const originX = marginX + (rect.width - marginX * 2 - spanX) / 2 - projectedMinX;
+    const originY = marginY + (rect.height - marginY * 2 - spanY) / 2 - projectedMinY;
+    const stroke = IAW.toAlpha(theme.border, 0.24);
+
+    function project(col, row, z) {
+      return {
+        x: originX + (col - row) * sx,
+        y: originY + (col + row) * sy - z * sz
+      };
+    }
+
+    for (let sum = 0; sum <= rows + cols - 2; sum += 1) {
+      for (let row = 0; row < rows; row += 1) {
+        const col = sum - row;
+        if (col < 0 || col >= cols) continue;
+
+        const heightValue = normalizedGrid[row][col];
+        const h = 0.08 + heightValue * 0.92;
+        const palette = getTerrainPalette(heightValue);
+        const nw = project(col, row, h);
+        const ne = project(col + 1, row, h);
+        const se = project(col + 1, row + 1, h);
+        const sw = project(col, row + 1, h);
+
+        const westNeighbor = col > 0 ? (0.08 + normalizedGrid[row][col - 1] * 0.92) : 0;
+        if (h > westNeighbor + 1e-6) {
+          const nwLow = project(col, row, westNeighbor);
+          const swLow = project(col, row + 1, westNeighbor);
+          drawPolygon(ctx, [nw, sw, swLow, nwLow], palette.west, stroke);
+        }
+
+        const southNeighbor = row < rows - 1 ? (0.08 + normalizedGrid[row + 1][col] * 0.92) : 0;
+        if (h > southNeighbor + 1e-6) {
+          const swLow = project(col, row + 1, southNeighbor);
+          const seLow = project(col + 1, row + 1, southNeighbor);
+          drawPolygon(ctx, [sw, se, seLow, swLow], palette.south, stroke);
+        }
+
+        drawPolygon(ctx, [nw, ne, se, sw], palette.top, stroke);
+      }
+    }
+  }
+
+  function drawFlatTerrain() {
+    const flatGrid = Array.from({ length: 4 }, () => Array(6).fill(0));
+    drawTerrain(directCtx, directCanvas, flatGrid);
+    drawTerrain(proceduralCtx, proceduralCanvas, flatGrid);
+  }
+
+  function clearActiveClasses() {
+    [directSourceShell, easySourceShell, directTerrainShell, easyTerrainShell, directArrow, easyArrow].forEach((node) => {
+      node.classList.remove('is-active');
+    });
+    blackBox.classList.remove('is-active');
+    die1El.classList.remove('is-rolling');
+    die2El.classList.remove('is-rolling');
+  }
+
+  function resetSlots() {
+    slots.forEach((slot) => {
+      slot.textContent = '·';
+      slot.classList.remove('is-active', 'is-settled');
+    });
+  }
+
+  function dieFaceIcon(value) {
+    const faces = [
+      'fa-dice-one',
+      'fa-dice-two',
+      'fa-dice-three',
+      'fa-dice-four',
+      'fa-dice-five',
+      'fa-dice-six'
+    ];
+    const index = Math.max(1, Math.min(6, Number(value))) - 1;
+    return faces[index];
+  }
+
+  function setDice(left, right) {
+    const die1Rolling = die1El.classList.contains('is-rolling');
+    const die2Rolling = die2El.classList.contains('is-rolling');
+    die1El.className = `fas ${dieFaceIcon(left)} srw__die`;
+    die2El.className = `fas ${dieFaceIcon(right)} srw__die`;
+    if (die1Rolling) die1El.classList.add('is-rolling');
+    if (die2Rolling) die2El.classList.add('is-rolling');
+  }
+
+  function flash(node, duration = 260) {
+    node.classList.add('is-active');
+    rememberTimeout(window.setTimeout(() => node.classList.remove('is-active'), duration));
+  }
+
+  function renderCurrent() {
+    if (!lastTerrainGrid) {
+      drawFlatTerrain();
+      return;
+    }
+    drawTerrain(directCtx, directCanvas, lastTerrainGrid);
+    drawTerrain(proceduralCtx, proceduralCanvas, lastTerrainGrid);
+  }
+
+  function startSample() {
+    const directStepMs = 150;
+    const diceStageMs = 240;
+    const generatorStageMs = 820;
+    const proceduralRevealMs = diceStageMs + generatorStageMs;
+
+    clearTimers();
+    sampleBtn.disabled = true;
+    lastTerrainGrid = null;
+    clearActiveClasses();
+    resetSlots();
+    setDice(1, 2);
+    drawFlatTerrain();
+
+    const die1 = 1 + Math.floor(Math.random() * 6);
+    const die2 = 1 + Math.floor(Math.random() * 6);
+    const seed = ((die1 - 1) * 6 + (die2 - 1)) / 35;
+    const terrainGrid = buildTerrainGrid(seed);
+
+    directSourceShell.classList.add('is-active');
+    directArrow.classList.add('is-active');
+    easySourceShell.classList.add('is-active');
+
+    const rollInterval = rememberInterval(window.setInterval(() => {
+      setDice(1 + Math.floor(Math.random() * 6), 1 + Math.floor(Math.random() * 6));
+    }, 90));
+
+    rememberTimeout(window.setTimeout(() => {
+      window.clearInterval(rollInterval);
+      die1El.classList.remove('is-rolling');
+      die2El.classList.remove('is-rolling');
+      setDice(die1, die2);
+      blackBox.classList.add('is-active');
+      easyArrow.classList.add('is-active');
+    }, diceStageMs));
+
+    die1El.classList.add('is-rolling');
+    die2El.classList.add('is-rolling');
+
+    function finishDirectSampling() {
+      const flatHeights = terrainGrid.flat();
+      slots.forEach((slot, index) => {
+        const value = flatHeights[Math.min(index, flatHeights.length - 1)];
+        slot.textContent = String(value);
+        slot.classList.remove('is-active');
+        slot.classList.add('is-settled');
+      });
+      drawTerrain(directCtx, directCanvas, terrainGrid);
+      directSourceShell.classList.remove('is-active');
+      directArrow.classList.remove('is-active');
+      flash(directTerrainShell, 420);
+      sampleBtn.disabled = false;
+    }
+
+    let slotIndex = 0;
+    const slotInterval = rememberInterval(window.setInterval(() => {
+      slots.forEach((slot, index) => {
+        if (index < slotIndex) {
+          slot.classList.remove('is-active');
+          slot.classList.add('is-settled');
+        } else if (index === slotIndex) {
+          slot.textContent = String(Math.floor(Math.random() * 10));
+          slot.classList.add('is-active');
+          slot.classList.remove('is-settled');
+        }
+      });
+
+      slotIndex += 1;
+      if (slotIndex >= slots.length) {
+        window.clearInterval(slotInterval);
+        rememberTimeout(window.setTimeout(() => {
+          finishDirectSampling();
+        }, Math.round(directStepMs * 0.4)));
+      }
+    }, directStepMs));
+
+    rememberTimeout(window.setTimeout(() => {
+      lastTerrainGrid = terrainGrid;
+      drawTerrain(proceduralCtx, proceduralCanvas, terrainGrid);
+      easySourceShell.classList.remove('is-active');
+      easyArrow.classList.remove('is-active');
+      blackBox.classList.remove('is-active');
+      flash(easyTerrainShell, 360);
+    }, proceduralRevealMs));
+  }
+
+  sampleBtn.addEventListener('click', startSample);
+
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    renderCurrent();
+  });
+
+  window.addEventListener('resize', renderCurrent);
+
+  setDice(1, 2);
+  resetSlots();
+  drawFlatTerrain();
+  IAW.requestMathTypeset(root);
+});
+</script>
