@@ -182,6 +182,7 @@ IAW.mountFigure('polarFactorizationFigure', function(root) {
   let activePerm = 'id';
   let currentT = 0;
   let theme = IAW.getThemeColors(root);
+  let playback = null;
 
   function getExtent(points, padding = 0.14) {
     const xs = points.map((point) => point[0]);
@@ -358,9 +359,11 @@ IAW.mountFigure('polarFactorizationFigure', function(root) {
 
   IAW.bindSegmentedControl(segBtns, (button) => {
     activePerm = button.dataset.perm;
-    slider.value = '0';
-    renderFrame(0);
-    updateReadouts();
+    if (playback) playback.setFrame(0, { notify: true, stopPlayback: true });
+    else {
+      renderFrame(0);
+      updateReadouts();
+    }
   });
 
   IAW.observeTheme(() => {
@@ -373,7 +376,7 @@ IAW.mountFigure('polarFactorizationFigure', function(root) {
   updateReadouts();
   draw();
 
-  IAW.createPlaybackController({
+  playback = IAW.createPlaybackController({
     button: playBtn,
     slider: slider,
     maxFrame: 1,

@@ -107,6 +107,7 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
   let currentMapType = 'kr';
   let currentT = 0;
   let theme = IAW.getThemeColors(root);
+  let playback = null;
   const viewport = IAW.createStageViewport(stage, canvas, ctx, mapScale);
 
   function getVizColors() {
@@ -177,7 +178,8 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
 
   IAW.bindSegmentedControl(segBtns, (button) => {
       currentMapType = button.dataset.map;
-      draw();
+      if (playback) playback.setFrame(0, { notify: true, stopPlayback: true });
+      else renderFrame(0);
   });
 
   IAW.observeTheme(() => {
@@ -193,7 +195,7 @@ IAW.mountFigure('continuousTransportFigure', function(root) {
   viewport.measure();
   draw();
 
-  IAW.createPlaybackController({
+  playback = IAW.createPlaybackController({
     button: playBtn,
     slider: slider,
     maxFrame: 1.0,
