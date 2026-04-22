@@ -1,20 +1,3 @@
-@article{brenierPolarFactorizationMonotone1991,
-  title = {Polar Factorization and Monotone Rearrangement of Vector-valued Functions},
-  author = {Brenier, Yann},
-  year = 1991,
-  month = jun,
-  journal = {Communications on Pure and Applied Mathematics},
-  volume = {44},
-  number = {4},
-  pages = {375--417},
-  issn = {0010-3640, 1097-0312},
-  doi = {10.1002/cpa.3160440402},
-  url = {https://onlinelibrary.wiley.com/doi/10.1002/cpa.3160440402},
-  urldate = {2026-04-20},
-  abstract = {Given a probability space ( X , p ) and a bounded domain R in R d equipped with the Lebesgue measure 1 . I (normalized so that 10I = I ), it is shown (under additional technical assumptions on X and Q) that for every vector-valued function u E L p ( X ,p; R d )there is a unique ``polar factorization'' u = V\$.s, where \$ is a convex function defined on R and s is a measure-preservingmapping from ( X , p ) into ( Q , I . I), provided that u is nondegenerate, in the sense that p ( u - ' ( E ) )= 0 for each Lebesgue negligible subset E of Rd.},
-  langid = {english}
-}
-
 @article{benamouBrenierComputationalFluid2000,
   title = {A Computational Fluid Mechanics Solution to the Monge-Kantorovich Mass Transfer Problem},
   author = {Benamou, Jean-David and Brenier, Yann},
@@ -31,38 +14,21 @@
   langid = {english}
 }
 
-@misc{chenRelationOptimalTransport2014,
-  title = {On the Relation between Optimal Transport and Schrödinger Bridges: A Stochastic Control Viewpoint},
-  author = {Chen, Yongxin and Georgiou, Tryphon T. and Pavon, Michele},
-  year = 2014,
-  month = dec,
-  number = {arXiv:1412.4430},
-  eprint = {1412.4430},
-  primaryclass = {cs.SY},
-  publisher = {arXiv},
-  doi = {10.48550/arXiv.1412.4430},
-  url = {http://arxiv.org/abs/1412.4430},
-  urldate = {2026-04-22},
-  abstract = {This paper revisits the relation between optimal transport and Schrödinger bridges from the stochastic control perspective, deriving fluid-dynamic formulations and optimal transport with prior.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Systems and Control,Mathematics - Optimization and Control}
-}
-
-@misc{deBortoliDiffusionSchrodingerBridge2021,
-  title = {Diffusion Schrödinger Bridge with Applications to Score-Based Generative Modeling},
-  author = {De Bortoli, Valentin and Thornton, James and Heng, Jeremy and Doucet, Arnaud},
-  year = 2021,
+@article{brenierPolarFactorizationMonotone1991,
+  title = {Polar Factorization and Monotone Rearrangement of Vector-valued Functions},
+  author = {Brenier, Yann},
+  year = 1991,
   month = jun,
-  number = {arXiv:2106.01357},
-  eprint = {2106.01357},
-  primaryclass = {stat.ML},
-  publisher = {arXiv},
-  doi = {10.48550/arXiv.2106.01357},
-  url = {http://arxiv.org/abs/2106.01357},
-  urldate = {2026-04-22},
-  abstract = {Diffusion SB casts generative modeling as a Schrödinger bridge, an entropy-regularized optimal transport problem on path space, and approximates its iterative proportional fitting solution.},
-  archiveprefix = {arXiv},
-  keywords = {Statistics - Machine Learning,Computer Science - Machine Learning}
+  journal = {Communications on Pure and Applied Mathematics},
+  volume = {44},
+  number = {4},
+  pages = {375--417},
+  issn = {0010-3640, 1097-0312},
+  doi = {10.1002/cpa.3160440402},
+  url = {https://onlinelibrary.wiley.com/doi/10.1002/cpa.3160440402},
+  urldate = {2026-04-20},
+  abstract = {Given a probability space ( X , p ) and a bounded domain R in R d equipped with the Lebesgue measure 1 . I (normalized so that 10I = I ), it is shown (under additional technical assumptions on X and Q) that for every vector-valued function u E L p ( X ,p; R d )there is a unique ``polar factorization'' u = V\$.s, where \$ is a convex function defined on R and s is a measure-preservingmapping from ( X , p ) into ( Q , I . I), provided that u is nondegenerate, in the sense that p ( u - ' ( E ) )= 0 for each Lebesgue negligible subset E of Rd.},
+  langid = {english}
 }
 
 @misc{dengGenerativeModelingDrifting2026,
@@ -167,8 +133,8 @@
 }
 
 @misc{leonardSurveySchrodinger2013,
-  title = {A Survey of the Schrödinger Problem and Some of Its Connections with Optimal Transport},
-  author = {Léonard, Christian},
+  title = {A Survey of the Schr\"odinger Problem and Some of Its Connections with Optimal Transport},
+  author = {L{\'e}onard, Christian},
   year = 2013,
   month = aug,
   number = {arXiv:1308.0215},
@@ -178,7 +144,7 @@
   doi = {10.48550/arXiv.1308.0215},
   url = {http://arxiv.org/abs/1308.0215},
   urldate = {2026-04-22},
-  abstract = {This survey presents the Schrödinger problem together with its connections to optimal transport, reference processes, displacement interpolation, and path-space entropy minimization.},
+  abstract = {This survey presents the Schr\"odinger problem together with its connections to optimal transport, reference processes, displacement interpolation, and path-space entropy minimization.},
   archiveprefix = {arXiv},
   keywords = {Mathematics - Probability}
 }
@@ -198,6 +164,24 @@
   abstract = {We introduce a new paradigm for generative modeling built on Continuous Normalizing Flows (CNFs), allowing us to train CNFs at unprecedented scale. Specifically, we present the notion of Flow Matching (FM), a simulation-free approach for training CNFs based on regressing vector fields of fixed conditional probability paths. Flow Matching is compatible with a general family of Gaussian probability paths for transforming between noise and data samples -- which subsumes existing diffusion paths as specific instances. Interestingly, we find that employing FM with diffusion paths results in a more robust and stable alternative for training diffusion models. Furthermore, Flow Matching opens the door to training CNFs with other, non-diffusion probability paths. An instance of particular interest is using Optimal Transport (OT) displacement interpolation to define the conditional probability paths. These paths are more efficient than diffusion paths, provide faster training and sampling, and result in better generalization. Training CNFs using Flow Matching on ImageNet leads to consistently better performance than alternative diffusion-based methods in terms of both likelihood and sample quality, and allows fast and reliable sample generation using off-the-shelf numerical ODE solvers.},
   archiveprefix = {arXiv},
   keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Statistics - Machine Learning}
+}
+
+@misc{liuFlowStraightFast2022,
+  title = {Flow {{Straight}} and {{Fast}}: {{Learning}} to {{Generate}} and {{Transfer Data}} with {{Rectified Flow}}},
+  shorttitle = {Flow {{Straight}} and {{Fast}}},
+  author = {Liu, Xingchao and Gong, Chengyue and Liu, Qiang},
+  year = 2022,
+  month = sep,
+  number = {arXiv:2209.03003},
+  eprint = {2209.03003},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2209.03003},
+  url = {http://arxiv.org/abs/2209.03003},
+  urldate = {2026-04-22},
+  abstract = {We present rectified flow, a surprisingly simple approach to learning (neural) ordinary differential equation (ODE) models to transport between two empirically observed distributions {$\pi\_$}0 and {$\pi\_$}1, hence providing a unified solution to generative modeling and domain transfer, among various other tasks involving distribution transport. The idea of rectified flow is to learn the ODE to follow the straight paths connecting the points drawn from {$\pi\_$}0 and {$\pi\_$}1 as much as possible. This is achieved by solving a straightforward nonlinear least squares optimization problem, which can be easily scaled to large models without introducing extra parameters beyond standard supervised learning. The straight paths are special and preferred because they are the shortest paths between two points, and can be simulated exactly without time discretization and hence yield computationally efficient models. We show that the procedure of learning a rectified flow from data, called rectification, turns an arbitrary coupling of {$\pi\_$}0 and {$\pi\_$}1 to a new deterministic coupling with provably non-increasing convex transport costs. In addition, recursively applying rectification allows us to obtain a sequence of flows with increasingly straight paths, which can be simulated accurately with coarse time discretization in the inference phase. In empirical studies, we show that rectified flow performs superbly on image generation, image-to-image translation, and domain adaptation. In particular, on image generation and translation, our method yields nearly straight flows that give high quality results even with a single Euler discretization step.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning}
 }
 
 @misc{morelTurningNormalizingFlows2023,
@@ -277,19 +261,6 @@
   langid = {english}
 }
 
-@inproceedings{tongSimulationFreeSchrodinger2024,
-  title = {Simulation-Free Schrödinger Bridges via Score and Flow Matching},
-  author = {Tong, Alexander Y. and Malkin, Nikolay and Fatras, Kilian and Atanackovic, Lazar and Zhang, Yanlei and Huguet, Guillaume and Wolf, Guy and Bengio, Yoshua},
-  year = 2024,
-  booktitle = {Proceedings of The 27th International Conference on Artificial Intelligence and Statistics},
-  volume = {238},
-  pages = {1279--1287},
-  publisher = {PMLR},
-  url = {https://proceedings.mlr.press/v238/tong24a.html},
-  urldate = {2026-04-22},
-  abstract = {This paper introduces a simulation-free objective for learning Schrödinger bridges that combines score and flow matching with static entropic optimal transport or minibatch approximations.}
-}
-
 @incollection{santambrogioIntroductionOptimalTransport2014,
   title = {Introduction to Optimal Transport Theory},
   booktitle = {Optimal {{Transport}}},
@@ -313,6 +284,23 @@
   langid = {english}
 }
 
+@misc{tangFoundationsSchrodingerBridges2026,
+  title = {Foundations of {{Schr\"odinger Bridges}} for {{Generative Modeling}}},
+  author = {Tang, Sophia},
+  year = 2026,
+  month = mar,
+  number = {arXiv:2603.18992},
+  eprint = {2603.18992},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2603.18992},
+  url = {http://arxiv.org/abs/2603.18992},
+  urldate = {2026-04-22},
+  abstract = {At the core of modern generative modeling frameworks, including diffusion models, score-based models, and flow matching, is the task of transforming a simple prior distribution into a complex target distribution through stochastic paths in probability space. Schr\"odinger bridges provide a unifying principle underlying these approaches, framing the problem as determining an optimal stochastic bridge between marginal distribution constraints with minimal-entropy deviations from a pre-defined reference process. This guide develops the mathematical foundations of the Schr\"odinger bridge problem, drawing on optimal transport, stochastic control, and path-space optimization, and focuses on its dynamic formulation with direct connections to modern generative modeling. We build a comprehensive toolkit for constructing Schr\"odinger bridges from first principles, and show how these constructions give rise to generalized and task-specific computational methods.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning}
+}
+
 @article{thorpeIntroductionOptimalTransport,
   title = {Introduction to {{Optimal Transport}}},
   author = {Thorpe, Matthew},
@@ -320,6 +308,19 @@
   month = mar,
   publisher = {University of Cambridge},
   langid = {english}
+}
+
+@inproceedings{tongSimulationFreeSchrodinger2024,
+  title = {Simulation-Free Schr\"odinger Bridges via Score and Flow Matching},
+  booktitle = {Proceedings of the 27th International Conference on Artificial Intelligence and Statistics},
+  author = {Tong, Alexander Y. and Malkin, Nikolay and Fatras, Kilian and Atanackovic, Lazar and Zhang, Yanlei and Huguet, Guillaume and Wolf, Guy and Bengio, Yoshua},
+  year = 2024,
+  volume = {238},
+  pages = {1279--1287},
+  publisher = {PMLR},
+  url = {https://proceedings.mlr.press/v238/tong24a.html},
+  urldate = {2026-04-22},
+  abstract = {This paper introduces a simulation-free objective for learning Schr\"odinger bridges that combines score and flow matching with static entropic optimal transport or minibatch approximations.}
 }
 
 @misc{vesseronNeuralImplementationBreniers2025,

@@ -416,7 +416,7 @@ So the training question becomes: what conditional dynamics should $v_\theta$ re
 
 ### Flow Matching & Rectified Flows
 
-**Flow Matching** {% cite lipmanFlowMatchingGenerative2023 %} and closely related **Rectified Flow** methods choose a coupling $q(x_0,x_1)$ between source and target points, then define a conditional path between each paired endpoint. For the straight-line version,
+**Flow Matching** {% cite lipmanFlowMatchingGenerative2023 %} and closely related **Rectified Flow** {% cite liuFlowStraightFast2022 %} methods choose a coupling $q(x_0,x_1)$ between source and target points, then define a conditional path between each paired endpoint. For the straight-line version,
 $$ X_t=(1-t)X_0+tX_1, $$
 the target velocity is the constant displacement $X_1-X_0$.
 
@@ -429,7 +429,7 @@ the target velocity is the constant displacement $X_1-X_0$.
 > If $q=P_{\text{noise}}\otimes P_{\text{data}}$, we get the usual independent-pairing target.
 > If $q$ is chosen from an OT plan, we get an OT-informed target.
 > If the conditional paths are Brownian bridges weighted by an entropic OT coupling, we move to Schrödinger-bridge variants.
-> So flow matching is a framework for turning a chosen coupling-and-path construction into a regression loss; it is not automatically the Benamou-Brenier geodesic {% cite lipmanFlowMatchingGenerative2023 tongSimulationFreeSchrodinger2024 deBortoliDiffusionSchrodingerBridge2021 %}.
+> So flow matching is a framework for turning a chosen coupling-and-path construction into a regression loss; it is not automatically the Benamou-Brenier geodesic {% cite lipmanFlowMatchingGenerative2023 liuFlowStraightFast2022 tongSimulationFreeSchrodinger2024 deBortoliDiffusionSchrodingerBridge2021 %}.
 
 ## Practical OT: Regularized Couplings
 
