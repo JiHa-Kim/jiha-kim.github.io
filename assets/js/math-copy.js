@@ -92,8 +92,7 @@
         continue;
       }
 
-      const replacement = node.classList.contains('math-block') ? `\n${source}\n` : source;
-      node.replaceWith(document.createTextNode(replacement));
+      node.replaceWith(document.createTextNode(source));
     }
 
     const renderedNodes = fragment.querySelectorAll(RENDERED_SELECTOR);
@@ -105,9 +104,15 @@
         continue;
       }
 
-      const replacement = node.dataset.mathDisplay === 'true' ? `\n${source}\n` : source;
-      node.replaceWith(document.createTextNode(replacement));
+      node.replaceWith(document.createTextNode(source));
     }
+  }
+
+  function normalizeCopiedText(text) {
+    return text
+      .replace(/\r\n?/g, '\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n');
   }
 
   function fragmentToPlainText(fragment) {
@@ -120,7 +125,7 @@
     container.appendChild(fragment);
     document.body.appendChild(container);
 
-    const text = (container.innerText || container.textContent || '').replace(/\u200b/g, '');
+    const text = normalizeCopiedText((container.innerText || container.textContent || '').replace(/\u200b/g, ''));
     container.remove();
     return text;
   }
