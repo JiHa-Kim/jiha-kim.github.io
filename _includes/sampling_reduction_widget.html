@@ -346,7 +346,7 @@ IAW.mountFigure('samplingReductionFigure', function(root) {
     const light = 36 + height * 16;
     return {
       top: `hsl(${hue.toFixed(1)} ${sat.toFixed(1)}% ${light.toFixed(1)}%)`,
-      west: `hsl(${hue.toFixed(1)} ${(sat - 4).toFixed(1)}% ${(light - 9).toFixed(1)}%)`,
+      south: `hsl(${hue.toFixed(1)} ${(sat - 4).toFixed(1)}% ${(light - 9).toFixed(1)}%)`,
       east: `hsl(${hue.toFixed(1)} ${(sat - 10).toFixed(1)}% ${(light - 14).toFixed(1)}%)`
     };
   }
@@ -414,11 +414,11 @@ IAW.mountFigure('samplingReductionFigure', function(root) {
         const se = project(col + 1, row + 1, h);
         const sw = project(col, row + 1, h);
 
-        const westNeighbor = col > 0 ? (0.08 + normalizedGrid[row][col - 1] * 0.92) : 0;
-        if (h > westNeighbor + 1e-6) {
-          const nwLow = project(col, row, westNeighbor);
-          const swLow = project(col, row + 1, westNeighbor);
-          drawPolygon(ctx, [nw, sw, swLow, nwLow], palette.west, stroke);
+        const southNeighbor = row < rows - 1 ? (0.08 + normalizedGrid[row + 1][col] * 0.92) : 0;
+        if (h > southNeighbor + 1e-6) {
+          const swLow = project(col, row + 1, southNeighbor);
+          const seLow = project(col + 1, row + 1, southNeighbor);
+          drawPolygon(ctx, [sw, se, seLow, swLow], palette.south, stroke);
         }
 
         const eastNeighbor = col < cols - 1 ? (0.08 + normalizedGrid[row][col + 1] * 0.92) : 0;
