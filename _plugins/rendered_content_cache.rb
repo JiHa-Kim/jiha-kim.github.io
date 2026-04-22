@@ -11,6 +11,7 @@ module Jekyll
     BODY_CACHE_VERSION = "2026-04-22-rendered-body-v1".freeze
     LAYOUT_CACHE_NAMESPACE = "RenderedLayoutOutput".freeze
     LAYOUT_CACHE_VERSION = "2026-04-22-rendered-layout-v1".freeze
+    TRANSIENT_LAYOUT_DATA_KEYS = %w[cited scholar_backlinks].freeze
 
     module_function
 
@@ -86,7 +87,7 @@ module Jekyll
           "path" => document.path,
           "url" => document.url,
           "layout" => document.data["layout"],
-          "data_digest" => payload_digest(document.data.to_h),
+          "data_digest" => payload_digest(layout_cache_document_data(document)),
           "body_digest" => Digest::SHA1.hexdigest(body_content.to_s)
         },
         "bibliography_signature" => bibliography_signature(site, document),
@@ -156,6 +157,44 @@ module Jekyll
 
     def payload_digest(value)
       Digest::SHA1.hexdigest(Marshal.dump(stable_cache_value(value)))
+    end
+
+    def layout_cache_document_data(document)
+      normalized = stable_cache_value(document.data.to_h)
+      return normalized unless normalized.is_a?(Hash)
+
+      normalized = normalized.reject { |key, _| TRANSIENT_LAYOUT_DATA_KEYS.include?(key) }
+
+      if strip_implicit_date_from_layout_cache?(document, normalized)
+        normalized = normalized.reject { |key, _| key == "date" }
+      end
+
+      normalized
+    end
+
+    def strip_implicit_date_from_layout_cache?(document, normalized_data)
+      return false unless normalized_data.key?("date")
+      return false if document.data["layout"].to_s.split(".").first == "post"
+
+      !front_matter_includes_key?(document.path, "date")
+    end
+
+    def front_matter_includes_key?(path, key)
+      @front_matter_key_cache ||= {}
+      cache_key = [path, key.to_s]
+
+      @front_matter_key_cache.fetch(cache_key) do
+        value = begin
+          content = File.read(path)
+          match = content.match(/\A---\s*\n(.*?)\n(?:---|\.\.\.)\s*\n/m)
+          front_matter = match && match[1]
+          front_matter && front_matter.lines.any? { |line| line.match?(/^\s*#{Regexp.escape(key.to_s)}\s*:/) }
+        rescue Errno::ENOENT, Errno::EISDIR
+          false
+        end
+
+        @front_matter_key_cache[cache_key] = value
+      end
     end
 
     def stable_cache_value(value)
