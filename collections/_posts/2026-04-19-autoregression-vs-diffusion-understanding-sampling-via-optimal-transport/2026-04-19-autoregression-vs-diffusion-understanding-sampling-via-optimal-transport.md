@@ -407,27 +407,46 @@ On a small fixed discrete instance, entropic OT is easiest to read as a sharp-vs
 Flow matching still leaves one practical question open: inside a mini-batch, which source sample should be paired with which target sample?
 
 > [!idea] Batch OT
-> Random pairings produce heavily crossed trajectories, which makes $v_\theta$ harder to learn. A mini-batch OT solve uncrosses them:
+> Random pairings can send nearby interpolation points toward very different endpoints, so the conditional targets $X_1-X_0$ vary abruptly across the batch. A mini-batch OT solve reduces that mismatch by pairing nearby endpoints:
 >
 > $$ \pi^* = \arg\min_{\pi \text{ matching } X_0^B \text{ to } X_1^B} \sum_{i,j} \pi_{ij}\, \bigl\|X_0^{(i)} - X_1^{(j)}\bigr\|_2^2 $$
 
-This is efficiently approximated with **Sinkhorn**. With product reference, it is exactly the entropic OT relaxation above. The immediate geometric effect is simple: the supervised trajectories cross less, so the regression target for $v_\theta$ is less tangled.
+This is efficiently approximated with **Sinkhorn**. With product reference, it is exactly the entropic OT relaxation above. Geometrically, the batch paths cross less, so nearby interpolation points tend to carry more compatible velocity targets.
 
 On a small cached batch, the contrast is easiest to see directly:
 
 {% include random_pairwise_flows_widget.html %}
 
 > [!note] Endpoint Matching Is Not Yet a Dynamical Model
-> Mini-batch OT only picks endpoint pairings for one time gap. That is enough to uncross paths, but not enough to define a law over whole trajectories.
+> Mini-batch OT solves a two-marginal problem: for one time gap, it picks a coupling between the batch at the start and the batch at the end. That is enough to draw straight-line paths across that single gap, but a trajectory model over times $t_1,\dots,t_n$ needs one joint law, or at least mutually compatible transitions, across all times.
 >
-> Freulon et al. make this precise in the Gaussian setting: to reconstruct dynamics from finitely many marginals, the reference coupling used at each pairwise entropic OT step should come from one common continuous-time reference process. A Gaussian-process reference gives pairwise transitions that fit together into one coherent continuous-time model; a product reference instead pushes each gap toward independence, so temporal coherence is not built in {% cite freulonEntropicOptimalTransport2026 %}.
+> Freulon et al. make this precise in the Gaussian setting. They show that if each pairwise entropic OT problem is regularized by a reference coupling coming from the same continuous-time Gaussian reference process, then the local transitions remain independently solvable but still fit together into one coherent dynamical model. With a product reference, each gap is regularized toward independence instead, so solving the gaps separately does not build in temporal coherence {% cite freulonEntropicOptimalTransport2026 %}.
 
 ## One-Step Maps
 
-> [!idea] Drifting Models
-> CNFs and diffusion-style flows approximate unconstrained transport, but they still spend inference time tracing a path. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} move that iteration into training: the pushforward distribution evolves during optimization, and inference becomes a single evaluation of
-> $$ x=f_\theta(z), \qquad z \sim P_{\text{noise}}. $$
-> The point is to amortize transport into training time rather than sampling time.
+One-step generators try to learn the transport map directly, rather than integrating an ODE or running many denoising steps at inference. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} are a concrete example.
+
+> [!definition] Drifting Model
+> A drifting model parameterizes a one-step generator
+> $$ x=f_\theta(z), \qquad z \sim P_{\text{noise}}, $$
+> and studies the **training-time** pushforward distribution
+> $$ q_\theta = [f_\theta]_\sharp P_{\text{noise}}. $$
+> Instead of specifying an inference-time transport field, it introduces a **drifting field** $V_{p,q}(x)$ that prescribes how a current generated sample should move as the model is updated. The paper imposes the anti-symmetry condition
+> $$ V_{p,q}(x) = -V_{q,p}(x), $$
+> so that $V_{p,p}(x)=0$: matched data and model distributions are equilibrium points.
+
+> [!algorithm] Drifting Objective and Training Step
+> For generated samples $x=f_\theta(z)\sim q_\theta$, positive samples $y^+\sim P_{\text{data}}$, and negative samples $y^-\sim q_\theta$, Deng et al. use a kernelized attraction-repulsion field
+> $$ V_{p,q}(x)=V_p^+(x)-V_q^-(x), $$
+> where
+> $$ V_p^+(x)=\frac{1}{Z_p(x)}\mathbb{E}_{y^+\sim p}\!\big[k(x,y^+)(y^+-x)\big], \qquad V_q^-(x)=\frac{1}{Z_q(x)}\mathbb{E}_{y^-\sim q}\!\big[k(x,y^-)(y^--x)\big], $$
+> with normalization factors $Z_p(x)=\mathbb{E}_{y^+\sim p}[k(x,y^+)]$ and $Z_q(x)=\mathbb{E}_{y^-\sim q}[k(x,y^-)]$. In their implementation, the similarity kernel is
+> $$ k(x,y)=\exp\!\left(-\frac{\|x-y\|_2}{\tau}\right), $$
+> realized with batchwise softmax normalizations. The update target is then the drifted sample
+> $$ x_{\mathrm{drift}}=\operatorname{stopgrad}\bigl(x+V_{P_{\text{data}},q_\theta}(x)\bigr), $$
+> and the training loss is $\mathcal{L}_{\mathrm{drift}}(\theta)=\mathbb{E}\bigl\|x-x_{\mathrm{drift}}\bigr\|_2^2$. In practice, the expectations are estimated on mini-batches, the generated batch is reused as negative samples, and the same construction is often applied in a learned feature space $\phi(x)$ rather than raw pixel space.
+
+Unlike flow matching, this objective does **not** require paired endpoints. It compares generated samples against positive and negative neighborhoods, uses the resulting drift to update the one-step generator during training, and then samples with one evaluation of $f_\theta$ at test time.
 
 Conceptually, this closes the loop:
 $$ \text{Map (Brenier, intractable)} \to \text{Flow (tractable, multi-step)} \to \text{Learned one-step map}. $$
