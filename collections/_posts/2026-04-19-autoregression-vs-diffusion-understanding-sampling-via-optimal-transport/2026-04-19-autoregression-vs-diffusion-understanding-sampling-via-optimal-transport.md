@@ -2,7 +2,7 @@
 layout: post
 title: Autoregression vs Diffusion - Understanding Sampling via Optimal Transport
 date: 2026-04-19 16:09 +0000
-description: Why does autoregression work well for text generation, while diffusion and flow models work well for image generation? Perhaps they are not so unrelated - both can be understood as sampling via optimal transport.
+description: Autoregression and diffusion look like opposites, but both are solving the same transport problem: how to turn simple noise into structured data.
 image: 
 categories:
 - Machine Learning
