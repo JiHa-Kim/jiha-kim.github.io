@@ -84,7 +84,7 @@ Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}
 > Since $p(x)$ is constant, it must precisely be $\frac{1}{b-a}$ to integrate to 1.
 
 > [!proposition] Gaussian Maximum Entropy
-> On $\mathbb{R}$, there is no uniform probability distribution on the whole space, and differential entropy has no maximizer without an additional moment constraint. If we fix the mean $\mu$ and variance $\sigma^2$, then the unique maximum-entropy distribution is the Gaussian $N(\mu, \sigma^2)$.
+> On $\mathbb{R}$, there is no uniform probability distribution on the whole space, and differential entropy has no maximizer without an additional moment constraint. If we fix the mean $\mu$ and variance $\sigma^2$, then the unique maximum-entropy distribution is the Gaussian $\mathcal{N}(\mu, \sigma^2)$.
 > 
 > This is why Gaussian noise is the canonical maximum-entropy base under a fixed second-moment budget {% cite NormalDistribution2026 %}.
 

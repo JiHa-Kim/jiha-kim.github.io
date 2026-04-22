@@ -43,24 +43,27 @@
 
   <section class="iaw__figure-card iaw__figure-card--compact">
     <div class="iaw__figure-label">Plan Matrix</div>
-    <div class="sink__matrix-frame">
-      <div class="sink__matrix-top">
-        <span>$x_1$</span>
-        <span>$x_2$</span>
-        <span>$x_3$</span>
-        <span>$x_4$</span>
-        <span>$x_5$</span>
-      </div>
-      <div class="sink__matrix-body">
-        <div class="sink__matrix-side">
+    <div class="sink__matrix-frame iaw__table-shell">
+      <div class="sink__matrix-table iaw__table-grid">
+        <div class="sink__matrix-corner iaw__table-cell iaw__table-cell--first-row iaw__table-cell--first-col"></div>
+        <div class="sink__matrix-top iaw__table-cell iaw__table-cell--first-row">
+          <span>$x_1$</span>
+          <span>$x_2$</span>
+          <span>$x_3$</span>
+          <span>$x_4$</span>
+          <span>$x_5$</span>
+        </div>
+        <div class="sink__matrix-side iaw__table-cell iaw__table-cell--first-col">
           <span>$z_1$</span>
           <span>$z_2$</span>
           <span>$z_3$</span>
           <span>$z_4$</span>
           <span>$z_5$</span>
         </div>
-        <div class="sink__matrix-shell iaw__canvas-shell iaw__canvas-shell--square">
-          <canvas id="sinkMatrixCanvas"></canvas>
+        <div class="sink__matrix-canvas-cell iaw__table-cell">
+          <div class="sink__matrix-shell iaw__canvas-shell iaw__canvas-shell--square">
+            <canvas id="sinkMatrixCanvas"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -175,16 +178,35 @@
 }
 
 .sink__matrix-frame {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  overflow: hidden;
+}
+
+.sink__matrix-table {
+  grid-template-columns: 1.9rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.sink__matrix-corner,
+.sink__matrix-top,
+.sink__matrix-side,
+.sink__matrix-canvas-cell {
+  background: var(--iaw-bg);
+}
+
+.sink__matrix-corner {
+  background: color-mix(in srgb, var(--iaw-surface) 78%, var(--iaw-bg));
+}
+
+.sink__matrix-top,
+.sink__matrix-side {
+  background: color-mix(in srgb, var(--iaw-surface) 72%, var(--iaw-bg));
 }
 
 .sink__matrix-top {
-  margin-left: 1.6rem;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 0.25rem;
+  padding: 0.45rem 0.35rem 0.42rem;
 }
 
 .sink__matrix-side {
@@ -192,6 +214,7 @@
   grid-template-rows: repeat(5, minmax(0, 1fr));
   gap: 0.25rem;
   align-items: center;
+  padding: 0.35rem 0.2rem;
 }
 
 .sink__matrix-top span,
@@ -202,15 +225,13 @@
   text-align: center;
 }
 
-.sink__matrix-body {
-  display: grid;
-  grid-template-columns: 1.6rem minmax(0, 1fr);
-  gap: 0.45rem;
-  align-items: stretch;
+.sink__matrix-canvas-cell {
+  padding: 0.35rem;
 }
 
 .sink__matrix-shell {
   aspect-ratio: 1 / 1;
+  border-radius: 10px;
 }
 
 .sink__status-grid .iaw__status-value {
