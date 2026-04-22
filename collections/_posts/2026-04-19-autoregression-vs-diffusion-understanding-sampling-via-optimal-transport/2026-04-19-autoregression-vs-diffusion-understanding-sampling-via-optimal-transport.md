@@ -15,7 +15,7 @@ tags:
 scholar:
   bibliography: posts/2026-04-19-autoregression-vs-diffusion-understanding-sampling-via-optimal-transport/autoregression-diffusion.bib
 llm-instructions: |
-  I am using the Chirpy theme in Jekyll with a custom pre-processor (preprocess.py).
+  I am using the Chirpy theme in Jekyll with a custom pre-processor (`_plugins/obsidian_preprocess.rb`).
 
   ### Metadata
   - Up to 2 levels of categories (e.g., - Machine Learning, - Mathematical Optimization).
@@ -71,7 +71,7 @@ Autoregressive models and diffusion models are often presented as very different
 
 ### The Choice of Base Distribution
 
-Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? While practitioners favor them heavily for practical reasons—they are trivially easy to sample from, completely isotropic, stable under perturbation, and highly compatible with stochastic noising processes—they also possess rigorous theoretical elegance by natively maximizing differential entropy. This yields the most unbiased statistical start given underlying space constraints.
+Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? Practitioners favor them for practical reasons: they are easy to sample from, isotropic, stable under perturbation, and compatible with common noising procedures. They also have a clean maximum-entropy characterization once the underlying domain or moment constraints are fixed.
 
 > [!proposition] Uniform Maximum Entropy
 > For a strictly bounded interval $[a, b]$, the maximum entropy distribution is the Uniform distribution $\mathcal{U}[a, b]$.
@@ -84,14 +84,15 @@ Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}
 > Since $p(x)$ is constant, it must precisely be $\frac{1}{b-a}$ to integrate to 1.
 
 > [!proposition] Gaussian Maximum Entropy
-> For an unbounded domain space like $\mathbb{R}$, a uniform probability distribution cannot exist (it would require infinite mass), and the maximum possible differential entropy is unbounded ($+\infty$). To get a meaningful maximum entropy base, we constrain the variance $\mathbb{E}[(X - \mathbb{E}[X])^2] \le \sigma^2$.
+> On $\mathbb{R}$, there is no uniform probability distribution on the whole space, and differential entropy has no maximizer without an additional moment constraint. If we fix the mean $\mu$ and variance $\sigma^2$, then the unique maximum-entropy distribution is the Gaussian $N(\mu, \sigma^2)$.
 > 
-> This geometrically yields the Gaussian distribution $N(\mu, \sigma^2)$. {% cite NormalDistribution2026 %}
+> This is why Gaussian noise is the canonical maximum-entropy base under a fixed second-moment budget {% cite NormalDistribution2026 %}.
 
 > [!proof]-
-> We maximize $\mathbb{E}[-\ln p(x)]$ subject to $\int p(x) dx = 1$ and bounded variance $\int x^2 p(x) dx = \sigma^2$ (assuming zero mean). The Lagrangian functional derivative yields:
+> By translation invariance of differential entropy, we may center first and assume $\mu=0$. We then maximize $\mathbb{E}[-\ln p(x)]$ subject to $\int p(x) dx = 1$ and $\int x^2 p(x) dx = \sigma^2$. The Lagrangian functional derivative yields:
 > $$ -\ln p(x) - 1 + \lambda_0 + \lambda_1 x^2 = 0 \implies p(x) = e^{\lambda_0 - 1 + \lambda_1 x^2} $$
-> For this to be a valid integrable probability density, we require $\lambda_1 < 0$. Setting $\lambda_1 = -c$ directly recovers the canonical Gaussian form $p(x) \propto e^{-cx^2}$.
+> Integrability forces the quadratic coefficient to be negative, which yields the Gaussian form
+> $$ p(x) \propto \exp\bigl(-c(x-\mu)^2\bigr). $$
 
 {% include max_entropy_widget.html %}
 
@@ -130,7 +131,7 @@ Optimal transport is the continuous, high-dimensional version of this same mass-
 > This is useful here because it allows mass splitting and turns the discrete problem into a linear optimization problem. Monge is recovered as the special case
 > $$ \pi_{i,T(i)} = a_i, \qquad \pi_{ij} = 0 \text{ for } j \ne T(i). $$
 
-> [!important] Linear Cost Assumption
+> [!important] Why the Discrete Problem Is Linear
 > Kantorovich transport is **linear** in the plan $\pi_{ij}$, so the discrete problem is a linear optimization problem. We will return to its dual later, once the basic OT picture is in place.
 
 {% include transport_split_widget.html %}
@@ -259,7 +260,7 @@ This gives the **Knothe-Rosenblatt rearrangement**, which is the mathematical ba
 > By factorizing sequentially, it implicitly solves a **greedy** transport problem. It is canonical only because it appears as the optimal limit of a heavily skewed quadratic cost that strictly prioritizes earlier coordinates:
 > $$ c(x, y) = \sum_{i=1}^D \lambda_i (x_i - y_i)^2, \qquad \lambda_1 \gg \lambda_2 \gg \dots \gg \lambda_D $$
 
-Vanilla autoregression is exactly this triangular transport written in density language.
+At the population level, vanilla autoregression is this triangular transport written in density language.
 
 > [!definition] Chain Rule Factorization
 > If $x=(x_1,\dots,x_D)$ and $x_{<i}=(x_1,\dots,x_{i-1})$, then
@@ -275,7 +276,7 @@ Vanilla autoregression is exactly this triangular transport written in density l
 >
 > Suppose it predicts $(0.6, 0.3, 0.1)$. The discrete CDF is then $(0.6, 0.9, 1.0)$. If we draw $u=0.75$, the inverse-CDF rule picks the first token whose cumulative probability exceeds $u$, namely **"banana"**.
 >
-> So next-token sampling is just conditional inverse transform sampling, and standard cross-entropy training learns these 1D conditional transports:
+> So next-token sampling is conditional inverse transform sampling, and standard cross-entropy training learns the conditional distributions that induce these 1D transports:
 > $$ \mathcal{L}_{\text{NLL}} = -\sum_{i=1}^D \log P(x_i^{\text{true}} \mid x_{<i}). $$
 
 {% include llm_sampling_widget.html %}
@@ -323,7 +324,9 @@ If we abandon the greedy sequence and seek the true globally optimal map for the
 > has a unique optimal map up to $P$-null sets, and it has the form $T=\nabla\psi$ for a convex potential $\psi$.
 
 > [!remark] Why a Convex Gradient?
-> In 1D, optimal transport was monotone: equal quantiles never cross. In higher dimensions, the analogue of that monotonicity is a convex gradient. Indeed, convexity gives $(\nabla\psi(x)-\nabla\psi(y))\cdot(x-y)\ge 0$, so points are not sent in locally contradictory directions. When $D=1$, gradients of convex functions are exactly increasing functions, so Brenier reduces to monotone rearrangement.
+> In 1D, optimal transport was monotone: equal quantiles never cross. In higher dimensions, the analogue of that monotonicity is a convex gradient. Indeed, convexity gives
+> $$ \langle \nabla\psi(x)-\nabla\psi(y),\, x-y \rangle \ge 0, $$
+> so the displacement field is monotone in the ambient inner product. When $D=1$, gradients of convex functions are exactly increasing functions, so Brenier reduces to monotone rearrangement.
 
 > [!note] What the Theorem Says Geometrically
 > Brenier's theorem is stronger than existence: the global $W_2^2$ optimizer is deterministic, unique almost everywhere, and generated by a single scalar potential. So the best quadratic-cost generator is not an arbitrary black box, but a convex-potential gradient.
@@ -341,7 +344,7 @@ That distinction is the main architectural split.
 >
 > | Feature | Autoregression (Knothe-Rosenblatt) | Flow / Diffusion (Unconstrained) |
 > | :--- | :--- | :--- |
-> | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | $T(x) = \nabla \psi(x)$, $\psi$ convex |
+> | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | Ideal OT map: $T(x) = \nabla \psi(x)$; practical parameterization: learn $v_\theta(x,t)$ |
 > | **Tractability** | Exact sequential 1D inversions | Learned via velocity regression |
 > | **Structural Bias** | Arbitrary coordinate ordering | None (isotropic) |
 > | **Training Signal** | Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM / score matching |
@@ -414,7 +417,7 @@ There is another equivalent way to describe OT. Instead of optimizing the transp
 > So if we can find large prices that still satisfy the constraints, we certify that the transport cost cannot be any smaller. Duality says the best such certificate exactly matches the true optimum.
 
 > [!tip] Complementary Slackness
-> At optimality, transported pairs typically satisfy $\pi_{ij}>0 \Rightarrow f_i+g_j=c_{ij}$. In words: mass only travels along pairs whose price constraint is tight. So the dual potentials identify the active geometry of the coupling.
+> At optimality, transported pairs satisfy $\pi_{ij}>0 \Rightarrow f_i+g_j=c_{ij}$. In words: mass only travels along pairs whose price constraint is tight. So the dual potentials identify the active geometry of the coupling.
 
 The same tiny transport example makes this lower-bound picture concrete:
 
@@ -447,7 +450,7 @@ This is efficiently approximated with **Sinkhorn**. With product reference, it i
 ## One-Step Maps
 
 > [!idea] Drifting Models
-> CNFs and diffusion-style flows approximate unconstrained transport, but they still spend inference time tracing a path. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} move that iteration into training: the pushforward map evolves during optimization, and inference becomes a single evaluation of
+> CNFs and diffusion-style flows approximate unconstrained transport, but they still spend inference time tracing a path. **Drifting Models** {% cite dengGenerativeModelingDrifting2026 %} move that iteration into training: the pushforward distribution evolves during optimization, and inference becomes a single evaluation of
 > $$ x=f_\theta(z), \qquad z \sim P_{\text{noise}}. $$
 > The point is to amortize transport into training time rather than sampling time.
 
@@ -459,7 +462,7 @@ $$ \text{Map (Brenier, intractable)} \to \text{Flow (tractable, multi-step)} \to
 Even if a generator already matches the correct density, its internal geometry need not be transport-optimal.
 
 > [!corollary] Polar Factorization Theorem
-> Any exact generator $F$ with $F_\sharp P_{\text{noise}} = P_{\text{data}}$ can be written as
+> Under the same regularity assumptions as Brenier's theorem, any exact generator $F$ with $F_\sharp P_{\text{noise}} = P_{\text{data}}$ can be written as
 > $$ F=\nabla\psi \circ M, $$
 > where $\nabla\psi$ is the Brenier map and $M$ preserves the source law: $M_\sharp P_{\text{noise}}=P_{\text{noise}}$.
 >
@@ -473,7 +476,7 @@ Even if a generator already matches the correct density, its internal geometry n
 > [!corollary] Immediate Consequence of Brenier's Theorem
 > If $T=\nabla\psi$ is Brenier's map from $P_{\text{noise}}$ to $P_{\text{data}}$, then for any exact generator $\widetilde{G}$ with the same pushforward law,
 > $$ \mathbb{E}\|Z-T(Z)\|_2^2 \le \mathbb{E}\|Z-\widetilde{G}(Z)\|_2^2, \qquad Z\sim P_{\text{noise}}. $$
-> This is just Brenier's theorem applied to the class of exact generators: among all maps with pushforward $P_{\text{data}}$, the Brenier map has the smallest quadratic transport cost.
+> This is the generator-language restatement of Brenier's theorem: among all maps with pushforward $P_{\text{data}}$, the Brenier map has the smallest quadratic transport cost.
 
 This is exactly the lens used by Morel et al.: start from a trained normalizing flow that already matches $P_{\text{data}}$, then search over Gaussian-preserving latent rearrangements that lower its quadratic transport cost without changing the final density. The target is not a new density model, but a coupling closer to the Monge map {% cite morelTurningNormalizingFlows2023 %}.
 
