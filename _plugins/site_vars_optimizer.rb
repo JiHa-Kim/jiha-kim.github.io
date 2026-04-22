@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require "addressable/uri"
+require "cgi"
 require "digest"
 require "jekyll"
+require "json"
 require_relative "site_item_helpers"
 
 module Jekyll
@@ -55,6 +58,20 @@ module Jekyll
       else
         File.join(site.baseurl, url)
       end
+    end
+
+    def self.absolute_url(site, input)
+      return nil if input.nil?
+      return input if Addressable::URI.parse(input.to_s).absolute?
+
+      baseurl = site.baseurl.to_s.chomp("/")
+      path = input.to_s.start_with?("/") ? input.to_s : "/#{input}"
+      relative = Addressable::URI.parse("#{baseurl}#{path}").normalize.to_s
+      site_url = site.config["url"].to_s
+
+      return relative if site_url.empty?
+
+      Addressable::URI.parse(site_url + relative).normalize.to_s
     end
 
     def self.origin_type(site)
@@ -124,6 +141,70 @@ module Jekyll
 
       html.join("\n")
     end
+
+    def self.render_post_share(site, item)
+      lang = item.data["lang"] || resolve_lang(site, item)
+      locale = site.data.dig("locales", lang, "post") || {}
+      share_link_locale = locale.dig("button", "share_link") || {}
+      title = "#{item.data['title']} - #{site.config['title']}"
+      escaped_title = Addressable::URI.normalize_component(title)
+      encoded_url = CGI.escape(absolute_url(site, item.url))
+      share_platforms = site.data.dig("share", "platforms") || []
+
+      html = []
+      html << '<div class="share-wrapper d-flex align-items-center">'
+      html << %(<span class="share-label text-muted">#{locale["share"]}</span>)
+      html << '<span class="share-icons">'
+
+      share_platforms.each do |share|
+        tooltip = %(data-bs-toggle="tooltip" data-bs-placement="top" title="#{share["type"]}" aria-label="#{share["type"]}")
+
+        if share["type"] == "Mastodon"
+          html << '<script defer type="module" src="https://cdn.jsdelivr.net/npm/@justinribeiro/share-to-mastodon/+esm"></script>'
+          html << %(<button class="btn text-start" #{tooltip}>)
+          mastodon = [
+            '<share-to-mastodon',
+            '              class="share-mastodon"',
+            %(              message="#{escaped_title}"),
+            %(              url="#{encoded_url}")
+          ]
+          if share["instances"]
+            mastodon << %( customInstanceList="#{xml_escape(JSON.generate(share["instances"]))}")
+          end
+          mastodon << "            >"
+          html << mastodon.join
+          html << %(<i class="fa-fw #{share["icon"]}"></i>)
+          html << "</share-to-mastodon>"
+          html << "</button>"
+          next
+        end
+
+        link = share["link"].to_s.gsub("TITLE", escaped_title).gsub("URL", encoded_url)
+        html << %(<a href="#{link}" target="_blank" rel="noopener" #{tooltip}>)
+        html << %(<i class="fa-fw #{share["icon"]}"></i>)
+        html << "</a>"
+      end
+
+      html << "<button\n"
+      html << "      id=\"copy-link\"\n"
+      html << "      aria-label=\"Copy link\"\n"
+      html << "      class=\"btn small\"\n"
+      html << "      data-bs-toggle=\"tooltip\"\n"
+      html << "      data-bs-placement=\"top\"\n"
+      html << %(      title="#{share_link_locale["title"]}"\n)
+      html << %(      data-title-succeed="#{share_link_locale["succeed"]}"\n)
+      html << '    >'
+      html << '<i class="fa-fw fas fa-link pe-none fs-6"></i>'
+      html << "</button>"
+      html << "</span>"
+      html << "</div>"
+
+      html.join
+    end
+
+    def self.xml_escape(input)
+      input.to_s.encode(:xml => :attr).gsub(%r!\A"|"\Z!, "")
+    end
   end
 
   # Pre-calculate SEO and absolute image URLs to avoid expensive Liquid logic
@@ -143,6 +224,10 @@ module Jekyll
 
     # 2. Pre-render SEO tags in Ruby natively to bypass Liquid overhead
     item.data['precomputed_seo_html'] = SiteVarsOptimizer.render_seo(site, item)
+
+    if item.data['layout'] == 'post'
+      item.data['precomputed_post_sharing_html'] = SiteVarsOptimizer.render_post_share(site, item)
+    end
   end
   # High-performance Ruby-based HTML Compression
   # Replaces the theme's extremely slow Liquid-based compress.html layout

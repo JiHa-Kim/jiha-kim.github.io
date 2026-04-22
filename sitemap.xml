@@ -1,0 +1,5 @@
+---
+layout: none
+permalink: /sitemap.xml
+---
+{{ site.data.sitemap_xml }}
