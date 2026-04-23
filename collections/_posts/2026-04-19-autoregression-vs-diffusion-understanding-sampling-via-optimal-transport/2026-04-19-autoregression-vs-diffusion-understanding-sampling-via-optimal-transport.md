@@ -106,30 +106,30 @@ Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}
 
 ## From Noise to Data: The Transport Problem
 
-To formalize this, we turn to Optimal Transport (OT). {% cite peyreOptimalTransportMachine2025 %} {% cite thorpeIntroductionOptimalTransport %}
+Once the base distribution is fixed, the next question is geometric: how do we move mass from $P_{\text{noise}}$ to $P_{\text{data}}$ while paying as little cost as possible? Optimal transport formalizes exactly that source-to-target conversion problem {% cite peyreOptimalTransportMachine2025 %} {% cite thorpeIntroductionOptimalTransport %}.
 
-
-Optimal transport is the continuous, high-dimensional version of this same mass-moving problem.
-
-> [!note] Generative Optimal Transport
-> In the generative setting, we start from noise $Z \sim P_{\text{noise}}$ and want an output with distribution $P_{\text{data}}$. A transport map $T$ should therefore satisfy $T(Z) \sim P_{\text{data}}$.
+It studies how to rearrange one distribution into another, either by a point-to-point map or, more generally, by a transport plan on source-target pairs.
 
 > [!notation] Pushforward Shorthand
-> Later we will abbreviate "if $Z \sim P$ then $T(Z) \sim Q$" by writing $T_\sharp P = Q$.
+> We write $T_\sharp P = Q$ to mean: if $Z \sim P$, then $T(Z) \sim Q$.
 >
 > If $T$ is a differentiable bijection, this distribution-matching condition is equivalent to the usual change-of-variables formula:
 > $$ p_{\text{data}}(x) = p_{\text{noise}}(T^{-1}(x)) \left| \det J_{T^{-1}}(x) \right| = p_{\text{noise}}(z)\left| \det J_T(z) \right|^{-1}, \qquad x=T(z). $$
 
+> [!note] Generative Optimal Transport
+> In the generative setting, we start from noise $Z \sim P_{\text{noise}}$ and want outputs with law $P_{\text{data}}$. A transport map therefore aims to satisfy $T_\sharp P_{\text{noise}} = P_{\text{data}}$.
+
 > [!problem] The Monge Problem
-> Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost. Monge seeks a deterministic map $T$ minimizing
-> $$ \min_T \underset{Z \,\sim\, P_{\text{noise}}}{\mathbb{E}}[c(Z, T(Z))] \quad \text{s.t.} \quad T(Z) \sim P_{\text{data}}. $$
+> Let $c: \mathcal{Z} \times \mathcal{X} \to \mathbb{R} \cup \{+\infty\}$ be a fixed ground cost. Monge seeks a single-valued transport map $T$ minimizing
+> $$ \min_T \underset{Z \,\sim\, P_{\text{noise}}}{\mathbb{E}}[c(Z, T(Z))] \quad \text{s.t.} \quad T_\sharp P_{\text{noise}} = P_{\text{data}}. $$
 
 {% include transport_widget.html %}
 
 > [!problem] The Kantorovich Problem
-> Monge forces each source point $z$ to choose a single destination $T(z)$. Kantorovich relaxes this by optimizing over any random pair $(Z,X)$ with the correct marginals:
-> $$ \min_{(Z,X)} \mathbb{E}[c(Z,X)] \quad \text{s.t.} \quad Z \sim P_{\text{noise}}, \quad X \sim P_{\text{data}}. $$
-> In probabilistic language, we are free to choose any **coupling** between noise and data. Monge is the special case $X = T(Z)$ almost surely.
+> Monge forces each source point $z$ to choose a single destination $T(z)$. Kantorovich relaxes this by optimizing over any **coupling** $\pi$ on $\mathcal{Z} \times \mathcal{X}$ with marginals $P_{\text{noise}}$ and $P_{\text{data}}$:
+> $$ \min_{\pi \in \Pi(P_{\text{noise}}, P_{\text{data}})} \int c(z,x)\,d\pi(z,x). $$
+> Here $\pi$ records how much source mass at $z$ is assigned to target mass at $x$. Monge is the special case where the plan is concentrated on the graph of a map:
+> $$ \pi = (\mathrm{Id}, T)_\sharp P_{\text{noise}}. $$
 
 > [!info] Discrete Kantorovich Form
 > In the finite case, if source point $i$ carries mass $a_i$, target point $j$ needs mass $b_j$, and moving one unit of mass costs $c_{ij}$, then Kantorovich transport solves
