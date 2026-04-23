@@ -24,6 +24,10 @@
   --iaw-ring: 0 0 0 1px var(--iaw-border), 0 0 0 4px color-mix(in srgb, var(--iaw-primary) 10%, transparent);
 
   [data-mode="dark"] & {
+    --iaw-source-a: #eab308;
+    --iaw-source-b: #0284c7;
+    --iaw-target: var(--iaw-source-b);
+    --iaw-destination: #fb7185;
     --iaw-matte-bg: var(--card-bg, #1e293b);
     --iaw-matte-border: color-mix(in srgb, var(--iaw-border) 85%, white 15%);
     --iaw-shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.24);

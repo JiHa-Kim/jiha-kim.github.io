@@ -1,199 +1,302 @@
 {% capture describe %}
 <p>
-  Choose either a convex-gradient map or a non-monotone comparison map. Drag two nearby source points $x,y$.
-  The colored cloud shows how the whole space moves, and the tail-to-tail vector board makes the sign of
-  $\langle M(x)-M(y),\,x-y\rangle$ visually obvious: if the projected component points the same way as $x-y$, the
-  correlation is positive; if it crosses into the red half-plane, the map is locally folding backward.
+  Drag the three source points $x_1,x_2,x_3$. The middle panel shows $T(x_i)$, and the right panel asks whether the same triple can be explained by one convex potential $\phi$.
 </p>
+<div class="iaw__split-strip bcm__intro-strip">
+  <div class="iaw__split-pane">
+    <div class="bcm__intro-title">Cycle Test</div>
+    <div class="iaw__display-math bcm__intro-math">
+      $\displaystyle \sum_{i=1}^3 \langle x_i,T(x_i)\rangle \ge \sum_{i=1}^3 \langle x_i,T(x_{i+1})\rangle$
+    </div>
+    <div class="bcm__intro-note">
+      Negative means the cyclic reassignment is cheaper than the original pairing.
+    </div>
+  </div>
+  <div class="iaw__split-pane iaw__split-pane--divider bcm__intro-pane">
+    <div class="bcm__intro-title">Support Test</div>
+    <div class="iaw__display-math bcm__intro-math">
+      $\displaystyle \phi(x_j)\ge s_i(x_j), \qquad s_i(x_j)=\phi(x_i)+\langle T(x_i),x_j-x_i\rangle$
+    </div>
+    <div class="bcm__intro-note">
+      Colored lines are the affine supports $s_i(x_j)$ and black dots are the witness heights $\phi(x_j)$. The red circle marks the first violated support.
+    </div>
+  </div>
+</div>
 {% endcapture %}
 
 {% capture controls %}
 <button class="iaw__seg-btn active" data-mode="convex">Convex Gradient</button>
-<button class="iaw__seg-btn" data-mode="fold">Non-Monotone Map</button>
+<button class="iaw__seg-btn" data-mode="twist">Monotone + Rotation</button>
+{% endcapture %}
+
+{% capture bcmSourceMarker %}
+<span class="bcm__legend-line bcm__legend-line--source"></span>
+{% endcapture %}
+{% capture bcmMappedMarker %}
+<span class="bcm__legend-line bcm__legend-line--mapped"></span>
+{% endcapture %}
+{% capture bcmSupportMarker %}
+<span class="bcm__legend-support-stack">
+  <span class="bcm__legend-support bcm__legend-support--a"></span>
+  <span class="bcm__legend-support bcm__legend-support--b"></span>
+  <span class="bcm__legend-support bcm__legend-support--c"></span>
+</span>
+{% endcapture %}
+{% capture bcmWitnessMarker %}
+<span class="bcm__legend-dot"></span>
+{% endcapture %}
+
+{% capture legend %}
+  {% include iaw_legend_item.html marker_html=bcmSourceMarker label="Source cycle" %}
+  {% include iaw_legend_item.html marker_html=bcmMappedMarker label="Mapped cycle" %}
+  {% include iaw_legend_item.html marker_html=bcmSupportMarker label="Affine supports" %}
+  {% include iaw_legend_item.html marker_html=bcmWitnessMarker label="Witness heights $\phi(x_j)$" %}
+{% endcapture %}
+
+{% capture bcmOverlay %}
+<div class="bcm__overlay">
+  <div class="bcm__col-label bcm__col-label--left">Source Cycle</div>
+  <div class="bcm__col-label bcm__col-label--mid">Mapped Cycle</div>
+  <div class="bcm__col-label bcm__col-label--right">Support Test</div>
+
+  <div class="bcm__label-layer" aria-hidden="true">
+    <span class="bcm__point-label bcm__point-label--a" id="bcmSourceLabel1">$x_1$</span>
+    <span class="bcm__point-label bcm__point-label--b" id="bcmSourceLabel2">$x_2$</span>
+    <span class="bcm__point-label bcm__point-label--c" id="bcmSourceLabel3">$x_3$</span>
+
+    <span class="bcm__point-label bcm__point-label--a" id="bcmMappedLabel1">$T(x_1)$</span>
+    <span class="bcm__point-label bcm__point-label--b" id="bcmMappedLabel2">$T(x_2)$</span>
+    <span class="bcm__point-label bcm__point-label--c" id="bcmMappedLabel3">$T(x_3)$</span>
+
+    <span class="bcm__point-label bcm__point-label--axis" id="bcmWitnessLabel1">$x_1$</span>
+    <span class="bcm__point-label bcm__point-label--axis" id="bcmWitnessLabel2">$x_2$</span>
+    <span class="bcm__point-label bcm__point-label--axis" id="bcmWitnessLabel3">$x_3$</span>
+  </div>
+</div>
 {% endcapture %}
 
 {% capture visuals %}
-<div class="brm__layout iaw__figure-grid">
-  <section class="iaw__figure-card iaw__figure-card--compact">
-    <div class="iaw__figure-label">Source Pair</div>
-    <div class="brm__shell iaw__canvas-shell" id="brmSourceShell">
-      <canvas id="brmSourceCanvas"></canvas>
-      <div class="brm__overlay" aria-hidden="true">
-        <span class="brm__point-label brm__point-label--x" id="brmSourceLabelX">$x$</span>
-        <span class="brm__point-label brm__point-label--y" id="brmSourceLabelY">$y$</span>
-      </div>
-    </div>
-    <div class="brm__note">Drag $x$ and $y$ in the source cloud.</div>
-  </section>
-
-  <section class="iaw__figure-card iaw__figure-card--compact">
-    <div class="iaw__figure-label">Mapped Pair</div>
-    <div class="brm__shell iaw__canvas-shell" id="brmImageShell">
-      <canvas id="brmImageCanvas"></canvas>
-      <div class="brm__overlay" aria-hidden="true">
-        <span class="brm__point-label brm__point-label--x" id="brmImageLabelX">$M(x)$</span>
-        <span class="brm__point-label brm__point-label--y" id="brmImageLabelY">$M(y)$</span>
-      </div>
-    </div>
-    <div class="brm__note" id="brmModeNote">Same colored cloud after the selected map.</div>
-  </section>
-</div>
+{% include iaw_canvas_stage.html canvas_id="bcmCanvas" overlay=bcmOverlay %}
 {% endcapture %}
 
 {% capture footer %}
-<div class="brm__compare-shell iaw__canvas-shell" id="brmCompareShell">
-  <canvas id="brmCompareCanvas"></canvas>
-</div>
-<div class="brm__compare-note" id="brmCompareNote">
-  Tail-to-tail view: yellow is $x-y$, and green or red is $M(x)-M(y)$.
-</div>
-
-<div class="iaw__table-shell brm__calc-shell">
-  <div class="iaw__table-grid brm__calc-grid">
-    <div class="iaw__table-cell iaw__table-cell--first-row iaw__table-cell--first-col brm__calc-label">$x-y$</div>
-    <div class="iaw__table-cell iaw__table-cell--first-row brm__calc-value brm__calc-value--mono" id="brmDelta"></div>
-    <div class="iaw__table-cell iaw__table-cell--first-col brm__calc-label">$M(x)-M(y)$</div>
-    <div class="iaw__table-cell brm__calc-value brm__calc-value--mono" id="brmMappedDelta"></div>
-    <div class="iaw__table-cell iaw__table-cell--first-col brm__calc-label">$\langle M(x)-M(y),\,x-y\rangle$</div>
-    <div class="iaw__table-cell brm__calc-value brm__calc-value--mono" id="brmInner"></div>
-  </div>
-</div>
-
-<div class="iaw__status-grid iaw__status-grid--single">
-  {% include iaw_status_item.html label="Reading" value="Positive inner product: the mapped difference still points forward along the source direction." value_id="brmReading" %}
+<div class="iaw__status-grid bcm__status-grid">
+  {% include iaw_status_item.html label="Min 2-Point Gap" value="0.00" value_id="bcmPairMin" value_class="iaw__status-value--mono" %}
+  {% include iaw_status_item.html label="3-Cycle Gap" value="0.00" value_id="bcmGap" value_class="iaw__status-value--mono" %}
+  {% include iaw_status_item.html label="Min Support Gap" value="0.00" value_id="bcmSlackMin" value_class="iaw__status-value--mono" %}
+  {% include iaw_status_item.html class="bcm__status-item--span-3" label="Interpretation" value="Drag the source points to compare the 2-point gap, the 3-cycle gap, and the support inequalities in the right panel." value_id="bcmReading" %}
 </div>
 {% endcapture %}
 
 {% include iaw_skeleton.html
     id="brenierMonotonicityFigure"
-    eyebrow="Brenier Intuition"
-    title="Local Monotonicity vs Local Folding"
+    eyebrow="Brenier Structure"
+    title="Cyclic Monotonicity and Rockafellar's Witness"
     description=describe
     controls=controls
+    legend=legend
     visuals=visuals
     footer=footer
-    stage_id="brmStage"
-    stage_style="height: auto; min-height: 250px; border: none; background: transparent;"
+    stage_id="bcmStage"
+    stage_style="height: 390px;"
 %}
 
 <style>
-.brm__layout {
+.bcm__intro-strip {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: stretch;
+  gap: 0.95rem;
+  margin-top: 0.85rem;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--iaw-border) 82%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--iaw-surface) 88%, var(--iaw-bg));
 }
 
-.brm__shell {
-  aspect-ratio: 1 / 1;
-  min-height: 252px;
+.bcm__intro-title {
+  color: var(--iaw-text);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 
-.brm__overlay {
+.bcm__intro-math {
+  justify-content: flex-start;
+  font-size: 0.95rem;
+}
+
+.bcm__intro-math mjx-container {
+  overflow: visible !important;
+}
+
+.bcm__intro-note {
+  color: var(--iaw-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.bcm__overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.brm__point-label {
+.bcm__col-label {
   position: absolute;
-  padding: 0.14rem 0.42rem;
+  top: 0.5rem;
+  transform: translateX(-50%);
+  padding: 0.12rem 0.45rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--iaw-border) 88%, transparent);
-  background: color-mix(in srgb, var(--iaw-bg) 94%, transparent);
+  background: color-mix(in srgb, var(--iaw-bg) 92%, transparent);
   color: var(--iaw-text);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.bcm__col-label--left { left: 16.7%; }
+.bcm__col-label--mid { left: 50%; }
+.bcm__col-label--right { left: 83.3%; }
+
+.bcm__label-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bcm__point-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 0.14rem 0.44rem;
+  border-radius: 999px;
+  color: var(--iaw-text);
+  font-size: 0.86rem;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
   box-shadow: var(--iaw-shadow-soft);
-  transform: translate(-50%, -50%);
+  border: 1px solid color-mix(in srgb, var(--iaw-border) 86%, transparent);
+  background: color-mix(in srgb, var(--iaw-bg) 94%, transparent);
 }
 
-.brm__point-label--x {
+.bcm__point-label mjx-container {
+  margin: 0 !important;
+  color: inherit !important;
+}
+
+.bcm__point-label--a {
   border-color: color-mix(in srgb, var(--iaw-source-a) 34%, var(--iaw-border));
 }
 
-.brm__point-label--y {
+.bcm__point-label--b {
   border-color: color-mix(in srgb, var(--iaw-target) 34%, var(--iaw-border));
 }
 
-.brm__note {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  color: var(--iaw-muted);
-  text-align: center;
+.bcm__point-label--c {
+  border-color: color-mix(in srgb, var(--iaw-success) 34%, var(--iaw-border));
 }
 
-.brm__compare-shell {
-  min-height: 160px;
+.bcm__point-label--axis {
+  border-color: color-mix(in srgb, var(--iaw-text) 16%, var(--iaw-border));
 }
 
-.brm__compare-note {
-  font-size: 0.9rem;
-  line-height: 1.45;
-  color: var(--iaw-muted);
+.bcm__legend-line {
+  width: 18px;
+  height: 0;
+  display: inline-block;
+  flex-shrink: 0;
+  border-top: 2px solid var(--iaw-border);
 }
 
-.brm__compare-note mjx-container {
-  margin: 0;
+.bcm__legend-line--source {
+  border-top-style: dashed;
 }
 
-.brm__calc-shell {
-  overflow: hidden;
+.bcm__legend-line--mapped {
+  border-top-color: color-mix(in srgb, var(--iaw-text) 78%, var(--iaw-border));
 }
 
-.brm__calc-grid {
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+.bcm__legend-support-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
-.brm__calc-label,
-.brm__calc-value {
-  background: var(--iaw-bg);
-  padding: 0.72rem 0.9rem;
+.bcm__legend-support {
+  width: 18px;
+  height: 0;
+  display: block;
+  border-top: 2px solid var(--iaw-border);
 }
 
-.brm__calc-label {
-  display: flex;
-  align-items: center;
-  color: var(--iaw-text);
-  font-size: 0.96rem;
-  font-weight: 700;
+.bcm__legend-support--a {
+  border-top-color: var(--iaw-source-a);
 }
 
-.brm__calc-label mjx-container {
-  margin: 0;
+.bcm__legend-support--b {
+  border-top-color: var(--iaw-target);
 }
 
-.brm__calc-value {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  color: var(--iaw-text);
-  font-size: 1rem;
-  font-weight: 700;
+.bcm__legend-support--c {
+  border-top-color: var(--iaw-success);
 }
 
-.brm__calc-value--mono {
-  font-family: var(--font-family-monospace, monospace);
+.bcm__legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  display: inline-block;
+  flex-shrink: 0;
+  background: var(--iaw-text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--iaw-bg) 45%, transparent);
 }
 
-@media (max-width: 900px) {
-  .brm__layout {
+.bcm__status-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.bcm__status-item--span-3 {
+  grid-column: span 3;
+}
+
+#bcmStage {
+  height: 390px;
+}
+
+@media (max-width: 720px) {
+  .bcm__intro-strip {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    padding: 0.72rem 0.8rem;
+  }
+
+  .bcm__intro-pane {
+    padding-left: 0;
+    padding-top: 0.7rem;
+    border-left: none;
+    border-top: 1px solid color-mix(in srgb, var(--iaw-border) 82%, transparent);
+  }
+
+  #bcmStage {
+    height: 360px;
+  }
+
+  .bcm__col-label {
+    font-size: 0.78rem;
+    padding: 0.1rem 0.35rem;
+  }
+
+  .bcm__point-label {
+    font-size: 0.8rem;
+  }
+
+  .bcm__status-grid {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 640px) {
-  .brm__calc-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .brm__calc-value {
-    justify-content: flex-start;
-  }
-
-  .brm__calc-label,
-  .brm__calc-value {
-    border-left: none !important;
+  .bcm__status-item--span-3 {
+    grid-column: span 1;
   }
 }
 </style>
@@ -202,71 +305,56 @@
 <script>
 IAW.mountFigure('brenierMonotonicityFigure', function(root) {
 
-  const sourceCanvas = root.querySelector('#brmSourceCanvas');
-  const imageCanvas = root.querySelector('#brmImageCanvas');
-  const compareCanvas = root.querySelector('#brmCompareCanvas');
-  const sourceShell = root.querySelector('#brmSourceShell');
-  const imageShell = root.querySelector('#brmImageShell');
-  const compareShell = root.querySelector('#brmCompareShell');
-  const sourceCtx = sourceCanvas.getContext('2d');
-  const imageCtx = imageCanvas.getContext('2d');
-  const compareCtx = compareCanvas.getContext('2d');
-  const deltaEl = root.querySelector('#brmDelta');
-  const mappedDeltaEl = root.querySelector('#brmMappedDelta');
-  const innerEl = root.querySelector('#brmInner');
-  const readingEl = root.querySelector('#brmReading');
-  const modeNoteEl = root.querySelector('#brmModeNote');
-  const compareNoteEl = root.querySelector('#brmCompareNote');
-
+  const canvas = root.querySelector('#bcmCanvas');
+  const ctx = canvas.getContext('2d');
+  const stage = root.querySelector('#bcmStage');
+  const pairMinEl = root.querySelector('#bcmPairMin');
+  const gapEl = root.querySelector('#bcmGap');
+  const slackMinEl = root.querySelector('#bcmSlackMin');
+  const readingEl = root.querySelector('#bcmReading');
+  const segBtns = root.querySelectorAll('.iaw__seg-btn');
   const labelEls = {
-    sourceX: root.querySelector('#brmSourceLabelX'),
-    sourceY: root.querySelector('#brmSourceLabelY'),
-    imageX: root.querySelector('#brmImageLabelX'),
-    imageY: root.querySelector('#brmImageLabelY')
+    source: [
+      root.querySelector('#bcmSourceLabel1'),
+      root.querySelector('#bcmSourceLabel2'),
+      root.querySelector('#bcmSourceLabel3')
+    ],
+    mapped: [
+      root.querySelector('#bcmMappedLabel1'),
+      root.querySelector('#bcmMappedLabel2'),
+      root.querySelector('#bcmMappedLabel3')
+    ],
+    witness: [
+      root.querySelector('#bcmWitnessLabel1'),
+      root.querySelector('#bcmWitnessLabel2'),
+      root.querySelector('#bcmWitnessLabel3')
+    ]
   };
 
-  const PAD_X = 10;
-  const PAD_Y = 10;
-  const SOURCE_VIEW_ZOOM = 1.08;
-  const IMAGE_VIEW_ZOOM = 1.46;
-  const sourceExtent = { xMin: -1.55, xMax: 1.55, yMin: -1.35, yMax: 1.35 };
-  const cloudPoints = buildGridPoints(sourceExtent, 15);
-  const rotatedTheta = 0.78;
-  const rotatedCos = Math.cos(rotatedTheta);
-  const rotatedSin = Math.sin(rotatedTheta);
+  const EPS = 1e-9;
+  const POINT_RADIUS = 6.6;
+  const sourceExtent = { xMin: -1.2, xMax: 1.2, yMin: -1.05, yMax: 1.05 };
+  const initialPoints = [
+    { x: -0.94, y: -0.05 },
+    { x: 0.62, y: 0.78 },
+    { x: -0.09, y: -0.61 }
+  ];
+  const cloudPoints = buildGridPoints(sourceExtent, 11);
 
   const modes = {
     convex: {
-      note: 'Same colored cloud after a convex-gradient map $M=\\nabla\\psi$.',
-      initialPair: {
-        x: { x: 0.92, y: -0.42 },
-        y: { x: -0.30, y: 0.26 }
-      },
       map(point) {
-        const r1 = rotatedCos * point.x + rotatedSin * point.y;
-        const r2 = -rotatedSin * point.x + rotatedCos * point.y;
-        const g1 = 1.20 * r1 + 0.14 * r2 + 0.46 * Math.pow(r1, 3);
-        const g2 = 0.14 * r1 + 0.92 * r2 + 0.22 * Math.pow(r2, 3);
         return {
-          x: rotatedCos * g1 - rotatedSin * g2,
-          y: rotatedSin * g1 + rotatedCos * g2
+          x: 1.1 * point.x + 0.32 * point.y + 0.32 * Math.pow(point.x, 3),
+          y: 0.32 * point.x + 0.9 * point.y + 0.24 * Math.pow(point.y, 3)
         };
       }
     },
-    fold: {
-      note: 'Same colored cloud after a milder non-monotone comparison map with one local fold.',
-      initialPair: {
-        x: { x: 0.95, y: 0.95 },
-        y: { x: 0.40, y: 0.40 }
-      },
+    twist: {
       map(point) {
-        const s = 0.84 * point.x + 0.54 * point.y;
-        const t = -0.54 * point.x + 0.84 * point.y;
-        const u = 0.92 * s - 0.62 * Math.pow(s, 3) + 0.12 * t;
-        const v = 0.08 * s + 0.96 * t;
         return {
-          x: 0.84 * u - 0.54 * v,
-          y: 0.54 * u + 0.84 * v
+          x: 0.25 * point.x - 1.0 * point.y,
+          y: 1.0 * point.x + 0.25 * point.y
         };
       }
     }
@@ -281,85 +369,37 @@ IAW.mountFigure('brenierMonotonicityFigure', function(root) {
     return [
       key,
       {
-        ...mode,
+        map: mode.map,
         ambientGrid,
-        imageExtent: getExtentFromPoints(ambientGrid.map((item) => item.mapped), 0.025, 0.03)
+        imageExtent: getExtentFromPoints(ambientGrid.map((item) => item.mapped), 0.1, 0.12)
       }
     ];
   }));
 
   const state = {
-    x: { ...modeData.convex.initialPair.x },
-    y: { ...modeData.convex.initialPair.y }
+    points: initialPoints.map((point) => ({ ...point })),
+    activeIndex: null,
+    activeMode: 'convex'
   };
 
   let theme = IAW.getThemeColors(root);
-  let activeKey = null;
-  let activeMode = 'convex';
 
-  function subtract(a, b) {
-    return { x: a.x - b.x, y: a.y - b.y };
+  function buildGridPoints(extent, steps) {
+    const points = [];
+
+    for (let iy = 0; iy < steps; iy += 1) {
+      for (let ix = 0; ix < steps; ix += 1) {
+        points.push({
+          x: extent.xMin + (ix / (steps - 1)) * (extent.xMax - extent.xMin),
+          y: extent.yMin + (iy / (steps - 1)) * (extent.yMax - extent.yMin)
+        });
+      }
+    }
+
+    return points;
   }
 
-  function dot(a, b) {
-    return a.x * b.x + a.y * b.y;
-  }
-
-  function norm(vector) {
-    return Math.hypot(vector.x, vector.y);
-  }
-
-  function activeMap(point) {
-    return modeData[activeMode].map(point);
-  }
-
-  function formatVectorText(vector) {
-    return `(${vector.x.toFixed(2)}, ${vector.y.toFixed(2)})`;
-  }
-
-  function setupCanvas(canvas, ctx) {
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, rect.width, rect.height);
-    return rect;
-  }
-
-  function getViewport(rect, extent, zoom = 1) {
-    const spanX = Math.max(extent.xMax - extent.xMin, 1e-6);
-    const spanY = Math.max(extent.yMax - extent.yMin, 1e-6);
-    const usableWidth = Math.max(rect.width - 2 * PAD_X, 1);
-    const usableHeight = Math.max(rect.height - 2 * PAD_Y, 1);
-    const scale = Math.min(usableWidth / spanX, usableHeight / spanY) * zoom;
-    const drawWidth = spanX * scale;
-    const drawHeight = spanY * scale;
-
-    return {
-      scale,
-      left: (rect.width - drawWidth) / 2,
-      top: (rect.height - drawHeight) / 2
-    };
-  }
-
-  function toScreen(point, rect, extent, zoom = 1) {
-    const viewport = getViewport(rect, extent, zoom);
-    return {
-      x: viewport.left + (point.x - extent.xMin) * viewport.scale,
-      y: viewport.top + (extent.yMax - point.y) * viewport.scale
-    };
-  }
-
-  function fromScreen(point, rect, extent, zoom = 1) {
-    const viewport = getViewport(rect, extent, zoom);
-    return {
-      x: extent.xMin + (point.x - viewport.left) / viewport.scale,
-      y: extent.yMax - (point.y - viewport.top) / viewport.scale
-    };
-  }
-
-  function getExtentFromPoints(points, padX = 0.10, padY = 0.12) {
+  function getExtentFromPoints(points, padX = 0.1, padY = 0.12) {
     const xs = points.map((point) => point.x);
     const ys = points.map((point) => point.y);
     const minX = Math.min(...xs);
@@ -377,114 +417,36 @@ IAW.mountFigure('brenierMonotonicityFigure', function(root) {
     };
   }
 
-  function buildGridPoints(extent, steps) {
-    const points = [];
-
-    for (let iy = 0; iy < steps; iy += 1) {
-      for (let ix = 0; ix < steps; ix += 1) {
-        points.push({
-          x: extent.xMin + (ix / (steps - 1)) * (extent.xMax - extent.xMin),
-          y: extent.yMin + (iy / (steps - 1)) * (extent.yMax - extent.yMin)
-        });
-      }
-    }
-
-    return points;
+  function colorForIndex(index) {
+    return [
+      theme.sourceA || '#d4a017',
+      theme.target || '#0ea5e9',
+      theme.success || '#059669'
+    ][index] || theme.text || '#111827';
   }
 
-  function ambientColor(point, extent) {
-    const tx = (point.x - extent.xMin) / (extent.xMax - extent.xMin);
-    const ty = (point.y - extent.yMin) / (extent.yMax - extent.yMin);
+  function ambientColor(point) {
+    const tx = (point.x - sourceExtent.xMin) / (sourceExtent.xMax - sourceExtent.xMin);
+    const ty = (point.y - sourceExtent.yMin) / (sourceExtent.yMax - sourceExtent.yMin);
     const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
-    const hue = 24 + 220 * tx;
-    const saturation = 76;
-    const lightness = isDark ? 46 + 16 * ty : 50 + 10 * ty;
-    const alpha = isDark ? 0.46 : 0.42;
+    const hue = 26 + 210 * tx;
+    const saturation = 72;
+    const lightness = isDark ? 42 + 12 * ty : 50 + 10 * ty;
+    const alpha = isDark ? 0.36 : 0.30;
     return `hsla(${hue.toFixed(1)}, ${saturation}%, ${lightness.toFixed(1)}%, ${alpha})`;
   }
 
-  function sourceVectorColor() {
-    return theme.sourceA || '#d4a017';
+  function subtract(a, b) {
+    return { x: a.x - b.x, y: a.y - b.y };
   }
 
-  function drawArrowHead(ctx, from, to, color) {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const length = Math.hypot(dx, dy) || 1;
-    const ux = dx / length;
-    const uy = dy / length;
-    const px = -uy;
-    const py = ux;
-    const size = 12;
-
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(to.x, to.y);
-    ctx.lineTo(to.x - ux * size + px * size * 0.45, to.y - uy * size + py * size * 0.45);
-    ctx.lineTo(to.x - ux * size - px * size * 0.45, to.y - uy * size - py * size * 0.45);
-    ctx.closePath();
-    ctx.fill();
+  function dot(a, b) {
+    return a.x * b.x + a.y * b.y;
   }
 
-  function drawPoint(ctx, point, color) {
-    ctx.fillStyle = color;
-    ctx.strokeStyle = IAW.toAlpha(theme.bg || '#fff', 0.96);
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-  }
-
-  function positionLabel(el, point, dx, dy) {
-    if (!el) return;
-    const width = el.offsetWidth || 42;
-    const height = el.offsetHeight || 20;
-    const clampedX = Math.max(width / 2 + 6, Math.min(point.boundsWidth - width / 2 - 6, point.x + dx));
-    const clampedY = Math.max(height / 2 + 6, Math.min(point.boundsHeight - height / 2 - 6, point.y + dy));
-    el.style.left = `${clampedX}px`;
-    el.style.top = `${clampedY}px`;
-  }
-
-  function drawAmbientCloud(ctx, rect, extent, points, key, zoom) {
-    points.forEach((item) => {
-      const screen = toScreen(item[key], rect, extent, zoom);
-      ctx.fillStyle = ambientColor(item.source, sourceExtent);
-      ctx.beginPath();
-      ctx.arc(screen.x, screen.y, 2.0, 0, Math.PI * 2);
-      ctx.fill();
-    });
-  }
-
-  function drawPair(canvas, ctx, labels, a, b, arrowColor, extent, ambientPoints, key, zoom) {
-    const rect = setupCanvas(canvas, ctx);
-    const aScreen = toScreen(a, rect, extent, zoom);
-    const bScreen = toScreen(b, rect, extent, zoom);
-
-    drawAmbientCloud(ctx, rect, extent, ambientPoints, key, zoom);
-
-    ctx.strokeStyle = IAW.toAlpha(theme.bg || '#fff', document.documentElement.getAttribute('data-mode') === 'dark' ? 0.68 : 0.82);
-    ctx.lineWidth = 6.4;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(bScreen.x, bScreen.y);
-    ctx.lineTo(aScreen.x, aScreen.y);
-    ctx.stroke();
-
-    ctx.strokeStyle = arrowColor;
-    ctx.lineWidth = 4.2;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(bScreen.x, bScreen.y);
-    ctx.lineTo(aScreen.x, aScreen.y);
-    ctx.stroke();
-    drawArrowHead(ctx, bScreen, aScreen, arrowColor);
-
-    drawPoint(ctx, aScreen, theme.sourceA || '#d4a017');
-    drawPoint(ctx, bScreen, theme.target || '#0ea5e9');
-
-    positionLabel(labels.x, { ...aScreen, boundsWidth: rect.width, boundsHeight: rect.height }, 0, -18);
-    positionLabel(labels.y, { ...bScreen, boundsWidth: rect.width, boundsHeight: rect.height }, 0, -18);
+  function format(value) {
+    const cleaned = Math.abs(value) < 0.005 ? 0 : value;
+    return cleaned.toFixed(2);
   }
 
   function clampPoint(point, extent) {
@@ -494,232 +456,453 @@ IAW.mountFigure('brenierMonotonicityFigure', function(root) {
     };
   }
 
-  function pickActivePoint(clientX, clientY) {
-    const rect = sourceCanvas.getBoundingClientRect();
-    const local = { x: clientX - rect.left, y: clientY - rect.top };
-    const xScreen = toScreen(state.x, rect, sourceExtent, SOURCE_VIEW_ZOOM);
-    const yScreen = toScreen(state.y, rect, sourceExtent, SOURCE_VIEW_ZOOM);
-    const dx = Math.hypot(local.x - xScreen.x, local.y - xScreen.y);
-    const dy = Math.hypot(local.x - yScreen.x, local.y - yScreen.y);
-    const threshold = 26;
+  function setupCanvas() {
+    const rect = stage.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    return rect;
+  }
 
-    if (dx > threshold && dy > threshold) return null;
-    return dx <= dy ? 'x' : 'y';
+  function getPanels(rect) {
+    const marginX = rect.width < 720 ? 16 : 24;
+    const gap = rect.width < 720 ? 14 : 22;
+    const plotTop = rect.width < 720 ? 48 : 56;
+    const plotBottom = 16;
+    const panelWidth = (rect.width - 2 * marginX - 2 * gap) / 3;
+    const panelHeight = rect.height - plotTop - plotBottom;
+
+    return [0, 1, 2].map((index) => ({
+      x: marginX + index * (panelWidth + gap),
+      y: plotTop,
+      width: panelWidth,
+      height: panelHeight
+    }));
+  }
+
+  function getViewport(panel, extent, zoom = 1) {
+    const spanX = Math.max(extent.xMax - extent.xMin, 1e-6);
+    const spanY = Math.max(extent.yMax - extent.yMin, 1e-6);
+    const padX = Math.min(12, panel.width * 0.08);
+    const padY = Math.min(12, panel.height * 0.08);
+    const usableWidth = Math.max(panel.width - 2 * padX, 1);
+    const usableHeight = Math.max(panel.height - 2 * padY, 1);
+    const scale = Math.min(usableWidth / spanX, usableHeight / spanY) * zoom;
+    const drawWidth = spanX * scale;
+    const drawHeight = spanY * scale;
+
+    return {
+      scale,
+      left: panel.x + (panel.width - drawWidth) / 2,
+      top: panel.y + (panel.height - drawHeight) / 2
+    };
+  }
+
+  function mapPoint(point, panel, extent, zoom = 1) {
+    const viewport = getViewport(panel, extent, zoom);
+    return {
+      x: viewport.left + (point.x - extent.xMin) * viewport.scale,
+      y: viewport.top + (extent.yMax - point.y) * viewport.scale
+    };
+  }
+
+  function unmapPoint(localPoint, panel, extent, zoom = 1) {
+    const viewport = getViewport(panel, extent, zoom);
+    return {
+      x: extent.xMin + (localPoint.x - viewport.left) / viewport.scale,
+      y: extent.yMax - (localPoint.y - viewport.top) / viewport.scale
+    };
+  }
+
+  function positionLabel(el, x, y, rect, dx = 0, dy = 0) {
+    if (!el) return;
+    const width = el.offsetWidth || 42;
+    const height = el.offsetHeight || 22;
+    const left = Math.max(width / 2 + 6, Math.min(rect.width - width / 2 - 6, x + dx));
+    const top = Math.max(height / 2 + 6, Math.min(rect.height - height / 2 - 6, y + dy));
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+  }
+
+  function drawSeparators(rect, panels) {
+    ctx.strokeStyle = IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.5);
+    ctx.lineWidth = 1;
+
+    for (let index = 0; index < panels.length - 1; index += 1) {
+      const x = panels[index].x + panels[index].width + (panels[index + 1].x - (panels[index].x + panels[index].width)) / 2;
+      ctx.beginPath();
+      ctx.moveTo(x, 48);
+      ctx.lineTo(x, rect.height - 12);
+      ctx.stroke();
+    }
+  }
+
+  function drawCycle(screenPoints, options = {}) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(screenPoints[0].x, screenPoints[0].y);
+    for (let index = 1; index < screenPoints.length; index += 1) {
+      ctx.lineTo(screenPoints[index].x, screenPoints[index].y);
+    }
+    ctx.closePath();
+    ctx.setLineDash(options.dash || []);
+    ctx.strokeStyle = options.stroke || theme.text || '#111827';
+    ctx.lineWidth = options.lineWidth || 2;
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  function drawPoint(screenPoint, index, isActive) {
+    const color = colorForIndex(index);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(screenPoint.x, screenPoint.y, POINT_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawAmbientCloud(panel, extent, ambientGrid, key) {
+    ambientGrid.forEach((item) => {
+      const screen = mapPoint(item[key], panel, extent, 1.02);
+      ctx.fillStyle = ambientColor(item.source);
+      ctx.beginPath();
+      ctx.arc(screen.x, screen.y, 1.9, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function computeWitness(points, images) {
+    const count = points.length;
+    const weights = Array.from({ length: count }, (_, i) => Array.from({ length: count }, (_, j) => dot(images[i], subtract(points[j], points[i]))));
+    let phi = Array(count).fill(-1e6);
+    phi[0] = 0;
+
+    for (let step = 0; step < count - 1; step += 1) {
+      const next = phi.slice();
+      for (let i = 0; i < count; i += 1) {
+        for (let j = 0; j < count; j += 1) {
+          next[j] = Math.max(next[j], phi[i] + weights[i][j]);
+        }
+      }
+      phi = next;
+    }
+
+    let minSlack = Infinity;
+    let minSlackIndex = { i: 0, j: 0 };
+
+    for (let i = 0; i < count; i += 1) {
+      for (let j = 0; j < count; j += 1) {
+        const slack = phi[j] - phi[i] - weights[i][j];
+        if (slack < minSlack) {
+          minSlack = slack;
+          minSlackIndex = { i, j };
+        }
+      }
+    }
+
+    const minPhi = Math.min(...phi);
+    const shiftedPhi = phi.map((value) => value - minPhi);
+    const supports = Array.from({ length: count }, (_, i) => Array.from({ length: count }, (_, j) => shiftedPhi[i] + weights[i][j]));
+
+    return {
+      phi: shiftedPhi,
+      supports,
+      minSlack,
+      minSlackIndex
+    };
+  }
+
+  function computeMetrics() {
+    const points = state.points;
+    const images = points.map((point) => modeData[state.activeMode].map(point));
+    const direct = points.reduce((sum, point, index) => sum + dot(point, images[index]), 0);
+    const shifted = points.reduce((sum, point, index) => sum + dot(point, images[(index + 1) % points.length]), 0);
+    const cycleGap = direct - shifted;
+
+    let pairMin = Infinity;
+    for (let i = 0; i < points.length; i += 1) {
+      for (let j = i + 1; j < points.length; j += 1) {
+        pairMin = Math.min(pairMin, dot(subtract(images[i], images[j]), subtract(points[i], points[j])));
+      }
+    }
+
+    return {
+      points,
+      images,
+      pairMin,
+      cycleGap,
+      witness: computeWitness(points, images)
+    };
+  }
+
+  function renderSource(panel, rect, metrics) {
+    drawAmbientCloud(panel, sourceExtent, modeData[state.activeMode].ambientGrid, 'source');
+    const screenPoints = metrics.points.map((point) => mapPoint(point, panel, sourceExtent, 1.02));
+
+    drawCycle(screenPoints, {
+      stroke: IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.92),
+      dash: [7, 5],
+      lineWidth: 2.1
+    });
+
+    screenPoints.forEach((screenPoint, index) => {
+      drawPoint(screenPoint, index, state.activeIndex === index);
+      positionLabel(labelEls.source[index], screenPoint.x, screenPoint.y, rect, 0, -18);
+    });
+  }
+
+  function renderMapped(panel, rect, metrics) {
+    const extent = modeData[state.activeMode].imageExtent;
+    drawAmbientCloud(panel, extent, modeData[state.activeMode].ambientGrid, 'mapped');
+    const screenPoints = metrics.images.map((point) => mapPoint(point, panel, extent, 1.02));
+
+    drawCycle(screenPoints, {
+      stroke: IAW.toAlpha(theme.text || '#111827', 0.34),
+      lineWidth: 2.3
+    });
+
+    screenPoints.forEach((screenPoint, index) => {
+      drawPoint(screenPoint, index, false);
+      positionLabel(labelEls.mapped[index], screenPoint.x, screenPoint.y, rect, 0, -18);
+    });
+  }
+
+  function renderWitness(panel, rect, metrics) {
+    const count = metrics.points.length;
+    const baselineY = panel.y + panel.height - 22;
+    const xPositions = Array.from({ length: count }, (_, index) => panel.x + panel.width * (0.18 + index * 0.32));
+    const witnessValues = metrics.witness.phi;
+    const supportValues = metrics.witness.supports.flat();
+    const yMin = Math.min(...witnessValues, ...supportValues);
+    const yMax = Math.max(...witnessValues, ...supportValues);
+    const span = Math.max(1e-6, yMax - yMin);
+
+    function mapY(value) {
+      const t = (value - yMin) / span;
+      return panel.y + panel.height - 44 - t * (panel.height - 78);
+    }
+
+    ctx.strokeStyle = IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.38);
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    for (let step = 0; step < 4; step += 1) {
+      const y = panel.y + 18 + step * ((panel.height - 52) / 3);
+      ctx.beginPath();
+      ctx.moveTo(panel.x + 12, y);
+      ctx.lineTo(panel.x + panel.width - 12, y);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.65);
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(panel.x + 10, baselineY);
+    ctx.lineTo(panel.x + panel.width - 10, baselineY);
+    ctx.stroke();
+
+    for (let i = 0; i < count; i += 1) {
+      const color = colorForIndex(i);
+      const values = metrics.witness.supports[i];
+      ctx.strokeStyle = IAW.toAlpha(color, 0.88);
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(xPositions[0], mapY(values[0]));
+      for (let j = 1; j < count; j += 1) {
+        ctx.lineTo(xPositions[j], mapY(values[j]));
+      }
+      ctx.stroke();
+
+      for (let j = 0; j < count; j += 1) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(xPositions[j], mapY(values[j]), 3.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    xPositions.forEach((x, index) => {
+      const y = mapY(witnessValues[index]);
+
+      ctx.strokeStyle = IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.62);
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(x, baselineY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      ctx.fillStyle = theme.text || '#111827';
+      ctx.beginPath();
+      ctx.arc(x, y, 5.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      positionLabel(labelEls.witness[index], x, baselineY + 14, rect, 0, 0);
+    });
+
+    if (metrics.witness.minSlack < -EPS) {
+      const bad = metrics.witness.minSlackIndex;
+      const badX = xPositions[bad.j];
+      const badY = mapY(metrics.witness.supports[bad.i][bad.j]);
+      ctx.strokeStyle = IAW.toAlpha(theme.danger || '#dc2626', 0.95);
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(badX, badY, 8.8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  function updateReadout(el, value, ok) {
+    el.textContent = format(value);
+    el.style.color = ok ? (theme.success || '#059669') : (theme.danger || '#dc2626');
+  }
+
+  function updateFooter(metrics) {
+    updateReadout(pairMinEl, metrics.pairMin, metrics.pairMin >= -EPS);
+    updateReadout(gapEl, metrics.cycleGap, metrics.cycleGap >= -EPS);
+    updateReadout(slackMinEl, metrics.witness.minSlack, metrics.witness.minSlack >= -EPS);
+
+    if (metrics.witness.minSlack >= -EPS) {
+      readingEl.textContent = 'All three gaps are nonnegative, so one convex potential fits the mapped triple: every colored support curve stays below the black witness dots.';
+      return;
+    }
+
+    if (metrics.pairMin >= -EPS && metrics.cycleGap < -EPS) {
+      readingEl.textContent = 'The pairwise test still passes, but the 3-cycle gap is negative. The red circle marks a support value that rises above the witness height, which is exactly the extra failure caught by cyclic monotonicity.';
+      return;
+    }
+
+    if (metrics.pairMin < -EPS) {
+      readingEl.textContent = 'The 2-point gap is already negative, so even ordinary monotonicity fails before the cyclic test is checked.';
+      return;
+    }
+
+    readingEl.textContent = 'The support test still fails: a colored support curve rises above a black witness dot, so no single convex potential can generate this triple.';
+  }
+
+  function render() {
+    const rect = setupCanvas();
+    const panels = getPanels(rect);
+    const metrics = computeMetrics();
+
+    drawSeparators(rect, panels);
+    renderSource(panels[0], rect, metrics);
+    renderMapped(panels[1], rect, metrics);
+    renderWitness(panels[2], rect, metrics);
+    updateFooter(metrics);
+  }
+
+  function pickActivePoint(clientX, clientY) {
+    const rect = stage.getBoundingClientRect();
+    const localPoint = { x: clientX - rect.left, y: clientY - rect.top };
+    const sourcePanel = getPanels(rect)[0];
+
+    if (
+      localPoint.x < sourcePanel.x ||
+      localPoint.x > sourcePanel.x + sourcePanel.width ||
+      localPoint.y < sourcePanel.y ||
+      localPoint.y > sourcePanel.y + sourcePanel.height
+    ) {
+      return null;
+    }
+
+    const screenPoints = state.points.map((point) => mapPoint(point, sourcePanel, sourceExtent, 1.02));
+    let bestIndex = null;
+    let bestDistance = Infinity;
+
+    screenPoints.forEach((screenPoint, index) => {
+      const distance = Math.hypot(localPoint.x - screenPoint.x, localPoint.y - screenPoint.y);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestIndex = index;
+      }
+    });
+
+    return bestDistance <= 22 ? bestIndex : null;
+  }
+
+  function updateCursor(clientX, clientY) {
+    if (state.activeIndex != null) {
+      stage.style.cursor = 'grabbing';
+      return;
+    }
+
+    stage.style.cursor = pickActivePoint(clientX, clientY) == null ? 'default' : 'grab';
   }
 
   function updateDraggedPoint(clientX, clientY) {
-    if (!activeKey) return;
-    const rect = sourceCanvas.getBoundingClientRect();
-    const world = fromScreen({ x: clientX - rect.left, y: clientY - rect.top }, rect, sourceExtent, SOURCE_VIEW_ZOOM);
-    state[activeKey] = clampPoint(world, sourceExtent);
+    if (state.activeIndex == null) return;
+
+    const rect = stage.getBoundingClientRect();
+    const sourcePanel = getPanels(rect)[0];
+    const worldPoint = unmapPoint(
+      { x: clientX - rect.left, y: clientY - rect.top },
+      sourcePanel,
+      sourceExtent,
+      1.02
+    );
+
+    state.points[state.activeIndex] = clampPoint(worldPoint, sourceExtent);
     render();
   }
 
   function handlePointerDown(event) {
-    const key = pickActivePoint(event.clientX, event.clientY);
-    if (!key) return;
-    activeKey = key;
-    sourceShell.style.cursor = 'grabbing';
-    sourceShell.setPointerCapture(event.pointerId);
+    const index = pickActivePoint(event.clientX, event.clientY);
+    if (index == null) return;
+
+    state.activeIndex = index;
+    stage.setPointerCapture(event.pointerId);
     updateDraggedPoint(event.clientX, event.clientY);
+    updateCursor(event.clientX, event.clientY);
   }
 
   function handlePointerMove(event) {
-    if (!activeKey) return;
-    updateDraggedPoint(event.clientX, event.clientY);
+    if (state.activeIndex != null) {
+      updateDraggedPoint(event.clientX, event.clientY);
+      return;
+    }
+
+    updateCursor(event.clientX, event.clientY);
   }
 
   function handlePointerUp(event) {
-    if (!activeKey) return;
-    activeKey = null;
-    sourceShell.style.cursor = 'grab';
-    if (sourceShell.hasPointerCapture(event.pointerId)) {
-      sourceShell.releasePointerCapture(event.pointerId);
+    if (state.activeIndex == null) {
+      updateCursor(event.clientX, event.clientY);
+      return;
     }
-  }
 
-  function drawComparisonBoard(delta, mappedDelta, inner) {
-    const rect = setupCanvas(compareCanvas, compareCtx);
-    const origin = { x: rect.width * 0.50, y: rect.height * 0.58 };
-    const sourceNorm = Math.max(norm(delta), 1e-6);
-    const extent = Math.max(sourceNorm, norm(mappedDelta), 1e-6);
-    const scale = Math.min(rect.width, rect.height) * 0.29 / extent;
-    const unit = { x: delta.x / sourceNorm, y: delta.y / sourceNorm };
-    const axisStart = { x: origin.x - unit.x * rect.width * 0.34, y: origin.y + unit.y * rect.width * 0.34 };
-    const axisEnd = { x: origin.x + unit.x * rect.width * 0.34, y: origin.y - unit.y * rect.width * 0.34 };
-
-    const sourceTip = { x: origin.x + delta.x * scale, y: origin.y - delta.y * scale };
-    const mappedTip = { x: origin.x + mappedDelta.x * scale, y: origin.y - mappedDelta.y * scale };
-    const normal = { x: -unit.y, y: unit.x };
-    const halfPlaneExtent = Math.max(rect.width, rect.height) * 0.92;
-    const boundaryA = {
-      x: origin.x + normal.x * halfPlaneExtent,
-      y: origin.y - normal.y * halfPlaneExtent
-    };
-    const boundaryB = {
-      x: origin.x - normal.x * halfPlaneExtent,
-      y: origin.y + normal.y * halfPlaneExtent
-    };
-    const positiveA = {
-      x: boundaryA.x + unit.x * halfPlaneExtent,
-      y: boundaryA.y - unit.y * halfPlaneExtent
-    };
-    const positiveB = {
-      x: boundaryB.x + unit.x * halfPlaneExtent,
-      y: boundaryB.y - unit.y * halfPlaneExtent
-    };
-    const negativeA = {
-      x: boundaryA.x - unit.x * halfPlaneExtent,
-      y: boundaryA.y + unit.y * halfPlaneExtent
-    };
-    const negativeB = {
-      x: boundaryB.x - unit.x * halfPlaneExtent,
-      y: boundaryB.y + unit.y * halfPlaneExtent
-    };
-    const mappedColor = inner >= 0
-      ? IAW.toAlpha(theme.success || '#059669', 0.92)
-      : IAW.toAlpha(theme.danger || '#dc2626', 0.96);
-    const positivePlaneColor = IAW.toAlpha(theme.success || '#059669', 0.10);
-    const negativePlaneColor = IAW.toAlpha(theme.danger || '#dc2626', 0.10);
-
-    compareCtx.lineCap = 'round';
-    compareCtx.lineJoin = 'round';
-
-    compareCtx.fillStyle = negativePlaneColor;
-    compareCtx.beginPath();
-    compareCtx.moveTo(boundaryA.x, boundaryA.y);
-    compareCtx.lineTo(boundaryB.x, boundaryB.y);
-    compareCtx.lineTo(negativeB.x, negativeB.y);
-    compareCtx.lineTo(negativeA.x, negativeA.y);
-    compareCtx.closePath();
-    compareCtx.fill();
-
-    compareCtx.fillStyle = positivePlaneColor;
-    compareCtx.beginPath();
-    compareCtx.moveTo(boundaryA.x, boundaryA.y);
-    compareCtx.lineTo(boundaryB.x, boundaryB.y);
-    compareCtx.lineTo(positiveB.x, positiveB.y);
-    compareCtx.lineTo(positiveA.x, positiveA.y);
-    compareCtx.closePath();
-    compareCtx.fill();
-
-    compareCtx.strokeStyle = IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.42);
-    compareCtx.lineWidth = 1.5;
-    compareCtx.setLineDash([4, 4]);
-    compareCtx.beginPath();
-    compareCtx.moveTo(boundaryA.x, boundaryA.y);
-    compareCtx.lineTo(boundaryB.x, boundaryB.y);
-    compareCtx.stroke();
-    compareCtx.setLineDash([]);
-
-    compareCtx.strokeStyle = IAW.toAlpha(theme.border || theme.muted || '#94a3b8', 0.42);
-    compareCtx.lineWidth = 1.2;
-    compareCtx.setLineDash([5, 5]);
-    compareCtx.beginPath();
-    compareCtx.moveTo(axisStart.x, axisStart.y);
-    compareCtx.lineTo(axisEnd.x, axisEnd.y);
-    compareCtx.stroke();
-    compareCtx.setLineDash([]);
-
-    compareCtx.strokeStyle = sourceVectorColor();
-    compareCtx.lineWidth = 4.2;
-    compareCtx.beginPath();
-    compareCtx.moveTo(origin.x, origin.y);
-    compareCtx.lineTo(sourceTip.x, sourceTip.y);
-    compareCtx.stroke();
-    drawArrowHead(compareCtx, origin, sourceTip, sourceVectorColor());
-
-    compareCtx.strokeStyle = mappedColor;
-    compareCtx.lineWidth = 4.2;
-    compareCtx.beginPath();
-    compareCtx.moveTo(origin.x, origin.y);
-    compareCtx.lineTo(mappedTip.x, mappedTip.y);
-    compareCtx.stroke();
-    drawArrowHead(compareCtx, origin, mappedTip, mappedColor);
-
-    compareCtx.fillStyle = IAW.toAlpha(theme.text || '#111827', 0.86);
-    compareCtx.beginPath();
-    compareCtx.arc(origin.x, origin.y, 4.2, 0, Math.PI * 2);
-    compareCtx.fill();
-  }
-
-  function render() {
-    const mode = modeData[activeMode];
-    const mx = activeMap(state.x);
-    const my = activeMap(state.y);
-    const delta = subtract(state.x, state.y);
-    const mappedDelta = subtract(mx, my);
-    const inner = dot(mappedDelta, delta);
-
-    drawPair(
-      sourceCanvas,
-      sourceCtx,
-      { x: labelEls.sourceX, y: labelEls.sourceY },
-      state.x,
-      state.y,
-      sourceVectorColor(),
-      sourceExtent,
-      mode.ambientGrid,
-      'source',
-      SOURCE_VIEW_ZOOM
-    );
-
-    drawPair(
-      imageCanvas,
-      imageCtx,
-      { x: labelEls.imageX, y: labelEls.imageY },
-      mx,
-      my,
-      inner >= 0 ? IAW.toAlpha(theme.success || '#059669', 0.88) : IAW.toAlpha(theme.danger || '#dc2626', 0.92),
-      mode.imageExtent,
-      mode.ambientGrid,
-      'mapped',
-      IMAGE_VIEW_ZOOM
-    );
-
-    drawComparisonBoard(delta, mappedDelta, inner);
-
-    deltaEl.textContent = formatVectorText(delta);
-    mappedDeltaEl.textContent = formatVectorText(mappedDelta);
-    innerEl.textContent = `${inner >= 0 ? '' : ''}${inner.toFixed(2)}`;
-    innerEl.style.color = inner >= 0 ? (theme.success || '#059669') : (theme.danger || '#dc2626');
-
-    modeNoteEl.textContent = activeMode === 'convex'
-      ? 'Same colored cloud after the convex-gradient map.'
-      : 'Same colored cloud after the non-monotone comparison map.';
-    compareNoteEl.textContent = inner >= 0
-      ? 'Tail-to-tail view: the mapped difference stays in the green half-plane set by x-y.'
-      : 'Tail-to-tail view: the mapped difference crosses the separating line into the red half-plane.';
-
-    readingEl.textContent = inner >= 0
-      ? 'Positive inner product: the projected map arrow still points the same way as the source direction.'
-      : 'Negative inner product: the projected map arrow flips and points backward against the source direction.';
-  }
-
-  function setMode(nextMode) {
-    activeMode = nextMode;
-    activeKey = null;
-    sourceShell.style.cursor = 'grab';
-    state.x = { ...modeData[nextMode].initialPair.x };
-    state.y = { ...modeData[nextMode].initialPair.y };
+    state.activeIndex = null;
+    if (stage.hasPointerCapture(event.pointerId)) {
+      stage.releasePointerCapture(event.pointerId);
+    }
+    updateCursor(event.clientX, event.clientY);
     render();
   }
 
-  sourceShell.addEventListener('pointerdown', handlePointerDown);
-  sourceShell.addEventListener('pointermove', handlePointerMove);
-  sourceShell.addEventListener('pointerup', handlePointerUp);
-  sourceShell.addEventListener('pointercancel', handlePointerUp);
-  sourceShell.style.cursor = 'grab';
+  function setMode(nextMode) {
+    state.activeMode = nextMode;
+    state.activeIndex = null;
+    state.points = initialPoints.map((point) => ({ ...point }));
+    stage.style.cursor = 'default';
+    render();
+  }
 
-  IAW.bindSegmentedControl(root.querySelectorAll('.iaw__seg-btn'), function(button) {
+  stage.addEventListener('pointerdown', handlePointerDown);
+  stage.addEventListener('pointermove', handlePointerMove);
+  stage.addEventListener('pointerup', handlePointerUp);
+  stage.addEventListener('pointerleave', () => {
+    if (state.activeIndex == null) stage.style.cursor = 'default';
+  });
+  stage.addEventListener('pointercancel', handlePointerUp);
+
+  IAW.bindSegmentedControl(segBtns, function(button) {
     setMode(button.dataset.mode || 'convex');
   }, { triggerInitial: true });
 
   const resizeObserver = window.ResizeObserver ? new ResizeObserver(render) : null;
   if (resizeObserver) {
-    resizeObserver.observe(sourceShell);
-    resizeObserver.observe(imageShell);
-    resizeObserver.observe(compareShell);
+    resizeObserver.observe(stage);
   } else {
     window.addEventListener('resize', render);
   }
@@ -731,5 +914,6 @@ IAW.mountFigure('brenierMonotonicityFigure', function(root) {
 
   window.setTimeout(render, 250);
   IAW.requestMathTypeset(root);
+  window.setTimeout(render, 500);
 });
 </script>

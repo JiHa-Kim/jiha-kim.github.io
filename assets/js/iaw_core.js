@@ -14,14 +14,13 @@ window.IAW = (function() {
      */
     core.getThemeColors = function(rootElement) {
         const style = getComputedStyle(rootElement || document.documentElement);
-        const isDark = document.documentElement.getAttribute('data-mode') === 'dark';
 
         return {
-            // Identity Tokens (Calibrated for Matte Aesthetic)
-            sourceA: isDark ? '#eab308' : '#d4a017', // Matte Yellow vs True Mustard
-            sourceB: isDark ? '#0284c7' : '#0ea5e9', // Deep Sky vs Bright Sky
-            target:  isDark ? '#0284c7' : '#0ea5e9', // Aqua for 1D mappings
-            destination: isDark ? '#6366f1' : '#818cf8', // Indigo for Holes
+            // Identity Tokens come from the shared widget CSS custom properties.
+            sourceA: style.getPropertyValue('--iaw-source-a').trim() || '#d4a017',
+            sourceB: style.getPropertyValue('--iaw-source-b').trim() || '#0ea5e9',
+            target: style.getPropertyValue('--iaw-target').trim() || '#0ea5e9',
+            destination: style.getPropertyValue('--iaw-destination').trim() || '#f43f5e',
             
             // Semantic Tokens
             success: style.getPropertyValue('--iaw-success').trim() || '#059669',
