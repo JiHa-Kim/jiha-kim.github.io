@@ -163,7 +163,11 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 {% include transport_uncrossing_widget.html %}
 
 > [!problem] Discrete 1D OT: Equal-Mass Matching
-> Suppose source points $x_1,\dots,x_n$ and target points $y_1,\dots,y_n$ each carry mass $\frac{1}{n}$, and each source point must be matched to exactly one target point. Then we choose a permutation $\sigma$ and solve
+> Suppose source points $x_1,\dots,x_n$ and target points $y_1,\dots,y_n$ each carry mass $\frac{1}{n}$, and each source point must be matched to exactly one target point.
+>
+> Under this equal-mass assumption, any feasible Monge map must match each source to a **distinct** target: if two sources landed on the same target, that target would receive mass $\frac{2}{n}$ instead of $\frac{1}{n}$, and some other target would be left empty. So every feasible matching is a bijection between the two sets, hence it is completely described by a permutation $\sigma \in S_n$.
+>
+> We therefore solve
 > $$ \min_{\sigma \in S_n} \frac{1}{n}\sum_{i=1}^n c(x_i, y_{\sigma(i)}). $$
 
 > [!lemma] Quadrangle Inequality
