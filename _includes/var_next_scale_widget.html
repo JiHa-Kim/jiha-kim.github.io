@@ -1,0 +1,506 @@
+{% capture describe %}
+<p>
+  VAR-style image autoregression changes the ordering variable. Instead of predicting pixels in raster order,
+  it predicts the next resolution conditioned on all coarser resolutions. The same sample is refined scale by scale:
+  first a seed image, then a coarse layout, then mid-frequency structure, and finally the full-resolution detail.
+</p>
+{% endcapture %}
+
+{% capture controls %}
+<button class="iaw__seg-btn active" data-preset="smooth">Smooth</button>
+<button class="iaw__seg-btn" data-preset="edge">Vertical Edge</button>
+<button class="iaw__seg-btn" data-preset="checker">Checker Texture</button>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="varw__layout iaw__figure-grid">
+  <section class="iaw__figure-card iaw__figure-card--compact varw__current-card">
+    <div class="iaw__figure-label">Current Prediction</div>
+    <div class="varw__current-grid">
+      <div class="varw__panel">
+        <div class="varw__panel-title" id="varwCurrentTitle">1x1 Seed</div>
+        <div class="varw__canvas-shell iaw__canvas-shell iaw__canvas-shell--square">
+          <canvas id="varwCurrentCanvas"></canvas>
+        </div>
+        <div class="varw__panel-copy" id="varwCurrentCopy">Only the global intensity is fixed.</div>
+      </div>
+
+      <div class="varw__panel">
+        <div class="varw__panel-title" id="varwDetailTitle">Seed Signal</div>
+        <div class="varw__canvas-shell iaw__canvas-shell iaw__canvas-shell--square">
+          <canvas id="varwDetailCanvas"></canvas>
+        </div>
+        <div class="varw__panel-copy" id="varwDetailCopy">The first prediction is a single coarse value expanded across the whole canvas.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Coarse-to-Fine Schedule</div>
+    <div class="varw__pyramid">
+      <button type="button" class="varw__scale-card is-active" data-stage="0">
+        <div class="varw__scale-head">
+          <span class="varw__scale-name">1x1 Seed</span>
+          <span class="varw__scale-meta">1 value</span>
+        </div>
+        <div class="varw__mini-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini">
+          <canvas id="varwScale1"></canvas>
+        </div>
+        <div class="varw__scale-note">Global mean only</div>
+      </button>
+
+      <button type="button" class="varw__scale-card" data-stage="1">
+        <div class="varw__scale-head">
+          <span class="varw__scale-name">2x2 Layout</span>
+          <span class="varw__scale-meta">4 values</span>
+        </div>
+        <div class="varw__mini-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini">
+          <canvas id="varwScale2"></canvas>
+        </div>
+        <div class="varw__scale-note">Quadrant structure</div>
+      </button>
+
+      <button type="button" class="varw__scale-card" data-stage="2">
+        <div class="varw__scale-head">
+          <span class="varw__scale-name">4x4 Structure</span>
+          <span class="varw__scale-meta">16 values</span>
+        </div>
+        <div class="varw__mini-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini">
+          <canvas id="varwScale4"></canvas>
+        </div>
+        <div class="varw__scale-note">Edges and contours</div>
+      </button>
+
+      <button type="button" class="varw__scale-card" data-stage="3">
+        <div class="varw__scale-head">
+          <span class="varw__scale-name">8x8 Detail</span>
+          <span class="varw__scale-meta">64 values</span>
+        </div>
+        <div class="varw__mini-shell iaw__canvas-shell iaw__canvas-shell--square iaw__canvas-shell--mini">
+          <canvas id="varwScale8"></canvas>
+        </div>
+        <div class="varw__scale-note">Fine local detail</div>
+      </button>
+    </div>
+  </section>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid varw__status-grid">
+  {% include iaw_status_item.html label="Current Scale" value="1x1 Seed" value_id="varwScaleLabel" %}
+  {% include iaw_status_item.html label="Predicted Resolution" value="1 x 1" value_id="varwResolution" %}
+  {% include iaw_status_item.html label="Conditioning Context" value="No coarser scale yet" value_id="varwContext" %}
+  {% include iaw_status_item.html label="Reading" value="Only the global mean is known, so every location still looks identical." value_id="varwReading" %}
+</div>
+
+<div class="iaw__split-strip varw__footer-strip">
+  <div class="iaw__split-pane">
+    <div class="iaw__slider-header">
+      <span>Generation Stage</span>
+      <span class="iaw__slider-readout" id="varwStageReadout">1 / 4</span>
+    </div>
+    {% assign varwTicks = "1x1, 2x2, 4x4, 8x8" | split: ", " %}
+    {% include iaw_timeline_controls.html play_id="varwPlay" play_label="Play next-scale prediction animation" slider_id="varwSlider" min="0" max="3" step="1" value="0" ticks=varwTicks variant="progress" %}
+  </div>
+
+  <div class="iaw__split-pane iaw__split-pane--divider">
+    <div class="varw__footer-copy" id="varwFooterCopy">
+      The autoregressive state is a single coarse token. Later scales condition on this whole low-resolution canvas instead of only a left-to-right prefix.
+    </div>
+  </div>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="varNextScaleFigure"
+    eyebrow="Visual Autoregressive Modeling"
+    title="Next-Scale Prediction Instead of Raster Order"
+    description=describe
+    controls=controls
+    visuals=visuals
+    footer=footer
+    stage_id="varwStage"
+    stage_style="height: auto; min-height: 320px; border: none; background: transparent;"
+%}
+
+<style>
+.varw__layout {
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  align-items: stretch;
+}
+
+.varw__current-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.varw__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.varw__panel-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--iaw-text);
+  text-align: center;
+}
+
+.varw__panel-copy,
+.varw__footer-copy {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--iaw-muted);
+}
+
+.varw__pyramid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.varw__scale-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.75rem;
+  border: 1px solid var(--iaw-border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--iaw-surface) 72%, var(--iaw-bg));
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.varw__scale-card:hover {
+  border-color: color-mix(in srgb, var(--iaw-target) 42%, var(--iaw-border));
+  transform: translateY(-1px);
+}
+
+.varw__scale-card.is-active {
+  border-color: color-mix(in srgb, var(--iaw-target) 58%, var(--iaw-border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--iaw-target) 25%, transparent);
+  background: color-mix(in srgb, var(--iaw-target) 6%, var(--iaw-bg));
+}
+
+.varw__scale-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.varw__scale-name,
+.varw__scale-meta {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--iaw-text);
+}
+
+.varw__scale-meta {
+  color: var(--iaw-muted);
+  white-space: nowrap;
+}
+
+.varw__scale-note {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--iaw-muted);
+}
+
+.varw__mini-shell {
+  width: min(100%, 102px);
+  align-self: center;
+}
+
+.varw__status-grid .iaw__status-value {
+  line-height: 1.35;
+}
+
+.varw__footer-strip {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+}
+
+@media (max-width: 980px) {
+  .varw__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .varw__current-grid,
+  .varw__pyramid,
+  .varw__footer-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .varw__footer-strip .iaw__split-pane--divider {
+    padding-left: 0;
+    border-left: none;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--iaw-border);
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('varNextScaleFigure', function(root) {
+
+  const SIZE = 8;
+  const stageSpecs = [
+    {
+      scale: 1,
+      label: '1x1 Seed',
+      resolution: '1 x 1',
+      currentTitle: '1x1 Seed',
+      currentCopy: 'Only the global intensity is fixed.',
+      detailTitle: 'Seed Signal',
+      detailCopy: 'The first prediction is a single coarse value expanded across the whole canvas.',
+      context: 'No coarser scale yet',
+      reading: 'Only the global mean is known, so every location still looks identical.',
+      footer: 'The autoregressive state is a single coarse token. Later scales condition on this whole low-resolution canvas instead of only a left-to-right prefix.'
+    },
+    {
+      scale: 2,
+      label: '2x2 Layout',
+      resolution: '2 x 2',
+      currentTitle: '2x2 Layout',
+      currentCopy: 'The model now resolves quadrant-scale structure.',
+      detailTitle: 'New Coarse Detail',
+      detailCopy: 'This step predicts the next resolution from the 1x1 seed, separating the image into broad regions.',
+      context: 'Condition on the 1x1 seed',
+      reading: 'Global layout appears, but edges and texture are still averaged inside each quadrant.',
+      footer: 'Next-scale prediction adds a whole low-resolution canvas at once, so the model gets global spatial structure early in generation.'
+    },
+    {
+      scale: 4,
+      label: '4x4 Structure',
+      resolution: '4 x 4',
+      currentTitle: '4x4 Structure',
+      currentCopy: 'Mid-frequency structure sharpens the coarse layout.',
+      detailTitle: 'Mid-Frequency Update',
+      detailCopy: 'Compared with the 2x2 stage, this refinement resolves contours, stronger gradients, and intermediate texture.',
+      context: 'Condition on 1x1 and 2x2 scales',
+      reading: 'The sample now carries recognizable geometry rather than only block-level averages.',
+      footer: 'Because each stage conditions on all coarser scales, refinement stays globally coherent while adding more local structure.'
+    },
+    {
+      scale: 8,
+      label: '8x8 Detail',
+      resolution: '8 x 8',
+      currentTitle: '8x8 Detail',
+      currentCopy: 'The final stage resolves the full local detail of the sample.',
+      detailTitle: 'Final Refinement',
+      detailCopy: 'The last next-scale prediction sharpens the remaining local variation to reach the target resolution.',
+      context: 'Condition on 1x1, 2x2, and 4x4 scales',
+      reading: 'Fine-scale local variation is filled in only after the coarse global structure is already fixed.',
+      footer: 'This is still autoregression, but the ordering variable is scale rather than raster position.'
+    }
+  ];
+
+  const presetMessages = {
+    smooth: [
+      'Only the average brightness of the whole image is visible.',
+      'Two coarse bright regions begin to separate across quadrants.',
+      'Blob boundaries and large gradients become visible.',
+      'The final sample resolves smooth shading and local contrast.'
+    ],
+    edge: [
+      'Only the average dark-vs-light balance is visible.',
+      'A coarse left-right split appears at the quadrant level.',
+      'The boundary sharpens into a clear edge across the image.',
+      'The final scale resolves the exact edge profile.'
+    ],
+    checker: [
+      'The alternating pattern is invisible at the global mean level.',
+      'A coarse alternating layout appears across large blocks.',
+      'Higher-frequency structure starts to emerge inside each block.',
+      'The full checker texture is only visible at the finest scale.'
+    ]
+  };
+
+  const canvases = {
+    current: root.querySelector('#varwCurrentCanvas'),
+    detail: root.querySelector('#varwDetailCanvas'),
+    scales: [
+      root.querySelector('#varwScale1'),
+      root.querySelector('#varwScale2'),
+      root.querySelector('#varwScale4'),
+      root.querySelector('#varwScale8')
+    ]
+  };
+
+  const stageCards = Array.from(root.querySelectorAll('.varw__scale-card'));
+  const segBtns = root.querySelectorAll('.iaw__seg-btn');
+  const slider = root.querySelector('#varwSlider');
+  const playBtn = root.querySelector('#varwPlay');
+
+  const currentTitle = root.querySelector('#varwCurrentTitle');
+  const currentCopy = root.querySelector('#varwCurrentCopy');
+  const detailTitle = root.querySelector('#varwDetailTitle');
+  const detailCopy = root.querySelector('#varwDetailCopy');
+  const scaleLabel = root.querySelector('#varwScaleLabel');
+  const resolution = root.querySelector('#varwResolution');
+  const context = root.querySelector('#varwContext');
+  const reading = root.querySelector('#varwReading');
+  const footerCopy = root.querySelector('#varwFooterCopy');
+  const stageReadout = root.querySelector('#varwStageReadout');
+
+  let currentPreset = 'smooth';
+  let currentStage = 0;
+  let theme = IAW.getThemeColors(root);
+
+  function downsampleAverage(image, scale) {
+    const block = SIZE / scale;
+    const matrix = Array.from({ length: scale }, () => Array(scale).fill(0));
+
+    for (let y = 0; y < scale; y += 1) {
+      for (let x = 0; x < scale; x += 1) {
+        let total = 0;
+        for (let yy = 0; yy < block; yy += 1) {
+          for (let xx = 0; xx < block; xx += 1) {
+            total += image[y * block + yy][x * block + xx];
+          }
+        }
+        matrix[y][x] = total / (block * block);
+      }
+    }
+
+    return matrix;
+  }
+
+  function upsampleNearest(matrix) {
+    const scale = matrix.length;
+    const block = SIZE / scale;
+    const upsampled = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+
+    for (let y = 0; y < scale; y += 1) {
+      for (let x = 0; x < scale; x += 1) {
+        for (let yy = 0; yy < block; yy += 1) {
+          for (let xx = 0; xx < block; xx += 1) {
+            upsampled[y * block + yy][x * block + xx] = matrix[y][x];
+          }
+        }
+      }
+    }
+
+    return upsampled;
+  }
+
+  function buildPyramid(preset) {
+    const image = IAW.buildFrequencyExampleImage(preset, SIZE);
+    return stageSpecs.map((stage) => {
+      const coarse = downsampleAverage(image, stage.scale);
+      return {
+        coarse,
+        display: upsampleNearest(coarse)
+      };
+    });
+  }
+
+  function buildResidual(currentMatrix, previousMatrix) {
+    const residual = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+
+    for (let y = 0; y < SIZE; y += 1) {
+      for (let x = 0; x < SIZE; x += 1) {
+        residual[y][x] = currentMatrix[y][x] - previousMatrix[y][x];
+      }
+    }
+
+    return residual;
+  }
+
+  function residualColor(value, scale) {
+    const normalized = scale > 1e-8 ? Math.max(-1, Math.min(1, value / scale)) : 0;
+    const magnitude = Math.abs(normalized);
+
+    if (normalized >= 0) {
+      return `hsl(38, ${34 + magnitude * 42}%, ${92 - magnitude * 42}%)`;
+    }
+
+    return `hsl(205, ${28 + magnitude * 42}%, ${92 - magnitude * 40}%)`;
+  }
+
+  function updateStage(stage) {
+    currentStage = stage;
+    stageCards.forEach((card, index) => card.classList.toggle('is-active', index === stage));
+
+    const pyramid = buildPyramid(currentPreset);
+    const currentDisplay = pyramid[stage].display;
+    const prevDisplay = stage > 0 ? pyramid[stage - 1].display : null;
+    const spec = stageSpecs[stage];
+    const presetCopy = presetMessages[currentPreset][stage];
+
+    canvases.scales.forEach((canvas, index) => {
+      IAW.drawMatrix(canvas, pyramid[index].display, IAW.grayscaleColor, { borderColor: theme.border });
+    });
+
+    IAW.drawMatrix(canvases.current, currentDisplay, IAW.grayscaleColor, { borderColor: theme.border });
+
+    if (prevDisplay) {
+      const residual = buildResidual(currentDisplay, prevDisplay);
+      const maxResidual = IAW.maxAbs(residual);
+      IAW.drawMatrix(
+        canvases.detail,
+        residual,
+        (value) => residualColor(value, maxResidual),
+        { borderColor: theme.border }
+      );
+    } else {
+      IAW.drawMatrix(canvases.detail, currentDisplay, IAW.grayscaleColor, { borderColor: theme.border });
+    }
+
+    currentTitle.textContent = spec.currentTitle;
+    currentCopy.textContent = presetCopy;
+    detailTitle.textContent = spec.detailTitle;
+    detailCopy.textContent = spec.detailCopy;
+    scaleLabel.textContent = spec.label;
+    resolution.textContent = spec.resolution;
+    context.textContent = spec.context;
+    reading.textContent = spec.reading;
+    footerCopy.textContent = spec.footer;
+    stageReadout.textContent = `${stage + 1} / ${stageSpecs.length}`;
+  }
+
+  const playback = IAW.createPlaybackController({
+    button: playBtn,
+    slider,
+    minFrame: 0,
+    maxFrame: stageSpecs.length - 1,
+    initialFrame: 0,
+    frameDuration: 950,
+    onFrameChange(frame) {
+      updateStage(Number(frame));
+    }
+  });
+
+  stageCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      playback.setFrame(Number(card.dataset.stage), { stopPlayback: true, notify: true });
+    });
+  });
+
+  IAW.bindSegmentedControl(segBtns, (button) => {
+    currentPreset = button.dataset.preset;
+    updateStage(currentStage);
+  });
+
+  IAW.observeTheme(() => {
+    theme = IAW.getThemeColors(root);
+    updateStage(currentStage);
+  });
+
+  window.addEventListener('resize', () => updateStage(currentStage));
+
+  updateStage(0);
+  IAW.requestMathTypeset(root);
+});
+</script>

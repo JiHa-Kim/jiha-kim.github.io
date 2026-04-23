@@ -309,9 +309,17 @@ Instead of autoregressing in the original coordinates, we can first change coord
 > [!example] Permuting Coordinates
 > If $y_i=x_{\sigma(i)}$ for a permutation $\sigma$, then $J_g$ is a permutation matrix, so $|\det J_g|=1$. For example, $(y_1,y_2,y_3)=(x_2,x_1,x_3)$ simply changes generation order. The model is still autoregressive, just in a different ordering.
 
-### Example 2: Frequency Space
+### Example 2: Next-Scale Prediction
 
-One concrete way to see frequency-space autoregression is through the 2-point Haar basis, the smallest wavelet example of coarse-to-fine generation {% cite yuFrequencyAutoregressiveImage2026 %}.
+An important recent ML example is **Visual Autoregressive Modeling (VAR)**, which replaces raster-scan next-token prediction with **next-scale prediction**: generate a coarse image first, then autoregressively refine it resolution by resolution {% cite tianVisualAutoregressiveModeling2024 %}. The factorization is still autoregressive, but the ordering now runs over image scales rather than individual pixel positions.
+
+{% include var_next_scale_widget.html %}
+
+### Example 3: Frequency Space
+
+Frequency-space autoregression is a different kind of reparameterization: instead of changing only the generation schedule, we first change basis and then autoregress in the transformed coordinates.
+
+At toy scale, one concrete way to see the same coarse-to-fine logic is through the 2-point Haar basis, the smallest wavelet example of frequency-space autoregression {% cite yuFrequencyAutoregressiveImage2026 %}.
 
 {% include frequency_reconstruction_widget.html %}
 
