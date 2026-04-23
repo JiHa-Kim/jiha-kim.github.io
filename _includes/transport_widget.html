@@ -1,7 +1,7 @@
 {% capture describe %}
 <p>
   In the discrete Monge problem, each source atom $z_i$ must choose exactly one target atom $x_j$.
-  If the masses are indivisible, a feasible deterministic map $T$ exists only when the source atoms already come in the exact pieces demanded by the targets.
+  If the masses are indivisible, a feasible single-valued map $T$ exists only when the source atoms already come in the exact pieces demanded by the targets.
   Here the route coefficients $c_{ij}$ are shipping rates in $\$/\mathrm{kg}$, so with 1kg boxes the Monge objective is the total dollar cost.
 </p>
 {% endcapture %}
@@ -40,7 +40,7 @@
 {% capture footer1 %}
 <div class="iaw__status-grid">
   {% include iaw_status_item.html label="Status" value="Feasible, Optimal" value_class="otm-status" value_style="color: var(--iaw-success);" %}
-  {% include iaw_status_item.html label="Verdict" value="Cost-minimizing deterministic map." value_class="otm-verdict" %}
+  {% include iaw_status_item.html label="Verdict" value="Cost-minimizing Monge map." value_class="otm-verdict" %}
   {% include iaw_status_item.html label="Active Costs ($/kg)" value="$c_{11}+c_{22}$" value_class="otm-breakdown" %}
   {% include iaw_status_item.html label="Monge Objective ($)" value="3" value_class="otm-total-cost" value_style="color: var(--iaw-primary); font-size: 1.25rem;" %}
 </div>
@@ -49,7 +49,7 @@
 {% include iaw_skeleton.html 
     id="mongeFeasibleWidget" 
     eyebrow="Discrete Monge Example" 
-    title="Two Feasible Deterministic Maps $T$" 
+    title="Two Feasible Monge Maps $T$" 
     description=describe
     visuals=visuals1
     controls=controls1
@@ -83,14 +83,14 @@
 {% capture footer2 %}
 <div class="iaw__status-grid">
   {% include iaw_status_item.html label="Status" value="Infeasible" value_style="color: var(--iaw-danger);" %}
-  {% include iaw_status_item.html label="Verdict" value="No deterministic map can match both target masses." %}
+  {% include iaw_status_item.html label="Verdict" value="No single-valued Monge map can match both target masses." %}
 </div>
 {% endcapture %}
 
 {% include iaw_skeleton.html 
     id="mongeFailureWidget" 
     eyebrow="Discrete Monge Failure" 
-    title="No Feasible Deterministic Map $T$" 
+    title="No Feasible Monge Map $T$" 
     visuals=visuals2
     stage_id="otmStage2"
     stage_style="height: 380px;"
@@ -219,11 +219,11 @@
           if (p === 1) {
             status.textContent = 'Feasible, Optimal';
             status.style.color = COLORS.success;
-            verdict.textContent = 'Cost-minimizing deterministic map.';
+            verdict.textContent = 'Cost-minimizing Monge map.';
           } else {
             status.textContent = 'Feasible, Suboptimal';
             status.style.color = COLORS.sourceA;
-            verdict.textContent = 'Feasible, but not cost-minimizing.';
+            verdict.textContent = 'Feasible Monge map, but not cost-minimizing.';
           }
           const hC = root.querySelector('.iaw__node--c .otm-hub__circle'), hD = root.querySelector('.iaw__node--d .otm-hub__circle');
           

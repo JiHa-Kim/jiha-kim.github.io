@@ -399,7 +399,7 @@ Brenier chooses the optimal **endpoint map**. Dynamic OT asks for the optimal **
 > and then setting $\rho_t=[X_t]_\sharp \mu_0$. This curve of measures is the **displacement interpolation**: each particle moves at constant speed along the segment from its source location to its Brenier destination. So the static map view and the dynamic least-action view describe the same quadratic OT geodesic.
 
 > [!note] Path-Space / Stochastic Formulation
-> A different dynamic formulation optimizes not over deterministic trajectories but over **laws on paths**:
+> A different dynamic formulation optimizes not over density/velocity fields directly but over **laws on paths**:
 > $$
 > \inf_{P:\,P_0=\mu_0,\ P_1=\mu_1}\operatorname{KL}(P \Vert R),
 > $$
