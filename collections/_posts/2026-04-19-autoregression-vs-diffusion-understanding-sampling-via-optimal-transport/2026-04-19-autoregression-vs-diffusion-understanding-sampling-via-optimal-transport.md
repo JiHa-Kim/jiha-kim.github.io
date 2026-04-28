@@ -340,6 +340,8 @@ The 1D closed form also gives a practical high-dimensional approximation: projec
 
 {% include sliced_wasserstein_widget.html %}
 
+This is useful as a geometry-aware comparison or loss, but it is not yet a sampler: every projection gives its own 1D pairing, and those pairings do not assemble into a single high-dimensional transport map.
+
 For sampling maps in higher dimensions, a different reuse of the 1D idea is to apply quantile matching one coordinate at a time.
 
 ## Autoregression as Sequential Transport
@@ -564,6 +566,8 @@ With the Wasserstein distance in place, probability laws can be treated as point
 
 {% include wasserstein_geodesic_widget.html %}
 
+The point of the comparison is that the Wasserstein path is not merely a visually smoother interpolation. It is the shortest path in the $W_2$ geometry, and it has an equivalent dynamic formulation as the least-action velocity field carrying one density into the other.
+
 > [!theorem] Benamou-Brenier Dynamic Formulation
 > For quadratic cost,
 > $$
@@ -609,8 +613,8 @@ That distinction is the main architectural split.
 >
 > | Feature | Autoregression (Knothe-Rosenblatt) | Flow / Diffusion (Unconstrained) |
 > | :--- | :--- | :--- |
-> | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | Ideal OT map: $T(x) = \nabla \psi(x)$; practical parameterization: learn $v_\theta(x,t)$ |
-> | **Tractability** | Exact sequential 1D inversions | Learned via velocity regression |
+> | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | Learn an unconstrained transport map; OT ideal: $T(x) = \nabla \psi(x)$ |
+> | **Tractability** | Exact sequential 1D inversions | Learned numerically rather than by exact coordinatewise inversions |
 > | **Structural Bias** | Arbitrary coordinate ordering | None (isotropic) |
 > | **Training Signal** | Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM / score matching |
 > | **Inference** | $D$ sequential steps | ODE integration (or one-step maps) |
