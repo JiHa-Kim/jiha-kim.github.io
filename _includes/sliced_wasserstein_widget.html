@@ -1,0 +1,455 @@
+{% capture describe %}
+<p>
+  Sliced OT turns a high-dimensional comparison into many 1D comparisons. Rotate the projection direction, then read the induced 1D sorted matching on the right.
+</p>
+{% endcapture %}
+
+{% capture swotSourceMarker %}<span class="swot__legend-dot swot__legend-dot--source"></span>{% endcapture %}
+{% capture swotTargetMarker %}<span class="swot__legend-dot swot__legend-dot--target"></span>{% endcapture %}
+{% capture swotAxisMarker %}<span class="swot__legend-line swot__legend-line--axis"></span>{% endcapture %}
+{% capture swotMatchMarker %}<span class="swot__legend-line swot__legend-line--match"></span>{% endcapture %}
+
+{% capture legend %}
+  {% include iaw_legend_item.html marker_html=swotSourceMarker label="Source samples" %}
+  {% include iaw_legend_item.html marker_html=swotTargetMarker label="Target samples" %}
+  {% include iaw_legend_item.html marker_html=swotAxisMarker label="Projection direction $\theta$" %}
+  {% include iaw_legend_item.html marker_html=swotMatchMarker label="1D sorted rank matching" %}
+{% endcapture %}
+
+{% capture visuals %}
+<div class="swot__layout iaw__figure-grid">
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Project 2D Clouds</div>
+    <div class="swot__canvas-shell iaw__canvas-shell" id="swotProjectionShell">
+      <canvas id="swotProjectionCanvas"></canvas>
+    </div>
+  </section>
+
+  <section class="iaw__figure-card iaw__figure-card--compact">
+    <div class="iaw__figure-label">Solve the 1D Slice</div>
+    <div class="swot__canvas-shell iaw__canvas-shell" id="swotSliceShell">
+      <canvas id="swotSliceCanvas"></canvas>
+    </div>
+  </section>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__status-grid swot__status-grid">
+  {% include iaw_status_item.html label="Direction" value="theta = 25.0 deg" value_id="swotAngle" %}
+  {% include iaw_status_item.html label="Slice $W_2^2$" value="0.000" value_id="swotSliceCost" %}
+  {% include iaw_status_item.html label="Estimated $\operatorname{SW}_2^2$" value="0.000" value_id="swotAverageCost" %}
+  {% include iaw_status_item.html label="Matching" value="Sorted ranks only" value_id="swotMatchingStatus" %}
+</div>
+
+<div class="swot__slider-block iaw__control-stack">
+  <div class="iaw__slider-header">
+    <span>Projection Angle</span>
+    <span class="iaw__slider-readout" id="swotAngleReadout">25.0 deg</span>
+  </div>
+  {% assign swotTicks = "0, 45, 90, 135, 180" | split: ", " %}
+  {% include iaw_timeline_controls.html play_id="swotPlay" play_label="Rotate sliced Wasserstein projection direction" slider_id="swotAngleSlider" min="0" max="180" step="0.5" value="25" ticks=swotTicks variant="progress" %}
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="slicedWassersteinFigure"
+    eyebrow="Sliced Optimal Transport"
+    title="Project, Sort, Average"
+    description=describe
+    legend=legend
+    visuals=visuals
+    footer=footer
+    stage_id="swotStage"
+    stage_style="height: auto; min-height: 300px; border: none; background: transparent;"
+%}
+
+<style>
+.swot__layout {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+}
+
+.swot__canvas-shell {
+  aspect-ratio: 1.22 / 1;
+  min-height: 270px;
+}
+
+.swot__status-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.swot__slider-block {
+  gap: 0.4rem;
+}
+
+.swot__legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--iaw-bg) 45%, transparent);
+}
+
+.swot__legend-dot--source {
+  background: var(--iaw-source-a);
+}
+
+.swot__legend-dot--target {
+  background: var(--iaw-target);
+}
+
+.swot__legend-line {
+  width: 22px;
+  height: 3px;
+  border-radius: 999px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.swot__legend-line--axis {
+  background: var(--iaw-success);
+}
+
+.swot__legend-line--match {
+  background: color-mix(in srgb, var(--iaw-border) 76%, var(--iaw-text));
+}
+
+@media (max-width: 860px) {
+  .swot__layout,
+  .swot__status-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('slicedWassersteinFigure', function(root) {
+  const projectionShell = root.querySelector('#swotProjectionShell');
+  const projectionCanvas = root.querySelector('#swotProjectionCanvas');
+  const projectionCtx = projectionCanvas.getContext('2d');
+  const sliceShell = root.querySelector('#swotSliceShell');
+  const sliceCanvas = root.querySelector('#swotSliceCanvas');
+  const sliceCtx = sliceCanvas.getContext('2d');
+  const slider = root.querySelector('#swotAngleSlider');
+  const playBtn = root.querySelector('#swotPlay');
+  const angleValue = root.querySelector('#swotAngle');
+  const angleReadout = root.querySelector('#swotAngleReadout');
+  const sliceCostValue = root.querySelector('#swotSliceCost');
+  const averageCostValue = root.querySelector('#swotAverageCost');
+
+  const sourcePoints = [
+    [-1.45, -0.66], [-1.21, -0.23], [-1.08, 0.34], [-0.86, 0.78],
+    [-0.58, -0.52], [-0.42, 0.02], [-0.19, 0.48], [0.02, -0.82],
+    [0.2, -0.27], [0.36, 0.22], [0.58, 0.72], [0.82, -0.58],
+    [1.04, -0.08], [1.18, 0.42], [-1.63, 0.16], [-0.72, 1.05],
+    [0.66, -1.0], [1.39, 0.05], [-0.08, 0.96], [0.96, 0.93]
+  ];
+
+  const targetPoints = sourcePoints.map(function(point, index) {
+    const x = point[0];
+    const y = point[1];
+    const wobble = 0.06 * Math.sin(index * 1.7);
+    return [
+      0.62 + 0.78 * x - 0.34 * y + wobble,
+      0.28 + 0.42 * x + 0.88 * y - 0.04 * Math.cos(index * 1.3)
+    ];
+  });
+
+  const allPoints = sourcePoints.concat(targetPoints);
+  const domain = makeSquareDomain(allPoints, 0.38);
+  const projectionExtent = Math.max(...allPoints.map(function(point) {
+    return Math.sqrt(point[0] * point[0] + point[1] * point[1]);
+  })) + 0.3;
+  const directionCount = 48;
+  const slicedAverage = estimateSlicedCost(directionCount);
+
+  let theme = IAW.getThemeColors(root);
+  let playback = null;
+
+  function makeSquareDomain(points, padding) {
+    const xs = points.map((point) => point[0]);
+    const ys = points.map((point) => point[1]);
+    const xMid = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const yMid = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) + 2 * padding;
+
+    return {
+      xMin: xMid - span / 2,
+      xMax: xMid + span / 2,
+      yMin: yMid - span / 2,
+      yMax: yMid + span / 2
+    };
+  }
+
+  function setupCanvas(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, width: rect.width, height: rect.height };
+  }
+
+  function mapPoint(point, width, height) {
+    const xSpan = domain.xMax - domain.xMin;
+    const ySpan = domain.yMax - domain.yMin;
+    const scale = Math.min(width / xSpan, height / ySpan) * 0.92;
+    const xCenter = (domain.xMin + domain.xMax) / 2;
+    const yCenter = (domain.yMin + domain.yMax) / 2;
+
+    return {
+      x: width / 2 + (point[0] - xCenter) * scale,
+      y: height / 2 - (point[1] - yCenter) * scale
+    };
+  }
+
+  function projection(point, angleRad) {
+    return point[0] * Math.cos(angleRad) + point[1] * Math.sin(angleRad);
+  }
+
+  function projectedPoint(value, angleRad) {
+    return [value * Math.cos(angleRad), value * Math.sin(angleRad)];
+  }
+
+  function sortedProjections(points, angleRad) {
+    return points
+      .map(function(point, index) {
+        return { index: index, value: projection(point, angleRad), point: point };
+      })
+      .sort(function(a, b) {
+        return a.value - b.value;
+      });
+  }
+
+  function sliceCost(angleDeg) {
+    const angleRad = (angleDeg / 180) * Math.PI;
+    const source = sortedProjections(sourcePoints, angleRad);
+    const target = sortedProjections(targetPoints, angleRad);
+    let total = 0;
+
+    for (let i = 0; i < source.length; i += 1) {
+      const diff = source[i].value - target[i].value;
+      total += diff * diff;
+    }
+
+    return total / source.length;
+  }
+
+  function estimateSlicedCost(count) {
+    let total = 0;
+    for (let i = 0; i < count; i += 1) {
+      total += sliceCost((180 * i) / count);
+    }
+    return total / count;
+  }
+
+  function drawGrid(ctx, width, height) {
+    ctx.strokeStyle = IAW.toAlpha(theme.border || '#94a3b8', 0.32);
+    ctx.lineWidth = 1;
+
+    for (let i = 1; i < 4; i += 1) {
+      const x = (width * i) / 4;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+
+    for (let i = 1; i < 4; i += 1) {
+      const y = (height * i) / 4;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+  }
+
+  function drawProjectionPanel(angleDeg) {
+    const setup = setupCanvas(projectionCanvas);
+    const ctx = setup.ctx;
+    const width = setup.width;
+    const height = setup.height;
+    const angleRad = (angleDeg / 180) * Math.PI;
+    const unit = [Math.cos(angleRad), Math.sin(angleRad)];
+    const axisColor = theme.success || '#059669';
+    const sourceColor = theme.sourceA || '#d4a017';
+    const targetColor = theme.target || '#0ea5e9';
+    const neutral = theme.border || '#94a3b8';
+    const axisLength = projectionExtent;
+
+    ctx.clearRect(0, 0, width, height);
+    drawGrid(ctx, width, height);
+
+    const axisStart = mapPoint([-axisLength * unit[0], -axisLength * unit[1]], width, height);
+    const axisEnd = mapPoint([axisLength * unit[0], axisLength * unit[1]], width, height);
+
+    ctx.strokeStyle = IAW.toAlpha(axisColor, 0.9);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(axisStart.x, axisStart.y);
+    ctx.lineTo(axisEnd.x, axisEnd.y);
+    ctx.stroke();
+
+    drawArrowHead(ctx, axisEnd, axisStart, axisColor);
+
+    drawProjectedCloud(ctx, width, height, sourcePoints, angleRad, sourceColor, neutral);
+    drawProjectedCloud(ctx, width, height, targetPoints, angleRad, targetColor, neutral);
+  }
+
+  function drawArrowHead(ctx, end, start, color) {
+    const angle = Math.atan2(end.y - start.y, end.x - start.x);
+    const size = 8;
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(end.x, end.y);
+    ctx.lineTo(end.x - size * Math.cos(angle - Math.PI / 6), end.y - size * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(end.x - size * Math.cos(angle + Math.PI / 6), end.y - size * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawProjectedCloud(ctx, width, height, points, angleRad, color, neutral) {
+    points.forEach(function(point) {
+      const value = projection(point, angleRad);
+      const projected = projectedPoint(value, angleRad);
+      const p = mapPoint(point, width, height);
+      const q = mapPoint(projected, width, height);
+
+      ctx.strokeStyle = IAW.toAlpha(neutral, 0.28);
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(q.x, q.y);
+      ctx.stroke();
+
+      IAW.drawCircle(ctx, q.x, q.y, 2.5, IAW.toAlpha(color, 0.45));
+      IAW.drawCircle(ctx, p.x, p.y, 3.8, IAW.toAlpha(color, 0.9));
+    });
+  }
+
+  function mapProjectionValue(value, width) {
+    const pad = Math.max(28, width * 0.08);
+    return pad + ((value + projectionExtent) / (2 * projectionExtent)) * (width - 2 * pad);
+  }
+
+  function drawSlicePanel(angleDeg) {
+    const setup = setupCanvas(sliceCanvas);
+    const ctx = setup.ctx;
+    const width = setup.width;
+    const height = setup.height;
+    const angleRad = (angleDeg / 180) * Math.PI;
+    const source = sortedProjections(sourcePoints, angleRad);
+    const target = sortedProjections(targetPoints, angleRad);
+    const sourceY = height * 0.32;
+    const targetY = height * 0.68;
+    const axisY = height * 0.5;
+    const sourceColor = theme.sourceA || '#d4a017';
+    const targetColor = theme.target || '#0ea5e9';
+    const neutral = theme.border || '#94a3b8';
+
+    ctx.clearRect(0, 0, width, height);
+    drawProjectionAxis(ctx, width, axisY);
+
+    for (let i = 0; i < source.length; i += 1) {
+      const sx = mapProjectionValue(source[i].value, width);
+      const tx = mapProjectionValue(target[i].value, width);
+      const diff = Math.abs(source[i].value - target[i].value);
+
+      ctx.strokeStyle = IAW.toAlpha(neutral, IAW.clamp(0.18 + diff * 0.16, 0.18, 0.58));
+      ctx.lineWidth = IAW.clamp(0.8 + diff * 0.55, 0.8, 2.4);
+      ctx.beginPath();
+      ctx.moveTo(sx, sourceY);
+      ctx.lineTo(tx, targetY);
+      ctx.stroke();
+    }
+
+    source.forEach(function(item, rank) {
+      const x = mapProjectionValue(item.value, width);
+      drawRankDot(ctx, x, sourceY, sourceColor, rank);
+    });
+
+    target.forEach(function(item, rank) {
+      const x = mapProjectionValue(item.value, width);
+      drawRankDot(ctx, x, targetY, targetColor, rank);
+    });
+
+    drawRowLabel(ctx, width, sourceY, 'source ranks', sourceColor);
+    drawRowLabel(ctx, width, targetY, 'target ranks', targetColor);
+  }
+
+  function drawProjectionAxis(ctx, width, y) {
+    const pad = Math.max(28, width * 0.08);
+
+    ctx.strokeStyle = IAW.toAlpha(theme.border || '#94a3b8', 0.8);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(width - pad, y);
+    ctx.stroke();
+
+    for (let i = -2; i <= 2; i += 1) {
+      const x = mapProjectionValue((projectionExtent * i) / 2, width);
+      ctx.strokeStyle = IAW.toAlpha(theme.border || '#94a3b8', 0.65);
+      ctx.beginPath();
+      ctx.moveTo(x, y - 4);
+      ctx.lineTo(x, y + 4);
+      ctx.stroke();
+    }
+  }
+
+  function drawRankDot(ctx, x, y, color, rank) {
+    const radius = rank % 5 === 0 ? 4.2 : 3.2;
+    IAW.drawCircle(ctx, x, y, radius, IAW.toAlpha(color, 0.9));
+  }
+
+  function drawRowLabel(ctx, width, y, label, color) {
+    ctx.fillStyle = IAW.toAlpha(color, 0.9);
+    ctx.font = '700 11px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, Math.max(14, width * 0.03), y + 4);
+  }
+
+  function updateStatus(angleDeg) {
+    const cost = sliceCost(angleDeg);
+    const angleText = angleDeg.toFixed(1) + ' deg';
+
+    if (angleValue) angleValue.textContent = 'theta = ' + angleText;
+    if (angleReadout) angleReadout.textContent = angleText;
+    if (sliceCostValue) sliceCostValue.textContent = cost.toFixed(3);
+    if (averageCostValue) averageCostValue.textContent = slicedAverage.toFixed(3) + ' (K=' + directionCount + ')';
+  }
+
+  function render(angleDeg) {
+    const angle = IAW.clamp(Number(angleDeg), 0, 180);
+    drawProjectionPanel(angle);
+    drawSlicePanel(angle);
+    updateStatus(angle);
+  }
+
+  IAW.observeTheme(function() {
+    theme = IAW.getThemeColors(root);
+    render(playback ? playback.getFrame() : Number(slider.value));
+  });
+
+  window.addEventListener('resize', function() {
+    render(playback ? playback.getFrame() : Number(slider.value));
+  });
+
+  playback = IAW.createPlaybackController({
+    button: playBtn,
+    slider: slider,
+    minFrame: 0,
+    maxFrame: 180,
+    isTimeBased: true,
+    speed: 0.026,
+    onFrameChange: render
+  });
+
+  render(Number(slider.value));
+  IAW.requestMathTypeset(root);
+});
+</script>

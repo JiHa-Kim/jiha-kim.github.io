@@ -338,6 +338,8 @@ The 1D closed form also gives a practical high-dimensional approximation: projec
 >
 > Kitagawa and Takatsu make the limitation precise: sliced Wasserstein-type metrics are topologically equivalent to classical Wasserstein metrics, but they are generally not bi-Lipschitz equivalent, and for $p>1$ in dimension $D\ge2$ the sliced spaces are not geodesic. So sliced OT is often a cheap geometry-aware surrogate when full high-dimensional OT is too expensive, but it should not replace $W_p$ in arguments where the exact metric scale or Wasserstein geodesic structure matters {% cite montesumaRecentAdvancesOptimal2024 kitagawaSlicedOptimalTransport2024 %}.
 
+{% include sliced_wasserstein_widget.html %}
+
 For sampling maps in higher dimensions, a different reuse of the 1D idea is to apply quantile matching one coordinate at a time.
 
 ## Autoregression as Sequential Transport
