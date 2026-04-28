@@ -306,7 +306,37 @@ The local swap behind the 1D OT solution is easiest to see in the smallest nontr
 
 {% include transport_1d_widget.html %}
 
-In higher dimensions, we can keep the same quantile-matching idea, but apply it one coordinate at a time.
+### Sliced Wasserstein: Reusing 1D OT
+
+The 1D closed form also gives a practical high-dimensional approximation: project the distributions onto many lines, solve the resulting 1D OT problems, and average the costs.
+
+> [!definition] Sliced Wasserstein Distance
+> For a direction $\theta$ on the unit sphere $\mathbb{S}^{D-1}$, let
+> $$
+> P_\theta=(x\mapsto \theta^\top x)_\sharp P,
+> \qquad
+> Q_\theta=(x\mapsto \theta^\top x)_\sharp Q
+> $$
+> be the 1D projected laws. The sliced Wasserstein distance is
+> $$
+> \operatorname{SW}_p^p(P,Q)
+> =
+> \int_{\mathbb{S}^{D-1}}
+> W_p^p(P_\theta,Q_\theta)\,d\theta.
+> $$
+> In practice, the integral is estimated with random directions:
+> $$
+> \operatorname{SW}_p^p(P,Q)
+> \approx
+> \frac1K\sum_{k=1}^K W_p^p(P_{\theta_k},Q_{\theta_k}).
+> $$
+
+> [!remark] Why This Belongs Here
+> Sliced OT is useful because each projected problem is 1D, so the quantile-matching solution above applies directly. For empirical samples, this means: project both clouds onto a direction, sort the projected values, pair equal ranks, and repeat across directions.
+>
+> The tradeoff is that sliced OT is a comparison metric, not a single high-dimensional transport map. Each projection induces its own 1D matching, so the averaged objective does not by itself produce one coherent Brenier coupling in the original space. Still, it is often a cheap geometry-aware surrogate when full high-dimensional OT is too expensive {% cite montesumaRecentAdvancesOptimal2024 %}.
+
+For sampling maps in higher dimensions, a different reuse of the 1D idea is to apply quantile matching one coordinate at a time.
 
 ## Autoregression as Sequential Transport
 
