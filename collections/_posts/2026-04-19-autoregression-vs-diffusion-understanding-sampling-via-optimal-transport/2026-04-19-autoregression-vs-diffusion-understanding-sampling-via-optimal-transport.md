@@ -58,7 +58,7 @@ llm-instructions: |
   Please do not modify sources, references, or further reading without explicit request.
 ---
 
-# Introduction
+## Introduction
 
 Generative modeling is fundamentally an exercise in statistical estimation.
 
@@ -77,7 +77,9 @@ Generative modeling is fundamentally an exercise in statistical estimation.
 
 Autoregressive models and diffusion models are often presented as very different generative strategies. At a high level, however, both function as this "procedural generation algorithm," converting simple randomness into complex samples from the data distribution. The difference is in how they parameterize that conversion: autoregression does it through a sequence of conditional transports, while diffusion does it through a time-dependent denoising dynamics. Optimal transport is therefore a useful geometric lens for comparing them, even when the underlying training objectives are not literally the same.
 
-### The Choice of Base Distribution
+The route is: define the transport problem, solve it exactly in 1D, show how autoregression reuses that 1D solution conditionally, then compare it with Brenier maps, Wasserstein geodesics, and the learned flow or one-step approximations used in practice.
+
+## The Choice of Base Distribution
 
 Why are Gaussian or Uniform distributions standard choices for $P_{\text{noise}}$? Practitioners favor them for practical reasons: they are easy to sample from, isotropic, stable under perturbation, and compatible with common noising procedures. They also have a clean maximum-entropy characterization once the underlying domain or moment constraints are fixed.
 
@@ -140,9 +142,38 @@ It studies how to rearrange one distribution into another, either by a point-to-
 > $$ \pi_{i,T(i)} = a_i, \qquad \pi_{ij} = 0 \text{ for } j \ne T(i). $$
 
 > [!important] Why the Discrete Problem Is Linear
-> Kantorovich transport is **linear** in the plan $\pi_{ij}$, so the discrete problem is a linear optimization problem. We will return to its dual later, once the basic OT picture is in place.
+> Kantorovich transport is **linear** in the plan $\pi_{ij}$, so the discrete problem is a linear optimization problem. That linear structure gives a dual problem with its own useful interpretation.
 
 {% include transport_split_widget.html %}
+
+### Dual Potentials
+
+Because the discrete Kantorovich problem is linear, it has a useful dual: instead of moving mass directly, we assign prices to source and target locations and use those prices to certify lower bounds on every transport plan.
+
+> [!problem] Discrete Kantorovich Dual
+> In the discrete case, the dual problem is
+> $$ \max_{f_i,\,g_j} \sum_i a_i f_i + \sum_j b_j g_j \qquad \text{s.t.} \qquad f_i + g_j \le c_{ij}\;\; \text{for all } i,j. $$
+> Here $f_i$ is the price assigned to source point $x_i$ and $g_j$ is the price assigned to target point $y_j$. The rule $f_i+g_j \le c_{ij}$ says their combined price can never exceed the true cost of pairing them.
+
+> [!remark] Why This Is Useful
+> Any feasible pair $(f,g)$ gives a guaranteed lower bound on every transport plan:
+> $$ \sum_i a_i f_i + \sum_j b_j g_j = \sum_{i,j}\pi_{ij}(f_i+g_j) \le \sum_{i,j} c_{ij}\pi_{ij}. $$
+> So if we can find large prices that still satisfy the constraints, we certify that the transport cost cannot be any smaller. Duality says the best such certificate exactly matches the true optimum.
+
+> [!tip] Complementary Slackness
+> At optimality, transported pairs satisfy $\pi_{ij}>0 \Rightarrow f_i+g_j=c_{ij}$. In words: mass only travels along pairs whose price constraint is tight. So the dual potentials identify the active geometry of the coupling.
+
+The same tiny transport example makes this lower-bound picture concrete:
+
+{% include kantorovich_dual_widget.html %}
+
+> [!problem] Continuous Kantorovich Dual
+> The continuous version is the same idea, but now the prices are functions rather than finite lists of numbers. Among all $f$ and $g$ satisfying $f(z)+g(x)\le c(z,x)$ for every $z,x$, the best lower bound is
+> $$ \sup_{f,g} \; \mathbb{E}[f(Z)] + \mathbb{E}[g(X)], \qquad Z \sim P_{\text{noise}},\; X \sim P_{\text{data}}. $$
+> Under standard assumptions, this equals the Kantorovich optimum.
+
+> [!note] Why This Matters Here
+> These dual potentials are the continuous analogue of the discrete prices. They reappear in regularized OT, Sinkhorn-style updates, and potential-based viewpoints on transport geometry.
 
 ### Wasserstein Distance: Earth Mover's Distance
 
@@ -170,6 +201,8 @@ The Kantorovich problem does more than choose a coupling. When the cost comes fr
 > For quadratic transport, the common object is $W_2^2$, the minimum expected squared displacement. The metric is $W_2$ itself, after taking the square root.
 
 > [!theorem] Kantorovich-Rubinstein Duality for $W_1$
+> For $W_1$, the general continuous dual above collapses to a single 1-Lipschitz potential.
+>
 > For the distance cost $c(x,y)=d(x,y)$,
 > $$
 > W_1(P,Q)
@@ -615,11 +648,11 @@ That distinction is the main architectural split.
 > | :--- | :--- | :--- |
 > | **Map Form** | $T_i(x_i | x_{<i}) = F^{-1}_{Q_i | Q_{<i}}(F_{P_i | P_{<i}}(x_i))$ | Learn an unconstrained transport map; OT ideal: $T(x) = \nabla \psi(x)$ |
 > | **Tractability** | Exact sequential 1D inversions | Learned numerically rather than by exact coordinatewise inversions |
-> | **Structural Bias** | Arbitrary coordinate ordering | None (isotropic) |
-> | **Training Signal** | Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM / score matching |
-> | **Inference** | $D$ sequential steps | ODE integration (or one-step maps) |
+> | **Structural Bias** | Fixed coordinate or token ordering | No required coordinate order; bias comes from architecture, coupling, and path choice |
+> | **Typical Training Signal** | Exact likelihood: $\sum_i \log p(x_i | x_{<i})$ | CFM, score matching, likelihood, or distillation variants |
+> | **Typical Inference** | $D$ sequential steps | ODE/SDE integration, denoising, or one-step maps |
 
-Autoregression keeps an exact sequential sampler and exact likelihood factorization, but pays for it with an ordering bias. Unconstrained transport is geometrically better aligned with the symmetric quadratic cost, but it must be learned numerically.
+Autoregression keeps an exact sequential sampler and exact likelihood factorization, but pays for it with an ordering bias. Unconstrained transport removes that coordinate-ordering constraint and can target the symmetric quadratic geometry, but the map or flow has to be learned numerically.
 
 Two 2D pictures help keep the distinction straight. First, we compare two <strong>exact continuous maps at the population-law level</strong>: same source law, same target law, different map. Then we pass to a <strong>finite-sample discretization</strong> of those same laws: one frozen source cloud, one frozen target cloud, and two couplings on the same cached point set.
 
@@ -629,13 +662,13 @@ Two 2D pictures help keep the distinction straight. First, we compare two <stron
 
 ## Unconstrained Transport: Continuous Flows
 
-A standard parameterization of an unconstrained transport is to learn a time-dependent velocity field and integrate it {% cite laiPrinciplesDiffusionModels2025 %}.
+One standard way to parameterize an unconstrained transport is to learn a time-dependent velocity field and integrate it {% cite laiPrinciplesDiffusionModels2025 %}.
 
 > [!definition] Continuous Normalizing Flow (CNF)
 > $$ \frac{dx}{dt} = v_\theta(x, t), \qquad x(0) \sim P_{\text{noise}}, \quad x(1) \sim P_{\text{data}} $$
 > The field induces a flow map $\phi_t$, and we want $\phi_1(X)$ to follow $P_{\text{data}}$ when $X \sim P_{\text{noise}}$.
 
-This avoids parameterizing $\nabla\psi$ directly, but it does **not** by itself specify which dynamics should connect the endpoints. Benamou-Brenier chooses the least-action field; a generic CNF objective only chooses some field whose terminal pushforward is correct.
+This avoids parameterizing $\nabla\psi$ directly. It learns a transport map indirectly as the endpoint flow $\phi_1$, but it does **not** by itself specify which dynamics should connect the endpoints. Benamou-Brenier chooses the least-action field; a generic CNF objective only chooses some field whose terminal pushforward is correct.
 
 So the training question becomes: what conditional dynamics should $v_\theta$ regress toward?
 
@@ -726,35 +759,6 @@ Unlike flow matching, this objective does **not** require paired endpoints. It c
 Conceptually, this closes the loop:
 $$ \text{Map (Brenier, intractable)} \to \text{Flow (tractable, multi-step)} \to \text{Learned one-step map}. $$
 
-### Dual Potentials
-
-Before returning to exact-map structure, it is useful to switch from the primal viewpoint of moving mass to the dual viewpoint of certifying transport cost by potentials.
-
-> [!problem] Discrete Kantorovich Dual
-> In the discrete case, the dual problem is
-> $$ \max_{f_i,\,g_j} \sum_i a_i f_i + \sum_j b_j g_j \qquad \text{s.t.} \qquad f_i + g_j \le c_{ij}\;\; \text{for all } i,j. $$
-> Here $f_i$ is the price assigned to source point $x_i$ and $g_j$ is the price assigned to target point $y_j$. The rule $f_i+g_j \le c_{ij}$ says their combined price can never exceed the true cost of pairing them.
-
-> [!remark] Why This Is Useful
-> Any feasible pair $(f,g)$ gives a guaranteed lower bound on every transport plan:
-> $$ \sum_i a_i f_i + \sum_j b_j g_j = \sum_{i,j}\pi_{ij}(f_i+g_j) \le \sum_{i,j} c_{ij}\pi_{ij}. $$
-> So if we can find large prices that still satisfy the constraints, we certify that the transport cost cannot be any smaller. Duality says the best such certificate exactly matches the true optimum.
-
-> [!tip] Complementary Slackness
-> At optimality, transported pairs satisfy $\pi_{ij}>0 \Rightarrow f_i+g_j=c_{ij}$. In words: mass only travels along pairs whose price constraint is tight. So the dual potentials identify the active geometry of the coupling.
-
-The same tiny transport example makes this lower-bound picture concrete:
-
-{% include kantorovich_dual_widget.html %}
-
-> [!problem] Continuous Kantorovich Dual
-> The continuous version is the same idea, but now the prices are functions rather than finite lists of numbers. Among all $f$ and $g$ satisfying $f(z)+g(x)\le c(z,x)$ for every $z,x$, the best lower bound is
-> $$ \sup_{f,g} \; \mathbb{E}[f(Z)] + \mathbb{E}[g(X)], \qquad Z \sim P_{\text{noise}},\; X \sim P_{\text{data}}. $$
-> Under standard assumptions, this equals the Kantorovich optimum.
-
-> [!note] Why This Matters Here
-> These dual potentials are the continuous analogue of the discrete prices. They reappear in regularized OT, Sinkhorn-style updates, and potential-based viewpoints on transport geometry.
-
 ## Optional Refinement: Polar Factorization
 
 Even if a generator already matches the correct density, its internal geometry need not be transport-optimal.
@@ -797,7 +801,9 @@ For standard normal priors, Morel et al. make this concrete by moving to uniform
 > [!summary] 
 > Through the lens of optimal transport, autoregression and diffusion are two computational strategies for the same geometric task: transporting $P_{\text{noise}}$ to $P_{\text{data}}$.
 >
-> Neither paradigm is tied to a modality by mathematical necessity. Text uses autoregression and images use diffusion mostly because of inductive bias and computational convenience. Better transport parameterizations and solvers will likely keep blurring that boundary.
+> Autoregression makes the transport exact by imposing a triangular, coordinate-ordered structure. Flow and diffusion methods remove that ordering constraint, but then the transport map or dynamics must be learned from a chosen objective, coupling, and path family.
+>
+> The OT lens is therefore not saying that these methods are literally the same algorithm. It says they are different parameterizations and relaxations of the same source-to-target problem. Text uses autoregression and images use diffusion mostly because of inductive bias and computational convenience; better transport parameterizations and solvers will keep blurring that boundary.
 
 ---
 
