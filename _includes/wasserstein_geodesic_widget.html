@@ -82,7 +82,6 @@
   border-radius: 999px;
   display: inline-block;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--iaw-bg) 45%, transparent);
 }
 
 .wgeo__legend-dot--source {
@@ -151,12 +150,6 @@ IAW.mountFigure('wassersteinGeodesicFigure', function(root) {
     return points;
   }
 
-  function gaussianDensity(x, y, law) {
-    const dx = (x - law.mx) / law.sx;
-    const dy = (y - law.my) / law.sy;
-    return Math.exp(-0.5 * (dx * dx + dy * dy)) / (law.sx * law.sy);
-  }
-
   function mixLaw(t) {
     return {
       mx: IAW.lerp(source.mx, target.mx, t),
@@ -203,27 +196,6 @@ IAW.mountFigure('wassersteinGeodesicFigure', function(root) {
     }
   }
 
-  function drawGaussianField(ctx, width, height, law, color, weight) {
-    const cols = 72;
-    const rows = 50;
-    const cellW = width / cols;
-    const cellH = height / rows;
-    const peak = 1 / (law.sx * law.sy);
-
-    for (let iy = 0; iy < rows; iy += 1) {
-      const y = domain.yMax - ((iy + 0.5) / rows) * (domain.yMax - domain.yMin);
-      for (let ix = 0; ix < cols; ix += 1) {
-        const x = domain.xMin + ((ix + 0.5) / cols) * (domain.xMax - domain.xMin);
-        const normalized = gaussianDensity(x, y, law) / peak;
-        const alpha = IAW.clamp(normalized * weight * 0.55, 0, 0.58);
-        if (alpha > 0.006) {
-          ctx.fillStyle = IAW.toAlpha(color, alpha);
-          ctx.fillRect(ix * cellW, iy * cellH, Math.ceil(cellW) + 0.5, Math.ceil(cellH) + 0.5);
-        }
-      }
-    }
-  }
-
   function ellipsePoint(law, angle, radius) {
     return [
       law.mx + radius * law.sx * Math.cos(angle),
@@ -246,6 +218,13 @@ IAW.mountFigure('wassersteinGeodesicFigure', function(root) {
     }
     ctx.stroke();
     ctx.restore();
+  }
+
+  function drawLawContours(ctx, width, height, law, color, alpha, dash) {
+    if (alpha <= 0.02) return;
+    const safeAlpha = IAW.clamp(alpha, 0, 0.9);
+    drawEllipse(ctx, width, height, law, IAW.toAlpha(color, safeAlpha), 1.0, 1.1, dash);
+    drawEllipse(ctx, width, height, law, IAW.toAlpha(color, safeAlpha * 0.72), 1.65, 1.1, dash);
   }
 
   function sampleInLaw(sample, law) {
@@ -307,18 +286,17 @@ IAW.mountFigure('wassersteinGeodesicFigure', function(root) {
     drawGrid(ctx, width, height);
 
     if (mode === 'mix') {
-      drawGaussianField(ctx, width, height, source, sourceColor, 1 - t);
-      drawGaussianField(ctx, width, height, target, targetColor, t);
+      drawLawContours(ctx, width, height, source, sourceColor, 1 - t, []);
+      drawLawContours(ctx, width, height, target, targetColor, t, []);
       drawSamples(ctx, width, height, t, 'mix');
     } else {
       const law = mixLaw(t);
-      drawGaussianField(ctx, width, height, law, flowColor, 1);
       drawSamples(ctx, width, height, t, 'w2');
-      drawEllipse(ctx, width, height, law, IAW.toAlpha(flowColor, 0.88), 1.55, 1.6, []);
+      drawLawContours(ctx, width, height, law, flowColor, 0.86, []);
+      drawEllipse(ctx, width, height, source, IAW.toAlpha(sourceColor, 0.42), 1.65, 1.1, [5, 4]);
+      drawEllipse(ctx, width, height, target, IAW.toAlpha(targetColor, 0.42), 1.65, 1.1, [5, 4]);
     }
 
-    drawEllipse(ctx, width, height, source, IAW.toAlpha(sourceColor, 0.7), 1.55, 1.2, [5, 4]);
-    drawEllipse(ctx, width, height, target, IAW.toAlpha(targetColor, 0.7), 1.55, 1.2, [5, 4]);
     drawCentroid(ctx, width, height, source, IAW.toAlpha(sourceColor, 0.92), 'rho0');
     drawCentroid(ctx, width, height, target, IAW.toAlpha(targetColor, 0.92), 'rho1');
   }
