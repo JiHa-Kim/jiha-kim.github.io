@@ -660,10 +660,96 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > $$
 > Multiplying by $n$ gives $m_4\ge1/n^3$.
 
-### 4.6 Scalar Solver Widget
+### 4.6 Why Sharp Spectra Give Tight Bounds
 
-> [!example] Exact Synthetic Spectra
-> The widget below skips the matrix side entirely. It chooses a normalized spectrum $p_i$, computes exact moments $m_2,m_3,m_4$, and runs the same scalar endpoint solvers used by the algorithm.
+> [!proposition] Dominant-Atom Tightness
+> Let $p_1=\theta$ and let the remaining mass be $\varepsilon=1-\theta$. Write the tail as $p_i=\varepsilon r_i$ for $i\ge2$, where $r_i\ge0$ and $\sum_{i\ge2}r_i=1$. Define $\rho_k=\sum_{i\ge2}r_i^k\le1$.
+>
+> Then
+> $$
+> m_k=\theta^k+\varepsilon^k\rho_k.
+> $$
+> The four-moment upper endpoint satisfies
+> $$
+> 0\le\beta_4-\theta
+> \le
+> m_4^{1/4}-\theta
+> \le
+> \frac{\varepsilon^4}{4\theta^3},
+> $$
+> and the lower certificate satisfies
+> $$
+> 0\le\theta-\ell_4
+> \le
+> \theta-\frac{m_4}{m_3}
+> \le
+> \frac{\varepsilon^3}{\theta^2}.
+> $$
+>
+> Therefore, when one atom dominates, the certified interval closes rapidly:
+> $$
+> \beta_4-\ell_4
+> \le
+> \frac{\varepsilon^3}{\theta^2}
+> +
+> \frac{\varepsilon^4}{4\theta^3}.
+> $$
+
+> [!proof]- Moment-Dominance Derivation
+> Since the tail has mass $\varepsilon$, write $p_i=\varepsilon r_i$ for $i\ge2$. Then
+> $$
+> m_k
+> =
+> \theta^k+\sum_{i\ge2}p_i^k
+> =
+> \theta^k+\varepsilon^k\sum_{i\ge2}r_i^k
+> =
+> \theta^k+\varepsilon^k\rho_k.
+> $$
+>
+> For the upper side, every feasible top atom $t$ must leave nonnegative residual fourth moment, so $t^4\le m_4$. Hence $\beta_4\le m_4^{1/4}$. Since $m_4=\theta^4+\varepsilon^4\rho_4$,
+> $$
+> m_4^{1/4}-\theta
+> =
+> \theta\left[
+> \left(1+\frac{\varepsilon^4\rho_4}{\theta^4}\right)^{1/4}
+> -1
+> \right].
+> $$
+> Concavity of $x^{1/4}$ gives $(1+x)^{1/4}\le1+x/4$, so
+> $$
+> m_4^{1/4}-\theta
+> \le
+> \frac{\varepsilon^4\rho_4}{4\theta^3}
+> \le
+> \frac{\varepsilon^4}{4\theta^3}.
+> $$
+>
+> For the lower side, the support test includes the ratio bound $p_1\ge m_4/m_3$, and the implemented lower certificate starts at least from this value. Thus $\ell_4\ge m_4/m_3$. Also
+> $$
+> \theta-\frac{m_4}{m_3}
+> =
+> \frac{\theta m_3-m_4}{m_3}.
+> $$
+> Substituting the tail decomposition gives
+> $$
+> \theta m_3-m_4
+> =
+> \theta(\theta^3+\varepsilon^3\rho_3)
+> -
+> (\theta^4+\varepsilon^4\rho_4)
+> =
+> \varepsilon^3(\theta\rho_3-\varepsilon\rho_4).
+> $$
+> Since $m_3\ge\theta^3$ and $\rho_3\le1$,
+> $$
+> 0\le
+> \theta-\frac{m_4}{m_3}
+> \le
+> \frac{\varepsilon^3}{\theta^2}.
+> $$
+
+### 4.7 Scalar Solver Widget
 
 {% include spectral_moment_bounds_widget.html %}
 

@@ -10,7 +10,6 @@
 <button class="iaw__seg-btn active" data-preset="geometric">Geometric</button>
 <button class="iaw__seg-btn" data-preset="power">Power Law</button>
 <button class="iaw__seg-btn" data-preset="clustered">Clustered</button>
-<button class="iaw__seg-btn" data-preset="spike">Spike</button>
 {% endcapture %}
 
 {% capture smbBarsMarker %}<span class="iaw__legend-dot iaw__legend-dot--source-b"></span>{% endcapture %}
@@ -68,8 +67,8 @@
 
   <div class="iaw__control-field">
     <div class="iaw__slider-header">
-      <span id="smbShapeLabel">Top Mass</span>
-      <span class="iaw__slider-readout" id="smbShapeReadout">0.425</span>
+      <span id="smbShapeLabel">Decay Ratio</span>
+      <span class="iaw__slider-readout" id="smbShapeReadout">0.567</span>
     </div>
     {% assign smbShapeTicks = "flat, mid, sharp" | split: ", " %}
     {% include iaw_slider.html id="smbShapeSlider" min="0" max="1" step="0.001" value="0.45" ticks=smbShapeTicks variant="parameter" %}
@@ -370,13 +369,7 @@ IAW.mountFigure('spectralMomentBoundsFigure', function(root) {
     const s = IAW.clamp(shape);
     const spectrum = new Array(n).fill(0);
 
-    if (preset === 'spike') {
-      const top = Math.max(1 / n, 0.02 + 0.9 * s);
-      spectrum[0] = top;
-      for (let i = 1; i < n; i += 1) spectrum[i] = (1 - top) / (n - 1);
-      shapeLabel.textContent = 'Top Mass';
-      shapeReadout.textContent = top.toFixed(3);
-    } else if (preset === 'geometric') {
+    if (preset === 'geometric') {
       const ratio = 0.985 - 0.93 * s;
       let total = 0;
       for (let i = 0; i < n; i += 1) {
@@ -399,21 +392,20 @@ IAW.mountFigure('spectralMomentBoundsFigure', function(root) {
     } else if (preset === 'clustered') {
       const topCount = Math.max(2, Math.round(2 + 10 * (1 - s)));
       const tailDecay = 0.78 - 0.5 * s;
+      const visibleTopCount = Math.min(n, topCount);
+      const topValues = Array.from({ length: visibleTopCount }, (_, i) => 1 + 0.22 * Math.cos(i))
+        .sort((a, b) => b - a);
       let total = 0;
       for (let i = 0; i < n; i += 1) {
-        const cluster = i < topCount ? 1 + 0.22 * Math.cos(i) : 0.35 * Math.pow(tailDecay, i - topCount);
+        const cluster = i < visibleTopCount
+          ? topValues[i]
+          : 0.35 * Math.pow(tailDecay, i - visibleTopCount);
         spectrum[i] = Math.max(1e-16, cluster);
         total += spectrum[i];
       }
       for (let i = 0; i < n; i += 1) spectrum[i] /= total;
       shapeLabel.textContent = 'Top Cluster Size';
       shapeReadout.textContent = `${topCount}`;
-    } else {
-      const top = Math.max(1 / n, 0.02 + 0.9 * s);
-      spectrum[0] = top;
-      for (let i = 1; i < n; i += 1) spectrum[i] = (1 - top) / (n - 1);
-      shapeLabel.textContent = 'Top Mass';
-      shapeReadout.textContent = top.toFixed(3);
     }
 
     return spectrum;
