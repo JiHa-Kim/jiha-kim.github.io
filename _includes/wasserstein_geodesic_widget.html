@@ -1,45 +1,25 @@
 {% capture describe %}
 <p>
-  Compare two ways to connect the same source and target Gaussian laws. The left panel takes the straight line between density functions, while the right panel follows the quadratic Wasserstein geodesic.
+  Start from one sampled source cloud and compare two paths between the same Gaussian endpoint laws. The Euclidean density path fades one law into the other, while the Wasserstein geodesic moves the same samples along the Brenier displacement.
+</p>
+<p>
+  The endpoint ellipses are density contours. In the Wasserstein mode, every source-to-target path is drawn as a faint gray trace; the yellow sample cloud shows how mass actually moves along those paths.
 </p>
 {% endcapture %}
 
-{% capture wgeoSourceMarker %}<span class="wgeo__legend-dot wgeo__legend-dot--source"></span>{% endcapture %}
-{% capture wgeoTargetMarker %}<span class="wgeo__legend-dot wgeo__legend-dot--target"></span>{% endcapture %}
-{% capture wgeoGeodesicMarker %}<span class="wgeo__legend-line"></span>{% endcapture %}
-
-{% capture legend %}
-  {% include iaw_legend_item.html marker_html=wgeoSourceMarker label="Source law $\rho_0$" %}
-  {% include iaw_legend_item.html marker_html=wgeoTargetMarker label="Target law $\rho_1$" %}
-  {% include iaw_legend_item.html marker_html=wgeoGeodesicMarker label="Moving mass along the $W_2$ geodesic" %}
+{% capture controls %}
+<button class="iaw__seg-btn active" data-mode="density">Euclidean Density Path</button>
+<button class="iaw__seg-btn" data-mode="w2">Wasserstein Geodesic</button>
 {% endcapture %}
 
 {% capture visuals %}
-<div class="wgeo__layout iaw__figure-grid">
-  <section class="iaw__figure-card iaw__figure-card--compact">
-    <div class="iaw__figure-label">Euclidean Density Geodesic</div>
-    <div class="wgeo__canvas-shell iaw__canvas-shell">
-      <canvas id="wgeoMixCanvas"></canvas>
-    </div>
-    <div class="wgeo__formula">$\rho_t=(1-t)\rho_0+t\rho_1$</div>
-  </section>
-
-  <section class="iaw__figure-card iaw__figure-card--compact">
-    <div class="iaw__figure-label">Wasserstein Geodesic</div>
-    <div class="wgeo__canvas-shell iaw__canvas-shell">
-      <canvas id="wgeoW2Canvas"></canvas>
-    </div>
-    <div class="wgeo__formula">$\rho_t=[(1-t)\mathrm{Id}+tT]_\sharp\rho_0$</div>
-  </section>
-</div>
+{% include iaw_canvas_stage.html canvas_id="wgeoCanvas" %}
 {% endcapture %}
 
 {% capture footer %}
 <div class="iaw__status-grid wgeo__status-grid">
   {% include iaw_status_item.html label="Time $t$" value="0.00" value_id="wgeoTime" %}
-  {% include iaw_status_item.html label="Euclidean Midpoint" value="Two half-strength modes" value_id="wgeoMixStatus" %}
-  {% include iaw_status_item.html label="$W_2$ Midpoint" value="One transported mode" value_id="wgeoW2Status" %}
-  {% include iaw_status_item.html label="Continuity Equation" value="Mass-conserving flow" value_id="wgeoFlowStatus" %}
+  {% include iaw_status_item.html label="Reading" value="Endpoint densities fade in place." value_id="wgeoReading" %}
 </div>
 
 {% include iaw_timeline_controls.html play_id="wgeoPlay" play_label="Play geodesic comparison" slider_id="wgeoSlider" min="0" max="1" step="0.005" value="0" variant="progress" %}
@@ -50,64 +30,24 @@
     eyebrow="Distribution Geometry"
     title="Euclidean vs. Wasserstein Geodesics"
     description=describe
-    legend=legend
+    controls=controls
     visuals=visuals
     footer=footer
     stage_id="wgeoStage"
-    stage_style="height: auto; min-height: 300px; border: none; background: transparent;"
 %}
 
 <style>
-.wgeo__layout {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.wgeo__canvas-shell {
-  aspect-ratio: 1.35 / 1;
-  min-height: 250px;
-}
-
-.wgeo__formula {
-  display: flex;
-  justify-content: center;
-  min-height: 1.7rem;
-  color: var(--iaw-text);
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
-.wgeo__legend-dot {
-  width: 11px;
-  height: 11px;
-  border-radius: 999px;
-  display: inline-block;
-  flex-shrink: 0;
-}
-
-.wgeo__legend-dot--source {
-  background: var(--iaw-source-a);
-}
-
-.wgeo__legend-dot--target {
-  background: var(--iaw-target);
-}
-
-.wgeo__legend-line {
-  width: 22px;
-  height: 3px;
-  border-radius: 999px;
-  display: inline-block;
-  background: var(--iaw-success);
-}
-
 .wgeo__status-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0.5rem;
 }
 
-@media (max-width: 820px) {
-  .wgeo__layout,
-  .wgeo__status-grid {
-    grid-template-columns: 1fr;
+#wgeoStage {
+  height: 410px;
+}
+
+@media (max-width: 720px) {
+  #wgeoStage {
+    height: 380px;
   }
 }
 </style>
@@ -115,22 +55,58 @@
 <script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
 <script>
 IAW.mountFigure('wassersteinGeodesicFigure', function(root) {
-  const mixCanvas = root.querySelector('#wgeoMixCanvas');
-  const w2Canvas = root.querySelector('#wgeoW2Canvas');
+  const canvas = root.querySelector('#wgeoCanvas');
+  const ctx = canvas.getContext('2d');
+  const stage = root.querySelector('#wgeoStage');
   const slider = root.querySelector('#wgeoSlider');
   const playBtn = root.querySelector('#wgeoPlay');
+  const segBtns = root.querySelectorAll('.iaw__seg-btn');
   const timeValue = root.querySelector('#wgeoTime');
-  const mixStatus = root.querySelector('#wgeoMixStatus');
-  const w2Status = root.querySelector('#wgeoW2Status');
+  const readingValue = root.querySelector('#wgeoReading');
 
-  const domain = { xMin: -3.2, xMax: 3.2, yMin: -2.2, yMax: 2.2 };
-  const source = { mx: -1.55, my: -0.45, sx: 0.42, sy: 0.78 };
-  const target = { mx: 1.55, my: 0.5, sx: 0.86, sy: 0.38 };
-  const samples = buildSamples(54);
+  const sourcePoints = buildSourcePoints(64);
+  const targetMean = [1.05, 0.28];
+  const targetLinear = [[1.22, 0.48], [0.48, 1.02]];
+  const targetPoints = sourcePoints.map(applyTargetMap);
+  const contourPoints = buildContourPoints();
+  const allPoints = sourcePoints.concat(targetPoints, contourPoints);
+  const allX = allPoints.map((point) => point[0]);
+  const allY = allPoints.map((point) => point[1]);
+  const padding = 0.65;
+  const mapScale = {
+    xMin: Math.min(...allX) - padding,
+    xMax: Math.max(...allX) + padding,
+    yMin: Math.min(...allY) - padding,
+    yMax: Math.max(...allY) + padding
+  };
+
+  let currentMode = 'density';
+  let currentT = 0;
   let theme = IAW.getThemeColors(root);
   let playback = null;
+  const viewport = IAW.createStageViewport(stage, canvas, ctx, mapScale);
 
-  function buildSamples(count) {
+  function canvasColor(value, fallback) {
+    const color = String(value || '').trim();
+    return !color || color.includes('var(') || color === 'inherit' ? fallback : color;
+  }
+
+  function getVizColors() {
+    const source = canvasColor(theme.sourceA, '#d4a017');
+    const target = canvasColor(theme.target, canvasColor(theme.sourceB, '#0ea5e9'));
+    const neutral = canvasColor(theme.border, '#94a3b8');
+
+    return {
+      path: IAW.toAlpha(neutral, 0.28),
+      movingDot: source,
+      sourceDot: source,
+      targetDot: target,
+      sourceLaw: source,
+      targetLaw: target
+    };
+  }
+
+  function buildSourcePoints(count) {
     let seed = 91423;
 
     function rand() {
@@ -150,203 +126,143 @@ IAW.mountFigure('wassersteinGeodesicFigure', function(root) {
     return points;
   }
 
-  function mixLaw(t) {
-    return {
-      mx: IAW.lerp(source.mx, target.mx, t),
-      my: IAW.lerp(source.my, target.my, t),
-      sx: IAW.lerp(source.sx, target.sx, t),
-      sy: IAW.lerp(source.sy, target.sy, t)
-    };
-  }
-
-  function mapToCanvas(x, y, width, height) {
-    const nx = (x - domain.xMin) / (domain.xMax - domain.xMin);
-    const ny = (y - domain.yMin) / (domain.yMax - domain.yMin);
-    return { x: nx * width, y: height - ny * height };
-  }
-
-  function setupCanvas(canvas) {
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    const ctx = canvas.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    return { ctx, width: rect.width, height: rect.height };
-  }
-
-  function drawGrid(ctx, width, height) {
-    ctx.strokeStyle = IAW.toAlpha(theme.border || '#94a3b8', 0.36);
-    ctx.lineWidth = 1;
-
-    for (let i = 1; i < 4; i += 1) {
-      const x = (width * i) / 4;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
-
-    for (let i = 1; i < 3; i += 1) {
-      const y = (height * i) / 3;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-  }
-
-  function ellipsePoint(law, angle, radius) {
+  function applyTargetMap(point) {
     return [
-      law.mx + radius * law.sx * Math.cos(angle),
-      law.my + radius * law.sy * Math.sin(angle)
+      targetMean[0] + targetLinear[0][0] * point[0] + targetLinear[0][1] * point[1],
+      targetMean[1] + targetLinear[1][0] * point[0] + targetLinear[1][1] * point[1]
     ];
   }
 
-  function drawEllipse(ctx, width, height, law, color, radius, lineWidth, dash) {
-    ctx.save();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = lineWidth;
-    ctx.setLineDash(dash || []);
-    ctx.beginPath();
-    for (let i = 0; i <= 120; i += 1) {
-      const angle = (i / 120) * Math.PI * 2;
-      const point = ellipsePoint(law, angle, radius);
-      const p = mapToCanvas(point[0], point[1], width, height);
-      if (i === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
-    }
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function drawLawContours(ctx, width, height, law, color, alpha, dash) {
-    if (alpha <= 0.02) return;
-    const safeAlpha = IAW.clamp(alpha, 0, 0.9);
-    drawEllipse(ctx, width, height, law, IAW.toAlpha(color, safeAlpha), 1.0, 1.1, dash);
-    drawEllipse(ctx, width, height, law, IAW.toAlpha(color, safeAlpha * 0.72), 1.65, 1.1, dash);
-  }
-
-  function sampleInLaw(sample, law) {
-    return [law.mx + law.sx * sample[0], law.my + law.sy * sample[1]];
-  }
-
-  function drawSamples(ctx, width, height, t, mode) {
-    const sourceColor = theme.sourceA || '#d4a017';
-    const targetColor = theme.target || '#0ea5e9';
-    const flowColor = theme.success || '#059669';
-    const pathColor = IAW.toAlpha(theme.border || '#64748b', 0.34);
-
-    samples.forEach((sample, index) => {
-      const a = sampleInLaw(sample, source);
-      const b = sampleInLaw(sample, target);
-
-      if (mode === 'w2') {
-        const current = [IAW.lerp(a[0], b[0], t), IAW.lerp(a[1], b[1], t)];
-        if (index % 3 === 0) {
-          const pa = mapToCanvas(a[0], a[1], width, height);
-          const pb = mapToCanvas(b[0], b[1], width, height);
-          ctx.strokeStyle = pathColor;
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(pa.x, pa.y);
-          ctx.lineTo(pb.x, pb.y);
-          ctx.stroke();
-        }
-        const p = mapToCanvas(current[0], current[1], width, height);
-        IAW.drawCircle(ctx, p.x, p.y, 2.6, IAW.toAlpha(flowColor, 0.86));
-      } else {
-        const pa = mapToCanvas(a[0], a[1], width, height);
-        const pb = mapToCanvas(b[0], b[1], width, height);
-        IAW.drawCircle(ctx, pa.x, pa.y, 2.3, IAW.toAlpha(sourceColor, IAW.clamp((1 - t) * 0.78, 0.06, 0.78)));
-        IAW.drawCircle(ctx, pb.x, pb.y, 2.3, IAW.toAlpha(targetColor, IAW.clamp(t * 0.78, 0.06, 0.78)));
+  function buildContourPoints() {
+    const points = [];
+    for (let radius = 1; radius <= 2; radius += 1) {
+      for (let i = 0; i < 96; i += 1) {
+        const angle = (i / 96) * Math.PI * 2;
+        const source = [radius * Math.cos(angle), radius * Math.sin(angle)];
+        points.push(source, applyTargetMap(source));
       }
+    }
+    return points;
+  }
+
+  function drawContour(radius, color, lineWidth, mapper) {
+    const steps = 120;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i += 1) {
+      const angle = (i / steps) * Math.PI * 2;
+      const base = [radius * Math.cos(angle), radius * Math.sin(angle)];
+      const point = mapper ? mapper(base) : base;
+      const px = viewport.mapPoint(point[0], point[1]);
+      if (i === 0) ctx.moveTo(px.x, px.y);
+      else ctx.lineTo(px.x, px.y);
+    }
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+  }
+
+  function drawEndpointContours(colors, sourceAlpha, targetAlpha) {
+    if (sourceAlpha > 0.02) {
+      drawContour(2.0, IAW.toAlpha(colors.sourceLaw, 0.14 * sourceAlpha), 1.1);
+      drawContour(1.0, IAW.toAlpha(colors.sourceLaw, 0.28 * sourceAlpha), 1.5);
+    }
+
+    if (targetAlpha > 0.02) {
+      drawContour(2.0, IAW.toAlpha(colors.targetLaw, 0.16 * targetAlpha), 1.1, applyTargetMap);
+      drawContour(1.0, IAW.toAlpha(colors.targetLaw, 0.34 * targetAlpha), 1.5, applyTargetMap);
+    }
+  }
+
+  function drawDensityPath(colors) {
+    const sourceAlpha = IAW.clamp(1 - currentT, 0.08, 1);
+    const targetAlpha = IAW.clamp(currentT, 0.08, 1);
+
+    drawEndpointContours(colors, sourceAlpha, targetAlpha);
+
+    sourcePoints.forEach((source, index) => {
+      const target = targetPoints[index];
+      const pSource = viewport.mapPoint(source[0], source[1]);
+      const pTarget = viewport.mapPoint(target[0], target[1]);
+      IAW.drawCircle(ctx, pSource.x, pSource.y, 3.1, IAW.toAlpha(colors.movingDot, sourceAlpha * 0.88));
+      IAW.drawCircle(ctx, pTarget.x, pTarget.y, 3.1, IAW.toAlpha(colors.targetDot, targetAlpha * 0.82));
     });
   }
 
-  function drawCentroid(ctx, width, height, law, color, label) {
-    const p = mapToCanvas(law.mx, law.my, width, height);
-    IAW.drawCircle(ctx, p.x, p.y, 4.2, color);
-    ctx.fillStyle = color;
-    ctx.font = '700 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, p.x, p.y - 10);
+  function drawWassersteinPath(colors) {
+    drawEndpointContours(colors, 0.62, 1);
+
+    sourcePoints.forEach((source, index) => {
+      const target = targetPoints[index];
+      IAW.drawTransportPath(ctx, viewport.mapPoint, source, target, {
+        color: colors.path,
+        lineWidth: 0.9
+      });
+    });
+
+    sourcePoints.forEach((source, index) => {
+      const target = targetPoints[index];
+      const curX = source[0] + currentT * (target[0] - source[0]);
+      const curY = source[1] + currentT * (target[1] - source[1]);
+      const pCur = viewport.mapPoint(curX, curY);
+      IAW.drawCircle(ctx, pCur.x, pCur.y, 3.4, colors.movingDot);
+    });
   }
 
-  function drawPanel(canvas, t, mode) {
-    const setup = setupCanvas(canvas);
-    const ctx = setup.ctx;
-    const width = setup.width;
-    const height = setup.height;
-    const sourceColor = theme.sourceA || '#d4a017';
-    const targetColor = theme.target || '#0ea5e9';
-    const flowColor = theme.success || '#059669';
+  function draw() {
+    const stageRect = viewport.getRect();
+    const colors = getVizColors();
 
-    ctx.clearRect(0, 0, width, height);
-    drawGrid(ctx, width, height);
+    ctx.clearRect(0, 0, stageRect.width, stageRect.height);
 
-    if (mode === 'mix') {
-      drawLawContours(ctx, width, height, source, sourceColor, 1 - t, []);
-      drawLawContours(ctx, width, height, target, targetColor, t, []);
-      drawSamples(ctx, width, height, t, 'mix');
+    if (currentMode === 'w2') {
+      drawWassersteinPath(colors);
     } else {
-      const law = mixLaw(t);
-      drawSamples(ctx, width, height, t, 'w2');
-      drawLawContours(ctx, width, height, law, flowColor, 0.86, []);
-      drawEllipse(ctx, width, height, source, IAW.toAlpha(sourceColor, 0.42), 1.65, 1.1, [5, 4]);
-      drawEllipse(ctx, width, height, target, IAW.toAlpha(targetColor, 0.42), 1.65, 1.1, [5, 4]);
+      drawDensityPath(colors);
     }
-
-    drawCentroid(ctx, width, height, source, IAW.toAlpha(sourceColor, 0.92), 'rho0');
-    drawCentroid(ctx, width, height, target, IAW.toAlpha(targetColor, 0.92), 'rho1');
   }
 
   function updateStatus(t) {
     if (timeValue) timeValue.textContent = t.toFixed(2);
+    if (!readingValue) return;
 
-    if (mixStatus) {
-      mixStatus.textContent = t < 0.05
-        ? 'Source density'
-        : t > 0.95
-          ? 'Target density'
-          : 'Two fading modes';
-    }
-
-    if (w2Status) {
-      w2Status.textContent = t < 0.05
-        ? 'At source'
-        : t > 0.95
-          ? 'At target'
-          : 'One moving mode';
-    }
+    readingValue.textContent = currentMode === 'w2'
+      ? 'Mass travels through the sample space.'
+      : 'Endpoint densities fade in place.';
   }
 
-  function render(t) {
-    const time = IAW.clamp(Number(t) || 0);
-    drawPanel(mixCanvas, time, 'mix');
-    drawPanel(w2Canvas, time, 'w2');
-    updateStatus(time);
+  function renderFrame(t) {
+    currentT = IAW.clamp(Number(t) || 0);
+    draw();
+    updateStatus(currentT);
   }
+
+  IAW.bindSegmentedControl(segBtns, (button) => {
+    currentMode = button.dataset.mode;
+    if (playback) playback.setFrame(0, { notify: true, stopPlayback: true });
+    else renderFrame(0);
+  });
 
   IAW.observeTheme(() => {
     theme = IAW.getThemeColors(root);
-    render(playback ? playback.getFrame() : Number(slider.value));
+    draw();
   });
 
   window.addEventListener('resize', () => {
-    render(playback ? playback.getFrame() : Number(slider.value));
+    viewport.measure();
+    draw();
   });
+
+  viewport.measure();
+  renderFrame(0);
 
   playback = IAW.createPlaybackController({
     button: playBtn,
     slider: slider,
-    maxFrame: 1,
+    maxFrame: 1.0,
     isTimeBased: true,
-    speed: 0.00045,
-    onFrameChange: render
+    speed: 0.0006,
+    onFrameChange: renderFrame
   });
-
-  render(Number(slider.value));
   IAW.requestMathTypeset(root);
 });
 </script>
