@@ -558,6 +558,8 @@ With the Wasserstein distance in place, probability laws can be treated as point
 > $$
 > and the intermediate law is $\rho_t=[X_t]_\sharp\rho_0$. This is **displacement interpolation**: mass travels through the sample space instead of appearing and disappearing.
 
+{% include wasserstein_geodesic_widget.html %}
+
 > [!theorem] Benamou-Brenier Dynamic Formulation
 > For quadratic cost,
 > $$
