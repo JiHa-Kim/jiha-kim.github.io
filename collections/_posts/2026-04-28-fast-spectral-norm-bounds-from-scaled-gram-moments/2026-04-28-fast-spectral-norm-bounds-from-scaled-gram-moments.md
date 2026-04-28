@@ -857,7 +857,7 @@ def Pow2CeilEven($a$):
     $q \leftarrow \left\lceil \frac12\log_2 a\right\rceil$
     return $(2^{2q},2^q)$  # $(\alpha,\sqrt{\alpha})$
 
-def Beta2($m_2,n$):
+def Beta2($m_2$, $n$):
     $v \leftarrow \max(0, m_2-\frac1n)$
     return $\frac1n+\sqrt{\frac{n-1}{n}v}$
 ```
@@ -932,7 +932,7 @@ def SpectralNormUpperBound($X$, order = 4):
     if order = 2:
         $r_2 \leftarrow \|T\|_F^2$
         $m_2 \leftarrow r_2/t_1^2$
-        $\beta_2 \leftarrow$ @Beta2($m_2,n$)
+        $\beta_2 \leftarrow$ @Beta2($m_2$, $n$)
         $u \leftarrow \sqrt{\alpha t_1\beta_2}$
         return upper = $u$
 
@@ -948,9 +948,9 @@ def SpectralNormUpperBound($X$, order = 4):
     $m_3 \leftarrow r_3/t_1^3$
     $m_4 \leftarrow r_4/t_1^4$
 
-    $\beta_2 \leftarrow$ @Beta2($m_2,n$)
-    $\beta_4 \leftarrow$ @FourMomentUpper($m_2,m_3,m_4,n,\beta_2$)
-    $\ell_4 \leftarrow$ @FourMomentLower($m_2,m_3,m_4$)
+    $\beta_2 \leftarrow$ @Beta2($m_2$, $n$)
+    $\beta_4 \leftarrow$ @FourMomentUpper($m_2$, $m_3$, $m_4$, $n$, $\beta_2$)
+    $\ell_4 \leftarrow$ @FourMomentLower($m_2$, $m_3$, $m_4$)
 
     $u \leftarrow \sqrt{\alpha t_1\beta_4}$
     $\ell \leftarrow \sqrt{\alpha t_1\ell_4}$
@@ -979,7 +979,7 @@ def SpectralNormUpperBound($X$, order = 4):
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 3</span> Four-Moment Upper Endpoint</div>
 ```pseudo
-def FourMomentUpper($m_2,m_3,m_4,n,\beta_2$):
+def FourMomentUpper($m_2$, $m_3$, $m_4$, $n$, $\beta_2$):
     # Constant-size root enumeration; no iterative bisection.
     polys $\leftarrow \{A,B_0,C,D,E,F_0,U,W,Q\}$
     roots $\leftarrow \{0,\beta_2\}$
@@ -992,37 +992,37 @@ def FourMomentUpper($m_2,m_3,m_4,n,\beta_2$):
 
     for each adjacent pair $(a,b)$ in roots:
         $z \leftarrow (a+b)/2$
-        if @ResidualPSD($z,m_2,m_3,m_4,n$):
+        if @ResidualPSD($z$, $m_2$, $m_3$, $m_4$, $n$):
             $\beta \leftarrow \max(\beta,b)$
 
     # Also test roots themselves for numerical safety.
     for $z$ in roots:
-        if @ResidualPSD($z,m_2,m_3,m_4,n$):
+        if @ResidualPSD($z$, $m_2$, $m_3$, $m_4$, $n$):
             $\beta \leftarrow \max(\beta,z)$
 
     return $\beta$
 
-def ResidualPSD($t,m_2,m_3,m_4,n$):
+def ResidualPSD($t$, $m_2$, $m_3$, $m_4$, $n$):
     # Equivalent to $M_0(t)\succeq0$ and $M_1(t)\succeq0$.
-    return @AllNonnegative($B_0(t),F_0(t),A(t),C(t),E(t),D(t),U(t),W(t),Q(t)$)
+    return @AllNonnegative($B_0(t)$, $F_0(t)$, $A(t)$, $C(t)$, $E(t)$, $D(t)$, $U(t)$, $W(t)$, $Q(t)$)
 ```
 </div>
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 4</span> Four-Moment Lower Certificate</div>
 ```pseudo
-def FourMomentLower($m_2,m_3,m_4$):
+def FourMomentLower($m_2$, $m_3$, $m_4$):
     # Direct 2x2 PSD support endpoint; no interval scan needed.
     $q_{\mathrm{low}}(t) \leftarrow (t-m_2)(tm_3-m_4)-(tm_2-m_3)^2$
     $\ell_0 \leftarrow \max(m_2,\ m_4/m_3)$
-    if @SupportPSD($\ell_0,m_2,m_3,m_4$):
+    if @SupportPSD($\ell_0$, $m_2$, $m_3$, $m_4$):
         return $\ell_0$
 
     roots $\leftarrow$ @RealRootsInInterval($q_{\mathrm{low}}$, $\ell_0$, $1$)
     candidates $\leftarrow$ @SortUnique(roots $\cup \{1\}$)
-    return first $z$ in candidates with @SupportPSD($z,m_2,m_3,m_4$)
+    return first $z$ in candidates with @SupportPSD($z$, $m_2$, $m_3$, $m_4$)
 
-def SupportPSD($t,m_2,m_3,m_4$):
+def SupportPSD($t$, $m_2$, $m_3$, $m_4$):
     $a \leftarrow t-m_2$
     $b \leftarrow tm_2-m_3$
     $c \leftarrow tm_3-m_4$
@@ -1038,7 +1038,7 @@ def SupportPSD($t,m_2,m_3,m_4$):
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 5</span> Shifted-Inverse Minimum Singular Value Lower Bound</div>
 ```pseudo
-def MinSingularLowerBound($X,\rho$, order = 4):
+def MinSingularLowerBound($X$, $\rho$, order = 4):
     setup $\leftarrow$ @ScaledGramSetup($X$)
     if setup is ZeroMatrixCase:
         return lower = $0$
@@ -1058,7 +1058,7 @@ def MinSingularLowerBound($X,\rho$, order = 4):
 
     if order = 2:
         $m_2^{\mathrm{inv}} \leftarrow \eta_2/\eta_1^2$
-        $\beta_{\mathrm{inv}} \leftarrow$ @Beta2($m_2^{\mathrm{inv}},n$)
+        $\beta_{\mathrm{inv}} \leftarrow$ @Beta2($m_2^{\mathrm{inv}}$, $n$)
     else:
         $H_2 \leftarrow$ @Sym($H^2$)
         $\eta_2 \leftarrow \operatorname{tr}(H_2)$
@@ -1069,9 +1069,9 @@ def MinSingularLowerBound($X,\rho$, order = 4):
         $m_3^{\mathrm{inv}} \leftarrow \eta_3/\eta_1^3$
         $m_4^{\mathrm{inv}} \leftarrow \eta_4/\eta_1^4$
 
-        $\beta_2^{\mathrm{inv}} \leftarrow$ @Beta2($m_2^{\mathrm{inv}},n$)
+        $\beta_2^{\mathrm{inv}} \leftarrow$ @Beta2($m_2^{\mathrm{inv}}$, $n$)
         $\beta_{\mathrm{inv}} \leftarrow$ @FourMomentUpper(
-            $m_2^{\mathrm{inv}},m_3^{\mathrm{inv}},m_4^{\mathrm{inv}},n,\beta_2^{\mathrm{inv}}$
+            $m_2^{\mathrm{inv}}$, $m_3^{\mathrm{inv}}$, $m_4^{\mathrm{inv}}$, $n$, $\beta_2^{\mathrm{inv}}$
         )
 
     $\tau_{\min}^{\mathrm{lower}} \leftarrow \frac{1}{\eta_1\beta_{\mathrm{inv}}}-\rho$

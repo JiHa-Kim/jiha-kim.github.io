@@ -8,7 +8,7 @@ require 'base64'
 module Jekyll
   class ObsidianPreprocess < Jekyll::Generator
     priority :high
-    CACHE_VERSION = "2026-04-21-math-copy-wrapper-source-v1".freeze
+    CACHE_VERSION = "2026-04-28-algo-multiline-func-calls-v1".freeze
 
     # Map Obsidian callout types -> Chirpy box classes
     TYPE_MAP = {
@@ -436,7 +436,12 @@ module Jekyll
     def highlight_pythonic_code(code)
       code, buckets = protect_algo_math(code)
 
-      # Improved to handle @Func(...) and def Func(...) including parentheses and LaTeX scaling
+      # Handle multiline calls before the balanced-call matcher sees the bare name only.
+      code = code.gsub(/@([A-Za-z_]\w+)\s*\(\s*\z/) do
+        "<span class=\"algo-func\">#{$1}</span><span class=\"algo-func paren\">(</span>"
+      end
+
+      # Handle @Func(...) and def Func(...) including parentheses and LaTeX scaling.
       # Uses a recursive regex for balanced parentheses: (\((?>[^()]+|\g<2>)*\))
       code = code.gsub(/@([A-Za-z_]\w+)(?:\s*(\((?>[^()]+|\g<2>)*\)))?/) do
         format_algo_func($1, $2, buckets)
@@ -459,6 +464,7 @@ module Jekyll
       # This fixes both MathJax superscript context and the site-wide block-math misinterpretation bug.
       # We do it after restoration but before returning to the global pipeline.
       code = code.gsub(/\$\$/, '')
+      code = code.gsub(/\A\)\z/, "<span class=\"algo-func paren\">)</span>")
 
       code
     end
