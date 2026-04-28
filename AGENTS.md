@@ -49,5 +49,13 @@ Use Obsidian-style callouts. They are automatically converted to styled boxes or
 If you must use HTML (e.g., complex nesting not supported by Obsidian callouts), always include `markdown="1"` in the opening tag.
 - **Example**: `<blockquote class="box-definition" markdown="1">...</blockquote>`
 
+## Interactive Widgets
+- Use the existing Interactive Widget Framework (`iaw_skeleton.html`, `iaw__figure-card`, `iaw__canvas-shell`, `iaw__metric-pill`, sliders, status items) unless there is a concrete reason not to.
+- Keep widget visuals clean and consistent with prior posts: neutral surfaces, borders, compact cards, semantic colors, and readable labels.
+- Do not add decorative glow effects, arbitrary radial gradients, neon styling, or one-off visual treatments that are not part of the established widget language.
+- Prefer data visualization clarity over ornament: encode meaning with position, line style, opacity, and the shared semantic color tokens.
+- Add reusable layout, legend, metric, canvas, and footer patterns to `_sass/widgets.scss` instead of redefining them inside individual widget includes.
+- Scope unavoidable widget-specific CSS to the widget id and keep it minimal; only add styles that the shared IAW classes do not already provide.
+
 ## Sources and References
 Please do not modify sources, references, or further reading without an explicit request.

@@ -660,6 +660,13 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > $$
 > Multiplying by $n$ gives $m_4\ge1/n^3$.
 
+### 4.6 Scalar Solver Widget
+
+> [!example] Exact Synthetic Spectra
+> The widget below skips the matrix side entirely. It chooses a normalized spectrum $p_i$, computes exact moments $m_2,m_3,m_4$, and runs the same scalar endpoint solvers used by the algorithm.
+
+{% include spectral_moment_bounds_widget.html %}
+
 ---
 
 ## 5. Minimum Singular Value by Shifted Inverse Moments
@@ -789,7 +796,7 @@ def ScaledGramSetup($X\in\mathbb{F}^{m\times n}$):
 
     # Exact power-of-two column scales.
     for $j=1,\ldots,n$:
-        $d_j \leftarrow$ Pow2Round($\sqrt{c_j^2}$)
+        $d_j \leftarrow$ @Pow2Round($\sqrt{c_j^2}$)
 
     $D \leftarrow \operatorname{diag}(d_1,\ldots,d_n)$
     $Z \leftarrow XD^{-1}$  # preferably fused into the Gram input path
@@ -797,13 +804,13 @@ def ScaledGramSetup($X\in\mathbb{F}^{m\times n}$):
     $B \leftarrow Z^HZ$
 
     # Global power-of-two scaling.
-    $(\alpha,\sqrt{\alpha}) \leftarrow$ Pow2CeilEven($\max_j c_j^2$)
+    $(\alpha,\sqrt{\alpha}) \leftarrow$ @Pow2CeilEven($\max_j c_j^2$)
     for $j=1,\ldots,n$:
         $r_j \leftarrow d_j/\sqrt{\alpha}$
 
     $R \leftarrow \operatorname{diag}(r_1,\ldots,r_n)$
     $T \leftarrow RBR$  # elementwise: $T_{ij}=r_iB_{ij}r_j$
-    $T \leftarrow$ Sym($T$)
+    $T \leftarrow$ @Sym($T$)
 
     $t_1 \leftarrow \operatorname{tr}(T)$
     return $(T,t_1,\alpha)$
@@ -828,7 +835,7 @@ def ScaledGramSetup($X\in\mathbb{F}^{m\times n}$):
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 2</span> Spectral Norm Upper Bound</div>
 ```pseudo
 def SpectralNormUpperBound($X$, order = 4):
-    setup $\leftarrow$ ScaledGramSetup($X$)
+    setup $\leftarrow$ @ScaledGramSetup($X$)
     if setup is ZeroMatrixCase:
         return upper = $0$, lower_cert = $0$, rel_slack = $0$
 
@@ -839,12 +846,12 @@ def SpectralNormUpperBound($X$, order = 4):
     if order = 2:
         $r_2 \leftarrow \|T\|_F^2$
         $m_2 \leftarrow r_2/t_1^2$
-        $\beta_2 \leftarrow$ Beta2($m_2,n$)
+        $\beta_2 \leftarrow$ @Beta2($m_2,n$)
         $u \leftarrow \sqrt{\alpha t_1\beta_2}$
         return upper = $u$
 
     # Four-moment path.
-    $S \leftarrow$ Sym($T^2$)
+    $S \leftarrow$ @Sym($T^2$)
 
     # Fused reduction over $T$ and $S$.
     $r_2 \leftarrow \operatorname{tr}(S)$
@@ -855,9 +862,9 @@ def SpectralNormUpperBound($X$, order = 4):
     $m_3 \leftarrow r_3/t_1^3$
     $m_4 \leftarrow r_4/t_1^4$
 
-    $\beta_2 \leftarrow$ Beta2($m_2,n$)
-    $\beta_4 \leftarrow$ FourMomentUpper($m_2,m_3,m_4,n,\beta_2$)
-    $\ell_4 \leftarrow$ FourMomentLower($m_2,m_3,m_4$)
+    $\beta_2 \leftarrow$ @Beta2($m_2,n$)
+    $\beta_4 \leftarrow$ @FourMomentUpper($m_2,m_3,m_4,n,\beta_2$)
+    $\ell_4 \leftarrow$ @FourMomentLower($m_2,m_3,m_4$)
 
     $u \leftarrow \sqrt{\alpha t_1\beta_4}$
     $\ell \leftarrow \sqrt{\alpha t_1\ell_4}$
@@ -892,26 +899,26 @@ def FourMomentUpper($m_2,m_3,m_4,n,\beta_2$):
     roots $\leftarrow \{0,\beta_2\}$
 
     for $p$ in polys:
-        roots $\leftarrow$ roots $\cup$ RealRootsInInterval($p$, $0$, $\beta_2$)
+        roots $\leftarrow$ roots $\cup$ @RealRootsInInterval($p$, $0$, $\beta_2$)
 
-    roots $\leftarrow$ SortUnique(roots)
+    roots $\leftarrow$ @SortUnique(roots)
     $\beta \leftarrow 0$
 
     for each adjacent pair $(a,b)$ in roots:
         $z \leftarrow (a+b)/2$
-        if ResidualPSD($z,m_2,m_3,m_4,n$):
+        if @ResidualPSD($z,m_2,m_3,m_4,n$):
             $\beta \leftarrow \max(\beta,b)$
 
     # Also test roots themselves for numerical safety.
     for $z$ in roots:
-        if ResidualPSD($z,m_2,m_3,m_4,n$):
+        if @ResidualPSD($z,m_2,m_3,m_4,n$):
             $\beta \leftarrow \max(\beta,z)$
 
     return $\beta$
 
 def ResidualPSD($t,m_2,m_3,m_4,n$):
     # Equivalent to $M_0(t)\succeq0$ and $M_1(t)\succeq0$.
-    return AllNonnegative($B_0(t),F_0(t),A(t),C(t),E(t),D(t),U(t),W(t),Q(t)$)
+    return @AllNonnegative($B_0(t),F_0(t),A(t),C(t),E(t),D(t),U(t),W(t),Q(t)$)
 ```
 </div>
 
@@ -922,12 +929,12 @@ def FourMomentLower($m_2,m_3,m_4$):
     # Direct 2x2 PSD support endpoint; no interval scan needed.
     $q_{\mathrm{low}}(t) \leftarrow (t-m_2)(tm_3-m_4)-(tm_2-m_3)^2$
     $\ell_0 \leftarrow \max(m_2,\ m_4/m_3)$
-    if SupportPSD($\ell_0,m_2,m_3,m_4$):
+    if @SupportPSD($\ell_0,m_2,m_3,m_4$):
         return $\ell_0$
 
-    roots $\leftarrow$ RealRootsInInterval($q_{\mathrm{low}}$, $\ell_0$, $1$)
-    candidates $\leftarrow$ SortUnique(roots $\cup \{1\}$)
-    return first $z$ in candidates with SupportPSD($z,m_2,m_3,m_4$)
+    roots $\leftarrow$ @RealRootsInInterval($q_{\mathrm{low}}$, $\ell_0$, $1$)
+    candidates $\leftarrow$ @SortUnique(roots $\cup \{1\}$)
+    return first $z$ in candidates with @SupportPSD($z,m_2,m_3,m_4$)
 
 def SupportPSD($t,m_2,m_3,m_4$):
     $a \leftarrow t-m_2$
@@ -946,7 +953,7 @@ def SupportPSD($t,m_2,m_3,m_4$):
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 5</span> Shifted-Inverse Minimum Singular Value Lower Bound</div>
 ```pseudo
 def MinSingularLowerBound($X,\rho$, order = 4):
-    setup $\leftarrow$ ScaledGramSetup($X$)
+    setup $\leftarrow$ @ScaledGramSetup($X$)
     if setup is ZeroMatrixCase:
         return lower = $0$
 
@@ -954,8 +961,8 @@ def MinSingularLowerBound($X,\rho$, order = 4):
     $n \leftarrow$ number of columns of $X$
 
     # Use fp32/fp64 factorization; avoid fp16 here.
-    $A \leftarrow$ Sym($T+\rho I$)
-    $L \leftarrow$ Cholesky($A$)
+    $A \leftarrow$ @Sym($T+\rho I$)
+    $L \leftarrow$ @Cholesky($A$)
 
     # Conceptually form $H=A^{-1}$; implementations may use triangular solves.
     $H \leftarrow A^{-1}$
@@ -965,9 +972,9 @@ def MinSingularLowerBound($X,\rho$, order = 4):
 
     if order = 2:
         $m_2^{\mathrm{inv}} \leftarrow \eta_2/\eta_1^2$
-        $\beta_{\mathrm{inv}} \leftarrow$ Beta2($m_2^{\mathrm{inv}},n$)
+        $\beta_{\mathrm{inv}} \leftarrow$ @Beta2($m_2^{\mathrm{inv}},n$)
     else:
-        $H_2 \leftarrow$ Sym($H^2$)
+        $H_2 \leftarrow$ @Sym($H^2$)
         $\eta_2 \leftarrow \operatorname{tr}(H_2)$
         $\eta_3 \leftarrow \operatorname{Re}\langle H,H_2\rangle_F$
         $\eta_4 \leftarrow \|H_2\|_F^2$
@@ -976,8 +983,8 @@ def MinSingularLowerBound($X,\rho$, order = 4):
         $m_3^{\mathrm{inv}} \leftarrow \eta_3/\eta_1^3$
         $m_4^{\mathrm{inv}} \leftarrow \eta_4/\eta_1^4$
 
-        $\beta_2^{\mathrm{inv}} \leftarrow$ Beta2($m_2^{\mathrm{inv}},n$)
-        $\beta_{\mathrm{inv}} \leftarrow$ FourMomentUpper(
+        $\beta_2^{\mathrm{inv}} \leftarrow$ @Beta2($m_2^{\mathrm{inv}},n$)
+        $\beta_{\mathrm{inv}} \leftarrow$ @FourMomentUpper(
             $m_2^{\mathrm{inv}},m_3^{\mathrm{inv}},m_4^{\mathrm{inv}},n,\beta_2^{\mathrm{inv}}$
         )
 

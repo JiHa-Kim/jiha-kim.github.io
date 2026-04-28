@@ -348,6 +348,7 @@ window.IAW = (function() {
             const root = core.initFigure(rootOrId, options);
             if (!root) return;
             initFn(root);
+            core.requestMathTypeset(root);
         };
 
         if (document.readyState === 'loading') {

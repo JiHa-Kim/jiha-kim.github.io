@@ -1,0 +1,9 @@
+<div class="iaw__stat-card{% if include.class %} {{ include.class }}{% endif %}">
+  <span class="iaw__stat-label{% if include.label_class %} {{ include.label_class }}{% endif %}">
+    <span class="iaw__stat-label-text">{{ include.label }}</span>{% if include.label_math %} <span class="iaw__stat-label-math">{{ include.label_math }}</span>{% endif %}
+  </span>
+  <strong
+    class="iaw__stat-value{% if include.value_class %} {{ include.value_class }}{% endif %}"
+    {% if include.value_id %}id="{{ include.value_id }}"{% endif %}
+  >{{ include.value }}</strong>
+</div>

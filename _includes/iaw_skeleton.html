@@ -21,7 +21,7 @@
       </div>
       {% endif %}
       
-      <div class="iaw__stage" id="{{ include.stage_id }}" 
+      <div class="iaw__stage{% if include.stage_class %} {{ include.stage_class }}{% endif %}" id="{{ include.stage_id }}" 
            {% if include.stage_style %}style="{{ include.stage_style }}"{% endif %}>
         <div class="iaw__stage-content">
           {{ include.visuals }}

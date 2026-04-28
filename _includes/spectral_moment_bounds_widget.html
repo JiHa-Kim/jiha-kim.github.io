@@ -1,0 +1,572 @@
+{% capture describe %}
+<p>
+  This widget isolates the scalar part of the algorithm. It chooses a synthetic normalized squared singular spectrum
+  $p_i=\sigma_i^2/\sum_j\sigma_j^2$, computes the exact moments $m_k=\sum_i p_i^k$, and then runs the two-
+  and four-moment endpoint certificates.
+</p>
+{% endcapture %}
+
+{% capture controls %}
+<button class="iaw__seg-btn active" data-preset="geometric">Geometric</button>
+<button class="iaw__seg-btn" data-preset="power">Power Law</button>
+<button class="iaw__seg-btn" data-preset="clustered">Clustered</button>
+<button class="iaw__seg-btn" data-preset="spike">Spike</button>
+{% endcapture %}
+
+{% capture smbBarsMarker %}<span class="iaw__legend-dot iaw__legend-dot--source-b"></span>{% endcapture %}
+{% capture smbLowerMarker %}<span class="iaw__legend-dot iaw__legend-dot--success"></span>{% endcapture %}
+{% capture smbTrueMarker %}<span class="iaw__legend-dot iaw__legend-dot--text"></span>{% endcapture %}
+{% capture smbUpperMarker %}<span class="iaw__legend-dot iaw__legend-dot--danger"></span>{% endcapture %}
+
+{% capture legend %}
+  {% include iaw_legend_item.html marker_html=smbBarsMarker label="spectrum $p_i$" %}
+  {% include iaw_legend_item.html marker_html=smbLowerMarker label="lower certificate $\ell_4$" %}
+  {% include iaw_legend_item.html marker_html=smbTrueMarker label="true endpoint $p_1$" %}
+  {% include iaw_legend_item.html marker_html=smbUpperMarker label="upper certificate $\beta_4$" %}
+{% endcapture %}
+
+{% capture smbIntervalValue %}
+<span id="smbEll4">-</span> $\le p_1 \le$ <span id="smbBeta4">-</span>
+{% endcapture %}
+
+{% capture visuals %}
+<div class="iaw__chart-layout">
+  <section class="iaw__chart-panel" aria-label="Synthetic spectrum and endpoint certificates">
+    <canvas id="smbSpectrumCanvas"></canvas>
+  </section>
+
+  <aside class="iaw__side-panel">
+    <div class="iaw__panel-title">Scalar Certificates</div>
+    <div class="iaw__stat-grid">
+      {% include iaw_stat_card.html label="true endpoint" label_math="$p_1$" value="-" value_id="smbP1" %}
+      {% include iaw_stat_card.html label="two-moment upper" label_math="$\beta_2$" value="-" value_id="smbBeta2" %}
+      {% include iaw_stat_card.html class="iaw__stat-card--wide iaw__stat-card--accent" label="four-moment interval" label_math="$\ell_4,\beta_4$" value=smbIntervalValue %}
+      {% include iaw_stat_card.html label="certified slack" value="-" value_id="smbCertSlack" %}
+      {% include iaw_stat_card.html label="actual overestimate" value="-" value_id="smbActualSlack" %}
+      {% include iaw_stat_card.html label="spectrum size" value="128" value_id="smbNValue" %}
+      {% include iaw_stat_card.html label="root candidates" value="-" value_id="smbRootCount" %}
+    </div>
+
+    <div class="iaw__panel-title">Moment Inputs</div>
+    <div class="iaw__kv-list">
+      <div><span>$m_2$</span><code id="smbM2">-</code></div>
+      <div><span>$m_3$</span><code id="smbM3">-</code></div>
+      <div><span>$m_4$</span><code id="smbM4">-</code></div>
+    </div>
+  </aside>
+</div>
+{% endcapture %}
+
+{% capture footer %}
+<div class="iaw__control-grid">
+  <div class="iaw__control-field">
+    <div class="iaw__slider-header">
+      <span>Spectrum Size</span>
+    </div>
+    <input class="iaw__number-input" id="smbNInput" type="number" min="2" max="1000000" step="1" value="128" inputmode="numeric">
+  </div>
+
+  <div class="iaw__control-field">
+    <div class="iaw__slider-header">
+      <span id="smbShapeLabel">Top Mass</span>
+      <span class="iaw__slider-readout" id="smbShapeReadout">0.425</span>
+    </div>
+    {% assign smbShapeTicks = "flat, mid, sharp" | split: ", " %}
+    {% include iaw_slider.html id="smbShapeSlider" min="0" max="1" step="0.001" value="0.45" ticks=smbShapeTicks variant="parameter" %}
+  </div>
+
+  <label class="iaw__check-row">
+    <input id="smbLogScale" type="checkbox" checked>
+    Log y-scale
+  </label>
+</div>
+{% endcapture %}
+
+{% include iaw_skeleton.html
+    id="spectralMomentBoundsFigure"
+    eyebrow="Scalar Moment Solver"
+    title="Certified Endpoint Bounds from Synthetic Moments"
+    description=describe
+    controls=controls
+    legend=legend
+    visuals=visuals
+    footer=footer
+    stage_id="smbStage"
+    stage_class="iaw__stage--chart"
+%}
+
+<script src="{{ '/assets/js/iaw_core.js' | relative_url }}"></script>
+<script>
+IAW.mountFigure('spectralMomentBoundsFigure', function(root) {
+  const canvas = root.querySelector('#smbSpectrumCanvas');
+  const ctx = canvas.getContext('2d');
+  const nInput = root.querySelector('#smbNInput');
+  const shapeSlider = root.querySelector('#smbShapeSlider');
+  const logScaleInput = root.querySelector('#smbLogScale');
+  const shapeLabel = root.querySelector('#smbShapeLabel');
+  const shapeReadout = root.querySelector('#smbShapeReadout');
+  const buttons = root.querySelectorAll('.iaw__seg-btn');
+
+  const output = {
+    p1: root.querySelector('#smbP1'),
+    beta2: root.querySelector('#smbBeta2'),
+    ell4: root.querySelector('#smbEll4'),
+    beta4: root.querySelector('#smbBeta4'),
+    certSlack: root.querySelector('#smbCertSlack'),
+    actualSlack: root.querySelector('#smbActualSlack'),
+    nValue: root.querySelector('#smbNValue'),
+    rootCount: root.querySelector('#smbRootCount'),
+    m2: root.querySelector('#smbM2'),
+    m3: root.querySelector('#smbM3'),
+    m4: root.querySelector('#smbM4')
+  };
+
+  let preset = 'geometric';
+  let theme = IAW.getThemeColors(root);
+
+  function formatNumber(value) {
+    if (!Number.isFinite(value)) return '-';
+    if (value === 0) return '0';
+    const magnitude = Math.abs(value);
+    if (magnitude < 1e-5 || magnitude >= 1000) return value.toExponential(5);
+    return value.toPrecision(7);
+  }
+
+  function formatPercent(value) {
+    if (!Number.isFinite(value)) return '-';
+    const percent = 100 * value;
+    const magnitude = Math.abs(percent);
+    if (magnitude > 0 && magnitude < 1e-3) return `${percent.toExponential(3)}%`;
+    if (magnitude < 0.1) return `${percent.toFixed(5)}%`;
+    if (magnitude < 1) return `${percent.toFixed(4)}%`;
+    return `${percent.toFixed(2)}%`;
+  }
+
+  function readSpectrumSize(fallback = 128) {
+    const raw = Math.round(Number(nInput.value));
+    if (!Number.isFinite(raw)) return fallback;
+    return Math.max(2, Math.min(1000000, raw));
+  }
+
+  function uniqueSorted(values, tolerance = 1e-9) {
+    const sorted = values.filter(Number.isFinite).sort((a, b) => a - b);
+    const result = [];
+    for (const value of sorted) {
+      const previous = result[result.length - 1];
+      if (previous === undefined || Math.abs(value - previous) > tolerance * (1 + Math.abs(value))) {
+        result.push(value);
+      }
+    }
+    return result;
+  }
+
+  function normalizePolynomial(coefficients) {
+    const trimmed = coefficients.slice();
+    while (trimmed.length > 1 && Math.abs(trimmed[0]) < 1e-14) trimmed.shift();
+    return trimmed;
+  }
+
+  function evaluatePolynomial(coefficients, x) {
+    let value = coefficients[0];
+    for (let i = 1; i < coefficients.length; i += 1) {
+      value = value * x + coefficients[i];
+    }
+    return value;
+  }
+
+  function derivativePolynomial(coefficients) {
+    const degree = coefficients.length - 1;
+    return coefficients.slice(0, -1).map((value, index) => value * (degree - index));
+  }
+
+  function polishRoot(coefficients, guess, lower, upper) {
+    const derivative = derivativePolynomial(coefficients);
+    let x = IAW.clamp(guess, lower, upper);
+
+    for (let iteration = 0; iteration < 8; iteration += 1) {
+      const fx = evaluatePolynomial(coefficients, x);
+      const dfx = evaluatePolynomial(derivative, x);
+      if (!Number.isFinite(fx) || !Number.isFinite(dfx) || Math.abs(dfx) < 1e-30) break;
+
+      const next = x - fx / dfx;
+      if (!Number.isFinite(next) || next < lower - 1e-10 || next > upper + 1e-10) break;
+      if (Math.abs(next - x) < 1e-14 * (1 + Math.abs(x))) {
+        x = next;
+        break;
+      }
+      x = next;
+    }
+
+    return IAW.clamp(x, lower, upper);
+  }
+
+  function evaluateComplexPolynomial(coefficients, z) {
+    let re = coefficients[0];
+    let im = 0;
+    for (let i = 1; i < coefficients.length; i += 1) {
+      const nextRe = re * z.re - im * z.im + coefficients[i];
+      const nextIm = re * z.im + im * z.re;
+      re = nextRe;
+      im = nextIm;
+    }
+    return { re, im };
+  }
+
+  function realRootsInInterval(coefficients, lower, upper) {
+    const poly = normalizePolynomial(coefficients);
+    const degree = poly.length - 1;
+    const tolerance = 1e-8;
+
+    if (degree <= 0) return [];
+
+    if (degree === 1) {
+      const root = -poly[1] / poly[0];
+      return root >= lower - tolerance && root <= upper + tolerance
+        ? [polishRoot(poly, root, lower, upper)]
+        : [];
+    }
+
+    if (degree === 2) {
+      const [a, b, c] = poly;
+      const discriminant = b * b - 4 * a * c;
+      if (discriminant < -tolerance) return [];
+      const radius = Math.sqrt(Math.max(0, discriminant));
+      return uniqueSorted([
+        (-b - radius) / (2 * a),
+        (-b + radius) / (2 * a)
+      ].filter((rootValue) => rootValue >= lower - tolerance && rootValue <= upper + tolerance)
+        .map((rootValue) => polishRoot(poly, rootValue, lower, upper)));
+    }
+
+    const leading = poly[0];
+    const monic = poly.map((value) => value / leading);
+    const radius = 1 + Math.max(...monic.slice(1).map(Math.abs));
+    let roots = Array.from({ length: degree }, (_, index) => {
+      const angle = 2 * Math.PI * index / degree + 0.17;
+      return { re: radius * Math.cos(angle), im: radius * Math.sin(angle) };
+    });
+
+    for (let iteration = 0; iteration < 80; iteration += 1) {
+      let maxStep = 0;
+      roots = roots.map((z, index) => {
+        const value = evaluateComplexPolynomial(monic, z);
+        let denom = { re: 1, im: 0 };
+
+        for (let j = 0; j < roots.length; j += 1) {
+          if (j === index) continue;
+          const diff = { re: z.re - roots[j].re, im: z.im - roots[j].im };
+          denom = {
+            re: denom.re * diff.re - denom.im * diff.im,
+            im: denom.re * diff.im + denom.im * diff.re
+          };
+        }
+
+        const denomNorm = denom.re * denom.re + denom.im * denom.im || 1e-30;
+        const step = {
+          re: (value.re * denom.re + value.im * denom.im) / denomNorm,
+          im: (value.im * denom.re - value.re * denom.im) / denomNorm
+        };
+        maxStep = Math.max(maxStep, Math.hypot(step.re, step.im));
+        return { re: z.re - step.re, im: z.im - step.im };
+      });
+      if (maxStep < 1e-12) break;
+    }
+
+    return uniqueSorted(roots
+      .filter((z) => Math.abs(z.im) < 1e-7 * (1 + Math.abs(z.re)))
+      .map((z) => z.re)
+      .filter((rootValue) => rootValue >= lower - tolerance && rootValue <= upper + tolerance)
+      .map((rootValue) => polishRoot(poly, rootValue, lower, upper)));
+  }
+
+  function twoMomentUpper(m2, n) {
+    return 1 / n + Math.sqrt(Math.max(0, (n - 1) / n * (m2 - 1 / n)));
+  }
+
+  function residualIsFeasible(t, m2, m3, m4, n) {
+    const eps = -2e-12;
+    const s0 = n - 1;
+    const s1 = 1 - t;
+    const s2 = m2 - t * t;
+    const s3 = m3 - t * t * t;
+    const s4 = m4 - t * t * t * t;
+
+    const m01 = s0 * s2 - s1 * s1;
+    const m02 = s0 * s4 - s2 * s2;
+    const m12 = s2 * s4 - s3 * s3;
+    const det = s0 * s2 * s4 + 2 * s1 * s2 * s3 - s0 * s3 * s3 - s2 * s2 * s2 - s1 * s1 * s4;
+
+    const a = t * s1 - s2;
+    const b = t * s2 - s3;
+    const c = t * s3 - s4;
+
+    return s0 >= eps && s2 >= eps && s4 >= eps &&
+      m01 >= eps && m02 >= eps && m12 >= eps && det >= eps &&
+      a >= eps && c >= eps && a * c - b * b >= eps;
+  }
+
+  function fourMomentUpper(m2, m3, m4, n, beta2) {
+    const polynomials = [
+      [-1, 0, m2],
+      [-1, 0, 0, 0, m4],
+      [-n, 2, (n - 1) * m2 - 1],
+      [-n, 0, 2 * m2, 0, (n - 1) * m4 - m2 * m2],
+      [-m2, 2 * m3, -m4, 0, m2 * m4 - m3 * m3],
+      [
+        1 - n * m2,
+        2 * (n * m3 - m2),
+        3 * m2 * m2 - 2 * m3 - n * m4,
+        2 * (m4 - m2 * m3),
+        (n - 1) * (m2 * m4 - m3 * m3) - m2 * m2 * m2 + 2 * m2 * m3 - m4
+      ],
+      [1, -m2],
+      [m3, -m4],
+      [m3 - m2 * m2, m2 * m3 - m4, m2 * m4 - m3 * m3]
+    ];
+
+    let candidates = [0, beta2];
+    for (const polynomial of polynomials) {
+      candidates = candidates.concat(realRootsInInterval(polynomial, 0, beta2));
+    }
+    const roots = uniqueSorted(candidates, 1e-8);
+
+    let beta = 0;
+    for (let i = 0; i + 1 < roots.length; i += 1) {
+      const a = roots[i];
+      const b = roots[i + 1];
+      if (b - a <= 1e-12) continue;
+      const midpoint = 0.5 * (a + b);
+      if (residualIsFeasible(midpoint, m2, m3, m4, n)) beta = Math.max(beta, b);
+    }
+
+    for (const rootValue of roots) {
+      if (residualIsFeasible(rootValue, m2, m3, m4, n)) beta = Math.max(beta, rootValue);
+    }
+
+    return {
+      beta: IAW.clamp(beta || beta2, 0, beta2),
+      rootCount: roots.length
+    };
+  }
+
+  function supportIsFeasible(t, m2, m3, m4) {
+    const eps = -2e-12;
+    const a = t - m2;
+    const b = t * m2 - m3;
+    const c = t * m3 - m4;
+    return a >= eps && c >= eps && a * c - b * b >= eps;
+  }
+
+  function fourMomentLower(m2, m3, m4) {
+    const lowerStart = Math.max(m2, m4 / Math.max(m3, 1e-300));
+    if (supportIsFeasible(lowerStart, m2, m3, m4)) return lowerStart;
+
+    const qLower = [m3 - m2 * m2, m2 * m3 - m4, m2 * m4 - m3 * m3];
+    const candidates = uniqueSorted(realRootsInInterval(qLower, lowerStart, 1).concat([1]));
+    return candidates.find((value) => supportIsFeasible(value, m2, m3, m4)) || 1;
+  }
+
+  function makeSpectrum(n, shape) {
+    const s = IAW.clamp(shape);
+    const spectrum = new Array(n).fill(0);
+
+    if (preset === 'spike') {
+      const top = Math.max(1 / n, 0.02 + 0.9 * s);
+      spectrum[0] = top;
+      for (let i = 1; i < n; i += 1) spectrum[i] = (1 - top) / (n - 1);
+      shapeLabel.textContent = 'Top Mass';
+      shapeReadout.textContent = top.toFixed(3);
+    } else if (preset === 'geometric') {
+      const ratio = 0.985 - 0.93 * s;
+      let total = 0;
+      for (let i = 0; i < n; i += 1) {
+        spectrum[i] = Math.pow(ratio, i);
+        total += spectrum[i];
+      }
+      for (let i = 0; i < n; i += 1) spectrum[i] /= total;
+      shapeLabel.textContent = 'Decay Ratio';
+      shapeReadout.textContent = ratio.toFixed(3);
+    } else if (preset === 'power') {
+      const exponent = 0.15 + 4.2 * s;
+      let total = 0;
+      for (let i = 0; i < n; i += 1) {
+        spectrum[i] = Math.pow(i + 1, -exponent);
+        total += spectrum[i];
+      }
+      for (let i = 0; i < n; i += 1) spectrum[i] /= total;
+      shapeLabel.textContent = 'Tail Exponent';
+      shapeReadout.textContent = exponent.toFixed(2);
+    } else if (preset === 'clustered') {
+      const topCount = Math.max(2, Math.round(2 + 10 * (1 - s)));
+      const tailDecay = 0.78 - 0.5 * s;
+      let total = 0;
+      for (let i = 0; i < n; i += 1) {
+        const cluster = i < topCount ? 1 + 0.22 * Math.cos(i) : 0.35 * Math.pow(tailDecay, i - topCount);
+        spectrum[i] = Math.max(1e-16, cluster);
+        total += spectrum[i];
+      }
+      for (let i = 0; i < n; i += 1) spectrum[i] /= total;
+      shapeLabel.textContent = 'Top Cluster Size';
+      shapeReadout.textContent = `${topCount}`;
+    } else {
+      const top = Math.max(1 / n, 0.02 + 0.9 * s);
+      spectrum[0] = top;
+      for (let i = 1; i < n; i += 1) spectrum[i] = (1 - top) / (n - 1);
+      shapeLabel.textContent = 'Top Mass';
+      shapeReadout.textContent = top.toFixed(3);
+    }
+
+    return spectrum;
+  }
+
+  function moments(spectrum) {
+    let m2 = 0;
+    let m3 = 0;
+    let m4 = 0;
+    let c2 = 0;
+    let c3 = 0;
+    let c4 = 0;
+    for (const value of spectrum) {
+      const square = value * value;
+      const cube = square * value;
+      const fourth = square * square;
+      let y = square - c2;
+      let t = m2 + y;
+      c2 = (t - m2) - y;
+      m2 = t;
+      y = cube - c3;
+      t = m3 + y;
+      c3 = (t - m3) - y;
+      m3 = t;
+      y = fourth - c4;
+      t = m4 + y;
+      c4 = (t - m4) - y;
+      m4 = t;
+    }
+    return { m2, m3, m4 };
+  }
+
+  function drawChart(spectrum, certificate, useLogScale) {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width < 1 || rect.height < 1) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, Math.round(rect.width * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    theme = IAW.getThemeColors(root);
+    const pad = { left: 54, right: 18, top: 20, bottom: 34 };
+    const width = Math.max(1, rect.width - pad.left - pad.right);
+    const height = Math.max(1, rect.height - pad.top - pad.bottom);
+    const visible = spectrum.slice(0, Math.min(96, spectrum.length));
+    const yMax = Math.max(certificate.beta4, certificate.p1, certificate.ell4) * 1.12 || 1;
+    const positiveValues = visible.concat([certificate.beta4, certificate.p1, certificate.ell4])
+      .filter((value) => value > 0);
+    const yMin = useLogScale
+      ? Math.max(Math.min(...positiveValues) * 0.75, 1e-18)
+      : 0;
+    const logMin = Math.log10(yMin || 1e-18);
+    const logMax = Math.log10(Math.max(yMax, yMin * 1.0001));
+    const y = (value) => {
+      if (!useLogScale) return pad.top + height * (1 - value / yMax);
+      const clamped = Math.max(value, yMin);
+      return pad.top + height * (1 - (Math.log10(clamped) - logMin) / (logMax - logMin));
+    };
+
+    ctx.strokeStyle = theme.border;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, pad.top);
+    ctx.lineTo(pad.left, pad.top + height);
+    ctx.lineTo(pad.left + width, pad.top + height);
+    ctx.stroke();
+
+    ctx.fillStyle = theme.muted;
+    ctx.font = '11px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(formatNumber(yMax), pad.left - 8, pad.top + 4);
+    ctx.fillText(useLogScale ? formatNumber(yMin) : '0', pad.left - 8, pad.top + height);
+
+    const step = width / visible.length;
+    const gap = Math.max(1, step * 0.16);
+    const barWidth = Math.max(1, step - gap);
+
+    ctx.fillStyle = theme.sourceB;
+    ctx.globalAlpha = 0.82;
+    visible.forEach((value, index) => {
+      const x = pad.left + index * step + 0.5 * gap;
+      const yValue = y(value);
+      ctx.fillRect(x, yValue, barWidth, pad.top + height - yValue);
+    });
+    ctx.globalAlpha = 1;
+
+    function drawLevel(value, color, dash = []) {
+      const yValue = y(value);
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.setLineDash(dash);
+      ctx.beginPath();
+      ctx.moveTo(pad.left, yValue);
+      ctx.lineTo(pad.left + width, yValue);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    drawLevel(certificate.beta4, theme.danger);
+    drawLevel(certificate.p1, theme.text, [2, 3]);
+    drawLevel(certificate.ell4, theme.success);
+
+    ctx.fillStyle = theme.muted;
+    ctx.textAlign = 'center';
+    ctx.font = '12px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.fillText(`showing ${visible.length} largest entries of n = ${spectrum.length}`, pad.left + width / 2, rect.height - 10);
+  }
+
+  function update() {
+    const n = readSpectrumSize(Number(output.nValue.textContent) || 128);
+    const spectrum = makeSpectrum(n, Number(shapeSlider.value));
+    const { m2, m3, m4 } = moments(spectrum);
+    const beta2 = twoMomentUpper(m2, n);
+    const upper = fourMomentUpper(m2, m3, m4, n, beta2);
+    const ell4 = fourMomentLower(m2, m3, m4);
+    const p1 = spectrum[0];
+    const beta4 = Math.max(upper.beta, p1);
+
+    output.p1.textContent = formatNumber(p1);
+    output.beta2.textContent = formatNumber(beta2);
+    output.ell4.textContent = formatNumber(ell4);
+    output.beta4.textContent = formatNumber(beta4);
+    output.certSlack.textContent = formatPercent(Math.sqrt(beta4 / Math.max(ell4, 1e-300)) - 1);
+    output.actualSlack.textContent = formatPercent(Math.sqrt(beta4 / p1) - 1);
+    output.nValue.textContent = `${n}`;
+    output.rootCount.textContent = `${upper.rootCount}`;
+    output.m2.textContent = formatNumber(m2);
+    output.m3.textContent = formatNumber(m3);
+    output.m4.textContent = formatNumber(m4);
+
+    drawChart(spectrum, { p1, beta2, beta4, ell4 }, logScaleInput.checked);
+  }
+
+  IAW.bindSegmentedControl(buttons, (button) => {
+    preset = button.dataset.preset || 'geometric';
+    update();
+  });
+
+  nInput.addEventListener('change', () => {
+    const n = readSpectrumSize(Number(output.nValue.textContent) || 128);
+    nInput.value = String(n);
+    update();
+  });
+  nInput.addEventListener('input', update);
+  shapeSlider.addEventListener('input', update);
+  logScaleInput.addEventListener('change', update);
+  window.addEventListener('resize', update);
+  IAW.observeTheme(update);
+  update();
+});
+</script>
