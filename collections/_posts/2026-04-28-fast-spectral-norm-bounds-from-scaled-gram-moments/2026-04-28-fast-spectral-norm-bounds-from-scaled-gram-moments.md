@@ -452,7 +452,7 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > Thus the true $p_1$ is feasible in the set defining $\beta_4$, so $p_1\le\beta_4$.
 
 > [!algorithm]- Scalar Solver Details
-> To solve for $\beta_4$, isolate real roots of the feasibility polynomials, add endpoints $0,\beta_2$, sort, and test one midpoint in each interval. The $M_1(t)\succeq0$ tests are
+> The scalar solver should not use iterative bisection. Feasibility changes only when one of the fixed low-degree feasibility polynomials changes sign. Isolate their real roots, add endpoints $0,\beta_2$, sort the resulting constant-size list, and test one midpoint in each interval. The $M_1(t)\succeq0$ tests are
 > $$
 > U(t)=t-m_2,
 > \qquad
@@ -495,6 +495,8 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > \end{aligned}
 > $$
 > where $D(t)=\det M_0(t)$. Feasibility is tested by nonnegativity of these polynomials and the actual PSD checks at roots.
+>
+> All polynomial degrees are at most four. In practice this is a fixed-size scalar kernel: closed-form roots for linear/quadratic pieces, a robust quartic routine or companion-matrix eigenvalue solve for the quartics, fixed-size stack arrays, and no heap allocation.
 
 > [!proof]- Derivation of the Polynomial Tests
 > For $M_1(t)$, the diagonal entries are
@@ -583,6 +585,8 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > \sqrt{\frac{\beta_4}{\ell_4}}.
 > $$
 > Report the a posteriori relative slack $\sqrt{\beta_4/\ell_4}-1$. No separate lower-bound menu is needed: the lower-right entry of $K(t)$ already enforces the strongest elementary ratio check $t\ge m_4/m_3$.
+>
+> Practically, start at $\ell_0=\max\{m_2,m_4/m_3\}$. If $K(\ell_0)\succeq0$, then $\ell_4=\ell_0$. Otherwise $\ell_4$ is the next real root of the quadratic $q_{\mathrm{low}}(t)$ in $[\ell_0,1]$ that passes the same $2\times2$ PSD test.
 
 > [!proof]- Why the Support Test Gives a Lower Bound
 > Let $t=p_1$. Since $0\le p_i\le p_1$, for every linear $q(x)=a+bx$,
@@ -877,13 +881,13 @@ def SpectralNormUpperBound($X$, order = 4):
 ### 6.4 Scalar Four-Moment Solvers
 
 > [!tip] Scalar Precision
-> The scalar solver is not a performance bottleneck. Write it for robustness and clarity, preferably in fp64.
+> The scalar solver is not a performance bottleneck, but it should still be written as a constant-size kernel: fp64 coefficients, fixed-size root buffers, closed-form linear/quadratic roots, robust quartic roots, and direct minor tests instead of matrix eigensolvers.
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 3</span> Four-Moment Upper Endpoint</div>
 ```pseudo
 def FourMomentUpper($m_2,m_3,m_4,n,\beta_2$):
-    # Candidate interval is $[0,\beta_2]$.
+    # Constant-size root enumeration; no iterative bisection.
     polys $\leftarrow \{A,B_0,C,D,E,F_0,U,W,Q\}$
     roots $\leftarrow \{0,\beta_2\}$
 
@@ -915,28 +919,15 @@ def ResidualPSD($t,m_2,m_3,m_4,n$):
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm 4</span> Four-Moment Lower Certificate</div>
 ```pseudo
 def FourMomentLower($m_2,m_3,m_4$):
-    # Find the smallest $t\in[0,1]$ with $K(t)\succeq0$.
+    # Direct 2x2 PSD support endpoint; no interval scan needed.
     $q_{\mathrm{low}}(t) \leftarrow (t-m_2)(tm_3-m_4)-(tm_2-m_3)^2$
-    polys $\leftarrow \{t-m_2,\ tm_3-m_4,\ q_{\mathrm{low}}(t)\}$
-    roots $\leftarrow \{0,1\}$
+    $\ell_0 \leftarrow \max(m_2,\ m_4/m_3)$
+    if SupportPSD($\ell_0,m_2,m_3,m_4$):
+        return $\ell_0$
 
-    for $p$ in polys:
-        roots $\leftarrow$ roots $\cup$ RealRootsInInterval($p$, $0$, $1$)
-
-    roots $\leftarrow$ SortUnique(roots)
-    $\ell_{\mathrm{support}} \leftarrow 1$
-
-    for each adjacent pair $(a,b)$ in roots:
-        $z \leftarrow (a+b)/2$
-        if SupportPSD($z,m_2,m_3,m_4$):
-            $\ell_{\mathrm{support}} \leftarrow a$
-            break
-
-    for $z$ in roots:
-        if SupportPSD($z,m_2,m_3,m_4$):
-            $\ell_{\mathrm{support}} \leftarrow \min(\ell_{\mathrm{support}},z)$
-
-    return $\ell_{\mathrm{support}}$
+    roots $\leftarrow$ RealRootsInInterval($q_{\mathrm{low}}$, $\ell_0$, $1$)
+    candidates $\leftarrow$ SortUnique(roots $\cup \{1\}$)
+    return first $z$ in candidates with SupportPSD($z,m_2,m_3,m_4$)
 
 def SupportPSD($t,m_2,m_3,m_4$):
     $a \leftarrow t-m_2$
