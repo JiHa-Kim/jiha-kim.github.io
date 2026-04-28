@@ -144,6 +144,47 @@ It studies how to rearrange one distribution into another, either by a point-to-
 
 {% include transport_split_widget.html %}
 
+### Wasserstein Distance: Earth Mover's Distance
+
+The Kantorovich problem does more than choose a coupling. When the cost comes from a ground metric, its optimal value becomes a metric on probability distributions themselves.
+
+> [!definition] $p$-Wasserstein Distance
+> Let $d(x,y)$ be a ground metric on the sample space and let $p\ge 1$. For probability laws $P$ and $Q$ with finite $p$-th moments, the $p$-Wasserstein distance is
+> $$
+> W_p(P,Q)
+> =
+> \left(
+> \inf_{\pi\in\Pi(P,Q)}
+> \int d(x,y)^p\,d\pi(x,y)
+> \right)^{1/p}.
+> $$
+> The coupling $\pi$ tells us how to align source samples with target samples before measuring average movement.
+
+> [!remark] Earth Mover's Distance
+> In the finite case, $W_1$ has the literal earth-moving interpretation:
+> $$
+> W_1(P,Q)=\min_{\pi_{ij}\ge0}\sum_{i,j} d_{ij}\pi_{ij}
+> $$
+> subject to the same row and column marginal constraints as before. If $a_i$ is a pile of dirt, $b_j$ is a hole to fill, and $d_{ij}$ is travel distance, then $\pi_{ij}$ says how much dirt moves from $i$ to $j$. The objective is total work.
+>
+> For quadratic transport, the common object is $W_2^2$, the minimum expected squared displacement. The metric is $W_2$ itself, after taking the square root.
+
+> [!important] Why the Ground Geometry Matters
+> Pointwise divergences compare probability mass at the same location. Wasserstein distances compare distributions through the geometry of the sample space: moving mass a short distance is cheaper than moving it far away.
+>
+> This is why Wasserstein geometry is natural for generative modeling. It does not merely say whether two densities agree pointwise; it asks how much work is needed to deform one distribution into the other.
+
+> [!note] Preview: The Flow View
+> Once $W_2$ is treated as a metric on probability laws, it becomes meaningful to ask for shortest paths between distributions. If a curve of densities $\rho_t$ is transported by a velocity field $v_t$ through
+> $$
+> \partial_t \rho_t+\operatorname{div}(\rho_t v_t)=0,
+> $$
+> then its kinetic action is
+> $$
+> \int_0^1\!\int \Vert v_t(x)\Vert_2^2\,\rho_t(x)\,dx\,dt.
+> $$
+> The Benamou-Brenier formulation below says that $W_2^2$ is exactly the smallest possible action over all such flows. So the Wasserstein metric is not just an endpoint loss; it induces the dynamical least-action picture.
+
 ## The 1D Case: Inverse Transform Sampling
 
 To build intuition, let's start with a simple case: **Inverse Transform Sampling** {% cite InverseTransformSampling2025 %}.
@@ -383,9 +424,79 @@ The key point is that cyclic monotonicity is strictly stronger than the ordinary
 > [!note] Why Brenier Produces a Convex Potential
 > For quadratic cost, the support of the optimal plan is cyclically monotone. Rockafellar turns that geometric optimality into a convex potential, and absolute continuity of $P$ upgrades the plan to an almost-everywhere-defined map. So $T=\nabla\psi$ is not an extra modeling choice; it is the structural consequence of optimality.
 
+### Closed Form: Gaussian to Gaussian
+
+One of the few genuinely high-dimensional cases with a clean closed form is transport between Gaussian laws. It is especially useful here because the standard ML prior is usually Gaussian, and because it gives a concrete non-1D example where the Brenier map can be written down explicitly.
+
+> [!proposition] Gaussian-to-Gaussian Brenier Map
+> Let
+> $$
+> P=\mathcal{N}(m_0,\Sigma_0), \qquad Q=\mathcal{N}(m_1,\Sigma_1),
+> $$
+> where $\Sigma_0$ and $\Sigma_1$ are positive definite covariance matrices. For squared Euclidean cost, the optimal Monge map from $P$ to $Q$ is affine:
+> $$
+> T(x)=m_1+A(x-m_0),
+> $$
+> with
+> $$
+> A=\Sigma_0^{-1/2}\left(\Sigma_0^{1/2}\Sigma_1\Sigma_0^{1/2}\right)^{1/2}\Sigma_0^{-1/2}.
+> $$
+> This is the unique symmetric positive-definite matrix satisfying
+> $$
+> A\Sigma_0 A=\Sigma_1.
+> $$
+> Hence $T$ is the gradient of the convex quadratic potential
+> $$
+> \psi(x)=m_1^\top x+\frac12(x-m_0)^\top A(x-m_0).
+> $$
+
+> [!corollary] Gaussian $W_2$ Distance
+> The corresponding squared Wasserstein distance is
+> $$
+> W_2^2(P,Q)
+> =
+> \Vert m_0-m_1\Vert_2^2
+> +
+> \operatorname{tr}\left(
+> \Sigma_0+\Sigma_1
+> -
+> 2\left(\Sigma_0^{1/2}\Sigma_1\Sigma_0^{1/2}\right)^{1/2}
+> \right).
+> $$
+> This covariance term is the Bures metric on positive definite matrices {% cite peyreOptimalTransportMachine2025 %}.
+
+> [!example] Useful Special Cases
+> If the source is standard Gaussian, then
+> $$
+> Z\sim \mathcal{N}(0,I), \qquad Q=\mathcal{N}(m,\Sigma)
+> $$
+> gives the especially simple Brenier map
+> $$
+> T(z)=m+\Sigma^{1/2}z.
+> $$
+> This is the direct map used in the 2D comparison below.
+>
+> If $\Sigma_0$ and $\Sigma_1$ commute, then the formula reduces to
+> $$
+> A=\Sigma_1^{1/2}\Sigma_0^{-1/2},
+> \qquad
+> W_2^2(P,Q)=\Vert m_0-m_1\Vert_2^2+\Vert \Sigma_0^{1/2}-\Sigma_1^{1/2}\Vert_F^2.
+> $$
+> In 1D, this becomes
+> $$
+> T(x)=m_1+\frac{\sigma_1}{\sigma_0}(x-m_0),
+> \qquad
+> W_2^2=(m_0-m_1)^2+(\sigma_0-\sigma_1)^2.
+> $$
+
+> [!remark] Brenier vs. Cholesky / KR for Gaussians
+> A Gaussian target has many exact affine generators. If $\Sigma=LL^\top$ is the Cholesky factorization, then $z\mapsto m+Lz$ also sends $\mathcal{N}(0,I)$ to $\mathcal{N}(m,\Sigma)$. That triangular map is the Gaussian Knothe-Rosenblatt rearrangement for the chosen coordinate order.
+>
+> The Brenier map instead uses the symmetric square root $z\mapsto m+\Sigma^{1/2}z$. Both maps produce the same target law, but they induce different couplings and different quadratic transport costs. This is the population-level distinction visualized in the 2D figure later in the post.
+
 ## Dynamic Optimal Transport
 
-Brenier chooses the optimal **endpoint map**. Dynamic OT asks for the optimal **interpolation in time**.
+With the Wasserstein distance in place, probability laws can be treated as points in a metric space. Brenier chooses the optimal **endpoint map** between two such points. Dynamic OT asks for the optimal **interpolation in time**: the Wasserstein geodesic connecting them.
 
 > [!theorem] Benamou-Brenier Dynamic Formulation
 > For quadratic cost,
