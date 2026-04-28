@@ -660,94 +660,136 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > $$
 > Multiplying by $n$ gives $m_4\ge1/n^3$.
 
-### 4.6 Why Sharp Spectra Give Tight Bounds
+### 4.6 Why Decaying Spectra Give Tight Bounds
 
-> [!proposition] Dominant-Atom Tightness
-> Let $p_1=\theta$ and let the remaining mass be $\varepsilon=1-\theta$. Write the tail as $p_i=\varepsilon r_i$ for $i\ge2$, where $r_i\ge0$ and $\sum_{i\ge2}r_i=1$. Define $\rho_k=\sum_{i\ge2}r_i^k\le1$.
->
-> Then
+> [!proposition] Decay-Ratio Tightness
+> Let the normalized eigenvalues be sorted as $p_1\ge p_2\ge\cdots\ge0$, with $\sum_i p_i=1$. Set $\theta=p_1$ and write the relative tail ratios
 > $$
-> m_k=\theta^k+\varepsilon^k\rho_k.
+> a_i=\frac{p_i}{\theta},
+> \qquad
+> a_1=1,
+> \qquad
+> 0\le a_i\le1.
 > $$
-> The four-moment upper endpoint satisfies
+> Define the high-power tail sums
+> $$
+> R_k=\sum_{i\ge2}a_i^k.
+> $$
+> Then $m_k=\theta^k(1+R_k)$, and the certified interval obeys
 > $$
 > 0\le\beta_4-\theta
 > \le
-> m_4^{1/4}-\theta
+> \theta\left((1+R_4)^{1/4}-1\right)
 > \le
-> \frac{\varepsilon^4}{4\theta^3},
+> \frac{\theta R_4}{4},
 > $$
-> and the lower certificate satisfies
+> while
 > $$
 > 0\le\theta-\ell_4
 > \le
 > \theta-\frac{m_4}{m_3}
-> \le
-> \frac{\varepsilon^3}{\theta^2}.
+> =
+> \theta\frac{R_3-R_4}{1+R_3}
+> =
+> \theta\frac{\sum_{i\ge2}a_i^3(1-a_i)}{1+R_3}.
 > $$
->
-> Therefore, when one atom dominates, the certified interval closes rapidly:
+> Hence
 > $$
+> \boxed{
 > \beta_4-\ell_4
 > \le
-> \frac{\varepsilon^3}{\theta^2}
+> \frac{\theta R_4}{4}
 > +
-> \frac{\varepsilon^4}{4\theta^3}.
+> \theta\frac{R_3-R_4}{1+R_3}.
+> }
+> $$
+> The important quantities are not the dimension itself, but the high-power tail sums $R_3$ and $R_4$. Fast spectral decay makes these small. The upper estimate here is deliberately conservative: it only uses $m_4$, while the implemented scalar solver also uses $m_2$ and $m_3$.
+
+> [!proof]- Decay-Ratio Derivation
+> Since $p_i=\theta a_i$ and $a_1=1$,
+> $$
+> m_k=\sum_i p_i^k
+> =
+> \theta^k\sum_i a_i^k
+> =
+> \theta^k(1+R_k).
+> $$
+>
+> For the upper endpoint, any feasible largest atom $t$ must satisfy $t^4\le m_4$. Therefore
+> $$
+> \beta_4\le m_4^{1/4}
+> =
+> \theta(1+R_4)^{1/4}.
+> $$
+> Concavity gives $(1+x)^{1/4}\le1+x/4$ for $x\ge0$, hence
+> $$
+> \beta_4-\theta
+> \le
+> \theta\left((1+R_4)^{1/4}-1\right)
+> \le
+> \frac{\theta R_4}{4}.
+> $$
+>
+> For the lower certificate, the support test includes $\ell_4\ge m_4/m_3$. Using the ratio form of the moments,
+> $$
+> \frac{m_4}{m_3}
+> =
+> \theta\frac{1+R_4}{1+R_3}.
+> $$
+> Thus
+> $$
+> \theta-\frac{m_4}{m_3}
+> =
+> \theta\left(1-\frac{1+R_4}{1+R_3}\right)
+> =
+> \theta\frac{R_3-R_4}{1+R_3}.
+> $$
+> Since $R_3-R_4=\sum_{i\ge2}a_i^3(1-a_i)$, the lower gap is controlled by a weighted tail defect. It is small when the high-power tail is small, and it also vanishes for exact top multiplicities. Adding the upper and lower gaps gives the stated interval bound.
+
+> [!corollary] Simple Ratio Bound
+> If every tail ratio satisfies $a_i\le q<1$ for $i\ge2$, and $\delta=1-\theta$ is the total tail mass, then
+> $$
+> \beta_4-\theta\le\frac{\delta q^3}{4},
+> \qquad
+> \theta-\ell_4\le\delta q^2,
+> \qquad
+> \beta_4-\ell_4\le\delta\left(q^2+\frac{q^3}{4}\right).
 > $$
 
-> [!proof]- Moment-Dominance Derivation
-> Since the tail has mass $\varepsilon$, write $p_i=\varepsilon r_i$ for $i\ge2$. Then
+> [!proof]- Ratio-Bound Derivation
+> Let $R_1=\sum_{i\ge2}a_i$. Since $\sum_i p_i=1$, the tail mass is $\delta=\theta R_1$. If $a_i\le q$, then
 > $$
-> m_k
-> =
-> \theta^k+\sum_{i\ge2}p_i^k
-> =
-> \theta^k+\varepsilon^k\sum_{i\ge2}r_i^k
-> =
-> \theta^k+\varepsilon^k\rho_k.
+> R_3=\sum_{i\ge2}a_i^3\le q^2R_1,
+> \qquad
+> R_4=\sum_{i\ge2}a_i^4\le q^3R_1.
 > $$
->
-> For the upper side, every feasible top atom $t$ must leave nonnegative residual fourth moment, so $t^4\le m_4$. Hence $\beta_4\le m_4^{1/4}$. Since $m_4=\theta^4+\varepsilon^4\rho_4$,
+> Substitute these into the decay-ratio bound:
 > $$
-> m_4^{1/4}-\theta
-> =
-> \theta\left[
-> \left(1+\frac{\varepsilon^4\rho_4}{\theta^4}\right)^{1/4}
-> -1
-> \right].
+> \beta_4-\theta\le\frac{\theta R_4}{4}\le\frac{\delta q^3}{4},
+> \qquad
+> \theta-\ell_4\le\theta R_3\le\delta q^2.
 > $$
-> Concavity of $x^{1/4}$ gives $(1+x)^{1/4}\le1+x/4$, so
+
+> [!example] Geometric Decay
+> For an ideal geometric profile $a_i=q^{i-1}$, $i\ge1$, on an infinite tail,
 > $$
-> m_4^{1/4}-\theta
-> \le
-> \frac{\varepsilon^4\rho_4}{4\theta^3}
-> \le
-> \frac{\varepsilon^4}{4\theta^3}.
+> \theta=1-q,
+> \qquad
+> R_k=\frac{q^k}{1-q^k}.
 > $$
->
-> For the lower side, the support test includes the ratio bound $p_1\ge m_4/m_3$, and the implemented lower certificate starts at least from this value. Thus $\ell_4\ge m_4/m_3$. Also
+> The lower ratio certificate has the exact gap
 > $$
 > \theta-\frac{m_4}{m_3}
 > =
-> \frac{\theta m_3-m_4}{m_3}.
+> \frac{(1-q)^2q^3}{1-q^4},
 > $$
-> Substituting the tail decomposition gives
+> while the upper gap satisfies
 > $$
-> \theta m_3-m_4
-> =
-> \theta(\theta^3+\varepsilon^3\rho_3)
-> -
-> (\theta^4+\varepsilon^4\rho_4)
-> =
-> \varepsilon^3(\theta\rho_3-\varepsilon\rho_4).
-> $$
-> Since $m_3\ge\theta^3$ and $\rho_3\le1$,
-> $$
-> 0\le
-> \theta-\frac{m_4}{m_3}
+> \beta_4-\theta
 > \le
-> \frac{\varepsilon^3}{\theta^2}.
+> \frac{(1-q)q^4}{4(1-q^4)}.
 > $$
+> Thus the interval closes like $O(q^3)$ as the decay ratio $q$ becomes small. For a finite geometric tail, replace $R_k$ by $q^k(1-q^{k(n-1)})/(1-q^k)$.
 
 ### 4.7 Scalar Solver Widget
 
