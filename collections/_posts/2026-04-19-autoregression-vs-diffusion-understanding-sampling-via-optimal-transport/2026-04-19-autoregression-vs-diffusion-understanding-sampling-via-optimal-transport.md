@@ -334,7 +334,9 @@ The 1D closed form also gives a practical high-dimensional approximation: projec
 > [!remark] Why This Belongs Here
 > Sliced OT is useful because each projected problem is 1D, so the quantile-matching solution above applies directly. For empirical samples, this means: project both clouds onto a direction, sort the projected values, pair equal ranks, and repeat across directions.
 >
-> The tradeoff is that sliced OT is a comparison metric, not a single high-dimensional transport map. Each projection induces its own 1D matching, so the averaged objective does not by itself produce one coherent Brenier coupling in the original space. Still, it is often a cheap geometry-aware surrogate when full high-dimensional OT is too expensive {% cite montesumaRecentAdvancesOptimal2024 %}.
+> The tradeoff is that sliced OT is a comparison metric, not a single high-dimensional transport map. Each projection induces its own 1D matching, so the averaged objective does not by itself produce one coherent Brenier coupling in the original space.
+>
+> Kitagawa and Takatsu make the limitation precise: sliced Wasserstein-type metrics are topologically equivalent to classical Wasserstein metrics, but they are generally not bi-Lipschitz equivalent, and for $p>1$ in dimension $D\ge2$ the sliced spaces are not geodesic. So sliced OT is often a cheap geometry-aware surrogate when full high-dimensional OT is too expensive, but it should not replace $W_p$ in arguments where the exact metric scale or Wasserstein geodesic structure matters {% cite montesumaRecentAdvancesOptimal2024 kitagawaSlicedOptimalTransport2024 %}.
 
 For sampling maps in higher dimensions, a different reuse of the 1D idea is to apply quantile matching one coordinate at a time.
 
