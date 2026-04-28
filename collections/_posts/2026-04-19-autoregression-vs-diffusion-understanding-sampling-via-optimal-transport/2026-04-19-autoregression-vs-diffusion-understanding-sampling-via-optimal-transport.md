@@ -169,6 +169,23 @@ The Kantorovich problem does more than choose a coupling. When the cost comes fr
 >
 > For quadratic transport, the common object is $W_2^2$, the minimum expected squared displacement. The metric is $W_2$ itself, after taking the square root.
 
+> [!theorem] Kantorovich-Rubinstein Duality for $W_1$
+> For the distance cost $c(x,y)=d(x,y)$,
+> $$
+> W_1(P,Q)
+> =
+> \sup_{\|f\|_{\mathrm{Lip}}\le 1}
+> \left\{
+> \mathbb{E}_{X\sim P}[f(X)]-\mathbb{E}_{Y\sim Q}[f(Y)]
+> \right\}.
+> $$
+> Instead of minimizing over couplings, the dual maximizes over all 1-Lipschitz test functions. Such a function assigns scalar "height" values to the sample space, but its slope is capped by the ground metric {% cite thickstunKantorovichRubinsteinDuality %}.
+
+> [!remark] Why the $W_1$ Dual Is Useful
+> The primal earth-mover view asks how to move mass. The dual view asks for the strongest 1-Lipschitz critic that separates the two distributions in expectation.
+>
+> This is the reason $W_1$ became important in adversarial generative modeling: if two distributions are close in the ground geometry, no Lipschitz critic can give them very different scores, even when their supports do not overlap exactly.
+
 > [!important] Why the Ground Geometry Matters
 > Pointwise divergences compare probability mass at the same location. Wasserstein distances compare distributions through the geometry of the sample space: moving mass a short distance is cheaper than moving it far away.
 >
@@ -498,6 +515,19 @@ One of the few genuinely high-dimensional cases with a clean closed form is tran
 
 With the Wasserstein distance in place, probability laws can be treated as points in a metric space. Brenier chooses the optimal **endpoint map** between two such points. Dynamic OT asks for the optimal **interpolation in time**: the Wasserstein geodesic connecting them.
 
+> [!remark] Mixture Interpolation vs. Displacement Interpolation
+> A simple way to interpolate two densities is the linear mixture
+> $$
+> \rho_t=(1-t)\rho_0+t\rho_1.
+> $$
+> This does not move mass. It fades one distribution out while fading the other in at fixed spatial locations.
+>
+> Wasserstein interpolation is different. If $T$ is the Brenier map from $\rho_0$ to $\rho_1$, then particles move by
+> $$
+> X_t=(1-t)X_0+tT(X_0), \qquad X_0\sim \rho_0,
+> $$
+> and the intermediate law is $\rho_t=[X_t]_\sharp\rho_0$. This is **displacement interpolation**: mass travels through the sample space instead of appearing and disappearing.
+
 > [!theorem] Benamou-Brenier Dynamic Formulation
 > For quadratic cost,
 > $$
@@ -519,7 +549,7 @@ With the Wasserstein distance in place, probability laws can be treated as point
 > $$
 > X_t=(1-t)X_0+t\,T(X_0), \qquad X_0\sim \mu_0,
 > $$
-> and then setting $\rho_t=[X_t]_\sharp \mu_0$. This curve of measures is the **displacement interpolation**: each particle moves at constant speed along the segment from its source location to its Brenier destination. So the static map view and the dynamic least-action view describe the same quadratic OT geodesic.
+> and then setting $\rho_t=[X_t]_\sharp \mu_0$. Thus the static map view and the dynamic least-action view describe the same quadratic OT geodesic.
 
 > [!note] Path-Space / Stochastic Formulation
 > A different dynamic formulation optimizes not over density/velocity fields directly but over **laws on paths**:
