@@ -68,9 +68,15 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > In this tall orientation, full column rank means $r=n$. If $r<n$, the smallest singular value as a map from $\mathbb{F}^n$ to $\mathbb{F}^m$ is zero.
 
 > [!definition] Endpoint Quantities
-> The spectral norm is the largest stretch factor
+> The matrix spectral norm is the Schatten-$\infty$ norm. To avoid confusing it with the vector Euclidean norm, this post writes it as $\|\cdot\|_{S_\infty}$ and reserves $\|\cdot\|_2$ for vectors:
 > $$
-> \sigma_{\max}(X)=\max_{\|v\|_2=1}\|Xv\|_2=\sigma_1.
+> \|X\|_{S_\infty}
+> =
+> \sigma_{\max}(X)
+> =
+> \max_{\|v\|_2=1}\|Xv\|_2
+> =
+> \sigma_1.
 > $$
 >
 > The minimum singular value is
@@ -109,6 +115,182 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > r^{1/p}M.
 > $$
 > Since $r^{1/p}\to1$, the squeeze theorem gives the result.
+
+> [!lemma] Unitary Symmetry Selects the Euclidean Norm
+> A norm $N$ on $\mathbb{F}^n$ is invariant under every unitary map,
+> $$
+> N(Ux)=N(x)
+> \qquad
+> (U^HU=I,\ x\in\mathbb{F}^n),
+> $$
+> if and only if it is a positive multiple of the Euclidean norm:
+> $$
+> N=c\|\cdot\|_2
+> $$
+> for some $c>0$.
+>
+> This is a statement about norms on $\mathbb{F}^n$. Matrix unitarily invariant norms form a larger family, including Schatten norms and Ky Fan norms.
+
+> [!proof]-
+> The case $x=0$ is automatic. For $x\ne0$, set $q_1=x/\|x\|_2$. Extend $q_1$ to an orthonormal basis $q_1,\ldots,q_n$ of $\mathbb{F}^n$, and let
+> $$
+> Q=\begin{bmatrix}q_1 & q_2 & \cdots & q_n\end{bmatrix}.
+> $$
+> Then $Q$ is unitary, and
+> $$
+> Q^Hx
+> =
+> (q_1^Hx,\ldots,q_n^Hx)^T
+> =
+> (\|x\|_2,0,\ldots,0)^T
+> =
+> \|x\|_2e_1,
+> $$
+> so $U=Q^H$ is unitary and sends $x$ to $\|x\|_2e_1$. By unitary invariance and homogeneity,
+> $$
+> N(x)=N(Ux)=N(\|x\|_2e_1)=\|x\|_2N(e_1).
+> $$
+> Thus $N=c\|\cdot\|_2$ with $c=N(e_1)>0$.
+>
+> Conversely, every positive multiple of $\|\cdot\|_2$ is unitary invariant because
+> $$
+> \|Ux\|_2^2=x^HU^HUx=x^Hx=\|x\|_2^2.
+> $$
+
+> [!lemma] Trace, Power Sums, and Frobenius Reductions
+> For compatible matrices whose product is square, trace is cyclic:
+> $$
+> \operatorname{tr}(A_1A_2\cdots A_\ell)
+> =
+> \operatorname{tr}(A_2\cdots A_\ell A_1),
+> $$
+> and therefore trace powers are invariant under similarity:
+> $$
+> \operatorname{tr}\left((C^{-1}AC)^k\right)=\operatorname{tr}(A^k)
+> \qquad
+> (C\text{ invertible},\ k\ge1).
+> $$
+>
+> In particular, if $H=H^H$ has eigenvalues $\lambda_1,\ldots,\lambda_n$, then
+> $$
+> \operatorname{tr}(H^k)=\sum_{i=1}^n\lambda_i^k.
+> $$
+> Applying this to $G=X^HX$ gives
+> $$
+> \operatorname{tr}(G^k)=\sum_i\sigma_i^{2k}.
+> $$
+>
+> The Frobenius inner product is the trace inner product:
+> $$
+> \langle A,B\rangle_F
+> =
+> \operatorname{tr}(A^HB)
+> =
+> \sum_{i,j}\overline{A_{ij}}B_{ij}.
+> $$
+> With $S=G^2$, the concrete reductions used in the algorithm are
+> $$
+> \operatorname{tr}(G)=\|X\|_F^2,
+> \qquad
+> \operatorname{tr}(G^2)=\|G\|_F^2=\operatorname{tr}(S),
+> $$
+> $$
+> \operatorname{tr}(G^3)=\langle G,S\rangle_F,
+> \qquad
+> \operatorname{tr}(G^4)=\|S\|_F^2.
+> $$
+>
+> Finally, unitary factors preserve the Schatten-$\infty$ and Frobenius norms:
+> $$
+> \|UAV\|_{S_\infty}=\|A\|_{S_\infty},
+> \qquad
+> \|UAV\|_F=\|A\|_F.
+> $$
+> For real matrices, read "unitary" as "orthogonal."
+
+> [!proof]- Proof
+> For two compatible matrices $A\in\mathbb{F}^{a\times b}$ and $B\in\mathbb{F}^{b\times a}$,
+> $$
+> \operatorname{tr}(AB)
+> =
+> \sum_{i=1}^a\sum_{j=1}^b A_{ij}B_{ji}
+> =
+> \sum_{j=1}^b\sum_{i=1}^a B_{ji}A_{ij}
+> =
+> \operatorname{tr}(BA).
+> $$
+> Repeating this step gives cyclic invariance. Since $(C^{-1}AC)^k=C^{-1}A^kC$,
+> $$
+> \operatorname{tr}\left((C^{-1}AC)^k\right)
+> =
+> \operatorname{tr}(C^{-1}A^kC)
+> =
+> \operatorname{tr}(A^k).
+> $$
+>
+> If $H=H^H$, the spectral theorem gives $H=Q\Lambda Q^H$ with $Q$ unitary and
+> $\Lambda=\operatorname{diag}(\lambda_1,\ldots,\lambda_n)$. Therefore
+> $$
+> \operatorname{tr}(H^k)
+> =
+> \operatorname{tr}(Q\Lambda^kQ^H)
+> =
+> \operatorname{tr}(\Lambda^k)
+> =
+> \sum_{i=1}^n\lambda_i^k.
+> $$
+>
+> The SVD gives $X=U_r\Sigma_rV_r^H$, so
+> $$
+> G=X^HX=V_r\Sigma_r^2V_r^H,
+> $$
+> with $n-r$ additional zero eigenvalues. Thus the eigenvalues of $G$ are $\sigma_1^2,\ldots,\sigma_r^2$ plus zeros, and
+> $$
+> \operatorname{tr}(G^k)=\sum_i\sigma_i^{2k}.
+> $$
+>
+> The Frobenius identity is the diagonal sum of $A^HB$:
+> $$
+> \operatorname{tr}(A^HB)
+> =
+> \sum_j (A^HB)_{jj}
+> =
+> \sum_j\sum_i \overline{A_{ij}}B_{ij}
+> =
+> \sum_{i,j}\overline{A_{ij}}B_{ij}.
+> $$
+> Since $G=G^H$ and $S=G^2=S^H$,
+> $$
+> \operatorname{tr}(G)=\operatorname{tr}(X^HX)=\|X\|_F^2,
+> \qquad
+> \operatorname{tr}(G^2)=\operatorname{tr}(G^HG)=\|G\|_F^2,
+> $$
+> $$
+> \operatorname{tr}(G^3)=\operatorname{tr}(G^HS)=\langle G,S\rangle_F,
+> \qquad
+> \operatorname{tr}(G^4)=\operatorname{tr}(S^HS)=\|S\|_F^2.
+> $$
+>
+> Finally, unitary matrices preserve Euclidean length. Thus
+> $$
+> \|UAV\|_{S_\infty}
+> =
+> \max_{\|x\|_2=1}\|UAVx\|_2
+> =
+> \max_{\|y\|_2=1}\|Ay\|_2
+> =
+> \|A\|_{S_\infty},
+> $$
+> and cyclic trace gives
+> $$
+> \|UAV\|_F^2
+> =
+> \operatorname{tr}(V^HA^HAV)
+> =
+> \operatorname{tr}(A^HA)
+> =
+> \|A\|_F^2.
+> $$
 
 > [!fact] Gram Reduction and Inverse Trick
 > Let $G=X^HX\succeq0$. Its eigenvalues are $\sigma_1^2,\ldots,\sigma_r^2$ plus $n-r$ zeros, hence
@@ -202,6 +384,11 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > m_k=\operatorname{tr}(P^k).
 > $$
 > If $p_1\ge\cdots\ge p_n\ge0$ are the eigenvalues of $P$, then $\sum_i p_i=1$ and
+> the trace power-sum identity from Section 1 gives
+> $$
+> m_k=\sum_i p_i^k.
+> $$
+> Also,
 > $$
 > \sigma_{\max}(X)=\sqrt{\mu_1p_1}.
 > $$
@@ -637,7 +824,7 @@ Inspired by discussions with [@YouJiacheng](https://x.com/YouJiacheng/status/203
 > $$
 > So the dimension-only eigenvalue overestimate is at most about $11.31\times$.
 >
-> For the spectral norm,
+> For the Schatten-$\infty$ norm,
 > $$
 > n^{1/8}=2^{1.75}\approx 3.36.
 > $$
