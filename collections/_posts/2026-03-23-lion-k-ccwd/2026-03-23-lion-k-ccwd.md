@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "Lion-K CCWD: Corrected Cautious Weight Decay and Hyperparameter Transfer"
+title: "Lion-K CCWD: Corrected Cautious Weight Decay"
 date: 2026-03-23 11:00 +0000
-description: "Derivation of the Lion-K optimizer with Corrected Cautious Weight Decay (CCWD) and transformation rules for hyperparameter transfer."
+description: "Derivation of the Lion-K optimizer with Corrected Cautious Weight Decay (CCWD)."
 categories:
   - Machine Learning
   - Mathematical Optimization
@@ -10,8 +10,6 @@ tags:
   - Optimizers
   - Weight Decay
   - Lion
-  - Mu-P
-  - Scaling
 math: true
 scholar:
   bibliography: posts/2026-03-23-lion-k-ccwd/lion-k-ccwd.bib
@@ -21,7 +19,7 @@ scholar:
 > https://github.com/JiHa-Kim/ScionC
 
 > [!info] Overview
-> This post derives **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)** and provides hyperparameter-transfer rules for scaling across width, depth, batch size, and duration.
+> This post derives **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)**.
 >
 > **Key assumptions:**
 > 1. **Normalized updates accumulate like a random walk.** For bounded optimizer directions (sign, LMO), total parameter displacement after $T = D/B$ steps scales as $\gamma\sqrt{T}$, requiring $\gamma \propto 1/\sqrt{T}$.
@@ -230,109 +228,6 @@ In decoupled weight decay, the physically meaningful quantity is the per-step mu
 
 ---
 
-## 5. Hyperparameter Transfer
-
-> [!notation] Scaling Ratios
-> Define the scaling ratios (base $\to$ target):
->
-> | Ratio | Definition | Meaning |
-> | :---: | :---: | :--- |
-> | $m_N$ | $N'/N$ | Width multiplier |
-> | $m_L$ | $L'/L$ | Depth multiplier |
-> | $m_B$ | $B'/B$ | Batch size multiplier |
-> | $m_D$ | $D'/D$ | Data/duration multiplier |
-> | $m_T$ | $m_D/m_B$ | Total steps multiplier |
-
-Using the Complete(d)P framework {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, we define scaling rules for Transformer models.
-
-### 5.1 Momentum Transfer (Token Half-Lives)
-
-When the batch size or duration changes, the per-step $\beta$ must be adjusted to preserve the same forgetting rate in token space.
-
-> [!proposition] Beta Transfer Rule
-> Define the half-life $H$ of an EMA with coefficient $\beta$ and batch size $B$ as the number of **tokens** after which the weight drops to $\frac{1}{2}$:
-> $$
-> H = -\frac{B}{\log_2 \beta}
-> $$
-> Holding $H$ fixed while changing batch size gives:
-> $$
-> \beta' = \beta^{1/m_T} \qquad \text{equivalently} \qquad \beta' = 2^{-\Delta\tau'/H}
-> $$
-> where $\Delta\tau' = B'$ is the token step size of the target run.
-
-> [!important] Effective Learning Rate Correction
-> Changing $\beta$ alters the correlation factor $S$, which changes the optimizer's random-walk step size. To transfer perfectly across different momentum values, adjust the base learning rate so the **effective learning rate** $\gamma_{\text{eff}} = \gamma\sqrt{S}$ is invariant:
-> $$
-> \gamma' = \gamma \sqrt{\frac{S(\beta_{\text{eff}}, \beta_2)}{S(\beta_{\text{eff}}', \beta_2')}}
-> $$
-> This ensures that the total parameter displacement scale is preserved.
-
-> [!remark]- Why Not Just Keep $\beta$ Fixed?
-> If you double the batch size without adjusting $\beta$, the EMA forgets twice as fast in token space — the momentum window shrinks by half. For small-batch scaling this is especially destructive {% cite marekSmallBatchSize2025 %}.
-
-### 5.2 Width and Depth Transfer: Optimizer-Dependent Rules
-
-The transfer rules for model scale ($m_N$ and $m_L$) depend heavily on the optimizer's underlying geometry and Linear Minimization Oracle (LMO). 
-
-#### 5.2.1 Standard Euclidean Optimizers (Adam, SGD, Lion)
-
-For optimizers where the update direction's magnitude is width-dependent, $\mu$P requires a compensating $m_N^{-1}$ factor in the learning rate to ensure stable feature learning.
-
-> [!fact] Standard Scaling Rules
->
-> | Component | Scaling Rule |
-> | :--- | :--- |
-> | Residual branch multiplier | $\text{residual_multiplier}' = \text{residual_multiplier}\cdot m_L^{-\alpha}$, with $\alpha\in\left[\frac{1}{2},1\right]$ |
-> | Init variance: hidden | $\mathrm{Var}(W_{\text{hid}})' = \mathrm{Var}(W_{\text{hid}})\cdot m_N^{-1}$ |
-> | Init variance: output | $\mathrm{Var}(W_{\text{out}})' = \mathrm{Var}(W_{\text{out}})\cdot m_N^{-2}$ |
-> | LR: Input embeddings | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_N^{-1} \cdot m_L^{\alpha-1}}$ |
-> | LR: Hidden weights | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#e67e22}{m_N^{-1}} \cdot \color{#27ae60}{m_L^{\alpha-1}}$ |
-> | LR: Hidden bias/norm | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \phantom{m_N^{-1} \cdot} \color{#27ae60}{m_L^{\alpha-1}}$ |
-> | LR: Output weights | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#e67e22}{m_N^{-1}} \phantom{\cdot m_L^{\alpha-1}}$ |
-
-> [!remark] Choosing $\alpha$: Random Walk vs. Coherent Residuals
-> - **$\alpha = \frac{1}{2}$ (random walk):** Layer outputs are approximately independent and isotropic. Their sum grows as $\sqrt{L}$, so each branch scales by $1/\sqrt{L}$.
-> - **$\alpha = 1$ (coherent):** Residual branches are aligned, accumulating linearly as $L$, requiring $1/L$ scaling.
->
-> In practice, $\alpha = 1$ is conservative; $\alpha = \frac{1}{2}$ often works better empirically for moderate depth ranges.
-
-#### 5.2.2 Spectral-Norm Optimizers (Scion, Muon)
-
-> [!important] Width-Invariant LMOs
-> In the Scion framework {% cite pethickTrainingDeepLearning2025a %}, geometry-aware LMOs (Linear Minimization Oracles) are defined for **all** layers, not just hidden weights. Because each layer's LMO explicitly absorbs the dimension-dependent scaling factor, the optimizer intrinsically normalizes out the width dependence. 
-> 
-> As a result, the width multiplier $m_N$ disappears entirely from the learning rate and initialization transfer rules.
-
-> [!fact] Scion Scaling Rules
->
-> | Module | Recommended LMO | Initialization | LR $\gamma'$ Scaling |
-> | :--- | :--- | :--- | :--- |
-> | Input embeddings | ColNorm | Column-normalized Gaussian | $\gamma'_{\rm emb} = \gamma_{\rm emb} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_L^{\alpha-1}}$ |
-> | Hidden weights | Spectral | Semi-orthogonal | $\gamma'_{\rm hidW} = \gamma_{\rm hidW} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#27ae60}{m_L^{\alpha-1}}$ |
-> | Hidden bias/norm | RMS | Zeros | $\gamma'_{\rm hidBN} = \gamma_{\rm hidBN} \cdot \color{#3498db}{m_T^{-1/2}} \cdot \color{#27ae60}{m_L^{\alpha-1}}$ |
-> | Output weights | Row-Norm | Row-normalized Gaussian | $\gamma'_{\rm outW} = \gamma_{\rm outW} \cdot \color{#3498db}{m_T^{-1/2}} \phantom{\cdot m_L^{\alpha-1}}$ |
-
-> [!fact] Recommended Operator Norms and LMOs for Deep Learning
-> The choice of LMO depends on the input assumptions and the layer position. Below is the configuration proposed by the Scion authors {% cite pethickTrainingDeepLearning2025a %}, using the reduced SVD $W_\ell = U \Sigma V^\top \in \mathbb{R}^{d_{\rm out} \times d_{\rm in}}$:
->
-> **Table 3: LMO Choices across layers**
->
-> | Parameter | $W_1$ (image domain) | $\{W_\ell\}_{\ell \in [2,\dots,L-1]}$ | $W_L$ | $b_\ell$ |
-> | :--- | :--- | :--- | :--- | :--- |
-> | **Norm** | $\text{RMS} \to \text{RMS}$ | $\text{RMS} \to \text{RMS}$ | $\text{RMS} \to \infty$ *(or $1 \to \infty$)* | $\text{RMS}$ |
-> | **LMO** | $-\max(1, \sqrt{\frac{d_{\rm out}}{d_{\rm in}}})UV^\top$ | $-\sqrt{\frac{d_{\rm out}}{d_{\rm in}}} U V^\top$ | $\text{row}_i(W_L) \mapsto -\frac{\text{row}_i(W_L)}{\sqrt{d_{\rm in}} \|\text{row}_i(W_L)\|_2}$ *(or $-\frac{1}{d_{\rm in}} \text{sign}(W_L)$)* | $-\frac{b_\ell}{\|b_\ell\|_{\rm RMS}}$ |
-> | **Init.** | Semi-orthogonal | Semi-orthogonal | Row-wise normalized Gaussian *(or Random sign)* | $0$ |
->
-> **Table 4: Example LMO Choices for 1-hot Encoded Inputs**
->
-> | Parameter | $W_1$ (1-hot encoded input) |
-> | :--- | :--- |
-> | **Norm** | $1 \to \text{RMS}$ *(or $1 \to \infty$)* |
-> | **LMO** | $\text{col}_j(W_1) \mapsto -\sqrt{d_{\rm out}} \frac{\text{col}_j(W_1)}{\|\text{col}_j(W_1)\|_2}$ *(or $-\text{sign}(W_1)$)* |
-> | **Init.** | Column-wise normalized Gaussian *(or Random sign)* |
-
----
-
 ## 6. Complete Algorithm
 
 > [!algorithm] Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay
@@ -363,9 +258,7 @@ For optimizers where the update direction's magnitude is width-dependent, $\mu$P
 > [!warning] Caveats for Output Layers
 > The steady-state independence assumption frequently breaks down for the cross-entropy output layer. You may need to exclude the output unembedding layer from corrected decay or manage it separately {% cite chouCorrectionDecoupledWeight2026 %}.
 
-## Conclusion
-
-Combining Complete(d)P {% cite mlodozeniecCompletedHyperparameterTransfer2025 %}, corrected weight decay from AdamC/ScionC {% cite chouCorrectionDecoupledWeight2026 %}, and bounded direction maps from Lion-$\mathcal{K}$ with CCWD {% cite chenCautiousWeightDecay2026 %} yields a theoretically grounded hyperparameter transfer mechanism for sign/LMO-based optimizers.
+Combining corrected weight decay from AdamC/ScionC {% cite chouCorrectionDecoupledWeight2026 %} and bounded direction maps from Lion-$\mathcal{K}$ with CCWD {% cite chenCautiousWeightDecay2026 %} yields a theoretically grounded formulation for stable weight decay in sign/LMO-based optimizers.
 
 ## References
 
