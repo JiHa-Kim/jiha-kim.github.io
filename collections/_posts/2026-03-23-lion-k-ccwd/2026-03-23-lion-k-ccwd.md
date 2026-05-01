@@ -20,10 +20,6 @@ scholar:
 
 > [!info] Overview
 > This post derives **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)**.
->
-> **Key assumptions:**
-> 1. **Normalized updates accumulate like a random walk.** For bounded optimizer directions (sign, LMO), total parameter displacement after $T = D/B$ steps scales as $\gamma\sqrt{T}$, requiring $\gamma \propto 1/\sqrt{T}$.
-> 2. **Momentum and decay are parameterized by half-lives in tokens.** This yields exact formulas for betas and decay instead of linear approximations {% cite marekSmallBatchSize2025 %}.
 
 ---
 
