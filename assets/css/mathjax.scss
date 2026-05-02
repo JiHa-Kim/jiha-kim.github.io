@@ -9,10 +9,18 @@ mjx-container {
   cursor: text;
 
   &[display="true"] {
-    overflow-x: auto;            /* Allow horizontal scrolling for long block equations */
+    overflow-x: visible;         /* Display math should not become a scroll region by default */
     padding-top: 5px;            /* Extra safety padding for tall delimiters */
     padding-bottom: 5px;         /* Extra safety padding for subscripts */
   }
+}
+
+blockquote[class^="box-"] mjx-container[display="true"],
+blockquote[class*=" box-"] mjx-container[display="true"],
+details[class^="box-"] mjx-container[display="true"],
+details[class*=" box-"] mjx-container[display="true"] {
+  max-width: 100%;
+  overflow-x: visible;
 }
 
 mjx-container,
