@@ -283,6 +283,11 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 >
 > Dimensionless readout blends transfer as $\mu^*=\mu$.
 
+For some normalized optimizers, $\eta_t$ is better treated as a derived
+quantity. The ScionC example below chooses a target steady-state radius first,
+then derives the additive step from the shrink half-life and the RMS size of
+the update atoms.
+
 ---
 
 ## Appendix: Notation
@@ -300,8 +305,12 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > | $\beta$ | EMA retention factor |
 > | $\mu$ | Nesterov readout blend |
 > | $a$ | Direct shrink factor |
+> | $\zeta$ | ScionC direct shrink factor |
 > | $\eta$ | Additive step scale |
+> | $\rho$ | Target steady-state radius |
+> | $s_t$ | Dimensionless action schedule |
 > | $u$ | Update direction |
+> | $S$ | Momentum amplification factor |
 > | $\|\cdot\|$ | Layerwise norm; normalized directions satisfy $\|u\|=1$ |
 >
 > Starred quantities denote transferred values.
@@ -310,24 +319,214 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 
 ## Appendix: ScionC Example
 
-Scion supplies unit-norm LMO ($\operatorname{ulmo}$) directions {% cite pethickTrainingDeepLearning2025a %}. The corrected-decay variant motivates treating shrinkage as its own component {% cite chouCorrectionDecoupledWeight2026 %}. In half-life coordinates, the invariant hyperparameters are $h_\beta$ and $h_a$; the raw factors $\beta$ and $a$ are computed from the current count increment $\Delta\tau$.
+Scion supplies unit-norm LMO ($\operatorname{ulmo}$) directions {% cite pethickTrainingDeepLearning2025a %}. The corrected-decay variant motivates treating shrinkage as its own component {% cite chouCorrectionDecoupledWeight2026 %}. For ScionC, the more useful coordinates are not a free pair $(a,\eta_t)$, but a shrink half-life, a target radius, and a dimensionless schedule.
 
-Inside the layer loop, $\theta$, $m$, $\eta$, $h_\beta$, $h_a$, $\|\cdot\|$, and $\operatorname{ulmo}$ are local to the current layer. The random variable $\xi$ denotes the sampled minibatch.
+For one optimizer group, write the parameter tensor as $X$, the current gradient as $G$, and the EMA memory as $M$. One optimizer update advances the training count by $\Delta\tau$ processed tokens:
+
+$$
+\Delta\tau
+=
+\text{batch size}
+\cdot
+\text{block size}
+\cdot
+\text{gradient accumulation}.
+$$
+
+Use half-life coordinates for memory and direct shrinkage:
+
+$$
+\beta=2^{-\Delta\tau/h_\beta},
+\qquad
+\zeta=2^{-\Delta\tau/h_\zeta}.
+$$
+
+The memory update and readout are:
+
+$$
+\bar M=\beta M+(1-\beta)G,
+\qquad
+R=(1-\mu)G+\mu\bar M.
+$$
+
+The ULMO returns a unit action in the group geometry:
+
+$$
+V=\operatorname{ulmo}(R).
+$$
+
+The parameter update is:
+
+$$
+X^+=\zeta X+\eta_tV.
+$$
+
+Here $\zeta$ is chosen from the independent shrink half-life. The additive step $\eta_t$ is derived from the target radius and the dimensionless schedule.
+
+> [!proposition] RMS Steady-State Step
+> Assume the update atoms have effective squared size
+>
+> $$
+> \mathbb{E}\|V\|^2=C.
+> $$
+>
+> For Lion-$\mathcal{K}$ style normalized updates, write
+>
+> $$
+> C=\frac{c_u^2S}{q}.
+> $$
+>
+> Here $c_u^2$ is the atom squared-norm scale, $S$ is the momentum amplification factor, and $q$ is the cautious-mask keep fraction. The second-moment steady state at radius $\rho$ satisfies
+>
+> $$
+> \rho^2=\zeta^2\rho^2+\eta^2C.
+> $$
+>
+> Thus
+>
+> $$
+> 1-\zeta^2
+> =
+> \frac{\eta^2c_u^2S}{q\rho^2}.
+> $$
+>
+> Solving for the additive step gives
+>
+> $$
+> \boxed{
+> \eta_t
+> =
+> s_t\rho
+> \sqrt{
+> \frac{q(1-\zeta^2)}{c_u^2S}
+> }.
+> }
+> $$
+
+In the current ScionC training script, there is no cautious masking and the ULMO atoms are unit-scale, so $q=1$ and $c_u^2=1$:
+
+$$
+\boxed{
+\eta_t
+=
+s_t\rho
+\sqrt{
+\frac{1-\zeta^2}{S}
+}.
+}
+$$
+
+The momentum amplification factor is computed from the readout blend $\mu$ and memory retention $\beta$. Since
+
+$$
+R=\mu\beta M+(1-\mu\beta)G,
+$$
+
+the effective readout coefficient is $\mu\beta$, and
+
+$$
+S
+=
+\frac{1+\beta}
+{(1-\mu\beta)^2(1+\beta)+(\mu\beta)^2(1-\beta)}.
+$$
+
+> [!summary] ScionC Transfer Coordinates
+> The primary transfer coordinates are
+>
+> $$
+> \boxed{
+> \rho,
+> \qquad
+> h_\zeta,
+> \qquad
+> s_t,
+> \qquad
+> h_\beta,
+> \qquad
+> \mu.
+> }
+> $$
+>
+> When the count increment changes from $\Delta\tau$ to $\Delta\tau_\star$, keep these semantic hyperparameters fixed and recompute the raw factors:
+>
+> $$
+> \zeta_\star=2^{-\Delta\tau_\star/h_\zeta},
+> \qquad
+> \beta_\star=2^{-\Delta\tau_\star/h_\beta},
+> $$
+>
+> $$
+> \eta_{t,\star}
+> =
+> s_t\rho
+> \sqrt{
+> \frac{1-\zeta_\star^2}{S_\star}
+> }.
+> $$
+
+This keeps shrink independent of the additive step schedule while preserving the memory half-life, shrink half-life, steady-state radius, and dimensionless action schedule in token-count units.
+
+> [!remark] Relation to Corrected Decay
+> The lower-level corrected-decay approximation solves the same RMS balance in the small-shrink regime. Let $d=1-\zeta$. Since
+>
+> $$
+> 1-\zeta^2=(1-\zeta)(1+\zeta)\approx 2d,
+> $$
+>
+> we get
+>
+> $$
+> d
+> \approx
+> \frac{\eta_t^2c_u^2S}{2q\rho^2}.
+> $$
+>
+> This is the existing corrected decoupled-decay formula, but used in the forward direction: choose independent shrink first, then derive the additive step. The recipe does not set shrink from the additive-step schedule.
+
+> [!warning] Hard Invariant Bound
+> A more conservative alternative is to require the whole radius ball to be invariant by the triangle inequality. If $\|V\|\le 1$, then
+>
+> $$
+> \|X^+\|
+> \le
+> \zeta\|X\|+\eta_t.
+> $$
+>
+> The ball $\|X\|\le\rho$ is invariant when
+>
+> $$
+> \eta_t\le(1-\zeta)\rho.
+> $$
+>
+> At equality,
+>
+> $$
+> X^+=\zeta X+(1-\zeta)\rho V.
+> $$
+>
+> This bound is useful for comparison, but it is not the active ScionC step-size correction.
+
+Inside the group loop, $X$, $M$, $\rho$, $s_t$, $h_\beta$, $h_\zeta$, $\mu$, $\|\cdot\|$, and $\operatorname{ulmo}$ are local to the current group. The random variable $\xi$ denotes the sampled minibatch.
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Example</span> ScionC in Half-Life Coordinates</div>
 ```pseudo
 def ScionCStep($\Theta,M;\xi,\Delta\tau$):
-    for each layer $\ell=0,\ldots,L$:
-        $(\theta,m,\eta,h_\beta,h_a,\|\cdot\|,\operatorname{ulmo}) \leftarrow$ values for layer $\ell$
+    for each group $k=0,\ldots,K$:
+        $(X,M,\rho,s_t,h_\beta,h_\zeta,\mu,\|\cdot\|,\operatorname{ulmo}) \leftarrow$ values for group $k$
         $\beta \leftarrow 2^{-\Delta\tau/h_\beta}$
-        $a \leftarrow 2^{-\Delta\tau/h_a}$
-        $g \leftarrow \nabla_\theta f(\Theta;\xi)$
-        $m \leftarrow \beta m+(1-\beta)g$
-        $u \leftarrow \operatorname{ulmo}(m)$
-        $\|u\|=1$
-        $\theta \leftarrow a\theta+\eta u$
-        write back $\theta,m$ to layer $\ell$
+        $\zeta \leftarrow 2^{-\Delta\tau/h_\zeta}$
+        $G \leftarrow \nabla_X f(\Theta;\xi)$
+        $\bar M \leftarrow \beta M+(1-\beta)G$
+        $R \leftarrow (1-\mu)G+\mu\bar M$
+        $S \leftarrow \dfrac{1+\beta}{(1-\mu\beta)^2(1+\beta)+(\mu\beta)^2(1-\beta)}$
+        $\eta_t \leftarrow s_t\rho\sqrt{(1-\zeta^2)/S}$
+        $V \leftarrow \operatorname{ulmo}(R)$
+        $\|V\|=1$
+        $X \leftarrow \zeta X+\eta_tV$
+        $M \leftarrow \bar M$
+        write back $X,M$ to group $k$
 ```
 </div>
 
