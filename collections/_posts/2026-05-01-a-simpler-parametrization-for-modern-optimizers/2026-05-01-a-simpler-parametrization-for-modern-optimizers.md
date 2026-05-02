@@ -18,7 +18,9 @@ scholar:
 ---
 
 > [!summary]
-> EMA coefficients and shrink factors are multiplicative scalars in $(0,1]$; learning rates scale additive updates after the direction and norm have been fixed.
+> 2 small changes of variables for a simpler and more robust parametrization of modern optimizers:
+> 1. Direct Shrinkage: Replace the coupled $(1-\eta\lambda)$ multiplier from decoupled weight decay with a strictly positive shrink factor $a \in (0,1]$ that is independent of the learning rate $\eta$.
+> 2. Half-Life Coordinates: Parametrize the per-step factors ($\beta$ and $a$) via half-lives $h$. Defining $h$ in units of tokens or samples makes the underlying timescales invariant, allowing easier hyperparameter transfer across different batch sizes.
 
 > [!definition] State-Based Optimizer
 > $$
