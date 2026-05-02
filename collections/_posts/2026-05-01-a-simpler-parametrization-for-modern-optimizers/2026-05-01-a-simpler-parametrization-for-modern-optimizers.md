@@ -19,16 +19,16 @@ scholar:
 
 > [!summary]
 > 2 small changes of variables for a simpler and more robust parametrization of modern optimizers:
-> 1. Direct Shrinkage: Replace the coupled $(1-\eta\lambda)$ multiplier from decoupled weight decay with a strictly positive shrink factor $a \in (0,1]$ that is independent of the learning rate $\eta$.
+> 1. Direct Shrinkage: Replace the learning-rate-coupled multiplier $1-\eta \lambda_w$ from decoupled weight decay with a strictly positive shrink factor $a \in (0,1]$ that is independent of the learning rate $\eta$.
 > 2. Half-Life Coordinates: Parametrize the per-step factors ($\beta$ and $a$) via half-lives $h$. Defining $h$ in units of tokens or samples makes the underlying timescales invariant, allowing easier hyperparameter transfer across different batch sizes.
 
 > [!definition] State-Based Optimizer
 > $$
 > \boxed{
 > \begin{aligned}
-> s^+ &= F(s,g),\\
-> u &= U(s^+,g),\\
-> \theta^+ &= a\theta+\eta u.
+> s' &= F(s,g),\\
+> u &= U(s',g),\\
+> \theta' &= a\theta+\eta u.
 > \end{aligned}
 > }
 > $$
@@ -82,9 +82,9 @@ scholar:
 > Fix a scalar training count $\tau$: updates, samples, tokens, epochs, or another monotone count. For
 >
 > $$
-> c(\Delta\tau)=2^{-q\Delta\tau},
+> c(\Delta\tau)=2^{-\chi\Delta\tau},
 > \qquad
-> [q]=[\tau]^{-1},
+> [\chi]=[\tau]^{-1},
 > $$
 >
 > the half-life $h$ is defined by $c(h)=1/2$:
@@ -93,7 +93,7 @@ scholar:
 > \boxed{
 > [h]=[\Delta\tau]=[\tau],
 > \qquad
-> qh=1,
+> \chi h=1,
 > \qquad
 > H_{c(\Delta\tau)}
 > =
@@ -114,7 +114,7 @@ scholar:
 
 > [!notation] EMA Retention
 > $$
-> m^+
+> m'
 > =
 > \beta m+(1-\beta)g,
 > \qquad
@@ -218,7 +218,7 @@ This coordinate change is the fixed token-half-life rule for memory in small-bat
 
 > [!notation] Shrink Action
 > $$
-> \theta^+
+> \theta'
 > =
 > a\theta+\eta u,
 > \qquad
@@ -278,7 +278,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > \qquad
 > a_t=2^{-\Delta\tau_t/h_a},
 > \qquad
-> \theta_{t+1}=a_t\theta_t+\eta_tu_t.
+> \theta'=a_t\theta+\eta_tu.
 > $$
 >
 > Dimensionless readout blends transfer as $\mu^*=\mu$.
@@ -291,7 +291,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 ## 5. ScionC Steady-State Coordinates
 
 > [!principle] Coordinate Choice
-> Scion supplies unit-norm LMO ($\operatorname{ulmo}$) directions {% cite pethickTrainingDeepLearning2025a %}. The corrected-decay variant motivates treating shrinkage as its own component {% cite chouCorrectionDecoupledWeight2026 %}. For ScionC, the more useful coordinates are not a free pair $(a,\eta_t)$, but a shrink half-life, a target radius, and a dimensionless schedule.
+> Scion supplies unit-norm ULMO ($\operatorname{ulmo}$) directions {% cite pethickTrainingDeepLearning2025a %}. The corrected-decay variant motivates treating shrinkage as its own component {% cite chouCorrectionDecoupledWeight2026 %}. For ScionC, the more useful coordinates are not a free pair $(a,\eta_t)$, but a shrink half-life, a target radius, and a dimensionless schedule.
 
 > [!summary] Transfer Coordinates
 > The primary ScionC transfer coordinates are
@@ -302,7 +302,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > \qquad
 > h_\zeta,
 > \qquad
-> s_t,
+> s(\tau),
 > \qquad
 > h_\beta,
 > \qquad
@@ -310,7 +310,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > }
 > $$
 >
-> They preserve the target radius, shrink half-life, dimensionless action schedule, memory half-life, and readout blend in token-count units.
+> They preserve the target radius, shrink half-life, dimensionless action schedule, memory half-life, and readout blend in token-count units. At update $t$, write $s_t=s(\tau_t)$.
 
 ### 5.1 Group Update
 
@@ -344,7 +344,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > \bar M &= \beta M+(1-\beta)G,\\
 > R &= (1-\mu)G+\mu\bar M,\\
 > V &= \operatorname{ulmo}(R),\\
-> X^+ &= \zeta X+\eta_tV.
+> X' &= \zeta X+\eta_tV.
 > \end{aligned}
 > $$
 >
@@ -353,19 +353,13 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 ### 5.2 RMS Step Size
 
 > [!proposition] Steady-State Step
-> Assume the update atoms have effective squared size
->
-> $$
-> \mathbb{E}\|V\|^2=C.
-> $$
->
-> For Lion-$\mathcal{K}$ style normalized updates, write
+> Assume the normalized update stream can be summarized in the RMS balance by an effective squared action scale $C$. For Lion-$\mathcal{K}$ style normalized updates, write
 >
 > $$
 > C=\frac{c_u^2S}{q}.
 > $$
 >
-> Here $c_u^2$ is the atom squared-norm scale, $S$ is the momentum amplification factor, and $q$ is the cautious-mask keep fraction. The additive step at target radius $\rho$ is
+> Here $c_u^2$ is the one-step atom squared-norm scale, $S$ is the momentum correlation amplification factor, and $q$ is the cautious-mask keep fraction. With $s_t=s(\tau_t)$, the additive step at target radius $\rho$ is
 >
 > $$
 > \boxed{
@@ -379,7 +373,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > $$
 
 > [!corollary] Active ScionC Step
-> In the current ScionC training script, there is no cautious masking and the ULMO atoms are unit-scale, so $q=1$ and $c_u^2=1$:
+> Specializing the steady-state step to the active ScionC setup, there is no cautious masking and the ULMO atoms are unit-scale, so $q=1$ and $c_u^2=1$:
 >
 > $$
 > \boxed{
@@ -439,12 +433,12 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > $$
 
 > [!proof]- Momentum Factor Derivation
-> Let $\alpha=\mu\beta$. Under independent gradient atoms, the readout has filter weights
+> Let $\kappa=\mu\beta$. Under independent gradient atoms, the readout has filter weights
 >
 > $$
-> w_0=1-\alpha,
+> w_0=1-\kappa,
 > \qquad
-> w_j=\alpha(1-\beta)\beta^{j-1}
+> w_j=\kappa(1-\beta)\beta^{j-1}
 > \quad (j\ge1).
 > $$
 >
@@ -453,7 +447,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > $$
 > \sum_{j\ge0}w_j^2
 > =
-> (1-\alpha)^2+\frac{\alpha^2(1-\beta)}{1+\beta}.
+> (1-\kappa)^2+\frac{\kappa^2(1-\beta)}{1+\beta}.
 > $$
 >
 > Therefore the normalized correlation-sum amplification is
@@ -464,12 +458,15 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > \frac{1}{\sum_{j\ge0}w_j^2}
 > =
 > \frac{1+\beta}
-> {(1-\alpha)^2(1+\beta)+\alpha^2(1-\beta)}.
+> {(1-\kappa)^2(1+\beta)+\kappa^2(1-\beta)}.
 > $$
 >
-> Substituting $\alpha=\mu\beta$ gives the displayed formula.
+> Substituting $\kappa=\mu\beta$ gives the displayed formula.
 
 ### 5.4 Transfer Rule
+
+> [!remark] Tuning Interpretation
+> The shrink half-life $h_\zeta$ is the structural timescale. The schedule $s(\tau)$ and radius $\rho$ control the additive drive, while $\eta_t$ is the derived implementation step.
 
 > [!summary] Count-Increment Transfer
 > When the count increment changes from $\Delta\tau$ to $\Delta\tau_\star$, keep the semantic hyperparameters fixed:
@@ -479,7 +476,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > \qquad
 > h_{\zeta,\star}=h_\zeta,
 > \qquad
-> s_{t,\star}=s_t,
+> s_\star(\tau)=s(\tau),
 > \qquad
 > h_{\beta,\star}=h_\beta,
 > \qquad
@@ -495,9 +492,9 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > $$
 >
 > $$
-> \eta_{t,\star}
+> \eta_\star(\tau)
 > =
-> s_t\rho
+> s(\tau)\rho
 > \sqrt{
 > \frac{1-\zeta_\star^2}{S_\star}
 > }.
@@ -508,14 +505,14 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 ### 5.5 Algorithm
 
 > [!notation] Group Loop State
-> Inside the group loop, $X$, $M$, $\rho$, $s_t$, $h_\beta$, $h_\zeta$, $\mu$, $\|\cdot\|$, and $\operatorname{ulmo}$ are local to the current group. The random variable $\xi$ denotes the sampled minibatch.
+> Inside the group loop, $X$, $M$, $\rho$, $s_t=s(\tau_t)$, $h_\beta$, $h_\zeta$, $\mu$, $\|\cdot\|$, and $\operatorname{ulmo}$ are local to the current group. The random variable $\xi$ denotes the sampled minibatch.
 
 <div class="algorithm-container">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> ScionC Group Step</div>
 ```pseudo
 def ScionCStep($\Theta,M;\xi,\Delta\tau$):
-    for each group $k=0,\ldots,K$:
-        $(X,M,\rho,s_t,h_\beta,h_\zeta,\mu,\|\cdot\|,\operatorname{ulmo}) \leftarrow$ values for group $k$
+    for each optimizer group:
+        $(X,M,\rho,s_t,h_\beta,h_\zeta,\mu,\|\cdot\|,\operatorname{ulmo}) \leftarrow$ group-local values
         $\beta \leftarrow 2^{-\Delta\tau/h_\beta}$
         $\zeta \leftarrow 2^{-\Delta\tau/h_\zeta}$
         $G \leftarrow \nabla_X f(\Theta;\xi)$
@@ -527,8 +524,9 @@ def ScionCStep($\Theta,M;\xi,\Delta\tau$):
         $\|V\|=1$
         $X \leftarrow \zeta X+\eta_tV$
         $M \leftarrow \bar M$
-        write back $X,M$ to group $k$
+        write back $X,M$ to the group
 ```
+
 </div>
 
 ### 5.6 Comparisons
@@ -554,7 +552,7 @@ def ScionCStep($\Theta,M;\xi,\Delta\tau$):
 > A more conservative alternative is to require the whole radius ball to be invariant by the triangle inequality. If $\|V\|\le 1$, then
 >
 > $$
-> \|X^+\|
+> \|X'\|
 > \le
 > \zeta\|X\|+\eta_t.
 > $$
@@ -568,7 +566,7 @@ def ScionCStep($\Theta,M;\xi,\Delta\tau$):
 > At equality,
 >
 > $$
-> X^+=\zeta X+(1-\zeta)\rho V.
+> X'=\zeta X+(1-\zeta)\rho V.
 > $$
 >
 > This bound is useful for comparison, but it is not the active ScionC step-size correction.
@@ -586,6 +584,7 @@ def ScionCStep($\Theta,M;\xi,\Delta\tau$):
 > | $\tau$ | Chosen training count |
 > | $\Delta\tau$ | Count advanced by one optimizer update |
 > | $h$ | Half-life in units of $\tau$ |
+> | $\chi$ | Halving rate in $c(\Delta\tau)=2^{-\chi\Delta\tau}$ |
 > | $H_x$ | Halving exponent, $H_x=-\log_2x$ |
 > | $\beta$ | EMA retention factor |
 > | $\mu$ | Nesterov readout blend |
@@ -593,11 +592,12 @@ def ScionCStep($\Theta,M;\xi,\Delta\tau$):
 > | $\zeta$ | ScionC direct shrink factor |
 > | $\eta$ | Additive step scale |
 > | $\rho$ | Target steady-state radius |
-> | $s_t$ | Dimensionless action schedule |
+> | $s_t$ or $s(\tau)$ | Dimensionless action schedule |
 > | $u,V$ | Update direction or ULMO action |
 > | $c_u^2$ | Atom squared-norm scale |
 > | $q$ | Cautious-mask keep fraction |
 > | $S$ | Momentum amplification factor |
+> | $\kappa$ | Effective readout coefficient, $\kappa=\mu\beta$ |
 > | $\|\cdot\|$ | Layerwise norm; normalized directions satisfy $\|u\|=1$ or $\|V\|=1$ |
 >
 > Starred quantities denote transferred values.
