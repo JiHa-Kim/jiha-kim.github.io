@@ -327,7 +327,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > \text{gradient accumulation}.
 > $$
 
-> [!fact] Raw Factors
+> [!notation] Raw Factors
 > Use half-life coordinates for memory and direct shrinkage:
 >
 > $$
@@ -378,7 +378,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 > }
 > $$
 
-> [!fact] Active Script Case
+> [!corollary] Active ScionC Step
 > In the current ScionC training script, there is no cautious masking and the ULMO atoms are unit-scale, so $q=1$ and $c_u^2=1$:
 >
 > $$
@@ -422,7 +422,7 @@ Fix the optimizer family: state update, direction map, and layerwise norm constr
 
 ### 5.3 Momentum Amplification
 
-> [!fact] Readout Amplification
+> [!proposition] Momentum Amplification
 > The momentum amplification factor is computed from the readout blend $\mu$ and memory retention $\beta$. Since
 >
 > $$
