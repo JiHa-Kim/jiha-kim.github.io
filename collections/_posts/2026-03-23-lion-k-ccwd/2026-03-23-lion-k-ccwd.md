@@ -2,7 +2,7 @@
 layout: post
 title: "Lion-K CCWD: Corrected Cautious Weight Decay"
 date: 2026-03-23 11:00 +0000
-description: "Derivation of the Lion-K optimizer with Corrected Cautious Weight Decay (CCWD)."
+description: "Retention and radius parametrization for Lion-K with Corrected Cautious Weight Decay."
 categories:
   - Machine Learning
   - Mathematical Optimization
@@ -18,243 +18,483 @@ scholar:
 > [!info] PyTorch implementation on GitHub
 > https://github.com/JiHa-Kim/ScionC
 
-> [!info] Overview
-> This post derives **Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay (CCWD)**.
+> [!summary]
+> Lion-$\mathcal{K}$ with corrected cautious weight decay is cleaner when written in retention/radius coordinates. The update is
+>
+> $$
+> M'=\beta_2M+(1-\beta_2)G,
+> \qquad
+> Z=\beta_1M'+(1-\beta_1)G,
+> \qquad
+> U=-\nabla\mathcal{K}(Z),
+> $$
+>
+> $$
+> P_i=\mathbf{1}_{\{\operatorname{sign}(W_i)=\operatorname{sign}(U_i)\}},
+> \qquad
+> W'=W-(1-\zeta)(P\odot W)+(1-\zeta)\rho U.
+> $$
+>
+> Here $\beta_2$ is the **momentum state retention**, $\beta_1$ is a dimensionless readout blend, $\zeta$ is the active-coordinate **weight retention**, and $\rho$ is the radius coordinate. The equivalent additive scale is $\gamma=(1-\zeta)\rho$.
+
+> [!principle] Why This Parametrization
+> Raw Lion/AdamW-style knobs mix three different roles: memory timescale, additive update scale, and weight-decay strength. Retention/radius coordinates separate them. The retentions $\beta_2$ and $\zeta$ transfer as half-lives in the chosen training count, while $\rho=1/\lambda$ carries the weight-decay coordinate. This matches the constrained-optimization view of Lion-$\mathcal{K}$ {% cite chenLionSecretlySolves2025 %}, the cautious mask from CWD {% cite chenCautiousWeightDecay2026 %}, and corrected decoupled decay {% cite chouCorrectionDecoupledWeight2026 %}.
 
 ---
 
-## 1. Lion-$\mathcal{K}$
+## 1. Retention Coordinates
 
-> [!algorithm] Lion-$\mathcal{K}$ Update Rule {% cite chenLionSecretlySolves2025 %}
-> **Input:** Parameters $\theta_t$, gradient $g_t = \nabla f(\theta_t)$, momentum state $m_t$, direction map $\nabla \mathcal{K}$.
-> **Step 1 — Momentum update:**
+> [!definition] EMA Retention
+> Any update
+>
 > $$
-> m_{t+1} = \beta_2 m_t + (1-\beta_2) g_t
+> Y'=qY+(1-q)Z
 > $$
-> **Step 2 — Direction input** (a common Lion-$\mathcal{K}$ choice):
+>
+> has retention $q$. Use the halving exponent
+>
 > $$
-> z_t = \beta_1 m_{t+1} + (1-\beta_1) g_t
-> $$
-> **Step 3 — Direction map:**
-> $$
-> u_t = -\nabla \mathcal{K}(z_t)
-> $$
-> **Step 4 — Parameter update** (with decoupled decay):
-> $$
-> \theta_{t+1} = (1-\eta_t)\theta_t + \gamma_t u_t
+> \boxed{
+> H_q=-\log_2q,
+> \qquad
+> q=2^{-H_q}.
+> }
 > $$
 
-> [!info] Special Cases of Lion-$\mathcal{K}$
-> **Scion** sits naturally inside the Lion-$\mathcal{K}$ frame, where $\partial\mathcal{K}$ is a Linear Minimization Oracle (LMO) over a norm ball. This includes Muon, Lion, and Normalized-SGD.
+> [!definition] Scheduled Half-Life
+> For a training count $\tau$, a scheduled halving rate $\chi_q(\tau)$ gives
+>
+> $$
+> \boxed{
+> H_q
+> =
+> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_q(\sigma)\,d\sigma,
+> \qquad
+> q=2^{-H_q}.
+> }
+> $$
+>
+> Constant half-life $h_q$ is the special case $\chi_q=1/h_q$, so $q=2^{-\Delta\tau/h_q}$.
+
+> [!summary] Lion-$\mathcal{K}$ Transfer Coordinates
+> For Lion-$\mathcal{K}$ with corrected cautious decay, use
+>
+> $$
+> \boxed{
+> R_W,
+> \qquad
+> \chi_{\beta_2}(\tau),
+> \qquad
+> \chi_\zeta(\tau),
+> \qquad
+> \beta_1,
+> \qquad
+> \text{direction-correlation model}.
+> }
+> $$
+>
+> The readout blend $\beta_1$ is dimensionless. The retentions $\beta_2$ and $\zeta$ are recomputed from their half-lives or halving-rate schedules whenever the count increment changes.
 
 ---
 
-## 2. Cautious Weight Decay (CWD)
+## 2. Lion-$\mathcal{K}$ Direction
 
-Cautious Weight Decay (CWD) modifies standard decoupled decay to decay only coordinates whose signs align with the optimizer update direction {% cite chenCautiousWeightDecay2026 %}.
+> [!definition] Direction Map
+> For each weight block $W$, let $G=\nabla_W f(\Theta;\mathcal{B})$ be the minibatch gradient. The Lion-$\mathcal{K}$ state/readout update is
+>
+> $$
+> \boxed{
+> \begin{aligned}
+> M' &= \beta_2M+(1-\beta_2)G,\\
+> Z &= \beta_1M'+(1-\beta_1)G,\\
+> U &= -\nabla\mathcal{K}(Z).
+> \end{aligned}
+> }
+> $$
+>
+> Standard Lion is the sign-map case. Muon, Scion-style LMO directions, and normalized SGD fit the same bounded-direction template through different choices of $\mathcal{K}$ or the direction map.
 
-> [!definition] CWD Mask and Update
-> Let the CWD mask be:
+> [!notation] Momentum Retention
+> The current momentum retention is
+>
 > $$
-> M_t \in \{0,1\}^{\mathrm{shape}(\theta)},\qquad (M_t)_i = \mathbf{1}_{\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}}
+> H_{\beta_2}
+> =
+> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_{\beta_2}(\sigma)\,d\sigma,
+> \qquad
+> \boxed{\beta_2=2^{-H_{\beta_2}}}.
 > $$
-> Apply decay only on masked coordinates:
+>
+> With a constant momentum half-life, $\beta_2=2^{-\Delta\tau/h_{\beta_2}}$.
+
+> [!remark] Effective Readout Coefficient
+> For the Nesterov readout above,
+>
 > $$
-> \theta_{t+1} = \theta_t - \eta_t (M_t \odot \theta_t) + \gamma_t u_t
+> Z
+> =
+> \beta_1\beta_2M+(1-\beta_1\beta_2)G,
 > $$
+>
+> so the effective coefficient on the stored state is
+>
+> $$
+> \boxed{\beta_{\mathrm{eff}}=\beta_1\beta_2.}
+> $$
+>
+> For the non-Nesterov readout $Z=\beta_1M+(1-\beta_1)G$, use $\beta_{\mathrm{eff}}=\beta_1$.
 
 ---
 
-## 3. Corrected Weight Decay
+## 3. Weight Retention and Radius
 
-In decoupled weight decay, the physically meaningful quantity is the per-step multiplicative factor $\eta$, not the decay coefficient $\lambda$ (often written $\eta = \gamma \lambda$). The steady-state analysis from AdamC {% cite defazioWhyGradientsRapidly2025 %} / ScionC {% cite chouCorrectionDecoupledWeight2026 %} shows that stability requires $\eta \propto \gamma^2$.
+> [!definition] Unmasked Retention Form
+> Without the cautious mask, the decoupled update can be written
+>
+> $$
+> \boxed{
+> W'=\zeta W+(1-\zeta)\rho U.
+> }
+> $$
+>
+> This is the same as $W'=(1-\gamma\lambda)W+\gamma U$ with
+>
+> $$
+> \boxed{
+> \gamma=(1-\zeta)\rho,
+> \qquad
+> \lambda=\frac{1}{\rho}.
+> }
+> $$
+>
+> Thus $\zeta$ is a retention and $\rho$ is the weight-decay coordinate.
 
-> [!assumption] Steady-State Assumptions
-> 1. $u_t$ has stable RMS size: $\mathbb{E}|u_t|^2 \approx C_u^2$.
-> 2. Cross-term vanishes in expectation: $\mathbb{E}\langle \theta_t,u_t\rangle \approx 0$.
-> 3. $u_t$ may be correlated across time due to momentum.
+> [!definition] Cautious Retention Form
+> Cautious weight decay applies the weight-retention action only on coordinates aligned with the update direction {% cite chenCautiousWeightDecay2026 %}. Define
+>
+> $$
+> P_i=\mathbf{1}_{\{\operatorname{sign}(W_i)=\operatorname{sign}(U_i)\}}.
+> $$
+>
+> The masked update is
+>
+> $$
+> \boxed{
+> W'=W-(1-\zeta)(P\odot W)+(1-\zeta)\rho U.
+> }
+> $$
+>
+> Active coordinates have retention $\zeta$; inactive coordinates have retention $1$. The additive scale remains $\gamma=(1-\zeta)\rho$.
 
-> [!notation] Momentum Correlation Factor
-> For the standard update $\theta_{t+1} = (1-\eta)\theta_t + \gamma u_t$, define a normalized direction autocorrelation $\rho_k$ and a correlation-sum factor $S$:
+> [!notation] Weight Retention
+> The current active-coordinate weight retention is
+>
 > $$
-> \rho_k := \frac{\mathbb{E}\langle u_t,u_{t-k}\rangle}{\mathbb{E}|u_t|^2},\qquad \rho_0=1,\qquad S := 1 + 2\sum_{k\ge 1}\rho_k
+> H_\zeta
+> =
+> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\zeta(\sigma)\,d\sigma,
+> \qquad
+> \boxed{\zeta=2^{-H_\zeta}}.
+> $$
+>
+> With a constant weight-retention half-life, $\zeta=2^{-\Delta\tau/h_\zeta}$.
+
+---
+
+## 4. RMS-Matched Radius
+
+> [!principle] Correction Objective
+> The radius $\rho$ is chosen to match a target stationary RMS weight radius:
+>
+> $$
+> \boxed{
+> \mathbb{E}\|W\|^2=R_W^2.
+> }
+> $$
+>
+> Corrected decay is the calculation that maps $(R_W,\zeta,\text{direction statistics})$ to the radius $\rho$, rather than treating $\rho$ or $\lambda$ as arbitrary raw knobs.
+
+> [!proposition] Unmasked Corrected Radius
+> Let
+>
+> $$
+> c_k
+> =
+> \frac{\mathbb{E}\langle U_t,U_{t-k}\rangle}
+> {\mathbb{E}\|U_t\|^2},
+> \qquad
+> c_0=1,
+> $$
+>
+> and define
+>
+> $$
+> c_u^2=\mathbb{E}\|U_t\|^2,
+> \qquad
+> A_\zeta=1+2\sum_{k\ge1}\zeta^kc_k.
+> $$
+>
+> For the unmasked update $W'=\zeta W+(1-\zeta)\rho U$,
+>
+> $$
+> \mathbb{E}\|W_t\|^2
+> =
+> \rho^2
+> \frac{1-\zeta}{1+\zeta}
+> c_u^2A_\zeta.
+> $$
+>
+> Therefore
+>
+> $$
+> \boxed{
+> \rho
+> =
+> R_W
+> \sqrt{
+> \frac{1+\zeta}{(1-\zeta)c_u^2A_\zeta}
+> }.
+> }
 > $$
 
-> [!lemma] Steady-State Parameter Norm
-> The steady-state parameter norm satisfies (to leading order in small $\eta$):
-> $$
-> \mathbb{E}|\theta|^2 \approx \frac{\gamma^2 C_u^2}{2\eta} S = \frac{\gamma_{\text{eff}}^2 C_u^2}{2\eta}
-> $$
-> where $\gamma_{\text{eff}} := \gamma \sqrt{S}$ is the **effective learning rate** accounting for momentum.
+> [!proposition] Corrected Cautious Radius
+> Let $p$ be the masked squared-norm fraction,
 >
-> To target a steady-state squared norm $C_\theta^2$, solve for $\eta$:
 > $$
-> \eta \approx \frac{\gamma^2 C_u^2 S}{2C_\theta^2} \qquad \Longrightarrow \qquad \lambda \approx \frac{\gamma C_u^2 S}{2C_\theta^2}
+> p
+> \approx
+> \mathbb{E}\frac{\|P_t\odot W_t\|^2}{\|W_t\|^2}.
+> $$
+>
+> Under the same scalar-mask approximation used by CCWD, the masked RMS balance is
+>
+> $$
+> R_W^2
+> \approx
+> \rho^2
+> \frac{1-\zeta}{p(1+\zeta)}
+> c_u^2A_\zeta.
+> $$
+>
+> Hence
+>
+> $$
+> \boxed{
+> \rho
+> \approx
+> R_W
+> \sqrt{
+> \frac{p(1+\zeta)}
+> {(1-\zeta)c_u^2A_\zeta}
+> }.
+> }
+> $$
+>
+> The corresponding additive scale is
+>
+> $$
+> \boxed{
+> \gamma=(1-\zeta)\rho
+> \approx
+> R_W
+> \sqrt{
+> \frac{p(1-\zeta)(1+\zeta)}
+> {c_u^2A_\zeta}
+> }.
+> }
 > $$
 
-> [!proof]- Derivation of the Steady-State Norm
-> Consider the one-step energy expansion:
+> [!proof]- Masked RMS Balance
+> Write $d=1-\zeta$. For the cautious update
 >
 > $$
-> |\theta_{t+1}|^2 = |(1-\eta)\theta_t + \gamma u_t|^2
+> W'=W-d(P\odot W)+d\rho U,
 > $$
 >
-> Expanding and taking expectations under the steady-state assumptions:
+> the masked decay changes the squared norm by approximately
 >
 > $$
-> \mathbb{E}|\theta_{t+1}|^2 = (1-\eta)^2 \mathbb{E}|\theta_t|^2 + 2\gamma(1-\eta)\underbrace{\mathbb{E}\langle \theta_t, u_t\rangle}_{\approx 0} + \gamma^2 \mathbb{E}|u_t|^2
+> \|W-d(P\odot W)\|^2
+> \approx
+> \left(1-p(2d-d^2)\right)\|W\|^2
+> =
+> \left(1-p(1-\zeta^2)\right)\|W\|^2.
 > $$
 >
-> At steady state $\mathbb{E}|\theta_{t+1}|^2 = \mathbb{E}|\theta_t|^2 = C_\theta^2$:
+> Balancing this loss against the correlated update contribution gives
 >
 > $$
-> C_\theta^2 = (1-\eta)^2 C_\theta^2 + \gamma^2 C_u^2 S
+> p(1-\zeta^2)R_W^2
+> \approx
+> (1-\zeta)^2\rho^2c_u^2A_\zeta.
 > $$
 >
-> $$
-> C_\theta^2 [1 - (1-\eta)^2] = \gamma^2 C_u^2 S
-> $$
->
-> For small $\eta$: $1 - (1-\eta)^2 = 2\eta - \eta^2 \approx 2\eta$, giving the result.
+> Solving for $\rho$ gives the displayed cautious-radius formula.
 
-> [!proposition] Momentum Correlation Factor for Lion-$\mathcal{K}$
-> In Lion-$\mathcal{K}$, the direction input $z_t$ is a convex combination of momentum and the current gradient:
+> [!remark]- Recovering the Old CCWD Formula
+> If one insists on raw additive scale $\gamma$ and retention complement $d=1-\zeta$, then $\gamma=d\rho$. In the small-step regime $\zeta\approx1$ and $A_\zeta\approx S$, the cautious-radius balance gives
+>
 > $$
-> z_t = \beta_{\text{eff}} m_t + (1-\beta_{\text{eff}}) g_t
+> d
+> \approx
+> \frac{\gamma^2c_u^2S}{2pR_W^2}.
 > $$
 >
-> where:
-> - **Standard Lion** ($z_t = \beta_1 m_t + (1-\beta_1) g_t$): $\beta_{\text{eff}} = \beta_1$.
-> - **Nesterov Lion-$\mathcal{K}$** ($z_t = \beta_1 m_{t+1} + (1-\beta_1) g_t$): substituting $m_{t+1}$ yields $\beta_{\text{eff}} = \beta_1 \beta_2$.
->
-> Under the assumption of independent gradients ($\mathbb{E}\langle g_s, g_{s'}\rangle = C'^2\,\delta_{ss'}$), the correlation-sum factor evaluates to:
-> $$
-> S(\beta_{\text{eff}},\beta_2) = \frac{1+\beta_2}{ (1-\beta_{\text{eff}})^2(1+\beta_2) + \beta_{\text{eff}}^2(1-\beta_2) }
-> $$
->
-> Note that Adam/Scion (where $u_t$ directly tracks the momentum EMA) gives $S \approx \frac{1+\beta_2}{1-\beta_2}$, while Lion's gradient mixture drastically alters $S$.
+> This is the old CCWD multiplier formula, now interpreted as the small-step form of the retention/radius parametrization.
 
-> [!proof]- Derivation of $S(\beta_{\text{eff}},\beta_2)$
-> Expressing $z_t$ as a weighted sum of past gradients, the filter weights are:
+---
+
+## 5. Direction Correlation Factor
+
+> [!summary] Empirical Default
+> The most direct estimate is empirical:
+>
+> $$
+> A_\zeta
+> =
+> 1+2\sum_{k\ge1}\zeta^k
+> \frac{\mathbb{E}\langle U_t,U_{t-k}\rangle}
+> {\mathbb{E}\|U_t\|^2}.
+> $$
+>
+> This automatically captures sign maps, LMO maps, masking side effects, and non-independent gradients.
+
+> [!proposition] Linear-Filter Approximation for Lion-$\mathcal{K}$
+> For a simple independent-gradient approximation, set $b=\beta_{\mathrm{eff}}$ and define
+>
+> $$
+> a_0
+> =
+> (1-b)^2+\frac{b^2(1-\beta_2)}{1+\beta_2}.
+> $$
+>
+> Then the retention-weighted correlation factor is
+>
+> $$
+> \boxed{
+> A_\zeta
+> \approx
+> 1+
+> \frac{
+> 2\zeta b(1-\beta_2)(1+\beta_2-b)
+> }
+> {
+> (1+\beta_2)(1-\zeta\beta_2)a_0
+> }.
+> }
+> $$
+>
+> In the small-step limit $\zeta\to1$, this reduces to the usual unweighted factor
+>
+> $$
+> \boxed{
+> S(b,\beta_2)
+> =
+> \frac{1}{a_0}
+> =
+> \frac{1+\beta_2}
+> {(1-b)^2(1+\beta_2)+b^2(1-\beta_2)}.
+> }
+> $$
+
+> [!proof]- Linear-Filter Calculation
+> Under independent gradients, the linear readout has filter weights
 >
 > | Lag $\ell$ | Weight $w_\ell$ |
 > |:---:|:---|
-> | $0$ | $1-\beta_{\text{eff}}$ |
-> | $\ell \geq 1$ | $\beta_{\text{eff}}(1-\beta_2)\beta_2^{\ell-1}$ |
+> | $0$ | $1-b$ |
+> | $\ell\ge1$ | $b(1-\beta_2)\beta_2^{\ell-1}$ |
 >
-> **Lag-0 autocorrelation.** $A_0 = w_0^2 + \sum_{\ell\geq 1}w_\ell^2$:
->
-> $$
-> A_0 = (1-\beta_{\text{eff}})^2 + \frac{\beta_{\text{eff}}^2(1-\beta_2)}{1+\beta_2} = \frac{(1+\beta_2)(1-2\beta_{\text{eff}}) + 2\beta_{\text{eff}}^2}{1+\beta_2}
-> $$
->
-> **Lag-$k$ autocorrelation** ($k \geq 1$):
+> The lag-zero unnormalized autocorrelation is
 >
 > $$
-> A_k = \frac{\beta_{\text{eff}}(1-\beta_2)(1+\beta_2-\beta_{\text{eff}})}{1+\beta_2}\cdot\beta_2^{k-1}
+> a_0
+> =
+> (1-b)^2+\frac{b^2(1-\beta_2)}{1+\beta_2}.
 > $$
 >
-> **Summing.** $\sum_{k\geq 1} A_k = \frac{\beta_{\text{eff}}(1+\beta_2-\beta_{\text{eff}})}{1+\beta_2}$. Since $S = (A_0 + 2\sum_{k\geq 1}A_k)/A_0$, the numerator simplifies to $1$, giving $S = 1/A_0$, which yields the stated result.
+> For $k\ge1$,
+>
+> $$
+> a_k
+> =
+> \frac{b(1-\beta_2)(1+\beta_2-b)}{1+\beta_2}\beta_2^{k-1}.
+> $$
+>
+> Since $c_k=a_k/a_0$,
+>
+> $$
+> A_\zeta
+> =
+> 1+2\sum_{k\ge1}\zeta^k\frac{a_k}{a_0}
+> =
+> 1+
+> \frac{
+> 2\zeta b(1-\beta_2)(1+\beta_2-b)
+> }
+> {
+> (1+\beta_2)(1-\zeta\beta_2)a_0
+> }.
+> $$
 
 ---
 
-## 4. Corrected Cautious Weight Decay (CCWD)
+## 6. Algorithm
 
-> [!proposition] CCWD Multiplier Formula
-> The correct weight decay multiplier $\eta$ for a masked decay fraction $q$ is:
-> $$
-> \eta = \frac{\gamma^2 C_u^2 S}{2 q C_\theta^2}
-> $$
->
-> | Variable | Meaning |
-> | :--- | :--- |
-> | $\gamma$ | Learning rate |
-> | $C_u^2 \approx \mathbb{E}|u_t|^2$ | Steady-state update variance |
-> | $S = S(\beta_{\text{eff}},\beta_2)$ | Momentum correlation factor (Section 3) |
-> | $C_\theta^2$ | Target steady-state parameter norm |
-> | $q \approx p_g$ | Masked decay fraction |
+> [!notation] Block-Local Quantities
+> The weight block $W$, momentum state $M$, target RMS radius $R_W$, halving exponents $H_{\beta_2},H_\zeta$, direction map $\nabla\mathcal{K}$, direction scale $c_u^2$, and correlation estimates are block-local. The mask fraction $p$ may be measured with an EMA; use $p=1$ to recover the unmasked update.
 
-> [!important] Avoiding New Hyperparameters
-> You don't need to manually guess $C_\theta^2$ and $q$. Profile a base run and measure:
-> - **$C_{\theta,g}^2$**: Expected parameter norm $\mathbb{E}|\theta_g|^2$
-> - **$p_g$**: Average mask rate $\mathbb{E}[\text{mean}(M_{t,g})]$ for group $g$ 
-> - **$S_g$**: Derived empirically from $\rho_k$ or via $S(\beta_{\text{eff}},\beta_2)$
+<div class="algorithm-container" markdown="1">
+<div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> Lion-$\mathcal{K}$ with RMS-Matched CCWD</div>
+```pseudo
+def LionK_CCWD_Step($\Theta,M;\mathcal{B}$):
+    for each weight block:
+        $(W,M,R_W,H_{\beta_2},H_\zeta,\beta_1,c_u^2,\nabla\mathcal{K}) \leftarrow$ block-local current values
+        $\beta_2 \leftarrow 2^{-H_{\beta_2}}$
+        $\zeta \leftarrow 2^{-H_\zeta}$
+        $G \leftarrow \nabla_W f(\Theta;\mathcal{B})$
+        $M' \leftarrow \beta_2M+(1-\beta_2)G$
+        $Z \leftarrow \beta_1M'+(1-\beta_1)G$
+        $U \leftarrow -\nabla\mathcal{K}(Z)$
+        $P_i \leftarrow \mathbf{1}_{\{\operatorname{sign}(W_i)=\operatorname{sign}(U_i)\}}$
+        $p \leftarrow \operatorname{EMA}(\|P\odot W\|^2/\|W\|^2)$
+        $A_\zeta \leftarrow$ empirical estimate or linear-filter approximation
+        $\rho \leftarrow R_W\sqrt{p(1+\zeta)/((1-\zeta)c_u^2A_\zeta)}$
+        $W \leftarrow W-(1-\zeta)(P\odot W)+(1-\zeta)\rho U$
+        $M \leftarrow M'$
+        write back $W,M$ to the block
+```
 
-> [!proof]- Derivation of CCWD
-> CWD operates via masked decay. Because fewer coordinates are shrunk per step, a naive identical $\eta$ no longer preserves the target steady-state norm.
-> 
-> **Step 1: Exact One-Step Energy Change**
-> Let $d_t := M_t \odot \theta_t$. The update is $\theta_{t+1} = \theta_t - \eta d_t + \gamma u_t$. Expanding the squared norm:
-> $$
-> |\theta_{t+1}|^2 = |\theta_t|^2 - (2\eta - \eta^2)|d_t|^2 + 2\gamma\langle \theta_t - \eta d_t, u_t\rangle + \gamma^2|u_t|^2
-> $$
-> 
-> **Step 2: Masking Fraction $q_t$**
-> Define the fraction of the squared norm being shrunk:
-> $$
-> q_t := \frac{|d_t|^2}{|\theta_t|^2} = \frac{|M_t \odot \theta_t|^2}{|\theta_t|^2}
-> $$
-> Thus, $(2\eta-\eta^2)|d_t|^2 = (2\eta-\eta^2) q_t |\theta_t|^2 \approx 2\eta q_t |\theta_t|^2$.
-> 
-> **Step 3: Steady-State Assumption**
-> Assuming independence ($\mathbb{E}\langle \theta_t, u_t \rangle \approx 0$) and incorporating the momentum correlation factor $S$, the expected steady-state norm satisfies:
-> $$
-> \mathbb{E}|\theta|^2 \approx \frac{\gamma^2 C_u^2}{2\eta q} S \quad \Longrightarrow \quad \eta = \frac{\gamma^2 C_u^2 S}{2 q C_\theta^2}
-> $$
-
-> [!note]- Optional $\kappa$ Feedback Controller
-> Because the analytical $\eta$ formula assumes perfect orthogonality, real-world metrics may drift slightly. A slow feedback controller $\kappa$ can lock onto the target norm.
-> 
-> **Calculate the observed ratio:**
-> $$
-> R_t := \frac{|\theta_t|^2}{C_\theta^2}
-> $$
-> 
-> **Update the scale correction $\kappa$ multiplicatively ($c$ is a small gain, e.g., $0.05$):**
-> $$
-> \kappa_{t+1} = \kappa_t \cdot R_t^c
-> $$
-> 
-> **Scale the analytical formula by $\kappa_t$:**
-> $$
-> \eta_t = \kappa_t \cdot \eta^{(\text{formula})}
-> $$
-> 
-> In practice, this is mostly optional as the analytical approximation is usually quite accurate.
-
----
-
-## 6. Complete Algorithm
-
-> [!algorithm] Lion-$\mathcal{K}$ with Corrected Cautious Weight Decay
-> **Require:** Initial parameters $\theta_0$, initial momentum $m_0 = 0$, direction map $\nabla \mathcal{K}$
-> **Require:** Learning rate $\gamma$, momentum coefficients $\beta_1, \beta_2$
-> **Require:** Per-group target norms $C_{\theta,g}^2$, mask rates $p_g$, correlation factors $S_g$
->
-> **for**&nbsp;$t = 0, 1, 2, \dots$&nbsp;**do**
-> $\quad$&nbsp;$g_t \leftarrow \nabla f(\theta_t)$
->
-> $\quad$&nbsp;*// Momentum update*
-> $\quad$&nbsp;$m_{t+1} \leftarrow \beta_2\, m_t + (1-\beta_2)\, g_t$
->
-> $\quad$&nbsp;*// Direction*
-> $\quad$&nbsp;$z_t \leftarrow \beta_1\, m_{t+1} + (1-\beta_1)\, g_t$
-> $\quad$&nbsp;$u_t \leftarrow -\nabla \mathcal{K}(z_t)$
->
-> $\quad$&nbsp;*// Cautious mask*
-> $\quad$&nbsp;$(M_t)_i \leftarrow \mathbf{1}\{\mathrm{sign}(\theta_{t,i}) = \mathrm{sign}(u_{t,i})\}$
->
-> $\quad$&nbsp;*// Corrected decay (per parameter group $g$)*
-> $\quad$&nbsp;$\displaystyle\eta_g \leftarrow \frac{\gamma_g^2\, C_{u,g}^2\, S_g}{2\, p_g\, C_{\theta,g}^2}$
->
-> $\quad$&nbsp;*// Parameter update*
-> $\quad$&nbsp;$\theta_{t+1} \leftarrow \theta_t - \eta_g\,(M_t \odot \theta_t) + \gamma_g\, u_t$
-> **end for**
+</div>
 
 > [!warning] Caveats for Output Layers
 > The steady-state independence assumption frequently breaks down for the cross-entropy output layer. You may need to exclude the output unembedding layer from corrected decay or manage it separately {% cite chouCorrectionDecoupledWeight2026 %}.
 
-Combining corrected weight decay from AdamC/ScionC {% cite chouCorrectionDecoupledWeight2026 %} and bounded direction maps from Lion-$\mathcal{K}$ with CCWD {% cite chenCautiousWeightDecay2026 %} yields a theoretically grounded formulation for stable weight decay in sign/LMO-based optimizers.
+---
+
+## Appendix: Notation
+
+> [!notation] Symbols
+> | Symbol | Meaning |
+> |---|---|
+> | $W$ | Weight block |
+> | $G$ | Block gradient |
+> | $M$ | Momentum state |
+> | $Z$ | Direction-map input |
+> | $U$ | Lion-$\mathcal{K}$ direction |
+> | $P$ | CWD mask |
+> | $\beta_2$ | Momentum state retention |
+> | $\beta_1$ | Readout blend |
+> | $\beta_{\mathrm{eff}}$ | Effective stored-state readout coefficient |
+> | $\zeta$ | Active-coordinate weight retention |
+> | $\gamma$ | Equivalent additive scale, $\gamma=(1-\zeta)\rho$ |
+> | $\lambda$ | Equivalent decoupled weight-decay coefficient, $\lambda=1/\rho$ |
+> | $\rho$ | Radius / inverse weight-decay coordinate |
+> | $R_W$ | Target stationary RMS weight radius |
+> | $p$ | Masked squared-norm fraction |
+> | $c_u^2$ | Direction squared-norm scale, $\mathbb{E}\|U_t\|^2$ |
+> | $c_k$ | Normalized direction autocorrelation at lag $k$ |
+> | $A_\zeta$ | Retention-weighted direction-correlation factor |
 
 ## References
 
