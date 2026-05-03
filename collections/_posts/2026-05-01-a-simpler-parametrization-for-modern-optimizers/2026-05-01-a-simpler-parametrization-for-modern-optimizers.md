@@ -18,80 +18,79 @@ scholar:
 ---
 
 > [!summary]
-> The useful coordinate is **retention**. Any update of the form $Y'=qY+(1-q)Z$ is an EMA mix with retention $q$. Scion's stochastic conditional gradient form uses this primitive twice:
+> Treat optimizer knobs as schedules in a chosen training count $\tau$. For a Scion-style stochastic conditional-gradient block, the useful coordinates are
 >
 > $$
-> M'=\beta M+(1-\beta)G,
+> R_W(\tau),
 > \qquad
-> V=\operatorname{ulmo}(M'),
+> \chi_\beta(\tau),
 > \qquad
-> W'=\zeta W+(1-\zeta)\rho V.
+> \chi_\zeta(\tau),
+> \qquad
+> \|\cdot\|,
+> \qquad
+> \operatorname{ulmo}.
 > $$
 >
-> Here $\beta$ is the **momentum state retention**, $\zeta$ is the **weight retention**, and $\rho$ is chosen so the modeled stationary RMS weight radius equals a target $R_W$. This gives more principled transfer coordinates than raw AdamW-style learning-rate and weight-decay knobs: the retentions carry timescales, while the radius carries the weight-decay coordinate.
+> The retentions $\beta_t$ and $\zeta_t$ are computed from scheduled halving rates. The radius $\rho_t$ is not an independent schedule: it is the current value that makes the actual next weight block match the scheduled RMS target $R_{W,t}$.
 
 > [!principle] Background
-> Half-life parametrizes EMA retention as an additive $\log_2$ coordinate {% cite marekSmallBatchSize2025 %}. Weight-retention coordinates separate the multiplicative weight action from the additive learning-rate scale {% cite kossonWeightDecayMay2026 %}. Scion supplies the stochastic conditional gradient update structure {% cite pethickTrainingDeepLearning2025a %}; the RMS matching below is the radius-coordinate version of corrected decoupled decay {% cite chouCorrectionDecoupledWeight2026 %}.
+> Half-life parametrizes EMA retention as an additive $\log_2$ coordinate {% cite marekSmallBatchSize2025 %}. Weight-retention coordinates separate multiplicative weight action from additive update scale {% cite kossonWeightDecayMay2026 %}. Scion supplies the stochastic conditional-gradient structure {% cite pethickTrainingDeepLearning2025a %}; choosing $\rho_t$ from a target radius is the radius-coordinate view of corrected decoupled decay {% cite chouCorrectionDecoupledWeight2026 %}.
 
 ---
 
-## 1. One EMA Coordinate
+## 1. Scheduled Retentions
 
 > [!definition] EMA Mix
-> Start with the common primitive:
+> The primitive update
 >
 > $$
 > \boxed{
 > Y'=qY+(1-q)Z,
 > \qquad
-> q\in(0,1].
+> q\in(0,1]
 > }
 > $$
 >
-> The multiplier $q$ is a **retention**. Its complement $1-q$ is the fraction of the new target $Z$ mixed in on this update.
+> has retention $q$. The complement $1-q$ is the fraction of the new target $Z$ mixed in on this update.
 
 > [!definition] Halving Exponent
 > Define
 >
 > $$
 > \boxed{
-> H_q=-\log_2 q,
+> H_q=-\log_2q,
 > \qquad
 > q=2^{-H_q}.
 > }
 > $$
 >
-> Multiplying retentions adds halving exponents:
+> Retention products become sums of halving exponents:
 >
 > $$
-> H_{\prod_k q_k}
+> H_{\prod_i q_i}
 > =
-> \sum_k H_{q_k}.
+> \sum_i H_{q_i}.
 > $$
 
-> [!definition] Retention Half-Life
-> Fix a scalar training count $\tau$: updates, samples, tokens, epochs, or another monotone count. A scheduled halving rate $\chi_q(\tau)$ gives the current-update exponent
+> [!definition] Scheduled Halving Rate
+> Fix a scalar training count $\tau$: updates, samples, tokens, epochs, or another monotone count. A retention schedule is represented by a halving-rate schedule $\chi_q(\tau)$. For an update from $\tau_t$ to $\tau_t+\Delta\tau$,
 >
 > $$
 > \boxed{
-> H_q
+> H_{q,t}
 > =
 > \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_q(\sigma)\,d\sigma,
 > \qquad
-> q=2^{-H_q}.
+> q_t=2^{-H_{q,t}}.
 > }
 > $$
 >
-> Constant half-life $h_q$ is the special case $\chi_q=1/h_q$:
+> A constant half-life $h_q$ is the constant schedule $\chi_q=1/h_q$, so
 >
 > $$
-> \boxed{
-> q=2^{-\Delta\tau/h_q}.
-> }
+> q_t=2^{-\Delta\tau/h_q}.
 > $$
-
-> [!summary] Transfer Rule for Any Retention
-> Keep the rate schedule $\chi_q(\tau)$, or equivalently the half-life $h_q$ in constant-rate cases, fixed in the chosen count units. When $\Delta\tau$ changes, recompute $q$.
 
 > [!example]- Token Count
 > For language models, processed tokens are often the count:
@@ -110,56 +109,20 @@ scholar:
 
 ---
 
-## 2. Stochastic Conditional Gradient
+## 2. Block Update
 
-> [!definition] Block Update
-> For a weight block $W$, the stochastic conditional gradient update keeps a momentum state $M$, forms a ULMO atom $V$, and mixes the weights toward $\rho V$:
+> [!definition] Scheduled Block Quantities
+> For each weight block $W$, use block-local schedules
 >
 > $$
-> \boxed{
-> \begin{aligned}
-> M' &= \beta M+(1-\beta)G,\\
-> V &= \operatorname{ulmo}(M'),\\
-> W' &= \zeta W+(1-\zeta)\rho V.
-> \end{aligned}
-> }
-> $$
->
-> In this note, $\beta$, $\zeta$, and $\rho$ are the current-update values. They may vary over training and by block; update subscripts are omitted to keep the formulas readable.
-
-> [!notation] Scheduled Retentions
-> The two retentions come from the same coordinate system:
->
-> $$
-> H_\beta
-> =
-> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\beta(\sigma)\,d\sigma,
+> R_W(\tau),
 > \qquad
-> H_\zeta
-> =
-> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\zeta(\sigma)\,d\sigma,
-> $$
->
-> $$
-> \boxed{
-> \beta=2^{-H_\beta},
+> \chi_\beta(\tau),
 > \qquad
-> \zeta=2^{-H_\zeta}.
-> }
+> \chi_\zeta(\tau),
 > $$
 >
-> With constant half-lives,
->
-> $$
-> \beta=2^{-\Delta\tau/h_\beta},
-> \qquad
-> \zeta=2^{-\Delta\tau/h_\zeta}.
-> $$
->
-> When a later formula contains powers such as $\beta^k$ or $\zeta^k$, those are the constant-retention special case. With scheduled retentions, use the accumulated products over the lag window, e.g. $\prod_{j=0}^{k-1}\beta_{t-j}$ and $\prod_{j=0}^{k-1}\zeta_{t-j}$, or treat the current values as a local stationary approximation when schedules move slowly.
-
-> [!definition] ULMO Atom
-> For a unit-radius norm ball,
+> together with a block norm $\|\cdot\|$ and its unit-ball linear minimization oracle
 >
 > $$
 > \operatorname{ulmo}(M)
@@ -167,52 +130,207 @@ scholar:
 > \arg\min_{\|V\|\le1}\langle M,V\rangle.
 > $$
 >
-> If $M\ne0$, the minimizer is on the boundary:
->
-> $$
-> \|\operatorname{ulmo}(M)\|=1.
-> $$
->
-> If $M=0$, every point in the unit ball minimizes; choose a fixed feasible convention such as $V=0$.
+> Constant hyperparameters are represented as constant schedules.
 
-> [!fact] Radius Is the Decay Coordinate
-> The stochastic conditional gradient update is also a decoupled-weight-decay update:
+> [!definition] Current Update Values
+> At update $t$, compute
 >
 > $$
-> W'
+> \boxed{
+> \begin{aligned}
+> H_{\beta,t}
+> &=
+> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\beta(\sigma)\,d\sigma,
+> &
+> \beta_t&=2^{-H_{\beta,t}},\\
+> H_{\zeta,t}
+> &=
+> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\zeta(\sigma)\,d\sigma,
+> &
+> \zeta_t&=2^{-H_{\zeta,t}},\\
+> R_t&=R_W(\tau_t+\Delta\tau).
+> \end{aligned}
+> }
+> $$
+>
+> The momentum and atom are
+>
+> $$
+> M_t=\beta_tM_{t-1}+(1-\beta_t)G_t,
+> \qquad
+> V_t=\operatorname{ulmo}(M_t).
+> $$
+
+> [!definition] Radius Form
+> The weight update is
+>
+> $$
+> \boxed{
+> W_t=\zeta_tW_{t-1}+(1-\zeta_t)\rho_tV_t.
+> }
+> $$
+>
+> Its decoupled-weight-decay form is
+>
+> $$
+> W_t
 > =
-> (1-\eta\lambda)W+\eta V
+> (1-\eta_t\lambda_t)W_{t-1}+\eta_tV_t
 > $$
 >
 > with
 >
 > $$
 > \boxed{
-> \eta=(1-\zeta)\rho,
+> \eta_t=(1-\zeta_t)\rho_t,
 > \qquad
-> \lambda=\frac{1}{\rho}.
+> \lambda_t=\frac{1}{\rho_t}.
 > }
 > $$
 >
-> Thus $\beta$ and $\zeta$ are retentions, not weight-decay coefficients. The weight-decay coordinate is the inverse radius $\lambda=1/\rho$.
+> Thus $\beta_t$ and $\zeta_t$ are retention values. The radius $\rho_t$, inverse decay $\lambda_t$, and additive scale $\eta_t$ are derived current values.
 
 ---
 
-## 3. RMS Radius Correction
+## 3. Actual Radius Matching
 
-> [!principle] Correction Objective
-> The radius parameter $\rho$ is not the same thing as the intended RMS weight radius. The objective is
+> [!principle] RMS Target
+> The scheduled target is imposed at the current update:
 >
 > $$
 > \boxed{
-> \mathbb{E}\|W\|^2=R_W^2.
+> \|W_t\|^2=R_t^2.
 > }
 > $$
 >
-> This is the correction: choose the radius $\rho$ so that the modeled stationary weights have target RMS radius $R_W$.
+> The radius $\rho_t$ is solved using the actual current block $W_{t-1}$ and actual current atom $V_t$.
 
-> [!proposition] Stationary Corrected Radius
-> Assume a locally stationary segment with fixed $\beta$, $\zeta$, and $\rho$. Let the ULMO atom stream have normalized autocorrelations
+> [!proposition] One-Step Radius
+> Let
+>
+> $$
+> d_t=1-\zeta_t,
+> \qquad
+> v_t^2=\|V_t\|^2,
+> \qquad
+> s_t=\langle W_{t-1},V_t\rangle.
+> $$
+>
+> The target equation
+>
+> $$
+> \|\zeta_tW_{t-1}+d_t\rho_tV_t\|^2=R_t^2
+> $$
+>
+> is the quadratic
+>
+> $$
+> d_t^2v_t^2\rho_t^2
+> +
+> 2\zeta_td_ts_t\rho_t
+> +
+> \zeta_t^2\|W_{t-1}\|^2
+> -
+> R_t^2
+> =
+> 0.
+> $$
+>
+> For $d_t>0$ and $v_t^2>0$, the usual nonnegative root is
+>
+> $$
+> \boxed{
+> \rho_t
+> =
+> \frac{
+> -\zeta_ts_t+
+> \sqrt{
+> \zeta_t^2s_t^2
+> +
+> v_t^2(R_t^2-\zeta_t^2\|W_{t-1}\|^2)
+> }
+> }
+> {d_tv_t^2}.
+> }
+> $$
+>
+> If no nonnegative real root exists, the requested target is not reachable by moving along the current atom ray. A practical implementation should then use its chosen fallback policy, such as projection to the target sphere, clipping the radius, or keeping the previous feasible radius.
+
+> [!remark] Unit Atoms
+> If $\|V_t\|=1$, this simplifies to
+>
+> $$
+> \rho_t
+> =
+> \frac{
+> -\zeta_ts_t+
+> \sqrt{
+> \zeta_t^2s_t^2
+> +
+> R_t^2-\zeta_t^2\|W_{t-1}\|^2
+> }
+> }
+> {1-\zeta_t}.
+> $$
+>
+> For $\|V_t\|\le1$, keep the general formula.
+
+> [!warning]- RMS Target Versus Hard Radius
+> If $\|W_{t-1}\|\le\rho_t$ and $\|V_t\|\le1$, then
+>
+> $$
+> \|W_t\|
+> \le
+> \zeta_t\|W_{t-1}\|+(1-\zeta_t)\rho_t
+> \le
+> \rho_t.
+> $$
+>
+> The scheduled RMS target $R_t$ and the support radius $\rho_t$ are different coordinates. The one-step solve chooses $\rho_t$ to hit $R_t$ along the current atom direction; a hard-radius implementation may still project when the radius schedule decreases.
+
+---
+
+## 4. Scheduled Memory
+
+> [!proposition] Unrolled Scheduled Update
+> Define
+>
+> $$
+> B_{t,i}
+> =
+> \prod_{r=i+1}^{t}\zeta_r,
+> \qquad
+> B_{t,t}=1.
+> $$
+>
+> Repeatedly expanding the update gives
+>
+> $$
+> \boxed{
+> W_t
+> =
+> B_{t,0}W_0
+> +
+> \sum_{i=1}^{t}
+> (1-\zeta_i)\rho_iB_{t,i}V_i.
+> }
+> $$
+>
+> After the initialized term has decayed, the second moment is
+>
+> $$
+> \mathbb{E}\|W_t\|^2
+> =
+> \sum_{i,j=1}^{t}
+> (1-\zeta_i)\rho_i(1-\zeta_j)\rho_j
+> B_{t,i}B_{t,j}
+> \mathbb{E}\langle V_i,V_j\rangle.
+> $$
+>
+> This expression uses the actual scheduled retention products and actual scheduled radii.
+
+> [!proposition] Local Stationary Prior
+> For schedule design, it is often useful to approximate a short memory window by its current values. With $\zeta_i\approx\zeta_t$, $\rho_i\approx\rho_t$, and normalized atom autocorrelations
 >
 > $$
 > c_k
@@ -223,110 +341,49 @@ scholar:
 > c_0=1,
 > $$
 >
-> and define
+> define
 >
 > $$
 > c_u^2=\mathbb{E}\|V_t\|^2,
 > \qquad
-> A_\zeta=1+2\sum_{k\ge1}\zeta^kc_k.
+> A_{\zeta_t}=1+2\sum_{k\ge1}\zeta_t^kc_k.
 > $$
 >
-> Then the stationary second moment is
->
-> $$
-> \mathbb{E}\|W_t\|^2
-> =
-> \rho^2
-> \frac{1-\zeta}{1+\zeta}
-> c_u^2A_\zeta.
-> $$
->
-> Solving $\mathbb{E}\|W_t\|^2=R_W^2$ gives
->
-> $$
-> \boxed{
-> \rho
-> =
-> R_W
-> \sqrt{
-> \frac{1+\zeta}{(1-\zeta)c_u^2A_\zeta}
-> }.
-> }
-> $$
->
-> Equivalently,
->
-> $$
-> \boxed{
-> \lambda
-> =
-> \frac{1}{\rho}
-> =
-> \frac{1}{R_W}
-> \sqrt{
-> \frac{(1-\zeta)c_u^2A_\zeta}{1+\zeta}
-> }.
-> }
-> $$
-
-> [!summary] Correction Factor
-> The radius multiplier relative to the target RMS radius is
->
-> $$
-> \boxed{
-> \frac{\rho}{R_W}
-> =
-> \sqrt{
-> \frac{1+\zeta}{(1-\zeta)c_u^2A_\zeta}
-> }.
-> }
-> $$
-
-> [!proof]- Second-Moment Calculation
-> The stationary linearized update is
->
-> $$
-> W_t
-> =
-> (1-\zeta)\rho\sum_{j\ge0}\zeta^jV_{t-j}.
-> $$
->
-> Taking the second moment gives
+> The local stationary second moment is
 >
 > $$
 > \mathbb{E}\|W_t\|^2
 > =
-> (1-\zeta)^2\rho^2c_u^2
-> \sum_{i,j\ge0}\zeta^{i+j}c_{|i-j|}.
+> \rho_t^2
+> \frac{1-\zeta_t}{1+\zeta_t}
+> c_u^2A_{\zeta_t}.
 > $$
 >
-> The double sum is
+> Solving $\mathbb{E}\|W_t\|^2=R_t^2$ gives the prior radius
 >
 > $$
-> \sum_{i,j\ge0}\zeta^{i+j}c_{|i-j|}
+> \boxed{
+> \rho_t^{\mathrm{prior}}
 > =
-> \frac{1}{1-\zeta^2}
-> \left(1+2\sum_{k\ge1}\zeta^kc_k\right)
-> =
-> \frac{A_\zeta}{1-\zeta^2}.
+> R_t
+> \sqrt{
+> \frac{1+\zeta_t}
+> {(1-\zeta_t)c_u^2A_{\zeta_t}}
+> }.
+> }
 > $$
 >
-> Therefore
->
-> $$
-> \mathbb{E}\|W_t\|^2
-> =
-> \rho^2
-> \frac{1-\zeta}{1+\zeta}
-> c_u^2A_\zeta.
-> $$
->
-> Setting this equal to $R_W^2$ and solving for $\rho$ gives the displayed formula.
+> This is useful for initialization, fallback, and schedule planning. The actual update still uses the one-step radius when $W_{t-1}$ and $V_t$ are available.
 
-> [!corollary] Geometry-Aware Atom Prior
-> The linear approximation $c_k\approx\beta^k$ treats the ULMO as if it preserved momentum correlations. A cheap cold-start refinement is to keep the Gaussian EMA model for $M$ but pass its correlations through the ULMO geometry.
->
-> Let $X,Y$ be jointly Gaussian momentum inputs with normalized correlation $r$, and define the ULMO correlation map
+---
+
+## 5. Atom Correlation Priors
+
+> [!summary] Correlation Estimation
+> The most direct choice is to estimate the atom correlations online from the actual $V_t$ stream. Analytic approximations are useful as cold-start priors.
+
+> [!definition] Geometry Map
+> Let $X,Y$ be jointly Gaussian momentum inputs with normalized correlation $r$. Define the ULMO correlation map
 >
 > $$
 > \Phi(r)
@@ -338,102 +395,76 @@ scholar:
 > \mathbb{E}\|\operatorname{ulmo}(X)\|^2
 > }.
 > $$
->
-> In the constant-retention model, the EMA state has input correlation approximately $\beta^k$, so use
+
+> [!proposition] Constant-Retention Prior
+> If the momentum retention is locally constant and the gradient-noise model is used only as a prior, then
 >
 > $$
-> \boxed{
-> c_k\approx \Phi(\beta^k),
+> c_k\approx \Phi(\beta_t^k),
 > \qquad
-> A_\zeta
+> A_{\zeta_t}
 > \approx
-> 1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k).
-> }
+> 1+2\sum_{k\ge1}\zeta_t^k\Phi(\beta_t^k).
 > $$
 >
-> This has negligible optimizer cost: $\Phi$ can be analytic for common geometries, precomputed once by Monte Carlo for a norm/block shape, or tabulated as a scalar function. It is still a prior, not a claim that real minibatch gradients are independent or zero-mean. Real batches can share a persistent task and architecture component, and larger batches can make that persistence stronger by reducing noise around the full-gradient direction. For the coordinate sign/box atom, the Gaussian arcsine law gives
+> For coordinate sign or box atoms, the Gaussian arcsine law gives
 >
 > $$
-> \boxed{
 > \Phi(r)=\frac{2}{\pi}\arcsin r,
 > \qquad
-> A_\zeta
+> A_{\zeta_t}
 > \approx
-> 1+\frac{4}{\pi}\sum_{k\ge1}\zeta^k\arcsin(\beta^k).
-> }
+> 1+\frac{4}{\pi}\sum_{k\ge1}\zeta_t^k\arcsin(\beta_t^k).
 > $$
 >
-> In general, plug this $A_\zeta$ into the corrected-radius formula above. For unit-scale atoms, this is
+> For high-dimensional $\ell_2$ normalization, $\Phi(r)\approx r$, so
 >
 > $$
-> \rho
-> =
-> R_W
-> \sqrt{
-> \frac{1+\zeta}{(1-\zeta)A_\zeta}
-> }.
-> $$
->
-> For high-dimensional $\ell_2$ normalization, $\Phi(r)\approx r$, which recovers the simpler EMA approximation
->
-> $$
-> \boxed{
-> A_\zeta
-> =
-> \frac{1+\zeta\beta}{1-\zeta\beta}.
-> }
-> $$
->
-> and therefore
->
-> $$
-> \boxed{
-> \rho
-> =
-> R_W
-> \sqrt{
-> \frac{(1+\zeta)(1-\zeta\beta)}
-> {(1-\zeta)(1+\zeta\beta)}
-> }.
-> }
+> A_{\zeta_t}
+> \approx
+> \frac{1+\zeta_t\beta_t}{1-\zeta_t\beta_t}.
 > $$
 
-> [!warning]- RMS Target Versus Hard Radius
-> With fixed $\rho$ and $\|V\|\le1$, the update preserves the hard ball $\|W\|\le\rho$:
+> [!remark] Scheduled Correlations
+> With materially varying retentions, replace $\beta_t^k$ and $\zeta_t^k$ by the products over the relevant lag window:
 >
 > $$
-> \|W'\|
-> \le
-> \zeta\|W\|+(1-\zeta)\rho
-> \le
-> \rho.
+> \beta_t^k
+> \leadsto
+> \prod_{r=t-k+1}^{t}\beta_r,
+> \qquad
+> \zeta_t^k
+> \leadsto
+> \prod_{r=t-k+1}^{t}\zeta_r.
 > $$
 >
-> The RMS target is different. Usually $\rho$ is larger than $R_W$ because an EMA of atoms has smaller RMS scale than its support radius. If $\rho$ is scheduled downward, project or rescale if hard feasibility at the new radius is required.
+> Online estimates avoid choosing a closed-form prior and naturally include task structure, batch correlations, atom geometry, and training-phase changes.
 
 ---
 
-## 4. Transfer Rule
+## 6. Transfer Rule
 
 > [!summary] Transfer Coordinates
-> The transferable hyperparameters are
+> Transfer the semantic schedules in the chosen count units:
 >
 > $$
 > \boxed{
-> R_W,
+> R_W(\tau),
 > \qquad
 > \chi_\beta(\tau),
 > \qquad
 > \chi_\zeta(\tau),
 > \qquad
-> \text{atom-correlation estimate or prior}.
+> \|\cdot\|,
+> \qquad
+> \operatorname{ulmo}.
 > }
 > $$
 >
-> For constant half-lives, replace $\chi_\beta,\chi_\zeta$ by $h_\beta,h_\zeta$.
+> Optional cold-start priors such as $c_u^2(\tau)$, $\Phi$, or $A_\zeta(\tau,\Delta\tau)$ are also block-local schedules. The raw quantities $\rho_t$, $\lambda_t$, and $\eta_t$ are recomputed from the current scheduled values and actual block state.
 
 > [!algorithm] Count-Increment Transfer
-> When the count increment changes from $\Delta\tau$ to $\Delta\tau_\star$, keep the semantic quantities fixed and recompute the current retentions:
+> If the count increment changes from $\Delta\tau$ to $\Delta\tau_\star$, keep the schedules fixed and recompute
 >
 > $$
 > H_{\beta,\star}
@@ -446,51 +477,41 @@ scholar:
 > $$
 >
 > $$
-> \boxed{
-> \beta=2^{-H_{\beta,\star}},
+> \beta_\star=2^{-H_{\beta,\star}},
 > \qquad
-> \zeta=2^{-H_{\zeta,\star}}.
-> }
-> $$
->
-> Then recompute $A_\zeta$ and $\rho$ from the RMS objective. Under the geometry-aware atom prior with unit-scale atoms,
->
-> $$
-> A_\zeta
-> =
-> 1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k),
+> \zeta_\star=2^{-H_{\zeta,\star}},
 > \qquad
-> \rho
-> =
-> R_W
-> \sqrt{
-> \frac{1+\zeta}{(1-\zeta)A_\zeta}
-> }.
+> R_\star=R_W(\tau_t+\Delta\tau_\star).
 > $$
 >
-> This preserves the momentum-state retention timescale, the weight-retention timescale, and the target RMS weight radius in the chosen count units. If the retentions vary materially across the lag window, replace the powers by the scheduled products from Section 2 or estimate $A_\zeta$ online from observed atom correlations.
+> Then form the actual atom $V_\star$ and solve the one-step radius equation with $\beta_\star,\zeta_\star,R_\star,W,V_\star$.
 
 ---
 
-## 5. Algorithm
+## 7. Algorithm
 
 > [!notation] Block-Local Quantities
-> The weight block $W$, momentum state $M$, target RMS radius $R_W$, halving exponents $H_\beta,H_\zeta$, norm, $\operatorname{ulmo}$, and atom-correlation estimate are block-local. The exponents may come from constant half-lives or from scheduled halving rates.
+> The weight block $W$, momentum state $M$, schedules $R_W(\tau),\chi_\beta(\tau),\chi_\zeta(\tau)$, norm, and $\operatorname{ulmo}$ are block-local. Constant hyperparameters are constant schedules.
 
 <div class="algorithm-container" markdown="1">
-<div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> RMS-Matched Stochastic Conditional Gradient Block Step</div>
+<div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> Scheduled RMS-Matched Stochastic Conditional Gradient</div>
 ```pseudo
-def StochasticConditionalGradientStep($\Theta,M;\mathcal{B}$):
+def ScheduledSCGStep($\Theta,M;\mathcal{B}$):
     for each weight block:
-        $(W,M,R_W,H_\beta,H_\zeta,\|\cdot\|,\operatorname{ulmo},\Phi) \leftarrow$ block-local current values
+        $(W,M,R_W(\tau),\chi_\beta,\chi_\zeta,\|\cdot\|,\operatorname{ulmo}) \leftarrow$ block-local schedules
+        $H_\beta \leftarrow \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\beta(\sigma)\,d\sigma$
+        $H_\zeta \leftarrow \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\zeta(\sigma)\,d\sigma$
         $\beta \leftarrow 2^{-H_\beta}$
         $\zeta \leftarrow 2^{-H_\zeta}$
-        $A_\zeta \leftarrow$ empirical atom-correlation estimate, or cold-start $1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k)$
-        $\rho \leftarrow R_W\sqrt{(1+\zeta)/((1-\zeta)A_\zeta)}$
+        $R \leftarrow R_W(\tau_t+\Delta\tau)$
         $G \leftarrow \nabla_W f(\Theta;\mathcal{B})$
         $M' \leftarrow \beta M+(1-\beta)G$
-        $V \leftarrow \operatorname{ulmo}(M')$  // $\|V\|=1$ if $M'\ne0$
-        $W \leftarrow \zeta W+(1-\zeta)\rho V$
+        $V \leftarrow \operatorname{ulmo}(M')$
+        $d \leftarrow 1-\zeta$
+        $v^2 \leftarrow \|V\|^2$
+        $s \leftarrow \langle W,V\rangle$
+        $\rho \leftarrow (-\zeta s+\sqrt{\zeta^2s^2+v^2(R^2-\zeta^2\|W\|^2)})/(dv^2)$
+        $W \leftarrow \zeta W+d\rho V$
         $M \leftarrow M'$
         write back $W,M$ to the block
 ```
@@ -506,24 +527,25 @@ def StochasticConditionalGradientStep($\Theta,M;\mathcal{B}$):
 > |---|---|
 > | $\tau$ | Chosen training count |
 > | $\Delta\tau$ | Count advanced by one optimizer update |
-> | $q$ | Generic EMA retention |
-> | $H_q$ | Halving exponent, $H_q=-\log_2q$ |
-> | $\chi_q$ | Scheduled halving rate for retention $q$ |
+> | $q_t$ | Current EMA retention |
+> | $H_{q,t}$ | Current halving exponent |
+> | $\chi_q(\tau)$ | Scheduled halving rate for retention $q$ |
 > | $h_q$ | Constant half-life, $h_q=1/\chi_q$ |
 > | $W$ | Weight block |
 > | $G$ | Block gradient |
 > | $M$ | Momentum state |
-> | $\beta$ | Momentum state retention |
-> | $\zeta$ | Weight retention |
-> | $V$ | ULMO atom |
-> | $\rho$ | Current norm-ball radius |
-> | $\lambda$ | Equivalent decoupled weight-decay coefficient, $\lambda=1/\rho$ |
-> | $\eta$ | Equivalent additive step scale, $\eta=(1-\zeta)\rho$ |
-> | $R_W$ | Target stationary RMS weight radius |
-> | $c_u^2$ | ULMO atom squared-norm scale, $\mathbb{E}\|V_t\|^2$ |
+> | $\beta_t$ | Current momentum-state retention |
+> | $\zeta_t$ | Current weight retention |
+> | $d_t$ | Retention complement, $d_t=1-\zeta_t$ |
+> | $V_t$ | Current ULMO atom |
+> | $R_W(\tau)$ | Scheduled target RMS weight radius |
+> | $R_t$ | Current target, $R_t=R_W(\tau_t+\Delta\tau)$ |
+> | $\rho_t$ | Current derived norm-ball radius |
+> | $\lambda_t$ | Equivalent decoupled weight-decay coefficient, $\lambda_t=1/\rho_t$ |
+> | $\eta_t$ | Equivalent additive step scale, $\eta_t=(1-\zeta_t)\rho_t$ |
 > | $c_k$ | Normalized ULMO atom autocorrelation at lag $k$ |
 > | $\Phi$ | Geometry-dependent ULMO correlation map |
-> | $A_\zeta$ | Weight-retention-weighted atom-correlation factor |
+> | $A_{\zeta_t}$ | Weight-retention-weighted atom-correlation factor |
 > | $\|\cdot\|$ | Block norm used by the constrained LMO |
 
 ## References
