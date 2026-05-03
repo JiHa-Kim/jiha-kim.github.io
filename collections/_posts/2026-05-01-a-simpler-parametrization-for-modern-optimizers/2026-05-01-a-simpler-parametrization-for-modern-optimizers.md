@@ -321,8 +321,58 @@ scholar:
 >
 > Setting this equal to $R_W^2$ and solving for $\rho$ gives the displayed formula.
 
-> [!corollary] EMA Atom Approximation
-> A simple approximation is $c_k\approx\beta^k$. Then
+> [!corollary] Geometry-Aware Atom Approximation
+> The linear approximation $c_k\approx\beta^k$ treats the ULMO as if it preserved momentum correlations. A cheap refinement is to keep the Gaussian EMA model for $M$ but pass its correlations through the ULMO geometry.
+>
+> Let $X,Y$ be jointly Gaussian momentum inputs with normalized correlation $r$, and define the ULMO correlation map
+>
+> $$
+> \Phi(r)
+> =
+> \frac{
+> \mathbb{E}\langle \operatorname{ulmo}(X),\operatorname{ulmo}(Y)\rangle
+> }
+> {
+> \mathbb{E}\|\operatorname{ulmo}(X)\|^2
+> }.
+> $$
+>
+> Since the EMA state has input correlation approximately $\beta^k$, use
+>
+> $$
+> \boxed{
+> c_k\approx \Phi(\beta^k),
+> \qquad
+> A_\zeta
+> \approx
+> 1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k).
+> }
+> $$
+>
+> This has negligible optimizer cost: $\Phi$ can be analytic for common geometries, precomputed once by Monte Carlo for a norm/block shape, or tabulated as a scalar function. For the coordinate sign/box atom, the Gaussian arcsine law gives
+>
+> $$
+> \boxed{
+> \Phi(r)=\frac{2}{\pi}\arcsin r,
+> \qquad
+> A_\zeta
+> \approx
+> 1+\frac{4}{\pi}\sum_{k\ge1}\zeta^k\arcsin(\beta^k).
+> }
+> $$
+>
+> In general, plug this $A_\zeta$ into the corrected-radius formula above. For unit-scale atoms, this is
+>
+> $$
+> \rho
+> =
+> R_W
+> \sqrt{
+> \frac{1+\zeta}{(1-\zeta)A_\zeta}
+> }.
+> $$
+>
+> For high-dimensional $\ell_2$ normalization, $\Phi(r)\approx r$, which recovers the simpler EMA approximation
 >
 > $$
 > \boxed{
@@ -332,7 +382,7 @@ scholar:
 > }
 > $$
 >
-> For unit-scale atoms, $c_u^2=1$, and
+> and therefore
 >
 > $$
 > \boxed{
@@ -401,12 +451,12 @@ scholar:
 > }
 > $$
 >
-> Then recompute $A_\zeta$ and $\rho$ from the RMS objective. Under the EMA atom approximation with unit-scale atoms,
+> Then recompute $A_\zeta$ and $\rho$ from the RMS objective. Under the geometry-aware atom approximation with unit-scale atoms,
 >
 > $$
 > A_\zeta
 > =
-> \frac{1+\zeta\beta}{1-\zeta\beta},
+> 1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k),
 > \qquad
 > \rho
 > =
@@ -423,17 +473,17 @@ scholar:
 ## 5. Algorithm
 
 > [!notation] Block-Local Quantities
-> The weight block $W$, momentum state $M$, target RMS radius $R_W$, halving exponents $H_\beta,H_\zeta$, norm, and $\operatorname{ulmo}$ are block-local. The exponents may come from constant half-lives or from scheduled halving rates.
+> The weight block $W$, momentum state $M$, target RMS radius $R_W$, halving exponents $H_\beta,H_\zeta$, norm, $\operatorname{ulmo}$, and ULMO correlation map $\Phi$ are block-local. The exponents may come from constant half-lives or from scheduled halving rates.
 
 <div class="algorithm-container" markdown="1">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> RMS-Matched Stochastic Conditional Gradient Block Step</div>
 ```pseudo
 def StochasticConditionalGradientStep($\Theta,M;\mathcal{B}$):
     for each weight block:
-        $(W,M,R_W,H_\beta,H_\zeta,\|\cdot\|,\operatorname{ulmo}) \leftarrow$ block-local current values
+        $(W,M,R_W,H_\beta,H_\zeta,\|\cdot\|,\operatorname{ulmo},\Phi) \leftarrow$ block-local current values
         $\beta \leftarrow 2^{-H_\beta}$
         $\zeta \leftarrow 2^{-H_\zeta}$
-        $A_\zeta \leftarrow (1+\zeta\beta)/(1-\zeta\beta)$
+        $A_\zeta \leftarrow 1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k)$
         $\rho \leftarrow R_W\sqrt{(1+\zeta)/((1-\zeta)A_\zeta)}$
         $G \leftarrow \nabla_W f(\Theta;\mathcal{B})$
         $M' \leftarrow \beta M+(1-\beta)G$
@@ -470,6 +520,7 @@ def StochasticConditionalGradientStep($\Theta,M;\mathcal{B}$):
 > | $R_W$ | Target stationary RMS weight radius |
 > | $c_u^2$ | ULMO atom squared-norm scale, $\mathbb{E}\|V_t\|^2$ |
 > | $c_k$ | Normalized ULMO atom autocorrelation at lag $k$ |
+> | $\Phi$ | Geometry-dependent ULMO correlation map |
 > | $A_\zeta$ | Weight-retention-weighted atom-correlation factor |
 > | $\|\cdot\|$ | Block norm used by the constrained LMO |
 

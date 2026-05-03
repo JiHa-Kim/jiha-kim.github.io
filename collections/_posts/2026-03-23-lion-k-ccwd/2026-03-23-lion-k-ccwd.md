@@ -266,14 +266,39 @@ scholar:
 > \mathbb{E}\frac{\|P_t\odot W_t\|^2}{\|W_t\|^2}.
 > $$
 >
-> Under the same scalar-mask approximation used by CCWD, the masked RMS balance is
+> Treat the CWD mask as a random diagonal retention. Define
+>
+> $$
+> \mathcal{R}_t
+> =
+> I-(1-\zeta)\operatorname{Diag}(P_t),
+> $$
+>
+> and approximate its first two coordinate moments by
+>
+> $$
+> a_1
+> \approx
+> 1-p(1-\zeta),
+> \qquad
+> a_2
+> \approx
+> 1-p(1-\zeta^2).
+> $$
+>
+> The first moment $a_1$ controls cross-time direction correlations; the second moment $a_2$ controls RMS energy retention. Define
+>
+> $$
+> A_{a_1}=1+2\sum_{k\ge1}a_1^kc_k.
+> $$
+>
+> The masked RMS balance is
 >
 > $$
 > R_W^2
 > \approx
-> \rho^2
-> \frac{1-\zeta}{p(1+\zeta)}
-> c_u^2A_\zeta.
+> \rho^2(1-\zeta)^2c_u^2
+> \frac{A_{a_1}}{1-a_2}.
 > $$
 >
 > Hence
@@ -285,7 +310,7 @@ scholar:
 > R_W
 > \sqrt{
 > \frac{p(1+\zeta)}
-> {(1-\zeta)c_u^2A_\zeta}
+> {(1-\zeta)c_u^2A_{a_1}}
 > }.
 > }
 > $$
@@ -299,40 +324,47 @@ scholar:
 > R_W
 > \sqrt{
 > \frac{p(1-\zeta)(1+\zeta)}
-> {c_u^2A_\zeta}
+> {c_u^2A_{a_1}}
 > }.
 > }
 > $$
+>
+> This costs only one scalar substitution, $A_\zeta\leadsto A_{a_1}$, because $p$ is already tracked for CCWD. When $p=1$, $a_1=\zeta$ and this recovers the unmasked formula.
 
 > [!proof]- Masked RMS Balance
-> Write $d=1-\zeta$. For the cautious update
+> Write $d=1-\zeta$. The cautious update is
 >
 > $$
-> W'=W-d(P\odot W)+d\rho U,
+> W'=\mathcal{R}_tW+d\rho U.
 > $$
 >
-> the masked decay changes the squared norm by approximately
+> Under the scalar moment closure,
 >
 > $$
-> \|W-d(P\odot W)\|^2
+> \mathbb{E}[(\mathcal{R}_t)_{ii}]\approx a_1,
+> \qquad
+> \mathbb{E}[(\mathcal{R}_t)_{ii}^2]\approx a_2.
+> $$
+>
+> The stationary linearized expansion has coefficients built from products of the random retentions. For lags $i,j$, the overlap contributes $a_2^{\min(i,j)}$ and the non-overlap contributes $a_1^{|i-j|}$. Therefore
+>
+> $$
+> \mathbb{E}\|W_t\|^2
 > \approx
-> \left(1-p(2d-d^2)\right)\|W\|^2
+> d^2\rho^2c_u^2
+> \sum_{i,j\ge0}
+> a_2^{\min(i,j)}
+> a_1^{|i-j|}
+> c_{|i-j|}
 > =
-> \left(1-p(1-\zeta^2)\right)\|W\|^2.
-> $$
->
-> Balancing this loss against the correlated update contribution gives
->
-> $$
-> p(1-\zeta^2)R_W^2
-> \approx
-> (1-\zeta)^2\rho^2c_u^2A_\zeta.
+> d^2\rho^2c_u^2
+> \frac{A_{a_1}}{1-a_2}.
 > $$
 >
 > Solving for $\rho$ gives the displayed cautious-radius formula.
 
 > [!remark]- Recovering the Old CCWD Formula
-> If one insists on raw additive scale $\gamma$ and retention complement $d=1-\zeta$, then $\gamma=d\rho$. In the small-step regime $\zeta\approx1$ and $A_\zeta\approx S$, the cautious-radius balance gives
+> If one insists on raw additive scale $\gamma$ and retention complement $d=1-\zeta$, then $\gamma=d\rho$. In the small-step regime $\zeta\approx1$ and $A_{a_1}\approx S$, the cautious-radius balance gives
 >
 > $$
 > d
@@ -347,23 +379,23 @@ scholar:
 ## 5. Direction Correlation Factor
 
 > [!summary] Empirical Default
-> The most direct estimate is empirical:
+> For any scalar retention $a$, define
 >
 > $$
-> A_\zeta
+> A_a
 > =
-> 1+2\sum_{k\ge1}\zeta^k
+> 1+2\sum_{k\ge1}a^k
 > \frac{\mathbb{E}\langle U_t,U_{t-k}\rangle}
 > {\mathbb{E}\|U_t\|^2}.
 > $$
 >
-> This automatically captures sign maps, LMO maps, masking side effects, and non-independent gradients.
+> Use $a=\zeta$ for the unmasked update and $a=a_1=1-p(1-\zeta)$ for CCWD. The most direct estimate of the correlations is empirical; this automatically captures sign maps, LMO maps, masking side effects, and non-independent gradients.
 
 > [!proposition] Linear-Filter Approximation for Lion-$\mathcal{K}$
 > For a simple independent-gradient approximation, set $b=\beta_{\mathrm{eff}}$ and define
 >
 > $$
-> a_0
+> \nu_0
 > =
 > (1-b)^2+\frac{b^2(1-\beta_2)}{1+\beta_2}.
 > $$
@@ -372,25 +404,25 @@ scholar:
 >
 > $$
 > \boxed{
-> A_\zeta
+> A_a
 > \approx
 > 1+
 > \frac{
-> 2\zeta b(1-\beta_2)(1+\beta_2-b)
+> 2ab(1-\beta_2)(1+\beta_2-b)
 > }
 > {
-> (1+\beta_2)(1-\zeta\beta_2)a_0
+> (1+\beta_2)(1-a\beta_2)\nu_0
 > }.
 > }
 > $$
 >
-> In the small-step limit $\zeta\to1$, this reduces to the usual unweighted factor
+> In the small-step limit $a\to1$, this reduces to the usual unweighted factor
 >
 > $$
 > \boxed{
 > S(b,\beta_2)
 > =
-> \frac{1}{a_0}
+> \frac{1}{\nu_0}
 > =
 > \frac{1+\beta_2}
 > {(1-b)^2(1+\beta_2)+b^2(1-\beta_2)}.
@@ -408,7 +440,7 @@ scholar:
 > The lag-zero unnormalized autocorrelation is
 >
 > $$
-> a_0
+> \nu_0
 > =
 > (1-b)^2+\frac{b^2(1-\beta_2)}{1+\beta_2}.
 > $$
@@ -416,24 +448,24 @@ scholar:
 > For $k\ge1$,
 >
 > $$
-> a_k
+> \nu_k
 > =
 > \frac{b(1-\beta_2)(1+\beta_2-b)}{1+\beta_2}\beta_2^{k-1}.
 > $$
 >
-> Since $c_k=a_k/a_0$,
+> Since $c_k=\nu_k/\nu_0$,
 >
 > $$
-> A_\zeta
+> A_a
 > =
-> 1+2\sum_{k\ge1}\zeta^k\frac{a_k}{a_0}
+> 1+2\sum_{k\ge1}a^k\frac{\nu_k}{\nu_0}
 > =
 > 1+
 > \frac{
-> 2\zeta b(1-\beta_2)(1+\beta_2-b)
+> 2ab(1-\beta_2)(1+\beta_2-b)
 > }
 > {
-> (1+\beta_2)(1-\zeta\beta_2)a_0
+> (1+\beta_2)(1-a\beta_2)\nu_0
 > }.
 > $$
 
@@ -458,8 +490,9 @@ def LionK_CCWD_Step($\Theta,M;\mathcal{B}$):
         $U \leftarrow -\nabla\mathcal{K}(Z)$
         $P_i \leftarrow \mathbf{1}_{\{\operatorname{sign}(W_i)=\operatorname{sign}(U_i)\}}$
         $p \leftarrow \operatorname{EMA}(\|P\odot W\|^2/\|W\|^2)$
-        $A_\zeta \leftarrow$ empirical estimate or linear-filter approximation
-        $\rho \leftarrow R_W\sqrt{p(1+\zeta)/((1-\zeta)c_u^2A_\zeta)}$
+        $a_1 \leftarrow 1-p(1-\zeta)$
+        $A_{a_1} \leftarrow$ empirical estimate or linear-filter approximation
+        $\rho \leftarrow R_W\sqrt{p(1+\zeta)/((1-\zeta)c_u^2A_{a_1})}$
         $W \leftarrow W-(1-\zeta)(P\odot W)+(1-\zeta)\rho U$
         $M \leftarrow M'$
         write back $W,M$ to the block
@@ -492,9 +525,11 @@ def LionK_CCWD_Step($\Theta,M;\mathcal{B}$):
 > | $\rho$ | Radius / inverse weight-decay coordinate |
 > | $R_W$ | Target stationary RMS weight radius |
 > | $p$ | Masked squared-norm fraction |
+> | $a_1$ | First moment of masked diagonal retention, $a_1\approx1-p(1-\zeta)$ |
+> | $a_2$ | Second moment of masked diagonal retention, $a_2\approx1-p(1-\zeta^2)$ |
 > | $c_u^2$ | Direction squared-norm scale, $\mathbb{E}\|U_t\|^2$ |
 > | $c_k$ | Normalized direction autocorrelation at lag $k$ |
-> | $A_\zeta$ | Retention-weighted direction-correlation factor |
+> | $A_a$ | Retention-weighted direction-correlation factor for scalar retention $a$ |
 
 ## References
 
