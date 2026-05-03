@@ -23,16 +23,16 @@ scholar:
 > $$
 > R_W(\tau),
 > \qquad
-> \chi_\beta(\tau),
+> H_\beta(\tau,\Delta\tau),
 > \qquad
-> \chi_\zeta(\tau),
+> H_\zeta(\tau,\Delta\tau),
 > \qquad
 > \|\cdot\|,
 > \qquad
 > \operatorname{ulmo}.
 > $$
 >
-> The retentions $\beta_t$ and $\zeta_t$ are computed from scheduled halving rates. The radius $\rho_t$ is not an independent schedule: it is the current value that makes the actual next weight block match the scheduled RMS target $R_{W,t}$.
+> The retentions $\beta_t$ and $\zeta_t$ are computed from scheduled halving exponents. The radius $\rho_t$ is not an independent schedule: it is the current value that makes the actual next weight block match the scheduled RMS target $R_{W,t}$.
 
 > [!principle] Background
 > Half-life parametrizes EMA retention as an additive $\log_2$ coordinate {% cite marekSmallBatchSize2025 %}. Weight-retention coordinates separate multiplicative weight action from additive update scale {% cite kossonWeightDecayMay2026 %}. Scion supplies the stochastic conditional-gradient structure {% cite pethickTrainingDeepLearning2025a %}; choosing $\rho_t$ from a target radius is the radius-coordinate view of corrected decoupled decay {% cite chouCorrectionDecoupledWeight2026 %}.
@@ -73,22 +73,22 @@ scholar:
 > \sum_i H_{q_i}.
 > $$
 
-> [!definition] Scheduled Halving Rate
-> Fix a scalar training count $\tau$: updates, samples, tokens, epochs, or another monotone count. A retention schedule is represented by a halving-rate schedule $\chi_q(\tau)$. For an update from $\tau_t$ to $\tau_t+\Delta\tau$,
+> [!definition] Discrete Retention Schedule
+> Fix a scalar training count $\tau$: updates, samples, tokens, epochs, or another monotone count. In practice $\tau$ is discrete at optimizer steps. A retention schedule directly returns the halving exponent for the next update:
 >
 > $$
 > \boxed{
-> H_{q,t}
-> =
-> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_q(\sigma)\,d\sigma,
+> H_{q,t}=H_q(\tau_t,\Delta\tau),
 > \qquad
 > q_t=2^{-H_{q,t}}.
 > }
 > $$
 >
-> A constant half-life $h_q$ is the constant schedule $\chi_q=1/h_q$, so
+> A constant half-life $h_q$ in the same count units is the schedule
 >
 > $$
+> H_q(\tau_t,\Delta\tau)=\frac{\Delta\tau}{h_q},
+> \qquad
 > q_t=2^{-\Delta\tau/h_q}.
 > $$
 
@@ -117,9 +117,9 @@ scholar:
 > $$
 > R_W(\tau),
 > \qquad
-> \chi_\beta(\tau),
+> H_\beta(\tau,\Delta\tau),
 > \qquad
-> \chi_\zeta(\tau),
+> H_\zeta(\tau,\Delta\tau),
 > $$
 >
 > together with a block norm $\|\cdot\|$ and its unit-ball linear minimization oracle
@@ -140,12 +140,12 @@ scholar:
 > \begin{aligned}
 > H_{\beta,t}
 > &=
-> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\beta(\sigma)\,d\sigma,
+> H_\beta(\tau_t,\Delta\tau),
 > &
 > \beta_t&=2^{-H_{\beta,t}},\\
 > H_{\zeta,t}
 > &=
-> \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\zeta(\sigma)\,d\sigma,
+> H_\zeta(\tau_t,\Delta\tau),
 > &
 > \zeta_t&=2^{-H_{\zeta,t}},\\
 > R_t&=R_W(\tau_t+\Delta\tau).
@@ -451,9 +451,9 @@ scholar:
 > \boxed{
 > R_W(\tau),
 > \qquad
-> \chi_\beta(\tau),
+> H_\beta(\tau,\Delta\tau),
 > \qquad
-> \chi_\zeta(\tau),
+> H_\zeta(\tau,\Delta\tau),
 > \qquad
 > \|\cdot\|,
 > \qquad
@@ -469,11 +469,11 @@ scholar:
 > $$
 > H_{\beta,\star}
 > =
-> \int_{\tau_t}^{\tau_t+\Delta\tau_\star}\chi_\beta(\sigma)\,d\sigma,
+> H_\beta(\tau_t,\Delta\tau_\star),
 > \qquad
 > H_{\zeta,\star}
 > =
-> \int_{\tau_t}^{\tau_t+\Delta\tau_\star}\chi_\zeta(\sigma)\,d\sigma,
+> H_\zeta(\tau_t,\Delta\tau_\star),
 > $$
 >
 > $$
@@ -491,27 +491,25 @@ scholar:
 ## 7. Algorithm
 
 > [!notation] Block-Local Quantities
-> The weight block $W$, momentum state $M$, schedules $R_W(\tau),\chi_\beta(\tau),\chi_\zeta(\tau)$, norm, and $\operatorname{ulmo}$ are block-local. Constant hyperparameters are constant schedules.
+> The weight block $W$, momentum state $M$, schedules $R_W(\tau),H_\beta(\tau,\Delta\tau),H_\zeta(\tau,\Delta\tau)$, norm, and $\operatorname{ulmo}$ are block-local. Constant hyperparameters are constant schedules.
 
 <div class="algorithm-container" markdown="1">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> Scheduled RMS-Matched Stochastic Conditional Gradient</div>
 ```pseudo
 def ScheduledSCGStep($\Theta,M;\mathcal{B}$):
     for each weight block:
-        $(W,M,R_W(\tau),\chi_\beta,\chi_\zeta,\|\cdot\|,\operatorname{ulmo}) \leftarrow$ block-local schedules
-        $H_\beta \leftarrow \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\beta(\sigma)\,d\sigma$
-        $H_\zeta \leftarrow \int_{\tau_t}^{\tau_t+\Delta\tau}\chi_\zeta(\sigma)\,d\sigma$
+        $(W,M,R_W(\tau),H_\beta(\tau,\Delta\tau),H_\zeta(\tau,\Delta\tau),\|\cdot\|,\operatorname{ulmo}) \leftarrow$ block-local schedules
+        $H_\beta \leftarrow H_\beta(\tau_t,\Delta\tau)$
+        $H_\zeta \leftarrow H_\zeta(\tau_t,\Delta\tau)$
         $\beta \leftarrow 2^{-H_\beta}$
         $\zeta \leftarrow 2^{-H_\zeta}$
         $R \leftarrow R_W(\tau_t+\Delta\tau)$
         $G \leftarrow \nabla_W f(\Theta;\mathcal{B})$
         $M' \leftarrow \beta M+(1-\beta)G$
         $V \leftarrow \operatorname{ulmo}(M')$
-        $d \leftarrow 1-\zeta$
-        $v^2 \leftarrow \|V\|^2$
         $s \leftarrow \langle W,V\rangle$
-        $\rho \leftarrow (-\zeta s+\sqrt{\zeta^2s^2+v^2(R^2-\zeta^2\|W\|^2)})/(dv^2)$
-        $W \leftarrow \zeta W+d\rho V$
+        $\rho \leftarrow (-\zeta s+\sqrt{\zeta^2s^2+\|V\|^2(R^2-\zeta^2\|W\|^2)})/((1-\zeta)\|V\|^2)$
+        $W \leftarrow \zeta W+(1-\zeta)\rho V$
         $M \leftarrow M'$
         write back $W,M$ to the block
 ```
@@ -529,8 +527,8 @@ def ScheduledSCGStep($\Theta,M;\mathcal{B}$):
 > | $\Delta\tau$ | Count advanced by one optimizer update |
 > | $q_t$ | Current EMA retention |
 > | $H_{q,t}$ | Current halving exponent |
-> | $\chi_q(\tau)$ | Scheduled halving rate for retention $q$ |
-> | $h_q$ | Constant half-life, $h_q=1/\chi_q$ |
+> | $H_q(\tau,\Delta\tau)$ | Discrete halving-exponent schedule for retention $q$ |
+> | $h_q$ | Constant half-life, $H_q(\tau,\Delta\tau)=\Delta\tau/h_q$ |
 > | $W$ | Weight block |
 > | $G$ | Block gradient |
 > | $M$ | Momentum state |
