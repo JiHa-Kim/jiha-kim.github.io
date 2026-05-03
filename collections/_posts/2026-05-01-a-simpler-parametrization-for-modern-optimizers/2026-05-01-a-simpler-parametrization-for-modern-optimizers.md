@@ -113,7 +113,7 @@ scholar:
 ## 3. Steady-State RMS
 
 > [!proposition] Stationary Radius
-> Define the dimension-normalized metrics $\|X\|_{\mathrm{rms}}=\|X\|_F/\sqrt{d}$ and $\langle X,Y\rangle_{\mathrm{rms}}=\langle X,Y\rangle_F/d$. Under locally constant retentions $\zeta$ and step-scales $\eta$, the weight block $W$ converges to a stationary second moment:
+> Define the dimension-normalized metrics $\|X\|_{\mathrm{rms}}=\|X/\sqrt{d}\|_F$ and $\langle X,Y\rangle_{\mathrm{rms}}=\langle X/\sqrt{d},Y/\sqrt{d}\rangle_F$ to avoid accumulation overflow. Under locally constant retentions $\zeta$ and step-scales $\eta$, the weight block $W$ converges to a stationary second moment:
 >
 > $$
 > \mathbb{E}\|W_t\|_{\mathrm{rms}}^2 = \frac{\eta^2 A_\zeta}{1-\zeta^2}.
