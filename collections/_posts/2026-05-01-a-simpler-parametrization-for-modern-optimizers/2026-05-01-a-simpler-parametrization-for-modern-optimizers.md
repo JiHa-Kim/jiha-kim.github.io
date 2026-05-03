@@ -155,6 +155,8 @@ scholar:
 > \qquad
 > \zeta=2^{-\Delta\tau/h_\zeta}.
 > $$
+>
+> When a later formula contains powers such as $\beta^k$ or $\zeta^k$, those are the constant-retention special case. With scheduled retentions, use the accumulated products over the lag window, e.g. $\prod_{j=0}^{k-1}\beta_{t-j}$ and $\prod_{j=0}^{k-1}\zeta_{t-j}$, or treat the current values as a local stationary approximation when schedules move slowly.
 
 > [!definition] ULMO Atom
 > For a unit-radius norm ball,
@@ -209,7 +211,7 @@ scholar:
 >
 > This is the correction: choose the radius $\rho$ so that the modeled stationary weights have target RMS radius $R_W$.
 
-> [!proposition] Corrected Radius
+> [!proposition] Stationary Corrected Radius
 > Assume a locally stationary segment with fixed $\beta$, $\zeta$, and $\rho$. Let the ULMO atom stream have normalized autocorrelations
 >
 > $$
@@ -321,8 +323,8 @@ scholar:
 >
 > Setting this equal to $R_W^2$ and solving for $\rho$ gives the displayed formula.
 
-> [!corollary] Geometry-Aware Atom Approximation
-> The linear approximation $c_k\approx\beta^k$ treats the ULMO as if it preserved momentum correlations. A cheap refinement is to keep the Gaussian EMA model for $M$ but pass its correlations through the ULMO geometry.
+> [!corollary] Geometry-Aware Atom Prior
+> The linear approximation $c_k\approx\beta^k$ treats the ULMO as if it preserved momentum correlations. A cheap cold-start refinement is to keep the Gaussian EMA model for $M$ but pass its correlations through the ULMO geometry.
 >
 > Let $X,Y$ be jointly Gaussian momentum inputs with normalized correlation $r$, and define the ULMO correlation map
 >
@@ -337,7 +339,7 @@ scholar:
 > }.
 > $$
 >
-> Since the EMA state has input correlation approximately $\beta^k$, use
+> In the constant-retention model, the EMA state has input correlation approximately $\beta^k$, so use
 >
 > $$
 > \boxed{
@@ -349,7 +351,7 @@ scholar:
 > }
 > $$
 >
-> This has negligible optimizer cost: $\Phi$ can be analytic for common geometries, precomputed once by Monte Carlo for a norm/block shape, or tabulated as a scalar function. For the coordinate sign/box atom, the Gaussian arcsine law gives
+> This has negligible optimizer cost: $\Phi$ can be analytic for common geometries, precomputed once by Monte Carlo for a norm/block shape, or tabulated as a scalar function. It is still a prior, not a claim that real minibatch gradients are independent or zero-mean. Real batches can share a persistent task and architecture component, and larger batches can make that persistence stronger by reducing noise around the full-gradient direction. For the coordinate sign/box atom, the Gaussian arcsine law gives
 >
 > $$
 > \boxed{
@@ -424,7 +426,7 @@ scholar:
 > \qquad
 > \chi_\zeta(\tau),
 > \qquad
-> \text{atom-correlation model}.
+> \text{atom-correlation estimate or prior}.
 > }
 > $$
 >
@@ -451,7 +453,7 @@ scholar:
 > }
 > $$
 >
-> Then recompute $A_\zeta$ and $\rho$ from the RMS objective. Under the geometry-aware atom approximation with unit-scale atoms,
+> Then recompute $A_\zeta$ and $\rho$ from the RMS objective. Under the geometry-aware atom prior with unit-scale atoms,
 >
 > $$
 > A_\zeta
@@ -466,14 +468,14 @@ scholar:
 > }.
 > $$
 >
-> This preserves the momentum-state retention timescale, the weight-retention timescale, and the target RMS weight radius in the chosen count units.
+> This preserves the momentum-state retention timescale, the weight-retention timescale, and the target RMS weight radius in the chosen count units. If the retentions vary materially across the lag window, replace the powers by the scheduled products from Section 2 or estimate $A_\zeta$ online from observed atom correlations.
 
 ---
 
 ## 5. Algorithm
 
 > [!notation] Block-Local Quantities
-> The weight block $W$, momentum state $M$, target RMS radius $R_W$, halving exponents $H_\beta,H_\zeta$, norm, $\operatorname{ulmo}$, and ULMO correlation map $\Phi$ are block-local. The exponents may come from constant half-lives or from scheduled halving rates.
+> The weight block $W$, momentum state $M$, target RMS radius $R_W$, halving exponents $H_\beta,H_\zeta$, norm, $\operatorname{ulmo}$, and atom-correlation estimate are block-local. The exponents may come from constant half-lives or from scheduled halving rates.
 
 <div class="algorithm-container" markdown="1">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> RMS-Matched Stochastic Conditional Gradient Block Step</div>
@@ -483,7 +485,7 @@ def StochasticConditionalGradientStep($\Theta,M;\mathcal{B}$):
         $(W,M,R_W,H_\beta,H_\zeta,\|\cdot\|,\operatorname{ulmo},\Phi) \leftarrow$ block-local current values
         $\beta \leftarrow 2^{-H_\beta}$
         $\zeta \leftarrow 2^{-H_\zeta}$
-        $A_\zeta \leftarrow 1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k)$
+        $A_\zeta \leftarrow$ empirical atom-correlation estimate, or cold-start $1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k)$
         $\rho \leftarrow R_W\sqrt{(1+\zeta)/((1-\zeta)A_\zeta)}$
         $G \leftarrow \nabla_W f(\Theta;\mathcal{B})$
         $M' \leftarrow \beta M+(1-\beta)G$

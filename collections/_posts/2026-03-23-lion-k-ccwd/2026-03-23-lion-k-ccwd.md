@@ -85,15 +85,15 @@ scholar:
 > \qquad
 > \chi_{\beta_2}(\tau),
 > \qquad
-> \chi_\zeta(\tau),
+> \gamma(\tau),
 > \qquad
 > \beta_1,
 > \qquad
-> \text{direction-correlation model}.
+> \text{online energy statistics}.
 > }
 > $$
 >
-> The readout blend $\beta_1$ is dimensionless. The retentions $\beta_2$ and $\zeta$ are recomputed from their half-lives or halving-rate schedules whenever the count increment changes.
+> The readout blend $\beta_1$ is dimensionless. The momentum retention $\beta_2$ is recomputed from its half-life or halving-rate schedule whenever the count increment changes. The additive scale $\gamma$ may also be scheduled. The active decay fraction $d=1-\zeta$ is best solved from measured one-step energy statistics once those statistics have warmed up.
 
 ---
 
@@ -197,7 +197,7 @@ scholar:
 > \boxed{\zeta=2^{-H_\zeta}}.
 > $$
 >
-> With a constant weight-retention half-life, $\zeta=2^{-\Delta\tau/h_\zeta}$.
+> With a constant weight-retention half-life, $\zeta=2^{-\Delta\tau/h_\zeta}$. This scheduled-retention form is useful as a cold-start prior or fallback. In the empirical CCWD rule below, $\zeta=1-d$ is instead solved from the current block statistics.
 
 ---
 
@@ -212,9 +212,45 @@ scholar:
 > }
 > $$
 >
-> Corrected decay is the calculation that maps $(R_W,\zeta,\text{direction statistics})$ to the radius $\rho$, rather than treating $\rho$ or $\lambda$ as arbitrary raw knobs.
+> In the stationary radius view, corrected decay maps $(R_W,\zeta,\text{direction statistics})$ to the radius $\rho$, rather than treating $\rho$ or $\lambda$ as arbitrary raw knobs. In the empirical one-step view, the additive scale $\gamma$ is scheduled and the active decay fraction $d=1-\zeta$ is solved from the measured energy balance.
 
-> [!proposition] Unmasked Corrected Radius
+> [!remark] Assumption Boundary
+> Defazio's corrected schedule is a normalized-layer steady-state argument: the clean derivation uses $\langle G_t,W_t\rangle=0$ and treats a learning-rate schedule as a moving steady-state target {% cite defazioWhyGradientsRapidly2025 %}. Chou's corrected decoupled decay is broader, but its basic random-walk calculation assumes $\mathbb{E}\langle W_{t-1},U_t\rangle=0$ at steady state; the output-layer caveat is exactly a case where that cross term is not zero {% cite chouCorrectionDecoupledWeight2026 %}. CCWD adds mask-dependent cross terms, so the practical rule should measure those terms online instead of assuming them away.
+
+> [!proposition] Empirical One-Step CWD Balance
+> Write $d=1-\zeta$ and use the additive update scale $\gamma$. The one-step cautious update is
+>
+> $$
+> W'=W-d(P\odot W)+\gamma U.
+> $$
+>
+> Track block-local EMAs of the actual current statistics
+>
+> $$
+> p_2=\frac{\|P\odot W\|^2}{\|W\|^2},
+> \qquad
+> h=\frac{\langle W,U\rangle}{\|W\|\|U\|},
+> \qquad
+> k=\frac{\langle P\odot W,U\rangle}{\|W\|\|U\|}.
+> $$
+>
+> Let $\alpha=\gamma\|U\|/R_W$. Near the target radius, $\|W\|\approx R_W$, the equation $\|W'\|^2=R_W^2$ becomes
+>
+> $$
+> \boxed{
+> p_2d^2-(2p_2+2\alpha k)d+(\alpha^2+2\alpha h)=0.
+> }
+> $$
+>
+> Use the smaller valid root in $[0,1]$, then set $\zeta=1-d$ and $\rho=\gamma/d$ when $d>0$. If the target radius differs noticeably from the current norm, let $r=\|W\|/R_W$ and solve the exact one-step target equation
+>
+> $$
+> p_2r^2d^2-(2p_2r^2+2\alpha kr)d+(r^2-1+\alpha^2+2\alpha hr)=0.
+> $$
+>
+> This is the preferred production rule because it adapts to real gradient persistence, sign-map persistence, mask structure, layer type, and training phase.
+
+> [!proposition] Unmasked Stationary Prior
 > Let
 >
 > $$
@@ -257,11 +293,11 @@ scholar:
 > }
 > $$
 
-> [!proposition] Corrected Cautious Radius
-> Let $p$ be the masked squared-norm fraction,
+> [!proposition] Closed-Form Cautious Prior
+> If online energy statistics are unavailable, use a stationary closed-form prior. Let $p_2$ be the masked squared-norm fraction,
 >
 > $$
-> p
+> p_2
 > \approx
 > \mathbb{E}\frac{\|P_t\odot W_t\|^2}{\|W_t\|^2}.
 > $$
@@ -279,11 +315,11 @@ scholar:
 > $$
 > a_1
 > \approx
-> 1-p(1-\zeta),
+> 1-p_2(1-\zeta),
 > \qquad
 > a_2
 > \approx
-> 1-p(1-\zeta^2).
+> 1-p_2(1-\zeta^2).
 > $$
 >
 > The first moment $a_1$ controls cross-time direction correlations; the second moment $a_2$ controls RMS energy retention. Define
@@ -309,7 +345,7 @@ scholar:
 > \approx
 > R_W
 > \sqrt{
-> \frac{p(1+\zeta)}
+> \frac{p_2(1+\zeta)}
 > {(1-\zeta)c_u^2A_{a_1}}
 > }.
 > }
@@ -323,13 +359,13 @@ scholar:
 > \approx
 > R_W
 > \sqrt{
-> \frac{p(1-\zeta)(1+\zeta)}
+> \frac{p_2(1-\zeta)(1+\zeta)}
 > {c_u^2A_{a_1}}
 > }.
 > }
 > $$
 >
-> This costs only one scalar substitution, $A_\zeta\leadsto A_{a_1}$, because $p$ is already tracked for CCWD. When $p=1$, $a_1=\zeta$ and this recovers the unmasked formula.
+> This costs only one scalar substitution, $A_\zeta\leadsto A_{a_1}$, because $p_2$ is already tracked for CCWD. It is still a prior: it closes the mask and direction process by low-order moments and a direction-correlation model. When $p_2=1$, $a_1=\zeta$ and this recovers the unmasked formula.
 
 > [!proof]- Masked RMS Balance
 > Write $d=1-\zeta$. The cautious update is
@@ -369,16 +405,16 @@ scholar:
 > $$
 > d
 > \approx
-> \frac{\gamma^2c_u^2S}{2pR_W^2}.
+> \frac{\gamma^2c_u^2S}{2p_2R_W^2}.
 > $$
 >
-> This is the old CCWD multiplier formula, now interpreted as the small-step form of the retention/radius parametrization.
+> This is the old CCWD multiplier formula, now interpreted as the small-step form of the retention/radius parametrization under the closed-form prior.
 
 ---
 
 ## 5. Direction Correlation Factor
 
-> [!summary] Empirical Default
+> [!summary] Correlation Priors
 > For any scalar retention $a$, define
 >
 > $$
@@ -389,10 +425,10 @@ scholar:
 > {\mathbb{E}\|U_t\|^2}.
 > $$
 >
-> Use $a=\zeta$ for the unmasked update and $a=a_1=1-p(1-\zeta)$ for CCWD. The most direct estimate of the correlations is empirical; this automatically captures sign maps, LMO maps, masking side effects, and non-independent gradients.
+> Use $a=\zeta$ for the unmasked update and $a=a_1=1-p_2(1-\zeta)$ for the closed-form CCWD prior. These correlation factors are useful for cold start, ablation, or when one wants a stationary model. The empirical one-step balance above is the practical default because it measures the cross terms $h$ and $k$ directly.
 
-> [!proposition] Linear-Filter Approximation for Lion-$\mathcal{K}$
-> For a simple independent-gradient approximation, set $b=\beta_{\mathrm{eff}}$ and define
+> [!proposition] Cold-Start Linear-Filter Approximation for Lion-$\mathcal{K}$
+> For a simple independent-gradient cold-start approximation, set $b=\beta_{\mathrm{eff}}$ and define
 >
 > $$
 > \nu_0
@@ -415,6 +451,8 @@ scholar:
 > }.
 > }
 > $$
+>
+> This is a null model, not a claim about real minibatch gradients. Real batches can share a persistent task and architecture component even at initialization; Lion's EMA/readout and the sign map can preserve that persistence as stable signs. If $\beta_2$ or the retention proxy $a$ is scheduled over the lag window, replace powers such as $\beta_2^k$ and $a^k$ by the corresponding accumulated products. The displayed closed form is the constant-retention special case.
 >
 > In the small-step limit $a\to1$, this reduces to the usual unweighted factor
 >
@@ -474,26 +512,26 @@ scholar:
 ## 6. Algorithm
 
 > [!notation] Block-Local Quantities
-> The weight block $W$, momentum state $M$, target RMS radius $R_W$, halving exponents $H_{\beta_2},H_\zeta$, direction map $\nabla\mathcal{K}$, direction scale $c_u^2$, and correlation estimates are block-local. The mask fraction $p$ may be measured with an EMA; use $p=1$ to recover the unmasked update.
+> The weight block $W$, momentum state $M$, target RMS radius $R_W$, halving exponent $H_{\beta_2}$, additive scale $\gamma$, direction map $\nabla\mathcal{K}$, and energy statistics are block-local. A scheduled $H_\zeta$ and the closed-form correlation prior can be used until the EMAs for $p_2,h,k$ have warmed up.
 
 <div class="algorithm-container" markdown="1">
 <div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> Lion-$\mathcal{K}$ with RMS-Matched CCWD</div>
 ```pseudo
 def LionK_CCWD_Step($\Theta,M;\mathcal{B}$):
     for each weight block:
-        $(W,M,R_W,H_{\beta_2},H_\zeta,\beta_1,c_u^2,\nabla\mathcal{K}) \leftarrow$ block-local current values
+        $(W,M,R_W,H_{\beta_2},\gamma,\beta_1,\nabla\mathcal{K}) \leftarrow$ block-local current values
         $\beta_2 \leftarrow 2^{-H_{\beta_2}}$
-        $\zeta \leftarrow 2^{-H_\zeta}$
         $G \leftarrow \nabla_W f(\Theta;\mathcal{B})$
         $M' \leftarrow \beta_2M+(1-\beta_2)G$
         $Z \leftarrow \beta_1M'+(1-\beta_1)G$
         $U \leftarrow -\nabla\mathcal{K}(Z)$
         $P_i \leftarrow \mathbf{1}_{\{\operatorname{sign}(W_i)=\operatorname{sign}(U_i)\}}$
-        $p \leftarrow \operatorname{EMA}(\|P\odot W\|^2/\|W\|^2)$
-        $a_1 \leftarrow 1-p(1-\zeta)$
-        $A_{a_1} \leftarrow$ empirical estimate or linear-filter approximation
-        $\rho \leftarrow R_W\sqrt{p(1+\zeta)/((1-\zeta)c_u^2A_{a_1})}$
-        $W \leftarrow W-(1-\zeta)(P\odot W)+(1-\zeta)\rho U$
+        $p_2 \leftarrow \operatorname{EMA}(\|P\odot W\|^2/\|W\|^2)$
+        $h \leftarrow \operatorname{EMA}(\langle W,U\rangle/(\|W\|\|U\|))$
+        $k \leftarrow \operatorname{EMA}(\langle P\odot W,U\rangle/(\|W\|\|U\|))$
+        $\alpha \leftarrow \gamma\|U\|/R_W$
+        $d \leftarrow$ smaller valid root of $p_2d^2-(2p_2+2\alpha k)d+(\alpha^2+2\alpha h)=0$
+        $W \leftarrow W-d(P\odot W)+\gamma U$
         $M \leftarrow M'$
         write back $W,M$ to the block
 ```
@@ -501,7 +539,7 @@ def LionK_CCWD_Step($\Theta,M;\mathcal{B}$):
 </div>
 
 > [!warning] Caveats for Output Layers
-> The steady-state independence assumption frequently breaks down for the cross-entropy output layer. You may need to exclude the output unembedding layer from corrected decay or manage it separately {% cite chouCorrectionDecoupledWeight2026 %}.
+> The steady-state independence assumption frequently breaks down for the cross-entropy output layer. Use the empirical cross terms for that layer, or exclude the output unembedding layer from corrected decay and manage it separately {% cite chouCorrectionDecoupledWeight2026 %}.
 
 ---
 
@@ -520,13 +558,17 @@ def LionK_CCWD_Step($\Theta,M;\mathcal{B}$):
 > | $\beta_1$ | Readout blend |
 > | $\beta_{\mathrm{eff}}$ | Effective stored-state readout coefficient |
 > | $\zeta$ | Active-coordinate weight retention |
-> | $\gamma$ | Equivalent additive scale, $\gamma=(1-\zeta)\rho$ |
+> | $d$ | Active decay fraction, $d=1-\zeta$ |
+> | $\gamma$ | Additive update scale, equal to $(1-\zeta)\rho$ in radius form |
 > | $\lambda$ | Equivalent decoupled weight-decay coefficient, $\lambda=1/\rho$ |
 > | $\rho$ | Radius / inverse weight-decay coordinate |
 > | $R_W$ | Target stationary RMS weight radius |
-> | $p$ | Masked squared-norm fraction |
-> | $a_1$ | First moment of masked diagonal retention, $a_1\approx1-p(1-\zeta)$ |
-> | $a_2$ | Second moment of masked diagonal retention, $a_2\approx1-p(1-\zeta^2)$ |
+> | $p_2$ | Masked squared-norm fraction |
+> | $h$ | Weight-direction cosine, $\langle W,U\rangle/(\|W\|\|U\|)$ |
+> | $k$ | Masked weight-direction cosine, $\langle P\odot W,U\rangle/(\|W\|\|U\|)$ |
+> | $\alpha$ | Normalized additive step, $\alpha=\gamma\|U\|/R_W$ |
+> | $a_1$ | First moment of masked diagonal retention, $a_1\approx1-p_2(1-\zeta)$ |
+> | $a_2$ | Second moment of masked diagonal retention, $a_2\approx1-p_2(1-\zeta^2)$ |
 > | $c_u^2$ | Direction squared-norm scale, $\mathbb{E}\|U_t\|^2$ |
 > | $c_k$ | Normalized direction autocorrelation at lag $k$ |
 > | $A_a$ | Retention-weighted direction-correlation factor for scalar retention $a$ |
