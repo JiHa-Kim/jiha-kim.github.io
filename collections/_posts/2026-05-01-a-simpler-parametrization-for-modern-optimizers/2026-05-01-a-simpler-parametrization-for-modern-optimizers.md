@@ -2,7 +2,7 @@
 layout: post
 title: "A Simpler Parametrization for Modern Optimizers"
 date: 2026-05-01 20:09 +0000
-description: "A compact math-first note on retention half-lives and RMS-matched stochastic conditional gradient."
+description: "A compact math-first note on RMS-sphere optimization, retention half-lives, and angular learning rates."
 categories:
   - Machine Learning
   - Mathematical Optimization
@@ -18,45 +18,106 @@ scholar:
 ---
 
 > [!summary]
-> The weight update is $W_t=\zeta_tW_{t-1}+\eta_tV_t$. The retention $\zeta_t$ controls the decay clock; the step scale $\eta_t$ controls the movement. These two coordinates are independent.
+> Modern normalized optimizers can be viewed as stochastic optimization on a product of RMS spheres. Initialization sets each controlled block radius. A single direction-retention clock sets the angular movement. Weight decay becomes the exact radial Lagrange correction, not a manually scheduled penalty.
 
 ---
 
-## 1. The Update
+## 1. The Constraint
 
-> [!definition] Block Update
-> For each weight block $W \in \Theta$ with gradient $G_t=\nabla_Wf(\Theta;\mathcal{B})$, maintain a momentum state $M$ and compute
+> [!definition] Product of RMS Spheres
+> For a controlled weight block $W_b$ of dimension $d_b$, use the dimension-normalized RMS metric
 >
 > $$
-> M_t=\beta_tM_{t-1}+(1-\beta_t)G_t,
+> \|X\|_{\mathrm{rms}}
+> =
+> \left(
+> \frac{1}{d_b}\|X\|_F^2
+> \right)^{1/2},
 > \qquad
-> V_t=\operatorname{ulmo}(M_t),
+> \langle X,Y\rangle_{\mathrm{rms}}
+> =
+> \frac{1}{d_b}\langle X,Y\rangle_F.
 > $$
 >
-> where $\operatorname{ulmo}(M)=\arg\min_{\|V\|\le1}\langle M,V\rangle$ is the unit-ball linear minimization oracle for a chosen block norm $\|\cdot\|$ {% cite pethickTrainingDeepLearning2025a %}. The atom satisfies $\|V_t\|=1$. The weight update is
+> Initialize the block radius by
 >
 > $$
 > \boxed{
-> W_t=\zeta_tW_{t-1}+\eta_tV_t.
+> R_b=\|W_{b,0}\|_{\mathrm{rms}}.
 > }
 > $$
 >
-> The weight retention $\zeta_t\in(0,1]$ controls how much of the previous weight survives. The step scale $\eta_t>0$ controls how far the update moves along the atom direction. These two roles are independent.
-
-> [!remark] Radius Form
-> Setting $\eta_t=(1-\zeta_t)\rho_t$ couples the step scale to the retention:
+> The constrained optimization problem is
 >
 > $$
-> W_t=\zeta_tW_{t-1}+(1-\zeta_t)\rho_tV_t.
+> \min_\Theta
+> \mathbb E_{\mathcal B} f(\Theta;\mathcal B)
+> \qquad
+> \text{subject to}
+> \qquad
+> \|W_b\|_{\mathrm{rms}}=R_b
+> \quad
+> \text{for every controlled block }b.
 > $$
 >
-> This is an EMA toward $\rho_tV_t$, so the trajectory stays inside the $\rho_t$-ball when $\|W_0\|\le\rho_0$. The equivalent decoupled-weight-decay form is $W_t=(1-\eta_t\lambda_t)W_{t-1}+\eta_tV_t$ with $\lambda_t=1/\rho_t$ {% cite kossonWeightDecayMay2026 %}.
->
-> For strict constrained stochastic conditional gradient, $\rho$ defines the feasible set and this coupling is natural. For the optimizer/regularization view, the step-scale form with $R_{\mathrm{ss}}$ as a diagnostic is the cleaner decoupled parametrization.
+> Thus the block scale is not a new schedule. It is inherited from initialization. Biases, normalization parameters, embeddings with special tying rules, and zero-radius blocks can be left outside the controlled set.
 
 ---
 
-## 2. Retentions as Schedules
+## 2. Tangent Descent
+
+> [!definition] Tangent Projection
+> On the RMS sphere $\|W\|_{\mathrm{rms}}=R$, the tangent space is
+>
+> $$
+> T_W\mathbb S_R
+> =
+> \{X:\langle X,W\rangle_{\mathrm{rms}}=0\}.
+> $$
+>
+> The Euclidean RMS tangent projection is
+>
+> $$
+> \boxed{
+> P_WX
+> =
+> X
+> -
+> \frac{\langle X,W\rangle_{\mathrm{rms}}}{\|W\|_{\mathrm{rms}}^2}W.
+> }
+> $$
+
+> [!proposition] Weight Decay as a Lagrange Multiplier
+> Let $G=\nabla_Wf$ be the block gradient. The constrained gradient flow on the sphere is
+>
+> $$
+> \boxed{
+> \dot W=-P_WG
+> =
+> -G
+> +
+> \frac{\langle G,W\rangle_{\mathrm{rms}}}{\|W\|_{\mathrm{rms}}^2}W.
+> }
+> $$
+>
+> The radial term is exactly the multiplier needed to keep $\frac{d}{dt}\|W\|_{\mathrm{rms}}^2=0$. In this formulation, "weight decay" is not an independently tuned penalty. It is the radial correction imposed by the constraint.
+
+> [!proof]- Radius Preservation
+> Since $P_WG$ is tangent,
+>
+> $$
+> \frac{d}{dt}\frac12\|W\|_{\mathrm{rms}}^2
+> =
+> \langle W,\dot W\rangle_{\mathrm{rms}}
+> =
+> -\langle W,P_WG\rangle_{\mathrm{rms}}
+> =
+> 0.
+> $$
+
+---
+
+## 3. The Direction Clock
 
 > [!definition] Halving Exponent
 > For any retention $q\in(0,1]$, define
@@ -71,26 +132,40 @@ scholar:
 >
 > Retention products become sums: $H_{\prod_iq_i}=\sum_iH_{q_i}$. The halving exponent is the natural additive coordinate for retentions {% cite marekSmallBatchSize2025 %}.
 
-> [!definition] Scheduled Retention
-> Fix a training count $\tau$ (tokens, updates, or another monotone count). A retention schedule returns the halving exponent for each update:
+> [!definition] Weight-Direction Retention
+> Fix a training count $\tau$ such as tokens or updates. With one global direction half-life $h$, define the per-update direction retention
 >
 > $$
 > \boxed{
-> H_{q,t}=H_q(\tau_t,\Delta\tau),
-> \qquad
-> q_t=2^{-H_{q,t}}.
+> q_t=2^{-\Delta\tau_t/h}.
 > }
 > $$
 >
-> A constant half-life $h_q$ is the special case $H_q(\tau_t,\Delta\tau)=\Delta\tau/h_q$.
-
-> [!principle] Transfer Rule
-> The schedules $H_\beta(\tau,\Delta\tau)$, $H_\zeta(\tau,\Delta\tau)$, and either $\eta(\tau)$ or $R_W(\tau)$ are defined in count units. When the count increment changes (e.g. batch size changes), the schedules are invariant; only the per-update retentions are recomputed:
+> The induced angular step and relative movement are not separately scheduled:
 >
 > $$
-> \beta_\star=2^{-H_\beta(\tau_t,\Delta\tau_\star)},
+> \boxed{
+> \theta_t=\arccos q_t,
 > \qquad
-> \zeta_\star=2^{-H_\zeta(\tau_t,\Delta\tau_\star)}.
+> \epsilon_t=\sin\theta_t=\sqrt{1-q_t^2}.
+> }
+> $$
+>
+> For small $\Delta\tau_t/h$,
+>
+> $$
+> \epsilon_t
+> \approx
+> \sqrt{2\ln 2\,\Delta\tau_t/h}.
+> $$
+>
+> Thus $h$ is a direction-retention half-life, not a conventional additive learning-rate scale.
+
+> [!principle] Transfer Rule
+> The schedule is defined in count units. When the count increment changes, the per-update retention is recomputed:
+>
+> $$
+> q_\star=2^{-\Delta\tau_\star/h}.
 > $$
 
 > [!example]- Token Count
@@ -106,165 +181,153 @@ scholar:
 > \text{batches}.
 > $$
 >
-> Keeping a token half-life fixed means the raw per-update retention changes when the batch size changes.
+> Keeping a token half-life fixed means the angular movement changes automatically when the batch size changes.
 
 ---
 
-## 3. Steady-State RMS
+## 4. Spherical Update
 
-> [!proposition] Stationary Radius
-> Define the dimension-normalized metrics $\|X\|_{\mathrm{rms}}=\|X/\sqrt{d}\|_F$ and $\langle X,Y\rangle_{\mathrm{rms}}=\langle X/\sqrt{d},Y/\sqrt{d}\rangle_F$ to avoid accumulation overflow. Under locally constant retentions $\zeta$ and step-scales $\eta$, the weight block $W$ converges to a stationary second moment:
+> [!definition] Tangent Unit Direction
+> Let
 >
 > $$
-> \mathbb{E}\|W_t\|_{\mathrm{rms}}^2 = \frac{\eta^2 A_\zeta}{1-\zeta^2}.
+> \widehat W_t=\frac{W_t}{R},
+> \qquad
+> \|\widehat W_t\|_{\mathrm{rms}}=1.
 > $$
 >
-> The implied steady-state radius $R_{\mathrm{ss}}$ is the characteristic scale maintained by the balance of movement and retention. For initialization and schedule planning, one may choose $\eta$ to match a target radius $R$:
+> Choose a tangent unit descent direction $U_t$ satisfying
+>
+> $$
+> \langle U_t,\widehat W_t\rangle_{\mathrm{rms}}=0,
+> \qquad
+> \|U_t\|_{\mathrm{rms}}=1.
+> $$
+
+> [!proposition] Exact RMS-Preserving Update
+> The spherical update is
 >
 > $$
 > \boxed{
-> \eta^{\mathrm{prior}}
+> \widehat W_{t+1}
 > =
-> R
-> \sqrt{
-> \frac{1-\zeta^2}
-> {A_\zeta}
-> }.
+> q_t\widehat W_t
+> +
+> \sqrt{1-q_t^2}\,U_t,
+> \qquad
+> W_{t+1}=R\widehat W_{t+1}.
 > }
 > $$
+>
+> Radius preservation is automatic:
+>
+> $$
+> \|\widehat W_{t+1}\|_{\mathrm{rms}}^2
+> =
+> q_t^2
+> +
+> (1-q_t^2)
+> =
+> 1.
+> $$
+>
+> There is no scalar RMS solve and no clipping. The effective learning rate is the angular movement implied by the retention clock.
 
-> [!proposition] Targeted One-Step Solve
-> Given a scheduled target radius $R_t$, we solve for the step scale $\eta_t$ that imposes $\|W_t\|_{\mathrm{rms}}^2 = R_t^2$ exactly in one step. Let $s_t = \langle W_{t-1}, V_t \rangle_{\mathrm{rms}}$ and $v_{\mathrm{sq},t} = \|V_t\|_{\mathrm{rms}}^2$. Expanding the update $W_t = \zeta_t W_{t-1} + \eta_t V_t$ yields the quadratic:
+> [!remark] What the Clock Replaces
+> The single half-life $h$ replaces the usual combination of learning-rate schedule, decoupled weight decay, RMS target schedule, and manual RMS clipping threshold. The block radius is fixed by initialization; the step size is induced by the desired direction turnover.
+
+---
+
+## 5. Tangent Atoms
+
+> [!definition] Euclidean RMS Direction
+> Maintain a momentum state
 >
 > $$
-> v_{\mathrm{sq},t}\eta_t^2 + 2\zeta_t s_t \eta_t + \left(\zeta_t^2 \|W_{t-1}\|_{\mathrm{rms}}^2 - R_t^2\right) = 0.
+> M_t=\beta_tM_{t-1}+(1-\beta_t)G_t,
+> \qquad
+> G_t=\nabla_Wf(\Theta;\mathcal B).
 > $$
 >
-> The admissible positive root is:
+> In the minimal one-clock version, tie the momentum retention to the direction retention:
 >
 > $$
 > \boxed{
-> \eta_t^{\mathrm{solve}} = \frac{-\zeta_t s_t + \sqrt{\zeta_t^2 s_t^2 + v_{\mathrm{sq},t}(R_t^2 - \zeta_t^2 \|W_{t-1}\|_{\mathrm{rms}}^2)}}{v_{\mathrm{sq},t}}.
+> \beta_t=q_t.
 > }
 > $$
+>
+> Then use the normalized tangent descent direction
+>
+> $$
+> D_t=-P_{\widehat W_t}M_t,
+> \qquad
+> U_t=\frac{D_t}{\|D_t\|_{\mathrm{rms}}}.
+> $$
+>
+> If $\|D_t\|_{\mathrm{rms}}=0$, the momentum has no first-order feasible component on the RMS sphere. The block update can be skipped for that step.
 
-> [!remark] Stability and Admissibility
-> During the transition from initialization (where $\|W_0\| \ll R_t$), the unconstrained solve $\eta_t^{\mathrm{solve}}$ may prescribe an excessively large step to reach the target radius immediately. To maintain model stability, the update is capped by a baseline step-scale schedule $\eta_{\mathrm{lr},t}$:
+> [!remark] Tangent ULMO
+> If a non-Euclidean atom is desired, define the tangent atom directly:
 >
 > $$
-> \eta_t = \min(\eta_t^{\mathrm{solve}}, \eta_{\mathrm{lr},t}).
+> U_t
+> \in
+> \arg\min_U
+> \langle M_t,U\rangle
+> \quad
+> \text{subject to}
+> \quad
+> \langle U,\widehat W_t\rangle_{\mathrm{rms}}=0,
+> \quad
+> \|U\|_{\mathrm{rms}}=1.
 > $$
 >
-> This allows the weights to approach the target manifold at a controlled rate before entering the steady-state maintenance regime.
-
-> [!remark] Discriminant Geometry
-> The discriminant is $v_{\mathrm{sq},t}(R_t^2-\zeta_t^2(\|W_{t-1}\|_{\mathrm{rms}}^2-s_t^2/v_{\mathrm{sq},t}))$. Factoring $s_t^2=v_{\mathrm{sq},t}\|W_{t-1}\|_{\mathrm{rms}}^2\cos^2\theta$ where $\theta$ is the angle between $W_{t-1}$ and $V_t$, this simplifies to $v_{\mathrm{sq},t}(R_t^2-\zeta_t^2\|W_{t-1}\|_{\mathrm{rms}}^2\sin^2\theta)$. The solve fails exactly when the retained weight's component perpendicular to the atom exceeds the target radius.
-
-> [!proof]- Stationary Second Moment
-> Define the cumulative retention $B_{t,i}=\prod_{r=i+1}^{t}\zeta_r$ for $i < t$, with $B_{t,t}=1$. Unrolling the recurrence $W_t = \zeta_t W_{t-1} + \eta_t V_t$ gives:
+> A practical approximation is to compute an unconstrained atom $V_t=\operatorname{ulmo}(M_t)$ {% cite pethickTrainingDeepLearning2025a %}, project it onto the tangent space, and normalize:
 >
 > $$
-> W_t = B_{t,0}W_0 + \sum_{i=1}^{t} \eta_i B_{t,i} V_i.
+> D_t=P_{\widehat W_t}V_t,
+> \qquad
+> U_t=\frac{D_t}{\|D_t\|_{\mathrm{rms}}}.
 > $$
 >
-> Neglecting the decayed initialization term, the second moment is:
->
-> $$
-> \mathbb{E}\|W_t\|_{\mathrm{rms}}^2 = \sum_{i=1}^t \sum_{j=1}^t \eta_i \eta_j B_{t,i} B_{t,j} \mathbb{E}\langle V_i, V_j \rangle_{\mathrm{rms}}.
-> $$
->
-> Under locally constant $\zeta$ and $\eta$, and letting $k = |i-j|$, we have $B_{t,i} B_{t,j} = \zeta^{2(t-\max(i,j))} \zeta^k$. Summing over the lag $k$:
->
-> $$
-> \mathbb{E}\|W_t\|_{\mathrm{rms}}^2 = \eta^2 \left( \sum_{m=0}^\infty \zeta^{2m} \right) \left( c_0 + 2 \sum_{k=1}^\infty \zeta^k c_k \right) = \frac{\eta^2 A_\zeta}{1-\zeta^2}.
-> $$
+> If $D_t=0$, the atom was purely radial and contains no feasible first-order movement for the constrained block.
 
 ---
 
-## 4. Correlation Priors
-
-> [!summary] Estimation
-> The most direct choice is to estimate $c_k$ and $A_\zeta$ online from the actual $V_t$ stream. Analytic approximations are useful as cold-start priors.
-
-> [!definition] Geometry Map
-> Let $X,Y$ be jointly Gaussian momentum inputs with normalized correlation $r$. Since $\|V\|=1$, the ULMO correlation map is
->
-> $$
-> \Phi(r)
-> =
-> \mathbb{E}\langle \operatorname{ulmo}(X),\operatorname{ulmo}(Y)\rangle.
-> $$
-
-> [!proposition] Constant-Retention Prior
-> If the momentum retention is locally constant and the gradient-noise model is used only as a prior, then
->
-> $$
-> c_k\approx \Phi(\beta^k),
-> \qquad
-> A_\zeta
-> \approx
-> 1+2\sum_{k\ge1}\zeta^k\Phi(\beta^k).
-> $$
->
-> For coordinate sign or box atoms, the Gaussian arcsine law gives
->
-> $$
-> \Phi(r)=\frac{2}{\pi}\arcsin r,
-> \qquad
-> A_\zeta
-> \approx
-> 1+\frac{4}{\pi}\sum_{k\ge1}\zeta^k\arcsin(\beta^k).
-> $$
->
-> For high-dimensional $\ell_2$ normalization, $\Phi(r)\approx r$, so
->
-> $$
-> A_\zeta
-> \approx
-> \frac{1+\zeta\beta}{1-\zeta\beta}.
-> $$
-
-> [!remark] Scheduled Correlations
-> With materially varying retentions, replace $\beta^k$ and $\zeta^k$ by the products over the relevant lag window:
->
-> $$
-> \beta^k
-> \leadsto
-> \prod_{r=t-k+1}^{t}\beta_r,
-> \qquad
-> \zeta^k
-> \leadsto
-> \prod_{r=t-k+1}^{t}\zeta_r.
-> $$
->
-> Online estimates avoid choosing a closed-form prior and naturally include task structure, batch correlations, atom geometry, and training-phase changes.
-
----
-
-## 5. Algorithm
+## 6. Algorithm
 
 > [!notation] Block-Local Quantities
-> All quantities — $W$, $M$, $\eta_{\mathrm{lr}}(\tau)$, $R_W(\tau)$, $H_\beta(\tau)$, $H_\zeta(\tau)$, and $\operatorname{ulmo}$ — are block-local.
+> Each controlled block stores its initialization radius $R$ and momentum state $M$. The only exposed dynamic schedule in the minimal version is the global direction half-life $h$.
 
 <div class="algorithm-container" markdown="1">
-<div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> Scheduled Stochastic Conditional Gradient</div>
+<div class="algorithm-header"><span class="algorithm-kw">Algorithm</span> RMS-Sphere Optimizer</div>
 ```pseudo
-def ScheduledSCGStep($\Theta, M; \mathcal{B}$):
-    for each block $W \in \Theta$:
-        $\beta \leftarrow 2^{-H_{\beta,t}}, \quad \zeta \leftarrow 2^{-H_{\zeta,t}}$
-        $G \leftarrow \nabla_W f(\Theta; \mathcal{B})$
+def RMSSphereStep($\Theta, M; \mathcal{B}$):
+    for each controlled block $W \in \Theta$:
+        $R \leftarrow \|W_0\|_{\mathrm{rms}}$
+        $\widehat W \leftarrow W/R$
+
+        $q \leftarrow 2^{-\Delta\tau/h}$
+        $\beta \leftarrow q$
+
+        $G \leftarrow \nabla_W f(\Theta;\mathcal{B})$
         $M \leftarrow \beta M + (1-\beta)G$
-        $V \leftarrow \operatorname{ulmo}(M)$
-        
-        // Solve for step scale $\eta$
-        $s \leftarrow \langle W, V \rangle_{\mathrm{rms}}, \quad v \leftarrow \|V\|_{\mathrm{rms}}^2$
-        $D \leftarrow \zeta^2 s^2 + v(R_t^2 - \zeta^2 \|W\|_{\mathrm{rms}}^2)$
-        $\eta \leftarrow \max(0, (-\zeta s + \sqrt{D})/v)$
-        $\eta \leftarrow \min(\eta, \eta_{\mathrm{lr},t})$
-        
-        $W \leftarrow \zeta W + \eta V$
+
+        $D \leftarrow -M+\langle M,\widehat W\rangle_{\mathrm{rms}}\widehat W$
+        if $\|D\|_{\mathrm{rms}} > 0$:
+            $U \leftarrow D/\|D\|_{\mathrm{rms}}$
+            $\widehat W \leftarrow q\widehat W+\sqrt{1-q^2}\,U$
+            $\widehat W \leftarrow \widehat W/\|\widehat W\|_{\mathrm{rms}}$
+            $W \leftarrow R\widehat W$
 ```
 </div>
+
+> [!remark] Numerical Projection
+> The final normalization of $\widehat W$ is a roundoff correction back to the constraint manifold.
+
+> [!remark] When to Untie Momentum
+> Tying $\beta_t=q_t$ is the clean base algorithm. If experiments show that gradient averaging needs a different timescale from weight-direction turnover, momentum can be untied later by giving $\beta$ its own half-life. That is an empirical extension, not part of the minimal parametrization.
 
 ---
 
@@ -273,23 +336,21 @@ def ScheduledSCGStep($\Theta, M; \mathcal{B}$):
 > [!notation]- Symbols
 > | Symbol | Meaning |
 > |---|---|
-> | $\tau$ | Training count (tokens, updates, etc.) |
-> | $H_q(\tau)$ | Halving-exponent schedule for retention $q$ |
-> | $W$ | Weight block |
-> | $V_t$ | ULMO atom, $\|V_t\|=1$ in block norm |
-> | $\eta_t$ | Step scale |
-> | $\eta_{\mathrm{lr},t}$ | Baseline step-scale (learning rate) schedule |
-> | $s_t$ | Inner product $\langle W_{t-1}, V_t \rangle_{\mathrm{rms}}$ |
-> | $v_{\mathrm{sq},t}$ | Atom RMS norm squared, $\|V_t\|_{\mathrm{rms}}^2$ |
-> | $\rho_t$ | Norm-ball radius, $\rho_t=\eta_t/(1-\zeta_t)$ |
-> | $\lambda_t$ | Decoupled weight-decay coefficient, $\lambda_t=1/\rho_t$ |
-> | $R_W(\tau)$ | Scheduled target RMS radius |
-> | $R_{\mathrm{ss}}$ | Implied steady-state radius |
-> | $c_k$ | Atom autocorrelation, $\mathbb{E}\langle V_t,V_{t-k}\rangle_{\mathrm{rms}}$ |
-> | $\Phi$ | ULMO correlation map |
-> | $A_\zeta$ | Retention-weighted correlation factor |
-> | $\|\cdot\|$ | Block-local norm (e.g., $\ell_2$, $\ell_\infty$) |
+> | $\tau$ | Training count, such as tokens or updates |
+> | $\Delta\tau$ | Count increment for one optimizer step |
+> | $W_b$ | Controlled weight block |
+> | $R_b$ | Fixed block RMS radius, $R_b=\|W_{b,0}\|_{\mathrm{rms}}$ |
+> | $\widehat W$ | Normalized block, $W/R$ |
+> | $G_t$ | Block gradient |
+> | $M_t$ | Momentum state |
+> | $P_W$ | RMS tangent projection at $W$ |
+> | $q_t$ | Weight-direction retention |
+> | $h$ | Weight-direction half-life in count units |
+> | $\theta_t$ | Angular step, $\arccos q_t$ |
+> | $\epsilon_t$ | Relative movement, $\sqrt{1-q_t^2}$ |
+> | $U_t$ | Unit RMS tangent descent direction |
 > | $\|\cdot\|_{\mathrm{rms}}$ | Dimension-normalized RMS norm |
+> | $\langle\cdot,\cdot\rangle_{\mathrm{rms}}$ | Dimension-normalized RMS inner product |
 
 ## References
 
