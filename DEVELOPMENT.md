@@ -64,6 +64,18 @@ bundle exec jekyll s
 
 This ensures that your files in `collections/` remain in their original Obsidian format while being rendered correctly in the browser.
 
+To preview drafts through the project wrapper:
+
+```bash
+bash tools/run.sh --drafts
+```
+
+Jekyll's native draft flag is plural:
+
+```bash
+bundle exec jekyll s --drafts --config _config.yml,_config_dev.yml
+```
+
 ## Local CI Replication
 
 To replicate the GitHub Actions workflow locally (build + test), use the provided test script:
