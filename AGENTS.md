@@ -5,6 +5,7 @@ This file contains instructions for AI agents when creating or modifying content
 ## General Guidelines
 - I am using the Chirpy theme in Jekyll with a custom pre-processor plugin (`_plugins/obsidian_preprocess.rb`).
 - **Automation**: The pre-processor runs automatically during the Jekyll build process. You should commit files in the **Obsidian-style math and callout format** (see below); Jekyll will handle the conversion to the processed HTML format required by the theme.
+- Keep these agent-facing instructions in `AGENTS.md`. Do not duplicate them in post front matter as `llm-instructions`.
 - Maintain a consistent tone and style across posts.
 
 ## Metadata
