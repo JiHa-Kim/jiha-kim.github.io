@@ -69,15 +69,15 @@ Assume $ab=1-\epsilon$, where $0<\epsilon\ll1$. The represented loss is $\frac{1
 > Since $\nabla_a f=-\epsilon b$ and $\nabla_b f=-\epsilon a$, a GD step gives
 >
 > $$
-> a^+=a+\eta\epsilon b,
+> a\leftarrow a+\eta\epsilon b,
 > \qquad
-> b^+=b+\eta\epsilon a.
+> b\leftarrow b+\eta\epsilon a.
 > $$
 >
 > Therefore
 >
 > $$
-> m^+
+> m_{\mathrm{after}}
 > =
 > ab+\eta\epsilon(a^2+b^2)+\eta^2\epsilon^2ab.
 > $$
@@ -88,7 +88,7 @@ The post-step loss is
 
 > [!calculation] Loss Condition
 > $$
-> f^+
+> f_{\mathrm{after}}
 > =
 > \frac{1}{2}\epsilon^2
 > \left[-1+\eta(a^2+b^2)+\eta^2\epsilon(1-\epsilon)\right]^2.
@@ -175,9 +175,9 @@ Decoupled weight decay is a shrink of the current iterate plus an optimizer incr
 
 > [!definition] Shrink-plus-Increment
 > $$
-> A^+=\rho_AA+U_A,
+> A\leftarrow\rho_AA+U_A,
 > \qquad
-> B^+=\rho_BB+U_B,
+> B\leftarrow\rho_BB+U_B,
 > \qquad
 > 0<\rho_A,\rho_B\le1.
 > $$
@@ -190,15 +190,15 @@ Define the factor Grams $H_A=A^\top A$, $H_B=B^\top B$. Gram balance means $H_A=
 > If $\rho_A=\rho_B=\rho$ and $U_A=U_B=0$, then
 >
 > $$
-> H_A^+=\rho^2H_A,
+> H_{A,\mathrm{after}}=\rho^2H_A,
 > \qquad
-> H_B^+=\rho^2H_B.
+> H_{B,\mathrm{after}}=\rho^2H_B.
 > $$
 >
 > Hence $D=H_A-H_B$ obeys
 >
 > $$
-> D^+=\rho^2D.
+> D_{\mathrm{after}}=\rho^2D.
 > $$
 
 Shared decay damps absolute Gram imbalance, including column RMS and column-correlation differences. It does not improve relative balance; it shrinks both the imbalance and the overall Grams.
@@ -207,13 +207,13 @@ With increments included,
 
 > [!calculation] Full Gram Evolution
 > $$
-> H_A^+
+> H_{A,\mathrm{after}}
 > =
 > \rho_A^2H_A+\rho_A(A^\top U_A+U_A^\top A)+U_A^\top U_A,
 > $$
 >
 > $$
-> H_B^+
+> H_{B,\mathrm{after}}
 > =
 > \rho_B^2H_B+\rho_B(B^\top U_B+U_B^\top B)+U_B^\top U_B.
 > $$
@@ -239,7 +239,7 @@ A typical wrapper normalizes the proposed update and retracts:
 > $$
 > U=-\eta R\,\frac{\widetilde U}{\lVert\widetilde U\rVert_F},
 > \qquad
-> W^+=R\,\frac{W+U}{\lVert W+U\rVert_F}.
+> W\leftarrow R\,\frac{W+U}{\lVert W+U\rVert_F}.
 > $$
 
 On the sphere, decoupled weight decay is normal to the constraint:
@@ -271,7 +271,7 @@ Common optimizers remove some coordinate dependence but not all of it.
 >
 > **Muon-style polar updates:** equivariant under orthogonal matrix changes. This does not cover anisotropic scalings or shears in $GL(d_h)$.
 
-Muon still has a factor-gauge failure. Consider $F(A,B)=\frac{1}{2}\lVert AB^\top-I\rVert_F^2$. Start from $A_0=I$, $B_0=(1-\epsilon)I$, then apply $S=\operatorname{diag}(K,K^{-1})$:
+Muon still has a factor-gauge failure. Consider $L(A,B)=\frac{1}{2}\lVert AB^\top-I\rVert_F^2$. Start from $A_0=I$, $B_0=(1-\epsilon)I$, then apply $S=\operatorname{diag}(K,K^{-1})$:
 
 > [!example] Factorwise Muon Can Still Explode
 > $$
@@ -288,20 +288,20 @@ Muon still has a factor-gauge failure. Consider $F(A,B)=\frac{1}{2}\lVert AB^\to
 > \end{pmatrix}.
 > $$
 >
-> Then $AB^\top=(1-\epsilon)I$, so $F=\epsilon^2$.
+> Then $AB^\top=(1-\epsilon)I$, so $L=\epsilon^2$.
 >
-> Since $\nabla_AF=-\epsilon B$ and $\nabla_BF=-\epsilon A$, both polar factors are $-I$. A factorwise Muon-style step with independent shrink gives
+> Since $\nabla_AL=-\epsilon B$ and $\nabla_BL=-\epsilon A$, both polar factors are $-I$. A factorwise Muon-style step with independent shrink gives
 >
 > $$
-> A^+=\rho_AA+\eta I,
+> A\leftarrow\rho_AA+\eta I,
 > \qquad
-> B^+=\rho_BB+\eta I.
+> B\leftarrow\rho_BB+\eta I.
 > $$
 >
-> The first represented diagonal entry becomes
+> The represented diagonal entries become
 >
 > $$
-> (A^+B^{+\top})_{11}
+> m_1=(AB^\top)_{\mathrm{after},11}
 > =
 > \rho_A\rho_B(1-\epsilon)
 > +\rho_A\eta K
@@ -309,7 +309,22 @@ Muon still has a factor-gauge failure. Consider $F(A,B)=\frac{1}{2}\lVert AB^\to
 > +\eta^2.
 > $$
 >
-> For $K\gg1/\eta$, the term $\rho_A\eta K$ sends the product from near $1$ to order $\rho_A\eta K$ in one step.
+> $$
+> m_2=(AB^\top)_{\mathrm{after},22}
+> =
+> \rho_A\rho_B(1-\epsilon)
+> +\rho_A\eta K^{-1}
+> +\rho_B\eta(1-\epsilon)K
+> +\eta^2.
+> $$
+>
+> Thus
+>
+> $$
+> L_{\mathrm{after}}=\frac{1}{2}\{(m_1-1)^2+(m_2-1)^2\}.
+> $$
+>
+> For shared shrink $\rho_A=\rho_B=\rho$ and $K\gg1/\eta$, both $m_1$ and $m_2$ are order $\rho\eta K$, so $L_{\mathrm{after}}=\Theta(\rho^2\eta^2K^2)$.
 
 Independent shrink can prevent this only by taking $\rho_A=O(1/(\eta K))$, which also collapses the retained represented map by $\rho_A\rho_B$ unless the other factor is expanded in a coordinated gauge move.
 
