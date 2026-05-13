@@ -13,6 +13,7 @@ if paths.empty? || paths.include?("-h") || paths.include?("--help")
   puts "Checks Markdown automation conventions:"
   puts "  - manual heading numbers with numbered_headings: true"
   puts "  - section references without matching headings"
+  puts "  - callout references without matching callout labels"
   puts "  - equation references without matching {#eq:...} labels"
   puts "  - equation labels/references without numbered_equations: true"
   puts "  - raw ChatGPT-style math delimiters [ and ] on their own lines"
@@ -110,6 +111,7 @@ paths.each do |path|
   text = File.read(path)
   data = front_matter_for(text)
   numbered_headings = truthy?(data["numbered_headings"] || data[:numbered_headings])
+  numbered_callouts = truthy?(data["numbered_callouts"] || data[:numbered_callouts])
   numbered_equations = truthy?(data["numbered_equations"] || data[:numbered_equations])
 
   lines = text.lines
@@ -118,8 +120,25 @@ paths.each do |path|
 
   labels = searchable.scan(/\{#(eq:[A-Za-z0-9_:-]+)\}/).flatten.to_set
   refs = searchable.scan(/(?<![\w.-])@(eq:[A-Za-z0-9_:-]+)/).flatten
+  callout_labels = searchable.scan(/^\s*>\s*\[\![A-Za-z0-9_-]+\].*\{#([A-Za-z][A-Za-z0-9_-]*:[A-Za-z0-9_:-]+)\}\s*$/).flatten.to_set
+  callout_refs = searchable.scan(/(?<![\w.-])@((?!eq:|sec:)[A-Za-z][A-Za-z0-9_-]*:[A-Za-z0-9_:-]+)/).flatten
   section_refs = searchable.scan(/(?<![\w.-])@sec:([A-Za-z0-9_-]+)/).flatten
   known_headings = heading_ids(lines, protected)
+
+  if callout_labels.any? && !numbered_callouts
+    issues << Issue.new(path, 1, "callout labels require numbered_callouts: true")
+  end
+
+  if callout_refs.any? && !numbered_callouts
+    issues << Issue.new(path, 1, "callout references require numbered_callouts: true")
+  end
+
+  callout_refs.each do |ref|
+    next if callout_labels.include?(ref)
+
+    line = first_line_for(searchable, "@#{ref}")
+    issues << Issue.new(path, line, "unknown callout reference @#{ref}")
+  end
 
   if section_refs.any? && !numbered_headings
     issues << Issue.new(path, 1, "section references require numbered_headings: true")

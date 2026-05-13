@@ -53,6 +53,7 @@ Use Obsidian-style callouts. They are automatically converted to styled boxes or
   - Reference generated heading ids as `@sec:heading-slug`; the build renders a numbered section link.
 - Use `numbered_callouts: true` to number math/logic callouts such as definitions, lemmas, propositions, theorems, examples, claims, notation, algorithms, problems, exercises, assumptions, conventions, and facts.
   - Write `> [!definition] Predictive-State Discrepancy`; the build can render the numbered label.
+  - Add a label as `> [!definition] Predictive-State Discrepancy {#def:predictive-state}` and reference it as `@def:predictive-state`.
 - Use `numbered_equations: true` for lightweight equation labels and references.
   - Put `{#eq:name}` at the beginning or end of a display-math block; labels may use letters, numbers, underscores, colons, and hyphens.
   - Reference it in prose as `@eq:name`; the build renders an equation link.

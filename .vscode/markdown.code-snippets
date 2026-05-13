@@ -53,5 +53,21 @@
       "@eq:${1:label}"
     ],
     "description": "Insert an equation reference"
+  },
+  "Section Reference": {
+    "scope": "markdown",
+    "prefix": "sec-ref",
+    "body": [
+      "@sec:${1:heading-slug}"
+    ],
+    "description": "Insert a numbered section reference"
+  },
+  "Callout Reference": {
+    "scope": "markdown",
+    "prefix": "callout-ref",
+    "body": [
+      "@${1:def}:${2:label}"
+    ],
+    "description": "Insert a numbered callout reference"
   }
 }

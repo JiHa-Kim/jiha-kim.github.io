@@ -43,6 +43,23 @@ class MarkdownAutomationTest < Minitest::Test
     assert_includes rendered, "Definition 1.1. Metric"
   end
 
+  def test_callout_labels_and_references_resolve
+    markdown = <<~MARKDOWN
+      ## Geometry
+
+      > [!definition] Metric {#def:metric}
+      > A distance-like object.
+
+      See @def:metric.
+    MARKDOWN
+
+    rendered = @processor.transform_markdown(markdown, doc("numbered_callouts" => true))
+
+    assert_includes rendered, 'id="def-metric"'
+    assert_includes rendered, "Definition 1.1. Metric"
+    assert_includes rendered, 'href="#def-metric" class="callout-ref">Definition&nbsp;1.1</a>'
+  end
+
   def test_equation_numbering_is_section_aware_and_references_resolve
     markdown = <<~MARKDOWN
       ## First

@@ -127,6 +127,7 @@ module Jekyll
       @current_doc = doc
       @heading_numbers = Array.new(4, 0)
       @callout_counters = Hash.new(0)
+      @callout_labels = {}
       @equation_counters = Hash.new(0)
       @equation_labels = {}
     end
@@ -341,8 +342,8 @@ module Jekyll
     end
 
     def number_callout_title(ctype, title)
-      return title unless numbered_callouts?
-      return title unless NUMBERED_CALLOUT_TYPES.include?(ctype)
+      return [title, nil] unless numbered_callouts?
+      return [title, nil] unless NUMBERED_CALLOUT_TYPES.include?(ctype)
 
       @callout_counters[ctype] += 1
       section = @heading_numbers[0]
@@ -350,7 +351,18 @@ module Jekyll
       number = section.positive? ? "#{section}.#{local}" : local.to_s
       label = ctype.split(/[_-]/).map(&:capitalize).join(" ")
 
-      title.empty? || title == "&nbsp;" ? "#{label} #{number}" : "#{label} #{number}. #{title}"
+      numbered_title = title.empty? || title == "&nbsp;" ? "#{label} #{number}" : "#{label} #{number}. #{title}"
+      [numbered_title, number]
+    end
+
+    def extract_callout_label(title)
+      label = nil
+      cleaned = title.sub(/\s+\{#(?<label>[A-Za-z][A-Za-z0-9_-]*:[A-Za-z0-9_:-]+)\}\s*\z/) do
+        label = Regexp.last_match[:label]
+        ""
+      end
+
+      [cleaned.strip, label]
     end
 
     def parse_callout_block(lines, start_idx)
@@ -361,6 +373,7 @@ module Jekyll
       state = m[:state]
       attr = m[:attr]
       title = (m[:title] || "").strip
+      title, callout_label = extract_callout_label(title)
 
       content_lines = []
       i = start_idx + 1
@@ -442,24 +455,37 @@ module Jekyll
       box_class = TYPE_MAP[ctype] || "box-info"
       box_class += " box-numbered" if numbered_callout
       box_class += " #{attr}" if attr
+      tag_attrs = +"class=\"#{box_class}\""
+
+      if callout_label
+        html_id = html_id_for_label(callout_label)
+        tag_attrs << " id=\"#{html_id}\""
+      end
 
       is_collapsible = !state.nil? || DEFAULT_OPEN_TYPES.include?(ctype)
       is_open = (state == "+") || DEFAULT_OPEN_TYPES.include?(ctype)
 
       effective_title = !title.empty? ? title : (LABELED_TYPES.include?(ctype) ? "&nbsp;" : ctype.capitalize)
-      effective_title = number_callout_title(ctype, effective_title) if numbered_callout
+      callout_number = nil
+      effective_title, callout_number = number_callout_title(ctype, effective_title) if numbered_callout
+
+      if callout_label
+        display_type = ctype.split(/[_-]/).map(&:capitalize).join(" ")
+        display = callout_number ? "#{display_type}&nbsp;#{callout_number}" : display_type
+        @callout_labels[callout_label] = { "display" => display, "id" => html_id_for_label(callout_label) }
+      end
 
       if is_collapsible
         open_attr = is_open ? " open" : ""
         html = <<~HTML
-          <details class="#{box_class}"#{open_attr} markdown="1">
+          <details #{tag_attrs}#{open_attr} markdown="1">
           <summary markdown="1">
           #{effective_title}
           </summary>\n\n#{processed_body}</details>
         HTML
       else
         html = <<~HTML
-          <blockquote class="#{box_class}" markdown="1">
+          <blockquote #{tag_attrs} markdown="1">
           <div class="title" markdown="1">
           #{effective_title}
           </div>\n\n#{processed_body}</blockquote>
@@ -548,6 +574,9 @@ module Jekyll
     end
 
     def convert_macro_references(content)
+      return content unless numbered_equations? || numbered_callouts?
+
+      content = convert_callout_references(content) if numbered_callouts?
       return content unless numbered_equations?
 
       content.gsub(/(?<![\w.-])@(eq:[A-Za-z0-9_:-]+)/) do |match|
@@ -561,6 +590,21 @@ module Jekyll
         href = CGI.escapeHTML("##{target["id"]}")
         number = CGI.escapeHTML(target["number"])
         "<a href=\"#{href}\" class=\"eq-ref\">Equation&nbsp;(#{number})</a>"
+      end
+    end
+
+    def convert_callout_references(content)
+      content.gsub(/(?<![\w.-])@((?!eq:|sec:)[A-Za-z][A-Za-z0-9_-]*:[A-Za-z0-9_:-]+)/) do |match|
+        label = Regexp.last_match[1]
+        target = @callout_labels[label]
+        unless target
+          Jekyll.logger.warn "ObsidianPreprocess:", "Unknown callout reference #{match} in #{@current_doc&.relative_path}"
+          next match
+        end
+
+        href = CGI.escapeHTML("##{target["id"]}")
+        display = target["display"]
+        "<a href=\"#{href}\" class=\"callout-ref\">#{display}</a>"
       end
     end
 
