@@ -55,6 +55,8 @@ Use Obsidian-style callouts. They are automatically converted to styled boxes or
 - Use `numbered_equations: true` for lightweight equation labels and references.
   - Put `{#eq:name}` at the beginning or end of a display-math block.
   - Reference it in prose as `@eq:name`; the build renders an equation link.
+- Use `ruby tools/new_draft.rb "Draft Title"` to scaffold drafts with the automation flags enabled.
+- Use `ruby tools/lint_markdown_automation.rb path/to/file.md` to catch manual numbering, unresolved equation refs, bare `[`/`]` math delimiters, and manual HTML callout issues.
 
 ## Manual HTML (Only if needed)
 If you must use HTML (e.g., complex nesting not supported by Obsidian callouts), always include `markdown="1"` in the opening tag.

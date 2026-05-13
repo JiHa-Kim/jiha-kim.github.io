@@ -1,0 +1,57 @@
+{
+  "Obsidian Summary Callout": {
+    "scope": "markdown",
+    "prefix": "callout-summary",
+    "body": [
+      "> [!summary] ${1:Thesis}",
+      "> ${2}"
+    ],
+    "description": "Insert a summary callout"
+  },
+  "Obsidian Definition Callout": {
+    "scope": "markdown",
+    "prefix": "callout-definition",
+    "body": [
+      "> [!definition] ${1:Title}",
+      "> ${2}"
+    ],
+    "description": "Insert a definition callout"
+  },
+  "Obsidian Example Callout": {
+    "scope": "markdown",
+    "prefix": "callout-example",
+    "body": [
+      "> [!example] ${1:Title}",
+      "> ${2}"
+    ],
+    "description": "Insert an example callout"
+  },
+  "Obsidian Proof Callout": {
+    "scope": "markdown",
+    "prefix": "callout-proof",
+    "body": [
+      "> [!proof]- ${1:Proof}",
+      "> ${2}"
+    ],
+    "description": "Insert a collapsible proof callout"
+  },
+  "Numbered Equation": {
+    "scope": "markdown",
+    "prefix": "eq-numbered",
+    "body": [
+      "$$",
+      "{#eq:${1:label}}",
+      "${2}",
+      "$$"
+    ],
+    "description": "Insert a labeled display equation"
+  },
+  "Equation Reference": {
+    "scope": "markdown",
+    "prefix": "eq-ref",
+    "body": [
+      "@eq:${1:label}"
+    ],
+    "description": "Insert an equation reference"
+  }
+}
