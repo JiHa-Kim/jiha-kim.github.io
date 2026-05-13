@@ -13,6 +13,9 @@ tags:
   - Bisimulation
   - Dynamical Systems
 math: true
+numbered_headings: true
+numbered_callouts: true
+numbered_equations: true
 ---
 
 > [!summary] Core Idea
@@ -26,7 +29,7 @@ This is a standalone brainstorming outline for a possible post. The goal is to s
 
 ---
 
-## 1. The Central Problem
+## The Central Problem
 
 Standard next-token cross-entropy uses exact token identity:
 
@@ -44,7 +47,7 @@ The objective should distinguish these cases without replacing autoregressive ge
 
 ---
 
-## 2. Simple Toy Example: The One-Hot Limitation
+## Simple Toy Example: The One-Hot Limitation
 
 Use this early in the post before the abstract machinery.
 
@@ -161,7 +164,7 @@ nats of loss for spreading probability across correct phrasings.
 
 ---
 
-## 3. Why One-Hot Cross-Entropy Still Works
+## Why One-Hot Cross-Entropy Still Works
 
 This example should not claim that cross-entropy is mathematically wrong. If the target is the exact distribution of surface strings, token-level CE is the proper objective.
 
@@ -249,7 +252,7 @@ That is not a bug if the goal is exact string modeling. It is wasted pressure if
 
 ---
 
-## 4. Best Framing
+## Best Framing
 
 The strongest framing is dynamical:
 
@@ -294,7 +297,7 @@ This is the main conceptual move. The unit of comparison is not the isolated tok
 
 ---
 
-## 5. Candidate Names
+## Candidate Names
 
 Best name:
 
@@ -319,7 +322,7 @@ Use **Predictive-State Cross-Entropy** as the title. Mention successor-state dis
 
 ---
 
-## 6. Idea Inventory
+## Idea Inventory
 
 Strong ideas to keep:
 
@@ -351,7 +354,7 @@ Ideas to set aside for the first draft:
 
 ---
 
-## 7. Clean Mathematical Object
+## Clean Mathematical Object
 
 Define the future path law after choosing token $a$:
 
@@ -401,7 +404,7 @@ This avoids defining similarity directly in embedding space. The similarity come
 
 ---
 
-## 8. Observable Version
+## Observable Version
 
 Full path laws may be too strict because they compare complete future strings. A useful relaxation is to compare predictions of future observables.
 
@@ -447,7 +450,7 @@ This gives the right middle ground:
 
 ---
 
-## 9. Proposed Loss
+## Proposed Loss
 
 Convert discrepancy into compatibility:
 
@@ -460,6 +463,7 @@ $$
 Then train with:
 
 $$
+{#eq:psce}
 \mathcal{L}_{\mathrm{PSCE}}(x,b)
 =
 -\log
@@ -484,11 +488,11 @@ Plain-language meaning:
 
 > Put probability mass on next tokens whose successor states predict futures similar to the observed successor state.
 
-This preserves the single-token autoregressive interface. The model still samples one token at a time from $p_\theta(a\mid x)$; the target is softened according to future-predictive compatibility.
+The objective in @eq:psce preserves the single-token autoregressive interface. The model still samples one token at a time from $p_\theta(a\mid x)$; the target is softened according to future-predictive compatibility.
 
 ---
 
-## 10. Limiting Cases
+## Limiting Cases
 
 Standard cross-entropy is recovered by:
 
@@ -536,7 +540,7 @@ This is the cleanest argument for why the objective is not a rejection of CE. It
 
 ---
 
-## 11. Main Example: `"yes"` Versus `"yeah"`
+## Main Example: `"yes"` Versus `"yeah"`
 
 Use this example because it shows context dependence without requiring much setup.
 
@@ -596,7 +600,7 @@ The point:
 
 ---
 
-## 12. Identifiability
+## Identifiability
 
 For fixed $x$, define:
 
@@ -629,7 +633,7 @@ $$
 
 ---
 
-## 13. Practical Training Sketch
+## Practical Training Sketch
 
 The ideal future law $\Pi_x^a$ is unavailable. A practical approximation can use an observed suffix:
 
@@ -672,7 +676,7 @@ Questions this section must leave open:
 
 ---
 
-## 14. Theoretical Anchors
+## Theoretical Anchors
 
 These are useful parallels, but the post should use them to support the main idea rather than letting them take over.
 
@@ -688,7 +692,7 @@ These are useful parallels, but the post should use them to support the main ide
 
 ---
 
-## 15. Focused Post Outline
+## Focused Post Outline
 
 1. **Problem:** exact token identity is too rigid.
 2. **Toy Example:** show the `"yes"`/`"yeah"` class-mass failure of one-hot loss.
@@ -705,7 +709,7 @@ These are useful parallels, but the post should use them to support the main ide
 
 ---
 
-## 16. Open Questions
+## Open Questions
 
 - Should the primary definition use path-law KL, observable distance, or both?
 - What future observables are rich enough to avoid collapse but selective enough to avoid exact string matching?
