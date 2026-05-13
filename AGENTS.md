@@ -53,7 +53,7 @@ Use Obsidian-style callouts. They are automatically converted to styled boxes or
 - Use `numbered_callouts: true` to number math/logic callouts such as definitions, lemmas, propositions, theorems, examples, claims, notation, algorithms, problems, exercises, assumptions, conventions, and facts.
   - Write `> [!definition] Predictive-State Discrepancy`; the build can render the numbered label.
 - Use `numbered_equations: true` for lightweight equation labels and references.
-  - Put `{#eq:name}` at the beginning or end of a display-math block.
+  - Put `{#eq:name}` at the beginning or end of a display-math block; labels may use letters, numbers, underscores, colons, and hyphens.
   - Reference it in prose as `@eq:name`; the build renders an equation link.
 - Use `ruby tools/new_draft.rb "Draft Title"` to scaffold drafts with the automation flags enabled.
 - Use `ruby tools/lint_markdown_automation.rb path/to/file.md` to catch manual numbering, unresolved equation refs, bare `[`/`]` math delimiters, and manual HTML callout issues.

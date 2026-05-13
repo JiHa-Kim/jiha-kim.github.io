@@ -45,6 +45,19 @@ prepare_test_root() {
   fi
 }
 
+run_markdown_automation_checks() {
+  ruby tools/test_markdown_automation.rb
+
+  local markdown_files=()
+  while IFS= read -r file; do
+    markdown_files+=("$file")
+  done < <(git ls-files -co --exclude-standard '*.md' ':!:_temp_old/**')
+
+  if ((${#markdown_files[@]})); then
+    ruby tools/lint_markdown_automation.rb "${markdown_files[@]}"
+  fi
+}
+
 help() {
   echo "Build and test the site content"
   echo
@@ -82,6 +95,7 @@ read_baseurl() {
 
 main() {
   read_baseurl
+  run_markdown_automation_checks
 
   if [[ "$_fast" == "true" ]]; then
     # fast build

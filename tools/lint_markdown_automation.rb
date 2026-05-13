@@ -89,8 +89,8 @@ paths.each do |path|
   protected = protected_code_lines(lines)
   searchable = searchable_text(text, protected)
 
-  labels = searchable.scan(/\{#(eq:[A-Za-z0-9_.:-]+)\}/).flatten.to_set
-  refs = searchable.scan(/(?<![\w.-])@(eq:[A-Za-z0-9_.:-]+)/).flatten
+  labels = searchable.scan(/\{#(eq:[A-Za-z0-9_:-]+)\}/).flatten.to_set
+  refs = searchable.scan(/(?<![\w.-])@(eq:[A-Za-z0-9_:-]+)/).flatten
 
   if labels.any? && !numbered_equations
     issues << Issue.new(path, 1, "equation labels require numbered_equations: true")

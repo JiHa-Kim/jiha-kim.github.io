@@ -9,7 +9,7 @@ require 'cgi'
 module Jekyll
   class ObsidianPreprocess < Jekyll::Generator
     priority :high
-    CACHE_VERSION = "2026-05-13-markdown-automation-v1".freeze
+    CACHE_VERSION = "2026-05-13-markdown-automation-v2".freeze
 
     # Map Obsidian callout types -> Chirpy box classes
     TYPE_MAP = {
@@ -127,7 +127,7 @@ module Jekyll
       @current_doc = doc
       @heading_numbers = Array.new(4, 0)
       @callout_counters = Hash.new(0)
-      @equation_counter = 0
+      @equation_counters = Hash.new(0)
       @equation_labels = {}
     end
 
@@ -301,7 +301,7 @@ module Jekyll
       out.join("\n")
     end
 
-    def track_markdown_heading(line)
+    def track_markdown_heading(line, counters = @heading_numbers)
       return if line.lstrip.start_with?(">")
       return if line.include?(".unnumbered") || line.include?('data-numbered="false"')
       return unless line =~ /^(?<marks>\#{1,6})\s+(?<title>.+?)\s*(?:\{:[^}]*\})?\s*$/
@@ -310,9 +310,9 @@ module Jekyll
       return unless level.between?(2, 5)
 
       idx = level - 2
-      @heading_numbers[idx] += 1
-      ((idx + 1)...@heading_numbers.length).each { |i| @heading_numbers[i] = 0 }
-      (0...idx).each { |i| @heading_numbers[i] = 1 if @heading_numbers[i].zero? }
+      counters[idx] += 1
+      ((idx + 1)...counters.length).each { |i| counters[i] = 0 }
+      (0...idx).each { |i| counters[i] = 1 if counters[i].zero? }
     end
 
     def number_callout_title(ctype, title)
@@ -445,7 +445,14 @@ module Jekyll
     end
 
     def convert_block_math(content)
+      heading_numbers = Array.new(4, 0)
+      cursor = 0
+
       content.gsub(/(?m)(?:^([\t ]*))?(?:(?<!\\)(?<!\$)\$\$(?!\$)([\s\S]+?)(?<!\\)(?<!\$)\$\$(?!\$)|\\\[([\s\S]+?)\\\])/) do
+        match_data = Regexp.last_match
+        update_heading_numbers_from_segment(content[cursor...match_data.begin(0)], heading_numbers)
+        cursor = match_data.end(0)
+
         indent = $1 || ""
         math_content = $2 || $3
         label, math_content = extract_equation_label(math_content)
@@ -461,7 +468,7 @@ module Jekyll
         }
 
         if label
-          number = next_equation_number
+          number = next_equation_number(heading_numbers)
           html_id = html_id_for_label(label)
           if @equation_labels.key?(label)
             Jekyll.logger.warn "ObsidianPreprocess:", "Duplicate equation label #{label} in #{@current_doc&.relative_path}"
@@ -477,10 +484,14 @@ module Jekyll
       end
     end
 
+    def update_heading_numbers_from_segment(segment, counters)
+      segment.to_s.each_line { |line| track_markdown_heading(line, counters) }
+    end
+
     def extract_equation_label(math_content)
       return [nil, math_content] unless numbered_equations?
 
-      label_re = /\{#(?<label>eq:[A-Za-z0-9_.:-]+)\}/
+      label_re = /\{#(?<label>eq:[A-Za-z0-9_:-]+)\}/
       math = math_content.to_s
 
       if math =~ /\A\s*#{label_re}\s*\n?/m
@@ -498,9 +509,13 @@ module Jekyll
       [nil, math_content]
     end
 
-    def next_equation_number
-      @equation_counter += 1
-      @equation_counter.to_s
+    def next_equation_number(heading_numbers)
+      section = heading_numbers[0]
+      key = section.positive? ? section : :global
+      @equation_counters[key] += 1
+      local = @equation_counters[key]
+
+      section.positive? ? "#{section}.#{local}" : local.to_s
     end
 
     def html_id_for_label(label)
@@ -510,7 +525,7 @@ module Jekyll
     def convert_macro_references(content)
       return content unless numbered_equations?
 
-      content.gsub(/(?<![\w.-])@(eq:[A-Za-z0-9_.:-]+)/) do |match|
+      content.gsub(/(?<![\w.-])@(eq:[A-Za-z0-9_:-]+)/) do |match|
         label = Regexp.last_match[1]
         target = @equation_labels[label]
         unless target
