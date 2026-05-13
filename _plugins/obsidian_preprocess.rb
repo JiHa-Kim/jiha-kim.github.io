@@ -229,6 +229,31 @@ module Jekyll
       end
     end
 
+    def convert_section_references(content, doc)
+      return content unless option_enabled?(doc, "numbered_headings", "heading_numbering")
+      return content unless content.include?("@sec:")
+
+      section_numbers = {}
+      content.scan(/<h([2-5])\b([^>]*)>(.+?)<\/h\1>/m) do |_level, attrs, text|
+        id = attrs[/\bid="([^"]+)"/, 1]
+        number = text[/<span class="heading-number">([^<]+)<\/span>/, 1]
+        section_numbers[id] = number if id && number
+      end
+
+      content.gsub(/(?<![\w.-])@sec:([A-Za-z0-9_-]+)/) do |match|
+        id = Regexp.last_match[1]
+        number = section_numbers[id]
+        unless number
+          Jekyll.logger.warn "ObsidianPreprocess:", "Unknown section reference #{match} in #{doc&.relative_path}"
+          next match
+        end
+
+        href = CGI.escapeHTML("##{id}")
+        label = CGI.escapeHTML(number)
+        "<a href=\"#{href}\" class=\"sec-ref\">Section&nbsp;#{label}</a>"
+      end
+    end
+
     def refactor_images(content, doc)
       return content unless content.include?('<img ')
       media_subpath = doc.data['media_subpath'] || ""
@@ -721,6 +746,7 @@ Jekyll::Hooks.register [:pages, :documents], :post_convert do |doc|
 
   if content.include?("<h2") || content.include?("<h3") || content.include?("<h4") || content.include?("<h5")
     content = OBSIDIAN_HTML_REFACTORER.number_headings(content, doc)
+    content = OBSIDIAN_HTML_REFACTORER.convert_section_references(content, doc)
     content = OBSIDIAN_HTML_REFACTORER.refactor_headings(content)
   end
 

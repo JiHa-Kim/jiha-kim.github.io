@@ -50,6 +50,7 @@ Use Obsidian-style callouts. They are automatically converted to styled boxes or
 - Prefer unnumbered source headings. Use `numbered_headings: true` in front matter when rendered section/subsection numbers are desired.
   - Write `## Motivation`, not `## 1. Motivation`.
   - Add `{: .unnumbered}` to a heading to skip generated numbering for that heading.
+  - Reference generated heading ids as `@sec:heading-slug`; the build renders a numbered section link.
 - Use `numbered_callouts: true` to number math/logic callouts such as definitions, lemmas, propositions, theorems, examples, claims, notation, algorithms, problems, exercises, assumptions, conventions, and facts.
   - Write `> [!definition] Predictive-State Discrepancy`; the build can render the numbered label.
 - Use `numbered_equations: true` for lightweight equation labels and references.

@@ -71,4 +71,15 @@ class MarkdownAutomationTest < Minitest::Test
     assert_includes rendered, 'href="#eq-first" class="eq-ref">Equation&nbsp;(1.1)</a>'
     assert_includes rendered, 'href="#eq-second" class="eq-ref">Equation&nbsp;(2.1)</a>'
   end
+
+  def test_section_references_resolve_to_numbered_headings
+    html = <<~HTML
+      <h2 id="main-result"><span class="heading-number">3</span> Main Result</h2>
+      <p>See @sec:main-result.</p>
+    HTML
+
+    rendered = @processor.convert_section_references(html, doc("numbered_headings" => true))
+
+    assert_includes rendered, 'href="#main-result" class="sec-ref">Section&nbsp;3</a>'
+  end
 end

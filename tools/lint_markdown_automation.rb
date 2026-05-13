@@ -12,6 +12,7 @@ if paths.empty? || paths.include?("-h") || paths.include?("--help")
   puts
   puts "Checks Markdown automation conventions:"
   puts "  - manual heading numbers with numbered_headings: true"
+  puts "  - section references without matching headings"
   puts "  - equation references without matching {#eq:...} labels"
   puts "  - equation labels/references without numbered_equations: true"
   puts "  - raw ChatGPT-style math delimiters [ and ] on their own lines"
@@ -72,6 +73,32 @@ def first_line_for(text, needle)
   text[0...index].count("\n") + 1
 end
 
+def heading_slug(title)
+  title.gsub(/`([^`]*)`/, '\1')
+       .gsub(/<[^>]+>/, "")
+       .gsub(/\{:[^}]*\}\s*\z/, "")
+       .gsub(/\{#[^}]*\}\s*\z/, "")
+       .downcase
+       .gsub(/[^a-z0-9]+/, "-")
+       .gsub(/\A-|-+\z/, "")
+end
+
+def heading_ids(lines, protected)
+  ids = Set.new
+
+  lines.each_with_index do |line, idx|
+    next if protected.include?(idx + 1)
+    next unless line =~ /^\s*\#{2,5}\s+(?<title>.+?)\s*$/
+
+    title = Regexp.last_match[:title]
+    explicit = title[/\{:\s*#([A-Za-z0-9_-]+)[^}]*\}\s*\z/, 1] ||
+               title[/\{#([A-Za-z0-9_-]+)\}\s*\z/, 1]
+    ids << (explicit || heading_slug(title))
+  end
+
+  ids
+end
+
 issues = []
 
 paths.each do |path|
@@ -91,6 +118,19 @@ paths.each do |path|
 
   labels = searchable.scan(/\{#(eq:[A-Za-z0-9_:-]+)\}/).flatten.to_set
   refs = searchable.scan(/(?<![\w.-])@(eq:[A-Za-z0-9_:-]+)/).flatten
+  section_refs = searchable.scan(/(?<![\w.-])@sec:([A-Za-z0-9_-]+)/).flatten
+  known_headings = heading_ids(lines, protected)
+
+  if section_refs.any? && !numbered_headings
+    issues << Issue.new(path, 1, "section references require numbered_headings: true")
+  end
+
+  section_refs.each do |ref|
+    next if known_headings.include?(ref)
+
+    line = first_line_for(searchable, "@sec:#{ref}")
+    issues << Issue.new(path, line, "unknown section reference @sec:#{ref}")
+  end
 
   if labels.any? && !numbered_equations
     issues << Issue.new(path, 1, "equation labels require numbered_equations: true")
