@@ -1,0 +1,37 @@
+/* ===========================================================================
+ * Markdown Automation
+ * ---------------------------------------------------------------------------
+ * Presentation for generated Markdown macros from _plugins/obsidian_preprocess.rb.
+ * =========================================================================== */
+
+.heading-number {
+  color: var(--text-muted-color);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.25rem;
+}
+
+.math-block--numbered {
+  position: relative;
+  padding-right: 3.5rem;
+
+  &::after {
+    content: "(" attr(data-eq-number) ")";
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    color: var(--text-muted-color);
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.eq-ref {
+  white-space: nowrap;
+}
+
+blockquote.box-numbered > .title > *:first-child::before,
+details.box-numbered > summary > *:first-child::before {
+  content: none !important;
+  margin-right: 0 !important;
+}

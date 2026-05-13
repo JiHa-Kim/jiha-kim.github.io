@@ -46,6 +46,16 @@ Use Obsidian-style callouts. They are automatically converted to styled boxes or
 - **Math/Logic**: definition, lemma, proposition, theorem, example, corollary, remark, proof, principle, axiom, postulate, conjecture, claim, notation, algorithm, problem, exercise, solution, assumption, convention, fact.
 - **Standard**: info, note, abstract, summary, tldr, todo, tip, hint, important, success, check, done, question, help, faq, warning, caution, attention, danger, error, bug, failure, fail, missing, quote, cite.
 
+## Markdown Automation
+- Prefer unnumbered source headings. Use `numbered_headings: true` in front matter when rendered section/subsection numbers are desired.
+  - Write `## Motivation`, not `## 1. Motivation`.
+  - Add `{: .unnumbered}` to a heading to skip generated numbering for that heading.
+- Use `numbered_callouts: true` to number math/logic callouts such as definitions, lemmas, propositions, theorems, examples, claims, notation, algorithms, problems, exercises, assumptions, conventions, and facts.
+  - Write `> [!definition] Predictive-State Discrepancy`; the build can render the numbered label.
+- Use `numbered_equations: true` for lightweight equation labels and references.
+  - Put `{#eq:name}` at the beginning or end of a display-math block.
+  - Reference it in prose as `@eq:name`; the build renders an equation link.
+
 ## Manual HTML (Only if needed)
 If you must use HTML (e.g., complex nesting not supported by Obsidian callouts), always include `markdown="1"` in the opening tag.
 - **Example**: `<blockquote class="box-definition" markdown="1">...</blockquote>`

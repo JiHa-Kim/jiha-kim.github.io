@@ -4,11 +4,12 @@ require 'jekyll'
 require 'rexml/document'
 require 'digest'
 require 'base64'
+require 'cgi'
 
 module Jekyll
   class ObsidianPreprocess < Jekyll::Generator
     priority :high
-    CACHE_VERSION = "2026-04-28-algo-multiline-func-calls-v1".freeze
+    CACHE_VERSION = "2026-05-13-markdown-automation-v1".freeze
 
     # Map Obsidian callout types -> Chirpy box classes
     TYPE_MAP = {
@@ -37,6 +38,8 @@ module Jekyll
     ].freeze
 
     DEFAULT_OPEN_TYPES = %w[question help faq].freeze
+
+    NUMBERED_CALLOUT_TYPES = (LABELED_TYPES - %w[proof solution]).freeze
 
     SKIP_FORMATTING_ENVS = %w[
       align align* equation equation* gather gather*
@@ -88,6 +91,8 @@ module Jekyll
     end
 
     def transform_markdown(content, doc)
+      reset_macro_state(doc)
+
       # 1. Convert Algorithms (must run before protection hides <pre> blocks)
       content = convert_algorithms(content)
 
@@ -104,6 +109,7 @@ module Jekyll
 
       # 4. Convert Math
       content = convert_block_math(content)
+      content = convert_macro_references(content)
       content = convert_inline_math(content)
 
       # 5. Restore Regions
@@ -115,6 +121,29 @@ module Jekyll
       content = preserve_semantic_spaces(content)
 
       content
+    end
+
+    def reset_macro_state(doc)
+      @current_doc = doc
+      @heading_numbers = Array.new(4, 0)
+      @callout_counters = Hash.new(0)
+      @equation_counter = 0
+      @equation_labels = {}
+    end
+
+    def option_enabled?(doc, *keys)
+      keys.any? do |key|
+        value = doc.data[key]
+        value == true || value.to_s.downcase == "true"
+      end
+    end
+
+    def numbered_callouts?
+      @current_doc && option_enabled?(@current_doc, "numbered_callouts", "callout_numbering")
+    end
+
+    def numbered_equations?
+      @current_doc && option_enabled?(@current_doc, "numbered_equations", "equation_numbering")
     end
 
     def preserve_semantic_spaces(content)
@@ -162,12 +191,41 @@ module Jekyll
 
     def refactor_headings(content)
       # Process h2, h3, h4, h5
-      content.gsub(/<h([2-5]) id="([^"]+)">(.+?)<\/h\1>/) do
+      content.gsub(/<h([2-5])\b([^>]*)>(.+?)<\/h\1>/m) do |match|
         level = $1
-        id = $2
+        attrs = $2
         text = $3
+        id = attrs[/\bid="([^"]+)"/, 1]
+        next match unless id
+        next match if text.include?('class="anchor text-muted"')
+
         anchor = "<a href=\"##{id}\" class=\"anchor text-muted\"><i class=\"fas fa-hashtag\"></i></a>"
-        "<h#{level} id=\"#{id}\"><span class=\"me-2\">#{text}</span>#{anchor}</h#{level}>"
+        "<h#{level}#{attrs}><span class=\"me-2\">#{text}</span>#{anchor}</h#{level}>"
+      end
+    end
+
+    def number_headings(content, doc)
+      return content unless option_enabled?(doc, "numbered_headings", "heading_numbering")
+
+      counters = Array.new(4, 0)
+      content.gsub(/<h([2-5])\b([^>]*)>(.+?)<\/h\1>/m) do |match|
+        level = $1.to_i
+        attrs = $2
+        text = $3
+
+        if attrs.include?("unnumbered") || attrs.include?('data-numbered="false"') ||
+           text.include?('class="heading-number"')
+          next match
+        end
+
+        idx = level - 2
+        counters[idx] += 1
+        ((idx + 1)...counters.length).each { |i| counters[i] = 0 }
+        (0...idx).each { |i| counters[i] = 1 if counters[i].zero? }
+
+        number = counters[0..idx].join(".")
+        numbered_text = "<span class=\"heading-number\">#{number}</span> #{text}"
+        "<h#{level}#{attrs}>#{numbered_text}</h#{level}>"
       end
     end
 
@@ -236,10 +294,38 @@ module Jekyll
             next
           end
         end
+        track_markdown_heading(line)
         out << line
         i += 1
       end
       out.join("\n")
+    end
+
+    def track_markdown_heading(line)
+      return if line.lstrip.start_with?(">")
+      return if line.include?(".unnumbered") || line.include?('data-numbered="false"')
+      return unless line =~ /^(?<marks>\#{1,6})\s+(?<title>.+?)\s*(?:\{:[^}]*\})?\s*$/
+
+      level = Regexp.last_match[:marks].length
+      return unless level.between?(2, 5)
+
+      idx = level - 2
+      @heading_numbers[idx] += 1
+      ((idx + 1)...@heading_numbers.length).each { |i| @heading_numbers[i] = 0 }
+      (0...idx).each { |i| @heading_numbers[i] = 1 if @heading_numbers[i].zero? }
+    end
+
+    def number_callout_title(ctype, title)
+      return title unless numbered_callouts?
+      return title unless NUMBERED_CALLOUT_TYPES.include?(ctype)
+
+      @callout_counters[ctype] += 1
+      section = @heading_numbers[0]
+      local = @callout_counters[ctype]
+      number = section.positive? ? "#{section}.#{local}" : local.to_s
+      label = ctype.split(/[_-]/).map(&:capitalize).join(" ")
+
+      title.empty? || title == "&nbsp;" ? "#{label} #{number}" : "#{label} #{number}. #{title}"
     end
 
     def parse_callout_block(lines, start_idx)
@@ -326,13 +412,17 @@ module Jekyll
 
 
 
+      numbered_callout = numbered_callouts? && NUMBERED_CALLOUT_TYPES.include?(ctype)
+
       box_class = TYPE_MAP[ctype] || "box-info"
+      box_class += " box-numbered" if numbered_callout
       box_class += " #{attr}" if attr
 
       is_collapsible = !state.nil? || DEFAULT_OPEN_TYPES.include?(ctype)
       is_open = (state == "+") || DEFAULT_OPEN_TYPES.include?(ctype)
 
       effective_title = !title.empty? ? title : (LABELED_TYPES.include?(ctype) ? "&nbsp;" : ctype.capitalize)
+      effective_title = number_callout_title(ctype, effective_title) if numbered_callout
 
       if is_collapsible
         open_attr = is_open ? " open" : ""
@@ -358,13 +448,79 @@ module Jekyll
       content.gsub(/(?m)(?:^([\t ]*))?(?:(?<!\\)(?<!\$)\$\$(?!\$)([\s\S]+?)(?<!\\)(?<!\$)\$\$(?!\$)|\\\[([\s\S]+?)\\\])/) do
         indent = $1 || ""
         math_content = $2 || $3
+        label, math_content = extract_equation_label(math_content)
         
         has_env = SKIP_FORMATTING_ENVS.any? { |env| math_content.include?("\\begin{#{env}}") }
         math_content = cleanup_latex_syntax(math_content) unless has_env
 
         encoded_source = encode_math_source(math_content.strip)
+        attrs = {
+          "class" => "math-block",
+          "data-math-source-b64" => encoded_source,
+          "markdown" => "0"
+        }
 
-        "\n#{indent}<div class=\"math-block\" data-math-source-b64=\"#{encoded_source}\" markdown=\"0\">\n\\[\n#{math_content.strip}\n\\]\n#{indent}</div>\n"
+        if label
+          number = next_equation_number
+          html_id = html_id_for_label(label)
+          if @equation_labels.key?(label)
+            Jekyll.logger.warn "ObsidianPreprocess:", "Duplicate equation label #{label} in #{@current_doc&.relative_path}"
+          end
+          @equation_labels[label] = { "number" => number, "id" => html_id }
+          attrs["id"] = html_id
+          attrs["class"] = "math-block math-block--numbered"
+          attrs["data-eq-number"] = number
+          attrs["data-eq-label"] = label
+        end
+
+        "\n#{indent}<div #{serialize_attrs(attrs)}>\n\\[\n#{math_content.strip}\n\\]\n#{indent}</div>\n"
+      end
+    end
+
+    def extract_equation_label(math_content)
+      return [nil, math_content] unless numbered_equations?
+
+      label_re = /\{#(?<label>eq:[A-Za-z0-9_.:-]+)\}/
+      math = math_content.to_s
+
+      if math =~ /\A\s*#{label_re}\s*\n?/m
+        label = Regexp.last_match[:label]
+        math = math.sub(/\A\s*#{label_re}\s*\n?/m, "")
+        return [label, math]
+      end
+
+      if math =~ /\n?\s*#{label_re}\s*\z/m
+        label = Regexp.last_match[:label]
+        math = math.sub(/\n?\s*#{label_re}\s*\z/m, "")
+        return [label, math]
+      end
+
+      [nil, math_content]
+    end
+
+    def next_equation_number
+      @equation_counter += 1
+      @equation_counter.to_s
+    end
+
+    def html_id_for_label(label)
+      label.to_s.gsub(/[^A-Za-z0-9_-]+/, "-")
+    end
+
+    def convert_macro_references(content)
+      return content unless numbered_equations?
+
+      content.gsub(/(?<![\w.-])@(eq:[A-Za-z0-9_.:-]+)/) do |match|
+        label = Regexp.last_match[1]
+        target = @equation_labels[label]
+        unless target
+          Jekyll.logger.warn "ObsidianPreprocess:", "Unknown equation reference #{match} in #{@current_doc&.relative_path}"
+          next match
+        end
+
+        href = CGI.escapeHTML("##{target["id"]}")
+        number = CGI.escapeHTML(target["number"])
+        "<a href=\"#{href}\" class=\"eq-ref\">Equation&nbsp;(#{number})</a>"
       end
     end
 
@@ -549,6 +705,7 @@ Jekyll::Hooks.register [:pages, :documents], :post_convert do |doc|
   end
 
   if content.include?("<h2") || content.include?("<h3") || content.include?("<h4") || content.include?("<h5")
+    content = OBSIDIAN_HTML_REFACTORER.number_headings(content, doc)
     content = OBSIDIAN_HTML_REFACTORER.refactor_headings(content)
   end
 
