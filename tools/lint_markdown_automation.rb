@@ -19,12 +19,6 @@ if paths.empty? || paths.include?("-h") || paths.include?("--help")
   exit(paths.empty? ? 1 : 0)
 end
 
-MATH_CALLOUT_TYPES = %w[
-  definition lemma proposition theorem example corollary remark proof
-  principle axiom postulate conjecture claim notation algorithm problem
-  exercise solution assumption convention fact
-].freeze
-
 Issue = Struct.new(:path, :line, :message) do
   def to_s
     "#{path}:#{line}: #{message}"
@@ -63,6 +57,21 @@ def protected_code_lines(lines)
   protected
 end
 
+def searchable_text(text, protected)
+  text.lines.each_with_index.map do |line, idx|
+    next "" if protected.include?(idx + 1)
+
+    line.gsub(/`[^`\n]+`/, "")
+  end.join
+end
+
+def first_line_for(text, needle)
+  index = text.index(needle)
+  return 1 unless index
+
+  text[0...index].count("\n") + 1
+end
+
 issues = []
 
 paths.each do |path|
@@ -76,8 +85,12 @@ paths.each do |path|
   numbered_headings = truthy?(data["numbered_headings"] || data[:numbered_headings])
   numbered_equations = truthy?(data["numbered_equations"] || data[:numbered_equations])
 
-  labels = text.scan(/\{#(eq:[A-Za-z0-9_.:-]+)\}/).flatten.to_set
-  refs = text.scan(/(?<![\w.-])@(eq:[A-Za-z0-9_.:-]+)/).flatten
+  lines = text.lines
+  protected = protected_code_lines(lines)
+  searchable = searchable_text(text, protected)
+
+  labels = searchable.scan(/\{#(eq:[A-Za-z0-9_.:-]+)\}/).flatten.to_set
+  refs = searchable.scan(/(?<![\w.-])@(eq:[A-Za-z0-9_.:-]+)/).flatten
 
   if labels.any? && !numbered_equations
     issues << Issue.new(path, 1, "equation labels require numbered_equations: true")
@@ -90,12 +103,9 @@ paths.each do |path|
   refs.each do |ref|
     next if labels.include?(ref)
 
-    line = text[0...text.index("@#{ref}")].count("\n") + 1
+    line = first_line_for(searchable, "@#{ref}")
     issues << Issue.new(path, line, "unknown equation reference @#{ref}")
   end
-
-  lines = text.lines
-  protected = protected_code_lines(lines)
 
   lines.each_with_index do |line, idx|
     line_no = idx + 1
@@ -109,16 +119,11 @@ paths.each do |path|
       issues << Issue.new(path, line_no, "use $$ display math delimiters instead of bare [ or ]")
     end
 
-    if line =~ /<(?<tag>blockquote|details)\b/i && line !~ /markdown\s*=\s*["']1["']/i
-      issues << Issue.new(path, line_no, "manual HTML #{Regexp.last_match[:tag]} should include markdown=\"1\"")
+    html_callout = line.match(/<(?<tag>blockquote|details)\b/i)
+    if html_callout && line !~ /markdown\s*=\s*["']1["']/i
+      issues << Issue.new(path, line_no, "manual HTML #{html_callout[:tag]} should include markdown=\"1\"")
     end
 
-    next unless line =~ /^\s*>\s*\[\!(?<type>[A-Za-z0-9_-]+)\]\s*$/
-
-    type = Regexp.last_match[:type].downcase
-    if MATH_CALLOUT_TYPES.include?(type)
-      issues << Issue.new(path, line_no, "math callout [!#{type}] should usually have a title")
-    end
   end
 end
 
